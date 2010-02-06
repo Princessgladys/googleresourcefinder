@@ -1,0 +1,935 @@
+{% comment %}
+# Copyright 2009-2010 by Ka-Ping Yee
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+<!-- No doctype: need quirks mode to get scrollbars in IE. -->
+<head>
+<title>Resource Mapper ({{instance}})</title>
+<style>
+body { margin: 0; }
+
+/* Type sizes */
+body, h1, h2, th, td { font-family: helvetica, arial; font-size: 13px; }
+tr { vertical-align: baseline; }
+th { text-align: left; }
+.stock-info, .legend-label { font-size: 11px; }
+.caption { font-size: 11px; font-weight: normal; color: #aaa; }
+
+/* Header line */
+.header { padding: 4px; }
+.user { float: right; }
+.title { float: left; font-weight: bold; }
+
+/* Data area */
+#data { position: absolute; left: 0px; width: 320px; top: 24px; bottom: 0; }
+#data table { width: 100%; padding: 0; cursor: default; }
+th, td { padding: 2px 4px; }
+.section { margin-top: 10px; }
+.section:first-child { margin-top: 0; }
+.table-head { background: #e0e2e8; padding: 2px 0; }
+.table-head tr { color: #000; }
+.table-head img, .legend-icon img { position: relative; top: 2px; }
+.table-body { overflow-y: auto; }
+.table-body tr { color: #222; }
+#supply-tbody, #division-tbody, #facility-tbody { cursor: pointer; }
+.hover { background: #cdf; }
+td.supply-set { text-align: center; width: 2em;
+    border-left: 1px solid #f0f1f4; border-bottom: 1px solid #f0f1f4; }
+td#supply-set-1 { border-left: none; }
+th.legend-icon { padding: 2px 4px; text-align: center; width: 2em; }
+td.legend-label { padding: 2px 4px 2px 0; }
+th.facility-count, td.facility-count { text-align: right; width: 2.5em; }
+th.stock-level, td.stock-level { text-align: right; width: 3em; }
+.stockout { color: #f24; }
+td.selected, tr.selected { background: #26d; color: #fff; font-weight: bold; }
+tr.selected .stockout { color: #f9a; }
+td.no-report { text-align: center; font-style: italic; }
+td.no-data { color: #aaa; }
+td.division-name { padding-left: 16px; }
+tr#division-0 td.division-name { padding-left: 4px; }
+td.status-0 { color: #000; }
+td.status-1 { color: #060; }
+td.status-2 { color: #a00; }
+td.status-3 { color: #444; }
+td.facility-count.selected { color: #fff; }
+
+/* Map area */
+#map, .hshadow, .vshadow { position: absolute; left: 320px; top: 24px; }
+#map { right: 0; bottom: 0; }
+.hshadow { bottom: 0; background: #000; font-size: 1px; }
+.hs1 { width: 2px; opacity: 0.09; filter:alpha(opacity=9); }
+.hs2 { width: 3px; opacity: 0.06; filter:alpha(opacity=6); }
+.hs3 { width: 4px; opacity: 0.03; filter:alpha(opacity=3); }
+.vshadow { right: 0; background: #000; font-size: 1px; }
+.vs1 { height: 2px; opacity: 0.09; filter:alpha(opacity=9); }
+.vs2 { height: 3px; opacity: 0.06; filter:alpha(opacity=6); }
+.vs3 { height: 4px; opacity: 0.03; filter:alpha(opacity=3); }
+#freshness { position: absolute; left: 0; bottom: 0; padding: 2px 4px; }
+
+/* Map info windows */
+.facility-info h1, .facility-info h2 { margin: 0; color: #000; }
+.facility-info .stock-info { margin: 1em 0; color: #666; }
+.facility-info .supply-level { color: #000; }
+</style>
+
+<!--[if lt IE 8]>
+<style>
+body { width: 100%; height: 100%; }
+#map, .vshadow { width:expression(document.body.clientWidth-320); }
+#data, #map, .hshadow { height:expression(document.body.clientHeight-24); }
+#supply-section { margin-top: 0; }
+#freshness { position: absolute; left: 0; bottom: 0; padding: 6px 4px 0px; }
+</style>
+<![endif]-->
+
+<script
+  type="text/javascript"
+  src="http://maps.google.com/maps/api/js?sensor=false">
+</script>
+<script type="text/javascript">
+
+// ==== Constants
+
+var STATUS_GOOD = 1;
+var STATUS_BAD = 2;
+var STATUS_UNKNOWN = 3;
+var MAX_STATUS = 3;
+
+var STATUS_ICON_COLORS = [null, '080', 'a00', '444'];
+var STATUS_TEXT_COLORS = [null, '040', 'a00', '444'];
+var STATUS_ZINDEXES = [null, 1, 3, 2];
+var STATUS_LABELS = [
+  null,
+  'At least one dose of {all_supplies}',
+  'Out of stock in {any_supply}',
+  'Data missing for {any_supply}'
+];
+
+var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+
+var INFO_TEMPLATE = '<div class="facility-info">' +
+  '<h1>{facility_name}</h1>' +
+  '<h2 class="caption">{division_name}</h2>' +
+  '<div class="stock-info">{stock_info}</div>' +
+  '<div class="caption">{last_report_date}</div></div>';
+
+var SUPPLY_TEMPLATE = '<div class="supply-item">' +
+  '<span class="supply-name">{supply_name}</span>: ' +
+  '<span class="supply-level">{supply_level}</span>' +
+  '</div>';
+
+// ==== Data loaded from the data store
+
+var supplies = [null];
+var facilities = [null];
+var divisions = [null];
+
+var supply_sets = [
+  null, {
+    description_all: 'doctors',
+    description_any: 'doctors',
+    abbreviation: 'D',
+    supplies: [1]
+  }, {
+    description_all: 'beds',
+    description_any: 'beds',
+    abbreviation: 'B',
+    supplies: [2]
+  }, {
+    description_all: 'patients',
+    description_any: 'patients',
+    abbreviation: 'P',
+    supplies: [3]
+  }
+];
+
+var DEFAULT_SUPPLY_SET_I = 1;
+
+// ==== Selection state
+
+var selected_supply_set_i = -1;
+var selected_supply_set = null;
+var selected_status_i = -1;
+var selected_division_i = -1;
+var selected_division = null;
+var selected_facility_i = -1;
+var selected_facility = null;
+
+var facility_status_is = [];  // status of each facility for selected supplies
+var bounds_match_selected_division = false;  // to skip redundant redraws
+
+// ==== Live API objects
+
+var map = null;
+var info = null;
+var markers = [];  // marker for each facility
+
+// ==== DOM utilities
+
+// Get an element by its id.
+function $(id) {
+  return document.getElementById(id);
+}
+
+// Special-case attribute handling.  For each ('k', 'v') pair, attribute k is
+// set by assigning to element.v rather than element.setAttribute('k', ...).
+var SPECIAL_ATTRIBUTES = {
+  'class': 'className',
+  colspan: 'colSpan',
+  onclick: 'onclick',
+  onmouseout: 'onmouseout',
+  onmouseover: 'onmouseover'
+};
+
+// Create an element with the given name and attributes.
+function $$(name, attrs, content) {
+  var element = document.createElement(name);
+  for (var key in attrs) {
+    if (typeof attrs[key] !== 'function') {
+      element.setAttribute(key, attrs[key]);
+    }
+    if (key in SPECIAL_ATTRIBUTES) {
+      element[SPECIAL_ATTRIBUTES[key]] = attrs[key];
+    }
+  }
+  if (content !== undefined) {
+    set_children(element, content);
+  }
+  return element;
+}
+
+// Replace all the children of an element with the given array of children.
+function set_children(element, children) {
+  if (!is_array(children)) {
+    children = [children];
+  }
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+  for (var i = 0; i < children.length; i++) {
+    var child = children[i];
+    if (!child.tagName) {
+      child = document.createTextNode('' + child);
+    }
+    element.appendChild(child);
+  }
+}
+
+// Get the size of the document area of the browser window.
+function get_window_size() {
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  if (typeof(width) === 'undefined') {
+    width = document.body.offsetWidth; // for IE
+    height = document.body.offsetHeight; // for IE
+  }
+  return [width, height];
+}
+
+// Get the top coordinate of a given element relative to the whole document.
+function get_element_top(element) {
+  var top = 0;
+  for (var node = element; node; node = node.offsetParent) {
+    top += node.offsetTop;
+  }
+  return top;
+}
+
+// ==== Array utilities
+
+function filter(array, predicate) {
+  var results = [];
+  for (var i = 0; i < array.length; i++) {
+    if (predicate(array[i])) {
+      results.push(array[i]);
+    }
+  }
+  return results;
+}
+
+function any(array, predicate) {
+  return filter(array, predicate).length > 0;
+}
+
+function last(array, count) {
+  return array[array.length - (count || 1)];
+}
+
+function is_array(thing) {
+  return (typeof thing === 'object') && (thing.constructor === Array);
+}
+
+// ==== String utilities
+
+function html_escape(text) {
+  return ('' + text).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function maybe_selected(selected) {
+  return selected ? ' selected' : '';
+}
+
+function render_template(template, params) {
+  var result = template;
+  for (var name in params) {
+    var placeholder = new RegExp('\\{' + name + '\\}');
+    var substitution;
+    if (params[name] === undefined || params[name] === null) {
+      substitution = '?';
+    } else if (typeof params[name] === 'object') {
+      substitution = params[name].html;
+    } else {
+      substitution = html_escape(params[name]);
+    }
+    result = result.replace(placeholder, substitution);
+  }
+  return result;
+}
+
+function make_icon(facility, status, detail) {
+  var text = detail ? facility.name : '';
+  var text_size = detail ? 10 : 0;
+  var text_fill = STATUS_TEXT_COLORS[status];
+  var icon = 'greek_cross_4w10';
+  var icon_size = '12';
+  var icon_fill = STATUS_ICON_COLORS[status];
+  var icon_outline = 'fff';
+  var params = [
+      text, text_size, text_fill,
+      icon, icon_size, icon_fill, icon_outline
+  ].join('|');
+  return 'http://chart.apis.google.com/chart?chst=d_simple_text_icon_above&' +
+      'chld=' + encodeURIComponent(params);
+}
+
+function clean_name(name) {
+  return name;
+
+  var ABBREVIATIONS = {VA: 1, RHC: 1, ILS: 1};
+  name = name.replace(/^\s*'?/g, '');
+  name = name.replace(/\s*\(.*\)\s*$/g, ' ');
+  name = name.replace(/\sHosp(ital)?\b\.?/i, ' Hosp.');
+  name = name.replace(/\sPara\b\.?/i, ' Para.');
+  name = name.replace(/\sDisp(ensary)?\b\.?/i, ' Disp.');
+  name = name.replace(/-/g, ' - ');
+  name = name.replace(/\s+/g, ' ');
+  var words = name.split(' ');
+  var capwords = [];
+  for (var i = 0; i < words.length; i++) {
+    var word = words[i].toUpperCase();
+    if (!ABBREVIATIONS[words[i]]) {
+      word = word.substring(0, 1) + word.substring(1).toLowerCase();
+    }
+    capwords.push(word);
+  }
+  return capwords.join(' ');
+}
+
+// ==== Maps API
+
+// Construct and set up the Map and InfoWindow objecs.
+function initialize_map() {
+  if (map) return;
+
+  map = new google.maps.Map($('map'), {
+    zoom: 1,
+    center: new google.maps.LatLng(0, 0),
+    mapTypeId: google.maps.MapTypeId.TERRAIN,
+    mapTypeControl: true,
+    scaleControl: true,
+    navigationControl: true,
+    navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL}
+  });
+  google.maps.event.addListener(map, 'tilesloaded', set_map_opacity);
+
+  info = new google.maps.InfoWindow();
+}
+
+// Reduce the opacity of the map layer to make markers stand out.
+function set_map_opacity() {
+  var panes = $('map').firstChild.firstChild;
+  for (var pane = panes.firstChild; pane; pane = pane.nextSibling) {
+    if (!pane.id.match(/^pane/)) {
+      pane.style.opacity = 0.7;
+      break;
+    }
+  }
+}
+
+// Construct and set up the map markers for the facilities.
+function initialize_markers() {
+  for (var f = 1; f < facilities.length; f++) {
+    var facility = facilities[f];
+    var location = facility.location;
+    markers[f] = new google.maps.Marker({
+      position: new google.maps.LatLng(location.lat, location.lon),
+      map: map,
+      icon: make_icon(facility.name, STATUS_UNKNOWN, false),
+      title: facility.name
+    });
+    google.maps.event.addListener(markers[f], 'click', facility_selector(f));
+  }
+}
+
+// ==== Display construction routines
+
+// Set up the supply selector.
+function initialize_supply_selector() {
+  var tbody = $('supply-tbody');
+  var tr = $$('tr');
+  var cells = [];
+  for (var s = 1; s < supply_sets.length; s++) {
+    cells.push($$('td', {
+      id: 'supply-set-' + s,
+      'class': 'supply-set',
+      onclick: supply_set_selector(s),
+      onmouseover: hover_activator('supply-set-' + s),
+      onmouseout: hover_deactivator('supply-set-' + s)
+    }, supply_sets[s].abbreviation));
+  }
+  set_children(tbody, tr);
+  set_children(tr, cells);
+}
+
+// Add the header to the division list.
+function initialize_division_header() {
+  var thead = $('division-thead');
+  var tr = $$('tr');
+  var cells = [$$('th', {}, 'Arrondissements')];
+  for (var s = 1; s <= MAX_STATUS; s++) {
+    cells.push($$('th', {'class': 'facility-count'},
+        $$('img', {src: make_icon('', s, false)})));
+  }
+  cells.push($$('th', {'class': 'facility-count'}, 'All'));
+  set_children(thead, tr);
+  set_children(tr, cells);
+}
+
+// Add the header to the facility list.
+function initialize_facility_header() {
+  var thead = $('facility-thead');
+  var tr = $$('tr');
+  var cells = [$$('th', {}, 'Facilities')];
+  for (var s = 1; s < supplies.length; s++) {
+    cells.push($$('th', {'class': 'stock-level'}, supplies[s].abbreviation));
+  }
+  set_children(thead, tr);
+  set_children(tr, cells);
+}
+
+// ==== Display update routines
+
+// Set the map bounds to fit all facilities in the given division.
+function update_map_bounds(division_i) {
+  if (bounds_match_selected_division && division_i === selected_division_i) {
+    // The map hasn't been moved since it was last fit to this division.
+    return;
+  }
+
+  var facility_is = divisions[division_i].facility_is;
+  var bounds = new google.maps.LatLngBounds();
+  for (var i = 0; i < facility_is.length; i++) {
+    var location = facilities[facility_is[i]].location;
+    if (location) {
+      bounds.extend(new google.maps.LatLng(location.lat, location.lon));
+    }
+  }
+  map.fitBounds(bounds);
+  bounds_match_selected_division = true;
+}
+
+// Update the facility map icons based on their status and the zoom level.
+function update_facility_icons() {
+  var detail = map.getZoom() > 8;
+  for (var f = 1; f < facilities.length; f++) {
+    if (markers[f]) {
+      var facility = facilities[f];
+      var s = facility_status_is[f];
+      markers[f].setIcon(make_icon(facility, s, detail));
+      markers[f].setZIndex(STATUS_ZINDEXES[s]);
+    }
+  }
+}
+
+// Fill in the facility legend.
+function update_facility_legend() {
+  var rows = [];
+  var stock = 'one dose';
+  for (var s = 1; s <= MAX_STATUS; s++) {
+    rows.push($$('tr', {'class': 'legend-row'}, [
+      $$('th', {'class': 'legend-icon'},
+        $$('img', {src: make_icon('', s, false)})),
+      $$('td', {'class': 'legend-label status-' + s},
+        render_template(STATUS_LABELS[s], {
+          all_supplies: selected_supply_set.description_all,
+          any_supply: selected_supply_set.description_any
+        }))
+    ]));
+  }
+  set_children($('legend-tbody'), rows);
+}
+
+// Repopulate the facility list based on the selected division and status.
+function update_facility_list() {
+  var rows = [];
+  for (var i = 0; i < selected_division.facility_is.length; i++) {
+    var f = selected_division.facility_is[i];
+    var facility = facilities[f];
+    if (selected_status_i === 0 ||
+        facility_status_is[f] === selected_status_i) {
+      var row = $$('tr', {
+        id: 'facility-' + f,
+        'class': 'facility' + maybe_selected(f === selected_facility_i),
+        onclick: facility_selector(f),
+        onmouseover: hover_activator('facility-' + f),
+        onmouseout: hover_deactivator('facility-' + f)
+      });
+      var cells = [$$('td', {'class': 'facility-name'}, facility.name)];
+      if (facility.levels &&
+          any(facility.levels, function (x) { return x !== null; })) {
+        for (var s = 1; s < supplies.length; s++) {
+          var level = facility.levels[s];
+          if (level === null) {
+            cells.push($$('td', {'class': 'stock-level no-data'}, '?'));
+          } else if (level === 0) {
+            cells.push($$('td', {'class': 'stock-level stockout'}, '0'));
+          } else {
+            cells.push($$('td', {'class': 'stock-level'}, level));
+          }
+        }
+      } else {
+        cells.push($$('td', {
+          'class': 'no-report',
+          'colspan': supplies.length - 1
+        }, 'no reports received'));
+      }
+      set_children(row, cells);
+      rows.push(row);
+    }
+  }
+  set_children($('facility-tbody'), rows);
+  update_facility_list_size();
+}
+
+// Update the height of the facility list to exactly fit the window.
+function update_facility_list_size() {
+  var windowHeight = get_window_size()[1];
+  var freshnessHeight = $('freshness').clientHeight;
+  var listTop = get_element_top($('facility-list'));
+  var listHeight = windowHeight - freshnessHeight - listTop;
+  $('facility-list').style.height = listHeight + 'px';
+  align_header_with_table($('facility-thead'), $('facility-tbody'));
+}
+
+// Update the width of header cells to match the table cells below.
+function align_header_with_table(thead, tbody) {
+  thead.parentNode.style.width = tbody.parentNode.clientWidth + 'px';
+  var head_cell = thead.firstChild.firstChild;
+  var body_cell = tbody.firstChild.firstChild;
+  while (body_cell) {
+    // Subtract 8 pixels to account for td padding: 2px 4px.
+    head_cell.style.width = (body_cell.clientWidth - 8) + 'px';
+    head_cell = head_cell.nextSibling;
+    body_cell = body_cell.nextSibling;
+  }
+}
+
+// Determine the stockout status of each facility for the selected supplies.
+function update_facility_status_is() {
+  var supplies = selected_supply_set.supplies;
+  for (var f = 1; f < facilities.length; f++) {
+    facility_status_is[f] = STATUS_GOOD;
+    var levels = facilities[f].levels;
+    if (!levels) {
+      facility_status_is[f] = STATUS_UNKNOWN;
+    } else {
+      for (var s = 0; s < supplies.length; s++) {
+        if (levels[supplies[s]] === null) {
+          facility_status_is[f] = STATUS_UNKNOWN;
+        } else if (levels[supplies[s]] === 0) {
+          facility_status_is[f] = STATUS_BAD;
+        }
+      }
+    }
+  }
+}
+
+// Update the contents of the division list based on the selected supply set.
+function update_division_list() {
+  var rows = [];
+  for (var d = 0; d < divisions.length; d++) {
+    var division = divisions[d];
+    var row = $$('tr', {
+      id: 'division-' + d,
+      'class': 'division'
+    });
+    var cells = [$$('td', {
+      'class': 'division-name',
+      onclick: division_and_status_selector(d, 0),
+      onmouseover: hover_activator('division-' + d),
+      onmouseout: hover_deactivator('division-' + d)
+    }, division.name)];
+    for (var s = 1; s <= MAX_STATUS; s++) {
+      var facility_is = filter(division.facility_is,
+        function (f) { return facility_status_is[f] === s; });
+      cells.push($$('td', {
+        'id': 'division-' + d + '-status-' + s,
+        'class': 'facility-count status-' + s + maybe_selected(
+            d === selected_division_i && s === selected_status_i),
+        onclick: division_and_status_selector(d, s),
+        onmouseover: hover_activator('division-' + d + '-status-' + s),
+        onmouseout: hover_deactivator('division-' + d + '-status-' + s)
+      }, facility_is.length));
+    }
+    cells.push($$('td', {
+      'id': 'division-' + d + '-status-0',
+      'class': 'facility-count status-0' + maybe_selected(
+          d === selected_division_i && 0 === selected_status_i),
+      onclick: division_and_status_selector(d, 0),
+      onmouseover: hover_activator('division-' + d + '-status-0'),
+      onmouseout: hover_deactivator('division-' + d + '-status-0')
+    }, division.facility_is.length));
+    set_children(row, cells);
+    rows.push(row);
+  }
+
+  set_children($('division-tbody'), rows);
+}
+
+// Update the data freshness indicator.
+function update_freshness(timestamp) {
+  if (!timestamp) {
+    $('freshness').innerHTML = 'No reports received';
+    return;
+  }
+
+  var t = new Date();
+  t.setTime(timestamp * 1000);
+
+  var timeout = 1000;
+  var seconds = (new Date()).getTime() / 1000 - timestamp;
+  var minutes = seconds/60;
+  var hours = seconds/3600;
+  var age;
+  if (hours >= 1.05) {
+    age = (Math.ceil(hours * 10) / 10) + ' hours ago';
+    timeout = 60000;
+  } else if (minutes >= 1.5) {
+    age = Math.ceil(minutes) + ' minutes ago';
+    timeout = 10000;
+  } else if (seconds >= 1.5) {
+    age = Math.ceil(seconds) + ' seconds ago';
+  } else if (seconds > 0) {
+    age = '1 second ago';
+  } else {
+    age = Math.round(seconds) + ' seconds in the future';
+  }
+
+  var months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+  var date = months[t.getMonth()] + ' ' + t.getDate();
+  var hours = (t.getHours() < 10 ? '0' : '') + t.getHours();
+  var minutes = (t.getMinutes() < 10 ? '0' : '') + t.getMinutes();
+  var time = hours + ':' + minutes;
+  var offset = - (t.getTimezoneOffset() / 60);
+  var zone = 'UTC' + (offset > 0 ? '+' : '&#x2212;') + Math.abs(offset);
+  $('freshness').innerHTML = 'Last updated ' +
+      age + ' (' + date + ' at ' + time + ' ' + zone + ')';
+  window.setTimeout(function () { update_freshness(timestamp); }, timeout);
+}
+
+// ==== UI event handlers
+
+function initialize_handlers() {
+  var window_size = [null, null];
+
+  window.onresize = function () {
+    var new_size = get_window_size();
+    if (new_size[0] !== window_size[0] || new_size[1] !== window_size[1]) {
+      handle_window_resize();
+      window_size = new_size;
+    }
+  };
+
+  google.maps.event.addListener(map, 'zoom_changed', handle_zoom_changed);
+  google.maps.event.addListener(map, 'bounds_changed', handle_bounds_changed);
+}
+
+function handle_window_resize() {
+  align_header_with_table($('division-thead'), $('division-tbody'));
+  update_facility_list_size();
+}
+
+function handle_zoom_changed() {
+  update_facility_icons(); // amount of detail in icons depends on zoom level
+}
+
+function handle_bounds_changed() {
+  bounds_match_selected_division = false;
+}
+
+function hover_activator(id) {
+  return function () {
+    var element = $(id);
+    element.className = element.className + ' hover';
+  };
+}
+
+function hover_deactivator(id) {
+  return function () {
+    var element = $(id);
+    element.className = element.className.replace(/ hover/g, '');
+  };
+}
+
+function supply_set_selector(supply_set_i) {
+  return function () {
+    select_supply_set(supply_set_i);
+  };
+}
+
+function division_and_status_selector(division_i, status_i) {
+  return function () {
+    select_division_and_status(division_i, status_i);
+  };
+}
+
+function facility_selector(facility_i) {
+  return function () {
+    select_facility(facility_i);
+  };
+}
+
+// ==== Selection behaviour
+
+function select_supply_set(supply_set_i) {
+  if (supply_set_i === selected_supply_set_i) {
+    return;
+  }
+
+  // Update the selection.
+  selected_supply_set_i = supply_set_i;
+  selected_supply_set = supply_sets[supply_set_i];
+
+  // Update the selection highlight.
+  for (var s = 1; s < supply_sets.length; s++) {
+    $('supply-set-' + s).className = 'supply-set' +
+        maybe_selected(s === supply_set_i);
+  }
+
+  // Update the facility icon legend.
+  update_facility_legend();
+
+  // Update the status of each facility.
+  update_facility_status_is();
+
+  // Update the facility icons to reflect their status.
+  update_facility_icons();
+
+  // Update the facility counts in the division list.
+  update_division_list();
+
+  if (selected_division !== null) {
+    // Filter the list of facilities by the selected supply set.
+    update_facility_list();
+  }
+}
+
+function select_division_and_status(division_i, status_i) {
+  update_map_bounds(division_i);
+
+  if (division_i === selected_division_i && status_i === selected_status_i) {
+    return;
+  }
+
+  // Update the selection.
+  selected_division_i = division_i;
+  selected_division = divisions[division_i];
+  selected_status_i = status_i;
+  
+  // Update the selection highlight.
+  for (var d = 0; d < divisions.length; d++) {
+    for (var s = 0; s <= MAX_STATUS; s++) {
+      $('division-' + d + '-status-' + s).className =
+          'facility-count status-' + s +
+          maybe_selected(d === division_i && s === status_i);
+    }
+  }
+
+  // Filter the list of facilities by the selected division and status.
+  update_facility_list();
+}
+
+function select_facility(facility_i, ignore_current) {
+  if (!ignore_current && facility_i === selected_facility_i) {
+    return;
+  }
+  
+  // Update the selection.
+  selected_facility_i = facility_i;
+  selected_facility = (facility_i <= 0) ? null : facilities[facility_i];
+
+  // Update the selection highlight.
+  for (var f = 1; f < facilities.length; f++) {
+    var item = $('facility-' + f);
+    if (item) {
+      item.className = 'facility' + maybe_selected(f === facility_i);
+    }
+  }
+
+  if (facility_i <= 0) {
+    // No selection.
+    info.close();
+    return;
+  }
+
+  // Pop up the InfoWindow on the selected clinic.
+  var last_report_date = 'No reports received';
+  if (selected_facility.reports.length) {
+    var ymd = last(selected_facility.reports).date.split('-');
+    last_report_date = 'Reported on ' +
+        MONTH_ABBRS[ymd[1] - 1] + ' ' + (ymd[2] - 0) + ', ' + ymd[0];
+  }
+  var stock_info = '';
+  for (var s = 1; s < supplies.length; s++) {
+    var level = selected_facility.levels[s];
+    if (level === 0) {
+      level = {html: '<span class="stockout">0</span>'};
+    }
+    stock_info += render_template(SUPPLY_TEMPLATE, {
+      supply_name: supplies[s].name,
+      supply_level: level
+    });
+  }
+  info.setContent(render_template(INFO_TEMPLATE, {
+    facility_name: selected_facility.name,
+    division_name: divisions[selected_facility.division_i].name,
+    stock_info: {html: stock_info},
+    last_report_date: last_report_date
+  }));
+
+  info.open(map, markers[selected_facility_i]);
+}
+
+// ==== Load data
+
+function load_data(data) {
+  supplies = data.supplies;
+  facilities = data.facilities;
+  divisions = data.divisions;
+
+  var facility_is = [];
+  for (var i = 1; i < facilities.length; i++) {
+    facility_is.push(i);
+    facilities[i].name = clean_name(facilities[i].name);
+  }
+  divisions[0] = {
+    name: 'All arrondissements',
+    facility_is: facility_is
+  };
+
+  initialize_supply_selector();
+  initialize_division_header();
+  initialize_facility_header();
+
+  initialize_map();
+  initialize_markers();
+  initialize_handlers();
+  update_freshness(data.timestamp);
+
+  select_supply_set(DEFAULT_SUPPLY_SET_I);
+  select_division_and_status(0, 0);
+}
+
+</script>
+
+<body>
+<div id="viewport"></div>
+<div class="header">
+  <div class="user">
+    <strong>{{authorization}}</strong> |
+    <a href="about:blank">Help</a> |
+    <a href="{{logout_url}}">Sign out</a>
+  </div>
+  <div class="title">
+    Resource Mapper
+  </div>
+</div>
+<div id="data">
+  <div id="supply-section" class="section">
+    <div class="table-head">
+      <table width="100%" cellspacing=0 cellpadding=0 border=0>
+        <thead id="supply-thead">
+          <tr>
+            <th>Supplies</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="table-body">
+      <table width="100%" cellspacing=0 cellpadding=0 border=0>
+        <tbody id="supply-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="legend-section" class="section">
+    <div class="table-body">
+      <table width="100%" cellspacing=0 cellpadding=0 border=0>
+        <tbody id="legend-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="division-section" class="section">
+    <div class="table-head">
+      <table width="100%" cellspacing=0 cellpadding=0 border=0>
+        <thead id="division-thead">
+          <th>Arrondissements</th>
+        </thead>
+      </table>
+    </div>
+    <div class="table-body" id="division-list">
+      <table width="100%" cellspacing=0 cellpadding=0 border=0>
+        <tbody id="division-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="facility-section" class="section">
+    <div class="table-head">
+      <table width="100%" cellspacing=0 cellpadding=0 border=0>
+        <thead id="facility-thead">
+          <th>Facilities</th>
+        </thead>
+      </table>
+    </div>
+    <div class="table-body" id="facility-list">
+      <table width="100%" cellspacing=0 cellpadding=0 border=0>
+        <tbody id="facility-tbody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div id="map"></div>
+<div class="hshadow hs1"></div>
+<div class="hshadow hs2"></div>
+<div class="hshadow hs3"></div>
+<div class="vshadow vs1"></div>
+<div class="vshadow vs2"></div>
+<div class="vshadow vs3"></div>
+<div id="freshness" class="caption"></div>
+<script type="text/javascript">
+load_data({{data}});
+</script>
+</body>
