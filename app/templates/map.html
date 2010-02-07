@@ -38,15 +38,18 @@ th { text-align: left; }
 th, td { padding: 2px 4px; }
 .section { margin-top: 10px; }
 .section:first-child { margin-top: 0; }
+#legend-section { margin-top: 4px; }
 .table-head { background: #e0e2e8; padding: 2px 0; }
 .table-head tr { color: #000; }
 .table-head img, .legend-icon img { position: relative; top: 2px; }
 .table-body { overflow-y: auto; }
 .table-body tr { color: #222; }
 #supply-tbody, #division-tbody, #facility-tbody { cursor: pointer; }
+#division-list { max-height: 190px; }  /* pad 2px*2 + 15px = 19px per row */
+#division-list tr { line-height: 15px; }
 .hover { background: #cdf; }
 td.supply-set { text-align: center; width: 2em;
-    border-left: 1px solid #f0f1f4; border-bottom: 1px solid #f0f1f4; }
+    border-left: 1px solid #e0e2e8; border-bottom: 1px solid #e0e2e8; }
 td#supply-set-1 { border-left: none; }
 th.legend-icon { padding: 2px 4px; text-align: center; width: 2em; }
 td.legend-label { padding: 2px 4px 2px 0; }
@@ -60,7 +63,7 @@ td.no-data { color: #aaa; }
 td.division-name { padding-left: 16px; }
 tr#division-0 td.division-name { padding-left: 4px; }
 td.status-0 { color: #000; }
-td.status-1 { color: #060; }
+td.status-1 { color: #080; }
 td.status-2 { color: #a00; }
 td.status-3 { color: #444; }
 td.facility-count.selected { color: #fff; }
@@ -851,6 +854,7 @@ function load_data(data) {
 
   select_supply_set(DEFAULT_SUPPLY_SET_I);
   select_division_and_status(0, 0);
+  handle_window_resize();
 }
 
 </script>

@@ -31,13 +31,13 @@ indexes:
   - name: division_type
   - name: name
 
-# Used 2 times in query history.
+# Used 8 times in query history.
 - kind: Division
   ancestor: yes
   properties:
   - name: name
 
-# Used 2 times in query history.
+# Used 8 times in query history.
 - kind: Facility
   ancestor: yes
   properties:
@@ -49,14 +49,14 @@ indexes:
   properties:
   - name: date
 
-# Used 2 times in query history.
+# Used 8 times in query history.
 - kind: Report
   ancestor: yes
   properties:
   - name: date
     direction: desc
 
-# Used 4 times in query history.
+# Used 18 times in query history.
 - kind: Version
   ancestor: yes
   properties:

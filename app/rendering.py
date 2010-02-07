@@ -142,7 +142,6 @@ def version_to_json(version):
     districts = [district
         for district in Division.all().ancestor(version).order('name')
         if district.type.key().name() == 'arrondissement']
-    print >>sys.stderr, 'districts', districts
     division_jobjects, division_is = make_jobjects(
         districts, district_transformer, facility_map)
 
