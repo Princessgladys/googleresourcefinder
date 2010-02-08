@@ -38,7 +38,6 @@ def delete_descendants(version):
         db.delete(version.dumps)
     version.dump = None
     version.dumps = []
-    version.supplies = []
     version.put()
     family = list(db.Query(keys_only=True).ancestor(version))
     kids = filter(lambda k: k != version.key(), family)

@@ -13,7 +13,12 @@ def make_key(text):
     return ''.join(ch for ch in decomposed if re.match(r'\w', ch)).lower()
 
 def get_hospitals(url='http://wiki.openstreetmap.org/wiki/WikiProject_Haiti/Status/Hospitals/OldHospitalReport'):
-    doc = scrape.Session().go(url)
+    """Scrapes a list of hospitals from the OSM website."""
+    return parse_hospitals(scrape.Session().go(url).content)
+
+def parse_hospitals(content):
+    """Parses a list of hospitals from the OSM website."""
+    doc = scrape.Region(content)
     hospitals = []
     division_map = {}
     for row in doc.first('table').all('tr'):
@@ -44,18 +49,8 @@ def get_hospitals(url='http://wiki.openstreetmap.org/wiki/WikiProject_Haiti/Stat
             })
     return hospitals, division_map
 
-def load_hospitals(hospitals, division_map, cc='ht'):
-    country = Country.get_by_key_name(cc)
-    version = Version(country)
-    supplies = [
-        Supply(key_name='doctor', name='Doctors', abbreviation='D'),
-        Supply(key_name='bed', name='Beds', abbreviation='B'),
-        Supply(key_name='patient', name='Patients', abbreviation='P')
-    ]
-    db.put(supplies)
-    version.supplies = [supply.key() for supply in supplies]
-    version.put()
-
+def load_hospitals(version, hospitals, division_map):
+    """Loads a list of hospitals into the given version."""
     arrondissement = DivisionType(
         version, key_name='arrondissement',
         singular='arrondissement', plural='arrondissements')
@@ -63,13 +58,15 @@ def load_hospitals(hospitals, division_map, cc='ht'):
     divisions = {}
     for key in sorted(division_map.keys(), key=lambda d: division_map[d]):
         divisions[key] = Division(
-            version, id=key, type=arrondissement, name=division_map[key])
+            version, id=key, type='arrondissement', name=division_map[key])
     db.put(divisions.values())
 
     facilities = {}
     for hospital in hospitals:
         facility = Facility(
-            version, id=make_key(hospital['name']),
+            version,
+            type='hospital',
+            id=make_key(hospital['name']),
             name=hospital['name'],
             location=db.GeoPt(*hospital['location']),
             division=divisions[hospital['division']],
@@ -77,5 +74,3 @@ def load_hospitals(hospitals, division_map, cc='ht'):
         )
         facilities[facility.id] = facility
     db.put(facilities.values())
-
-
