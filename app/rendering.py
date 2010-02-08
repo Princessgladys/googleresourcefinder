@@ -31,6 +31,7 @@ def make_jobjects(entities, transformer, *args):
 def attribute_transformer(index, attribute):
     """Construct the JSON object for an Attribute."""
     return {'name': attribute.name,
+            'type': attribute.type,
             'abbreviation': attribute.abbreviation}
 
 def facility_type_transformer(
@@ -42,7 +43,7 @@ def facility_type_transformer(
             'attributes': [attribute_is[p] for p in facility_type.attributes]}
 
 def facility_transformer(
-    index, facility, attribute_map, report_map, facility_map):
+    index, facility, attribute_map, report_map, facility_type_is, facility_map):
     """Construct the JSON object for a Facility."""
     # Add the facility to the facility lists for its containing divisions.
     for key in facility.divisions:
@@ -60,6 +61,7 @@ def facility_transformer(
     # Pack the results into an object suitable for JSON serialization.
     facility_jobject = {
         'name': facility.name,
+        'type': facility_type_is[facility.type],
         'division_i': facility.division.key(),
         'last_report': reports and reports[-1] or None
     }
@@ -113,8 +115,8 @@ def version_to_json(version):
     # facilities in each division.
     facility_map = {}
     facility_jobjects, facility_is = make_jobjects(
-        Facility.all().ancestor(version).order('name'),
-        facility_transformer, attribute_map, report_map, facility_map)
+        Facility.all().ancestor(version).order('name'), facility_transformer,
+        attribute_map, report_map, facility_type_is, facility_map)
 
     # Make JSON objects for the districts.
     division_jobjects, division_is = make_jobjects(

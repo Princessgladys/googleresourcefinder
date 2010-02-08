@@ -15,6 +15,7 @@ def setup_version(version):
                          abbreviation=abbr or name, values=values)
 
     str_attr = lambda key, name, abbr=None: attr('str', key, name, abbr)
+    text_attr = lambda key, name, abbr=None: attr('text', key, name, abbr)
     int_attr = lambda key, name, abbr=None: attr('int', key, name, abbr)
     multi_attr = (lambda key, name, abbr, values:
                   attr('multi', key, name, abbr, values))
@@ -33,7 +34,7 @@ def setup_version(version):
                                    'physical therapy']),
         multi_attr('medical_equipment', 'Medical equipment available',
                    'Equipment', ['x-ray', 'ultrasound']),
-        str_attr('comments', 'Comments')
+        text_attr('comment', 'Comment')
     ]
 
     hospital = FacilityType(version, key_name='hospital',

@@ -43,14 +43,14 @@ indexes:
   properties:
   - name: name
 
-# Used 14 times in query history.
+# Used 19 times in query history.
 - kind: Division
   ancestor: yes
   properties:
   - name: type
   - name: name
 
-# Used 17 times in query history.
+# Used 22 times in query history.
 - kind: Facility
   ancestor: yes
   properties:
@@ -69,14 +69,14 @@ indexes:
   - name: date
     direction: desc
 
-# Used 8 times in query history.
+# Used 13 times in query history.
 - kind: Report
   ancestor: yes
   properties:
   - name: timestamp
     direction: desc
 
-# Used 44 times in query history.
+# Used 54 times in query history.
 - kind: Version
   ancestor: yes
   properties:

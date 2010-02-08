@@ -67,7 +67,8 @@ class Attribute(db.Model):
     name = db.StringProperty(required=True)  # UI text
     abbreviation = db.StringProperty()  # UI text
     type = db.StringProperty(required=True, choices=[
-        'str',  # value is a string (Python unicode string)
+        'str',  # value is a single-line string (Python unicode)
+        'text',  # value is a string, shown as long text (Python unicode)
         'int',  # value is an integer (64-bit long)
         'float',  # value is a float (Python float, i.e. double)
         'choice',  # value is a string (one of the elements in 'values')  

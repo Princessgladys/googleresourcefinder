@@ -67,6 +67,7 @@ td.status-1 { color: #080; }
 td.status-2 { color: #a00; }
 td.status-3 { color: #444; }
 td.facility-count.selected { color: #fff; }
+.stock-info .text { margin-left: 2em; }
 
 /* Map area */
 #map, .hshadow, .vshadow { position: absolute; left: 320px; top: 24px; }
@@ -115,22 +116,22 @@ var STATUS_TEXT_COLORS = [null, '040', 'a00', '444'];
 var STATUS_ZINDEXES = [null, 1, 3, 2];
 var STATUS_LABELS = [
   null,
-  'One or more {all_supplies}',
-  'No {any_supply}',
-  'Data missing for {any_supply}'
+  'One or more ${all_supplies}',
+  'No ${any_supply}',
+  'Data missing for ${any_supply}'
 ];
 
 var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
 var INFO_TEMPLATE = '<div class="facility-info">' +
-  '<h1>{facility_name}</h1>' +
-  '<h2 class="caption">{division_name}</h2>' +
-  '<div class="stock-info">{stock_info}</div>' +
-  '<div class="caption">{last_report_date}</div></div>';
+  '<h1>${facility_name}</h1>' +
+  '<h2 class="caption">${division_name}</h2>' +
+  '<div class="stock-info">${stock_info}</div>' +
+  '<div class="caption">${last_report_date}</div></div>';
 
 var SUPPLY_TEMPLATE = '<div class="supply-item">' +
-  '<span class="supply-name">{supply_name}</span>: ' +
-  '<span class="supply-level">{supply_level}</span>' +
+  '<span class="supply-name">${supply_name}</span>: ' +
+  '<span class="supply-level">${supply_level}</span>' +
   '</div>';
 
 // ==== Data loaded from the data store
@@ -297,9 +298,11 @@ function maybe_selected(selected) {
 function render_template(template, params) {
   var result = template;
   for (var name in params) {
-    var placeholder = new RegExp('\\{' + name + '\\}');
+    var placeholder = new RegExp('\\$\\{' + name + '\\}');
     var substitution;
-    if (params[name] === undefined || params[name] === null) {
+    if (name === '$') {
+      substitution = '$';
+    } else if (params[name] === undefined || params[name] === null) {
       substitution = '?';
     } else if (typeof params[name] === 'object') {
       substitution = params[name].html;
@@ -521,7 +524,7 @@ function update_facility_list() {
           } else if (value === 0) {
             cells.push($$('td', {'class': 'stock-level stockout'}, '0'));
           } else {
-            cells.push($$('td', {'class': 'stock-level'}, level));
+            cells.push($$('td', {'class': 'stock-level'}, value));
           }
         }
       } else {
@@ -811,26 +814,38 @@ function select_facility(facility_i, ignore_current) {
 
   // Pop up the InfoWindow on the selected clinic.
   var last_report_date = 'No reports received';
-  if (selected_facility.reports.length) {
-    var ymd = last(selected_facility.reports).date.split('-');
+  var last_report = selected_facility.last_report;
+  if (last_report) {
+    var ymd = last_report.date.split('-');
     last_report_date = 'Reported on ' +
         MONTH_ABBRS[ymd[1] - 1] + ' ' + (ymd[2] - 0) + ', ' + ymd[0];
   }
-  var stock_info = '';
-  for (var s = 1; s < supplies.length; s++) {
-    var level = selected_facility.levels[s];
-    if (level === 0) {
-      level = {html: '<span class="stockout">0</span>'};
+  var report_display = '';
+  var facility_type = facility_types[selected_facility.type];
+  for (var a = 0; a < facility_type.attributes.length; a++) {
+    var attribute = attributes[facility_type.attributes[a]];
+    var value = last_report ? last_report.values[a] : '';
+    if (value === 0) {
+      value = {html: '<span class="stockout">0</span>'};
     }
-    stock_info += render_template(SUPPLY_TEMPLATE, {
-      supply_name: supplies[s].name,
-      supply_level: level
+    switch (attribute.type) {
+      case 'text':
+        value = {html: render_template('<div class="text">${text}</div>',
+                                       {text: value})};
+        break;
+      case 'multi':
+        value = value.join(', ');
+        break;
+    }
+    report_display += render_template(SUPPLY_TEMPLATE, {
+      supply_name: attribute.name,
+      supply_level: value
     });
   }
   info.setContent(render_template(INFO_TEMPLATE, {
     facility_name: selected_facility.name,
     division_name: divisions[selected_facility.division_i].name,
-    stock_info: {html: stock_info},
+    stock_info: {html: report_display},
     last_report_date: last_report_date
   }));
 
