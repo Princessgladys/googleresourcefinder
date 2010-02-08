@@ -25,7 +25,8 @@ class Country(db.Model):
     name = db.StringProperty(required=True)  # UI text
 
 class Dump(db.Model):
-    """A record of the data received from a data source.  Parent: Country."""
+    """A record of the data received from a data source in its native format,
+    before it was converted and loaded into the datastore.  Parent: Country."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
     base = db.SelfReference()  # if present, this dump is a clone of base
     source = db.StringProperty()  # URL identifying the source
@@ -40,19 +41,12 @@ class Version(db.Model):
     base = db.SelfReference()  # if present, this version is a clone of base
     dump = db.Reference(Dump)  # dump used to make this snapshot
     dumps = db.ListProperty(db.Key)  # list of dumps (deprecated)
-    supplies = db.ListProperty(db.Key)  # list of tracked supplies, in UI order
-
-class Supply(db.Model):
-    """A supply whose levels are tracked.  Parent: Version.  Key name:
-    property name used in a Report."""
-    timestamp = db.DateTimeProperty(auto_now_add=True)
-    name = db.StringProperty(required=True)  # UI text
-    abbreviation = db.StringProperty(required=True)  # UI text
 
 class DivisionType(db.Model):
     """Descriptor for a type of administrative division within a country.
     Usually each DivisionType corresponds to a level of granularity (e.g.
-    province, state, zone, region, district, ward).  Parent: Version."""
+    province, state, zone, region, district, ward).  Parent: Version.
+    Key name: an identifier used as the value of Division.type."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
     singular = db.StringProperty(required=True)  # UI text, singular form
     plural = db.StringProperty(required=True)  # UI text, plural form
@@ -61,23 +55,48 @@ class Division(db.Model):
     """An administrative division within a country.  Parent: Version."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
     id = db.StringProperty(required=True)  # government ID
-    type = db.Reference(DivisionType)
-    superdivision = db.SelfReference(collection_name='subdivisions')
+    type = db.StringProperty(required=True)  # key_name of a DivisionType
+    superdivision_id = db.StringProperty()  # a Division.id
     name = db.StringProperty(required=True)  # UI text
     location = db.GeoPtProperty()  # approximate center, for labelling
 
-class Facility(db.Model):
-    """A health facility whose stock is tracked.  Parent: Version."""
+class Attribute(db.Model):
+    """An attribute of a facility, e.g. services available, number of patients.
+    Parent: Version.  Key name: name of a property in a Report."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
+    name = db.StringProperty(required=True)  # UI text
+    abbreviation = db.StringProperty()  # UI text
+    type = db.StringProperty(required=True, choices=[
+        'str',  # value is a single-line string (Python unicode)
+        'text',  # value is a string, shown as long text (Python unicode)
+        'int',  # value is an integer (64-bit long)
+        'float',  # value is a float (Python float, i.e. double)
+        'choice',  # value is a string (one of the elements in 'values')  
+        'multi'  # value is a list of strings (which are elements of 'values')
+    ])
+    values = db.StringListProperty()  # for choice or multi
+
+class FacilityType(db.Model):
+    """A type of facility, e.g. hospital, warehouse.  Parent: Version.
+    Key name: an identifier used as the value of Facility.type."""
+    timestamp = db.DateTimeProperty(auto_now_add=True)
+    name = db.StringProperty(required=True)  # UI text
+    abbreviation = db.StringProperty(required=True)  # UI text
+    attributes = db.StringListProperty()  # key_names of Attribute entities
+
+class Facility(db.Model):
+    """A facility whose attributes are tracked.  Parent: Version."""
+    timestamp = db.DateTimeProperty(auto_now_add=True)
+    type = db.StringProperty(required=True)  # key_name of a FacilityType
     id = db.StringProperty(required=True)  # government ID
     name = db.StringProperty(required=True)  # UI text
-    division = db.Reference(Division)  # lowest-level division assigned
-    divisions = db.ListProperty(db.Key)  # all levels of containing divisions
+    division_id = db.StringProperty()  # a Division.id
+    division_ids = db.StringListProperty()  # all levels of containing divisions
     location = db.GeoPtProperty()  # for plotting the facility on a map
 
 class Report(db.Expando):
-    """A report on the stock levels at a facility.  Parent: Version."""
+    """A report on the attributes of a facility.  Parent: Version."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
-    facility = db.Reference(Facility)
-    date = db.DateProperty()  # date that supply levels were recorded
-    # additional float properties for each supply (named by the supply's id)
+    facility_id = db.StringProperty()  # a Facility.id
+    date = db.DateProperty()  # date that report contents were valid
+    # additional properties for each Attribute (named by Attribute's key_name)

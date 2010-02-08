@@ -23,14 +23,14 @@ PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP_DIR = os.path.join(PROJECT_DIR, 'app')
 sys.path.append(APP_DIR)
 
-for dir in [
+for path in [
     os.environ.get('APPENGINE_DIR', ''),
     '/usr/lib/google_appengine',
     '/usr/local/lib/google_appengine',
     '/usr/local/google_appengine'
 ]:
-    if os.path.isdir(dir):
-        APPENGINE_DIR = dir
+    if os.path.isdir(path):
+        APPENGINE_DIR = path
         break
 else:
     raise SystemExit('Could not find google_appengine directory. '
