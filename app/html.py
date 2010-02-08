@@ -66,8 +66,8 @@ def html_repr(value, depth=1, leaf=0):
                           db.PhoneNumber, db.PostalAddress, db.Rating)):
         return '%s(%r)' % (value.__class__.__name__, value)
     if isinstance(value, (db.Blob, db.Text)):
-        return '%s(%r..., len=%d)' % (
-            value.__class__.__name__, value[:20], len(value))
+        return '%s(%s..., len=%d)' % (
+            value.__class__.__name__, html_escape(repr(value[:40])), len(value))
     if isinstance(value, db.GeoPt):
         return 'GeoPt(%g, %g)' % (value.lat, value.lon)
     if isinstance(value, db.IM):
