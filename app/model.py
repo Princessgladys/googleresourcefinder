@@ -56,7 +56,7 @@ class Division(db.Model):
     timestamp = db.DateTimeProperty(auto_now_add=True)
     id = db.StringProperty(required=True)  # government ID
     type = db.StringProperty(required=True)  # key_name of a DivisionType
-    superdivision = db.SelfReference(collection_name='subdivisions')
+    superdivision_id = db.StringProperty()  # a Division.id
     name = db.StringProperty(required=True)  # UI text
     location = db.GeoPtProperty()  # approximate center, for labelling
 
@@ -90,13 +90,13 @@ class Facility(db.Model):
     type = db.StringProperty(required=True)  # key_name of a FacilityType
     id = db.StringProperty(required=True)  # government ID
     name = db.StringProperty(required=True)  # UI text
-    division = db.Reference(Division)  # lowest-level division assigned
-    divisions = db.ListProperty(db.Key)  # all levels of containing divisions
+    division_id = db.StringProperty()  # a Division.id
+    division_ids = db.StringListProperty()  # all levels of containing divisions
     location = db.GeoPtProperty()  # for plotting the facility on a map
 
 class Report(db.Expando):
     """A report on the attributes of a facility.  Parent: Version."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
-    facility = db.Reference(Facility)
+    facility_id = db.StringProperty()  # a Facility.id
     date = db.DateProperty()  # date that report contents were valid
     # additional properties for each Attribute (named by Attribute's key_name)

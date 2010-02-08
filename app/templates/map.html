@@ -24,7 +24,7 @@ body { margin: 0; }
 body, h1, h2, th, td { font-family: helvetica, arial; font-size: 13px; }
 tr { vertical-align: baseline; }
 th { text-align: left; }
-.stock-info, .legend-label { font-size: 11px; }
+.facility-info, .facility-info td, .legend-label { font-size: 11px; }
 .caption { font-size: 11px; font-weight: normal; color: #aaa; }
 
 /* Header line */
@@ -54,7 +54,7 @@ td#supply-set-1 { border-left: none; }
 th.legend-icon { padding: 2px 4px; text-align: center; width: 2em; }
 td.legend-label { padding: 2px 4px 2px 0; }
 th.facility-count, td.facility-count { text-align: right; width: 2.5em; }
-th.stock-level, td.stock-level { text-align: right; width: 3em; }
+th.stock-level, td.stock-level { text-align: right; width: 2.5em; }
 .stockout { color: #f24; }
 td.selected, tr.selected { background: #26d; color: #fff; font-weight: bold; }
 tr.selected .stockout { color: #f9a; }
@@ -67,7 +67,6 @@ td.status-1 { color: #080; }
 td.status-2 { color: #a00; }
 td.status-3 { color: #444; }
 td.facility-count.selected { color: #fff; }
-.stock-info .text { margin-left: 2em; }
 
 /* Map area */
 #map, .hshadow, .vshadow { position: absolute; left: 320px; top: 24px; }
@@ -86,6 +85,7 @@ td.facility-count.selected { color: #fff; }
 .facility-info h1, .facility-info h2 { margin: 0; color: #000; }
 .facility-info .stock-info { margin: 1em 0; color: #666; }
 .facility-info .supply-level { color: #000; }
+.facility-info .text { margin-left: 2em; }
 </style>
 
 <!--[if lt IE 8]>
@@ -144,7 +144,7 @@ var divisions = [null];
 // ==== Attributes shown in the facility table (hardcoded for now)
 
 // Indicates into the attributes list of the "hospital" facility type.
-var summary_attributes = [null, 5, 6, 7];
+var summary_attributes = [null, 5, 6, 7, 8];
 
 
 // ==== Filtering controls
@@ -161,10 +161,15 @@ var supply_sets = [
     abbreviation: 'Patients',
     supplies: [6]
   }, {
+    description_all: 'beds',
+    description_any: 'beds',
+    abbreviation: 'Beds',
+    supplies: [7]
+  }, {
     description_all: 'capacity',
     description_any: 'capacity',
     abbreviation: 'Capacity',
-    supplies: [7]
+    supplies: [8]
   }
 ];
 
@@ -553,14 +558,16 @@ function update_facility_list_size() {
 
 // Update the width of header cells to match the table cells below.
 function align_header_with_table(thead, tbody) {
-  thead.parentNode.style.width = tbody.parentNode.clientWidth + 'px';
-  var head_cell = thead.firstChild.firstChild;
-  var body_cell = tbody.firstChild.firstChild;
-  while (body_cell) {
-    // Subtract 8 pixels to account for td padding: 2px 4px.
-    head_cell.style.width = (body_cell.clientWidth - 8) + 'px';
-    head_cell = head_cell.nextSibling;
-    body_cell = body_cell.nextSibling;
+  if (tbody.firstChild) {
+    thead.parentNode.style.width = tbody.parentNode.clientWidth + 'px';
+    var head_cell = thead.firstChild.firstChild;
+    var body_cell = tbody.firstChild.firstChild;
+    while (body_cell) {
+      // Subtract 8 pixels to account for td padding: 2px 4px.
+      head_cell.style.width = (body_cell.clientWidth - 8) + 'px';
+      head_cell = head_cell.nextSibling;
+      body_cell = body_cell.nextSibling;
+    }
   }
 }
 
@@ -824,18 +831,26 @@ function select_facility(facility_i, ignore_current) {
   var facility_type = facility_types[selected_facility.type];
   for (var a = 0; a < facility_type.attributes.length; a++) {
     var attribute = attributes[facility_type.attributes[a]];
-    var value = last_report ? last_report.values[a] : '';
-    if (value === 0) {
-      value = {html: '<span class="stockout">0</span>'};
-    }
-    switch (attribute.type) {
-      case 'text':
-        value = {html: render_template('<div class="text">${text}</div>',
-                                       {text: value})};
-        break;
-      case 'multi':
-        value = value.join(', ');
-        break;
+    var value = '';
+    if (last_report) {
+      value = last_report.values[a];
+      switch (attribute.type) {
+        case 'text':
+          value = {html: render_template('<div class="text">${text}</div>',
+                                         {text: {html: value}})};
+          break;
+        case 'multi':
+          if (value !== null) {
+            value = value.join(', ');
+          }
+          break;
+        case 'int':
+        case 'float':
+          if (value === 0) {
+            value = {html: '<span class="stockout">0</span>'};
+          }
+          break;
+      }
     }
     report_display += render_template(SUPPLY_TEMPLATE, {
       supply_name: attribute.name,

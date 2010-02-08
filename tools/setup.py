@@ -1,4 +1,6 @@
-def make_new_version(cc, country_name):
+from model import *
+
+def make_version(cc, country_name):
     """Creates a new version for the given country."""
     country = Country.get_by_key_name(cc)
     if not country:
@@ -28,6 +30,7 @@ def setup_version(version):
         str_attr('end_date', 'Service end date'),
         int_attr('doctor_count', 'Current number of doctors', 'Doc'),
         int_attr('patient_count', 'Current number of patients', 'Pat'),
+        int_attr('bed_count', 'Total number of beds', 'Bed'),
         int_attr('patient_capacity', 'Patient capacity', 'Cap'),
         multi_attr('doctor_specialties', 'Doctor specialties available',
                    'Specialties', ['obstetrics', 'orthopedic surgery',
@@ -43,3 +46,8 @@ def setup_version(version):
 
     db.put(attributes)
     db.put(hospital)
+
+def setup_new_version(cc='ht', country_name='Haiti'):
+    version = make_version(cc, country_name)
+    setup_version(version)
+    return version
