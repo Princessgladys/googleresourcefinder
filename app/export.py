@@ -36,10 +36,10 @@ def get_districts(version):
     return get_all(
         lambda: Division.all().ancestor(version).filter('type =', type))
 
-def write_csv(out, version, supply_keys=None):
-    """Dump the stock level reports for all facilities in CSV format,
-    with a row for each facility and a group of N columns for each week,
-    where N is the number of supplies."""
+def write_csv(out, version, facility_type, property_keys=None):
+    """Dump the stock level reports for all facilities of the given type
+    in CSV format, with a row for each facility and a group of N columns
+    for each week, where N is the number of properties."""
     writer = csv.writer(out)
 
     # Get the base version and its country.
@@ -50,9 +50,9 @@ def write_csv(out, version, supply_keys=None):
     # Get the divisions.
     divisions = get_districts(version)
 
-    # Get the supply keys, if none were specified.
-    if supply_keys is None:
-        supply_keys = [s.name() for s in version.supplies]
+    # Get the property keys.
+    if property_keys is None:
+        property_keys = [p.key().name() for p in facility_type.properties]
 
     # Get the facilities.
     facilities = get_all(lambda: Facility.all().ancestor(version))
@@ -75,7 +75,7 @@ def write_csv(out, version, supply_keys=None):
 
     # Produce the header rows.
     row = [country.name, '%s: %d reports' % (timestamp, len(reports))]
-    group = [None] * len(supply_keys)
+    group = [None] * len(property_keys)
     d = min_date
     for week in range(num_weeks):
         group[0] = '%s - %s' % (short_date(d), short_date(d + TimeDelta(6)))
@@ -84,7 +84,7 @@ def write_csv(out, version, supply_keys=None):
     writer.writerow(row)
 
     row = ['%d districts' % len(divisions), '%d facilities' % len(facilities)]
-    row += supply_keys*num_weeks
+    row += property_keys*num_weeks
     writer.writerow(row)
 
     # Write a row for each facility.
@@ -96,13 +96,13 @@ def write_csv(out, version, supply_keys=None):
                 reports = reports_by_facility[facility.key()]
                 for week in range(num_weeks):
                     if reports[week]:
-                        for supply_key in supply_keys:
-                            value = getattr(reports[week], supply_key, None)
+                        for property_key in property_keys:
+                            value = getattr(reports[week], property_key, None)
                             if value is not None:
                                 value = int(value)
                             row.append(value)
                     else:
-                        row += [None]*len(supply_keys)
+                        row += [None]*len(property_keys)
                 writer.writerow(row)
 
 class Export(Handler):
@@ -111,26 +111,23 @@ class Export(Handler):
         if auth:
             country_code = self.request.get('cc')
             if country_code:
-                # Determine which supplies were selected.
+                # Get the selected facility type.
                 version = get_latest_version(country_code)
-                supply_keys = []
-                for supply in get_base(version).supplies:
-                    key = supply.name()
-                    if self.request.get('supply.' + key):
-                        supply_keys.append(key)
-                supply_code = ''.join(key[0] for key in supply_keys)
+                facility_type = FacilityType.get_by_key_name(
+                    self.request.get('facility_type'))
 
                 # Construct a reasonable filename.
                 timestamp = version.timestamp.replace(microsecond=0)
                 country = version.parent()
-                filename = '%s.%s.%s.csv' % (country.name, supply_code,
+                filename = '%s.%s.%s.csv' % (
+                    country_code, facility_type.key_name,
                     timestamp.isoformat().replace(':', '_'))
                 self.response.headers['Content-Type'] = 'text/csv'
                 self.response.headers['Content-Disposition'] = \
                     'attachment; filename=' + filename
 
                 # Write out the CSV data.
-                write_csv(self.response.out, version, supply_keys)
+                write_csv(self.response.out, version, facility_type)
             else:
                 self.write('<link rel=stylesheet href="static/style.css">')
                 for country in Country.all():
@@ -140,11 +137,12 @@ class Export(Handler):
                     self.write('<p><form>')
                     self.write('<input type=hidden name="cc" value="%s">' %
                                country.key().name())
-                    self.write('<p>Select supplies to export:')
-                    for supply in get_base(version).supplies:
+                    self.write('<p>Select facility type to export:')
+                    self.write('<select name="facility_type">')
+                    for facility_type in FacilityType.all().ancestor(version):
                         self.write(
-                            '<br><input type=checkbox name="%s" checked>%s' % (
-                            'supply.' + supply.name(), supply.name()))
+                            '<option value="%s">%s</option>' % (
+                            facility_type.key().name(), facility_type.name))
                     self.write('<p><input type=submit value="Export CSV">')
                     self.write('</form>')
         else:

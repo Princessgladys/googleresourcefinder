@@ -237,7 +237,7 @@ def fetch(url, data='', agent=None, referrer=None, charset=None, verbose=0,
                 charset = param.strip()[8:]
                 break
     if charset and charset is not RAW:
-        content = content.decode(charset)
+        content = content.decode(charset, 'ignore')  # Lenient for now.
 
     return url, status, message, headers, content
 
