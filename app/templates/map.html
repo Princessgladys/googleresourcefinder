@@ -33,7 +33,7 @@ th { text-align: left; }
 .title { float: left; font-weight: bold; }
 
 /* Data area */
-#data { position: absolute; left: 0px; width: 320px; top: 24px; bottom: 0; }
+#data { position: absolute; left: 0px; width: 480px; top: 24px; bottom: 0; }
 #data table { width: 100%; padding: 0; cursor: default; }
 th, td { padding: 2px 4px; }
 .section { margin-top: 10px; }
@@ -54,7 +54,8 @@ td#supply-set-1 { border-left: none; }
 th.legend-icon { padding: 2px 4px; text-align: center; width: 2em; }
 td.legend-label { padding: 2px 4px 2px 0; }
 th.facility-count, td.facility-count { text-align: right; width: 2.5em; }
-th.stock-level, td.stock-level { text-align: right; width: 2.5em; }
+th.stock-level, td.stock-level { text-align: right; width: 4em; }
+th.stock-level.attribute_6, td.stock-level.attribute_6 { width: 7em; }
 .stockout { color: #f24; }
 td.selected, tr.selected { background: #26d; color: #fff; font-weight: bold; }
 tr.selected .stockout { color: #f9a; }
@@ -69,7 +70,7 @@ td.status-3 { color: #444; }
 td.facility-count.selected { color: #fff; }
 
 /* Map area */
-#map, .hshadow, .vshadow { position: absolute; left: 320px; top: 24px; }
+#map, .hshadow, .vshadow { position: absolute; left: 480px; top: 24px; }
 #map { right: 0; bottom: 0; }
 .hshadow { bottom: 0; background: #000; font-size: 1px; }
 .hs1 { width: 2px; opacity: 0.09; filter:alpha(opacity=9); }
@@ -91,7 +92,7 @@ td.facility-count.selected { color: #fff; }
 <!--[if lt IE 8]>
 <style>
 body { width: 100%; height: 100%; }
-#map, .vshadow { width:expression(document.body.clientWidth-320); }
+#map, .vshadow { width:expression(document.body.clientWidth-480); }
 #data, #map, .hshadow { height:expression(document.body.clientHeight-24); }
 #supply-section { margin-top: 0; }
 #freshness { position: absolute; left: 0; bottom: 0; padding: 6px 4px 0px; }
@@ -146,7 +147,7 @@ var divisions = [null];
 // ==== Attributes shown in the facility table (hardcoded for now)
 
 // Indicates into the attributes list of the "hospital" facility type.
-var summary_attributes = [null, 3, 4, 5, 6];
+var summary_attributes = [null, 6, 4, 3];
 
 
 // ==== Filtering controls
@@ -447,8 +448,9 @@ function initialize_facility_header() {
   var cells = [$$('th', {}, 'Facilities')];
   var facility_attributes = facility_types[1].attributes;
   for (var s = 1; s < summary_attributes.length; s++) {
-    var attribute_i = facility_types[1].attributes[summary_attributes[s]];
-    cells.push($$('th', {'class': 'stock-level'},
+    var a = summary_attributes[s];
+    var attribute_i = facility_types[1].attributes[a];
+    cells.push($$('th', {'class': 'stock-level attribute_' + a},
                   attributes[attribute_i].abbreviation));
   }
   set_children(thead, tr);
@@ -513,6 +515,7 @@ function update_facility_list() {
   for (var i = 0; i < selected_division.facility_is.length; i++) {
     var f = selected_division.facility_is[i];
     var facility = facilities[f];
+    var facility_type = facility_types[facility.type];
     if (selected_status_i === 0 ||
         facility_status_is[f] === selected_status_i) {
       var row = $$('tr', {
@@ -525,13 +528,18 @@ function update_facility_list() {
       var cells = [$$('td', {'class': 'facility-name'}, facility.name)];
       if (facility.last_report) {
         for (var s = 1; s < summary_attributes.length; s++) {
-          var value = facility.last_report.values[summary_attributes[s]];
+          var a = summary_attributes[s];
+          var attribute = attributes[facility_type.attributes[a]];
+          var value = facility.last_report.values[a];
           if (value === null) {
             cells.push($$('td', {'class': 'stock-level no-data'}, '?'));
           } else if (value === 0) {
             cells.push($$('td', {'class': 'stock-level stockout'}, '0'));
           } else {
-            cells.push($$('td', {'class': 'stock-level'}, value));
+            if (attribute.type == 'multi') {
+              value = value.join(', ');
+            }
+            cells.push($$('td', {'class': 'stock-level attribute_' + a}, value));
           }
         }
       } else {
