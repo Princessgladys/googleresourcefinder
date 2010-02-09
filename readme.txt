@@ -9,6 +9,10 @@ Then start the server:
 
     dev_appserver.py app
 
+You ned to create a user to user the app, even locally
+In the admin console:
+Authorization(email='test@example.com', description='Test').put()
+
 Now connect to the server like this:
 
     tools/console.py resourcemapper localhost:8080
