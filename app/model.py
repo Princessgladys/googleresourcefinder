@@ -69,6 +69,8 @@ class Attribute(db.Model):
     type = db.StringProperty(required=True, choices=[
         'str',  # value is a single-line string (Python unicode)
         'text',  # value is a string, shown as long text (Python unicode)
+        'contact',  # value is a 3-line string (name, phone, e-mail address)
+        'date',  # value is a date (Python datetime with time 00:00:00)
         'int',  # value is an integer (64-bit long)
         'float',  # value is a float (Python float, i.e. double)
         'choice',  # value is a string (one of the elements in 'values')  
