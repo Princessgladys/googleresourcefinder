@@ -125,11 +125,11 @@ var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
 var INFO_TEMPLATE = '<div class="facility-info">' +
   '<h1>${facility_name}</h1>' +
-  '<h2 class="caption">${division_name}</h2>' +
+//'<h2 class="caption">${division_name}</h2>' +
   '<div class="stock-info">${stock_info}</div>' +
   '<div class="caption">${last_report_date}</div>' +
   '<div class="edit-link">' +
-  '<a href="/edit?cc=ht&id=${facility_id}">edit this record</a></div></div>';
+  '<a href="/edit?cc=ht&id=${facility_id}">Edit this record</a></div></div>';
 
 var SUPPLY_TEMPLATE = '<div class="supply-item">' +
   '<span class="supply-name">${supply_name}</span>: ' +
@@ -146,7 +146,7 @@ var divisions = [null];
 // ==== Attributes shown in the facility table (hardcoded for now)
 
 // Indicates into the attributes list of the "hospital" facility type.
-var summary_attributes = [null, 5, 6, 7, 8];
+var summary_attributes = [null, 3, 4, 5, 6];
 
 
 // ==== Filtering controls
@@ -837,6 +837,16 @@ function select_facility(facility_i, ignore_current) {
     if (last_report) {
       value = last_report.values[a];
       switch (attribute.type) {
+        case 'contact':
+          if (value !== null) {
+            value = value.replace(/\n/g, ', ');
+         }
+          break;
+        case 'date':
+          if (value != null) {
+            value = value.replace(/T.*/, '');
+          }
+          break;
         case 'text':
           value = {html: render_template('<div class="text">${text}</div>',
                                          {text: {html: value}})};

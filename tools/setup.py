@@ -18,25 +18,23 @@ def setup_version(version):
 
     str_attr = lambda key, name, abbr=None: attr('str', key, name, abbr)
     text_attr = lambda key, name, abbr=None: attr('text', key, name, abbr)
+    contact_attr = lambda key, name, abbr=None: attr('contact', key, name, abbr)
+    date_attr = lambda key, name, abbr=None: attr('date', key, name, abbr)
     int_attr = lambda key, name, abbr=None: attr('int', key, name, abbr)
     multi_attr = (lambda key, name, abbr, values:
                   attr('multi', key, name, abbr, values))
 
     attributes = [
-        str_attr('contact_name', 'Contact name'),
-        str_attr('contact_phone', 'Contact phone'),
-        str_attr('contact_email', 'Contact email'),
-        str_attr('hours_of_operation', 'Hours of operation'),
-        str_attr('end_date', 'Service end date'),
-        int_attr('doctor_count', 'Current number of doctors', 'Doc'),
+        contact_attr('contact', 'Contact'),
+        str_attr('hours_of_operation', 'Hours'),
+        date_attr('close_date', 'Date site will close'),
         int_attr('patient_count', 'Current number of patients', 'Pat'),
-        int_attr('bed_count', 'Total number of beds', 'Bed'),
         int_attr('patient_capacity', 'Patient capacity', 'Cap'),
-        multi_attr('doctor_specialties', 'Doctor specialties available',
-                   'Specialties', ['obstetrics', 'orthopedic surgery',
-                                   'physical therapy']),
+        int_attr('doctor_count', 'Current number of doctors', 'Doc'),
+        multi_attr('specialty_care', 'Specialty care', 'Specialty care',
+                   ['Obstetrics', 'Orthopedic surgery', 'Physical therapy']),
         multi_attr('medical_equipment', 'Medical equipment available',
-                   'Equipment', ['x-ray', 'ultrasound']),
+                   'Equipment', ['X-ray', 'Ultrasound']),
         text_attr('comment', 'Comment')
     ]
 

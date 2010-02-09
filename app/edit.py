@@ -14,14 +14,14 @@
 
 import model
 import utils
-from utils import ErrorMessage, Redirect, db, html_escape, users
+from utils import DateTime, ErrorMessage, Redirect, db, html_escape, users
 
 
 # ==== Form-field generators and parsers for each attribute type =============
 
 class AttributeType:
     input_size = 10
-    def make_input(self, name, value, attribute):
+    def make_input(self, name, value, attribute=None):
         """Generates the HTML for an input field for the given attribute."""
         return '<input name="%s" value="%s" size=%d>' % (
             html_escape(name),
@@ -43,6 +43,42 @@ class TextAttributeType(AttributeType):
     def parse_input(self, report, name, value, request, attribute):
         setattr(report, name, db.Text(value))
 
+class ContactAttributeType(AttributeType):
+    input_size = 30
+
+    def make_input(self, name, value, attribute):
+        contact_name, contact_phone, contact_email = (
+            (value or '').split('\n') + ['', '', ''])[:3]
+        return '''<table>
+                    <tr><td class="label">Name</td><td>%s</td></tr>
+                    <tr><td class="label">Phone</td><td>%s</td></tr>
+                    <tr><td class="label">E-mail</td><td>%s</td></tr>
+                  </table>''' % (
+            AttributeType.make_input(self, name + '.name', contact_name),
+            AttributeType.make_input(self, name + '.phone', contact_phone),
+            AttributeType.make_input(self, name + '.email', contact_email),
+        )
+
+    def parse_input(self, report, name, value, request, attribute):
+        setattr(report, name,
+                request.get(name + '.name', '') + '\n' +
+                request.get(name + '.phone', '') + '\n' +
+                request.get(name + '.email', ''))
+
+class DateAttributeType(AttributeType):
+    input_size = 10
+
+    def parse_input(self, report, name, value, request, attribute):
+        if value.strip():
+            try:
+                year, month, day = map(int, value.split('-'))
+                setattr(report, name, DateTime(year, month, day))
+            except (TypeError, ValueError):
+                raise ErrorMessage(
+                    400, 'Invalid date: %r (need YYYY-MM-DD format)' % value)
+        else:
+            setattr(report, name, None)
+
 class IntAttributeType(AttributeType):
     input_size = 10
 
@@ -51,7 +87,7 @@ class IntAttributeType(AttributeType):
 
 class FloatAttributeType(IntAttributeType):
     def make_input(self, name, value, attribute):
-        IntAttribute.make_input(self, name, '%g' % value, attribute)
+        Attribute.make_input(self, name, '%g' % value, attribute)
 
     def parse_input(self, report, name, value, request, attribute):
         setattr(report, name, value and float(value) or None)
@@ -94,6 +130,8 @@ class MultiAttributeType(AttributeType):
 ATTRIBUTE_TYPES = {
     'str': StrAttributeType(),
     'text': TextAttributeType(),
+    'contact': ContactAttributeType(),
+    'date': DateAttributeType(),
     'int': IntAttributeType(),
     'float': FloatAttributeType(),
     'choice': ChoiceAttributeType(),
