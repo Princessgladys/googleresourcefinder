@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from utils import *
+from model import Attribute, Division, Facility, FacilityType, Report
 import sys
 
 def make_jobjects(entities, transformer, *args):
@@ -63,6 +64,7 @@ def facility_transformer(
     # Pack the results into an object suitable for JSON serialization.
     facility_jobject = {
         'name': facility.name,
+        'id': facility.id,
         'type': facility_type_is[facility.type],
         'division_i': facility.division_id,
         'last_report': reports and reports[-1] or None

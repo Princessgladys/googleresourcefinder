@@ -43,39 +43,48 @@ indexes:
   properties:
   - name: name
 
-# Used 9 times in query history.
+# Used 28 times in query history.
 - kind: Division
   ancestor: yes
   properties:
   - name: type
   - name: name
 
-# Used 9 times in query history.
+# Used 28 times in query history.
 - kind: Facility
   ancestor: yes
   properties:
   - name: name
 
+# Unused in query history -- copied from input.
 - kind: Report
   ancestor: yes
   properties:
   - name: date
 
-# Used 2 times in query history.
+# Unused in query history -- copied from input.
 - kind: Report
   ancestor: yes
   properties:
   - name: date
     direction: desc
 
-# Used 9 times in query history.
+# Used 18 times in query history.
+- kind: Report
+  ancestor: yes
+  properties:
+  - name: facility_id
+  - name: timestamp
+    direction: desc
+
+# Used 28 times in query history.
 - kind: Report
   ancestor: yes
   properties:
   - name: timestamp
     direction: desc
 
-# Used 22 times in query history.
+# Used 166 times in query history.
 - kind: Version
   ancestor: yes
   properties:
