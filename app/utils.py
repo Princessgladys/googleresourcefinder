@@ -99,8 +99,11 @@ def key_repr(key):
     return '<Key: %s>' % '/'.join(levels)
 
 def model_repr(model):
-    key = model.key()
-    return '<%s: %s>' % (key.kind(), key.id() or repr(key.name()))
+    if model.is_saved():
+        key = model.key()
+        return '<%s: %s>' % (key.kind(), key.id() or repr(key.name()))
+    else:
+        return '<%s: unsaved>' % model.kind()
 
 db.Key.__repr__ = key_repr
 
