@@ -22,6 +22,7 @@ import google.appengine.ext.webapp.util
 import StringIO
 import access
 from calendar import timegm
+import cgitb
 from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
@@ -32,8 +33,20 @@ import model
 import os
 import re
 import simplejson
+import sys
 
 ROOT = os.path.dirname(__file__)
+
+class Redirect(Exception):
+    """Raise this exception to redirect to another page."""
+    def __init__(self, url):
+        self.url = url
+
+class ErrorMessage(Exception):
+    """Raise this exception to show an error message to the user."""
+    def __init__(self, status, message):
+        self.status = status
+        self.message = message
 
 def strip(text):
     return text.strip()
@@ -53,20 +66,30 @@ class Handler(webapp.RequestHandler):
     def write(self, text):
         self.response.out.write(text)
 
-    def error(self, status, message='Sorry!'):
-        webapp.RequestHandler.error(self, status)
-        self.render('templates/error.html', message=message)
-
-    def initialize(self, *args):
-        webapp.RequestHandler.initialize(self, *args)
-        for name in self.request.headers.keys():
+    def initialize(self, request, response):
+        webapp.RequestHandler.initialize(self, request, response)
+        for name in request.headers.keys():
             if name.lower().startswith('x-appengine'):
-                logging.debug('%s: %s' % (name, self.request.headers[name]))
-        self.auth = access.check_and_log(self.request, users.get_current_user())
+                logging.debug('%s: %s' % (name, request.headers[name]))
+        self.auth = access.check_and_log(request, users.get_current_user())
         self.params = Struct()
         for param in self.auto_params:
             validator = self.auto_params[param]
-            setattr(self.params, param, validator(self.request.get(param, '')))
+            setattr(self.params, param, validator(request.get(param, '')))
+
+    def handle_exception(self, exception, debug_mode):
+        if isinstance(exception, Redirect):
+            self.redirect(exception.url)
+        elif isinstance(exception, ErrorMessage):
+            self.error(exception.status)
+            self.response.clear()
+            self.render('templates/error.html', message=exception.message)
+        else:
+            self.error(500)
+            logging.exception(exception)
+            if debug_mode:
+                self.response.clear()
+                self.write(cgitb.html(sys.exc_info()))
 
 def key_repr(key):
     levels = []
