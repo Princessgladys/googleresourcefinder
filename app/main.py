@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utils import *
+from utils import Handler, Redirect, get_latest_version, run, users
 import access
 import rendering
 
@@ -26,7 +26,7 @@ class Main(Handler):
                 data=rendering.version_to_json(get_latest_version('ht')),
                 instance=self.request.host.split('.')[0])
         else:
-            self.redirect(users.create_login_url('/'))
+            raise Redirect(users.create_login_url('/'))
 
 if __name__ == '__main__':
     run([('/', Main)], debug=True)

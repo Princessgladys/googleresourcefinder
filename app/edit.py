@@ -14,7 +14,7 @@
 
 import model
 import utils
-from utils import db, html_escape, users
+from utils import ErrorMessage, Redirect, db, html_escape, users
 
 
 # ==== Form-field generators and parsers for each attribute type =============
@@ -116,19 +116,19 @@ def parse_input(report, request, attribute):
 # ==== Handler for the edit page =============================================
 
 class Edit(utils.Handler):
-    def init_parameters(self):
+    def init(self):
         """Checks for authentication and sets up self.version, self.facility,
         self.facility_type, and self.attributes based on the query params."""
         if not self.auth:
-            return self.redirect(users.create_login_url('/'))
+            raise Redirect(users.create_login_url('/'))
         try:
             self.version = utils.get_latest_version(self.params.cc)
         except:
-            return self.error(404, 'Invalid or missing country code.')
+            raise ErrorMessage(404, 'Invalid or missing country code.')
         self.facility = model.Facility.all().ancestor(self.version).filter(
             'id =', self.params.id).get()
         if not self.facility:
-            return self.error(404, 'Invalid or missing facility id.')
+            raise ErrorMessage(404, 'Invalid or missing facility id.')
         self.facility_type = model.FacilityType.get_by_key_name(
             self.facility.type, self.version)
         self.attributes = dict(
@@ -136,10 +136,7 @@ class Edit(utils.Handler):
             for a in model.Attribute.all().ancestor(self.version))
 
     def get(self):
-        self.init_parameters()
-        if not self.facility:
-            return
-
+        self.init()
         fields = []
         report = model.Report.all().ancestor(self.version).filter(
             'facility_id =', self.params.id).order('-timestamp').get()
@@ -157,10 +154,7 @@ class Edit(utils.Handler):
             logout_url=users.create_logout_url('/'))
 
     def post(self):
-        self.init_parameters()
-        if not self.facility:
-            return
-
+        self.init()
         report = model.Report(
             self.version,
             facility_id=self.facility.id,
@@ -171,7 +165,7 @@ class Edit(utils.Handler):
             parse_input(report, self.request, attribute)
         report.put()
 
-        self.redirect('/')
+        raise Redirect('/')
 
 if __name__ == '__main__':
     utils.run([('/edit', Edit)], debug=True)
