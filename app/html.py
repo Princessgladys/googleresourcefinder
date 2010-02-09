@@ -18,6 +18,8 @@ from datetime import date as Date
 from datetime import datetime as DateTime
 
 def html_escape(text):
+    if isinstance(text, unicode):
+        text = text.encode('utf-8')
     return str(text).replace('&', '&amp;').replace('<', '&lt;')
 
 def span(text, klass):

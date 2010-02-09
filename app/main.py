@@ -19,7 +19,7 @@ import rendering
 class Main(Handler):
     def get(self):
         auth = access.check_and_log(self.request, users.get_current_user())
-        if auth or True:
+        if auth:
             self.render('templates/map.html',
                 authorization=auth and auth.description or 'anonymous',
                 logout_url=users.create_logout_url('/'),

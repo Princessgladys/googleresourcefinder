@@ -19,32 +19,54 @@ from google.appengine.ext import webapp
 import google.appengine.ext.webapp.template
 import google.appengine.ext.webapp.util
 
-from model import *
 import StringIO
+import access
 from calendar import timegm
 from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
 import gzip
+from html import html_escape
 import logging
+import model
 import os
 import re
 import simplejson
 
 ROOT = os.path.dirname(__file__)
 
+def strip(text):
+    return text.strip()
+
+class Struct:
+    pass
+
 class Handler(webapp.RequestHandler):
+    auto_params = {
+        'cc': strip,
+        'id': strip
+    }
+
     def render(self, name, **values):
         self.write(webapp.template.render(os.path.join(ROOT, name), values))
 
     def write(self, text):
         self.response.out.write(text)
 
+    def error(self, status, message='Sorry!'):
+        webapp.RequestHandler.error(self, status)
+        self.render('templates/error.html', message=message)
+
     def initialize(self, *args):
         webapp.RequestHandler.initialize(self, *args)
         for name in self.request.headers.keys():
             if name.lower().startswith('x-appengine'):
                 logging.debug('%s: %s' % (name, self.request.headers[name]))
+        self.auth = access.check_and_log(self.request, users.get_current_user())
+        self.params = Struct()
+        for param in self.auto_params:
+            validator = self.auto_params[param]
+            setattr(self.params, param, validator(self.request.get(param, '')))
 
 def key_repr(key):
     levels = []
@@ -79,26 +101,26 @@ def get_base(entity):
     return entity
 
 def get_latest_version(cc):
-    country = get(None, Country, cc)
-    versions = Version.all().ancestor(country).order('-timestamp')
+    country = get(None, model.Country, cc)
+    versions = model.Version.all().ancestor(country).order('-timestamp')
     if versions.count():
         return versions[0]
 
 def fetch(cc, url, payload=None, previous_data=None):
-    country = get(None, Country, cc)
+    country = get(None, model.Country, cc)
     method = (payload is None) and urlfetch.GET or urlfetch.POST
     response = urlfetch.fetch(url, payload, method, deadline=10)
     data = response.content
     logging.info('utils.py: received %d bytes of data' % len(data))
     if data == previous_data:
         return None
-    dump = Dump(country, source=url, data=data)
+    dump = model.Dump(country, source=url, data=data)
     dump.put()
     return dump
 
 def load(loader, dump):
     logging.info('load started')
-    version = Version(dump.parent(), dump=dump)
+    version = model.Version(dump.parent(), dump=dump)
     version.put()
     logging.info('new version: %r' % version)
     loader.put_dump(version, decompress(dump.data))

@@ -127,7 +127,9 @@ var INFO_TEMPLATE = '<div class="facility-info">' +
   '<h1>${facility_name}</h1>' +
   '<h2 class="caption">${division_name}</h2>' +
   '<div class="stock-info">${stock_info}</div>' +
-  '<div class="caption">${last_report_date}</div></div>';
+  '<div class="caption">${last_report_date}</div>' +
+  '<div class="edit-link">' +
+  '<a href="/edit?cc=ht&id=${facility_id}">edit this record</a></div></div>';
 
 var SUPPLY_TEMPLATE = '<div class="supply-item">' +
   '<span class="supply-name">${supply_name}</span>: ' +
@@ -859,6 +861,7 @@ function select_facility(facility_i, ignore_current) {
   }
   info.setContent(render_template(INFO_TEMPLATE, {
     facility_name: selected_facility.name,
+    facility_id: selected_facility.id,
     division_name: divisions[selected_facility.division_i].name,
     stock_info: {html: report_display},
     last_report_date: last_report_date
