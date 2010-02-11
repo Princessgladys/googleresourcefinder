@@ -21,14 +21,14 @@
 body { margin: 0; }
 
 /* Type sizes */
-body, h1, h2, th, td { font-family: helvetica, arial; font-size: 13px; }
+body, h2, th, td { font-family: helvetica, arial; font-size: 11px; }
 tr { vertical-align: baseline; }
 th { text-align: left; }
 .facility-info, .facility-info td, .legend-label { font-size: 11px; }
 .caption { font-size: 11px; font-weight: normal; color: #aaa; }
 
 /* Header line */
-.header { padding: 4px; }
+.header { padding: 4px; font-size: 13px; }
 .user { float: right; }
 .title { float: left; font-weight: bold; }
 
@@ -38,7 +38,10 @@ th { text-align: left; }
 th, td { padding: 2px 4px; }
 .section { margin-top: 10px; }
 .section:first-child { margin-top: 0; }
-#legend-section { margin-top: 4px; }
+#supply-section { display: none; }
+#filter-section { margin-top: 0; }
+#legend-section { display: none; }
+#division-section { display: none; }
 .table-head { background: #e0e2e8; padding: 2px 0; }
 .table-head tr { color: #000; }
 .table-head img, .legend-icon img { position: relative; top: 2px; }
@@ -54,10 +57,11 @@ td#supply-set-1 { border-left: none; }
 th.legend-icon { padding: 2px 4px; text-align: center; width: 2em; }
 td.legend-label { padding: 2px 4px 2px 0; }
 th.facility-count, td.facility-count { text-align: right; width: 2.5em; }
-th.stock-level, td.stock-level { text-align: right; width: 4em; }
-th.stock-level.attribute_6, td.stock-level.attribute_6 { width: 7em; }
+th.value, td.value { text-align: right; width: 4em; }
+th.column_1, td.column_1 { text-align: left; width: 10em; }
+th.column_2, td.column_2 { text-align: right; width: 10em; }
 .stockout { color: #f24; }
-td.selected, tr.selected { background: #26d; color: #fff; font-weight: bold; }
+td.selected, tr.selected { background: #26d; color: #fff; }
 tr.selected .stockout { color: #f9a; }
 td.no-report { text-align: center; font-style: italic; white-space: nowrap; }
 td.no-data { color: #aaa; }
@@ -83,9 +87,10 @@ td.facility-count.selected { color: #fff; }
 #freshness { position: absolute; left: 0; bottom: 0; padding: 2px 4px; }
 
 /* Map info windows */
+.facility-info h1 { font-size: 13px; }
 .facility-info h1, .facility-info h2 { margin: 0; color: #000; }
 .facility-info .stock-info { margin: 1em 0; color: #666; }
-.facility-info .supply-level { color: #000; }
+.facility-info .attribute-value { color: #000; }
 .facility-info .text { margin-left: 2em; }
 </style>
 
@@ -114,7 +119,7 @@ var MAX_STATUS = 3;
 
 var STATUS_ICON_COLORS = [null, '080', 'a00', '444'];
 var STATUS_TEXT_COLORS = [null, '040', 'a00', '444'];
-var STATUS_ZINDEXES = [null, 1, 3, 2];
+var STATUS_ZINDEXES = [null, 3, 2, 1];
 var STATUS_LABELS = [
   null,
   'One or more ${all_supplies}',
@@ -133,8 +138,8 @@ var INFO_TEMPLATE = '<div class="facility-info">' +
   '<a href="/edit?cc=ht&id=${facility_id}">Edit this record</a></div></div>';
 
 var SUPPLY_TEMPLATE = '<div class="supply-item">' +
-  '<span class="supply-name">${supply_name}</span>: ' +
-  '<span class="supply-level">${supply_level}</span>' +
+  '<span class="attribute-name">${attribute_name}</span>: ' +
+  '<span class="attribute-value">${attribute_value}</span>' +
   '</div>';
 
 // ==== Data loaded from the data store
@@ -143,12 +148,38 @@ var attributes = [null];
 var facility_types = [null];
 var facilities = [null];
 var divisions = [null];
+var messages = {};
 
-// ==== Attributes shown in the facility table (hardcoded for now)
+// ==== Columns shown in the facility table
 
-// Indicates into the attributes list of the "hospital" facility type.
-var summary_attributes = [null, 6, 4, 3];
+var specialty_attribute_i = -1;
+var equipment_attribute_i = -1;
+var patient_capacity_attribute_i = -1;
+var patient_count_attribute_i = -1;
 
+var summary_columns = [
+  null, {
+    title: 'Services',
+    get_value: function(values) {
+      return [].concat(translate_values(values[specialty_attribute_i] || []))
+               .concat(translate_values(values[equipment_attribute_i] || []))
+               .join(', ');
+    }
+  }, {
+    title: 'Open/Total Beds',
+    get_value: function(values) {
+      var capacity = values[patient_capacity_attribute_i];
+      var patients = values[patient_count_attribute_i];
+      var open_beds = '?';
+      if (capacity === null) {
+        capacity = '?';
+      } else if (patients !== null) {
+        open_beds = capacity - patients;
+      }
+      return open_beds + ' / ' + capacity;
+    }
+  }
+];
 
 // ==== Filtering controls
 
@@ -182,6 +213,8 @@ var DEFAULT_SUPPLY_SET_I = 1;
 
 var selected_supply_set_i = -1;
 var selected_supply_set = null;
+var selected_filter_attribute_i = 0;
+var selected_filter_value = null;
 var selected_status_i = -1;
 var selected_division_i = -1;
 var selected_division = null;
@@ -209,6 +242,7 @@ function $(id) {
 var SPECIAL_ATTRIBUTES = {
   'class': 'className',
   colspan: 'colSpan',
+  onchange: 'onchange',
   onclick: 'onclick',
   onmouseout: 'onmouseout',
   onmouseover: 'onmouseover'
@@ -284,6 +318,10 @@ function any(array, predicate) {
   return filter(array, predicate).length > 0;
 }
 
+function contains(array, element) {
+  return any(array, function(e) { return e === element; });
+}
+
 function last(array, count) {
   return array[array.length - (count || 1)];
 }
@@ -293,6 +331,18 @@ function is_array(thing) {
 }
 
 // ==== String utilities
+
+function translate_value(value) {
+  return messages.attribute_value[value].en || value;
+}
+
+function translate_values(values) {
+  var results = [];
+  for (var i = 0; i < values.length; i++) {
+    results.push(translate_value(values[i]));
+  }
+  return results;
+}
 
 function html_escape(text) {
   return ('' + text).replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -370,7 +420,7 @@ function initialize_map() {
   map = new google.maps.Map($('map'), {
     zoom: 1,
     center: new google.maps.LatLng(0, 0),
-    mapTypeId: google.maps.MapTypeId.TERRAIN,
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
     mapTypeControl: true,
     scaleControl: true,
     navigationControl: true,
@@ -409,7 +459,7 @@ function initialize_markers() {
 
 // ==== Display construction routines
 
-// Set up the supply selector.
+// Set up the supply selector (currently unused).
 function initialize_supply_selector() {
   var tbody = $('supply-tbody');
   var tr = $$('tr');
@@ -425,6 +475,38 @@ function initialize_supply_selector() {
   }
   set_children(tbody, tr);
   set_children(tr, cells);
+}
+
+// Set up the filter widgets.
+function initialize_filters() {
+  var tbody = $('filter-tbody');
+  var tr = $$('tr');
+  var selector = $$('select', {
+    id: 'specialty-selector',
+    name: 'specialty',
+    onchange: function() {
+      select_filter.apply(null, $('specialty-selector').value.split(' '));
+    }
+  });
+  var options = [];
+  options.push($$('option', {value: '0 '}, 'All'));
+  var values = attributes[specialty_attribute_i].values;
+  for (var v = 0 ; v < values.length; v++) {
+    options.push($$('option', {
+      value: specialty_attribute_i + ' ' + values[v]
+    }, translate_value(values[v])));
+  }
+  values = attributes[equipment_attribute_i].values;
+  for (var v = 0 ; v < values.length; v++) {
+    options.push($$('option', {
+      value: equipment_attribute_i + ' ' + values[v]
+    }, translate_value(values[v])));
+  }
+  var cells = [$$('td', {}, ['Show: ', selector])];
+
+  set_children(tbody, tr);
+  set_children(tr, cells);
+  set_children(selector, options);
 }
 
 // Add the header to the division list.
@@ -446,12 +528,9 @@ function initialize_facility_header() {
   var thead = $('facility-thead');
   var tr = $$('tr');
   var cells = [$$('th', {}, 'Facilities')];
-  var facility_attributes = facility_types[1].attributes;
-  for (var s = 1; s < summary_attributes.length; s++) {
-    var a = summary_attributes[s];
-    var attribute_i = facility_types[1].attributes[a];
-    cells.push($$('th', {'class': 'stock-level attribute_' + a},
-                  attributes[attribute_i].abbreviation));
+  for (var c = 1; c < summary_columns.length; c++) {
+    cells.push($$('th', {'class': 'value column_' + c},
+                  summary_columns[c].title));
   }
   set_children(thead, tr);
   set_children(tr, cells);
@@ -527,26 +606,14 @@ function update_facility_list() {
       });
       var cells = [$$('td', {'class': 'facility-name'}, facility.name)];
       if (facility.last_report) {
-        for (var s = 1; s < summary_attributes.length; s++) {
-          var a = summary_attributes[s];
-          var attribute = attributes[facility_type.attributes[a]];
-          var value = facility.last_report.values[a];
-          if (value === null) {
-            cells.push($$('td', {'class': 'stock-level no-data'}, '?'));
-          } else if (value === 0) {
-            cells.push($$('td', {'class': 'stock-level stockout'}, '0'));
-          } else {
-            if (attribute.type == 'multi') {
-              value = value.join(', ');
-            }
-            cells.push($$('td', {'class': 'stock-level attribute_' + a}, value));
-          }
+        for (var c = 1; c < summary_columns.length; c++) {
+          var value = summary_columns[c].get_value(facility.last_report.values);
+          cells.push($$('td', {'class': 'value column_' + c}, value));
         }
       } else {
-        cells.push($$('td', {
-          'class': 'no-report',
-          'colspan': summary_attributes.length - 1
-        }, 'no reports'));
+        for (var c = 1; c < summary_columns.length; c++) {
+          cells.push($$('td'));
+        }
       }
       set_children(row, cells);
       rows.push(row);
@@ -581,21 +648,23 @@ function align_header_with_table(thead, tbody) {
   }
 }
 
-// Determine the stockout status of each facility for the selected supplies.
+// Determine the status of each facility according to the user's filters.
 function update_facility_status_is() {
-  var supplies = selected_supply_set.supplies;
   for (var f = 1; f < facilities.length; f++) {
-    facility_status_is[f] = STATUS_GOOD;
     var report = facilities[f].last_report;
-    if (!report) {
+    if (selected_filter_attribute_i <= 0) {
+      facility_status_is[f] = STATUS_GOOD;
+    } else if (!report) {
       facility_status_is[f] = STATUS_UNKNOWN;
     } else {
-      for (var s = 0; s < supplies.length; s++) {
-        if (report.values[supplies[s]] === null) {
-          facility_status_is[f] = STATUS_UNKNOWN;
-        } else if (report.values[supplies[s]] === 0) {
-          facility_status_is[f] = STATUS_BAD;
+      facility_status_is[f] = STATUS_BAD;
+      var a = selected_filter_attribute_i;
+      if (attributes[a].type === 'multi') {
+        if (contains(report.values[a] || [], selected_filter_value)) {
+          facility_status_is[f] = STATUS_GOOD;
         }
+      } else if (report.values[a] === selected_filter_value) {
+        facility_status_is[f] = STATUS_GOOD;
       }
     }
   }
@@ -748,6 +817,25 @@ function facility_selector(facility_i) {
 
 // ==== Selection behaviour
 
+function select_filter(attribute_i, value) {
+  selected_filter_attribute_i = attribute_i;
+  selected_filter_value = value;
+
+  // Apply the filter to the facility list.
+  update_facility_status_is();
+
+  // Update the facility icons to reflect their status.
+  update_facility_icons();
+
+  // Update the facility counts in the division list.
+  update_division_list();
+
+  if (selected_division !== null) {
+    // Filter the list of facilities by the selected supply set.
+    update_facility_list();
+  }
+}
+
 function select_supply_set(supply_set_i) {
   if (supply_set_i === selected_supply_set_i) {
     return;
@@ -839,30 +927,28 @@ function select_facility(facility_i, ignore_current) {
   }
   var report_display = '';
   var facility_type = facility_types[selected_facility.type];
-  for (var a = 0; a < facility_type.attributes.length; a++) {
-    var attribute = attributes[facility_type.attributes[a]];
+  for (var i = 0; i < facility_type.attribute_is.length; i++) {
+    var a = facility_type.attribute_is[i];
+    var attribute = attributes[a];
     var value = '';
     if (last_report) {
       value = last_report.values[a];
-      switch (attribute.type) {
+      switch (attributes[a].type) {
         case 'contact':
-          if (value !== null) {
-            value = value.replace(/\n/g, ', ');
-         }
+          value = (value || '').replace(/\n/g, ', ');
           break;
         case 'date':
-          if (value != null) {
-            value = value.replace(/T.*/, '');
-          }
+          value = (value || '').replace(/T.*/, '');
           break;
         case 'text':
           value = {html: render_template('<div class="text">${text}</div>',
-                                         {text: {html: value}})};
+                                         {text: {html: value || ''}})};
+          break;
+        case 'choice':
+          value = translate_value(value);
           break;
         case 'multi':
-          if (value !== null) {
-            value = value.join(', ');
-          }
+          value = translate_values(value || []).join(', ');
           break;
         case 'int':
         case 'float':
@@ -873,8 +959,8 @@ function select_facility(facility_i, ignore_current) {
       }
     }
     report_display += render_template(SUPPLY_TEMPLATE, {
-      supply_name: attribute.name,
-      supply_level: value
+      attribute_name: messages.attribute_name[attribute.id].en,
+      attribute_value: value
     });
   }
   info.setContent(render_template(INFO_TEMPLATE, {
@@ -895,6 +981,16 @@ function load_data(data) {
   facility_types = data.facility_types;
   facilities = data.facilities;
   divisions = data.divisions;
+  messages = data.messages;
+
+  for (var a = 1; a < attributes.length; a++) {
+    switch (attributes[a].id){
+      case 'specialty_care': specialty_attribute_i = a; break;
+      case 'medical_equipment': equipment_attribute_i = a; break;
+      case 'patient_capacity': patient_capacity_attribute_i = a; break;
+      case 'patient_count': patient_count_attribute_i = a; break;
+    }
+  }
 
   var facility_is = [];
   for (var i = 1; i < facilities.length; i++) {
@@ -907,6 +1003,7 @@ function load_data(data) {
   };
 
   initialize_supply_selector();
+  initialize_filters();
   initialize_division_header();
   initialize_facility_header();
 
@@ -916,7 +1013,7 @@ function load_data(data) {
   update_freshness(data.timestamp);
 
   select_supply_set(DEFAULT_SUPPLY_SET_I);
-  select_division_and_status(0, 0);
+  select_division_and_status(0, STATUS_GOOD);
   handle_window_resize();
 }
 
@@ -948,6 +1045,22 @@ function load_data(data) {
     <div class="table-body">
       <table width="100%" cellspacing=0 cellpadding=0 border=0>
         <tbody id="supply-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="filter-section" class="section">
+    <div class="table-head">
+      <table width="100%" cellspacing=0 cellpadding=0 border=0>
+        <thead id="filter-thead">
+          <tr>
+            <th>Filters</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="table-body">
+      <table width="100%" cellspacing=0 cellpadding=0 border=0>
+        <tbody id="filter-tbody"></tbody>
       </table>
     </div>
   </div>

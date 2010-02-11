@@ -102,3 +102,13 @@ class Report(db.Expando):
     facility_id = db.StringProperty()  # a Facility.id
     date = db.DateProperty()  # date that report contents were valid
     # additional properties for each Attribute (named by Attribute's key_name)
+
+class Message(db.Expando):
+    """Internationalized strings for value identifiers."""
+    namespace = db.StringProperty(required=True, choices=[
+      'english',  # id is an English string
+      'attribute_name',  # id is an attribute ID
+      'attribute_value'  # id is a value ID for a choice or multi attribute
+    ])
+    id = db.StringProperty()
+    # additional properties for each language (named by language code)
