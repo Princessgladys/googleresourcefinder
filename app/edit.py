@@ -14,19 +14,25 @@
 
 import model
 import utils
-from utils import DateTime, ErrorMessage, Redirect, db, html_escape, users
+from utils import DateTime, ErrorMessage, Redirect
+from utils import db, get_message, html_escape, users
 
 
 # ==== Form-field generators and parsers for each attribute type =============
 
 class AttributeType:
     input_size = 10
-    def make_input(self, name, value, attribute=None):
-        """Generates the HTML for an input field for the given attribute."""
+
+    def text_input(self, name, value):
+        """Generates a text input field."""
         return '<input name="%s" value="%s" size=%d>' % (
             html_escape(name),
             html_escape(value is not None and str(value) or ''),
             self.input_size)
+
+    def make_input(self, version, name, value, attribute=None):
+        """Generates the HTML for an input field for the given attribute."""
+        return self.text_input(name, value)
 
     def parse_input(self, report, name, value, request, attribute):
         """Adds an attribute to the given Report based on a query parameter."""
@@ -36,7 +42,7 @@ class StrAttributeType(AttributeType):
     input_size = 40
 
 class TextAttributeType(AttributeType):
-    def make_input(self, name, value, attribute):
+    def make_input(self, version, name, value, attribute):
         return '<textarea name="%s" rows=5 cols=40>%s</textarea>' % (
             html_escape(name), html_escape(value or ''))
 
@@ -46,7 +52,7 @@ class TextAttributeType(AttributeType):
 class ContactAttributeType(AttributeType):
     input_size = 30
 
-    def make_input(self, name, value, attribute):
+    def make_input(self, version, name, value, attribute):
         contact_name, contact_phone, contact_email = (
             (value or '').split('\n') + ['', '', ''])[:3]
         return '''<table>
@@ -54,9 +60,9 @@ class ContactAttributeType(AttributeType):
                     <tr><td class="label">Phone</td><td>%s</td></tr>
                     <tr><td class="label">E-mail</td><td>%s</td></tr>
                   </table>''' % (
-            AttributeType.make_input(self, name + '.name', contact_name),
-            AttributeType.make_input(self, name + '.phone', contact_phone),
-            AttributeType.make_input(self, name + '.email', contact_email),
+            self.text_input(name + '.name', contact_name),
+            self.text_input(name + '.phone', contact_phone),
+            self.text_input(name + '.email', contact_email),
         )
 
     def parse_input(self, report, name, value, request, attribute):
@@ -86,38 +92,39 @@ class IntAttributeType(AttributeType):
         setattr(report, name, value and int(float(value)) or None)
 
 class FloatAttributeType(IntAttributeType):
-    def make_input(self, name, value, attribute):
-        Attribute.make_input(self, name, '%g' % value, attribute)
+    def make_input(self, version, name, value, attribute):
+        Attribute.make_input(self, version, name, '%g' % value, attribute)
 
     def parse_input(self, report, name, value, request, attribute):
         setattr(report, name, value and float(value) or None)
 
 class ChoiceAttributeType(AttributeType):
-    def make_input(self, name, value, attribute):
+    def make_input(self, version, name, value, attribute):
         options = []
         if value is None:
             value = ''
         for choice in [''] + attribute.values:
-            escaped_choice = html_escape(choice or '(unspecified)')
+            message = get_message(version, 'attribute_value', choice)
+            title = html_escape(message or '(unspecified)')
             selected = (value == choice) and 'selected' or ''
-            options.append('<option value="%s" %s>%s</option>' % (
-                escaped_choice, selected, escaped_choice))
+            options.append('<option value="%s" %s>%s</option>' %
+                           (choice, selected, title))
         return '<select name="%s">%s</select>' % (
             html_escape(name), ''.join(options))
 
 class MultiAttributeType(AttributeType):
-    def make_input(self, name, value, attribute):
+    def make_input(self, version, name, value, attribute):
         if value is None:
             value = []
         checkboxes = []
         for choice in attribute.values:
-            escaped_choice = html_escape(choice or '(unspecified)')
+            message = get_message(version, 'attribute_value', choice)
+            title = html_escape(message or '(unspecified)')
             checked = (choice in value) and 'checked' or ''
             id = name + '.' + choice
             checkboxes.append(
                 ('<input type=checkbox name="%s" id="%s" %s>' +
-                 '<label for="%s">%s</label>') % (
-                id, id, checked, id, escaped_choice))
+                 '<label for="%s">%s</label>') % (id, id, checked, id, title))
         return '<br>\n'.join(checkboxes)
 
     def parse_input(self, report, name, value, request, attribute):
@@ -138,11 +145,11 @@ ATTRIBUTE_TYPES = {
     'multi': MultiAttributeType(),
 }
 
-def make_input(report, attribute):
+def make_input(version, report, attribute):
     """Generates the HTML for an input field for the given attribute."""
     name = attribute.key().name()
     return ATTRIBUTE_TYPES[attribute.type].make_input(
-        name, getattr(report, name, None), attribute)
+        version, name, getattr(report, name, None), attribute)
 
 def parse_input(report, request, attribute):
     """Adds an attribute to the given Report based on a query parameter."""
@@ -163,10 +170,10 @@ class Edit(utils.Handler):
             self.version = utils.get_latest_version(self.params.cc)
         except:
             raise ErrorMessage(404, 'Invalid or missing country code.')
-        self.facility = model.Facility.all().ancestor(self.version).filter(
-            'id =', self.params.id).get()
+        self.facility = model.Facility.get_by_key_name(
+            self.params.facility_name, self.version)
         if not self.facility:
-            raise ErrorMessage(404, 'Invalid or missing facility id.')
+            raise ErrorMessage(404, 'Invalid or missing facility name.')
         self.facility_type = model.FacilityType.get_by_key_name(
             self.facility.type, self.version)
         self.attributes = dict(
@@ -176,14 +183,16 @@ class Edit(utils.Handler):
     def get(self):
         self.init()
         fields = []
-        report = model.Report.all().ancestor(self.version).filter(
-            'facility_id =', self.params.id).order('-timestamp').get()
-        for attribute_name in self.facility_type.attributes:
-            attribute = self.attributes[attribute_name]
+        report = (model.Report.all()
+            .ancestor(self.version)
+            .filter('facility_name =', self.params.facility_name)
+            .order('-timestamp')).get()
+        for name in self.facility_type.attributes:
+            attribute = self.attributes[name]
             fields.append({
-                'name': attribute.name,
+                'name': get_message(self.version, 'attribute_name', name),
                 'type': attribute.type,
-                'input': make_input(report, attribute)
+                'input': make_input(self.version, report, attribute)
             })
 
         self.render('templates/edit.html',
@@ -195,7 +204,7 @@ class Edit(utils.Handler):
         self.init()
         report = model.Report(
             self.version,
-            facility_id=self.facility.id,
+            facility_name=self.facility.key().name(),
             date=utils.Date.today()
         )
         for attribute_name in self.facility_type.attributes:

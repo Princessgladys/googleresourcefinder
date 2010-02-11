@@ -34,6 +34,7 @@ import os
 import re
 import simplejson
 import sys
+import unicodedata
 
 ROOT = os.path.dirname(__file__)
 
@@ -51,17 +52,23 @@ class ErrorMessage(Exception):
 def strip(text):
     return text.strip()
 
+def get_message(version, namespace, name):
+    message = model.Message.all().ancestor(version).filter(
+        'namespace =', namespace).filter('name =', name).get()
+    return message and message.en or name
+
 class Struct:
     pass
 
 class Handler(webapp.RequestHandler):
     auto_params = {
         'cc': strip,
-        'id': strip
+        'facility_name': strip
     }
 
-    def render(self, name, **values):
-        self.write(webapp.template.render(os.path.join(ROOT, name), values))
+    def render(self, path, **params):
+        """Renders the template at the given path with the given parameters."""
+        self.write(webapp.template.render(os.path.join(ROOT, path), params))
 
     def write(self, text):
         self.response.out.write(text)
@@ -109,9 +116,10 @@ db.Key.__repr__ = key_repr
 
 db.Model.__repr__ = model_repr
 
-def make_identifier(name):
-    clean = re.sub('[^A-Za-z0-9]', ' ', name)
-    return '_'.join(clean.lower().strip().split())
+def make_name(text):
+    text = re.sub(r'[ -]+', '_', text.strip())
+    decomposed = unicodedata.normalize('NFD', text)
+    return ''.join(ch for ch in decomposed if re.match(r'\w', ch)).lower()
 
 def get(parent, Kind, kn):
     entity = Kind.get_by_key_name(kn, parent=parent)

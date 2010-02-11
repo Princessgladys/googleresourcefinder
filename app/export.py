@@ -74,7 +74,7 @@ def write_csv(out, version, facility_type, property_keys=None):
         reports_by_facility[report._facility][week] = report
 
     # Produce the header rows.
-    row = [country.name, '%s: %d reports' % (timestamp, len(reports))]
+    row = [country.title, '%s: %d reports' % (timestamp, len(reports))]
     group = [None] * len(property_keys)
     d = min_date
     for week in range(num_weeks):
@@ -88,11 +88,11 @@ def write_csv(out, version, facility_type, property_keys=None):
     writer.writerow(row)
 
     # Write a row for each facility.
-    sorted_facilities = sorted(facilities, key=lambda f: f.name)
-    for division in sorted(divisions, key=lambda d: d.name):
+    sorted_facilities = sorted(facilities, key=lambda f: f.title)
+    for division in sorted(divisions, key=lambda d: d.title):
         for facility in sorted_facilities:
             if facility._division == division.key():
-                row = [division.name, facility.name]
+                row = [division.title, facility.title]
                 reports = reports_by_facility[facility.key()]
                 for week in range(num_weeks):
                     if reports[week]:
@@ -132,7 +132,7 @@ class Export(Handler):
                 self.write('<link rel=stylesheet href="static/style.css">')
                 for country in Country.all():
                     version = get_latest_version(country.key().name())
-                    self.write('<h2>%s</h2>' % country.name)
+                    self.write('<h2>%s</h2>' % country.title)
                     self.write('<p>Last updated: %s' % version.timestamp)
                     self.write('<p><form>')
                     self.write('<input type=hidden name="cc" value="%s">' %
@@ -142,7 +142,8 @@ class Export(Handler):
                     for facility_type in FacilityType.all().ancestor(version):
                         self.write(
                             '<option value="%s">%s</option>' % (
-                            facility_type.key().name(), facility_type.name))
+                            facility_type.key().name(),
+                            facility_type.key().name()))
                     self.write('<p><input type=submit value="Export CSV">')
                     self.write('</form>')
         else:

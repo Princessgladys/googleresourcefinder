@@ -27,7 +27,7 @@ class Load(Handler):
             else:
                 description = '(no data)'
             options.append('<option value="%s">%s %s</option>' % (
-                cc, country.name, description))
+                cc, country.title, description))
         self.render('templates/load.html', cc_options=''.join(options))
 
     def post(self):

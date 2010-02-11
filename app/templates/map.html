@@ -29,8 +29,8 @@ th { text-align: left; }
 
 /* Header line */
 .header { padding: 4px; font-size: 13px; }
-.user { float: right; }
-.title { float: left; font-weight: bold; }
+.header .user { float: right; }
+.header .title { float: left; font-weight: bold; }
 
 /* Data area */
 #data { position: absolute; left: 0px; width: 400px; top: 24px; bottom: 0; }
@@ -65,8 +65,8 @@ td.selected, tr.selected { background: #26d; color: #fff; }
 tr.selected .stockout { color: #f9a; }
 td.no-report { text-align: center; font-style: italic; white-space: nowrap; }
 td.no-data { color: #aaa; }
-td.division-name { padding-left: 16px; }
-tr#division-0 td.division-name { padding-left: 4px; }
+td.division-title { padding-left: 16px; }
+tr#division-0 td.division-title { padding-left: 4px; }
 td.status-0 { color: #000; }
 td.status-1 { color: #080; }
 td.status-2 { color: #a00; }
@@ -89,8 +89,8 @@ td.facility-count.selected { color: #fff; }
 /* Map info windows */
 .facility-info h1 { font-size: 13px; }
 .facility-info h1, .facility-info h2 { margin: 0; color: #000; }
-.facility-info .stock-info { margin: 1em 0; color: #666; }
-.facility-info .attribute-value { color: #000; }
+.facility-info .attributes { margin: 1em 0; color: #666; }
+.facility-info .attribute .value { color: #000; }
 .facility-info .text { margin-left: 2em; }
 </style>
 
@@ -130,49 +130,47 @@ var STATUS_LABELS = [
 var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
 var INFO_TEMPLATE = '<div class="facility-info">' +
-  '<h1>${facility_name}</h1>' +
-//'<h2 class="caption">${division_name}</h2>' +
-  '<div class="stock-info">${stock_info}</div>' +
+  '<h1>${facility_title}</h1>' +
+//'<h2 class="caption">${division_title}</h2>' +
+  '<div class="attributes">${attributes}</div>' +
   '<div class="caption">${last_report_date}</div>' +
   '<div class="edit-link">' +
-  '<a href="/edit?cc=ht&id=${facility_id}">Edit this record</a></div></div>';
+  '<a href="/edit?cc=ht&facility_name=${facility_name}">' +
+  'Edit this record</a></div></div>';
 
-var SUPPLY_TEMPLATE = '<div class="supply-item">' +
-  '<span class="attribute-name">${attribute_name}</span>: ' +
-  '<span class="attribute-value">${attribute_value}</span>' +
+var ATTRIBUTE_TEMPLATE = '<div class="attribute">' +
+  '<span class="title">${attribute_title}</span>: ' +
+  '<span class="value">${attribute_value}</span>' +
   '</div>';
 
 // ==== Data loaded from the data store
 
 var attributes = [null];
+var attributes_by_name = {};  // {attribute_name: attribute_i}
 var facility_types = [null];
 var facilities = [null];
 var divisions = [null];
-var messages = {};
+var messages = {};  // {namespace: {name: {language: message}}
 
 // ==== Columns shown in the facility table
-
-var specialty_attribute_i = -1;
-var equipment_attribute_i = -1;
-var patient_capacity_attribute_i = -1;
-var patient_count_attribute_i = -1;
 
 var summary_columns = [
   null, {
     title: 'Services',
     get_value: function(values) {
-      return [].concat(translate_values(values[specialty_attribute_i] || []))
-               .concat(translate_values(values[equipment_attribute_i] || []))
-               .join(', ');
+      return translate_values(
+          [].concat(values[attributes_by_name.specialty_care] || [])
+            .concat(values[attributes_by_name.medical_equipment] || []))
+            .join(', ');
     }
   }, {
     title: 'Open/Total Beds',
     get_value: function(values) {
-      var capacity = values[patient_capacity_attribute_i];
-      var patients = values[patient_count_attribute_i];
-      var open_beds = '?';
+      var capacity = values[attributes_by_name.patient_capacity];
+      var patients = values[attributes_by_name.patient_count];
+      var open_beds = '\u2013';
       if (capacity === null) {
-        capacity = '?';
+        capacity = '\u2013';
       } else if (patients !== null) {
         open_beds = capacity - patients;
       }
@@ -248,9 +246,9 @@ var SPECIAL_ATTRIBUTES = {
   onmouseover: 'onmouseover'
 };
 
-// Create an element with the given name and attributes.
-function $$(name, attrs, content) {
-  var element = document.createElement(name);
+// Create an element with the given tag name and attributes.
+function $$(tag_name, attrs, content) {
+  var element = document.createElement(tag_name);
   for (var key in attrs) {
     if (typeof attrs[key] !== 'function') {
       element.setAttribute(key, attrs[key]);
@@ -372,8 +370,8 @@ function render_template(template, params) {
   return result;
 }
 
-function make_icon(facility, status, detail) {
-  var text = detail ? facility.name : '';
+function make_icon(title, status, detail) {
+  var text = detail ? title : '';
   var text_size = detail ? 10 : 0;
   var text_fill = STATUS_TEXT_COLORS[status];
   var icon = 'greek_cross_4w10';
@@ -386,29 +384,6 @@ function make_icon(facility, status, detail) {
   ].join('|');
   return 'http://chart.apis.google.com/chart?chst=d_simple_text_icon_above&' +
       'chld=' + encodeURIComponent(params);
-}
-
-function clean_name(name) {
-  return name;
-
-  var ABBREVIATIONS = {VA: 1, RHC: 1, ILS: 1};
-  name = name.replace(/^\s*'?/g, '');
-  name = name.replace(/\s*\(.*\)\s*$/g, ' ');
-  name = name.replace(/\sHosp(ital)?\b\.?/i, ' Hosp.');
-  name = name.replace(/\sPara\b\.?/i, ' Para.');
-  name = name.replace(/\sDisp(ensary)?\b\.?/i, ' Disp.');
-  name = name.replace(/-/g, ' - ');
-  name = name.replace(/\s+/g, ' ');
-  var words = name.split(' ');
-  var capwords = [];
-  for (var i = 0; i < words.length; i++) {
-    var word = words[i].toUpperCase();
-    if (!ABBREVIATIONS[words[i]]) {
-      word = word.substring(0, 1) + word.substring(1).toLowerCase();
-    }
-    capwords.push(word);
-  }
-  return capwords.join(' ');
 }
 
 // ==== Maps API
@@ -450,8 +425,8 @@ function initialize_markers() {
     markers[f] = new google.maps.Marker({
       position: new google.maps.LatLng(location.lat, location.lon),
       map: map,
-      icon: make_icon(facility.name, STATUS_UNKNOWN, false),
-      title: facility.name
+      icon: make_icon(facility.title, STATUS_UNKNOWN, false),
+      title: facility.title
     });
     google.maps.event.addListener(markers[f], 'click', facility_selector(f));
   }
@@ -477,6 +452,15 @@ function initialize_supply_selector() {
   set_children(tr, cells);
 }
 
+// Create option elements for all the allowed values for an attribute.
+function add_filter_options(options, attribute_i) {
+  var values = attributes[attribute_i].values;
+  for (var v = 0 ; v < values.length; v++) {
+    options.push($$('option', {value: attribute_i + ' ' + values[v]},
+                    translate_value(values[v])));
+  }
+}
+
 // Set up the filter widgets.
 function initialize_filters() {
   var tbody = $('filter-tbody');
@@ -490,23 +474,11 @@ function initialize_filters() {
   });
   var options = [];
   options.push($$('option', {value: '0 '}, 'All'));
-  var values = attributes[specialty_attribute_i].values;
-  for (var v = 0 ; v < values.length; v++) {
-    options.push($$('option', {
-      value: specialty_attribute_i + ' ' + values[v]
-    }, translate_value(values[v])));
-  }
-  values = attributes[equipment_attribute_i].values;
-  for (var v = 0 ; v < values.length; v++) {
-    options.push($$('option', {
-      value: equipment_attribute_i + ' ' + values[v]
-    }, translate_value(values[v])));
-  }
-  var cells = [$$('td', {}, ['Show: ', selector])];
-
-  set_children(tbody, tr);
-  set_children(tr, cells);
+  add_filter_options(options, attributes_by_name.specialty_care);
+  add_filter_options(options, attributes_by_name.medical_equipment);
   set_children(selector, options);
+  set_children(tr, [$$('td', {}, ['Show: ', selector])]);
+  set_children(tbody, tr);
 }
 
 // Add the header to the division list.
@@ -604,7 +576,7 @@ function update_facility_list() {
         onmouseover: hover_activator('facility-' + f),
         onmouseout: hover_deactivator('facility-' + f)
       });
-      var cells = [$$('td', {'class': 'facility-name'}, facility.name)];
+      var cells = [$$('td', {'class': 'facility-title'}, facility.title)];
       if (facility.last_report) {
         for (var c = 1; c < summary_columns.length; c++) {
           var value = summary_columns[c].get_value(facility.last_report.values);
@@ -680,11 +652,11 @@ function update_division_list() {
       'class': 'division'
     });
     var cells = [$$('td', {
-      'class': 'division-name',
+      'class': 'division-title',
       onclick: division_and_status_selector(d, 0),
       onmouseover: hover_activator('division-' + d),
       onmouseout: hover_deactivator('division-' + d)
-    }, division.name)];
+    }, division.title)];
     for (var s = 1; s <= MAX_STATUS; s++) {
       var facility_is = filter(division.facility_is,
         function (f) { return facility_status_is[f] === s; });
@@ -958,16 +930,16 @@ function select_facility(facility_i, ignore_current) {
           break;
       }
     }
-    report_display += render_template(SUPPLY_TEMPLATE, {
-      attribute_name: messages.attribute_name[attribute.id].en,
+    report_display += render_template(ATTRIBUTE_TEMPLATE, {
+      attribute_title: messages.attribute_name[attribute.name].en,
       attribute_value: value
     });
   }
   info.setContent(render_template(INFO_TEMPLATE, {
+    facility_title: selected_facility.title,
     facility_name: selected_facility.name,
-    facility_id: selected_facility.id,
-    division_name: divisions[selected_facility.division_i].name,
-    stock_info: {html: report_display},
+    division_title: divisions[selected_facility.division_i].title,
+    attributes: {html: report_display},
     last_report_date: last_report_date
   }));
 
@@ -983,8 +955,10 @@ function load_data(data) {
   divisions = data.divisions;
   messages = data.messages;
 
+  attributes_by_name = {}
   for (var a = 1; a < attributes.length; a++) {
-    switch (attributes[a].id){
+    attributes_by_name[attributes[a].name] = a;
+    switch (attributes[a].name){
       case 'specialty_care': specialty_attribute_i = a; break;
       case 'medical_equipment': equipment_attribute_i = a; break;
       case 'patient_capacity': patient_capacity_attribute_i = a; break;
@@ -995,10 +969,9 @@ function load_data(data) {
   var facility_is = [];
   for (var i = 1; i < facilities.length; i++) {
     facility_is.push(i);
-    facilities[i].name = clean_name(facilities[i].name);
   }
   divisions[0] = {
-    name: 'All arrondissements',
+    title: 'All arrondissements',
     facility_is: facility_is
   };
 

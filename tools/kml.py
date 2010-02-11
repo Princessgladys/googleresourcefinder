@@ -40,13 +40,13 @@ def clean_html(content):
 
 class Handler(xml.sax.handler.ContentHandler):
     field_for_tag = {
-        'name': 'name',
+        'name': 'title',
         'coordinates': 'location',
         'description': 'comment'
     }
 
     parser_for_field = {
-        'name': single_line,
+        'title': single_line,
         'location': parse_coordinates,
         'comment': clean_html,
     }
