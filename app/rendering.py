@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from utils import *
-from model import Attribute, Division, Facility, FacilityType, Report
+from model import Attribute, Division, Facility, FacilityType, Message, Report
 import sys
 
 def make_jobjects(entities, transformer, *args):
@@ -33,32 +33,29 @@ def make_jobjects(entities, transformer, *args):
 
 def attribute_transformer(index, attribute):
     """Construct the JSON object for an Attribute."""
-    return {'name': attribute.name,
+    return {'id': attribute.key().name(),
             'type': attribute.type,
-            'abbreviation': attribute.abbreviation}
+            'values': attribute.values}
 
-def facility_type_transformer(
-    index, facility_type, attribute_is, attribute_map):
+def facility_type_transformer(index, facility_type, attribute_is):
     """Construct the JSON object for a FacilityType."""
-    attribute_map[facility_type.key().name()] = facility_type.attributes
     return {'name': facility_type.name,
             'abbreviation': facility_type.abbreviation,
-            'attributes': [attribute_is[p] for p in facility_type.attributes]}
+            'attribute_is': [attribute_is[p] for p in facility_type.attributes]}
 
 def facility_transformer(
-    index, facility, attribute_map, report_map, facility_type_is, facility_map):
+    index, facility, attributes, report_map, facility_type_is, facility_map):
     """Construct the JSON object for a Facility."""
     # Add the facility to the facility lists for its containing divisions.
     for id in facility.division_ids:
         facility_map.setdefault(id, []).append(index)
 
     # Gather all the reports.
-    attributes = attribute_map[facility.type]
     reports = []
     for report in report_map.get(facility.id, []):
-        values = []
+        values = [None]
         for attribute in attributes:
-            values.append(getattr(report, attribute, None))
+            values.append(getattr(report, attribute.key().name(), None))
         reports.append({'date': report.date, 'values': values})
 
     # Pack the results into an object suitable for JSON serialization.
@@ -100,14 +97,14 @@ def version_to_json(version):
     version = get_base(version)
 
     # Get all the attributes.
+    attributes = list(Attribute.all().ancestor(version).order('__key__'))
     attribute_jobjects, attribute_is = make_jobjects(
-        Attribute.all().ancestor(version), attribute_transformer)
+        attributes, attribute_transformer)
 
     # Make JSON objects for the facility types.
-    attribute_map = {}
     facility_type_jobjects, facility_type_is = make_jobjects(
         FacilityType.all().ancestor(version),
-        facility_type_transformer, attribute_is, attribute_map)
+        facility_type_transformer, attribute_is)
 
     # Gather all the reports by facility ID.
     report_map = {}
@@ -119,7 +116,7 @@ def version_to_json(version):
     facility_map = {}
     facility_jobjects, facility_is = make_jobjects(
         Facility.all().ancestor(version).order('name'), facility_transformer,
-        attribute_map, report_map, facility_type_is, facility_map)
+        attributes, report_map, facility_type_is, facility_map)
 
     # Make JSON objects for the districts.
     division_jobjects, division_is = make_jobjects(
@@ -133,10 +130,18 @@ def version_to_json(version):
             facility_jobject['division_i'] = division_is[
                 facility_jobject['division_i']]
 
+    # Get all the messages.
+    message_jobjects = {}
+    for message in Message.all():
+        namespace = message_jobjects.setdefault(message.namespace, {})
+        namespace[message.id] = dict((lang, getattr(message, lang))
+                                     for lang in message.dynamic_properties())
+
     return clean_json(simplejson.dumps({
         'timestamp': to_posixtime(timestamp),
         'attributes': attribute_jobjects,
         'facility_types': facility_type_jobjects,
         'facilities': facility_jobjects,
-        'divisions': division_jobjects
+        'divisions': division_jobjects,
+        'messages': message_jobjects
     }, indent=2, default=json_encode))
