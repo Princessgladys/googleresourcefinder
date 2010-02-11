@@ -12,9 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""The SMS for Life data model.  All entities and fields are add-only and
+"""The Resource Mapper data model.  All entities and fields are add-only and
 are never deleted or overwritten.  To represent modifications to a country's
-data, create a new Version under the appropriate Country."""
+data, create a new Version under the appropriate Country.
+
+The data model and code should try to use the following terms consistently:
+
+    "key":
+        An App Engine entity key.
+
+    "name":
+        A unique identifier for an entity, used as the entity's key_name.
+        Fields ending in "_name" contain the key_names of other entities.
+        
+        Names should be C-style identifiers (thus usable as HTML element IDs,
+        form element names, and CSS classes) and are usually not displayed in
+        the UI directly.  For each name, there should be a corresponding
+        Message entity that provides the localized text.
+
+    "title":
+        A non-localizable, UI-displayable text label for an entity.
+"""
 
 from google.appengine.ext import db
 
@@ -22,7 +40,7 @@ class Country(db.Model):
     """Root entity for a country.  Key name: ISO 3166 two-letter lowercase
     country code."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
-    name = db.StringProperty(required=True)  # UI text
+    title = db.StringProperty(required=True)  # UI text
 
 class Dump(db.Model):
     """A record of the data received from a data source in its native format,
@@ -52,20 +70,19 @@ class DivisionType(db.Model):
     plural = db.StringProperty(required=True)  # UI text, plural form
 
 class Division(db.Model):
-    """An administrative division within a country.  Parent: Version."""
+    """An administrative division within a country.  Parent: Version.
+    Key name: government or internationally established division ID."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
-    id = db.StringProperty(required=True)  # government ID
     type = db.StringProperty(required=True)  # key_name of a DivisionType
-    superdivision_id = db.StringProperty()  # a Division.id
-    name = db.StringProperty(required=True)  # UI text
+    superdivision_name = db.StringProperty()  # a Division's key_name
+    title = db.StringProperty(required=True)  # UI text
     location = db.GeoPtProperty()  # approximate center, for labelling
 
 class Attribute(db.Model):
     """An attribute of a facility, e.g. services available, number of patients.
-    Parent: Version.  Key name: name of a property in a Report."""
+    Parent: Version.  Key name: name of a property in a Report, and also the
+    name of the Message providing the UI-displayable attribute name."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
-    name = db.StringProperty(required=True)  # UI text
-    abbreviation = db.StringProperty()  # UI text
     type = db.StringProperty(required=True, choices=[
         'str',  # value is a single-line string (Python unicode)
         'text',  # value is a string, shown as long text (Python unicode)
@@ -76,39 +93,37 @@ class Attribute(db.Model):
         'choice',  # value is a string (one of the elements in 'values')  
         'multi'  # value is a list of strings (which are elements of 'values')
     ])
-    values = db.StringListProperty()  # for choice or multi
+    values = db.StringListProperty()  # allowed value names for choice or multi
 
 class FacilityType(db.Model):
     """A type of facility, e.g. hospital, warehouse.  Parent: Version.
     Key name: an identifier used as the value of Facility.type."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
-    name = db.StringProperty(required=True)  # UI text
-    abbreviation = db.StringProperty(required=True)  # UI text
     attributes = db.StringListProperty()  # key_names of Attribute entities
 
 class Facility(db.Model):
-    """A facility whose attributes are tracked.  Parent: Version."""
+    """A facility whose attributes are tracked.  Parent: Version.
+    Key name: government or internationally established facility ID."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
     type = db.StringProperty(required=True)  # key_name of a FacilityType
-    id = db.StringProperty(required=True)  # government ID
-    name = db.StringProperty(required=True)  # UI text
-    division_id = db.StringProperty()  # a Division.id
-    division_ids = db.StringListProperty()  # all levels of containing divisions
+    title = db.StringProperty(required=True)  # UI text
+    division_name = db.StringProperty(required=True)  # a Division's key_name
+    division_names = db.StringListProperty()  # all levels of Divisions
     location = db.GeoPtProperty()  # for plotting the facility on a map
 
 class Report(db.Expando):
     """A report on the attributes of a facility.  Parent: Version."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
-    facility_id = db.StringProperty()  # a Facility.id
+    facility_name = db.StringProperty()  # a Facility's key_name
     date = db.DateProperty()  # date that report contents were valid
     # additional properties for each Attribute (named by Attribute's key_name)
 
 class Message(db.Expando):
-    """Internationalized strings for value identifiers."""
+    """Internationalized strings for value identifiers.  Parent: Version."""
     namespace = db.StringProperty(required=True, choices=[
-      'english',  # id is an English string
-      'attribute_name',  # id is an attribute ID
-      'attribute_value'  # id is a value ID for a choice or multi attribute
+      'english',  # name is an English string
+      'attribute_name',  # name is an Attribute's key_name
+      'attribute_value'  # name is a value name for a choice or multi attribute
     ])
-    id = db.StringProperty()
+    name = db.StringProperty()
     # additional properties for each language (named by language code)

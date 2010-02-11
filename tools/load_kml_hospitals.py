@@ -5,13 +5,9 @@ import datetime
 import kml
 import re
 import unicodedata
+import utils
 
 BEDS_RE = re.compile(r'(\d+) *[bB]eds')
-
-def make_key(text):
-    text = re.sub(r'[ -]+', '_', text.strip())
-    decomposed = unicodedata.normalize('NFD', text)
-    return ''.join(ch for ch in decomposed if re.match(r'\w', ch)).lower()
 
 def load_hospitals(version, records):
     """Loads a list of hospital records into the given version."""
@@ -20,28 +16,28 @@ def load_hospitals(version, records):
         singular='arrondissement', plural='arrondissements')
     db.put(arrondissement)
     unknown = Division(
-        version, id='unknown', type='arrondissement', name='Unknown')
+        version, key_name='unknown', type='arrondissement', title='Unknown')
     db.put(unknown)
 
     facilities = []
     reports = []
     for record in records:
         location = record['location']
-        facility_id = make_key(record['name'])
+        facility_name = utils.make_name(record['title'])
         facilities.append(Facility(
             version,
+            key_name=facility_name,
             type='hospital',
-            id=facility_id,
-            name=record['name'],
+            title=record['title'],
             location=db.GeoPt(location[1], location[0]),
-            division_id='unknown',
-            division_ids=['unknown']
+            division_name='unknown',
+            division_names=['unknown']
         ))
         if record.get('comment', ''):
             comment = record['comment']
             report = Report(
                 version,
-                facility_id=facility_id,
+                facility_name=facility_name,
                 date=datetime.date.today(),
                 comment=db.Text(comment))
             match = BEDS_RE.search(comment)

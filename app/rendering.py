@@ -19,40 +19,37 @@ import sys
 def make_jobjects(entities, transformer, *args):
     """Run a sequence of entities through a transformer function that produces
     objects suitable for serialization to JSON, returning a list of objects
-    and a dictionary that maps each entity's 'id' property (or key_name, if
-    no such property) to a positive numeric index (which is its index in the
-    list).  Item 0 of the list is always None."""
+    and a dictionary that maps each entity's key_name to its index in the list.
+    Item 0 of the list is always None."""
     jobjects = [None]
     indexes = {}
     for entity in entities:
         index = len(jobjects)
         jobjects.append(transformer(index, entity, *args))
-        entity_id = hasattr(entity, 'id') and entity.id or entity.key().name()
-        indexes[entity_id] = index
+        indexes[entity.key().name()] = index
     return jobjects, indexes
 
 def attribute_transformer(index, attribute):
     """Construct the JSON object for an Attribute."""
-    return {'id': attribute.key().name(),
+    return {'name': attribute.key().name(),
             'type': attribute.type,
             'values': attribute.values}
 
 def facility_type_transformer(index, facility_type, attribute_is):
     """Construct the JSON object for a FacilityType."""
-    return {'name': facility_type.name,
-            'abbreviation': facility_type.abbreviation,
+    return {'name': facility_type.key().name(),
             'attribute_is': [attribute_is[p] for p in facility_type.attributes]}
 
 def facility_transformer(
     index, facility, attributes, report_map, facility_type_is, facility_map):
     """Construct the JSON object for a Facility."""
     # Add the facility to the facility lists for its containing divisions.
-    for id in facility.division_ids:
-        facility_map.setdefault(id, []).append(index)
+    for name in facility.division_names:
+        facility_map.setdefault(name, []).append(index)
 
     # Gather all the reports.
     reports = []
-    for report in report_map.get(facility.id, []):
+    for report in report_map.get(facility.key().name(), []):
         values = [None]
         for attribute in attributes:
             values.append(getattr(report, attribute.key().name(), None))
@@ -60,10 +57,10 @@ def facility_transformer(
 
     # Pack the results into an object suitable for JSON serialization.
     facility_jobject = {
-        'name': facility.name,
-        'id': facility.id,
+        'title': facility.title,
+        'name': facility.key().name(),
         'type': facility_type_is[facility.type],
-        'division_i': facility.division_id,
+        'division_i': facility.division_name,
         'last_report': reports and reports[-1] or None
     }
     if facility.location is not None:
@@ -75,8 +72,8 @@ def facility_transformer(
 def division_transformer(index, division, facility_map):
     """Construct the JSON object for a division."""
     return {
-        'name': division.name,
-        'facility_is': facility_map.get(division.id, [])
+        'title': division.title,
+        'facility_is': facility_map.get(division.key().name(), [])
     }
 
 def json_encode(object):
@@ -109,19 +106,18 @@ def version_to_json(version):
     # Gather all the reports by facility ID.
     report_map = {}
     for report in Report.all().ancestor(version).order('-timestamp').fetch(500):
-        report_map.setdefault(report.facility_id, []).insert(0, report)
+        report_map.setdefault(report.facility_name, []).insert(0, report)
 
     # Make JSON objects for the facilities, while collecting lists of the
     # facilities in each division.
     facility_map = {}
     facility_jobjects, facility_is = make_jobjects(
-        Facility.all().ancestor(version).order('name'), facility_transformer,
+        Facility.all().ancestor(version), facility_transformer,
         attributes, report_map, facility_type_is, facility_map)
 
     # Make JSON objects for the districts.
     division_jobjects, division_is = make_jobjects(
-        Division.all().ancestor(version).filter(
-            'type =', 'arrondissement').order('name'),
+        Division.all().ancestor(version).filter('type =', 'arrondissement'),
         division_transformer, facility_map)
 
     # Fix up the facilities to point at the districts.
@@ -132,10 +128,10 @@ def version_to_json(version):
 
     # Get all the messages.
     message_jobjects = {}
-    for message in Message.all():
+    for message in Message.all().ancestor(version):
         namespace = message_jobjects.setdefault(message.namespace, {})
-        namespace[message.id] = dict((lang, getattr(message, lang))
-                                     for lang in message.dynamic_properties())
+        namespace[message.name] = dict((lang, getattr(message, lang))
+                                       for lang in message.dynamic_properties())
 
     return clean_json(simplejson.dumps({
         'timestamp': to_posixtime(timestamp),

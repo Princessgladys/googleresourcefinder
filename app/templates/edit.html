@@ -21,19 +21,19 @@ tr.field { vertical-align: baseline; margin-top: 1em; }
 tr.field.text { vertical-align: top; }
 .label { text-align: right; color: #666; }
 </style>
-<h1>Edit {{facility.name|escape}}</h1>
+<h1>Edit {{facility.title|escape}}</h1>
 
 <form method="post">
   <input type="hidden" name="cc" value="{{params.cc|escape}}">
   <input type="hidden" name="id" value="{{params.id|escape}}">
   <table>
   {% for field in fields %}
-    <tr class="field {{ field.type }}">
+    <tr class="field {{field.type}}">
       <td class="label">
-        {{ field.name|escape }}
+        {{field.name|escape}}
       </td>
       <td class="input">
-        {{ field.input }}
+        {{field.input}}
       </td>
     </tr>
   {% endfor %}
