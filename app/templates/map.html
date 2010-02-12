@@ -919,8 +919,8 @@ function select_facility(facility_i, ignore_current) {
       value = last_report.values[a];
       switch (attributes[a].type) {
         case 'contact':
-          value = (value || '').replace(/^\s+|\s+$/g, '');
-          value = value ? value.replace(/\n/g, ', ') : '\u2013';
+          value = (value || '').replace(/^[\s\|]+|[\s\|]+$/g, '');
+          value = value ? value.replace(/\|/g, ', ') : '\u2013';
           break;
         case 'date':
           value = (value || '').replace(/T.*/, '') || '\u2013';

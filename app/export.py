@@ -100,6 +100,8 @@ def write_csv(out, version, facility_type, attribute_names=None):
                             value = getattr(reports[week], name, None)
                             if isinstance(value, unicode):
                                 value = value.encode('utf-8')
+                            if isinstance(value, str):
+                                value = value.replace('\n', ' ')
                             row.append(value)
                     else:
                         row += [None]*len(attribute_names)

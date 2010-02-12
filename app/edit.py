@@ -54,7 +54,7 @@ class ContactAttributeType(AttributeType):
 
     def make_input(self, version, name, value, attribute):
         contact_name, contact_phone, contact_email = (
-            (value or '').split('\n') + ['', '', ''])[:3]
+            (value or '').split('|') + ['', '', ''])[:3]
         return '''<table>
                     <tr><td class="label">Name</td><td>%s</td></tr>
                     <tr><td class="label">Phone</td><td>%s</td></tr>
@@ -67,8 +67,8 @@ class ContactAttributeType(AttributeType):
 
     def parse_input(self, report, name, value, request, attribute):
         setattr(report, name,
-                request.get(name + '.name', '') + '\n' +
-                request.get(name + '.phone', '') + '\n' +
+                request.get(name + '.name', '') + '|' +
+                request.get(name + '.phone', '') + '|' +
                 request.get(name + '.email', ''))
 
 class DateAttributeType(AttributeType):
