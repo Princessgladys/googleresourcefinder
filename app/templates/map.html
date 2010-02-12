@@ -134,19 +134,23 @@ var STATUS_LABELS = [
 
 var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
-var INFO_TEMPLATE = '<div class="facility-info">' +
-  '<h1>${facility_title}</h1>' +
-//'<h2 class="caption">${division_title}</h2>' +
-  '<div class="attributes">${attributes}</div>' +
-  '<div class="caption">${last_report_date}</div>' +
-  '<div class="edit-link">' +
-  '<a href="/edit?cc=ht&facility_name=${facility_name}">' +
-  'Edit this record</a></div></div>';
+var INFO_TEMPLATE =
+    '<div class="facility-info">' +
+    '  <h1>${facility_title}</h1>' +
+    '  <div class="caption">' +
+    '    ${last_report_date} \u00b7 ' +
+    '    <a href="/edit?cc=ht&facility_name=${facility_name}">' +
+    '      Edit this record' +
+    '    </a>' +
+    '  </div>' +
+    '  <div class="attributes">${attributes}</div>' +
+    '</div>';
 
-var ATTRIBUTE_TEMPLATE = '<div class="attribute">' +
-  '<span class="title">${attribute_title}</span>: ' +
-  '<span class="value">${attribute_value}</span>' +
-  '</div>';
+var ATTRIBUTE_TEMPLATE =
+    '<div class="attribute">' +
+    '  <span class="title">${attribute_title}</span>: ' +
+    '  <span class="value">${attribute_value}</span>' +
+    '</div>';
 
 // ==== Data loaded from the data store
 
@@ -902,7 +906,7 @@ function select_facility(facility_i, ignore_current) {
   var last_report = selected_facility.last_report;
   if (last_report) {
     var ymd = last_report.date.split('-');
-    last_report_date = 'Reported on ' +
+    last_report_date = 'Updated ' +
         MONTH_ABBRS[ymd[1] - 1] + ' ' + (ymd[2] - 0) + ', ' + ymd[0];
   }
   var report_display = '';
