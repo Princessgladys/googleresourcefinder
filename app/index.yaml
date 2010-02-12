@@ -69,7 +69,15 @@ indexes:
   - name: date
     direction: desc
 
-# Used 4 times in query history.
+# Used 68 times in query history.
+- kind: Report
+  ancestor: yes
+  properties:
+  - name: facility_id
+  - name: timestamp
+    direction: desc
+
+# Used 11 times in query history.
 - kind: Report
   ancestor: yes
   properties:
@@ -77,14 +85,14 @@ indexes:
   - name: timestamp
     direction: desc
 
-# Used 234 times in query history.
+# Used 272 times in query history.
 - kind: Report
   ancestor: yes
   properties:
   - name: timestamp
     direction: desc
 
-# Used 781 times in query history.
+# Used 874 times in query history.
 - kind: Version
   ancestor: yes
   properties:

@@ -43,6 +43,11 @@ th, td { padding: 2px 4px; }
 #legend-section { display: none; }
 #division-section { display: none; }
 .table-head { background: #e0e2e8; padding: 2px 0; }
+#facility-section { margin-top: 0; }
+#facility-section .table-head {
+    background: #fff; border-bottom: 1px solid #ccc; }
+#filter-section .table-head { display: none; }
+#filter-section .table-body { background: #e0e2e8; }
 .table-head tr { color: #000; }
 .table-head img, .legend-icon img { position: relative; top: 2px; }
 .table-body { overflow-y: auto; }
@@ -58,8 +63,8 @@ th.legend-icon { padding: 2px 4px; text-align: center; width: 2em; }
 td.legend-label { padding: 2px 4px 2px 0; }
 th.facility-count, td.facility-count { text-align: right; width: 2.5em; }
 th.value, td.value { text-align: right; width: 4em; }
-th.column_1, td.column_1 { text-align: left; width: 10em; }
-th.column_2, td.column_2 { text-align: right; width: 10em; }
+th.column_1, td.column_1 { text-align: left; width: 18em; }
+th.value .beds, td.value .beds { float: right; padding-left: 0.5em; }
 .stockout { color: #f24; }
 td.selected, tr.selected { background: #26d; color: #fff; }
 tr.selected .stockout { color: #f9a; }
@@ -156,16 +161,15 @@ var messages = {};  // {namespace: {name: {language: message}}
 
 var summary_columns = [
   null, {
-    title: 'Services',
+    get_title: function() {
+      var beds_div = $$('div', {'class': 'beds'}, 'Open/Total Beds');
+      return $$('div', {}, [beds_div, 'Services']);
+    },
     get_value: function(values) {
-      return translate_values(
+      var services = translate_values(
           [].concat(values[attributes_by_name.specialty_care] || [])
             .concat(values[attributes_by_name.medical_equipment] || []))
             .join(', ');
-    }
-  }, {
-    title: 'Open/Total Beds',
-    get_value: function(values) {
       var capacity = values[attributes_by_name.patient_capacity];
       var patients = values[attributes_by_name.patient_count];
       var open_beds = '\u2013';
@@ -174,7 +178,10 @@ var summary_columns = [
       } else if (patients !== null) {
         open_beds = capacity - patients;
       }
-      return open_beds + ' / ' + capacity;
+      var beds = open_beds + ' / ' + capacity;
+      var beds_div = $$('div', {'class': 'beds'}, beds);
+      // WebKit rendering bug: vertical alignment is off if services is ''.
+      return $$('div', {}, [beds_div, services || '\u00a0']);
     }
   }
 ];
@@ -331,7 +338,8 @@ function is_array(thing) {
 // ==== String utilities
 
 function translate_value(value) {
-  return messages.attribute_value[value].en || value;
+  var message = messages.attribute_value[value];
+  return message && message.en || value;
 }
 
 function translate_values(values) {
@@ -359,7 +367,7 @@ function render_template(template, params) {
     if (name === '$') {
       substitution = '$';
     } else if (params[name] === undefined || params[name] === null) {
-      substitution = '?';
+      substitution = '\u2013';
     } else if (typeof params[name] === 'object') {
       substitution = params[name].html;
     } else {
@@ -499,10 +507,10 @@ function initialize_division_header() {
 function initialize_facility_header() {
   var thead = $('facility-thead');
   var tr = $$('tr');
-  var cells = [$$('th', {}, 'Facilities')];
+  var cells = [$$('th', {}, 'Facility')];
   for (var c = 1; c < summary_columns.length; c++) {
     cells.push($$('th', {'class': 'value column_' + c},
-                  summary_columns[c].title));
+                  summary_columns[c].get_title()));
   }
   set_children(thead, tr);
   set_children(tr, cells);
@@ -902,28 +910,35 @@ function select_facility(facility_i, ignore_current) {
   for (var i = 0; i < facility_type.attribute_is.length; i++) {
     var a = facility_type.attribute_is[i];
     var attribute = attributes[a];
-    var value = '';
+    var value = '\u2013';
     if (last_report) {
       value = last_report.values[a];
       switch (attributes[a].type) {
         case 'contact':
-          value = (value || '').replace(/\n/g, ', ');
+          value = (value || '').replace(/^\s+|\s+$/g, '');
+          value = value ? value.replace(/\n/g, ', ') : '\u2013';
           break;
         case 'date':
-          value = (value || '').replace(/T.*/, '');
+          value = (value || '').replace(/T.*/, '') || '\u2013';
+          break;
+        case 'str':
+          value = value || '\u2013';
           break;
         case 'text':
           value = {html: render_template('<div class="text">${text}</div>',
                                          {text: {html: value || ''}})};
           break;
         case 'choice':
-          value = translate_value(value);
+          value = translate_value(value) || '\u2013';
           break;
         case 'multi':
-          value = translate_values(value || []).join(', ');
+          value = translate_values(value || ['\u2013']).join(', ');
           break;
         case 'int':
         case 'float':
+          if (value === null || value === undefined) {
+            value = '\u2013';
+          }
           if (value === 0) {
             value = {html: '<span class="stockout">0</span>'};
           }
@@ -1065,7 +1080,7 @@ function load_data(data) {
       <table width="100%" cellspacing=0 cellpadding=0 border=0>
         <thead id="facility-thead">
           <tr>
-            <th>Facilities</th>
+            <th>Facility</th>
           </tr>
         </thead>
       </table>
