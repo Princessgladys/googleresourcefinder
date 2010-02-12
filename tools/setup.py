@@ -51,7 +51,7 @@ def setup_version(version):
         value_message('obstetrics', en='Obstetrics'),
         value_message('orthopedic_surgery', en='Orthopedic surgery'),
         value_message('physical_therapy', en='Physical therapy'),
-        value_message('x_ray', en='X-ray'),
+        value_message('x_ray', en=u'X\u2011ray'),
         value_message('ultrasound', en='Ultrasound'),
     ]
 

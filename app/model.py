@@ -14,9 +14,10 @@
 
 """The Resource Mapper data model.  All entities and fields are add-only and
 are never deleted or overwritten.  To represent modifications to a country's
-data, create a new Version under the appropriate Country.
+data, create a new Version under the appropriate Country.  To represent
+modifications to a facility's attributes, add a new Report for that Facility.
 
-The data model and code should try to use the following terms consistently:
+This project uses the following naming conventions in variables and properties:
 
     "key":
         An App Engine entity key.
@@ -123,7 +124,7 @@ class Message(db.Expando):
     namespace = db.StringProperty(required=True, choices=[
       'english',  # name is an English string
       'attribute_name',  # name is an Attribute's key_name
-      'attribute_value'  # name is a value name for a choice or multi attribute
+      'attribute_value'  # name is a value name in a choice or multi attribute
     ])
     name = db.StringProperty()
     # additional properties for each language (named by language code)

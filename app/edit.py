@@ -89,14 +89,22 @@ class IntAttributeType(AttributeType):
     input_size = 10
 
     def parse_input(self, report, name, value, request, attribute):
-        setattr(report, name, value and int(float(value)) or None)
+        if value:
+            value = int(float(value))
+        else:
+            value = None
+        setattr(report, name, value)
 
 class FloatAttributeType(IntAttributeType):
     def make_input(self, version, name, value, attribute):
         Attribute.make_input(self, version, name, '%g' % value, attribute)
 
     def parse_input(self, report, name, value, request, attribute):
-        setattr(report, name, value and float(value) or None)
+        if value:
+            value = float(value)
+        else:
+            value = None
+        setattr(report, name, value)
 
 class ChoiceAttributeType(AttributeType):
     def make_input(self, version, name, value, attribute):
