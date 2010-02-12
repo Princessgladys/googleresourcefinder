@@ -29,8 +29,9 @@ def setup_version(version):
         attr('text', 'comment')
     ]
 
-    hospital = FacilityType(version, key_name='hospital',
-                            attributes=[a.key().name() for a in attributes])
+    hospital = FacilityType(
+        version, key_name='hospital',
+        attribute_names=[a.key().name() for a in attributes])
 
     def message(namespace, name, **kw):
         return Message(version, namespace=namespace, name=name, **kw)

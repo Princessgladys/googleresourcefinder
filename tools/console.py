@@ -47,6 +47,28 @@ from google.appengine.ext import db
 from access import *
 from model import *
 
+# Set up more useful representations, handy for interactive data manipulation
+# and debugging.  Unfortunately, the App Engine runtime relies on the specific
+# output of repr(), so this isn't safe in production, only debugging.
+
+def key_repr(key):
+    levels = []
+    while key:
+        levels.insert(0, '%s %s' % (key.kind(), key.id() or repr(key.name())))
+        key = key.parent()
+    return '<Key: %s>' % '/'.join(levels)
+
+def model_repr(model):
+    if model.is_saved():
+        key = model.key()
+        return '<%s: %s>' % (key.kind(), key.id() or repr(key.name()))
+    else:
+        return '<%s: unsaved>' % model.kind()
+
+db.Key.__repr__ = key_repr
+
+db.Model.__repr__ = model_repr
+
 def init(app_id, host, username=None, password=None):
     print 'App Engine server at %s' % host
     if not username:

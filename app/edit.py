@@ -195,7 +195,7 @@ class Edit(utils.Handler):
             .ancestor(self.version)
             .filter('facility_name =', self.params.facility_name)
             .order('-timestamp')).get()
-        for name in self.facility_type.attributes:
+        for name in self.facility_type.attribute_names:
             attribute = self.attributes[name]
             fields.append({
                 'name': get_message(self.version, 'attribute_name', name),
@@ -215,7 +215,7 @@ class Edit(utils.Handler):
             facility_name=self.facility.key().name(),
             date=utils.Date.today()
         )
-        for attribute_name in self.facility_type.attributes:
+        for attribute_name in self.facility_type.attribute_names:
             attribute = self.attributes[attribute_name]
             parse_input(report, self.request, attribute)
         report.put()

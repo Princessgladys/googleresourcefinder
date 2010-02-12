@@ -100,7 +100,7 @@ class FacilityType(db.Model):
     """A type of facility, e.g. hospital, warehouse.  Parent: Version.
     Key name: an identifier used as the value of Facility.type."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
-    attributes = db.StringListProperty()  # key_names of Attribute entities
+    attribute_names = db.StringListProperty()  # key_names of Attribute entities
 
 class Facility(db.Model):
     """A facility whose attributes are tracked.  Parent: Version.
