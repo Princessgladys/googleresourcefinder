@@ -38,7 +38,8 @@ def attribute_transformer(index, attribute):
 def facility_type_transformer(index, facility_type, attribute_is):
     """Construct the JSON object for a FacilityType."""
     return {'name': facility_type.key().name(),
-            'attribute_is': [attribute_is[p] for p in facility_type.attributes]}
+            'attribute_is':
+                [attribute_is[p] for p in facility_type.attribute_names]}
 
 def facility_transformer(
     index, facility, attributes, report_map, facility_type_is, facility_map):

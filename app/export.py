@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from model import *
 from utils import *
 import access
 import calendar
@@ -32,11 +33,9 @@ def short_date(date):
     return '%s %d' % (calendar.month_abbr[date.month], date.day)
 
 def get_districts(version):
-    type = DivisionType.get_by_key_name('district', version)
-    return get_all(
-        lambda: Division.all().ancestor(version).filter('type =', type))
+    return get_all(lambda: Division.all().ancestor(version))
 
-def write_csv(out, version, facility_type, property_keys=None):
+def write_csv(out, version, facility_type, attribute_names=None):
     """Dump the stock level reports for all facilities of the given type
     in CSV format, with a row for each facility and a group of N columns
     for each week, where N is the number of properties."""
@@ -47,12 +46,11 @@ def write_csv(out, version, facility_type, property_keys=None):
     version = get_base(version)
     country = version.parent()
 
+    # Get the attribute names.
+    attribute_names = attribute_names or facility_type.attribute_names
+
     # Get the divisions.
     divisions = get_districts(version)
-
-    # Get the property keys.
-    if property_keys is None:
-        property_keys = [p.key().name() for p in facility_type.properties]
 
     # Get the facilities.
     facilities = get_all(lambda: Facility.all().ancestor(version))
@@ -68,14 +66,15 @@ def write_csv(out, version, facility_type, property_keys=None):
     num_weeks = (max_date + TimeDelta(7) - min_date).days / 7
 
     # Organize the reports by facility and week.
-    reports_by_facility = dict((f.key(), [None]*num_weeks) for f in facilities)
+    reports_by_facility = dict((f.key().name(), [None]*num_weeks) 
+                               for f in facilities)
     for report in reports:
         week = (report.date - min_date).days / 7
-        reports_by_facility[report._facility][week] = report
+        reports_by_facility[report.facility_name][week] = report
 
     # Produce the header rows.
     row = [country.title, '%s: %d reports' % (timestamp, len(reports))]
-    group = [None] * len(property_keys)
+    group = [None] * len(attribute_names)
     d = min_date
     for week in range(num_weeks):
         group[0] = '%s - %s' % (short_date(d), short_date(d + TimeDelta(6)))
@@ -83,26 +82,27 @@ def write_csv(out, version, facility_type, property_keys=None):
         d += TimeDelta(7)
     writer.writerow(row)
 
-    row = ['%d districts' % len(divisions), '%d facilities' % len(facilities)]
-    row += property_keys*num_weeks
+    row = ['Districts (%d)' % len(divisions),
+           'Facilities (%d)' % len(facilities)]
+    row += attribute_names*num_weeks
     writer.writerow(row)
 
     # Write a row for each facility.
     sorted_facilities = sorted(facilities, key=lambda f: f.title)
     for division in sorted(divisions, key=lambda d: d.title):
         for facility in sorted_facilities:
-            if facility._division == division.key():
-                row = [division.title, facility.title]
-                reports = reports_by_facility[facility.key()]
+            if facility.division_name == division.key().name():
+                row = [division.key().name(), facility.key().name()]
+                reports = reports_by_facility[facility.key().name()]
                 for week in range(num_weeks):
                     if reports[week]:
-                        for property_key in property_keys:
-                            value = getattr(reports[week], property_key, None)
-                            if value is not None:
-                                value = int(value)
+                        for name in attribute_names:
+                            value = getattr(reports[week], name, None)
+                            if isinstance(value, unicode):
+                                value = value.encode('utf-8')
                             row.append(value)
                     else:
-                        row += [None]*len(property_keys)
+                        row += [None]*len(attribute_names)
                 writer.writerow(row)
 
 class Export(Handler):
@@ -114,13 +114,13 @@ class Export(Handler):
                 # Get the selected facility type.
                 version = get_latest_version(country_code)
                 facility_type = FacilityType.get_by_key_name(
-                    self.request.get('facility_type'))
+                    self.request.get('facility_type'), version)
 
                 # Construct a reasonable filename.
                 timestamp = version.timestamp.replace(microsecond=0)
                 country = version.parent()
                 filename = '%s.%s.%s.csv' % (
-                    country_code, facility_type.key_name,
+                    country_code, facility_type.key().name(),
                     timestamp.isoformat().replace(':', '_'))
                 self.response.headers['Content-Type'] = 'text/csv'
                 self.response.headers['Content-Disposition'] = \

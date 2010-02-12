@@ -98,24 +98,6 @@ class Handler(webapp.RequestHandler):
                 self.response.clear()
                 self.write(cgitb.html(sys.exc_info()))
 
-def key_repr(key):
-    levels = []
-    while key:
-        levels.insert(0, '%s %s' % (key.kind(), key.id() or repr(key.name())))
-        key = key.parent()
-    return '<Key: %s>' % '/'.join(levels)
-
-def model_repr(model):
-    if model.is_saved():
-        key = model.key()
-        return '<%s: %s>' % (key.kind(), key.id() or repr(key.name()))
-    else:
-        return '<%s: unsaved>' % model.kind()
-
-db.Key.__repr__ = key_repr
-
-db.Model.__repr__ = model_repr
-
 def make_name(text):
     text = re.sub(r'[ -]+', '_', text.strip())
     decomposed = unicodedata.normalize('NFD', text)
