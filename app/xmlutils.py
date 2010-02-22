@@ -16,6 +16,22 @@ def qualify(ns, name):
     """Makes a namespace-qualified name."""
     return '{%s}%s' % (ns, name)
 
+def indent(element, level=0):
+    """Adds indentation to an element subtree."""
+    indentation = '\n' + level*'  '
+    if len(element):
+        if not element.text or not element.text.strip():
+            element.text = indentation + '  '
+        if not element.tail or not element.tail.strip():
+            element.tail = indentation
+        for child in element:
+            indent(child, level + 1)
+        if not child.tail or not child.tail.strip():
+            child.tail = indentation
+    elif level:
+        if not element.tail or not element.tail.strip():
+            element.tail = indentation
+
 
 # ==== Record types ========================================================
 
@@ -78,7 +94,9 @@ class Converter:
         include None, which is ignored."""
         element = etree.Element(self.qualify(name))
         for arg in child_args:
-            for child in isinstance(arg, list) and arg or [arg]:
+            if not isinstance(arg, list):
+                arg = [arg]
+            for child in arg:
                 if child is not None:
                     element.append(child)
         return element
