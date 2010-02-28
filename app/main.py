@@ -21,6 +21,7 @@ class Main(Handler):
         auth = access.check_and_log(self.request, users.get_current_user())
         if auth:
             self.render('templates/map.html',
+                params=self.params,
                 authorization=auth and auth.description or 'anonymous',
                 logout_url=users.create_logout_url('/'),
                 data=rendering.version_to_json(get_latest_version('ht')),

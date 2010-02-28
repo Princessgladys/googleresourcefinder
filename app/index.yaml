@@ -56,19 +56,6 @@ indexes:
   properties:
   - name: name
 
-# Unused in query history -- copied from input.
-- kind: Report
-  ancestor: yes
-  properties:
-  - name: date
-
-# Unused in query history -- copied from input.
-- kind: Report
-  ancestor: yes
-  properties:
-  - name: date
-    direction: desc
-
 # Used 68 times in query history.
 - kind: Report
   ancestor: yes
@@ -77,7 +64,7 @@ indexes:
   - name: timestamp
     direction: desc
 
-# Used 16 times in query history.
+# Used 23 times in query history.
 - kind: Report
   ancestor: yes
   properties:
@@ -85,14 +72,14 @@ indexes:
   - name: timestamp
     direction: desc
 
-# Used 291 times in query history.
+# Used 351 times in query history.
 - kind: Report
   ancestor: yes
   properties:
   - name: timestamp
     direction: desc
 
-# Used 996 times in query history.
+# Used 1166 times in query history.
 - kind: Version
   ancestor: yes
   properties:
