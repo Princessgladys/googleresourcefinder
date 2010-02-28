@@ -219,8 +219,10 @@ class Edit(utils.Handler):
             attribute = self.attributes[attribute_name]
             parse_input(report, self.request, attribute)
         report.put()
-
-        raise Redirect('/')
+        if self.params.embed:
+            self.write('Record updated.')
+        else:
+            raise Redirect('/')
 
 if __name__ == '__main__':
     utils.run([('/edit', Edit)], debug=True)

@@ -24,6 +24,13 @@ At the Python prompt:
     Country(key_name='ht', name='Haiti').put()
     execfile('tools/setup.py')
 
+To reload the database (from hospitals.kml in the current directory):
+
+    from load_kml_hospitals import *
+    v = setup_new_version()
+    load_kml_file(v, 'hospitals.kml')
+
+
 Dump of a conversation with Ka-Ping who created the app, about the data model:
 ----
 The entity hierarchy in the datastore is
