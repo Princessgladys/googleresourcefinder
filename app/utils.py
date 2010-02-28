@@ -52,6 +52,9 @@ class ErrorMessage(Exception):
 def strip(text):
     return text.strip()
 
+def validate_yes(text):
+    return (text.lower() == 'yes') and 'yes' or ''
+
 def get_message(version, namespace, name):
     message = model.Message.all().ancestor(version).filter(
         'namespace =', namespace).filter('name =', name).get()
@@ -63,7 +66,9 @@ class Struct:
 class Handler(webapp.RequestHandler):
     auto_params = {
         'cc': strip,
-        'facility_name': strip
+        'facility_name': strip,
+        'print': validate_yes,
+        'embed': validate_yes
     }
 
     def render(self, path, **params):

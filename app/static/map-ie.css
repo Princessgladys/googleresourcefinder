@@ -1,4 +1,4 @@
-{% comment %}
+/*
 # Copyright 2009-2010 by Ka-Ping Yee
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,11 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-{% endcomment %}
-
-<title>Resource Mapper ({{instance}})</title>
-<style>
-body, h1, p { font-family: helvetica, arial; font-size: 13px; }
-</style>
-<h1>Error</h1>
-<p>{{message|escape}}
+*/
+/* These CSS rules are only for IE 7 and earlier. */
+body { width: 100%; height: 100%; }
+#map, .vshadow { width:expression(document.body.clientWidth-400); }
+#data, #map, .hshadow { height:expression(document.body.clientHeight-24); }
+#supply-section { margin-top: 0; }
+#freshness { position: absolute; left: 0; bottom: 0; padding: 6px 4px 0px; }
