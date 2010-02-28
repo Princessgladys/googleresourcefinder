@@ -13,20 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 */
-#data { position: static; width: 1024px; margin-top: 24px; }
-th.stock-level.attribute_7, td.stock-level.attribute_7 { width: 7em; }
-th.stock-level.attribute_1, td.stock-level.attribute_1 { width: 15em; }
-th.stock-level.attribute_2, td.stock-level.attribute_2 { width: 10em; }
-th.stock-level.attribute_8, td.stock-level.attribute_8 { width: 20em; }
-th.stock-level.attribute_0, td.stock-level.attribute_0 { width: 12em; }
+/* Common */
 #print-timestamp { margin-top: 20px; font-size: 18px; font-weight: bold; }
+#map, #print-timestamp, #freshness, #update-instructions { padding: 4px; }
+#freshness, #update-instructions { font-size: 13px; }
 
 /* Map area */
 #map { position: relative; width: 1024px; height: 768px; left: 0; top: 0; }
 .hshadow, .vshadow { display: none; }
 #freshness { position: relative; left: 0; bottom: 0; padding: 2px 4px; }
 
-/* Common */
-#map, #print-timestamp, #freshness, #update-instructions { padding: 4px; }
-#freshness, #update-instructions { font-size: 13px; }
-
+/* Data area */
+#data { position: static; width: 1024px; margin-top: 24px; }
