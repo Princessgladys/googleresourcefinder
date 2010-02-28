@@ -16,34 +16,45 @@
 
 <title>Resource Mapper ({{instance}})</title>
 <style>
-body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
+{% if not params.embed %}
+  body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
+{% endif %}
 tr.field { vertical-align: baseline; margin-top: 1em; }
 tr.field.text { vertical-align: top; }
 .label { text-align: right; color: #666; }
 </style>
 <h1>Edit {{facility.title|escape}}</h1>
 
-<form method="post">
+<form method="post" id="edit" action="/edit">
+  <input type="hidden" name="embed" value="{{params.embed|escape}}">
   <input type="hidden" name="cc" value="{{params.cc|escape}}">
-  <input type="hidden" name="id" value="{{params.id|escape}}">
+  <input type="hidden" name="facility_name"
+      value="{{params.facility_name|escape}}">
   <table>
-  {% for field in fields %}
-    <tr class="field {{field.type}}">
-      <td class="label">
-        {{field.name|escape}}
-      </td>
-      <td class="input">
-        {{field.input}}
-      </td>
-    </tr>
-  {% endfor %}
+    {% for field in fields %}
+      <tr class="field {{field.type}}">
+        <td class="label">
+          {{field.name|escape}}
+        </td>
+        <td class="input">
+          {{field.input}}
+        </td>
+      </tr>
+    {% endfor %}
     <tr>
       <td>
       </td>
       <td class="field">
         <input type="submit" value="Save">
         <input type="reset" value="Revert">
+        <span id="edit-status"></span>
       </td>
     </tr>
   </table>
 </form>
+
+{% if params.embed %}
+  <script type="text/javascript">
+    $j('#edit').ajaxForm({target: '#edit-status'});
+  </script>
+{% endif %}
