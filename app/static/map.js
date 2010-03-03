@@ -459,7 +459,7 @@ function update_facility_icons() {
     if (markers[f]) {
       var facility = facilities[f];
       var s = facility_status_is[f];
-      markers[f].setIcon(make_icon(facility, s, detail));
+      markers[f].setIcon(make_icon(facility.title, s, detail));
       markers[f].setZIndex(STATUS_ZINDEXES[s]);
     }
   }

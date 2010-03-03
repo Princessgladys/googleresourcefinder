@@ -64,7 +64,7 @@ indexes:
   - name: timestamp
     direction: desc
 
-# Used 23 times in query history.
+# Used 26 times in query history.
 - kind: Report
   ancestor: yes
   properties:
@@ -72,14 +72,14 @@ indexes:
   - name: timestamp
     direction: desc
 
-# Used 351 times in query history.
+# Used 366 times in query history.
 - kind: Report
   ancestor: yes
   properties:
   - name: timestamp
     direction: desc
 
-# Used 1166 times in query history.
+# Used 1204 times in query history.
 - kind: Version
   ancestor: yes
   properties:
