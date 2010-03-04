@@ -9,27 +9,22 @@ Then start the server:
 
     dev_appserver.py app
 
-You ned to create a user to user the app, even locally
-In the admin console:
-
-from access import Authorization
-Authorization(email='test@example.com', description='Test').put()
-
-Now connect to the server like this:
+Connect to the server like this:
 
     tools/console.py resourcemapper localhost:8080
 
 Log in with any username and password.
 
+You need to create a user to user the app, even locally
 At the Python prompt:
 
-    Country(key_name='ht', title='Haiti').put()
+    Authorization(email='test@example.com', description='Test').put()
+
+Then to reload the database (from hospitals.kml in the current directory):
+
     execfile('tools/setup.py')
-
-To reload the database (from hospitals.kml in the current directory):
-
-    from load_kml_hospitals import *
     v = setup_new_version()
+    from load_kml_hospitals import *
     load_kml_file(v, 'hospitals.kml')
 
 
