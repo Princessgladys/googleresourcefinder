@@ -11,6 +11,8 @@ Then start the server:
 
 You ned to create a user to user the app, even locally
 In the admin console:
+
+from access import Authorization
 Authorization(email='test@example.com', description='Test').put()
 
 Now connect to the server like this:
@@ -21,7 +23,7 @@ Log in with any username and password.
 
 At the Python prompt:
 
-    Country(key_name='ht', name='Haiti').put()
+    Country(key_name='ht', title='Haiti').put()
     execfile('tools/setup.py')
 
 To reload the database (from hospitals.kml in the current directory):
