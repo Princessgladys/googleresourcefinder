@@ -1,14 +1,19 @@
 """XML conversion for EDXL-HAVE."""
 
-from xmlutils import Converter, etree, indent
+import xmlutils
 
 
 EDXL_HAVE_NS = 'urn:oasis:names:tc:emergency:EDXL:HAVE:1.0'
 GEO_OASIS_NS = 'http://www.opengis.net/gml/geo-oasis/10'
 GML_NS = 'http://opengis.net/gml'
+URI_PREFIXES = {
+    EDXL_HAVE_NS: 'have',
+    GEO_OASIS_NS: 'geo-oasis',
+    GML_NS: 'gml'
+}
 
-
-class HospitalStatus(Converter):
+class HospitalStatus(xmlutils.Converter):
+    __metaclass__ = xmlutils.Singleton
     NS = EDXL_HAVE_NS
 
     def from_element(self, element):
@@ -19,10 +24,9 @@ class HospitalStatus(Converter):
         return self.create_element(name,
             [Hospital.to_element('Hospital', hospital) for hospital in value])
 
-HospitalStatus = HospitalStatus()  # singleton
 
-
-class Hospital(Converter):
+class Hospital(xmlutils.Converter):
+    __metaclass__ = xmlutils.Singleton
     NS = EDXL_HAVE_NS
 
     def from_element(self, element):
@@ -77,16 +81,15 @@ class Hospital(Converter):
             ),
         )
 
-Hospital = Hospital()  # singleton
-
 
 def create_text_element(tag, text):
-    element = etree.Element(tag)
+    element = xmlutils.Element(tag)
     element.text = text
     return element
 
 
-class Text(Converter):
+class Text(xmlutils.Converter):
+    __metaclass__ = xmlutils.Singleton
     NS = EDXL_HAVE_NS
 
     def from_element(self, element):
@@ -95,10 +98,9 @@ class Text(Converter):
     def to_element(self, name, value):
         return create_text_element(self.qualify(name), value)
 
-Text = Text()  # singleton
 
-
-class GeoLocation(Converter):
+class GeoLocation(xmlutils.Converter):
+    __metaclass__ = xmlutils.Singleton
     NS = GEO_OASIS_NS
 
     def from_element(self, element):
@@ -118,25 +120,13 @@ class GeoLocation(Converter):
             )
         )
 
-GeoLocation = GeoLocation()  # singleton
-
 
 def parse_file(file):
     """Parses EDXL-HAVE <Hospital> elements and returns a list of records."""
-    hospitals = etree.parse(file).findall('.//{%s}Hospital' % EDXL_HAVE_NS)
+    hospitals = xmlutils.parse(file).findall('.//{%s}Hospital' % EDXL_HAVE_NS)
     return map(Hospital.from_element, hospitals)
-
-def register_namespaces():
-    """Sets the namespace prefixes for the namespaces we use."""
-    import xml.etree.ElementTree
-    xml.etree.ElementTree._namespace_map[EDXL_HAVE_NS] = 'have'
-    xml.etree.ElementTree._namespace_map[GEO_OASIS_NS] = 'geo-oasis'
-    xml.etree.ElementTree._namespace_map[GML_NS] = 'gml'
 
 def write_file(file, hospitals):
     """Writes a list of hospital elements as an EDXL-HAVE document."""
-    register_namespaces()
     root = HospitalStatus.to_element('HospitalStatus', hospitals)
-    indent(root)
-    file.write('<?xml version="1.0"?>\n')
-    etree.ElementTree(root).write(file, encoding='utf-8')
+    xmlutils.write_file(file, root, URI_PREFIXES)
