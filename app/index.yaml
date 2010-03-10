@@ -24,39 +24,33 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Unused in query history -- copied from input.
 - kind: Attribute
   ancestor: yes
   properties:
   - name: name
 
-# Unused in query history -- copied from input.
 - kind: Division
   ancestor: yes
   properties:
   - name: division_type
   - name: name
 
-# Unused in query history -- copied from input.
 - kind: Division
   ancestor: yes
   properties:
   - name: name
 
-# Used 226 times in query history.
 - kind: Division
   ancestor: yes
   properties:
   - name: type
   - name: name
 
-# Used 226 times in query history.
 - kind: Facility
   ancestor: yes
   properties:
   - name: name
 
-# Used 68 times in query history.
 - kind: Report
   ancestor: yes
   properties:
@@ -64,7 +58,6 @@ indexes:
   - name: timestamp
     direction: desc
 
-# Used 26 times in query history.
 - kind: Report
   ancestor: yes
   properties:
@@ -72,14 +65,12 @@ indexes:
   - name: timestamp
     direction: desc
 
-# Used 366 times in query history.
 - kind: Report
   ancestor: yes
   properties:
   - name: timestamp
     direction: desc
 
-# Used 1204 times in query history.
 - kind: Version
   ancestor: yes
   properties:
