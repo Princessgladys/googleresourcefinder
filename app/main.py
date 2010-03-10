@@ -18,16 +18,17 @@ import rendering
 
 class Main(Handler):
     def get(self):
-        auth = access.check_and_log(self.request, users.get_current_user())
-        if auth:
-            self.render('templates/map.html',
-                params=self.params,
-                authorization=auth and auth.description or 'anonymous',
-                logout_url=users.create_logout_url('/'),
-                data=rendering.version_to_json(get_latest_version('ht')),
-                instance=self.request.host.split('.')[0])
-        else:
-            raise Redirect(users.create_login_url('/'))
+        auth = self.auth
+        self.render('templates/map.html',
+                    params=self.params,
+                    authorization=auth and auth.description or 'anonymous',
+                    is_editor = (access.check_user_role(auth,'editor','ht')
+                                 and 1 or 0),
+                    loginout_url=(auth and users.create_logout_url('/') or
+                                  users.create_login_url('/')),
+                    loginout_text=(auth and "Sign out" or "Sign in"),
+                    data=rendering.version_to_json(get_latest_version('ht')),
+                    instance=self.request.host.split('.')[0])
 
 if __name__ == '__main__':
     run([('/', Main)], debug=True)

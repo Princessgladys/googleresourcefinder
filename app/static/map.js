@@ -37,12 +37,17 @@ var INFO_TEMPLATE =
     '  <h1>${facility_title}</h1>' +
     '  <div class="caption">' +
     '    ${last_report_date} \u00b7 ' +
-    '    <a href="/edit?cc=ht&facility_name=${facility_name}">' +
-    '      Edit this record</a> \u00b7 ' +
-    '    <a href="#" class="edit-ip-link" ' +
-    '        onclick="edit_handler(' +
-    '            \'/edit?cc=ht&facility_name=${facility_name}&embed=yes\');">' +
+    '    <div class="edit-links" style="display:${edit_links_disp};">' + 
+    '      <a href="/edit?cc=ht&facility_name=${facility_name}">' +
+    '        Edit this record</a> \u00b7 ' +
+    '      <a href="#" class="edit-ip-link" ' +
+    '          onclick="edit_handler(' +
+    '           \'/edit?cc=ht&facility_name=${facility_name}&embed=yes\');">' +
     '      Edit in place</a>' +
+    '    </div>' +
+    '    <div class="please-signin" style="display:${please_signin_disp};" >' +
+    '      Please sign in as editor to edit' +
+    '    </div>' +
     '  </div>' +
     '  <div class="attributes">${attributes}</div>' +
     '</div>';
@@ -874,10 +879,19 @@ function select_facility(facility_i, ignore_current) {
       attribute_value: value
     });
   }
+  if (rmapper.is_editor()) {
+    please_signin_disp = 'none';
+    edit_links_disp = 'block';
+  } else {
+    please_signin_disp = 'block';
+    edit_links_disp = 'none';
+  }
   info.setContent(render_template(INFO_TEMPLATE, {
     facility_title: selected_facility.title,
     facility_name: selected_facility.name,
     division_title: divisions[selected_facility.division_i].title,
+    please_signin_disp: please_signin_disp,
+    edit_links_disp: edit_links_disp,
     attributes: {html: report_display},
     last_report_date: last_report_date
   }));

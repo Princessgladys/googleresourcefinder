@@ -32,6 +32,17 @@
   </script>
   <script type="text/javascript" src="static/jquery.form.js"></script>
   <script type="text/javascript">
+    // Do we have a namespace already?
+    // shouldn't
+    // rmapper =  rmapper || {};
+    // work? it fails for me
+
+    rmapper = {};
+    rmapper.is_editor = function() {
+      return {{ is_editor }};
+    };
+  </script>
+  <script type="text/javascript">
     var print = {% if params.print %} true {% else %} false {% endif %};
     jQuery(document).ready(function() {
       jQuery.noConflict();
@@ -40,6 +51,7 @@
       });
     });
   </script>
+
 </head>
 
 <div id="viewport"></div>
@@ -52,7 +64,7 @@
       <a href="/?print=yes">Print</a> |
     {% endif %}
     <a href="about:blank">Help</a> |
-    <a href="{{logout_url}}">Sign out</a>
+    <a href="{{loginout_url}}">{{loginout_text}}</a>
   </div>
   <div class="title">
     Resource Mapper
