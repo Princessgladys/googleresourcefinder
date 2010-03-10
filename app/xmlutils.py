@@ -7,10 +7,11 @@ of an XML document to or from a Python value.  The type and structure of
 the Python value is up to the Converter.
 """
 
+import copy
 try:
-    import xml.etree.cElementTree as etree
+    from xml.etree.cElementTree import Element, ElementTree, parse, tostring
 except ImportError:
-    import xml.etree.ElementTree as etree
+    from xml.etree.ElementTree import Element, ElementTree, parse, tostring
 
 def qualify(ns, name):
     """Makes a namespace-qualified name."""
@@ -32,6 +33,33 @@ def indent(element, level=0):
         if not element.tail or not element.tail.strip():
             element.tail = indentation
 
+def fix_name(name, uri_prefixes):
+    """Converts a Clark qualified name into a name with a namespace prefix."""
+    if name[0] == '{':
+        uri, tag = name[1:].split('}')
+        if uri in uri_prefixes:
+            return uri_prefixes[uri] + ':' + tag
+    return name
+
+def set_prefixes(root, uri_prefixes):
+    """Replaces Clark qualified element names with specific given prefixes."""
+    for uri, prefix in uri_prefixes.items():
+        root.set('xmlns:' + prefix, uri)
+
+    for element in root.getiterator():
+        element.tag = fix_name(element.tag, uri_prefixes)
+
+def write_file(file, root, uri_prefixes={}, pretty_print=True):
+    """Writes an XML tree to a file, using the given map of namespace URIs to
+    prefixes, and adding nice indentation."""
+    root_copy = copy.deepcopy(root)
+    set_prefixes(root_copy, uri_prefixes)
+    if pretty_print:
+        indent(root_copy)
+    # Setting encoding to 'UTF-8' makes ElementTree write the XML declaration
+    # because 'UTF-8' differs from ElementTree's default, 'utf-8'.  According
+    # to the XML 1.0 specification, 'UTF-8' is also the recommended spelling.
+    ElementTree(root_copy).write(file, encoding='UTF-8')
 
 # ==== Record types ========================================================
 
@@ -49,7 +77,12 @@ class Struct(dict):
     
 # ==== Converter base class ================================================
 
-class Converter:
+def Singleton(name, bases, dict):
+    """Use this metaclass on Converter subclasses to create a instance."""
+    return type(name, bases, dict)()
+
+
+class Converter(object):
     """Abstract base class for subtree converters, which convert subtrees
     of XML to/from Python values."""
 
@@ -92,7 +125,7 @@ class Converter:
         """Creates an element containing the given child elements.  The
         arguments can be children or lists of children, and are allowed to
         include None, which is ignored."""
-        element = etree.Element(self.qualify(name))
+        element = Element(self.qualify(name))
         for arg in child_args:
             if not isinstance(arg, list):
                 arg = [arg]

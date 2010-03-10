@@ -17,7 +17,7 @@
 <!-- No doctype: need quirks mode to get scrollbars in IE. -->
 <head>
   <title>Resource Mapper ({{instance}})</title>
-    <link rel="stylesheet" href="static/map.css">
+
   {% if params.print %}
     <link rel="stylesheet" href="static/map-print.css">
   {% endif %}
@@ -27,10 +27,13 @@
   <script type="text/javascript"
       src="http://maps.google.com/maps/api/js?sensor=false">
   </script>
-  <script type="text/javascript"
-      src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js">
-  </script>
+        <link rel="stylesheet" href="static/map.css">
+    <link type="text/css" href="static/jquery-ui-1.8rc3.custom.css" rel="stylesheet" />
+  <script type="text/javascript" src="static/jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="static/jquery-ui-1.8rc3.custom.min.js"></script>
   <script type="text/javascript" src="static/jquery.form.js"></script>
+
+ 
   <script type="text/javascript">
     var print = {% if params.print %} true {% else %} false {% endif %};
     jQuery(document).ready(function() {
@@ -38,10 +41,12 @@
       jQuery.getScript('static/map.js', function() {
         load_data({{data}});
       });
+      
     });
+    
   </script>
 </head>
-
+ 
 <div id="viewport"></div>
 <div class="header">
   <div class="user">
