@@ -68,7 +68,10 @@ class Handler(webapp.RequestHandler):
         'cc': strip,
         'facility_name': strip,
         'print': validate_yes,
-        'embed': validate_yes
+        'embed': validate_yes,
+        'facility_title': strip,
+        'last_report_date': strip,
+        'attributes': strip
     }
 
     def render(self, path, **params):

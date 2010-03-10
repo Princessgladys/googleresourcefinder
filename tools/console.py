@@ -27,7 +27,9 @@ for path in [
     os.environ.get('APPENGINE_DIR', ''),
     '/usr/lib/google_appengine',
     '/usr/local/lib/google_appengine',
-    '/usr/local/google_appengine'
+    '/usr/local/google_appengine',
+    'C:\Program Files\Google\google_appengine'
+    
 ]:
     if os.path.isdir(path):
         APPENGINE_DIR = path

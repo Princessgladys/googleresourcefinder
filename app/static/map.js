@@ -33,25 +33,10 @@ var STATUS_LABELS = [
 var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
 var INFO_TEMPLATE =
-    '<div class="facility-info">' +
-    '  <h1>${facility_title}</h1>' +
-    '  <div class="caption">' +
-    '    ${last_report_date} \u00b7 ' +
-    '    <a href="/edit?cc=ht&facility_name=${facility_name}">' +
-    '      Edit this record</a> \u00b7 ' +
-    '    <a href="#" class="edit-ip-link" ' +
-    '        onclick="edit_handler(' +
-    '            \'/edit?cc=ht&facility_name=${facility_name}&embed=yes\');">' +
-    '      Edit in place</a>' +
-    '  </div>' +
-    '  <div class="attributes">${attributes}</div>' +
-    '</div>';
+    '<iframe src="/history?facility_title=${facility_title}&last_report_date=${last_report_date}&facility_name=${facility_name}" width=400 height=400/>';
+    
 
-var ATTRIBUTE_TEMPLATE =
-    '<div class="attribute">' +
-    '  <span class="title">${attribute_title}</span>: ' +
-    '  <span class="value">${attribute_value}</span>' +
-    '</div>';
+var ATTRIBUTE_TEMPLATE = 'attribute_title=${attribute_title}&attribute_value=${attribute_value}';
 
 // ==== Data loaded from the data store
 
@@ -290,6 +275,7 @@ function render_template(template, params) {
     }
     result = result.replace(placeholder, substitution);
   }
+  console.log(result);
   return result;
 }
 
@@ -327,6 +313,8 @@ function initialize_map() {
   google.maps.event.addListener(map, 'tilesloaded', set_map_opacity);
 
   info = new google.maps.InfoWindow();
+   
+
 }
 
 // Reduce the opacity of the map layer to make markers stand out.
@@ -351,7 +339,10 @@ function initialize_markers() {
       icon: make_icon(facility.title, STATUS_UNKNOWN, false),
       title: facility.title
     });
+    
     google.maps.event.addListener(markers[f], 'click', facility_selector(f));
+     
+
   }
 }
 
@@ -826,7 +817,7 @@ function select_facility(facility_i, ignore_current) {
   var last_report = selected_facility.last_report;
   if (last_report) {
     var ymd = last_report.date.split('-');
-    last_report_date = 'Updated ' +
+    last_report_date = 'Last Updated ' +
         MONTH_ABBRS[ymd[1] - 1] + ' ' + (ymd[2] - 0) + ', ' + ymd[0];
   }
   var report_display = '';
@@ -879,10 +870,12 @@ function select_facility(facility_i, ignore_current) {
     facility_name: selected_facility.name,
     division_title: divisions[selected_facility.division_i].title,
     attributes: {html: report_display},
-    last_report_date: last_report_date
-  }));
+    last_report_date: last_report_date,
+    }));
+    
 
   info.open(map, markers[selected_facility_i]);
+  
 }
 
 // ==== Load data
