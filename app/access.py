@@ -15,6 +15,8 @@
 from google.appengine.ext import db
 import logging
 
+ROLES = ['editor','superuser']
+
 class Authorization(db.Model):
     timestamp = db.DateTimeProperty(auto_now_add=True)
     description = db.StringProperty(required=True)
@@ -22,11 +24,12 @@ class Authorization(db.Model):
     user_id = db.StringProperty()
     token = db.StringProperty()
     # user roles are in the format: country_code:role
-    # where role is one of (editor,superuser)
+    # where role is one of ROLES
     # an empty country_code means the user has the role for
     # all countries
     user_roles = db.StringListProperty()
-
+    requested_roles = db.StringListProperty()
+    
 def check_token(token):
     return Authorization.all().filter('token =', token).get()
 
@@ -44,7 +47,8 @@ def check_request(request, user):
 
 def check_user_role(auth, role, cc):
     """Return true if the auth user has the given role for the given country"""
-    return auth and "%s:%s"%(cc or '',role) in auth.user_roles
+    return auth and ("%s:%s"%(cc or '',role) in auth.user_roles or
+                     ":%s"%role in auth.user_roles)
 
 def check_and_log(request, user):
     auth = check_request(request, user)

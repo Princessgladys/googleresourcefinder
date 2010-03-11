@@ -41,6 +41,11 @@
     rmapper.is_editor = function() {
       return {{ is_editor }};
     };
+    {% if user %}
+      rmapper.user = {};
+      rmapper.user.email = '{{ user.email }}';
+    {% endif %}
+    
   </script>
   <script type="text/javascript">
     var print = {% if params.print %} true {% else %} false {% endif %};

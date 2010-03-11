@@ -24,6 +24,12 @@ handlers:
 - url: /edit
   script: edit.py
 
+- url: /request_role
+  script: request_role.py
+
+- url: /process_role_request
+  script: process_role_request.py
+
 - url: /load
   script: load.py
   login: admin
