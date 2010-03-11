@@ -21,7 +21,7 @@ class HospitalStatus(xmlutils.Converter):
                 for hospital in element.find(self.qualify('Hospital'))]
 
     def to_element(self, name, value):
-        return self.create_element(name,
+        return self.element(name,
             [Hospital.to_element('Hospital', hospital) for hospital in value])
 
 
@@ -56,8 +56,8 @@ class Hospital(xmlutils.Converter):
         return value
 
     def to_element(self, name, value):
-        return self.create_element(name,
-            self.create_element('OrganizationInformation',
+        return self.element(name,
+            self.element('OrganizationInformation',
                 Text.struct_to_elements(value,
                     'OrganizationID',
                     'OrganizationIDProviderName',
@@ -65,7 +65,7 @@ class Hospital(xmlutils.Converter):
                     'OrganizationTypeText',
                     'CommentText',
                 ),
-                self.create_element('OrganizationLocation',
+                self.element('OrganizationLocation',
                     Text.struct_to_elements(value,
                         'StreetFullText',
                         'LocationCityName',
@@ -82,12 +82,6 @@ class Hospital(xmlutils.Converter):
         )
 
 
-def create_text_element(tag, text):
-    element = xmlutils.Element(tag)
-    element.text = text
-    return element
-
-
 class Text(xmlutils.Converter):
     __metaclass__ = xmlutils.Singleton
     NS = EDXL_HAVE_NS
@@ -96,7 +90,7 @@ class Text(xmlutils.Converter):
         return element.text.strip()
 
     def to_element(self, name, value):
-        return create_text_element(self.qualify(name), value)
+        return xmlutils.element(self.qualify(name), value)
 
 
 class GeoLocation(xmlutils.Converter):
@@ -112,21 +106,21 @@ class GeoLocation(xmlutils.Converter):
                 return (latitude, longitude)
 
     def to_element(self, name, value):
-        return self.create_element(name,
-            self.create_element('where',
-                create_text_element(qualify(GML_NS, 'Point'),
+        return self.element(name,
+            self.element('where',
+                xmlutils.element(qualify(GML_NS, 'Point'),
                     '%g %g' % (latitude, longitude)
                 )
             )
         )
 
 
-def parse_file(file):
+def read(file):
     """Parses EDXL-HAVE <Hospital> elements and returns a list of records."""
-    hospitals = xmlutils.parse(file).findall('.//{%s}Hospital' % EDXL_HAVE_NS)
+    hospitals = xmlutils.read(file).findall('.//{%s}Hospital' % EDXL_HAVE_NS)
     return map(Hospital.from_element, hospitals)
 
-def write_file(file, hospitals):
+def write(file, hospitals):
     """Writes a list of hospital elements as an EDXL-HAVE document."""
     root = HospitalStatus.to_element('HospitalStatus', hospitals)
-    xmlutils.write_file(file, root, URI_PREFIXES)
+    xmlutils.write(file, root, URI_PREFIXES)

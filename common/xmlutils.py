@@ -9,13 +9,31 @@ the Python value is up to the Converter.
 
 import copy
 try:
-    from xml.etree.cElementTree import Element, ElementTree, parse, tostring
+    import xml.etree.cElementTree as ElementTree
 except ImportError:
-    from xml.etree.ElementTree import Element, ElementTree, parse, tostring
+    import xml.etree.ElementTree as ElementTree
 
 def qualify(ns, name):
     """Makes a namespace-qualified name."""
     return '{%s}%s' % (ns, name)
+
+def element(tag, *attributes_and_text_and_children):
+    """Creates an Element with the given tag and contents.  The arguments may
+    include dictionaries of attributes, child elements, lists of child elements,
+    and text content for the element."""
+    element = ElementTree.Element(tag)
+    for arg in attributes_and_text_and_children:
+        if isinstance(arg, dict):  # attributes
+            for key, value in attributes:
+                element.set(key, value)
+        elif not isinstance(arg, list):
+            arg = [arg]
+        for child in arg:  # text or child elements
+            if isinstance(child, basestring):
+                element.text = (element.text or '') + child
+            else:
+                element.append(child)
+    return element
 
 def indent(element, level=0):
     """Adds indentation to an element subtree."""
@@ -49,7 +67,19 @@ def set_prefixes(root, uri_prefixes):
     for element in root.getiterator():
         element.tag = fix_name(element.tag, uri_prefixes)
 
-def write_file(file, root, uri_prefixes={}, pretty_print=True):
+def parse(string):
+    """Parses XML from a string."""
+    return ElementTree.fromstring(string)
+
+def serialize(root):
+    """Serializes XML to a string."""
+    return ElementTree.tostring(root)
+
+def read(file):
+    """Reads an XML tree from a file."""
+    return ElementTree.parse(file)
+
+def write(file, root, uri_prefixes={}, pretty_print=True):
     """Writes an XML tree to a file, using the given map of namespace URIs to
     prefixes, and adding nice indentation."""
     root_copy = copy.deepcopy(root)
@@ -59,7 +89,8 @@ def write_file(file, root, uri_prefixes={}, pretty_print=True):
     # Setting encoding to 'UTF-8' makes ElementTree write the XML declaration
     # because 'UTF-8' differs from ElementTree's default, 'utf-8'.  According
     # to the XML 1.0 specification, 'UTF-8' is also the recommended spelling.
-    ElementTree(root_copy).write(file, encoding='UTF-8')
+    ElementTree.ElementTree(root_copy).write(file, encoding='UTF-8')
+
 
 # ==== Record types ========================================================
 
@@ -121,15 +152,8 @@ class Converter(object):
                 elements.append(self.to_element(name, struct[name]))
         return elements
 
-    def create_element(self, name, *child_args):
-        """Creates an element containing the given child elements.  The
-        arguments can be children or lists of children, and are allowed to
-        include None, which is ignored."""
-        element = Element(self.qualify(name))
-        for arg in child_args:
-            if not isinstance(arg, list):
-                arg = [arg]
-            for child in arg:
-                if child is not None:
-                    element.append(child)
-        return element
+    def element(self, name, *attributes_and_text_and_children):
+        """Creates an element with the given name, qualified in this
+        Converter's default namespace.  See xmlutils.element."""
+        tag = self.qualify(name)
+        return element(tag, *attributes_and_text_and_children)
