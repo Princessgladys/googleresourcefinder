@@ -55,6 +55,9 @@ def strip(text):
 def validate_yes(text):
     return (text.lower() == 'yes') and 'yes' or ''
 
+def validate_role(text):
+    return text in access.ROLES and text
+
 def get_message(version, namespace, name):
     message = model.Message.all().ancestor(version).filter(
         'namespace =', namespace).filter('name =', name).get()
@@ -68,7 +71,8 @@ class Handler(webapp.RequestHandler):
         'cc': strip,
         'facility_name': strip,
         'print': validate_yes,
-        'embed': validate_yes
+        'embed': validate_yes,
+        'role': validate_role
     }
 
     def render(self, path, **params):
