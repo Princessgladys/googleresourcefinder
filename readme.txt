@@ -21,7 +21,7 @@ Log in with any username and password.
 
 At the Python prompt:
 
-    Country(key_name='ht', name='Haiti').put()
+    Country(key_name='ht', title='Haiti').put()
     execfile('tools/setup.py')
 
 To reload the database (from hospitals.kml in the current directory):
