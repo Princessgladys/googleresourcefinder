@@ -1,34 +1,36 @@
-The application won't work unless you populate it with a little data.
-
 To get started:
 
     hg clone https://resourcemapper.googlecode.com/hg/ resourcemapper 
+    export PATH=$(pwd)/resourcemapper/tools:$PATH
+
+The tools/ directory contains useful tools and scripts, so you will probably
+find it convenient to have in your PATH.
 
 
-Then start the server:
+To start the server:
 
-    dev_appserver.py app
+    gae run app
 
-You ned to create a user to user the app, even locally
-In the admin console:
-Authorization(email='test@example.com', description='Test').put()
 
-Now connect to the server like this:
+You can connect to your local running instance using the admin console like so
+(log in with any non-blank username and password):
 
-    tools/console.py resourcemapper localhost:8080
+    console resourcemapper localhost:8080
 
-Log in with any username and password.
 
-At the Python prompt:
+To use the app (even locally), you need an Authorization entity.  To create
+one, execute this command in the console:
 
-    Country(key_name='ht', title='Haiti').put()
-    execfile('tools/setup.py')
+>>> Authorization(email='test@example.com', description='Test').put()
 
-To reload the database (from hospitals.kml in the current directory):
 
-    from load_kml_hospitals import *
-    v = setup_new_version()
-    load_kml_file(v, 'hospitals.kml')
+The application won't work unless you populate it with a little data.  To
+initialize the datastore (you will need the hospitals.kml file), do this:
+
+>>> from load_kml_hospitals import *
+>>> v = setup_new_version()
+>>> load_kml_file(v, 'hospitals.kml')
+
 
 
 Dump of a conversation with Ka-Ping who created the app, about the data model:
