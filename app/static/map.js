@@ -868,14 +868,16 @@ function select_facility(facility_i, ignore_current) {
       attribute_value: value
     });
   }
-  if (rmapper.is_editor()) {
+  if (rmapper.user && rmapper.user.is_editor()) {
     var user_action_html = 
     '    <div class="edit-links">' + 
-    '      <a href="/edit?cc=ht&facility_name=${facility_name}">' +
+    '      <a href="/edit?cc=ht&facility_name=' + selected_facility.name +
+    '">' +
     '        Edit this record</a> \u00b7 ' +
     '      <a href="#" class="edit-ip-link" ' +
     '          onclick="edit_handler(' +
-    '           \'/edit?cc=ht&facility_name=${facility_name}&embed=yes\');">' +
+    '           \'/edit?cc=ht&facility_name=' + selected_facility.name +
+    '&embed=yes\');">' +
     '      Edit in place</a>' +
     '    </div>';
   } else if (rmapper.user) {
@@ -883,7 +885,7 @@ function select_facility(facility_i, ignore_current) {
     '    <div class="request-edit" >' +
     '      <a href="#" class="edit-ip-link" ' +
     '          onclick="request_role_handler(' +
-    '           \'/request_role?cc=ht&role=editor&embed=yes\');">' +
+    '           \'/request_access?cc=ht&role=editor&embed=yes\');">' +
     '      Request to become editor </a>' +
     '    </div>';
   } else {

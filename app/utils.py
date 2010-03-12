@@ -75,6 +75,15 @@ class Handler(webapp.RequestHandler):
         'role': validate_role
     }
 
+    def require_user_role(self, role, cc):
+        """Raise and exception in case the user don't have the given role
+        to the given country.
+        Redirect to login in case there is no user"""
+        if not self.auth:
+            raise Redirect(users.create_login_url(self.request.uri))
+        if not access.check_user_role(self.auth, role, cc):
+            raise ErrorMessage(403, 'Unauthorized user.')
+
     def render(self, path, **params):
         """Renders the template at the given path with the given parameters."""
         self.write(webapp.template.render(os.path.join(ROOT, path), params))
