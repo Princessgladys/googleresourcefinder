@@ -81,7 +81,7 @@ input, select, textarea, option {
             {{req.requested_role|escape}}
           </td>
           <td>
-            <form method="post" action="/process_role_request">
+            <form method="post" action="/grant_access">
               <input type="hidden" value="{{ req.key }}" name="key">
               <input type="hidden" value="{{ req.requested_role }}" name="ccrole">
               <input type="hidden" value="approve" name="action">
@@ -89,7 +89,7 @@ input, select, textarea, option {
             </form>
           </td>
           <td>
-            <form method="post" action="/process_role_request">
+            <form method="post" action="/grant_access">
               <input type="hidden" value="{{ req.key }}" name="key">
               <input type="hidden" value="{{ req.requested_role }}" name="ccrole">
               <input type="hidden" value="deny" name="action">

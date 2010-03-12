@@ -24,11 +24,11 @@ handlers:
 - url: /edit
   script: edit.py
 
-- url: /request_role
-  script: request_role.py
+- url: /request_access
+  script: request_access.py
 
-- url: /process_role_request
-  script: process_role_request.py
+- url: /grant_access
+  script: grant_access.py
 
 - url: /load
   script: load.py
