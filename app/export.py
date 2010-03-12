@@ -110,8 +110,10 @@ def write_csv(out, version, facility_type, attribute_names=None):
 class Export(Handler):
     def get(self):
         auth = access.check_and_log(self.request, users.get_current_user())
-        if auth:
-            country_code = self.request.get('cc')
+        country_code = self.request.get('cc')
+        if auth and access.check_user_role(self.auth,
+                                           'superuser',
+                                           country_code):
             if country_code:
                 # Get the selected facility type.
                 version = get_latest_version(country_code)
@@ -148,8 +150,11 @@ class Export(Handler):
                             facility_type.key().name()))
                     self.write('<p><input type=submit value="Export CSV">')
                     self.write('</form>')
+        elif not auth:
+            self.redirect(users.create_login_url(self.request.uri))
         else:
-            self.redirect(users.create_login_url('/'))
+            raise ErrorMessage(403, 'Unauthorized user.')
+
 
 if __name__ == '__main__':
     run([('/export', Export)], debug=True)
