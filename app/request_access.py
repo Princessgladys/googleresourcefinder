@@ -25,12 +25,17 @@ class RequestAccess(utils.Handler):
         if not self.auth:
             raise Redirect(users.create_login_url(self.request.uri))
         role = "%s:%s" % (self.params.cc, self.params.role)
-        if not role in self.auth.user_roles:
+        if role in self.auth.user_roles:
+            message = 'You are already %s' % role
+        elif role in self.auth.requested_roles:
+            message = 'Your request for %s is already registered' % role
+        else:
             self.auth.requested_roles.append(role)
+            message = 'Request for becoming %s was registered.' % role
             self.auth.put()
         
         if self.params.embed:
-            self.write('Request for becoming %s was registered.' % role)
+            self.write(message)
         else:
             raise Redirect('/')
 
