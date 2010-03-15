@@ -56,13 +56,18 @@ def facility_transformer(
             values.append(getattr(report, attribute.key().name(), None))
         reports.append({'date': report.date, 'values': values})
 
+    bubbleHtml = renderedString('templates/bubble.html',
+                                facility=facility,
+                                report=reports and reports[-1] or None,
+                                attributes=attributes)
     # Pack the results into an object suitable for JSON serialization.
     facility_jobject = {
         'title': facility.title,
         'name': facility.key().name(),
         'type': facility_type_is[facility.type],
         'division_i': facility.division_name,
-        'last_report': reports and reports[-1] or None
+        'last_report': reports and reports[-1] or None,
+        'bubbleHtml': bubbleHtml
     }
     if facility.location is not None:
         facility_jobject['location'] = {

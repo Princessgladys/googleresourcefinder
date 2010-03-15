@@ -196,3 +196,7 @@ def plural(n, singular='', plural='s'):
 
 def run(*args, **kwargs):
     webapp.util.run_wsgi_app(webapp.WSGIApplication(*args, **kwargs))
+
+def renderedString(path, **params):
+    """Renders the template at the given path with the given parameters."""
+    return webapp.template.render(os.path.join(ROOT, path), params)
