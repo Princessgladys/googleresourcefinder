@@ -24,7 +24,7 @@ You can connect to your local running instance using the admin console like so
 To use the app (even locally), you need an Authorization entity.  To create
 one, execute this command in the console:
 
->>> Authorization(email='test@example.com', description='Test').put()
+>>> Authorization(email='test@example.com', description='Test', user_roles=[':superuser']).put()
 
 
 The application won't work unless you populate it with a little data.  To
