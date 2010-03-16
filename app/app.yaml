@@ -24,6 +24,12 @@ handlers:
 - url: /edit
   script: edit.py
 
+- url: /request_access
+  script: request_access.py
+
+- url: /grant_access
+  script: grant_access.py
+
 - url: /load
   script: load.py
   login: admin
@@ -46,6 +52,9 @@ handlers:
 - url: /collapse
   script: collapse.py
   login: admin
+
+- url: /feeds/.*
+  script: feed_provider.py
 
 - url: /
   script: main.py

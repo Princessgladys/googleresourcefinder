@@ -61,7 +61,7 @@ def init(app_id, host=None, username=None, password=None):
     remote_api_stub.ConfigureRemoteDatastore(
         app_id, '/remote_api', lambda: (username, password), host)
 
-    db.Query().get()
+    db.Query().count()
     return host
 
 if __name__ == '__main__':

@@ -57,6 +57,7 @@ export PYTHONPATH=\
 
 function set_up_symlinks() {
     pushd $COMMON_DIR >/dev/null
+    find ../app ../feedsynth -type l -exec rm '{}' ';'
     for file in *.py; do
         ln -sf ../common/$file ../app/$file
         ln -sf ../common/$file ../feedsynth/$file

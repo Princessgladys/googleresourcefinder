@@ -12,47 +12,64 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""The data model for XML record storage."""
+"""Data model and utiltiy functions for XML record storage."""
 
-import record_model
+from google.appengine.ext import db
 import xmlutils
+
+
+class Record(db.Model):
+    """Entity representing one received XML document."""
+    feed = db.StringProperty(required=True)  # canonical URL for source feed
+    type = db.StringProperty(required=True)  # XML type in Clark notation
+    record_id = db.StringProperty(required=True)  # non-unique record ID
+    title = db.StringProperty()  # title or summary string
+    author_email = db.StringProperty(required=True)  # author identifier
+    observation_time = db.DateTimeProperty(required=True)  # UTC timestamp
+    arrival_time = db.DateTimeProperty(auto_now=True)  # UTC timestamp
+    content = db.TextProperty()  # XML document
+
 
 class RecordType:
     def get_identifier(self, element):
         """Extracts the record_id string from an ElementTree element."""
         raise NotImplementedError
 
+    def get_title(self, element):
+        """Gets or fashions a descriptive title from an ElementTree element."""
+        return ''
+
     def get_observation_time(self, element):
         """Extracts the observation time from an ElementTree element."""
         raise NotImplementedError
+
 
 type_registry = {}
 
 def register_type(type_name, record_type):
     type_registry[type_name] = record_type
 
-prefix_registry = {}
-
-def register_prefix(prefix, namespace):
-    prefix_registry[namespace] = prefix
-
-def put_record(feed, element):
-    record_model.Record(
+def put_record(feed, author_email, element):
+    record_type = type_registry[element.tag]
+    Record(
         feed=feed,
         type=element.tag,
-        record_id=type_registry[type].get_identifier(element),
-        observation_time=type_registry[type].get_observation_time(element),
-        content=xmlutils.tostring(element)
+        record_id=record_type.get_identifier(element),
+        title=record_type.get_title(element),
+        author_email=author_email,
+        observation_time=record_type.get_observation_time(element),
+        content=xmlutils.serialize(element)
     ).put()
 
 def get_latest_observed(type, record_id):
-    query = (record_model.Record.all().filter('type =', type)
-                                      .filter('record_id =', record_id)
-                                      .order('-observation_time'))
+    query = (Record.all().filter('type =', type)
+                         .filter('record_id =', record_id)
+                         .order('-observation_time'))
     return query.get()
 
-def get_latest_arrived(type, record_id, limit=None, min_arrival_time=None):
-    query = (record_model.Record.all().filter('type =', type)
-                                      .filter('record_id =', record_id)
-                                      .order('-arrival_time'))
+def get_latest_arrived(feed, limit=None, after_arrival_time=None):
+    query = (Record.all().filter('feed =', feed)
+                         .order('-arrival_time'))
+    if after_arrival_time:
+        query = query.filter('arrival_time >', after_arrival_time)
     return query.fetch(min(limit or 100, 100))

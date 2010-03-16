@@ -51,6 +51,12 @@ indexes:
   properties:
   - name: name
 
+- kind: Record
+  properties:
+  - name: feed
+  - name: arrival_time
+    direction: desc
+
 - kind: Report
   ancestor: yes
   properties:
