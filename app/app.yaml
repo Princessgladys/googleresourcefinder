@@ -56,6 +56,9 @@ handlers:
 - url: /feeds/.*
   script: feed_provider.py
 
+- url: /incoming/.*
+  script: feed_receiver.py
+
 - url: /
   script: main.py
 

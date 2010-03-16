@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Handler for feed retrieval requests."""
+
 from edxl_have import URI_PREFIXES
-from feeds import EntryNotFoundError, handle_entry_get, handle_feed_get
+from feeds import handle_entry_get, handle_feed_get
 from utils import ErrorMessage, Handler, run
 
 
