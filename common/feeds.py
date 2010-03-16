@@ -21,7 +21,7 @@ from crypto import sign, verify
 
 
 class EntryNotFoundError(Exception):
-    pass
+    """Indicates that the requested entry doesn't exist."""
 
 
 def check_request_etag(headers):
