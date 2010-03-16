@@ -18,10 +18,8 @@ import atom
 import records
 import time_formats
 from crypto import sign, verify
-
-
-class EntryNotFoundError(Exception):
-    """Indicates that the requested entry doesn't exist."""
+from errors import ErrorMessage
+from xmlutils import qualify, parse
 
 
 def check_request_etag(headers):
@@ -66,15 +64,45 @@ def handle_entry_get(request, response, feed_id, entry_id, uri_prefixes={}):
     try:
         id = int(entry_id)
     except ValueError:
-        raise EntryNotFoundError
+        raise ErrorMessage(404, 'No such entry')
     record = records.Record.get_by_id(id)
     if not record or record.feed_id != feed_id:
-        raise EntryNotFoundError
+        raise ErrorMessage(404, 'No such entry')
 
     response.headers['Content-Type'] = 'application/atom+xml'
     response.headers['Last-Modified'] = \
         time_formats.to_rfc1123(record.arrival_time)
     atom.write_entry(response.out, record, uri_prefixes)
+
+def get_child(element, name, error_message):
+    """Gets an Atom element, or raises an HTTP 400 error if not found."""
+    child = element.find(qualify(atom.ATOM_NS, name))
+    if child is None:
+        raise ErrorMessage(400, error_message)
+    return child
+
+def handle_feed_post(request, response):
+    """Handles a post of incoming entries from PubSubHubbub."""
+    try:
+        feed = parse(request.body)
+    except SyntaxError, e:
+        raise ErrorMessage(400, str(e))
+    if feed.tag != qualify(atom.ATOM_NS, 'feed'):
+        raise ErrorMessage(400, 'Incoming document is not an Atom feed')
+    feed_id = get_child(feed, 'id', 'feed has no id')
+    for entry in feed.findall(qualify(atom.ATOM_NS, 'entry')):
+        entry_id = get_child(entry, 'id', 'entry has no id')
+        author = get_child(entry, 'author', 'entry %r has no author' % entry_id)
+        email = get_child(author, 'email', 'entry %r has no email' % entry_id)
+        for child in entry.getchildren():
+            if not child.tag.startswith('{%s}' % atom.ATOM_NS):
+                try:
+                    records.put_record(feed_id.text, email.text, child)
+                except TypeError, e:
+                    raise ErrorMessage(400, str(e))
+                break
+        else:
+            raise ErrorMessage(400, 'entry %r contains no XML document')
 
 
 if __name__ == '__main__':

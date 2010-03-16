@@ -26,6 +26,7 @@ import cgitb
 from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
+from errors import ErrorMessage, Redirect
 import gzip
 from html import html_escape
 import logging
@@ -37,17 +38,6 @@ import sys
 import unicodedata
 
 ROOT = os.path.dirname(__file__)
-
-class Redirect(Exception):
-    """Raise this exception to redirect to another page."""
-    def __init__(self, url):
-        self.url = url
-
-class ErrorMessage(Exception):
-    """Raise this exception to show an error message to the user."""
-    def __init__(self, status, message):
-        self.status = status
-        self.message = message
 
 def strip(text):
     return text.strip()
