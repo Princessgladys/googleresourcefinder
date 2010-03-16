@@ -13,33 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""An interactive Python console connected to an app's datastore.
+
+Use common.sh to set PYTHONPATH and APPENGINE_DIR before running this tool."""
+
 import code
 import getpass
 import logging
-import os
 import sys
-
-PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-APP_DIR = os.path.join(PROJECT_DIR, 'app')
-sys.path.append(APP_DIR)
-
-for path in [
-    os.environ.get('APPENGINE_DIR', ''),
-    '/usr/lib/google_appengine',
-    '/usr/local/lib/google_appengine',
-    '/usr/local/google_appengine'
-]:
-    if os.path.isdir(path):
-        APPENGINE_DIR = path
-        break
-else:
-    raise SystemExit('Could not find google_appengine directory. '
-                     'Please set APPENGINE_DIR.')
-
-sys.path.append(APPENGINE_DIR)
-sys.path.append(APPENGINE_DIR + '/lib/django')
-sys.path.append(APPENGINE_DIR + '/lib/webob')
-sys.path.append(APPENGINE_DIR + '/lib/yaml/lib')
 
 from google.appengine.ext.remote_api import remote_api_stub
 from google.appengine.ext import db
@@ -57,6 +38,7 @@ def key_repr(key):
         levels.insert(0, '%s %s' % (key.kind(), key.id() or repr(key.name())))
         key = key.parent()
     return '<Key: %s>' % '/'.join(levels)
+db.Key.__repr__ = key_repr
 
 def model_repr(model):
     if model.is_saved():
@@ -64,12 +46,11 @@ def model_repr(model):
         return '<%s: %s>' % (key.kind(), key.id() or repr(key.name()))
     else:
         return '<%s: unsaved>' % model.kind()
-
-db.Key.__repr__ = key_repr
-
 db.Model.__repr__ = model_repr
 
-def init(app_id, host, username=None, password=None):
+def init(app_id, host=None, username=None, password=None):
+    if not host:
+        host = app_id + '.appspot.com'
     print 'App Engine server at %s' % host
     if not username:
         username = raw_input('Username: ')
@@ -80,12 +61,12 @@ def init(app_id, host, username=None, password=None):
     remote_api_stub.ConfigureRemoteDatastore(
         app_id, '/remote_api', lambda: (username, password), host)
 
-    db.Query().get()
+    db.Query().count()
     return host
 
 if __name__ == '__main__':
-    if len(sys.argv[1:]) < 2:
+    if len(sys.argv[1:]) < 1:
         raise SystemExit('Usage: %s <app_id> <hostname>' % sys.argv[0])
-    init(*sys.argv[1:])
     logging.basicConfig(file=sys.stderr, level=logging.INFO)
+    init(*sys.argv[1:])
     code.interact('', None, locals())

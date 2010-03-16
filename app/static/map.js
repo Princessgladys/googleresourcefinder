@@ -36,18 +36,7 @@ var INFO_TEMPLATE =
     '<div class="facility-info">' +
     '  <h1>${facility_title}</h1>' +
     '  <div class="caption">' +
-    '    ${last_report_date} \u00b7 ' +
-    '    <div class="edit-links" style="display:${edit_links_disp};">' + 
-    '      <a href="/edit?cc=ht&facility_name=${facility_name}">' +
-    '        Edit this record</a> \u00b7 ' +
-    '      <a href="#" class="edit-ip-link" ' +
-    '          onclick="edit_handler(' +
-    '           \'/edit?cc=ht&facility_name=${facility_name}&embed=yes\');">' +
-    '      Edit in place</a>' +
-    '    </div>' +
-    '    <div class="please-signin" style="display:${please_signin_disp};" >' +
-    '      Please sign in as editor to edit' +
-    '    </div>' +
+    '    ${user_action_html}' +
     '  </div>' +
     '  <div class="attributes">${attributes}</div>' +
     '</div>';
@@ -879,19 +868,37 @@ function select_facility(facility_i, ignore_current) {
       attribute_value: value
     });
   }
-  if (rmapper.is_editor()) {
-    please_signin_disp = 'none';
-    edit_links_disp = 'block';
+  if (rmapper.user && rmapper.user.is_editor()) {
+    var user_action_html = 
+    '    <div class="edit-links">' + 
+    '      <a href="/edit?cc=ht&facility_name=' + selected_facility.name +
+    '">' +
+    '        Edit this record</a> \u00b7 ' +
+    '      <a href="#" class="edit-ip-link" ' +
+    '          onclick="edit_handler(' +
+    '           \'/edit?cc=ht&facility_name=' + selected_facility.name +
+    '&embed=yes\');">' +
+    '      Edit in place</a>' +
+    '    </div>';
+  } else if (rmapper.user) {
+    var user_action_html = 
+    '    <div class="request-edit" >' +
+    '      <a href="#" class="edit-ip-link" ' +
+    '          onclick="request_role_handler(' +
+    '           \'/request_access?cc=ht&role=editor&embed=yes\');">' +
+    '      Request to become editor </a>' +
+    '    </div>';
   } else {
-    please_signin_disp = 'block';
-    edit_links_disp = 'none';
+    var user_action_html = 
+    '    <div class="please-signin">' +
+    '      Please sign in as editor to edit' +
+    '    </div>';
   }
   info.setContent(render_template(INFO_TEMPLATE, {
     facility_title: selected_facility.title,
     facility_name: selected_facility.name,
     division_title: divisions[selected_facility.division_i].title,
-    please_signin_disp: please_signin_disp,
-    edit_links_disp: edit_links_disp,
+    user_action_html: {html: user_action_html},
     attributes: {html: report_display},
     last_report_date: last_report_date
   }));
@@ -964,6 +971,21 @@ function edit_handler(edit_url) {
       info.close();
       info.setContent('<div class="facility-info">' + data + '</div>');
       info.open(map, markers[selected_facility_i]);
+    }
+  });
+  return false;
+}
+
+function request_role_handler(request_url) {
+  // Use AJAX to load the form in the InfoWindow, then reopen the
+  // InfoWindow so that it resizes correctly.
+  log('reqest role:', request_url);
+  $j.ajax({
+    url: request_url,
+    type: 'POST',
+    success: function(data) {
+       // TODO(eyalf): replace with a nice blocking popup
+       alert(data)
     }
   });
   return false;

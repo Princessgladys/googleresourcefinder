@@ -172,10 +172,8 @@ class Edit(utils.Handler):
     def init(self):
         """Checks for authentication and sets up self.version, self.facility,
         self.facility_type, and self.attributes based on the query params."""
-        if not self.auth:
-            raise Redirect(users.create_login_url(self.request.uri))
-        if not check_user_role(self.auth, 'editor', self.params.cc):
-            raise ErrorMessage(403, 'Unauthorized user.')
+        self.require_user_role('editor', self.params.cc)
+
         try:
             self.version = utils.get_latest_version(self.params.cc)
         except:

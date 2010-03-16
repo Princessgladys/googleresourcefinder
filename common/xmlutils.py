@@ -7,14 +7,33 @@ of an XML document to or from a Python value.  The type and structure of
 the Python value is up to the Converter.
 """
 
+import copy
 try:
-    import xml.etree.cElementTree as etree
+    import xml.etree.cElementTree as ElementTree
 except ImportError:
-    import xml.etree.ElementTree as etree
+    import xml.etree.ElementTree as ElementTree
 
 def qualify(ns, name):
     """Makes a namespace-qualified name."""
     return '{%s}%s' % (ns, name)
+
+def element(tag, *attributes_and_text_and_children):
+    """Creates an Element with the given tag and contents.  The arguments may
+    include dictionaries of attributes, child elements, lists of child elements,
+    and text content for the element."""
+    element = ElementTree.Element(tag)
+    for arg in attributes_and_text_and_children:
+        if isinstance(arg, dict):  # attributes
+            for key, value in attributes:
+                element.set(key, value)
+        elif not isinstance(arg, list):
+            arg = [arg]
+        for child in arg:  # text or child elements
+            if isinstance(child, basestring):
+                element.text = (element.text or '') + child
+            else:
+                element.append(child)
+    return element
 
 def indent(element, level=0):
     """Adds indentation to an element subtree."""
@@ -31,6 +50,46 @@ def indent(element, level=0):
     elif level:
         if not element.tail or not element.tail.strip():
             element.tail = indentation
+
+def fix_name(name, uri_prefixes):
+    """Converts a Clark qualified name into a name with a namespace prefix."""
+    if name[0] == '{':
+        uri, tag = name[1:].split('}')
+        if uri in uri_prefixes:
+            return uri_prefixes[uri] + ':' + tag
+    return name
+
+def set_prefixes(root, uri_prefixes):
+    """Replaces Clark qualified element names with specific given prefixes."""
+    for uri, prefix in uri_prefixes.items():
+        root.set('xmlns:' + prefix, uri)
+
+    for element in root.getiterator():
+        element.tag = fix_name(element.tag, uri_prefixes)
+
+def parse(string):
+    """Parses XML from a string."""
+    return ElementTree.fromstring(string)
+
+def serialize(root):
+    """Serializes XML to a string."""
+    return ElementTree.tostring(root)
+
+def read(file):
+    """Reads an XML tree from a file."""
+    return ElementTree.parse(file)
+
+def write(file, root, uri_prefixes={}, pretty_print=True):
+    """Writes an XML tree to a file, using the given map of namespace URIs to
+    prefixes, and adding nice indentation."""
+    root_copy = copy.deepcopy(root)
+    set_prefixes(root_copy, uri_prefixes)
+    if pretty_print:
+        indent(root_copy)
+    # Setting encoding to 'UTF-8' makes ElementTree write the XML declaration
+    # because 'UTF-8' differs from ElementTree's default, 'utf-8'.  According
+    # to the XML 1.0 specification, 'UTF-8' is also the recommended spelling.
+    ElementTree.ElementTree(root_copy).write(file, encoding='UTF-8')
 
 
 # ==== Record types ========================================================
@@ -49,7 +108,12 @@ class Struct(dict):
     
 # ==== Converter base class ================================================
 
-class Converter:
+def Singleton(name, bases, dict):
+    """Use this metaclass on Converter subclasses to create a instance."""
+    return type(name, bases, dict)()
+
+
+class Converter(object):
     """Abstract base class for subtree converters, which convert subtrees
     of XML to/from Python values."""
 
@@ -88,15 +152,8 @@ class Converter:
                 elements.append(self.to_element(name, struct[name]))
         return elements
 
-    def create_element(self, name, *child_args):
-        """Creates an element containing the given child elements.  The
-        arguments can be children or lists of children, and are allowed to
-        include None, which is ignored."""
-        element = etree.Element(self.qualify(name))
-        for arg in child_args:
-            if not isinstance(arg, list):
-                arg = [arg]
-            for child in arg:
-                if child is not None:
-                    element.append(child)
-        return element
+    def element(self, name, *attributes_and_text_and_children):
+        """Creates an element with the given name, qualified in this
+        Converter's default namespace.  See xmlutils.element."""
+        tag = self.qualify(name)
+        return element(tag, *attributes_and_text_and_children)

@@ -38,9 +38,14 @@
     // work? it fails for me
 
     rmapper = {};
-    rmapper.is_editor = function() {
-      return {{ is_editor }};
-    };
+    {% if user %}
+      rmapper.user = {};
+      rmapper.user.email = '{{ user.email|escape }}';
+      rmapper.user.is_editor = function() {
+        return {% if is_editor %} true {% else %} false {% endif %};
+      }
+    {% endif %}
+    
   </script>
   <script type="text/javascript">
     var print = {% if params.print %} true {% else %} false {% endif %};
