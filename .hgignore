@@ -1,6 +1,7 @@
 syntax: glob
 *.pyc
 .*.sw?
+*~
 
 # Ignore the symlinks that we use to make common/ files available to both apps.
 app/feeds.py
