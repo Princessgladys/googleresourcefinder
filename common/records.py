@@ -20,7 +20,7 @@ import xmlutils
 
 class Record(db.Model):
     """Entity representing one received or provided XML document entry."""
-    feed = db.StringProperty(required=True)  # canonical URL for source feed
+    feed_id = db.StringProperty(required=True)  # URI of parent feed
     type_name = db.StringProperty(required=True)  # XML type in Clark notation
     record_id = db.StringProperty(required=True)  # non-unique record ID
     title = db.StringProperty()  # title or summary string
@@ -51,11 +51,11 @@ def register_type(type_name, record_type):
     """Adds a RecordType instance to the XML type registry."""
     type_registry[type_name] = record_type
 
-def put_record(feed, author_email, element):
+def put_record(feed_id, author_email, element):
     """Stores an XML Element as a record."""
     record_type = type_registry[element.tag]
     Record(
-        feed=feed,
+        feed_id=feed_id,
         type_name=element.tag,
         record_id=record_type.get_identifier(element),
         title=record_type.get_title(element),
@@ -70,11 +70,11 @@ def get_latest_observed(type_name, record_id):
                         .filter('record_id =', record_id)
                         .order('-observation_time')).get()
 
-def get_latest_arrived(feed, limit=None, after_arrival_time=None):
+def get_latest_arrived(feed_id, limit=None, after_arrival_time=None):
     """Gets a list of records in the given feed in order of decreasing
     arrival_time, with an arrival_time greater than 'after_arrival_time' if
     specified, up to a maximum of 'limit' records if specified."""
-    query = (Record.all().filter('feed =', feed)
+    query = (Record.all().filter('feed_id =', feed_id)
                          .order('-arrival_time'))
     if after_arrival_time:
         query = query.filter('arrival_time >', after_arrival_time)

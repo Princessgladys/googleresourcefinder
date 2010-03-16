@@ -25,7 +25,7 @@ def add_atom_prefix(uri_prefixes):
 
 def create_entry(record):
     """Constructs an Element for an Atom entry for the given record."""
-    atom_id = record.feed + '/' + str(record.key().id())
+    atom_id = record.feed_id + '/' + str(record.key().id())
     return xmlutils.element('{%s}entry' % ATOM_NS,
         xmlutils.element('{%s}author' % ATOM_NS,
             xmlutils.element('{%s}email' % ATOM_NS, record.author_email)),
