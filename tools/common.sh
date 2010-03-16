@@ -70,8 +70,8 @@ function set_up_symlinks() {
     pushd $COMMON_DIR >/dev/null
     find ../app ../feedsynth -type l -exec rm '{}' ';'
     for file in *.py; do
-        ln -sf ../common/$file ../app/$file
-        ln -sf ../common/$file ../feedsynth/$file
+        ln -s ../common/$file ../app/$file || exit 1
+        ln -s ../common/$file ../feedsynth/$file || exit 1
     done
     popd >/dev/null
 }
