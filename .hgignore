@@ -10,8 +10,8 @@ app/crypto.py
 feedsynth/crypto.py
 app/edxl_have_record.py
 feedsynth/edxl_have_record.py
-app/feed_provider.py
-feedsynth/feed_provider.py
+app/feeds.py
+feedsynth/feeds.py
 app/records.py
 feedsynth/records.py
 app/time_formats.py
