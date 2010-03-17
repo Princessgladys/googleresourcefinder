@@ -36,9 +36,13 @@ class Incoming(Handler):
         version = get_latest_version('ht')
         for record in records:
             hospital = Hospital.from_element(xmlutils.parse(record.content))
-            if 'BedCapacity' in hospital:
+            if 'patient_capacity' in hospital:
                 Report(version, facility_name=record.record_id,
-                       patient_capacity=hospital['BedCapacity'],
+                       patient_capacity=hospital['patient_capacity'],
+                       date=datetime_to_date(record.observation_time)).put()
+            if 'patient_count' in hospital:
+                Report(version, facility_name=record.record_id,
+                       patient_count=hospital['patient_count'],
                        date=datetime_to_date(record.observation_time)).put()
 
 

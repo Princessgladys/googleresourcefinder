@@ -937,14 +937,31 @@ function load_data(data) {
         window.location.protocol + '//' + window.location.host);
   }
 
-  window.setTimeout(function() {
-    set_facility_attribute('canadian_field_hospital', 'patient_capacity', 12);
-  }, 5000);
+  start_monitoring();
 }
 
 // ==== In-place update
 
+function start_monitoring() {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = handle_monitor_notification;
+  xhr.open('GET', '/monitor');
+  xhr.send();
+}
+
+function handle_monitor_notification() {
+  if (this.readyState == 4 && this.status == 200) {
+    if (this.responseText != null && this.responseText.length) {
+      var parts = this.responseText.split(' ');
+      log('monitor sent', parts);
+      set_facility_attribute(parts[0], parts[1], parts[2]);
+    }
+    start_monitoring();
+  }
+}
+
 function set_facility_attribute(facility_name, attribute_name, value) {
+  log(facility_name, attribute_name, value);
   var facility_i = 0;
   for (var f = 1; f < facilities.length; f++) {
     if (facilities[f].name == facility_name) {
@@ -955,7 +972,11 @@ function set_facility_attribute(facility_name, attribute_name, value) {
   if (facility_i) {
     var facility = facilities[facility_i];
     if (!facility.last_report) {
-      facility.last_report = [];
+      var nulls = [];
+      for (var a = 0; a < attributes.length; a++) {
+        nulls.push(null);
+      }
+      facility.last_report = {values: nulls};
     }
     facility.last_report.values[attribute_i] = value;
   }
@@ -969,7 +990,7 @@ var glow_step = -1;
 
 function glow(element) {
   if (glow_element) {
-    glow_element.style.backgroundColor = 'inherit';
+    glow_element.style.backgroundColor = '';
   }
   glow_element = element;
   glow_step = 0;
@@ -982,7 +1003,7 @@ function glow_next() {
     glow_step++;
     window.setTimeout(glow_next, 150);
   } else {
-    glow_element.style.backgroundColor = 'inherit';
+    glow_element.style.backgroundColor = '';
     glow_element = null;
     glow_step = -1;
   }
@@ -996,6 +1017,7 @@ function update_facility_row(facility_i) {
     cell = cell.nextSibling;
     var value = summary_columns[c].get_value(facility.last_report.values);
     set_children(cell, value);
+    cell.className = 'value column_' + c;
   }
   glow(row);
 }
