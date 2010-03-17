@@ -1,5 +1,6 @@
 """XML conversion for EDXL-HAVE."""
 
+import time_formats
 import xmlutils
 
 
@@ -53,6 +54,7 @@ class Hospital(xmlutils.Converter):
                 value.update(GeoLocation.struct_from_children(org_loc,
                     'OrganizationGeoLocation',
                 ))
+        value.update(DateTime.struct_from_children(element, 'LastUpdateTime'))
         return value
 
     def to_element(self, name, value):
@@ -79,6 +81,7 @@ class Hospital(xmlutils.Converter):
                     )
                 ),
             ),
+            DateTime.struct_to_elements(value, 'LastUpdateTime')
         )
 
 
@@ -91,6 +94,18 @@ class Text(xmlutils.Converter):
 
     def to_element(self, name, value):
         return xmlutils.element(self.qualify(name), value)
+
+
+class DateTime(xmlutils.Converter):
+    __metaclass__ = xmlutils.Singleton
+    NS = EDXL_HAVE_NS
+
+    def from_element(self, element):
+        return time_formats.from_rfc3339(element.text.strip())
+
+    def to_element(self, name, value):
+        return xmlutils.element(
+            self.qualify(name), time_formats.to_rfc3339(value))
 
 
 class GeoLocation(xmlutils.Converter):
