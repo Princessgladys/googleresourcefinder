@@ -983,7 +983,7 @@ function set_facility_attribute(facility_name, attribute_name, value) {
   update_facility_row(facility_i);
 }
 
-var GLOW_COLORS = ['#ff4', '#ff4', '#ff6', '#ff8', '#ffa',
+var GLOW_COLORS = ['#ff4', '#ff4', '#ff5', '#ff6', '#ff8', '#ffa',
                    '#ffb', '#ffc', '#ffd', '#ffe', '#fffff8'];
 var glow_element = null;
 var glow_step = -1;
@@ -1001,7 +1001,7 @@ function glow_next() {
   if (glow_step < GLOW_COLORS.length) {
     glow_element.style.backgroundColor = GLOW_COLORS[glow_step];
     glow_step++;
-    window.setTimeout(glow_next, 150);
+    window.setTimeout(glow_next, 200);
   } else {
     glow_element.style.backgroundColor = '';
     glow_element = null;
