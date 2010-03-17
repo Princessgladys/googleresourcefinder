@@ -11,4 +11,7 @@ class EdxlHaveHospitalType(records.RecordType):
         time_element = element.find('.//{%s}LastUpdateTime' % EDXL_HAVE_NS)
         return time_formats.from_rfc3339(time_element.text.strip())
 
+    def get_title(self, element):
+        return element.find('.//{%s}OrganizationName' % EDXL_HAVE_NS).text
+
 records.register_type('{%s}Hospital' % EDXL_HAVE_NS, EdxlHaveHospitalType())

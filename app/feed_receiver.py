@@ -31,20 +31,24 @@ class Incoming(Handler):
         records = handle_feed_post(self.request, self.response)
 
         from utils import get_latest_version
-        import sys
 
         version = get_latest_version('ht')
         for record in records:
             hospital = Hospital.from_element(xmlutils.parse(record.content))
-            if 'patient_capacity' in hospital:
-                Report(version, facility_name=record.record_id,
-                       patient_capacity=hospital['patient_capacity'],
-                       date=datetime_to_date(record.observation_time)).put()
-            if 'patient_count' in hospital:
-                Report(version, facility_name=record.record_id,
-                       patient_count=hospital['patient_count'],
-                       date=datetime_to_date(record.observation_time)).put()
+            last_report = Report.all().ancestor(version).filter(
+                'facility_name =', record.record_id).get()
+            report = Report(version, facility_name=record.record_id)
+            if last_report and hasattr(last_report, 'patient_capacity'):
+                report.patient_capacity = last_report.patient_capacity
+            if last_report and hasattr(last_report, 'patient_count'):
+                report.patient_count = last_report.patient_count
 
+            report.date = datetime_to_date(record.observation_time)
+            if 'patient_capacity' in hospital:
+                report.patient_capacity = hospital['patient_capacity']
+            if 'patient_count' in hospital:
+                report.patient_count = hospital['patient_count']
+            report.put()
 
 if __name__ == '__main__':
     run([('/incoming/([^/]+)', Incoming)], debug=True)
