@@ -59,6 +59,9 @@ handlers:
 - url: /incoming/.*
   script: feed_receiver.py
 
+- url: /monitor
+  script: monitor.py
+
 - url: /
   script: main.py
 
