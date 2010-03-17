@@ -32,9 +32,10 @@ class Monitor(Handler):
             if report:
                 for name in ['patient_capacity', 'patient_count']:
                     if hasattr(report, name):
-                        self.write('''%s %s %r''' % (report.facility_name,
+                        self.write('''%s %s %s''' % (report.facility_name,
                             name, getattr(report, name)))
                         break
+                break
 
 
 if __name__ == '__main__':
