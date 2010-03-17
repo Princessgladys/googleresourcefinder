@@ -17,10 +17,21 @@
 import atom
 import records
 import time_formats
+import urllib
 from crypto import sign, verify
 from errors import ErrorMessage
 from xmlutils import qualify, parse
 
+HUB = 'http://pubsubhubbub.appspot.com'
+
+def notify_hub(feed_url):
+    """Notifies a PubSubHubbub hub of new content."""
+    import sys
+    data = urllib.urlencode({'hub.mode': 'publish', 'hub.url': feed_url})
+    print >>sys.stderr, 'notifying', HUB, data
+    file = urllib.urlopen(HUB, data)
+    file.read()
+    file.close()
 
 def check_request_etag(headers):
     """Determines etag, limit, after_arrival_time based on request headers."""
@@ -52,12 +63,12 @@ def handle_feed_get(request, response, feed_id, uri_prefixes={}):
     response.headers['Content-Type'] = 'application/atom+xml'
     if latest:  # Deliver the new entries.
         response.headers['ETag'] = create_response_etag(latest)
-        atom.write_feed(response.out, latest, uri_prefixes)
+        atom.write_feed(response.out, latest, uri_prefixes, hub=HUB)
     elif etag:  # If-None-Match was specified, and there was nothing new.
         response.set_status(304)
         response.headers['ETag'] = '"' + etag + '"'
     else:  # There are no entries in this feed.
-        atom.write_feed(response.out, latest, uri_prefixes)
+        atom.write_feed(response.out, latest, uri_prefixes, hub=HUB)
 
 def handle_entry_get(request, response, feed_id, entry_id, uri_prefixes={}):
     """Handles a request for the Atom entry for an individual XML record."""
@@ -105,6 +116,7 @@ def handle_feed_post(request, response):
                 break
         else:
             raise ErrorMessage(400, 'entry %r contains no XML document')
+    notify_hub(feed_id.text)
     return posted_records
 
 
