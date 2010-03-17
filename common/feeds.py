@@ -26,9 +26,7 @@ HUB = 'http://pubsubhubbub.appspot.com'
 
 def notify_hub(feed_url):
     """Notifies a PubSubHubbub hub of new content."""
-    import sys
     data = urllib.urlencode({'hub.mode': 'publish', 'hub.url': feed_url})
-    print >>sys.stderr, 'notifying', HUB, data
     file = urllib.urlopen(HUB, data)
     file.read()
     file.close()

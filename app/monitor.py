@@ -32,9 +32,9 @@ class Monitor(Handler):
             if report:
                 for name in ['patient_capacity', 'patient_count']:
                     if hasattr(report, name):
-                        self.write('''%s %s %s''' % (report.facility_name,
-                            name, getattr(report, name)))
-                        break
+                        self.write(
+    'set_facility_attribute(%r, %r, %d);\n' %
+    (str(report.facility_name), str(name), int(getattr(report, name))))
                 break
 
 

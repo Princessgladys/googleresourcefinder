@@ -952,9 +952,7 @@ function start_monitoring() {
 function handle_monitor_notification() {
   if (this.readyState == 4 && this.status == 200) {
     if (this.responseText != null && this.responseText.length) {
-      var parts = this.responseText.split(' ');
-      log('monitor sent', parts);
-      set_facility_attribute(parts[0], parts[1], parts[2]);
+      eval(this.responseText);
     }
     start_monitoring();
   }
@@ -998,12 +996,14 @@ function glow(element) {
 }
 
 function glow_next() {
-  if (glow_step < GLOW_COLORS.length) {
+  if (glow_element && glow_step < GLOW_COLORS.length) {
     glow_element.style.backgroundColor = GLOW_COLORS[glow_step];
     glow_step++;
     window.setTimeout(glow_next, 200);
   } else {
-    glow_element.style.backgroundColor = '';
+    if (glow_element) {
+      glow_element.style.backgroundColor = '';
+    }
     glow_element = null;
     glow_step = -1;
   }
