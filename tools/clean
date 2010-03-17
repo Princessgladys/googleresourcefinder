@@ -1,0 +1,8 @@
+#!/bin/bash
+
+pushd "$(dirname $0)" >/dev/null && source common.sh && popd >/dev/null
+set_up_symlinks
+update_hgignore
+
+find $PROJECT_DIR -name '*.pyc' -exec rm '{}' ';'
+find app feedsynth -type l -exec rm '{}' ';'
