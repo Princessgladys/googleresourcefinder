@@ -14,9 +14,11 @@
 # limitations under the License.
 {% endcomment %}
 
+{% load i18n %}
+
 <!-- No doctype: need quirks mode to get scrollbars in IE. -->
 <head>
-  <title>Resource Mapper ({{instance}})</title>
+  <title>{% trans "Resource Mapper" %} ({{instance}})</title>
     <link rel="stylesheet" href="static/map.css">
   {% if params.print %}
     <link rel="stylesheet" href="static/map-print.css">
@@ -64,15 +66,15 @@
   <div class="user">
     <strong>{{authorization}}</strong> |
     {% if params.print %}
-      <a href="/">Home</a> |
+      <a href="/">{% trans "Home" %}</a> |
     {% else %}
-      <a href="/?print=yes">Print</a> |
+      <a href="/?print=yes">{% trans "Print" %}</a> |
     {% endif %}
     <a href="about:blank">Help</a> |
     <a href="{{loginout_url}}">{{loginout_text}}</a>
   </div>
   <div class="title">
-    Resource Mapper
+    {% trans "Resource Mapper" %}
   </div>
 </div>
 <div id="print-timestamp"></div>
@@ -89,7 +91,7 @@
       <table width="100%" cellspacing=0 cellpadding=0 border=0>
         <thead id="supply-thead">
           <tr>
-            <th>Supplies</th>
+            <th>{% trans "Supplies" %}</th>
           </tr>
         </thead>
       </table>
@@ -105,7 +107,7 @@
       <table width="100%" cellspacing=0 cellpadding=0 border=0>
         <thead id="filter-thead">
           <tr>
-            <th>Filters</th>
+            <th>{% trans "Filters" %}</th>
           </tr>
         </thead>
       </table>
@@ -128,7 +130,7 @@
       <table width="100%" cellspacing=0 cellpadding=0 border=0>
         <thead id="division-thead">
           <tr>
-            <th>Arrondissements</th>
+            <th>{% trans "Arrondissements" %}</th>
           </tr>
         </thead>
       </table>
@@ -144,7 +146,7 @@
       <table width="100%" cellspacing=0 cellpadding=0 border=0>
         <thead id="facility-thead">
           <tr>
-            <th>Facility</th>
+            <th>{% trans "Facility" %}</th>
           </tr>
         </thead>
       </table>
@@ -160,7 +162,8 @@
 <div id="freshness" class="caption"></div>
 {% if params.print %}
   <div id="update-instructions">
-    If any information is wrong or missing,
-    please correct it on the web site: <span id="site-url"></span>
+    {% trans "If any information is wrong or missing,
+              please correct it on the web site:" %}
+    <span id="site-url"></span>
   </div>
 {% endif %}

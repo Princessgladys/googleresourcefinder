@@ -14,9 +14,11 @@
 # limitations under the License.
 {% endcomment %}
 
-<title>Resource Mapper ({{instance}})</title>
+{% load i18n %}
+
+<title>{% trans "Resource Mapper" %} ({{instance}})</title>
 <style>
 body, h1, p { font-family: helvetica, arial; font-size: 13px; }
 </style>
-<h1>Error</h1>
+<h1>{% trans "Error" %}</h1>
 <p>{{message|escape}}
