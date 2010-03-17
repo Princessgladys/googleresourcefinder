@@ -54,6 +54,9 @@ class Hospital(xmlutils.Converter):
                 value.update(GeoLocation.struct_from_children(org_loc,
                     'OrganizationGeoLocation',
                 ))
+        bed_info = element.find(self.qualify('BedCapacity'))
+        if bed_info is not None:
+            value['BedCapacity'] = int(bed_info.text)
         value.update(DateTime.struct_from_children(element, 'LastUpdateTime'))
         return value
 

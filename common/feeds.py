@@ -83,6 +83,7 @@ def get_child(element, name, error_message):
 
 def handle_feed_post(request, response):
     """Handles a post of incoming entries from PubSubHubbub."""
+    posted_records = []
     try:
         feed = parse(request.body)
     except SyntaxError, e:
@@ -97,12 +98,14 @@ def handle_feed_post(request, response):
         for child in entry.getchildren():
             if not child.tag.startswith('{%s}' % atom.ATOM_NS):
                 try:
-                    records.put_record(feed_id.text, email.text, child)
+                    posted_records.append(
+                        records.put_record(feed_id.text, email.text, child))
                 except TypeError, e:
                     raise ErrorMessage(400, str(e))
                 break
         else:
             raise ErrorMessage(400, 'entry %r contains no XML document')
+    return posted_records
 
 
 if __name__ == '__main__':

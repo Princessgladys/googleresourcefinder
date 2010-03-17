@@ -14,15 +14,32 @@
 
 """Handler for feed posting requests."""
 
-from edxl_have import URI_PREFIXES
+from edxl_have import Hospital, URI_PREFIXES
 from feeds import handle_feed_post
+from model import Report
 from utils import ErrorMessage, Handler, run
+import datetime
 import edxl_have_record  # register the EDXL-HAVE record type
+import xmlutils
+
+def datetime_to_date(dt):
+    return datetime.date.fromordinal(dt.toordinal())
 
 
 class Incoming(Handler):
     def post(self, token):
-        handle_feed_post(self.request, self.response)
+        records = handle_feed_post(self.request, self.response)
+
+        from utils import get_latest_version
+        import sys
+
+        version = get_latest_version('ht')
+        for record in records:
+            hospital = Hospital.from_element(xmlutils.parse(record.content))
+            if 'BedCapacity' in hospital:
+                Report(version, facility_name=record.record_id,
+                       patient_capacity=hospital['BedCapacity'],
+                       date=datetime_to_date(record.observation_time)).put()
 
 
 if __name__ == '__main__':
