@@ -1,0 +1,13 @@
+syntax: glob
+*.pyc
+.*.sw?
+
+# Ignore the symlinks that we use to make common/ files available to both apps.
+app/feeds.py
+app/record_model.py
+app/records.py
+app/xmlutils.py
+feedsynth/feeds.py
+feedsynth/record_model.py
+feedsynth/records.py
+feedsynth/xmlutils.py
