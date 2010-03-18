@@ -105,7 +105,7 @@ class Struct(dict):
     def __setattr__(self, name, value):
         self[name] = value
 
-    
+
 # ==== Converter base class ================================================
 
 def Singleton(name, bases, dict):
