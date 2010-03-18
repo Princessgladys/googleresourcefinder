@@ -17,6 +17,7 @@ import access
 import rendering
 
 class Main(Handler):
+    
     def get(self):
         auth = self.auth
         self.render('templates/map.html',

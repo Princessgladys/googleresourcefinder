@@ -894,16 +894,20 @@ function select_facility(facility_i, ignore_current) {
     '      Please sign in as editor to edit' +
     '    </div>';
   }
-  info.setContent(render_template(INFO_TEMPLATE, {
-    facility_title: selected_facility.title,
-    facility_name: selected_facility.name,
-    division_title: divisions[selected_facility.division_i].title,
-    user_action_html: {html: user_action_html},
-    attributes: {html: report_display},
-    last_report_date: last_report_date
-  }));
-
+//   info.setContent(render_template(INFO_TEMPLATE, {
+//     facility_title: selected_facility.title,
+//     facility_name: selected_facility.name,
+//     division_title: divisions[selected_facility.division_i].title,
+//     user_action_html: {html: user_action_html},
+//     attributes: {html: report_display},
+//     last_report_date: last_report_date
+//   }));
+  info.close();
+  a=rmapper.get_bubble_html()
+  info.setContent(a[1])
   info.open(map, markers[selected_facility_i]);
+  jQuery(a[0]).tabs();
+
 }
 
 // ==== Load data

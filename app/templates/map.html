@@ -32,6 +32,13 @@
   </script>
   <script type="text/javascript" src="static/jquery.form.js"></script>
   <script type="text/javascript">
+    jQuery.noConflict();
+  </script>
+
+  <link rel="stylesheet" href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css" type="text/css" media="all" /> 
+  <script type="text/javascript" src="static/jquery-ui-1.8rc3.custom.min.js"></script>
+  <script type="text/javascript" src="static/chain.js"></script>
+  <script type="text/javascript">
     // Do we have a namespace already?
     // shouldn't
     // rmapper =  rmapper || {};
@@ -47,13 +54,13 @@
     {% endif %}
     
   </script>
+  <link rel="stylesheet" href="static/bubble.css" type="text/css" media="all" /> 
+  <script type="text/javascript" src="static/bubble.js"></script>
+  <script type="text/javascript" src="static/map.js"></script>
   <script type="text/javascript">
     var print = {% if params.print %} true {% else %} false {% endif %};
     jQuery(document).ready(function() {
-      jQuery.noConflict();
-      jQuery.getScript('static/map.js', function() {
-        load_data({{data}});
-      });
+      load_data({{data}});
     });
   </script>
 
@@ -164,3 +171,6 @@
     please correct it on the web site: <span id="site-url"></span>
   </div>
 {% endif %}
+<div id="bubble-temp-placeholder" class="hidden">
+</div>
+
