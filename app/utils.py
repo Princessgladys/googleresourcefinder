@@ -72,7 +72,7 @@ class Handler(webapp.RequestHandler):
         if not self.auth:
             raise Redirect(users.create_login_url(self.request.uri))
         if not access.check_user_role(self.auth, role, cc):
-            raise ErrorMessage(403, 'Unauthorized user.')
+            raise ErrorMessage(403, _('Unauthorized user.'))
 
     def render(self, path, **params):
         """Renders the template at the given path with the given parameters."""
@@ -114,7 +114,7 @@ def make_name(text):
 def get(parent, Kind, kn):
     entity = Kind.get_by_key_name(kn, parent=parent)
     if entity is None:
-        raise KeyError('no %s has key=%s parent=%r' % (Kind.kind(), kn, parent))
+        raise KeyError(_('no %s has key=%s parent=%r') % (Kind.kind(), kn, parent))
     return entity
 
 def get_base(entity):
