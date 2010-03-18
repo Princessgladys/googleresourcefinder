@@ -27,7 +27,7 @@ class Main(Handler):
                     user=auth and {'email': auth.email} or None,
                     loginout_url=(auth and users.create_logout_url('/') or
                                   users.create_login_url('/')),
-                    loginout_text=(auth and "Sign out" or "Sign in"),
+                    loginout_text=(auth and _("Sign out") or _("Sign in")),
                     data=rendering.version_to_json(get_latest_version('ht')),
                     instance=self.request.host.split('.')[0])
 

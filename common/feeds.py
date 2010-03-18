@@ -64,10 +64,10 @@ def handle_entry_get(request, response, feed_id, entry_id, uri_prefixes={}):
     try:
         id = int(entry_id)
     except ValueError:
-        raise ErrorMessage(404, 'No such entry')
+        raise ErrorMessage(404, _('No such entry'))
     record = records.Record.get_by_id(id)
     if not record or record.feed_id != feed_id:
-        raise ErrorMessage(404, 'No such entry')
+        raise ErrorMessage(404, _('No such entry'))
 
     response.headers['Content-Type'] = 'application/atom+xml'
     response.headers['Last-Modified'] = \
@@ -88,12 +88,12 @@ def handle_feed_post(request, response):
     except SyntaxError, e:
         raise ErrorMessage(400, str(e))
     if feed.tag != qualify(atom.ATOM_NS, 'feed'):
-        raise ErrorMessage(400, 'Incoming document is not an Atom feed')
+        raise ErrorMessage(400, _('Incoming document is not an Atom feed'))
     feed_id = get_child(feed, 'id', 'feed has no id')
     for entry in feed.findall(qualify(atom.ATOM_NS, 'entry')):
-        entry_id = get_child(entry, 'id', 'entry has no id')
-        author = get_child(entry, 'author', 'entry %r has no author' % entry_id)
-        email = get_child(author, 'email', 'entry %r has no email' % entry_id)
+        entry_id = get_child(entry, 'id', _('entry has no id'))
+        author = get_child(entry, 'author', _('entry %r has no author') % entry_id)
+        email = get_child(author, 'email', _('entry %r has no email') % entry_id)
         for child in entry.getchildren():
             if not child.tag.startswith('{%s}' % atom.ATOM_NS):
                 try:
@@ -102,7 +102,7 @@ def handle_feed_post(request, response):
                     raise ErrorMessage(400, str(e))
                 break
         else:
-            raise ErrorMessage(400, 'entry %r contains no XML document')
+            raise ErrorMessage(400, _('entry %r contains no XML document'))
 
 
 if __name__ == '__main__':

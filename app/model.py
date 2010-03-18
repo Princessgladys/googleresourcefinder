@@ -25,7 +25,7 @@ This project uses the following naming conventions in variables and properties:
     "name":
         A unique identifier for an entity, used as the entity's key_name.
         Fields ending in "_name" contain the key_names of other entities.
-        
+
         Names should be C-style identifiers (thus usable as HTML element IDs,
         form element names, and CSS classes) and are usually not displayed in
         the UI directly.  For each name, there should be a corresponding
