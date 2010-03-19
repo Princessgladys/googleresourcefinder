@@ -17,15 +17,22 @@
   font-size: 10px;
   color: #666666;
 }
-
+.bubble-l2-inner {
+  #float: left;
+}
 .bubble-main-info {
   background-color: #EEE
 }
 
-.bubble-main-info thead {
-  font-size: 8px;
+.bubble-info-no-numbers {
+  background-color: #fffd8b;
+  border-color: red;
+  border-width: 2px;
 }
 
+.bubble-info-head {
+  font-size: 10px;
+}
 .bubble-main-info tbody  {
   font-size: 8px;
 }
@@ -53,6 +60,11 @@
   color: #666666
 }
 
+.new_window {
+  width: 10px;
+  height: 10px;
+  border-width: 0px;
+}
 .hidden {
   display: none;
 }

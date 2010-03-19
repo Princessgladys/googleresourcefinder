@@ -823,90 +823,18 @@ function select_facility(facility_i, ignore_current) {
     last_report_date = 'Updated ' +
         MONTH_ABBRS[ymd[1] - 1] + ' ' + (ymd[2] - 0) + ', ' + ymd[0];
   }
-  var report_display = '';
-  var facility_type = facility_types[selected_facility.type];
-  for (var i = 0; i < facility_type.attribute_is.length; i++) {
-    var a = facility_type.attribute_is[i];
-    var attribute = attributes[a];
-    var value = '\u2013';
-    if (last_report) {
-      value = last_report.values[a];
-      switch (attributes[a].type) {
-        case 'contact':
-          value = (value || '').replace(/^[\s\|]+|[\s\|]+$/g, '');
-          value = value ? value.replace(/\|/g, ', ') : '\u2013';
-          break;
-        case 'date':
-          value = (value || '').replace(/T.*/, '') || '\u2013';
-          break;
-        case 'str':
-          value = value || '\u2013';
-          break;
-        case 'text':
-          value = {html: render_template('<div class="text">${text}</div>',
-                                         {text: {html: value || ''}})};
-          break;
-        case 'choice':
-          value = translate_value(value) || '\u2013';
-          break;
-        case 'multi':
-          value = translate_values(value || ['\u2013']).join(', ');
-          break;
-        case 'int':
-        case 'float':
-          if (value === null || value === undefined) {
-            value = '\u2013';
-          }
-          if (value === 0) {
-            value = {html: '<span class="stockout">0</span>'};
-          }
-          break;
-      }
-    }
-    report_display += render_template(ATTRIBUTE_TEMPLATE, {
-      attribute_title: messages.attribute_name[attribute.name].en,
-      attribute_value: value
-    });
-  }
-  if (rmapper.user && rmapper.user.is_editor()) {
-    var user_action_html = 
-    '    <div class="edit-links">' + 
-    '      <a href="/edit?cc=ht&facility_name=' + selected_facility.name +
-    '">' +
-    '        Edit this record</a> \u00b7 ' +
-    '      <a href="#" class="edit-ip-link" ' +
-    '          onclick="edit_handler(' +
-    '           \'/edit?cc=ht&facility_name=' + selected_facility.name +
-    '&embed=yes\');">' +
-    '      Edit in place</a>' +
-    '    </div>';
-  } else if (rmapper.user) {
-    var user_action_html = 
-    '    <div class="request-edit" >' +
-    '      <a href="#" class="edit-ip-link" ' +
-    '          onclick="request_role_handler(' +
-    '           \'/request_access?cc=ht&role=editor&embed=yes\');">' +
-    '      Request to become editor </a>' +
-    '    </div>';
-  } else {
-    var user_action_html = 
-    '    <div class="please-signin">' +
-    '      Please sign in as editor to edit' +
-    '    </div>';
-  }
-//   info.setContent(render_template(INFO_TEMPLATE, {
-//     facility_title: selected_facility.title,
-//     facility_name: selected_facility.name,
-//     division_title: divisions[selected_facility.division_i].title,
-//     user_action_html: {html: user_action_html},
-//     attributes: {html: report_display},
-//     last_report_date: last_report_date
-//   }));
   info.close();
-  a=rmapper.get_bubble_html()
-  info.setContent(a[1])
+
+  division_title = divisions[selected_facility.division_i].title;
+  attribute_is = facility_types[selected_facility.type].attribute_is;
+
+  bubble_info = rmapper.bubble.get_html(selected_facility, attribute_is,
+                                        last_report_date);
+  info.setContent(bubble_info.html)
   info.open(map, markers[selected_facility_i]);
-  jQuery(a[0]).tabs();
+
+  // this call sets up the tabs and need to be called after the dom was created
+  jQuery(bubble_info.tabs_id).tabs();
 
 }
 
