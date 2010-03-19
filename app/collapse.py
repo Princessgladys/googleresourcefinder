@@ -94,12 +94,12 @@ def collapse_all(skip=0, time_limit=10):
 class Collapse(Handler):
     def get(self):
         skip = int(self.request.get('skip', 0))
-        self.write('<p>' + _('skip') + ' = ' + skip)
+        self.write('<p>skip = %d' % skip)
         next = collapse_all(skip, 15)
         if next is None:
-            self.write('<p>' + _('done!'))
+            self.write('<p>done!')
         else:
-            self.write('<p>' + _('next') + ' = ' + next)
+            self.write('<p>next = %d' % next)
             url = 'collapse?skip=%d' % next
             self.write('<meta http-equiv="refresh" content="45;url=%s">' % url)
 

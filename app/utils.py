@@ -114,7 +114,7 @@ def make_name(text):
 def get(parent, Kind, kn):
     entity = Kind.get_by_key_name(kn, parent=parent)
     if entity is None:
-        raise KeyError(_('no %s has key=%s parent=%r') % (Kind.kind(), kn, parent))
+        raise KeyError('no %s has key=%s parent=%r' % (Kind.kind(), kn, parent))
     return entity
 
 def get_base(entity):
