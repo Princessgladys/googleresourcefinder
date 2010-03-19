@@ -37,6 +37,7 @@
 
   <link rel="stylesheet" href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css" type="text/css" media="all" /> 
   <script type="text/javascript" src="static/jquery-ui-1.8rc3.custom.min.js"></script>
+  <script type="text/javascript" src="static/templating.js"></script>
   <script type="text/javascript" src="static/chain.js"></script>
   <script type="text/javascript">
     // Do we have a namespace already?
@@ -171,6 +172,4 @@
     please correct it on the web site: <span id="site-url"></span>
   </div>
 {% endif %}
-<div id="bubble-temp-placeholder" class="hidden">
-</div>
-
+{% include "bubble.html" %}
