@@ -1,3 +1,5 @@
+The application won't work unless you populate it with a little data.
+
 To get started:
 
     hg clone https://resourcemapper.googlecode.com/hg/ resourcemapper 
@@ -11,6 +13,7 @@ To start the server:
 
     gae run app
 
+Then start the server:
 
 You can connect to your local running instance using the admin console like so
 (log in with any non-blank username and password):

@@ -45,6 +45,9 @@ def strip(text):
 def validate_yes(text):
     return (text.lower() == 'yes') and 'yes' or ''
 
+def validate_role(text):
+    return text in access.ROLES and text
+
 def get_message(version, namespace, name):
     message = model.Message.all().ancestor(version).filter(
         'namespace =', namespace).filter('name =', name).get()
@@ -58,8 +61,18 @@ class Handler(webapp.RequestHandler):
         'cc': strip,
         'facility_name': strip,
         'print': validate_yes,
-        'embed': validate_yes
+        'embed': validate_yes,
+        'role': validate_role
     }
+
+    def require_user_role(self, role, cc):
+        """Raise and exception in case the user don't have the given role
+        to the given country.
+        Redirect to login in case there is no user"""
+        if not self.auth:
+            raise Redirect(users.create_login_url(self.request.uri))
+        if not access.check_user_role(self.auth, role, cc):
+            raise ErrorMessage(403, 'Unauthorized user.')
 
     def render(self, path, **params):
         """Renders the template at the given path with the given parameters."""
