@@ -36,14 +36,19 @@ def create_entry(record):
         xmlutils.parse(record.content)
     )
 
-def create_feed(records):
+def create_feed(records, hub=None):
     """Constructs an Element for an Atom feed containing the given records."""
-    return xmlutils.element('{%s}feed' % ATOM_NS, map(create_entry, records))
+    feed = xmlutils.element('{%s}feed' % ATOM_NS, map(create_entry, records))
+    if hub:
+        feed.append(xmlutils.element('{%s}link' % ATOM_NS,
+                                     {'rel': 'hub', 'href': hub}))
+    return feed
 
 def write_entry(file, record, uri_prefixes={}):
     """Writes an Atom entry for the given record to the given file."""
     xmlutils.write(file, create_entry(record), add_atom_prefix(uri_prefixes))
 
-def write_feed(file, records, uri_prefixes={}):
+def write_feed(file, records, uri_prefixes={}, hub=None):
     """Writes an Atom feed containing the given records to the given file."""
-    xmlutils.write(file, create_feed(records), add_atom_prefix(uri_prefixes))
+    xmlutils.write(
+        file, create_feed(records, hub), add_atom_prefix(uri_prefixes))

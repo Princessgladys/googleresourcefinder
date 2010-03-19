@@ -57,15 +57,16 @@ def put_record(feed_id, author_email, element):
         record_type = type_registry[element.tag]
     except KeyError:
         raise TypeError('unknown XML type %r' % element.tag)
-    Record(
+    record = Record(
         feed_id=feed_id,
         type_name=element.tag,
         record_id=record_type.get_identifier(element),
         title=record_type.get_title(element),
         author_email=author_email,
         observation_time=record_type.get_observation_time(element),
-        content=xmlutils.serialize(element)
-    ).put()
+        content=xmlutils.serialize(element))
+    record.put()
+    return record
 
 def get_latest_observed(type_name, record_id):
     """Gets the record with the given record ID and latest observation_time."""
