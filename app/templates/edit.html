@@ -1,0 +1,62 @@
+{% comment %}
+# Copyright 2009-2010 by Ka-Ping Yee
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+{% load i18n %}
+
+<title>{% trans "Resource Mapper" %} ({{instance}})</title>
+<style>
+{% if not params.embed %}
+  body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
+{% endif %}
+tr.field { vertical-align: baseline; margin-top: 1em; }
+tr.field.text { vertical-align: top; }
+.label { text-align: right; color: #666; }
+</style>
+<h1>{% trans "Edit" %} {{facility.title|escape}}</h1>
+
+<form method="post" id="edit" action="/edit">
+  <input type="hidden" name="embed" value="{{params.embed|escape}}">
+  <input type="hidden" name="cc" value="{{params.cc|escape}}">
+  <input type="hidden" name="facility_name"
+      value="{{params.facility_name|escape}}">
+  <table>
+    {% for field in fields %}
+      <tr class="field {{field.type}}">
+        <td class="label">
+          {{field.name|escape}}
+        </td>
+        <td class="input">
+          {{field.input}}
+        </td>
+      </tr>
+    {% endfor %}
+    <tr>
+      <td>
+      </td>
+      <td class="field">
+        <input type="submit" value='{% trans "Save" %}'>
+        <input type="reset" value='{% trans "Revert" %}'>
+        <span id="edit-status"></span>
+      </td>
+    </tr>
+  </table>
+</form>
+
+{% if params.embed %}
+  <script type="text/javascript">
+    $j('#edit').ajaxForm({target: '#edit-status'});
+  </script>
+{% endif %}
