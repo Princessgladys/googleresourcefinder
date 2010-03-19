@@ -22,21 +22,21 @@ class Record(db.Model):
     """Entity representing one received or provided XML document entry."""
     feed_id = db.StringProperty(required=True)  # URI of parent feed
     type_name = db.StringProperty(required=True)  # XML type in Clark notation
-    record_id = db.StringProperty(required=True)  # non-unique record ID
+    subject_id = db.StringProperty(required=True)  # thing this record is about
     title = db.StringProperty()  # title or summary string
     author_email = db.StringProperty(required=True)  # author identifier
-    observation_time = db.DateTimeProperty(required=True)  # UTC timestamp
+    original_time = db.DateTimeProperty(required=True)  # UTC timestamp
     arrival_time = db.DateTimeProperty(auto_now=True)  # UTC timestamp
     content = db.TextProperty()  # serialized XML document 
 
 
 class RecordType:
-    def get_identifier(self, element):
-        """Extracts the record_id string from an XML Element."""
+    def get_subject_id(self, element):
+        """Extracts the subject_id string from an XML Element."""
         raise NotImplementedError
 
-    def get_observation_time(self, element):
-        """Extracts the observation time from an XML Element."""
+    def get_original_time(self, element):
+        """Extracts the original time from an XML Element."""
         raise NotImplementedError
 
     def get_title(self, element):
@@ -60,18 +60,18 @@ def put_record(feed_id, author_email, element):
     Record(
         feed_id=feed_id,
         type_name=element.tag,
-        record_id=record_type.get_identifier(element),
+        subject_id=record_type.get_subject_id(element),
         title=record_type.get_title(element),
         author_email=author_email,
-        observation_time=record_type.get_observation_time(element),
+        original_time=record_type.get_original_time(element),
         content=xmlutils.serialize(element)
     ).put()
 
-def get_latest_observed(type_name, record_id):
-    """Gets the record with the given record ID and latest observation_time."""
+def get_latest_original(type_name, record_id):
+    """Gets the record with the given record ID and latest original_time."""
     return (Record.all().filter('type_name =', type_name)
                         .filter('record_id =', record_id)
-                        .order('-observation_time')).get()
+                        .order('-original_time')).get()
 
 def get_latest_arrived(feed_id, limit=None, after_arrival_time=None):
     """Gets a list of records in the given feed in order of decreasing
