@@ -65,10 +65,10 @@
                   <% if (availability || availability == 0) { %>
                   <td class="bubble-info-number bubble-info-ava"> <%=availability%> </td>
                   <td class="bubble-info-number"> <%=capacity%> </td>
-                  <% } else {%>
                   <% } %>
                   <td class="bubble-info-serv">
-                    Ultrasound, Orthopedic, Obstetrics, another</td>
+                    Ultrasound, Orthopedic, Obstetrics, another
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -82,26 +82,65 @@
             <div id="tabs-<%=__ID__%>-1" >
               <table>
                 <tbody id="bubble_attributes_body">
+                  <tr class="item">
+                    <td class="bubble_attr_title">
+                      <%=rmapper.trans('location')%> </td>
+                    <td class="bubble_attr_value">
+                      Tabarra 41, Port-au-prince, Haiti
+                    </td>
+                    <td class="bubble_attr_value">
+                      Latitude: <%=facility.location.lat%><br>
+                      Longitude: <%=facility.location.lon%>
+                    </td>
+                  </tr>
                   <% for ( var i = 0; i < attribute_is.length; i++ ) {
                        var a = attribute_is[i];
                        var attribute = attributes[a];
                   %>
 
                   <tr class="item">
-                    <th class="bubble_attr_title">
-                      <%=messages.attribute_name[attribute.name].en%> </th>
-                    <th class="bubble_attr_value">
+                    <td class="bubble_attr_title">
+                      <%=messages.attribute_name[attribute.name].en%> </td>
+                    <td class="bubble_attr_value" colspan="2">
                       <% if (facility.last_report) { %>
                         <%=rmapper.bubble.format_attr(attribute, facility.last_report.values[a])%>
                       <% } %>
-                    </th>
+                    </td>
                   </tr>
                   <% } %>
                 </tbody>
               </table>
             </div>
             <div id="tabs-<%=__ID__%>-2" >
-              TAB 2.
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date/Time</th>
+                    <th>Change</th>
+                    <th>Edit By</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <% if (facility.reports) {
+                         for (var i = facility.reports.length-1; i >= 0; i--) {
+                           var r = facility.reports[i];
+                           for ( var j = 0; j < attribute_is.length; j++ ) {
+                             var a = attribute_is[j];
+                             if (r.values[a] || r.values[a] == 0) {
+                               var attribute = attributes[a];
+                    %>
+                  <tr>
+                    <td><%=r.date%></td>
+                    <td><%=messages.attribute_name[attribute.name].en%>
+                      was updated</td>
+                    <td><%=r.user && r.user.nickname() || "anonymous"%></td>
+                  </tr>
+                          <% } %>
+                        <% } %>
+                      <% } %>
+                    <% } %>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>';

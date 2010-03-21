@@ -62,6 +62,7 @@ def facility_transformer(
         'name': facility.key().name(),
         'type': facility_type_is[facility.type],
         'division_i': facility.division_name,
+        'reports': reports and reports[-10:] or None,
         'last_report': reports and reports[-1] or None
     }
     if facility.location is not None:

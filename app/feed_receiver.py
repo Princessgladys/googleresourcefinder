@@ -37,7 +37,9 @@ class Incoming(Handler):
             hospital = Hospital.from_element(xmlutils.parse(record.content))
             last_report = Report.all().ancestor(version).filter(
                 'facility_name =', record.record_id).get()
-            report = Report(version, facility_name=record.record_id)
+            report = Report(version,
+                            facility_name=record.record_id,
+                            user=users.get_current_user())
             if last_report and hasattr(last_report, 'patient_capacity'):
                 report.patient_capacity = last_report.patient_capacity
             if last_report and hasattr(last_report, 'patient_count'):
