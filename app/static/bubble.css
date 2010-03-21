@@ -18,7 +18,7 @@
   color: #666666;
 }
 .bubble-l2-inner {
-  #float: left;
+  display: inline;
 }
 .bubble-main-info {
   background-color: #EEE
