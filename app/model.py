@@ -117,6 +117,7 @@ class Report(db.Expando):
     timestamp = db.DateTimeProperty(auto_now_add=True)
     facility_name = db.StringProperty()  # a Facility's key_name
     date = db.DateProperty()  # date that report contents were valid
+    user = db.UserProperty()
     # additional properties for each Attribute (named by Attribute's key_name)
 
 class Message(db.Expando):

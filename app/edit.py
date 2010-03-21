@@ -66,10 +66,12 @@ class ContactAttributeType(AttributeType):
         )
 
     def parse_input(self, report, name, value, request, attribute):
-        setattr(report, name,
-                request.get(name + '.name', '') + '|' +
-                request.get(name + '.phone', '') + '|' +
-                request.get(name + '.email', ''))
+        contact = (request.get(name + '.name', '') + '|' +
+                   request.get(name + '.phone', '') + '|' +
+                   request.get(name + '.email', ''))
+        # make sure we put empty string of all three are empty
+        contact = contact != '||' and contact or ''
+        setattr(report, name, contact)
 
 class DateAttributeType(AttributeType):
     input_size = 10
@@ -213,7 +215,8 @@ class Edit(utils.Handler):
         report = model.Report(
             self.version,
             facility_name=self.facility.key().name(),
-            date=utils.Date.today()
+            date=utils.Date.today(),
+            user=users.get_current_user()
         )
         for attribute_name in self.facility_type.attribute_names:
             attribute = self.attributes[attribute_name]

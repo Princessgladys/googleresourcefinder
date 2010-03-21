@@ -16,6 +16,11 @@
 
 rmapper.bubble = {};
 
+// TODO
+rmapper.trans = function(string) {
+  return string;
+}
+
 rmapper.bubble.format_attr = function(attr, value) {
   switch (attr.type) {
     case 'contact':

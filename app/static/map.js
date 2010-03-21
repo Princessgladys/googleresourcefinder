@@ -907,7 +907,7 @@ function handle_monitor_notification() {
     if (this.responseText != null && this.responseText.length) {
       eval(this.responseText);
     }
-    start_monitoring();
+    //start_monitoring();
   }
 }
 

@@ -32,6 +32,7 @@
 
 .bubble-info-head {
   font-size: 10px;
+  font-weight: bold;
 }
 .bubble-main-info tbody  {
   font-size: 8px;
@@ -52,6 +53,7 @@
 }
 
 .bubble_attr_title {
+  font-weight: bold;
 }
 
 .bubble_attr_value {
