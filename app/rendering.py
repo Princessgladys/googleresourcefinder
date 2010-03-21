@@ -41,6 +41,16 @@ def facility_type_transformer(index, facility_type, attribute_is):
             'attribute_is':
                 [attribute_is[p] for p in facility_type.attribute_names]}
 
+def user_transformer(user):
+    if user:
+        return {'email': user.email(),
+                'nickname': user.nickname(),
+                }
+    else:
+        return {'email': 'anonymous',
+                'nickname': 'anonymous',
+                }
+                
 def facility_transformer(
     index, facility, attributes, report_map, facility_type_is, facility_map):
     """Construct the JSON object for a Facility."""
@@ -54,7 +64,9 @@ def facility_transformer(
         values = [None]
         for attribute in attributes:
             values.append(getattr(report, attribute.key().name(), None))
-        reports.append({'date': report.date, 'values': values})
+        reports.append({'date': report.date,
+                        'values': values,
+                        'user': user_transformer(report.user)})
 
     # Pack the results into an object suitable for JSON serialization.
     facility_jobject = {

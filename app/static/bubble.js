@@ -53,22 +53,30 @@ rmapper.bubble.format_attr = function(attr, value) {
     break;
   }
 
-  return value
+  return value;
 }
-    
+
+
 uniqId=12110;  
 rmapper.bubble.get_html = function(facility, attribute_is,
                                    last_report_date) {
 
+  var availability, capacity;
+  if (facility.last_report &&
+      facility.last_report.values[patient_count_attribute_i] &&
+      facility.last_report.values[patient_capacity_attribute_i]) {
+    capacity = facility.last_report.values[patient_capacity_attribute_i];
+    availability = capacity - facility.last_report.values[patient_count_attribute_i];
+  }
+
   uniqId++;
   var vars = {__ID__: uniqId,
               facility: facility,
+              services_list: rmapper.get_services(facility),
               attribute_is: attribute_is,
               last_updated: last_report_date,
-              availability: facility.last_report && 
-                 facility.last_report.values[patient_count_attribute_i] || null,
-              capacity: facility.last_report &&
-                  facility.last_report.values[patient_capacity_attribute_i] || null,
+              availability: availability,
+              capacity: capacity,
               attrs: [ {title: "Organization Type",
                         value: "Red Cross Hospital"},
                        {title: "Transportation",
