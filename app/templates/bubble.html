@@ -67,7 +67,7 @@
                   <td class="bubble-info-number"> <%=capacity%> </td>
                   <% } %>
                   <td class="bubble-info-serv">
-                    Ultrasound, Orthopedic, Obstetrics, another
+                    <%=services_list %>
                   </td>
                 </tr>
               </tbody>
@@ -133,7 +133,7 @@
                     <td><%=r.date%></td>
                     <td><%=messages.attribute_name[attribute.name].en%>
                       was updated</td>
-                    <td><%=r.user && r.user.nickname() || "anonymous"%></td>
+                    <td><%=r.user.nickname%></td>
                   </tr>
                           <% } %>
                         <% } %>

@@ -58,6 +58,26 @@ var messages = {};  // {namespace: {name: {language: message}}
 
 // ==== Columns shown in the facility table
 
+rmapper.get_services_from_values = function(values) {
+
+  services = translate_values(
+      [].concat(values[attributes_by_name.specialty_care] || [])
+      .concat(values[attributes_by_name.medical_equipment] || []))
+  .join(', ');
+  return services;
+}
+
+rmapper.get_services = function(facility) {
+
+  var services = '';
+  if (facility.last_report) {
+    var values = facility.last_report.values;
+    services = rmapper.get_services_from_values(values);
+  }
+  return services;
+}
+
+  
 var summary_columns = [
   null, {
     get_title: function() {
@@ -65,10 +85,7 @@ var summary_columns = [
       return $$('div', {}, [beds_div, 'Services']);
     },
     get_value: function(values) {
-      var services = translate_values(
-          [].concat(values[attributes_by_name.specialty_care] || [])
-            .concat(values[attributes_by_name.medical_equipment] || []))
-            .join(', ');
+      var services = rmapper.get_services_from_values(values);
       var capacity = values[attributes_by_name.patient_capacity];
       var patients = values[attributes_by_name.patient_count];
       var open_beds = '\u2013';

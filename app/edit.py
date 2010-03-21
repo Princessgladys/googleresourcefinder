@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import model
 import utils
 from utils import DateTime, ErrorMessage, Redirect
@@ -174,8 +175,8 @@ class Edit(utils.Handler):
     def init(self):
         """Checks for authentication and sets up self.version, self.facility,
         self.facility_type, and self.attributes based on the query params."""
-        self.require_user_role('editor', self.params.cc)
-
+        #self.require_user_role('editor', self.params.cc)
+        
         try:
             self.version = utils.get_latest_version(self.params.cc)
         except:
@@ -212,11 +213,12 @@ class Edit(utils.Handler):
 
     def post(self):
         self.init()
+        logging.info("record by user: %s"%users.get_current_user())
         report = model.Report(
             self.version,
             facility_name=self.facility.key().name(),
             date=utils.Date.today(),
-            user=users.get_current_user()
+            user=users.get_current_user(),
         )
         for attribute_name in self.facility_type.attribute_names:
             attribute = self.attributes[attribute_name]

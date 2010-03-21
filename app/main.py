@@ -23,9 +23,10 @@ class Main(Handler):
         self.render('templates/map.html',
                     params=self.params,
                     authorization=auth and auth.description or 'anonymous',
-                    is_editor=access.check_user_role(auth,'editor','ht'),
-                    #TODO(eyalf): should remove the assumtio there is an email
-                    user=auth and {'email': auth.email} or None,
+                    #is_editor=access.check_user_role(auth,'editor','ht'),
+                    is_editor=True,
+                    #TODO(eyalf): should remove the assumption there is an email
+                    user=auth and {'email': auth.email} or {'email': 'anonymous'} ,
                     loginout_url=(auth and users.create_logout_url('/') or
                                   users.create_login_url('/')),
                     loginout_text=(auth and "Sign out" or "Sign in"),
