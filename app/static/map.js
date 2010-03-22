@@ -957,6 +957,90 @@ function load_data(data) {
     set_children($('site-url'),
         window.location.protocol + '//' + window.location.host);
   }
+
+  start_monitoring();
+}
+
+// ==== In-place update
+
+function start_monitoring() {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = handle_monitor_notification;
+  xhr.open('GET', '/monitor');
+  xhr.send();
+}
+
+function handle_monitor_notification() {
+  if (this.readyState == 4 && this.status == 200) {
+    if (this.responseText != null && this.responseText.length) {
+      eval(this.responseText);
+    }
+    start_monitoring();
+  }
+}
+
+function set_facility_attribute(facility_name, attribute_name, value) {
+  log(facility_name, attribute_name, value);
+  var facility_i = 0;
+  for (var f = 1; f < facilities.length; f++) {
+    if (facilities[f].name == facility_name) {
+      facility_i = f;
+    }
+  }
+  var attribute_i = attributes_by_name[attribute_name];
+  if (facility_i) {
+    var facility = facilities[facility_i];
+    if (!facility.last_report) {
+      var nulls = [];
+      for (var a = 0; a < attributes.length; a++) {
+        nulls.push(null);
+      }
+      facility.last_report = {values: nulls};
+    }
+    facility.last_report.values[attribute_i] = value;
+  }
+  update_facility_row(facility_i);
+}
+
+var GLOW_COLORS = ['#ff4', '#ff4', '#ff5', '#ff6', '#ff8', '#ffa',
+                   '#ffb', '#ffc', '#ffd', '#ffe', '#fffff8'];
+var glow_element = null;
+var glow_step = -1;
+
+function glow(element) {
+  if (glow_element) {
+    glow_element.style.backgroundColor = '';
+  }
+  glow_element = element;
+  glow_step = 0;
+  glow_next();
+}
+
+function glow_next() {
+  if (glow_element && glow_step < GLOW_COLORS.length) {
+    glow_element.style.backgroundColor = GLOW_COLORS[glow_step];
+    glow_step++;
+    window.setTimeout(glow_next, 200);
+  } else {
+    if (glow_element) {
+      glow_element.style.backgroundColor = '';
+    }
+    glow_element = null;
+    glow_step = -1;
+  }
+}
+
+function update_facility_row(facility_i) {
+  var row = $('facility-' + facility_i);
+  var cell = row.firstChild;
+  var facility = facilities[facility_i];
+  for (var c = 1; c < summary_columns.length; c++) {
+    cell = cell.nextSibling;
+    var value = summary_columns[c].get_value(facility.last_report.values);
+    set_children(cell, value);
+    cell.className = 'value column_' + c;
+  }
+  glow(row);
 }
 
 // ==== In-place editing
