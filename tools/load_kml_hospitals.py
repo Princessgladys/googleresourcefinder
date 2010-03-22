@@ -49,5 +49,3 @@ def load_hospitals(version, records):
 
 def load_kml_file(version, filename):
     load_hospitals(version, kml.parse_file(open(filename)))
-
-if __name__ == '__main__'
