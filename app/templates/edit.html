@@ -14,7 +14,9 @@
 # limitations under the License.
 {% endcomment %}
 
-<title>Resource Mapper ({{instance}})</title>
+{% load i18n %}
+
+<title>{% trans "Resource Mapper" %} ({{instance}})</title>
 <style>
 {% if not params.embed %}
   body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
@@ -23,7 +25,7 @@ tr.field { vertical-align: baseline; margin-top: 1em; }
 tr.field.text { vertical-align: top; }
 .label { text-align: right; color: #666; }
 </style>
-<h1>Edit {{facility.title|escape}}</h1>
+<h1>{% trans "Edit" %} {{facility.title|escape}}</h1>
 
 <form method="post" id="edit" action="/edit">
   <input type="hidden" name="embed" value="{{params.embed|escape}}">
@@ -45,8 +47,8 @@ tr.field.text { vertical-align: top; }
       <td>
       </td>
       <td class="field">
-        <input type="submit" value="Save">
-        <input type="reset" value="Revert">
+        <input type="submit" value='{% trans "Save" %}'>
+        <input type="reset" value='{% trans "Revert" %}'>
         <span id="edit-status"></span>
       </td>
     </tr>

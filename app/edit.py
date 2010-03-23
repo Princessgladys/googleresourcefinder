@@ -26,10 +26,16 @@ class AttributeType:
 
     def text_input(self, name, value):
         """Generates a text input field."""
-        return '<input name="%s" value="%s" size=%d>' % (
-            html_escape(name),
-            html_escape(value is not None and str(value) or ''),
-            self.input_size)
+        if isinstance(value, unicode):
+            pass
+        elif isinstance(value, str):
+            value = value.decode('utf-8')
+        elif value is not None:
+            value = str(value)
+        else:
+            value = ''
+        return u'<input name="%s" value="%s" size=%d>' % (
+            html_escape(name), html_escape(value), self.input_size)
 
     def make_input(self, version, name, value, attribute=None):
         """Generates the HTML for an input field for the given attribute."""
@@ -57,13 +63,13 @@ class ContactAttributeType(AttributeType):
         contact_name, contact_phone, contact_email = (
             (value or '').split('|') + ['', '', ''])[:3]
         return '''<table>
-                    <tr><td class="label">Name</td><td>%s</td></tr>
-                    <tr><td class="label">Phone</td><td>%s</td></tr>
-                    <tr><td class="label">E-mail</td><td>%s</td></tr>
+                    <tr><td class="label">%s</td><td>%s</td></tr>
+                    <tr><td class="label">%s</td><td>%s</td></tr>
+                    <tr><td class="label">%s</td><td>%s</td></tr>
                   </table>''' % (
-            self.text_input(name + '.name', contact_name),
-            self.text_input(name + '.phone', contact_phone),
-            self.text_input(name + '.email', contact_email),
+            _('Name'), self.text_input(name + '.name', contact_name),
+            _('Phone'), self.text_input(name + '.phone', contact_phone),
+            _('E-mail'), self.text_input(name + '.email', contact_email),
         )
 
     def parse_input(self, report, name, value, request, attribute):
@@ -84,7 +90,7 @@ class DateAttributeType(AttributeType):
                 setattr(report, name, DateTime(year, month, day))
             except (TypeError, ValueError):
                 raise ErrorMessage(
-                    400, 'Invalid date: %r (need YYYY-MM-DD format)' % value)
+                    400, _('Invalid date: %r (need YYYY-MM-DD format)') % value)
         else:
             setattr(report, name, None)
 
@@ -109,6 +115,30 @@ class FloatAttributeType(IntAttributeType):
             value = None
         setattr(report, name, value)
 
+class BoolAttributeType(AttributeType):
+    def make_input(self, version, name, value, attribute):
+        options = []
+        if value == True:
+            value = 'TRUE'
+        elif value == False:
+            value = 'FALSE'
+        else:
+            value = ''
+        for choice, title in [
+            ('', _('(unspecified)')), ('TRUE', _('yes')), ('FALSE', _('no'))]:
+            selected = (value == choice) and 'selected' or ''
+            options.append('<option value="%s" %s>%s</option>' %
+                           (choice, selected, title))
+        return '<select name="%s">%s</select>' % (
+            html_escape(name), ''.join(options))
+
+    def parse_input(self, report, name, value, request, attribute):
+        if value:
+            value = (value == 'TRUE')
+        else:
+            value = None
+        setattr(report, name, value)
+
 class ChoiceAttributeType(AttributeType):
     def make_input(self, version, name, value, attribute):
         options = []
@@ -116,7 +146,7 @@ class ChoiceAttributeType(AttributeType):
             value = ''
         for choice in [''] + attribute.values:
             message = get_message(version, 'attribute_value', choice)
-            title = html_escape(message or '(unspecified)')
+            title = html_escape(message or _('(unspecified)'))
             selected = (value == choice) and 'selected' or ''
             options.append('<option value="%s" %s>%s</option>' %
                            (choice, selected, title))
@@ -130,7 +160,7 @@ class MultiAttributeType(AttributeType):
         checkboxes = []
         for choice in attribute.values:
             message = get_message(version, 'attribute_value', choice)
-            title = html_escape(message or '(unspecified)')
+            title = html_escape(message or _('(unspecified)'))
             checked = (choice in value) and 'checked' or ''
             id = name + '.' + choice
             checkboxes.append(
@@ -152,6 +182,7 @@ ATTRIBUTE_TYPES = {
     'date': DateAttributeType(),
     'int': IntAttributeType(),
     'float': FloatAttributeType(),
+    'bool': BoolAttributeType(),
     'choice': ChoiceAttributeType(),
     'multi': MultiAttributeType(),
 }
@@ -180,11 +211,11 @@ class Edit(utils.Handler):
         try:
             self.version = utils.get_latest_version(self.params.cc)
         except:
-            raise ErrorMessage(404, 'Invalid or missing country code.')
+            raise ErrorMessage(404, _('Invalid or missing country code.'))
         self.facility = model.Facility.get_by_key_name(
             self.params.facility_name, self.version)
         if not self.facility:
-            raise ErrorMessage(404, 'Invalid or missing facility name.')
+            raise ErrorMessage(404, _('Invalid or missing facility name.'))
         self.facility_type = model.FacilityType.get_by_key_name(
             self.facility.type, self.version)
         self.attributes = dict(
@@ -225,7 +256,7 @@ class Edit(utils.Handler):
             parse_input(report, self.request, attribute)
         report.put()
         if self.params.embed:
-            self.write('Record updated.')
+            self.write(_('Record updated.'))
         else:
             raise Redirect('/')
 

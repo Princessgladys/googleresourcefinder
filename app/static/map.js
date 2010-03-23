@@ -85,16 +85,17 @@ var summary_columns = [
       return $$('div', {}, [beds_div, 'Services']);
     },
     get_value: function(values) {
-      var services = rmapper.get_services_from_values(values);
-      var capacity = values[attributes_by_name.patient_capacity];
-      var patients = values[attributes_by_name.patient_count];
-      var open_beds = '\u2013';
-      if (capacity === null) {
-        capacity = '\u2013';
-      } else if (patients !== null) {
-        open_beds = capacity - patients;
+      var services = translate_values(
+          values[attributes_by_name.services] || []).join(', ');
+      var total_beds = values[attributes_by_name.total_beds];
+      if (total_beds === null) {
+        total_beds = '\u2013';
       }
-      var beds = open_beds + ' / ' + capacity;
+      var open_beds = values[attributes_by_name.available_beds];
+      if (open_beds === null) {
+        open_beds = '\u2013';
+      }
+      var beds = open_beds + ' / ' + total_beds;
       var beds_div = $$('div', {'class': 'beds'}, beds);
       // WebKit rendering bug: vertical alignment is off if services is ''.
       return $$('div', {}, [beds_div, services || '\u00a0']);
@@ -408,8 +409,7 @@ function initialize_filters() {
   });
   var options = [];
   options.push($$('option', {value: '0 '}, 'All'));
-  add_filter_options(options, attributes_by_name.specialty_care);
-  add_filter_options(options, attributes_by_name.medical_equipment);
+  add_filter_options(options, attributes_by_name.services);
   set_children(selector, options);
   set_children(tr, [$$('td', {}, ['Show: ', selector])]);
   set_children(tbody, tr);
