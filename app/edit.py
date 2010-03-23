@@ -106,6 +106,30 @@ class FloatAttributeType(IntAttributeType):
             value = None
         setattr(report, name, value)
 
+class BoolAttributeType(AttributeType):
+    def make_input(self, version, name, value, attribute):
+        options = []
+        if value == True:
+            value = 'TRUE'
+        elif value == False:
+            value = 'FALSE'
+        else:
+            value = ''
+        for choice, title in [
+            ('', _('(unspecified)')), ('TRUE', _('yes')), ('FALSE', _('no'))]:
+            selected = (value == choice) and 'selected' or ''
+            options.append('<option value="%s" %s>%s</option>' %
+                           (choice, selected, title))
+        return '<select name="%s">%s</select>' % (
+            html_escape(name), ''.join(options))
+
+    def parse_input(self, report, name, value, request, attribute):
+        if value:
+            value = (value == 'TRUE')
+        else:
+            value = None
+        setattr(report, name, value)
+
 class ChoiceAttributeType(AttributeType):
     def make_input(self, version, name, value, attribute):
         options = []
@@ -149,6 +173,7 @@ ATTRIBUTE_TYPES = {
     'date': DateAttributeType(),
     'int': IntAttributeType(),
     'float': FloatAttributeType(),
+    'bool': BoolAttributeType(),
     'choice': ChoiceAttributeType(),
     'multi': MultiAttributeType(),
 }
