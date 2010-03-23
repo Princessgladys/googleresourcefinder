@@ -17,7 +17,7 @@ def setup_version(version):
 
     attributes = [
         attr('str', 'organization'),
-        attr('str', 'departement'),
+        attr('str', 'departemen'),
         attr('str', 'district'),
         attr('str', 'commune'),
         attr('str', 'address'),
@@ -57,7 +57,7 @@ def setup_version(version):
         name_message('organization',
                      en='Organization name',
                      fr='Nom de l\'organisation'),
-        name_message('departement', en='Departement', fr='Departement'),
+        name_message('departemen', en='Departement', fr='Departement'),
         name_message('district', en='District', fr='District'),
         name_message('commune', en='Commune', fr='Commune'),
         name_message('address', en='Address', fr='Adresse'),
