@@ -63,10 +63,11 @@ rmapper.bubble.get_html = function(facility, attribute_is,
 
   var availability, capacity;
   if (facility.last_report &&
-      facility.last_report.values[patient_count_attribute_i] &&
-      facility.last_report.values[patient_capacity_attribute_i]) {
-    capacity = facility.last_report.values[patient_capacity_attribute_i];
-    availability = capacity - facility.last_report.values[patient_count_attribute_i];
+      facility.last_report.values[attributes_by_name.total_beds] &&
+      facility.last_report.values[attributes_by_name.available_beds]) {
+    capacity = facility.last_report.values[attributes_by_name.total_beds];
+    npatients = facility.last_report.values[attributes_by_name.available_beds];
+    availability = capacity - npatients;
   }
 
   uniqId++;

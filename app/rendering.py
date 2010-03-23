@@ -119,8 +119,12 @@ def version_to_json(version):
 
     # Gather all the reports by facility ID.
     report_map = {}
+    num_reports = 0
     for report in Report.all().ancestor(version).order('-timestamp'):
         report_map.setdefault(report.facility_name, []).insert(0, report)
+        num_reports = num_reports + 1
+        #report_map.setdefault(report.facility_name, []).append(report)
+    logging.info("NUMBER OF REPORTS %d"%num_reports);
 
     # Make JSON objects for the facilities, while collecting lists of the
     # facilities in each division.
