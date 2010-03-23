@@ -25,10 +25,16 @@ class AttributeType:
 
     def text_input(self, name, value):
         """Generates a text input field."""
-        return '<input name="%s" value="%s" size=%d>' % (
-            html_escape(name),
-            html_escape(value is not None and str(value) or ''),
-            self.input_size)
+        if isinstance(value, unicode):
+            pass
+        elif isinstance(value, str):
+            value = value.decode('utf-8')
+        elif value is not None:
+            value = str(value)
+        else:
+            value = ''
+        return u'<input name="%s" value="%s" size=%d>' % (
+            html_escape(name), html_escape(value), self.input_size)
 
     def make_input(self, version, name, value, attribute=None):
         """Generates the HTML for an input field for the given attribute."""
