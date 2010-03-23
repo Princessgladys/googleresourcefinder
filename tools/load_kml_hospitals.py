@@ -39,10 +39,10 @@ def load_hospitals(version, records):
                 version,
                 facility_name=facility_name,
                 date=datetime.date.today(),
-                comment=db.Text(comment))
+                comments=db.Text(comment))
             match = BEDS_RE.search(comment)
             if match:
-                report.patient_capacity = int(match.group(1))
+                report.total_beds = int(match.group(1))
             reports.append(report)
     db.put(facilities)
     db.put(reports)

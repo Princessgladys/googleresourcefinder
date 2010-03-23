@@ -91,6 +91,7 @@ class Attribute(db.Model):
         'date',  # value is a date (Python datetime with time 00:00:00)
         'int',  # value is an integer (64-bit long)
         'float',  # value is a float (Python float, i.e. double)
+        'bool',  # value is a boolean
         'choice',  # value is a string (one of the elements in 'values')  
         'multi'  # value is a list of strings (which are elements of 'values')
     ])
