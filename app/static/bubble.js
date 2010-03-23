@@ -16,11 +16,6 @@
 
 rmapper.bubble = {};
 
-// TODO
-rmapper.trans = function(string) {
-  return string;
-}
-
 rmapper.bubble.format_attr = function(attr, value) {
   switch (attr.type) {
     case 'contact':
@@ -57,7 +52,6 @@ rmapper.bubble.format_attr = function(attr, value) {
 }
 
 
-uniqId=12110;  
 rmapper.bubble.get_html = function(facility, attribute_is,
                                    last_report_date) {
 
@@ -70,9 +64,7 @@ rmapper.bubble.get_html = function(facility, attribute_is,
     availability = capacity - npatients;
   }
 
-  uniqId++;
-  var vars = {__ID__: uniqId,
-              facility: facility,
+  var vars = {facility: facility,
               services_list: rmapper.get_services(facility),
               attribute_is: attribute_is,
               last_updated: last_report_date,
@@ -86,5 +78,5 @@ rmapper.bubble.get_html = function(facility, attribute_is,
   }
   var rendered_html = tmpl("bubble_tmpl", vars);
 
-  return {tabs_id: '#tabs-'+uniqId, html: rendered_html };
+  return {tabs_id: '#tabs-in-bubble', html: rendered_html };
 }
