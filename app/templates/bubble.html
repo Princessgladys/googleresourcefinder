@@ -18,10 +18,10 @@
           <h1><%=facility.title%></h1>
           <div class="bubble-l2">
             <div class="bubble-l2-inner">
-              Facility ID: <%=facility.id%> |
+              Facility ID: <%=facility.id%> \u00b7
             </div>
             <div class="bubble-l2-inner">
-              Updated <%=last_updated%> |
+              <%=last_updated%> \u00b7
             </div>
             <% if (rmapper.user && rmapper.user.is_editor()) { %>
             <div class="edit-links bubble-l2-inner"> 
@@ -143,6 +143,6 @@
               </table>
             </div>
           </div>
-        </div>';
+        </div>
       </script>
       
