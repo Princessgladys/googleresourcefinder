@@ -72,7 +72,7 @@ class Handler(webapp.RequestHandler):
         if not self.auth:
             raise Redirect(users.create_login_url(self.request.uri))
         if not access.check_user_role(self.auth, role, cc):
-            raise ErrorMessage(403, 'Unauthorized user.')
+            raise ErrorMessage(403, _('Unauthorized user.'))
 
     def render(self, path, **params):
         """Renders the template at the given path with the given parameters."""

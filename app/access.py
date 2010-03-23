@@ -29,7 +29,7 @@ class Authorization(db.Model):
     # all countries
     user_roles = db.StringListProperty()
     requested_roles = db.StringListProperty()
-    
+
 def check_token(token):
     return Authorization.all().filter('token =', token).get()
 

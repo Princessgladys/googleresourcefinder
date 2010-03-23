@@ -119,7 +119,7 @@ def version_to_json(version):
 
     # Gather all the reports by facility ID.
     report_map = {}
-    for report in Report.all().ancestor(version).order('-timestamp').fetch(500):
+    for report in Report.all().ancestor(version).order('-timestamp'):
         report_map.setdefault(report.facility_name, []).insert(0, report)
 
     # Make JSON objects for the facilities, while collecting lists of the
@@ -131,7 +131,7 @@ def version_to_json(version):
 
     # Make JSON objects for the districts.
     division_jobjects, division_is = make_jobjects(
-        Division.all().ancestor(version).filter('type =', 'arrondissement'),
+        Division.all().ancestor(version).filter('type =', 'departemen'),
         division_transformer, facility_map)
 
     # Fix up the facilities to point at the districts.

@@ -137,7 +137,8 @@ class Export(Handler):
                 for country in Country.all():
                     version = get_latest_version(country.key().name())
                     self.write('<h2>%s</h2>' % country.title)
-                    self.write('<p>Last updated: %s' % version.timestamp)
+                    self.write('<p>%s %s' %
+                        (_('Last updated:'), version.timestamp))
                     self.write('<p><form>')
                     self.write('<input type=hidden name="cc" value="%s">' %
                                country.key().name())
@@ -148,12 +149,13 @@ class Export(Handler):
                             '<option value="%s">%s</option>' % (
                             facility_type.key().name(),
                             facility_type.key().name()))
-                    self.write('<p><input type=submit value="Export CSV">')
+                    self.write('<p><input type=submit value="%s">' %
+                        _('Export CSV'))
                     self.write('</form>')
         elif not auth:
             self.redirect(users.create_login_url(self.request.uri))
         else:
-            raise ErrorMessage(403, 'Unauthorized user.')
+            raise ErrorMessage(403, _('Unauthorized user.'))
 
 
 if __name__ == '__main__':
