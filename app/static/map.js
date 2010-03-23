@@ -1004,6 +1004,7 @@ function edit_handler(edit_url) {
       info.close();
       info.setContent('<div class="facility-info">' + data + '</div>');
       info.open(map, markers[selected_facility_i]);
+      $j('#edit').ajaxForm({target: '#edit-status'});
     }
   });
   return false;
