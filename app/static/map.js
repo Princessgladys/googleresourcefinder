@@ -154,8 +154,15 @@ var markers = [];  // marker for each facility
 
 // Print a message to the Safari or Firebug console.
 function log() {
-  if (typeof console !== 'undefined' && console.log) {
-    console.log.apply(console, arguments);
+  // The strange way this function is written seems to be the only one
+  // working on IE
+  if (typeof console === 'undefined') {
+    return;
+  }
+  if (console) {
+    if (console.log) {
+      console.log.apply(console, arguments);
+    }
   }
 }
 
@@ -547,6 +554,7 @@ function align_header_with_table(thead, tbody) {
     var body_cell = tbody.firstChild.firstChild;
     while (body_cell) {
       // Subtract 8 pixels to account for td padding: 2px 4px.
+      // TODO: fix for IE
       head_cell.style.width = (body_cell.clientWidth - 8) + 'px';
       head_cell = head_cell.nextSibling;
       body_cell = body_cell.nextSibling;
@@ -911,6 +919,7 @@ function load_data(data) {
 // ==== In-place update
 
 function start_monitoring() {
+  // TODO: fix for IE
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = handle_monitor_notification;
   xhr.open('GET', '/monitor');
