@@ -61,8 +61,7 @@ var messages = {};  // {namespace: {name: {language: message}}
 rmapper.get_services_from_values = function(values) {
 
   services = translate_values(
-      [].concat(values[attributes_by_name.specialty_care] || [])
-      .concat(values[attributes_by_name.medical_equipment] || []))
+      [].concat(values[attributes_by_name.services] || []))
   .join(', ');
   return services;
 }
@@ -85,8 +84,7 @@ var summary_columns = [
       return $$('div', {}, [beds_div, 'Services']);
     },
     get_value: function(values) {
-      var services = translate_values(
-          values[attributes_by_name.services] || []).join(', ');
+      var services = rmapper.get_services_from_values(values);
       var total_beds = values[attributes_by_name.total_beds];
       if (total_beds === null) {
         total_beds = '\u2013';
@@ -924,7 +922,7 @@ function handle_monitor_notification() {
     if (this.responseText != null && this.responseText.length) {
       eval(this.responseText);
     }
-    start_monitoring();
+    //start_monitoring();
   }
 }
 
