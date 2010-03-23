@@ -20,7 +20,6 @@ def load_paho_csv(version, filename):
     facilities = []
     reports = []
     for record in csv.DictReader(open(filename)):
-        print record
         for key in record:
             record[key] = record[key].decode('utf-8')
         facility_name = 'mspphaiti.org..' + record['PCode']
@@ -53,6 +52,11 @@ def load_paho_csv(version, filename):
             damage=record['Damage'],
             comment=record['OperationalStatus']
         ))
-    db.put(facilities)
-    db.put(reports)
 
+    put_batches(facilities + reports)
+
+def put_batches(entities):
+    """Works around annoying limitations of App Engine's datastore."""
+    while entities:
+        batch, entities = entities[:200], entities[200:]
+        db.put(batch)
