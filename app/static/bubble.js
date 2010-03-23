@@ -70,11 +70,6 @@ rmapper.bubble.get_html = function(facility, attribute_is,
               last_updated: last_report_date,
               availability: availability,
               capacity: capacity,
-              attrs: [ {title: "Organization Type",
-                        value: "Red Cross Hospital"},
-                       {title: "Transportation",
-                        value:
-                        "Patient pickup available and reachable by road"}]
   }
   var rendered_html = tmpl("bubble_tmpl", vars);
 
