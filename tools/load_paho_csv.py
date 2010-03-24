@@ -32,7 +32,7 @@ def load_paho_csv(version, filename):
             version,
             key_name=facility_name,
             type='hospital',
-            title=record['Fac_NameFr'] or record['NomInstitu'],
+            title=record['Fac_NameFr'].strip() or record['NomInstitu'],
             location=db.GeoPt(latitude, longitude),
             division_name=record['Departemen'].strip()
         ))
