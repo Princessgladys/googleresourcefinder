@@ -51,6 +51,11 @@ indexes:
   properties:
   - name: name
 
+- kind: Facility
+  ancestor: yes
+  properties:
+  - name: title
+
 - kind: Record
   properties:
   - name: feed
