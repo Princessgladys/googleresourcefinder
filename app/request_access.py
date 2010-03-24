@@ -26,7 +26,8 @@ class RequestAccess(utils.Handler):
             raise Redirect(users.create_login_url(self.request.uri))
 
         self.render('templates/request_access.html',
-                    params=self.params);
+                    role='user',
+                    cc='ht');
 
 
     def post(self):
