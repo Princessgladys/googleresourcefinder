@@ -38,17 +38,9 @@
   vertical-align: top;
 }
 
-.bubble .scorecard th {
+.bubble .scorecard th, .bubble .scorecard td {
   font-weight: normal;
   padding: 4px 16px 0;
-}
-
-.bubble .scorecard th div {
-  margin-bottom: -6px; /* bring the content closer to the headings */
-}
-
-.bubble .scorecard td {
-  padding: 0 16px;
 }
 
 .bubble .scorecard .availability, .bubble .scorecard .capacity {
@@ -67,12 +59,12 @@
 
 .bubble .scorecard .number {
   font-size: 46px;
+  margin-top: -8px; /* bring the numbers closer to the headings */
 }
 
 .bubble .scorecard td.services {
   font-size: 16px;
   word-wrap: break-word;
-  vertical-align: middle;
 }
 
 .bubble #bubble-tabs {
