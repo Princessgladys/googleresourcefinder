@@ -60,8 +60,8 @@ rmapper.bubble.get_html = function(facility, attribute_is,
       facility.last_report.values[attributes_by_name.total_beds] &&
       facility.last_report.values[attributes_by_name.available_beds]) {
     capacity = facility.last_report.values[attributes_by_name.total_beds];
-    npatients = facility.last_report.values[attributes_by_name.available_beds];
-    availability = capacity - npatients;
+    availability =
+        facility.last_report.values[attributes_by_name.available_beds];
   }
 
   var vars = {facility: facility,
@@ -73,5 +73,5 @@ rmapper.bubble.get_html = function(facility, attribute_is,
   }
   var rendered_html = tmpl("bubble_tmpl", vars);
 
-  return {tabs_id: '#tabs-in-bubble', html: rendered_html };
+  return {tabs_id: '#bubble-tabs', html: rendered_html};
 }

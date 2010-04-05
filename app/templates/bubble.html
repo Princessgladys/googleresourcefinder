@@ -14,67 +14,54 @@
 # limitations under the License.
 {% endcomment %}
       <script type="text/html" id="bubble_tmpl">
-        <div id="bubble">
+        <div class="bubble">
           <h1><%=facility.title%></h1>
-          <div class="bubble-l2">
-            <div class="bubble-l2-inner">
-              Facility ID: <%=facility.name%> \u00b7
-            </div>
-            <div class="bubble-l2-inner">
-              <%=last_updated%> \u00b7
-            </div>
+          <h2>
+            Facility ID: <%=facility.name%> \u00b7
+            <%=last_updated%> \u00b7
             <% if (rmapper.user && rmapper.user.is_editor()) { %>
-            <div class="edit-links bubble-l2-inner"> 
               <a href="/edit?cc=ht&facility_name=<%=facility.name%>">
                 Edit this record</a>
-            </div>
             <% } else if (rmapper.user) { %>
-            <div class="request-edit" >
-              <a href="#" class="edit-ip-link" 
-                         onclick="request_role_handler(/request_access?cc=ht&role=editor&embed=yes');">
-                Request to become editor
-              </a>
-            </div>
+              <a href="#"
+                 onclick="request_role_handler(/request_access?cc=ht&role=editor&embed=yes');">
+                Request edit access</a>
             <% } else { %>
-            <div class="please-signin">
-              Please sign in as editor to edit
-            </div>
+              Please sign in to edit
             <% } %>
-          </div>
-          <div class="bubble-main-info">
-            <hr>
-            <table>
-              <tbody>
-                <tr class=bubble-info-head>
-                  <% if (availability || availability == 0) { %>
-                  <td class="bubble-info-ava"> availability </td>
-                  <td> capacity </td>
-                  <% } else {%>
-                  <td class="bubble-info-no-numbers" rowspan="2">
-                    Please call for availability information
-                  </td>
-                  <% } %>
-                  <td> services </td>
-                </tr>
-                <tr>
-                  <% if (availability || availability == 0) { %>
-                  <td class="bubble-info-number bubble-info-ava"> <%=availability%> </td>
-                  <td class="bubble-info-number"> <%=capacity%> </td>
-                  <% } %>
-                  <td class="bubble-info-serv">
-                    <%=services_list %>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <hr>
-          </div>
-          <div id="tabs-in-bubble">
+          </h2>
+          <table class="scorecard" cellpadding="0" cellspacing="0">
+            <tbody>
+              <tr>
+                <% if (availability || availability == 0) { %>
+                <th class="availability" width="1%">availability</td>
+                <th class="capacity" width="1%">capacity</td>
+                <% } else {%>
+                <th class="no-information" rowspan="2">
+                  Please call for availability information
+                </td>
+                <% } %>
+                <th class="services">services</th>
+              </tr>
+              <tr>
+                <% if (availability || availability == 0) { %>
+                <td class="availability"
+                    ><div class="number"><%=availability%></div></td>
+                <td class="capacity"
+                    ><div class="number"><%=capacity%></div></td>
+                <% } %>
+                <td class="services">
+                  <%=services_list %>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div id="bubble-tabs">
             <ul>
-              <li ><a href="#tabs-in-bubble-1">Facility Details</a></li> 
-              <li ><a href="#tabs-in-bubble-2">Change History</a></li>
+              <li><a href="#bubble-tab-details">Facility Details</a></li> 
+              <li><a href="#bubble-tab-history">Change History</a></li>
             </ul>
-            <div id="tabs-in-bubble-1" >
+            <div id="bubble-tab-details">
               <table>
                 <tbody id="bubble_attributes_body">
                   <tr class="item">
@@ -106,7 +93,7 @@
                 </tbody>
               </table>
             </div>
-            <div id="tabs-in-bubble-2" >
+            <div id="bubble-tab-history">
               <table>
                 <thead>
                   <tr>
