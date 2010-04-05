@@ -31,6 +31,13 @@ rmapper.bubble.format_attr = function(attr, value) {
     case 'text':
       value = '<div class="text">' + value || '' + '</div>';
       break;
+    case 'bool':
+      if (value === true) {
+        value = 'Yes';
+      } else if (value === false) {
+        value = 'No';
+      }
+      break;
     case 'choice':
       value = translate_value(value) || '\u2013';
       break;
