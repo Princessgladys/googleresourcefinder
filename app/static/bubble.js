@@ -52,9 +52,7 @@ rmapper.bubble.format_attr = function(attr, value) {
 }
 
 
-rmapper.bubble.get_html = function(facility, attribute_is,
-                                   last_report_date) {
-
+rmapper.bubble.get_html = function(facility, attribute_is, last_report_date) {
   var availability, capacity;
   if (facility.last_report &&
       facility.last_report.values[attributes_by_name.total_beds] &&
@@ -64,14 +62,14 @@ rmapper.bubble.get_html = function(facility, attribute_is,
         facility.last_report.values[attributes_by_name.available_beds];
   }
 
-  var vars = {facility: facility,
-              services_list: rmapper.get_services(facility),
-              attribute_is: attribute_is,
-              last_updated: last_report_date,
-              availability: availability,
-              capacity: capacity,
+  var vars = {
+    facility: facility,
+    services_list: rmapper.get_services(facility),
+    attribute_is: attribute_is,
+    last_updated: last_report_date,
+    availability: availability,
+    capacity: capacity,
   }
-  var rendered_html = tmpl("bubble_tmpl", vars);
-
+  var rendered_html = tmpl('bubble_tmpl', vars);
   return {tabs_id: '#bubble-tabs', html: rendered_html};
 }

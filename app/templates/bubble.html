@@ -33,22 +33,22 @@
           <table class="scorecard" cellpadding="0" cellspacing="0">
             <tbody>
               <tr>
-                <% if (availability || availability == 0) { %>
-                <th class="availability" width="1%">availability</td>
-                <th class="capacity" width="1%">capacity</td>
+                <% if (availability !== null) { %>
+                  <th class="availability" width="1%">availability</th>
+                  <th class="capacity" width="1%">capacity</th>
                 <% } else {%>
-                <th class="no-information" rowspan="2">
-                  Please call for availability information
-                </td>
+                  <th class="no-information" width="1%" rowspan="2">
+                    Please call for availability information
+                  </th>
                 <% } %>
                 <th class="services">services</th>
               </tr>
               <tr>
-                <% if (availability || availability == 0) { %>
-                <td class="availability"
-                    ><div class="number"><%=availability%></div></td>
-                <td class="capacity"
-                    ><div class="number"><%=capacity%></div></td>
+                <% if (availability !== null) { %>
+                  <td class="availability"
+                      ><div class="number"><%=availability%></div></td>
+                  <td class="capacity"
+                      ><div class="number"><%=capacity%></div></td>
                 <% } %>
                 <td class="services">
                   <%=services_list %>
@@ -78,17 +78,20 @@
                   <% for ( var i = 0; i < attribute_is.length; i++ ) {
                        var a = attribute_is[i];
                        var attribute = attributes[a];
-                  %>
-
-                  <tr class="item">
-                    <td class="bubble_attr_title">
-                      <%=messages.attribute_name[attribute.name].en%> </td>
-                    <td class="bubble_attr_value" colspan="2">
-                      <% if (facility.last_report) { %>
-                        <%=rmapper.bubble.format_attr(attribute, facility.last_report.values[a])%>
-                      <% } %>
-                    </td>
-                  </tr>
+                       var value = null;
+                       if (facility.last_report) {
+                         value = facility.last_report.values[a];
+                       }
+                       if (value !== null && value !== '') { %>
+                        <tr class="item">
+                          <td class="bubble_attr_title">
+                            <%=messages.attribute_name[attribute.name].en%>
+                          </td>
+                          <td class="bubble_attr_value" colspan="2">
+                            <%=rmapper.bubble.format_attr(attribute, value)%>
+                          </td>
+                        </tr>
+                    <% } %>
                   <% } %>
                 </tbody>
               </table>

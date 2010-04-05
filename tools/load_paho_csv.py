@@ -40,17 +40,17 @@ def load_paho_csv(version, filename):
             version,
             facility_name=facility_name,
             date=datetime.date.today(),
-            organization=record['Oorganisat'],
-            departemen=record['Departemen'],
-            district=record['DistrictNom'],
-            commune=record['Commune'],
-            address=record['Address'],
-            phone=record['Telephone'],
-            email=record['email'],
-            type=record['Type'],
-            category=record['Categorie'],
-            damage=record['Damage'],
-            comment=record['OperationalStatus']
+            organization=record['Oorganisat'].strip() or None,
+            departemen=record['Departemen'].strip() or None,
+            district=record['DistrictNom'].strip() or None,
+            commune=record['Commune'].strip() or None,
+            address=record['Address'].strip() or None,
+            phone=record['Telephone'].strip() or None,
+            email=record['email'].strip(),
+            type=record['Type'].strip() or None,
+            category=record['Categorie'].strip() or None,
+            damage=record['Damage'].strip() or None,
+            comment=record['OperationalStatus'].strip() or None
         ))
 
     put_batches(facilities + reports)
