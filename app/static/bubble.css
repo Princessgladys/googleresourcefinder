@@ -13,43 +13,58 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 */
-.bubble-l2 {
-  font-size: 10px;
-  color: #666666;
+
+.bubble h1 {
+  margin: 0;
 }
-.bubble-l2-inner {
-  display: inline;
-}
-.bubble-main-info {
-  background-color: #EEE
+.bubble h2 {
+  font-size: 11px;
+  font-weight: normal;
+  color: #666;
+  margin: 0 0 1em 0;
 }
 
-.bubble-info-no-numbers {
+.bubble .scorecard {
+  margin: 8px 0;
+  width: 100%;
+  background: #eee;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+.bubble .scorecard th, .bubble .scorecard td {
+  font-weight: normal;
+  padding: 4px 16px 0;
+}
+
+.bubble .scorecard .availability, .bubble .scorecard .capacity {
+  text-align: center;
+}
+
+.bubble .scorecard .no-information {
   background-color: #fffd8b;
   border-color: red;
   border-width: 2px;
 }
 
-.bubble-info-head {
-  font-size: 10px;
-  font-weight: bold;
-}
-.bubble-main-info tbody  {
-  font-size: 8px;
+.bubble .scorecard .availability {
+  color: #090;
 }
 
-.bubble-info-number {
-  font-size: 30px;
+.bubble .scorecard .number {
+  font-size: 46px;
+  margin-top: -6px;
 }
 
-.bubble-info-ava {
-  color: #009900;
-}
-
-.bubble-info-serv {
+.bubble .scorecard td.services {
+  font-size: 16px;
   word-wrap: break-word;
   vertical-align: middle;
-  width: 150px;
+}
+
+.bubble #bubble-tabs li {
+  font-family: arial;
+  font-size: 11px;
 }
 
 .bubble_attr_title {
