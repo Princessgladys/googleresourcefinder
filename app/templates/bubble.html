@@ -33,9 +33,9 @@
           <table class="scorecard" cellpadding="0" cellspacing="0">
             <tbody>
               <tr>
-                <th class="availability" width="1%">availability</th>
-                <th class="capacity" width="1%">capacity</th>
-                <th class="services">services</th>
+                <th class="availability" width="1%"><div>availability</div></th>
+                <th class="capacity" width="1%"><div>capacity</div></th>
+                <th class="services"><div>services</div></th>
               </tr>
               <tr>
                 <% if (availability === null) { %>
@@ -49,31 +49,31 @@
                       ><div class="number"><%=capacity%></div></td>
                 <% } %>
                 <td class="services">
-                  <%=services_list %>
+                  <%=services_list%>
                 </td>
               </tr>
             </tbody>
           </table>
           <div id="bubble-tabs">
             <ul>
-              <li><a href="#bubble-tab-details">Facility Details</a></li> 
-              <li><a href="#bubble-tab-history">Change History</a></li>
+              <li><a href="#bubble-tab-details">Facility details</a></li> 
+              <li><a href="#bubble-tab-history">Change history</a></li>
             </ul>
             <div id="bubble-tab-details">
-              <table>
-                <tbody id="bubble_attributes_body">
+              <table class="details" cellpadding="0" cellspacing="0">
+                <tbody>
                   <tr class="item">
-                    <td class="bubble_attr_title">
+                    <td class="label" width="20%">
                       <%=messages.attribute_name['address'].en%> </td>
-                    <td class="bubble_attr_value">
+                    <td class="value">
                       Tabarra 41, Port-au-prince, Haiti
                     </td>
-                    <td class="bubble_attr_value">
+                    <td class="value">
                       Latitude: <%=facility.location.lat%><br>
                       Longitude: <%=facility.location.lon%>
                     </td>
                   </tr>
-                  <% for ( var i = 0; i < attribute_is.length; i++ ) {
+                  <% for (var i = 0; i < attribute_is.length; i++) {
                        var a = attribute_is[i];
                        var attribute = attributes[a];
                        var value = null;
@@ -82,10 +82,10 @@
                        }
                        if (value !== null && value !== '') { %>
                         <tr class="item">
-                          <td class="bubble_attr_title">
+                          <td class="label">
                             <%=messages.attribute_name[attribute.name].en%>
                           </td>
-                          <td class="bubble_attr_value" colspan="2">
+                          <td class="value" colspan="2">
                             <%=rmapper.bubble.format_attr(attribute, value)%>
                           </td>
                         </tr>
@@ -106,18 +106,20 @@
                 <tbody>
                     <% if (facility.reports) {
                          for (var i = facility.reports.length-1; i >= 0; i--) {
-                           var r = facility.reports[i];
+                           var report = facility.reports[i];
                            for ( var j = 0; j < attribute_is.length; j++ ) {
                              var a = attribute_is[j];
-                             if (r.values[a] || r.values[a] == 0) {
+                             if (report.values[a] || report.values[a] == 0) {
                                var attribute = attributes[a];
                     %>
-                  <tr>
-                    <td><%=r.date%></td>
-                    <td><%=messages.attribute_name[attribute.name].en%>
-                      was updated</td>
-                    <td><%=r.user.nickname%></td>
-                  </tr>
+                            <tr>
+                              <td><%=report.date%></td>
+                              <td>
+                                <%=messages.attribute_name[attribute.name].en%>
+                                was updated
+                              </td>
+                              <td><%=report.user.nickname%></td>
+                            </tr>
                           <% } %>
                         <% } %>
                       <% } %>
