@@ -59,7 +59,7 @@
 
 .bubble .scorecard .number {
   font-size: 46px;
-  margin-top: -8px; /* bring the numbers closer to the headings */
+  margin-top: -7px; /* bring the numbers closer to the headings */
 }
 
 .bubble .scorecard td.services {
