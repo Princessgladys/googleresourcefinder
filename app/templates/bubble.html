@@ -33,18 +33,16 @@
           <table class="scorecard" cellpadding="0" cellspacing="0">
             <tbody>
               <tr>
-                <% if (availability !== null) { %>
-                  <th class="availability" width="1%">availability</th>
-                  <th class="capacity" width="1%">capacity</th>
-                <% } else {%>
-                  <th class="no-information" width="1%" rowspan="2">
-                    Please call for availability information
-                  </th>
-                <% } %>
+                <th class="availability" width="1%">availability</th>
+                <th class="capacity" width="1%">capacity</th>
                 <th class="services">services</th>
               </tr>
               <tr>
-                <% if (availability !== null) { %>
+                <% if (availability === null) { %>
+                  <td class="no-information" colspan="2">
+                    Please call for availability information
+                  </th>
+                <% } else {%>
                   <td class="availability"
                       ><div class="number"><%=availability%></div></td>
                   <td class="capacity"
