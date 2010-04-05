@@ -42,9 +42,9 @@
 }
 
 .bubble .scorecard .no-information {
-  background-color: #fffd8b;
-  border-color: red;
-  border-width: 2px;
+  font-style: italic;
+  padding: 6px;
+  text-align: center;
 }
 
 .bubble .scorecard .availability {
