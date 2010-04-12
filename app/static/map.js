@@ -30,6 +30,10 @@ var STATUS_LABELS = [
   'Data missing for ${any_supply}'
 ];
 
+// Temporary tweak for Health 2.0 demo (icons are always green).
+STATUS_ICON_COLORS = [null, '080', '080', '080'];
+STATUS_TEXT_COLORS = [null, '040', '040', '040'];
+
 var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
 var INFO_TEMPLATE =
@@ -475,8 +479,11 @@ function update_facility_icons() {
     if (markers[f]) {
       var facility = facilities[f];
       var s = facility_status_is[f];
-      markers[f].setIcon(make_icon(facility.title, s, detail));
-      markers[f].setZIndex(STATUS_ZINDEXES[s]);
+      var icon_url = make_icon(facility.title, s, detail);
+      if (markers[f].getIcon() !== icon_url) {
+        markers[f].setIcon(icon_url);
+        markers[f].setZIndex(STATUS_ZINDEXES[s]);
+      }
     }
   }
 }
