@@ -15,12 +15,12 @@
 """Handler for feed posting requests."""
 
 from edxl_have import Hospital, URI_PREFIXES
-from feeds import handle_feed_post
+from feeds import xmlutils
+from feeds.feedutils import handle_feed_post
 from model import Report
-from utils import ErrorMessage, Handler, run
+from utils import ErrorMessage, Handler, run, users
 import datetime
-import edxl_have_record  # register the EDXL-HAVE record type
-import xmlutils
+import feeds.edxl_have_record  # register the EDXL-HAVE record type
 
 def datetime_to_date(dt):
     return datetime.date.fromordinal(dt.toordinal())
