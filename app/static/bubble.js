@@ -58,7 +58,6 @@ rmapper.bubble.format_attr = function(attr, value) {
   return value;
 }
 
-
 rmapper.bubble.get_html = function(facility, attribute_is, last_report_date) {
   var availability = null, capacity = null;
   if (facility.last_report &&
