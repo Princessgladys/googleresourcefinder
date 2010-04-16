@@ -14,68 +14,140 @@
 # limitations under the License.
 */
 
-rmapper.bubble = {};
+/**
+ * @fileoverview Functions for rendering the InfoWindow for a facility.
+ */
 
-rmapper.bubble.format_attr = function(attr, value) {
+rf.bubble = {};
+
+/**
+ * Renders an attribute value, in a manner appropriate for the attribute type.
+ */
+rf.bubble.format_attr = function(attr, value) {
+  if (value === null || value === undefined || value === '') {
+    return '\u2013';
+  }
   switch (attr.type) {
     case 'contact':
       value = (value || '').replace(/^[\s\|]+|[\s\|]+$/g, '');
-      value = value ? value.replace(/\|/g, ', ') : '\u2013';
-      break;
+      return value ? value.replace(/\|/g, ', ') : '\u2013';
     case 'date':
-      value = (value || '').replace(/T.*/, '') || '\u2013';
-      break;
-    case 'str':
-      value = value || '\u2013';
-      break;
+      return value.replace(/T.*/, '');
     case 'text':
-      value = '<div class="text">' + value || '' + '</div>';
-      break;
+      return render(HTML('<div class="text">${TEXT}</div>', {TEXT: value}));
     case 'bool':
-      if (value === true) {
-        value = 'Yes';
-      } else if (value === false) {
-        value = 'No';
-      }
-      break;
+      return value ? locale.YES() : locale.NO();
     case 'choice':
-      value = translate_value(value) || '\u2013';
-      break;
+      return translate_value(value);
     case 'multi':
-      value = translate_values(value || ['\u2013']).join(', ');
-      break;
+      return translate_values(value).join(', ');
+    case 'str':
     case 'int':
     case 'float':
-      if (value === null || value === undefined) {
-        value = '\u2013';
-      }
-      if (value === 0) {
-        value = '<span class="stockout">0</span>';
-      }
-    break;
+    default:
+      return value + '';
+  }
+};
+
+/**
+ * Renders the HTML content of the InfoWindow for a given facility.
+ */
+rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
+  var EDIT_URL = '/edit?cc=ht&facility_name=${FACILITY_NAME}';
+  var AVAILABILITY_CELLS = HTML(
+    '<td class="availability">' +
+    '  <div class="number">${AVAILABILITY}</div></td>' +
+    '<td class="capacity">' +
+    '  <div class="number">${CAPACITY}</div></td>');
+  var AVAILABILITY_UNKNOWN = HTML(
+    '<td class="no-information" colspan="2">${MESSAGE}</td>');
+  var ATTRIBUTE_ROW = HTML(
+    '<tr class="item"><td class="label">${LABEL}</td>' +
+    '<td class="value" colspan="2">${VALUE}</td></tr>');
+  var HISTORY_ROW = HTML(
+    '<tr><td>${DATE}</td><td>${LABEL}: ${VALUE}</td><td>${AUTHOR}</td></tr>');
+  var REQUEST_ACCESS_LINK_START = HTML(
+    '<a href="#" onclick="' +
+        "request_role_handler('/request_access?cc=ht&role=editor&embed=yes')" +
+    '">');
+
+  var edit_link = '';
+  if (user && user.is_editor) {
+    var edit_url = render(EDIT_URL, {FACILITY_NAME: facility.name});
+    edit_link = locale.EDIT_LINK_HTML({
+      LINK_START: render(HTML('<a href="${URL}">'), {URL: edit_url}),
+      LINK_END: HTML('</a>')
+    });
+  } else if (user) {
+    edit_link = locale.REQUEST_EDIT_ACCESS_HTML({
+      LINK_START: REQUEST_ACCESS_LINK_START,
+      LINK_END: HTML('</a>')
+    });
+  } else {
+    edit_link = locale.SIGN_IN_TO_EDIT();
   }
 
-  return value;
-}
-
-rmapper.bubble.get_html = function(facility, attribute_is, last_report_date) {
-  var availability = null, capacity = null;
-  if (facility.last_report &&
-      facility.last_report.values[attributes_by_name.total_beds] &&
-      facility.last_report.values[attributes_by_name.available_beds]) {
-    capacity = facility.last_report.values[attributes_by_name.total_beds];
-    availability =
-        facility.last_report.values[attributes_by_name.available_beds];
+  var values = facility.last_report && facility.last_report.values;
+  if (values && values[attributes_by_name.total_beds]) {
+    availability_info = render(AVAILABILITY_CELLS, {
+      AVAILABILITY: values[attributes_by_name.available_beds],
+      CAPACITY: values[attributes_by_name.total_beds]
+    });
+  } else {
+    availability_info = render(AVAILABILITY_UNKNOWN, {
+      MESSAGE: locale.CALL_FOR_AVAILABILITY()
+    });
   }
 
-  var vars = {
-    facility: facility,
-    services_list: rmapper.get_services(facility),
-    attribute_is: attribute_is,
-    last_updated: last_report_date,
-    availability: availability,
-    capacity: capacity,
+  var geolocation_info = locale.GEOLOCATION_HTML({
+    LATITUDE: facility.location.lat,
+    LONGITUDE: facility.location.lon
+  });
+
+  var attributes_info = [];
+  for (var i = 0; i < attribute_is.length; i++) {
+    var a = attribute_is[i];
+    var attribute = attributes[a];
+    var value = null;
+    if (facility.last_report) {
+      value = facility.last_report.values[a];
+    }
+    if (value !== null && value !== '') {
+      attributes_info.push(render(ATTRIBUTE_ROW, {
+        LABEL: messages.attribute_name[attribute.name].en,
+        VALUE: rf.bubble.format_attr(attribute, value)
+      }));
+    }
   }
-  var rendered_html = tmpl('bubble_tmpl', vars);
-  return {tabs_id: '#bubble-tabs', html: rendered_html};
+
+  var history_info = [];
+  if (facility.reports) {
+    for (var i = facility.reports.length-1; i >= 0; i--) {
+      var report = facility.reports[i];
+      for (var j = 0; j < attribute_is.length; j++) {
+        var a = attribute_is[j];
+        if (report.values[a] || report.values[a] == 0) {
+          var attribute = attributes[a];
+          history_info.push(render(HISTORY_ROW, {
+            DATE: report.date,
+            LABEL: messages.attribute_name[attribute.name].en,
+            VALUE: rf.bubble.format_attr(attribute, report.values[a]),
+            AUTHOR: report.user.nickname
+          }));
+        } 
+      } 
+    } 
+  }
+
+  return render_template('bubble_template', {
+    FACILITY_TITLE: facility.title,
+    FACILITY_NAME: facility.name,
+    LAST_UPDATED: last_updated,
+    EDIT_LINK: edit_link,
+    AVAILABILITY_INFO: availability_info,
+    FACILITY_SERVICES: rf.get_services(facility),
+    GEOLOCATION_INFO: geolocation_info,
+    ATTRIBUTES_INFO: attributes_info,
+    HISTORY_INFO: history_info
+  });
 }

@@ -23,11 +23,11 @@ var MAX_STATUS = 3;
 var STATUS_ICON_COLORS = [null, '080', 'a00', '444'];
 var STATUS_TEXT_COLORS = [null, '040', 'a00', '444'];
 var STATUS_ZINDEXES = [null, 3, 2, 1];
-var STATUS_LABELS = [
+var STATUS_LABEL_TEMPLATES = [
   null,
-  'One or more ${all_supplies}',
-  'No ${any_supply}',
-  'Data missing for ${any_supply}'
+  'One or more ${ALL_SUPPLIES}',
+  'No ${ANY_SUPPLY}',
+  'Data missing for ${ANY_SUPPLY}'
 ];
 
 // Temporary tweak for Health 2.0 demo (icons are always green).
@@ -36,20 +36,6 @@ STATUS_TEXT_COLORS = [null, '040', '040', '040'];
 
 var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
-var INFO_TEMPLATE =
-    '<div class="facility-info">' +
-    '  <h1>${facility_title}</h1>' +
-    '  <div class="caption">' +
-    '    ${user_action_html}' +
-    '  </div>' +
-    '  <div class="attributes">${attributes}</div>' +
-    '</div>';
-
-var ATTRIBUTE_TEMPLATE =
-    '<div class="attribute">' +
-    '  <span class="title">${attribute_title}</span>: ' +
-    '  <span class="value">${attribute_value}</span>' +
-    '</div>';
 
 // ==== Data loaded from the data store
 
@@ -62,20 +48,18 @@ var messages = {};  // {namespace: {name: {language: message}}
 
 // ==== Columns shown in the facility table
 
-rmapper.get_services_from_values = function(values) {
-
+rf.get_services_from_values = function(values) {
   services = translate_values(
       [].concat(values[attributes_by_name.services] || []))
   .join(', ');
   return services;
 }
 
-rmapper.get_services = function(facility) {
-
+rf.get_services = function(facility) {
   var services = '';
   if (facility.last_report) {
     var values = facility.last_report.values;
-    services = rmapper.get_services_from_values(values);
+    services = rf.get_services_from_values(values);
   }
   return services;
 }
@@ -88,7 +72,7 @@ var summary_columns = [
       return $$('div', {}, [beds_div, 'Services']);
     },
     get_value: function(values) {
-      var services = rmapper.get_services_from_values(values);
+      var services = rf.get_services_from_values(values);
       var total_beds = values[attributes_by_name.total_beds];
       if (total_beds === null) {
         total_beds = '\u2013';
@@ -295,25 +279,6 @@ function maybe_selected(selected) {
   return selected ? ' selected' : '';
 }
 
-function render_template(template, params) {
-  var result = template;
-  for (var name in params) {
-    var placeholder = new RegExp('\\$\\{' + name + '\\}', 'g');
-    var substitution;
-    if (name === '$') {
-      substitution = '$';
-    } else if (params[name] === undefined || params[name] === null) {
-      substitution = '\u2013';
-    } else if (typeof params[name] === 'object') {
-      substitution = params[name].html;
-    } else {
-      substitution = html_escape(params[name]);
-    }
-    result = result.replace(placeholder, substitution);
-  }
-  return result;
-}
-
 function make_icon(title, status, detail) {
   var text = detail ? title : '';
   var text_size = detail ? 10 : 0;
@@ -497,9 +462,9 @@ function update_facility_legend() {
       $$('th', {'class': 'legend-icon'},
         $$('img', {src: make_icon('', s, false)})),
       $$('td', {'class': 'legend-label status-' + s},
-        render_template(STATUS_LABELS[s], {
-          all_supplies: selected_supply_set.description_all,
-          any_supply: selected_supply_set.description_any
+        render(STATUS_LABEL_TEMPLATES[s], {
+          ALL_SUPPLIES: selected_supply_set.description_all,
+          ANY_SUPPLY: selected_supply_set.description_any
         }))
     ]));
   }
@@ -846,11 +811,11 @@ function select_facility(facility_i, ignore_current) {
   }
 
   // Pop up the InfoWindow on the selected clinic.
-  var last_report_date = 'No reports received';
+  var last_updated = 'No reports received';
   var last_report = selected_facility.last_report;
   if (last_report) {
     var ymd = last_report.date.split('-');
-    last_report_date = 'Updated ' +
+    last_updated = 'Updated ' +
         MONTH_ABBRS[ymd[1] - 1] + ' ' + (ymd[2] - 0) + ', ' + ymd[0];
   }
   info.close();
@@ -858,14 +823,12 @@ function select_facility(facility_i, ignore_current) {
   division_title = divisions[selected_facility.division_i].title;
   attribute_is = facility_types[selected_facility.type].attribute_is;
 
-  bubble_info = rmapper.bubble.get_html(selected_facility, attribute_is,
-                                        last_report_date);
-  info.setContent(bubble_info.html)
+  info.setContent(to_html(rf.bubble.get_html(
+      selected_facility, attribute_is, last_updated, rf.user)));
   info.open(map, markers[selected_facility_i]);
 
-  // this call sets up the tabs and need to be called after the dom was created
-  jQuery(bubble_info.tabs_id).tabs();
-
+  // This call sets up the tabs and should be called after the DOM is created.
+  jQuery('#bubble-tabs').tabs();
 }
 
 // ==== Load data
