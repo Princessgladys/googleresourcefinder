@@ -21,6 +21,15 @@ from access import Authorization
 
 
 class RequestAccess(utils.Handler):
+    def get(self):
+        if not self.auth:
+            raise Redirect(users.create_login_url(self.request.uri))
+
+        self.render('templates/request_access.html',
+                    role='user',
+                    cc='ht');
+
+
     def post(self):
         if not self.auth:
             raise Redirect(users.create_login_url(self.request.uri))

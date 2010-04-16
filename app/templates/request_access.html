@@ -1,4 +1,4 @@
-/*
+{% comment %}
 # Copyright 2009-2010 by Ka-Ping Yee
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-*/
-/* These CSS rules are only for IE 7 and earlier. */
-body { width: 100%; height: 100%; }
-#map, .vshadow { width:expression(document.body.clientWidth-400); }
-#data, #map, .hshadow { height:expression(document.body.clientHeight-30); }
-#supply-section { margin-top: 0; }
-#freshness { position: absolute; left: 0; bottom: 0; padding: 6px 4px 0px; }
+{% endcomment %}
+
+<title>Resource Mapper ({{instance}})</title>
+
+    <h1>Requests Approval</h1>
+
+    <form method="post" action="/request_access">
+      <input type="text" value="{{ role }}" name="role">
+      <input type="text" value="{{ cc }}" name="cc">
+      <input type="submit" value="Request">
+    </form>
+

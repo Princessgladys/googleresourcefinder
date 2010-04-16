@@ -130,7 +130,7 @@ def version_to_json(version):
     # facilities in each division.
     facility_map = {}
     facility_jobjects, facility_is = make_jobjects(
-        Facility.all().ancestor(version), facility_transformer,
+        Facility.all().ancestor(version).order('title'), facility_transformer,
         attributes, report_map, facility_type_is, facility_map)
 
     # Make JSON objects for the districts.

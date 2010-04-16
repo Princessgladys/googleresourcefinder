@@ -15,7 +15,7 @@
 """Handler for feed retrieval requests."""
 
 from edxl_have import URI_PREFIXES
-from feeds import handle_entry_get, handle_feed_get
+from feeds.feedutils import handle_entry_get, handle_feed_get
 from utils import ErrorMessage, Handler, run
 
 

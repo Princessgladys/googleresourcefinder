@@ -13,136 +13,71 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 {% endcomment %}
-      <script type="text/html" id="bubble_tmpl">
-        <div id="bubble">
-          <h1><%=facility.title%></h1>
-          <div class="bubble-l2">
-            <div class="bubble-l2-inner">
-              Facility ID: <%=facility.id%> \u00b7
-            </div>
-            <div class="bubble-l2-inner">
-              <%=last_updated%> \u00b7
-            </div>
-            <% if (rmapper.user && rmapper.user.is_editor()) { %>
-            <div class="edit-links bubble-l2-inner"> 
-              <a href="#" class="edit-ip-link" 
-                         onclick="edit_handler('/edit?cc=ht&facility_name=<%=facility.name%>&embed=yes');">
-                Edit this record
-              </a>
-              <a href="/edit?cc=ht&facility_name=<%=facility.name%>">
-                <img src="static/new-window.png" class="new_window">
-              </a> \u00b7 
-            </div>
-            <% } else if (rmapper.user) { %>
-            <div class="request-edit" >
-              <a href="#" class="edit-ip-link" 
-                         onclick="request_role_handler/request_access?cc=ht&role=editor&embed=yes');">
-                Request to become editor
-              </a>
-            </div>
-            <% } else { %>
-            <div class="please-signin">
-              Please sign in as editor to edit
-            </div>
-            <% } %>
-          </div>
-          <div class="bubble-main-info">
-            <hr>
-            <table>
-              <tbody>
-                <tr class=bubble-info-head>
-                  <% if (availability || availability == 0) { %>
-                  <td class="bubble-info-ava"> availability </td>
-                  <td> capacity </td>
-                  <% } else {%>
-                  <td class="bubble-info-no-numbers" rowspan="2">
-                    Please call for availability information
-                  </td>
-                  <% } %>
-                  <td> services </td>
-                </tr>
-                <tr>
-                  <% if (availability || availability == 0) { %>
-                  <td class="bubble-info-number bubble-info-ava"> <%=availability%> </td>
-                  <td class="bubble-info-number"> <%=capacity%> </td>
-                  <% } %>
-                  <td class="bubble-info-serv">
-                    <%=services_list %>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <hr>
-          </div>
-          <div id="tabs-in-bubble">
-            <ul>
-              <li ><a href="#tabs-in-bubble-1">Facility Details</a></li> 
-              <li ><a href="#tabs-in-bubble-2">Change History</a></li>
-            </ul>
-            <div id="tabs-in-bubble-1" >
-              <table>
-                <tbody id="bubble_attributes_body">
-                  <tr class="item">
-                    <td class="bubble_attr_title">
-                      <%=messages.attribute_name['address'].en%> </td>
-                    <td class="bubble_attr_value">
-                      Tabarra 41, Port-au-prince, Haiti
-                    </td>
-                    <td class="bubble_attr_value">
-                      Latitude: <%=facility.location.lat%><br>
-                      Longitude: <%=facility.location.lon%>
-                    </td>
-                  </tr>
-                  <% for ( var i = 0; i < attribute_is.length; i++ ) {
-                       var a = attribute_is[i];
-                       var attribute = attributes[a];
-                  %>
 
-                  <tr class="item">
-                    <td class="bubble_attr_title">
-                      <%=messages.attribute_name[attribute.name].en%> </td>
-                    <td class="bubble_attr_value" colspan="2">
-                      <% if (facility.last_report) { %>
-                        <%=rmapper.bubble.format_attr(attribute, facility.last_report.values[a])%>
-                      <% } %>
-                    </td>
-                  </tr>
-                  <% } %>
-                </tbody>
-              </table>
-            </div>
-            <div id="tabs-in-bubble-2" >
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date/Time</th>
-                    <th>Change</th>
-                    <th>Edit By</th>
-                  </tr>
-                </thead>
-                <tbody>
-                    <% if (facility.reports) {
-                         for (var i = facility.reports.length-1; i >= 0; i--) {
-                           var r = facility.reports[i];
-                           for ( var j = 0; j < attribute_is.length; j++ ) {
-                             var a = attribute_is[j];
-                             if (r.values[a] || r.values[a] == 0) {
-                               var attribute = attributes[a];
-                    %>
-                  <tr>
-                    <td><%=r.date%></td>
-                    <td><%=messages.attribute_name[attribute.name].en%>
-                      was updated</td>
-                    <td><%=r.user.nickname%></td>
-                  </tr>
-                          <% } %>
-                        <% } %>
-                      <% } %>
-                    <% } %>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </script>
-      
+{% load i18n %}
+
+<script id="bubble_template" type="text/html">
+  <div class="bubble">
+    <h1>${FACILITY_TITLE}</h1>
+    <h2>
+      Facility ID: ${FACILITY_NAME} &#xb7;
+      ${LAST_UPDATED} &#xb7;
+      ${EDIT_LINK}
+    </h2>
+    <table class="scorecard" cellpadding="0" cellspacing="0">
+      <tbody>
+        <tr>
+          <th class="availability" width="1%">{% trans "availability" %}</th>
+          <th class="capacity" width="1%">{% trans "capacity" %}</th>
+          <th class="services">{% trans "services" %}</th>
+        </tr>
+        <tr>
+          ${AVAILABILITY_INFO}
+          <td class="services">
+            ${FACILITY_SERVICES}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div id="bubble-tabs">
+      <ul>
+        <li><a href="#bubble-tab-details">
+          {% trans "Facility details" %}</a></li> 
+        <li><a href="#bubble-tab-history">
+          {% trans "Change history" %}</a></li>
+      </ul>
+      <div id="bubble-tab-details">
+        <table class="details" cellpadding="0" cellspacing="0">
+          <tbody>
+            <tr class="item">
+              <td class="label" width="20%">
+                {% trans "Address" %}
+              </td>
+              <td class="value">
+                Tabarra 41, Port-au-prince, Haiti
+              </td>
+              <td class="value">
+                ${GEOLOCATION_INFO}
+              </td>
+            </tr>
+            ${ATTRIBUTES_INFO}
+          </tbody>
+        </table>
+      </div>
+      <div id="bubble-tab-history">
+        <table class="details" cellpadding="0" cellspacing="0">
+          <thead>
+            <tr>
+              <th>{% trans "Date and time" %}</th>
+              <th>{% trans "Change" %}</th>
+              <th>{% trans "Edited by" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${HISTORY_INFO}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</script>

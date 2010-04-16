@@ -30,12 +30,6 @@ handlers:
 - url: /grant_access
   script: grant_access.py
 
-- url: /request_access
-  script: request_access.py
-
-- url: /grant_access
-  script: grant_access.py
-
 - url: /load
   script: load.py
   login: admin
