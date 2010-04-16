@@ -1,7 +1,7 @@
 """XML conversion for EDXL-HAVE."""
 
-import time_formats
-import xmlutils
+from feeds import time_formats
+from feeds import xmlutils
 
 
 EDXL_HAVE_NS = 'urn:oasis:names:tc:emergency:EDXL:HAVE:1.0'

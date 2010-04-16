@@ -19,6 +19,8 @@ import rendering
 class Main(Handler):
     
     def get(self):
+        self.require_user_role('user', 'ht')
+
         auth = self.auth
         self.render('templates/map.html',
                     params=self.params,

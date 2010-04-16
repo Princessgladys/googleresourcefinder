@@ -206,7 +206,8 @@ class Edit(utils.Handler):
     def init(self):
         """Checks for authentication and sets up self.version, self.facility,
         self.facility_type, and self.attributes based on the query params."""
-        #self.require_user_role('editor', self.params.cc)
+
+        self.require_user_role('user', self.params.cc)
         
         try:
             self.version = utils.get_latest_version(self.params.cc)

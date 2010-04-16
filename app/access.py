@@ -15,7 +15,7 @@
 from google.appengine.ext import db
 import logging
 
-ROLES = ['editor', 'superuser']
+ROLES = ['user', 'editor', 'superuser']
 
 class Authorization(db.Model):
     timestamp = db.DateTimeProperty(auto_now_add=True)
