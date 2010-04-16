@@ -149,6 +149,7 @@ var bounds_match_selected_division = false;  // to skip redundant redraws
 var map = null;
 var info = null;
 var markers = [];  // marker for each facility
+var markerClusterer = null;  // clusters markers for efficient rendering
 
 // ==== Debugging
 
@@ -344,6 +345,20 @@ function initialize_map() {
   google.maps.event.addListener(map, 'tilesloaded', set_map_opacity);
 
   info = new google.maps.InfoWindow();
+
+  var markerStyle = {
+    url: 'static/greek_cross36.png',
+    height: 36,
+    width: 36,
+    opt_textColor: '#fff',
+    Y: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
+  };
+  markerClusterer = new MarkerClusterer(map, [], {
+    maxZoom: 14,  // closest zoom at which clusters are shown
+    gridSize: 40, // size of square pixels in which to cluster
+    // override default styles to render all cluster sizes in blue
+    styles: [markerStyle, markerStyle, markerStyle, markerStyle]
+  });
 }
 
 // Reduce the opacity of the map layer to make markers stand out.
@@ -364,12 +379,12 @@ function initialize_markers() {
     var location = facility.location;
     markers[f] = new google.maps.Marker({
       position: new google.maps.LatLng(location.lat, location.lon),
-      map: map,
       icon: make_icon(facility.title, STATUS_UNKNOWN, false),
       title: facility.title
     });
     google.maps.event.addListener(markers[f], 'click', facility_selector(f));
   }
+  markerClusterer.addMarkers(markers.slice(1));
 }
 
 // ==== Display construction routines
@@ -471,14 +486,20 @@ function update_map_bounds(division_i) {
 // Update the facility map icons based on their status and the zoom level.
 function update_facility_icons() {
   var detail = map.getZoom() > 10;
+  var markersToKeep = [];
   for (var f = 1; f < facilities.length; f++) {
     if (markers[f]) {
       var facility = facilities[f];
       var s = facility_status_is[f];
-      markers[f].setIcon(make_icon(facility.title, s, detail));
-      markers[f].setZIndex(STATUS_ZINDEXES[s]);
+      if (s == STATUS_GOOD) {
+        markers[f].setIcon(make_icon(facility.title, s, detail));
+        markers[f].setZIndex(STATUS_ZINDEXES[s]);  
+        markersToKeep.push(markers[f]);
+      }
     }
   }
+  markerClusterer.clearMarkers();
+  markerClusterer.addMarkers(markersToKeep);
 }
 
 // Fill in the facility legend.
@@ -853,7 +874,7 @@ function select_facility(facility_i, ignore_current) {
 
   bubble_info = rmapper.bubble.get_html(selected_facility, attribute_is,
                                         last_report_date);
-  info.setContent(bubble_info.html)
+  info.setContent(bubble_info.html);
   info.open(map, markers[selected_facility_i]);
 
   // this call sets up the tabs and need to be called after the dom was created
@@ -923,7 +944,7 @@ function start_monitoring() {
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = handle_monitor_notification;
   xhr.open('GET', '/monitor');
-  xhr.send();
+  xhr.send('');
 }
 
 function handle_monitor_notification() {
