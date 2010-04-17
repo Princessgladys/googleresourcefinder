@@ -17,17 +17,21 @@ import access
 import rendering
 
 class Main(Handler):
+    
     def get(self):
+        self.require_user_role('user', 'ht')
+
         auth = self.auth
         self.render('templates/map.html',
                     params=self.params,
                     authorization=auth and auth.description or 'anonymous',
-                    is_editor=access.check_user_role(auth,'editor','ht'),
-                    #TODO(eyalf): should remove the assumtio there is an email
-                    user=auth and {'email': auth.email} or None,
+                    #is_editor=access.check_user_role(auth,'editor','ht'),
+                    is_editor=True,
+                    #TODO(eyalf): should remove the assumption there is an email
+                    user=auth and {'email': auth.email} or {'email': 'anonymous'} ,
                     loginout_url=(auth and users.create_logout_url('/') or
                                   users.create_login_url('/')),
-                    loginout_text=(auth and "Sign out" or "Sign in"),
+                    loginout_text=(auth and _("Sign out") or _("Sign in")),
                     data=rendering.version_to_json(get_latest_version('ht')),
                     instance=self.request.host.split('.')[0])
 

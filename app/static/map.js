@@ -23,29 +23,19 @@ var MAX_STATUS = 3;
 var STATUS_ICON_COLORS = [null, '080', 'a00', '444'];
 var STATUS_TEXT_COLORS = [null, '040', 'a00', '444'];
 var STATUS_ZINDEXES = [null, 3, 2, 1];
-var STATUS_LABELS = [
+var STATUS_LABEL_TEMPLATES = [
   null,
-  'One or more ${all_supplies}',
-  'No ${any_supply}',
-  'Data missing for ${any_supply}'
+  'One or more ${ALL_SUPPLIES}',
+  'No ${ANY_SUPPLY}',
+  'Data missing for ${ANY_SUPPLY}'
 ];
+
+// Temporary tweak for Health 2.0 demo (icons are always green).
+STATUS_ICON_COLORS = [null, '080', '080', '080'];
+STATUS_TEXT_COLORS = [null, '040', '040', '040'];
 
 var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
-var INFO_TEMPLATE =
-    '<div class="facility-info">' +
-    '  <h1>${facility_title}</h1>' +
-    '  <div class="caption">' +
-    '    ${user_action_html}' +
-    '  </div>' +
-    '  <div class="attributes">${attributes}</div>' +
-    '</div>';
-
-var ATTRIBUTE_TEMPLATE =
-    '<div class="attribute">' +
-    '  <span class="title">${attribute_title}</span>: ' +
-    '  <span class="value">${attribute_value}</span>' +
-    '</div>';
 
 // ==== Data loaded from the data store
 
@@ -58,6 +48,23 @@ var messages = {};  // {namespace: {name: {language: message}}
 
 // ==== Columns shown in the facility table
 
+rf.get_services_from_values = function(values) {
+  services = translate_values(
+      [].concat(values[attributes_by_name.services] || []))
+  .join(', ');
+  return services;
+}
+
+rf.get_services = function(facility) {
+  var services = '';
+  if (facility.last_report) {
+    var values = facility.last_report.values;
+    services = rf.get_services_from_values(values);
+  }
+  return services;
+}
+
+  
 var summary_columns = [
   null, {
     get_title: function() {
@@ -65,19 +72,16 @@ var summary_columns = [
       return $$('div', {}, [beds_div, 'Services']);
     },
     get_value: function(values) {
-      var services = translate_values(
-          [].concat(values[attributes_by_name.specialty_care] || [])
-            .concat(values[attributes_by_name.medical_equipment] || []))
-            .join(', ');
-      var capacity = values[attributes_by_name.patient_capacity];
-      var patients = values[attributes_by_name.patient_count];
-      var open_beds = '\u2013';
-      if (capacity === null) {
-        capacity = '\u2013';
-      } else if (patients !== null) {
-        open_beds = capacity - patients;
+      var services = rf.get_services_from_values(values);
+      var total_beds = values[attributes_by_name.total_beds];
+      if (total_beds === null) {
+        total_beds = '\u2013';
       }
-      var beds = open_beds + ' / ' + capacity;
+      var open_beds = values[attributes_by_name.available_beds];
+      if (open_beds === null) {
+        open_beds = '\u2013';
+      }
+      var beds = open_beds + ' / ' + total_beds;
       var beds_div = $$('div', {'class': 'beds'}, beds);
       // WebKit rendering bug: vertical alignment is off if services is ''.
       return $$('div', {}, [beds_div, services || '\u00a0']);
@@ -138,8 +142,15 @@ var markers = [];  // marker for each facility
 
 // Print a message to the Safari or Firebug console.
 function log() {
-  if (typeof console !== 'undefined' && console.log) {
-    console.log.apply(console, arguments);
+  // The strange way this function is written seems to be the only one
+  // working on IE
+  if (typeof console === 'undefined') {
+    return;
+  }
+  if (console) {
+    if (console.log) {
+      console.log.apply(console, arguments);
+    }
   }
 }
 
@@ -268,25 +279,6 @@ function maybe_selected(selected) {
   return selected ? ' selected' : '';
 }
 
-function render_template(template, params) {
-  var result = template;
-  for (var name in params) {
-    var placeholder = new RegExp('\\$\\{' + name + '\\}', 'g');
-    var substitution;
-    if (name === '$') {
-      substitution = '$';
-    } else if (params[name] === undefined || params[name] === null) {
-      substitution = '\u2013';
-    } else if (typeof params[name] === 'object') {
-      substitution = params[name].html;
-    } else {
-      substitution = html_escape(params[name]);
-    }
-    result = result.replace(placeholder, substitution);
-  }
-  return result;
-}
-
 function make_icon(title, status, detail) {
   var text = detail ? title : '';
   var text_size = detail ? 10 : 0;
@@ -391,8 +383,7 @@ function initialize_filters() {
   });
   var options = [];
   options.push($$('option', {value: '0 '}, 'All'));
-  add_filter_options(options, attributes_by_name.specialty_care);
-  add_filter_options(options, attributes_by_name.medical_equipment);
+  add_filter_options(options, attributes_by_name.services);
   set_children(selector, options);
   set_children(tr, [$$('td', {}, ['Show: ', selector])]);
   set_children(tbody, tr);
@@ -453,8 +444,11 @@ function update_facility_icons() {
     if (markers[f]) {
       var facility = facilities[f];
       var s = facility_status_is[f];
-      markers[f].setIcon(make_icon(facility.title, s, detail));
-      markers[f].setZIndex(STATUS_ZINDEXES[s]);
+      var icon_url = make_icon(facility.title, s, detail);
+      if (markers[f].getIcon() !== icon_url) {
+        markers[f].setIcon(icon_url);
+        markers[f].setZIndex(STATUS_ZINDEXES[s]);
+      }
     }
   }
 }
@@ -468,9 +462,9 @@ function update_facility_legend() {
       $$('th', {'class': 'legend-icon'},
         $$('img', {src: make_icon('', s, false)})),
       $$('td', {'class': 'legend-label status-' + s},
-        render_template(STATUS_LABELS[s], {
-          all_supplies: selected_supply_set.description_all,
-          any_supply: selected_supply_set.description_any
+        render(STATUS_LABEL_TEMPLATES[s], {
+          ALL_SUPPLIES: selected_supply_set.description_all,
+          ANY_SUPPLY: selected_supply_set.description_any
         }))
     ]));
   }
@@ -532,6 +526,7 @@ function align_header_with_table(thead, tbody) {
     var body_cell = tbody.firstChild.firstChild;
     while (body_cell) {
       // Subtract 8 pixels to account for td padding: 2px 4px.
+      // TODO: fix for IE
       head_cell.style.width = (body_cell.clientWidth - 8) + 'px';
       head_cell = head_cell.nextSibling;
       body_cell = body_cell.nextSibling;
@@ -816,94 +811,24 @@ function select_facility(facility_i, ignore_current) {
   }
 
   // Pop up the InfoWindow on the selected clinic.
-  var last_report_date = 'No reports received';
+  var last_updated = 'No reports received';
   var last_report = selected_facility.last_report;
   if (last_report) {
     var ymd = last_report.date.split('-');
-    last_report_date = 'Updated ' +
+    last_updated = 'Updated ' +
         MONTH_ABBRS[ymd[1] - 1] + ' ' + (ymd[2] - 0) + ', ' + ymd[0];
   }
-  var report_display = '';
-  var facility_type = facility_types[selected_facility.type];
-  for (var i = 0; i < facility_type.attribute_is.length; i++) {
-    var a = facility_type.attribute_is[i];
-    var attribute = attributes[a];
-    var value = '\u2013';
-    if (last_report) {
-      value = last_report.values[a];
-      switch (attributes[a].type) {
-        case 'contact':
-          value = (value || '').replace(/^[\s\|]+|[\s\|]+$/g, '');
-          value = value ? value.replace(/\|/g, ', ') : '\u2013';
-          break;
-        case 'date':
-          value = (value || '').replace(/T.*/, '') || '\u2013';
-          break;
-        case 'str':
-          value = value || '\u2013';
-          break;
-        case 'text':
-          value = {html: render_template('<div class="text">${text}</div>',
-                                         {text: {html: value || ''}})};
-          break;
-        case 'choice':
-          value = translate_value(value) || '\u2013';
-          break;
-        case 'multi':
-          value = translate_values(value || ['\u2013']).join(', ');
-          break;
-        case 'int':
-        case 'float':
-          if (value === null || value === undefined) {
-            value = '\u2013';
-          }
-          if (value === 0) {
-            value = {html: '<span class="stockout">0</span>'};
-          }
-          break;
-      }
-    }
-    report_display += render_template(ATTRIBUTE_TEMPLATE, {
-      attribute_title: messages.attribute_name[attribute.name].en,
-      attribute_value: value
-    });
-  }
-  if (rmapper.user && rmapper.user.is_editor()) {
-    var user_action_html = 
-    '    <div class="edit-links">' + 
-    '      <a href="/edit?cc=ht&facility_name=' + selected_facility.name +
-    '">' +
-    '        Edit this record</a> \u00b7 ' +
-    '      <a href="#" class="edit-ip-link" ' +
-    '          onclick="edit_handler(' +
-    '           \'/edit?cc=ht&facility_name=' + selected_facility.name +
-    '&embed=yes\');">' +
-    '      Edit in place</a>' +
-    '    </div>';
-  } else if (rmapper.user) {
-    var user_action_html = 
-    '    <div class="request-edit" >' +
-    '      <a href="#" class="edit-ip-link" ' +
-    '          onclick="request_role_handler(' +
-    '           \'/request_access?cc=ht&role=editor&embed=yes\');">' +
-    '      Request to become editor </a>' +
-    '    </div>';
-  } else {
-    var user_action_html = 
-    '    <div class="please-signin">' +
-    '      Please sign in as editor to edit' +
-    '    </div>';
-  }
-  info.setContent(render_template(INFO_TEMPLATE, {
-    facility_title: selected_facility.title,
-    facility_name: selected_facility.name,
-    division_title: divisions[selected_facility.division_i].title,
-    user_action_html: {html: user_action_html},
-    attributes: {html: report_display},
-    last_report_date: last_report_date
-  }));
+  info.close();
 
+  division_title = divisions[selected_facility.division_i].title;
+  attribute_is = facility_types[selected_facility.type].attribute_is;
+
+  info.setContent(to_html(rf.bubble.get_html(
+      selected_facility, attribute_is, last_updated, rf.user)));
   info.open(map, markers[selected_facility_i]);
+
+  // This call sets up the tabs and should be called after the DOM is created.
+  jQuery('#bubble-tabs').tabs();
 }
 
 // ==== Load data
@@ -957,6 +882,91 @@ function load_data(data) {
     set_children($('site-url'),
         window.location.protocol + '//' + window.location.host);
   }
+
+  start_monitoring();
+}
+
+// ==== In-place update
+
+function start_monitoring() {
+  // TODO: fix for IE
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = handle_monitor_notification;
+  xhr.open('GET', '/monitor');
+  xhr.send();
+}
+
+function handle_monitor_notification() {
+  if (this.readyState == 4 && this.status == 200) {
+    if (this.responseText != null && this.responseText.length) {
+      eval(this.responseText);
+    }
+    start_monitoring();
+  }
+}
+
+function set_facility_attribute(facility_name, attribute_name, value) {
+  log(facility_name, attribute_name, value);
+  var facility_i = 0;
+  for (var f = 1; f < facilities.length; f++) {
+    if (facilities[f].name == facility_name) {
+      facility_i = f;
+    }
+  }
+  var attribute_i = attributes_by_name[attribute_name];
+  if (facility_i) {
+    var facility = facilities[facility_i];
+    if (!facility.last_report) {
+      var nulls = [];
+      for (var a = 0; a < attributes.length; a++) {
+        nulls.push(null);
+      }
+      facility.last_report = {values: nulls};
+    }
+    facility.last_report.values[attribute_i] = value;
+  }
+  update_facility_row(facility_i);
+}
+
+var GLOW_COLORS = ['#ff4', '#ff4', '#ff5', '#ff6', '#ff8', '#ffa',
+                   '#ffb', '#ffc', '#ffd', '#ffe', '#fffff8'];
+var glow_element = null;
+var glow_step = -1;
+
+function glow(element) {
+  if (glow_element) {
+    glow_element.style.backgroundColor = '';
+  }
+  glow_element = element;
+  glow_step = 0;
+  glow_next();
+}
+
+function glow_next() {
+  if (glow_element && glow_step < GLOW_COLORS.length) {
+    glow_element.style.backgroundColor = GLOW_COLORS[glow_step];
+    glow_step++;
+    window.setTimeout(glow_next, 200);
+  } else {
+    if (glow_element) {
+      glow_element.style.backgroundColor = '';
+    }
+    glow_element = null;
+    glow_step = -1;
+  }
+}
+
+function update_facility_row(facility_i) {
+  var row = $('facility-' + facility_i);
+  var cell = row.firstChild;
+  var facility = facilities[facility_i];
+  for (var c = 1; c < summary_columns.length; c++) {
+    cell = cell.nextSibling;
+    var value = summary_columns[c].get_value(facility.last_report.values);
+    set_children(cell, value);
+    cell.className = 'value column_' + c;
+  }
+  glow(row);
 }
 
 // ==== In-place editing
@@ -971,6 +981,7 @@ function edit_handler(edit_url) {
       info.close();
       info.setContent('<div class="facility-info">' + data + '</div>');
       info.open(map, markers[selected_facility_i]);
+      $j('#edit').ajaxForm({target: '#edit-status'});
     }
   });
   return false;

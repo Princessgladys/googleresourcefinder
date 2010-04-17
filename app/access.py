@@ -15,7 +15,7 @@
 from google.appengine.ext import db
 import logging
 
-ROLES = ['editor', 'superuser']
+ROLES = ['user', 'editor', 'superuser']
 
 class Authorization(db.Model):
     timestamp = db.DateTimeProperty(auto_now_add=True)
@@ -29,7 +29,7 @@ class Authorization(db.Model):
     # all countries
     user_roles = db.StringListProperty()
     requested_roles = db.StringListProperty()
-    
+
 def check_token(token):
     return Authorization.all().filter('token =', token).get()
 

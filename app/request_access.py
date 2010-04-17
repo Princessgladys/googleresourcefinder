@@ -21,19 +21,28 @@ from access import Authorization
 
 
 class RequestAccess(utils.Handler):
+    def get(self):
+        if not self.auth:
+            raise Redirect(users.create_login_url(self.request.uri))
+
+        self.render('templates/request_access.html',
+                    role='user',
+                    cc='ht');
+
+
     def post(self):
         if not self.auth:
             raise Redirect(users.create_login_url(self.request.uri))
         role = "%s:%s" % (self.params.cc, self.params.role)
         if role in self.auth.user_roles:
-            message = 'You are already %s' % role
+            message = _('You are already %s') % role
         elif role in self.auth.requested_roles:
-            message = 'Your request for %s is already registered' % role
+            message = _('Your request for %s is already registered') % role
         else:
             self.auth.requested_roles.append(role)
-            message = 'Request for becoming %s was registered.' % role
+            message = _('Request for becoming %s was registered.') % role
             self.auth.put()
-        
+
         if self.params.embed:
             self.write(message)
         else:

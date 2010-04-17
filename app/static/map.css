@@ -23,12 +23,12 @@ th { text-align: left; }
 .caption { font-size: 11px; font-weight: normal; color: #aaa; }
 
 /* Header line */
-.header { padding: 4px; font-size: 13px; }
-.header .user { float: right; }
-.header .title { float: left; font-weight: bold; }
+.header { font-size: 13px; }
+.header .user { float: right; padding: 8px; }
+.header .title { float: left; padding: 4px; font-size: 18px; color: #fff; background: #333; width: 392px; height: 30px; }
 
 /* Data area */
-#data { position: absolute; left: 0px; width: 400px; top: 24px; bottom: 0; }
+#data { position: absolute; left: 0px; width: 400px; top: 30px; bottom: 0; }
 #data table { width: 100%; padding: 0; cursor: default; }
 th, td { padding: 2px 4px; }
 .section { margin-top: 10px; }
@@ -40,9 +40,9 @@ th, td { padding: 2px 4px; }
 .table-head { background: #e0e2e8; padding: 2px 0; }
 #facility-section { margin-top: 0; }
 #facility-section .table-head {
-    background: #fff; border-bottom: 1px solid #ccc; }
+    background: #fff; border-bottom: 1px solid #999; }
 #filter-section .table-head { display: none; }
-#filter-section .table-body { background: #e0e2e8; }
+#filter-section .table-body { background: #eee; }
 .table-head tr { color: #000; }
 .table-head img, .legend-icon img { position: relative; top: 2px; }
 .table-body { overflow-y: auto; }
@@ -51,6 +51,7 @@ th, td { padding: 2px 4px; }
 #division-list { max-height: 190px; }  /* pad 2px*2 + 15px = 19px per row */
 #division-list tr { line-height: 15px; }
 .hover { background: #cdf; }
+#facility-list td { border-bottom: 1px solid #eee; }
 td.supply-set { text-align: center; width: 2em;
     border-left: 1px solid #e0e2e8; border-bottom: 1px solid #e0e2e8; }
 td#supply-set-1 { border-left: none; }
@@ -74,7 +75,7 @@ td.status-3 { color: #444; }
 td.facility-count.selected { color: #fff; }
 
 /* Map area */
-#map, .hshadow, .vshadow { position: absolute; left: 400px; top: 24px; }
+#map, .hshadow, .vshadow { position: absolute; left: 400px; top: 30px; }
 #map { right: 0; bottom: 0; }
 .hshadow { bottom: 0; background: #000; font-size: 1px; }
 .hs1 { width: 2px; opacity: 0.09; filter:alpha(opacity=9); }

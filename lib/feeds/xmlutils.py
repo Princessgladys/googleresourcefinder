@@ -24,15 +24,16 @@ def element(tag, *attributes_and_text_and_children):
     element = ElementTree.Element(tag)
     for arg in attributes_and_text_and_children:
         if isinstance(arg, dict):  # attributes
-            for key, value in attributes:
+            for key, value in arg.items():
                 element.set(key, value)
-        elif not isinstance(arg, list):
-            arg = [arg]
-        for child in arg:  # text or child elements
-            if isinstance(child, basestring):
-                element.text = (element.text or '') + child
-            else:
-                element.append(child)
+        else:
+            if not isinstance(arg, list):
+                arg = [arg]
+            for child in arg:  # text or child elements
+                if isinstance(child, basestring):
+                    element.text = (element.text or '') + child
+                else:
+                    element.append(child)
     return element
 
 def indent(element, level=0):
@@ -105,7 +106,7 @@ class Struct(dict):
     def __setattr__(self, name, value):
         self[name] = value
 
-    
+
 # ==== Converter base class ================================================
 
 def Singleton(name, bases, dict):
