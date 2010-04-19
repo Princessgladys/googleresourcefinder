@@ -325,7 +325,7 @@ function initialize_map() {
   marker_clusterer = new MarkerClusterer(map, [], {
     maxZoom: 14,  // closest zoom at which clusters are shown
     gridSize: 40, // size of square pixels in which to cluster
-    // override default styles to render all cluster sizes in blue
+    // override default styles to render all cluster sizes with our custom icon
     styles: [marker_style, marker_style, marker_style, marker_style]
   });
 }
