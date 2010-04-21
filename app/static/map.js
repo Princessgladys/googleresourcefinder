@@ -137,6 +137,7 @@ var bounds_match_selected_division = false;  // to skip redundant redraws
 var map = null;
 var info = null;
 var markers = [];  // marker for each facility
+var marker_clusterer = null;  // clusters markers for efficient rendering
 
 // ==== Debugging
 
@@ -313,6 +314,20 @@ function initialize_map() {
   google.maps.event.addListener(map, 'tilesloaded', set_map_opacity);
 
   info = new google.maps.InfoWindow();
+
+  var marker_style = {
+    url: 'static/greek_cross36.png',
+    height: 36,
+    width: 36,
+    opt_textColor: '#fff',
+    Y: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
+  };
+  marker_clusterer = new MarkerClusterer(map, [], {
+    maxZoom: 14,  // closest zoom at which clusters are shown
+    gridSize: 40, // size of square pixels in which to cluster
+    // override default styles to render all cluster sizes with our custom icon
+    styles: [marker_style, marker_style, marker_style, marker_style]
+  });
 }
 
 // Reduce the opacity of the map layer to make markers stand out.
@@ -333,12 +348,12 @@ function initialize_markers() {
     var location = facility.location;
     markers[f] = new google.maps.Marker({
       position: new google.maps.LatLng(location.lat, location.lon),
-      map: map,
       icon: make_icon(facility.title, STATUS_UNKNOWN, false),
       title: facility.title
     });
     google.maps.event.addListener(markers[f], 'click', facility_selector(f));
   }
+  marker_clusterer.addMarkers(markers.slice(1));
 }
 
 // ==== Display construction routines
@@ -440,17 +455,21 @@ function update_map_bounds(division_i) {
 // Update the facility map icons based on their status and the zoom level.
 function update_facility_icons() {
   var detail = map.getZoom() > 10;
+  var markers_to_keep = [];
   for (var f = 1; f < facilities.length; f++) {
     if (markers[f]) {
       var facility = facilities[f];
       var s = facility_status_is[f];
       var icon_url = make_icon(facility.title, s, detail);
-      if (markers[f].getIcon() !== icon_url) {
+      if (s == STATUS_GOOD) {
         markers[f].setIcon(icon_url);
         markers[f].setZIndex(STATUS_ZINDEXES[s]);
+        markers_to_keep.push(markers[f]);
       }
     }
   }
+  marker_clusterer.clearMarkers();
+  marker_clusterer.addMarkers(markers_to_keep);
 }
 
 // Fill in the facility legend.
@@ -893,7 +912,7 @@ function start_monitoring() {
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = handle_monitor_notification;
   xhr.open('GET', '/monitor');
-  xhr.send();
+  xhr.send('');
 }
 
 function handle_monitor_notification() {
