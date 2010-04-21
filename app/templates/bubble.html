@@ -1,0 +1,83 @@
+{% comment %}
+# Copyright 2009-2010 by Ka-Ping Yee
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+{% load i18n %}
+
+<script id="bubble_template" type="text/html">
+  <div class="bubble">
+    <h1>${FACILITY_TITLE}</h1>
+    <h2>
+      Facility ID: ${FACILITY_NAME} &#xb7;
+      ${LAST_UPDATED} &#xb7;
+      ${EDIT_LINK}
+    </h2>
+    <table class="scorecard" cellpadding="0" cellspacing="0">
+      <tbody>
+        <tr>
+          <th class="availability" width="1%">{% trans "availability" %}</th>
+          <th class="capacity" width="1%">{% trans "capacity" %}</th>
+          <th class="services">{% trans "services" %}</th>
+        </tr>
+        <tr>
+          ${AVAILABILITY_INFO}
+          <td class="services">
+            ${FACILITY_SERVICES}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div id="bubble-tabs">
+      <ul>
+        <li><a href="#bubble-tab-details">
+          {% trans "Facility details" %}</a></li> 
+        <li><a href="#bubble-tab-history">
+          {% trans "Change history" %}</a></li>
+      </ul>
+      <div id="bubble-tab-details">
+        <table class="details" cellpadding="0" cellspacing="0">
+          <tbody>
+            <tr class="item">
+              <td class="label" width="20%">
+                {% trans "Address" %}
+              </td>
+              <td class="value">
+                Tabarra 41, Port-au-prince, Haiti
+              </td>
+              <td class="value">
+                ${GEOLOCATION_INFO}
+              </td>
+            </tr>
+            ${ATTRIBUTES_INFO}
+          </tbody>
+        </table>
+      </div>
+      <div id="bubble-tab-history">
+        <table class="details" cellpadding="0" cellspacing="0">
+          <thead>
+            <tr>
+              <th>{% trans "Date and time" %}</th>
+              <th>{% trans "Change" %}</th>
+              <th>{% trans "Edited by" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${HISTORY_INFO}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</script>
