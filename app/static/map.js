@@ -418,6 +418,27 @@ function initialize_facility_header() {
 
 // ==== Display update routines
 
+function disable_print_link() {
+  var print_link = $('print-link');
+  if (print_link) {
+    print_link.href = 'javascript:void(0)';
+    print_link.title = locale.PRINT_DISABLED_TOOLTIP();
+    print_link.className = 'print-link-disabled';
+    // TODO(shakusa) Improve this
+    print_link.onclick = function() { alert(locale.PRINT_DISABLED_TOOLTIP()); return false; };    
+  }
+}
+
+function enable_print_link(facility_name) {
+  var print_link = $('print-link');
+  if (print_link) {
+    print_link.href = '/?print=yes';
+    print_link.title = locale.PRINT_ENABLED_TOOLTIP({HOSPITAL: facility_name});
+    print_link.className = '';
+    print_link.onclick = null;
+  }
+}
+
 // Set the map bounds to fit all facilities in the given division.
 function update_map_bounds(division_i) {
   if (bounds_match_selected_division && division_i === selected_division_i) {
@@ -829,6 +850,9 @@ function select_facility(facility_i, ignore_current) {
 
   // This call sets up the tabs and should be called after the DOM is created.
   jQuery('#bubble-tabs').tabs();
+
+  // Enable the Print link
+  enable_print_link(selected_facility.title);
 }
 
 // ==== Load data
@@ -860,6 +884,7 @@ function load_data(data) {
     facility_is: facility_is
   };
 
+  disable_print_link();
   initialize_supply_selector();
   initialize_filters();
   initialize_division_header();
@@ -883,7 +908,8 @@ function load_data(data) {
         window.location.protocol + '//' + window.location.host);
   }
 
-  start_monitoring();
+  // TODO(shakusa) Is this what makes dev_appengine slow?
+  //start_monitoring();
 }
 
 // ==== In-place update
