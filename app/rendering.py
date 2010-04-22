@@ -46,6 +46,8 @@ def user_transformer(user, hide_email):
     if user:
         address = user.email()
         if hide_email:
+            # Preserve the first letter of the username, then replace the
+            # (up to) 3 last characters of the username with '...'.
             address = re.sub(r'^(\w+?)\w{0,3}@', r'\1...@', address)
     return {'email': address}
                 
