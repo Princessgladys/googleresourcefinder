@@ -17,7 +17,7 @@ import access
 import rendering
 
 class Main(Handler):
-    
+
     def get(self):
         self.require_user_role('user', 'ht')
 
@@ -32,7 +32,11 @@ class Main(Handler):
                     loginout_url=(auth and users.create_logout_url('/') or
                                   users.create_login_url('/')),
                     loginout_text=(auth and _("Sign out") or _("Sign in")),
-                    data=rendering.version_to_json(get_latest_version('ht')),
+                    data=rendering.version_to_json(get_latest_version('ht'),
+                                                   self.params.facility_name,
+                                                   self.params.lat,
+                                                   self.params.lon,
+                                                   self.params.rad),
                     instance=self.request.host.split('.')[0])
 
 if __name__ == '__main__':

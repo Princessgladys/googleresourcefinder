@@ -38,7 +38,7 @@ locale = function() {
       'print a list of hospitals in order of distance from your selection.';
 
   messages.PRINT_ENABLED_TOOLTIP =
-      'Print a list of hospitals in order of distance from ${HOSPITAL}';
+      'Print a list of hospitals in order of distance from ${FACILITY_NAME}';
 
   messages.REQUEST_EDIT_ACCESS_HTML =
       HTML('${LINK_START}Request edit access${LINK_END}');
