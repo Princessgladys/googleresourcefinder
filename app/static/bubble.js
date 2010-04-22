@@ -132,7 +132,7 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
             DATE: report.date,
             LABEL: messages.attribute_name[attribute.name].en,
             VALUE: rf.bubble.format_attr(attribute, report.values[a]),
-            AUTHOR: report.user.nickname
+            AUTHOR: report.user.email
           }));
         } 
       } 

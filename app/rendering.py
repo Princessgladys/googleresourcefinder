@@ -44,19 +44,19 @@ def facility_type_transformer(index, facility_type, attribute_is):
             'attribute_is':
                 [attribute_is[p] for p in facility_type.attribute_names]}
 
-def user_transformer(user):
+def user_transformer(user, hide_email):
+    address = 'anonymous'
     if user:
-        return {'email': user.email(),
-                'nickname': user.nickname(),
-                }
-    else:
-        return {'email': 'anonymous',
-                'nickname': 'anonymous',
-                }
+        address = user.email()
+        if hide_email:
+            # Preserve the first letter of the username, then replace the
+            # (up to) 3 last characters of the username with '...'.
+            address = re.sub(r'^(\w+?)\w{0,3}@', r'\1...@', address)
+    return {'email': address}
 
 def facility_transformer(index, facility, attributes, report_map,
-                         facility_type_is, facility_map, facility_name,
-                         lat, lon, rad):
+                         facility_type_is, facility_map, hide_email,
+                         facility_name, lat, lon, rad):
     """Construct the JSON object for a Facility."""
     # Add the facility to the facility lists for its containing divisions.
     for name in facility.division_names:
@@ -70,7 +70,7 @@ def facility_transformer(index, facility, attributes, report_map,
             values.append(getattr(report, attribute.key().name(), None))
         reports.append({'date': report.date,
                         'values': values,
-                        'user': user_transformer(report.user)})
+                        'user': user_transformer(report.user, hide_email)})
 
     # Pack the results into an object suitable for JSON serialization.
     facility_jobject = {
@@ -111,7 +111,7 @@ def json_encode(object):
 def clean_json(json):
     return re.sub(r'"(\w+)":', r'\1:', json)
 
-def version_to_json(version, facility_name=None, lat=None, lon=None, rad=None):
+def version_to_json(version, hide_email, facility_name=None, lat=None, lon=None, rad=None):
     """Dump the data for a given country version as a JSON string."""
     if version is None:
         return '{}'
@@ -143,7 +143,7 @@ def version_to_json(version, facility_name=None, lat=None, lon=None, rad=None):
     facility_map = {}
     facility_jobjects, facility_is = make_jobjects(
         Facility.all().ancestor(version).order('title'), facility_transformer,
-        attributes, report_map, facility_type_is, facility_map,
+        attributes, report_map, facility_type_is, facility_map, hide_email,
         facility_name, lat, lon, rad)
 
     # Make JSON objects for the districts.
