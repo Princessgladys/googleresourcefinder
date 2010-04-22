@@ -76,7 +76,7 @@
     {% if params.print %}
       <a href="/">{% trans "Home" %}</a> |
     {% else %}
-      <a href="/?print=yes">{% trans "Print" %}</a> |
+      <a id="print-link" href="#" class="print-link-disabled">{% trans "Print" %}</a> |
     {% endif %}
     <a href="about:blank">Help</a> |
     <a href="{{loginout_url}}">{{loginout_text}}</a>
