@@ -36,6 +36,8 @@ STATUS_TEXT_COLORS = [null, '040', '040', '040'];
 
 var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
+// 10 miles, temporary for v1, this should be user-settable in the future
+var PRINT_RADIUS_METERS = 16093.44;
 
 // ==== Data loaded from the data store
 
@@ -322,8 +324,10 @@ function initialize_map() {
     opt_textColor: '#fff',
     Y: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
   };
+  // TODO(shakuas) Turn off clustering in print view ?
+  var max_zoom = 14; // print ? -1 : 14;
   marker_clusterer = new MarkerClusterer(map, [], {
-    maxZoom: 14,  // closest zoom at which clusters are shown
+    maxZoom: max_zoom,  // closest zoom at which clusters are shown
     gridSize: 40, // size of square pixels in which to cluster
     // override default styles to render all cluster sizes with our custom icon
     styles: [marker_style, marker_style, marker_style, marker_style]
@@ -444,11 +448,17 @@ function disable_print_link() {
   }
 }
 
-function enable_print_link(facility_name) {
+function enable_print_link() {
   var print_link = $('print-link');
   if (print_link) {
-    print_link.href = '/?print=yes';
-    print_link.title = locale.PRINT_ENABLED_TOOLTIP({HOSPITAL: facility_name});
+    var f = selected_facility;
+    var PRINT_URL = '/?print=yes&facility_name=${FACILITY_NAME}'
+      + '&lat=${LAT}&lon=${LON}&rad=${RAD}';
+    print_link.href = render(PRINT_URL, {FACILITY_NAME: facility.name,
+                                         LAT: f.location.lat,
+                                         LON: f.location.lon,
+                                         RAD: PRINT_RADIUS_METERS});
+    print_link.title = locale.PRINT_ENABLED_TOOLTIP({FACILITY_NAME: f.title});
     print_link.className = '';
     print_link.onclick = null;
   }
@@ -871,7 +881,7 @@ function select_facility(facility_i, ignore_current) {
   jQuery('#bubble-tabs').tabs();
 
   // Enable the Print link
-  enable_print_link(selected_facility.title);
+  enable_print_link();
 }
 
 // ==== Load data
