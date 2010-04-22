@@ -33,7 +33,7 @@ class Main(Handler):
                                   users.create_login_url('/')),
                     loginout_text=(auth and _("Sign out") or _("Sign in")),
                     data=rendering.version_to_json(get_latest_version('ht'),
-                                                   hide_email=not auth
+                                                   hide_email=not auth,
                                                    facility_name=self.params.facility_name,
                                                    lat=self.params.lat,
                                                    lon=self.params.lon,

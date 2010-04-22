@@ -454,7 +454,7 @@ function enable_print_link() {
     var f = selected_facility;
     var PRINT_URL = '/?print=yes&facility_name=${FACILITY_NAME}'
       + '&lat=${LAT}&lon=${LON}&rad=${RAD}';
-    print_link.href = render(PRINT_URL, {FACILITY_NAME: facility.name,
+    print_link.href = render(PRINT_URL, {FACILITY_NAME: f.title,
                                          LAT: f.location.lat,
                                          LON: f.location.lon,
                                          RAD: PRINT_RADIUS_METERS});

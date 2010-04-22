@@ -27,7 +27,7 @@ def make_jobjects(entities, transformer, *args):
     for entity in entities:
         index = len(jobjects)
         jobject = transformer(index, entity, *args)
-        if jobject is not None:
+        if jobject:
           jobjects.append(jobject)
         indexes[entity.key().name()] = index
     return jobjects, indexes
@@ -81,15 +81,15 @@ def facility_transformer(index, facility, attributes, report_map,
         'reports': reports and reports[-10:] or None,
         'last_report': reports and reports[-1] or None
     }
-    if facility.location is not None:
+    if facility.location:
         facility_jobject['location'] = {
             'lat': facility.location.lat, 'lon': facility.location.lon
         }
-        if lat is not None and lon is not None:
+        if lat and lon:
             facility_jobject['distance_meters'] = distance(
                 (facility.location.lat, facility.location.lon), (lat, lon))
 
-    if (rad is not None and facility_jobject['distance_meters'] is not None and
+    if (rad and facility_jobject['distance_meters'] and
         facility_jobject['distance_meters'] > rad):
         return None
 
@@ -158,7 +158,7 @@ def version_to_json(version, hide_email, facility_name=None, lat=None, lon=None,
                 facility_jobject['division_i']]
 
     # Sort by distance, if necessary
-    if lat is not None and lon is not None:
+    if lat and lon:
         facility_jobjects.sort(key=lambda fjo: fjo and fjo['distance_meters'] or 0)
 
     # Get all the messages.
