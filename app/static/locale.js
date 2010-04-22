@@ -21,8 +21,24 @@
 locale = function() {
   var messages = {};
 
+  messages.CALL_FOR_AVAILABILITY =
+      'Please call for availability information';
+
   messages.EDIT_LINK_HTML =
       HTML('${LINK_START}Edit this record${LINK_END}');
+
+  messages.GEOLOCATION_HTML =
+      HTML('Latitude: ${LATITUDE}<br>Longitude: ${LONGITUDE}');
+
+  messages.NO =
+      'No';
+
+  messages.PRINT_DISABLED_TOOLTIP =
+      'First select a hospital from the list on the left. Then Print will ' +
+      'print a list of hospitals in order of distance from your selection.';
+
+  messages.PRINT_ENABLED_TOOLTIP =
+      'Print a list of hospitals in order of distance from ${FACILITY_NAME}';
 
   messages.REQUEST_EDIT_ACCESS_HTML =
       HTML('${LINK_START}Request edit access${LINK_END}');
@@ -30,17 +46,8 @@ locale = function() {
   messages.SIGN_IN_TO_EDIT =
       'Please sign in to edit';
 
-  messages.CALL_FOR_AVAILABILITY =
-      'Please call for availability information';
-
-  messages.GEOLOCATION_HTML =
-      HTML('Latitude: ${LATITUDE}<br>Longitude: ${LONGITUDE}');
-
   messages.YES =
       'Yes';
-
-  messages.NO =
-      'No';
 
   function message_renderer(name) {
     return function (params) {

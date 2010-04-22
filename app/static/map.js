@@ -36,6 +36,8 @@ STATUS_TEXT_COLORS = [null, '040', '040', '040'];
 
 var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
+// 10 miles, temporary for v1, this should be user-settable in the future
+var PRINT_RADIUS_METERS = 16093.44;
 
 // ==== Data loaded from the data store
 
@@ -322,8 +324,10 @@ function initialize_map() {
     opt_textColor: '#fff',
     Y: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
   };
+  // TODO(shakuas) Turn off clustering in print view ?
+  var max_zoom = 14; // print ? -1 : 14;
   marker_clusterer = new MarkerClusterer(map, [], {
-    maxZoom: 14,  // closest zoom at which clusters are shown
+    maxZoom: max_zoom,  // closest zoom at which clusters are shown
     gridSize: 40, // size of square pixels in which to cluster
     // override default styles to render all cluster sizes with our custom icon
     styles: [marker_style, marker_style, marker_style, marker_style]
@@ -432,6 +436,33 @@ function initialize_facility_header() {
 }
 
 // ==== Display update routines
+
+function disable_print_link() {
+  var print_link = $('print-link');
+  if (print_link) {
+    print_link.href = 'javascript:void(0)';
+    print_link.title = locale.PRINT_DISABLED_TOOLTIP();
+    print_link.className = 'print-link-disabled';
+    // TODO(shakusa) Improve this
+    print_link.onclick = function() { alert(locale.PRINT_DISABLED_TOOLTIP()); return false; };    
+  }
+}
+
+function enable_print_link() {
+  var print_link = $('print-link');
+  if (print_link) {
+    var f = selected_facility;
+    var PRINT_URL = '/?print=yes&facility_name=${FACILITY_NAME}'
+      + '&lat=${LAT}&lon=${LON}&rad=${RAD}';
+    print_link.href = render(PRINT_URL, {FACILITY_NAME: facility.name,
+                                         LAT: f.location.lat,
+                                         LON: f.location.lon,
+                                         RAD: PRINT_RADIUS_METERS});
+    print_link.title = locale.PRINT_ENABLED_TOOLTIP({FACILITY_NAME: f.title});
+    print_link.className = '';
+    print_link.onclick = null;
+  }
+}
 
 // Set the map bounds to fit all facilities in the given division.
 function update_map_bounds(division_i) {
@@ -848,6 +879,9 @@ function select_facility(facility_i, ignore_current) {
 
   // This call sets up the tabs and should be called after the DOM is created.
   jQuery('#bubble-tabs').tabs();
+
+  // Enable the Print link
+  enable_print_link();
 }
 
 // ==== Load data
@@ -879,6 +913,7 @@ function load_data(data) {
     facility_is: facility_is
   };
 
+  disable_print_link();
   initialize_supply_selector();
   initialize_filters();
   initialize_division_header();
@@ -902,7 +937,8 @@ function load_data(data) {
         window.location.protocol + '//' + window.location.host);
   }
 
-  start_monitoring();
+  // TODO(shakusa) Is this what makes dev_appengine slow?
+  //start_monitoring();
 }
 
 // ==== In-place update

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from feeds.geo import distance
 from utils import *
 from model import Attribute, Division, Facility, FacilityType, Message, Report
 import sys
@@ -25,7 +26,9 @@ def make_jobjects(entities, transformer, *args):
     indexes = {}
     for entity in entities:
         index = len(jobjects)
-        jobjects.append(transformer(index, entity, *args))
+        jobject = transformer(index, entity, *args)
+        if jobject is not None:
+          jobjects.append(jobject)
         indexes[entity.key().name()] = index
     return jobjects, indexes
 
@@ -50,9 +53,10 @@ def user_transformer(user, hide_email):
             # (up to) 3 last characters of the username with '...'.
             address = re.sub(r'^(\w+?)\w{0,3}@', r'\1...@', address)
     return {'email': address}
-                
+
 def facility_transformer(index, facility, attributes, report_map,
-                         facility_type_is, facility_map, hide_email):
+                         facility_type_is, facility_map, hide_email,
+                         facility_name, lat, lon, rad):
     """Construct the JSON object for a Facility."""
     # Add the facility to the facility lists for its containing divisions.
     for name in facility.division_names:
@@ -81,6 +85,14 @@ def facility_transformer(index, facility, attributes, report_map,
         facility_jobject['location'] = {
             'lat': facility.location.lat, 'lon': facility.location.lon
         }
+        if lat is not None and lon is not None:
+            facility_jobject['distance_meters'] = distance(
+                (facility.location.lat, facility.location.lon), (lat, lon))
+
+    if (rad is not None and facility_jobject['distance_meters'] is not None and
+        facility_jobject['distance_meters'] > rad):
+        return None
+
     return facility_jobject
 
 def division_transformer(index, division, facility_map):
@@ -99,7 +111,7 @@ def json_encode(object):
 def clean_json(json):
     return re.sub(r'"(\w+)":', r'\1:', json)
 
-def version_to_json(version, hide_email):
+def version_to_json(version, hide_email, facility_name=None, lat=None, lon=None, rad=None):
     """Dump the data for a given country version as a JSON string."""
     if version is None:
         return '{}'
@@ -131,7 +143,8 @@ def version_to_json(version, hide_email):
     facility_map = {}
     facility_jobjects, facility_is = make_jobjects(
         Facility.all().ancestor(version).order('title'), facility_transformer,
-        attributes, report_map, facility_type_is, facility_map, hide_email)
+        attributes, report_map, facility_type_is, facility_map, hide_email,
+        facility_name, lat, lon, rad)
 
     # Make JSON objects for the districts.
     division_jobjects, division_is = make_jobjects(
@@ -143,6 +156,10 @@ def version_to_json(version, hide_email):
         if facility_jobject:
             facility_jobject['division_i'] = division_is[
                 facility_jobject['division_i']]
+
+    # Sort by distance, if necessary
+    if lat is not None and lon is not None:
+        facility_jobjects.sort(key=lambda fjo: fjo and fjo['distance_meters'] or 0)
 
     # Get all the messages.
     message_jobjects = {}
