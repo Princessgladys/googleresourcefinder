@@ -902,7 +902,8 @@ function load_data(data) {
         window.location.protocol + '//' + window.location.host);
   }
 
-  start_monitoring();
+  // TODO: Test further and re-enable
+  //start_monitoring();
 }
 
 // ==== In-place update
