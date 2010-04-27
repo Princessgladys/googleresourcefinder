@@ -28,7 +28,8 @@
   <!--[if lt IE 8]>
     <link rel="stylesheet" href="static/map-ie.css">
   <![endif]-->
-  <link rel="stylesheet" href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css" type="text/css" media="all"> 
+  <link rel="stylesheet" type="text/css" media="all"
+        href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css" > 
   <link rel="stylesheet" href="static/bubble.css">
 
   <!-- Google Maps API -->
@@ -43,7 +44,8 @@
   <script type="text/javascript" src="static/jquery.min.js"></script>
   <script type="text/javascript" src="static/jquery.form.js"></script>
   <script type="text/javascript">jQuery.noConflict();</script>
-  <script type="text/javascript" src="static/jquery-ui-1.8rc3.custom.min.js"></script>
+  <script type="text/javascript" src="static/jquery-ui-1.8rc3.custom.min.js">
+  </script>
   <script type="text/javascript" src="static/chain.js"></script>
 
   <!-- Initialize the rf namespace -->
@@ -76,7 +78,8 @@
     {% if params.print %}
       <a href="/">{% trans "Home" %}</a> |
     {% else %}
-      <a id="print-link" href="#" class="print-link-disabled">{% trans "Print" %}</a> |
+      <a id="print-link" href="#"
+         class="print-link-disabled">{% trans "Print" %}</a> |
     {% endif %}
     <a href="about:blank">Help</a> |
     <a href="{{loginout_url}}">{{loginout_text}}</a>

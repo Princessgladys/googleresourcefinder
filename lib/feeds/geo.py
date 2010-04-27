@@ -29,9 +29,9 @@ def central_angle((phi_s, lam_s), (phi_f, lam_f)):
     d_lam = lam_s - lam_f
     return 2*asin(sqrt(hav(d_phi) + cos(phi_s)*cos(phi_f)*hav(d_lam)))
 
-def distance((lat_s, lon_s), (lat_f, lon_f)):
+def distance(start, finish):
     """Approximates the distance in metres between two points on the Earth,
-    which are given as (latitude, longitude) pairs in degrees."""
-    start = (lat_s*pi/180, lon_s*pi/180)
-    finish = (lat_f*pi/180, lon_f*pi/180)
-    return central_angle(start, finish)*EARTH_RADIUS
+    which are given as {'lat':y, 'lon':x} objects in degrees."""
+    start_rad = (start['lat']*pi/180, start['lon']*pi/180)
+    finish_rad = (finish['lat']*pi/180, finish['lon']*pi/180)
+    return central_angle(start_rad, finish_rad)*EARTH_RADIUS
