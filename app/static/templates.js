@@ -60,16 +60,22 @@ function to_html(content) {
 }
 
 /**
- * Renders a string template as a string, or an HTML template as an HTML
- *     object.  See renderText and renderHtml for details.
- * @param {string|Object} template - A string template or HTML template.
- * @param {Object} params - An object whose property values are substituted
- *     for placeholders in the template.
+ * Renders a string, a string template as a string, or an HTML template as an
+ *     HTML object.  See renderText and renderHtml for details.
+ * @param {string|Object} template - A string, string template or HTML template.
+ *     Null or empty strings will be rendered as en-dashes (U+2013).
+ * @param {Object} opt_params - An object whose property values are substituted
+ *     for placeholders in the template. If missing, the template is rendered
+ *     as a string.
  * @return {string|Object} - The rendered string or HTML object.
  */
-function render(template, params) {
+function render(template, opt_params) {
+  if (!opt_params) {
+    return (template || typeof(template) === 'number') ? template : '\u2013';
+  }
+
   var result = (typeof template === 'object' && 'HTML' in template) ?
-    render_html(template, params) : render_text(template, params);
+    render_html(template, opt_params) : render_text(template, opt_params);
   return result;
 }
 
