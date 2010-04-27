@@ -24,11 +24,28 @@ locale = function() {
   messages.CALL_FOR_AVAILABILITY =
       'Please call for availability information';
 
+  messages.DATE_AT_TIME =
+      '${DATE} at ${TIME}';
+
+  messages.DISPLAYING_FACILITIES_IN_RANGE =
+      'Displaying facilities within ${RADIUS_MILES} miles';
+
+  messages.DISPLAYING_CLOSEST_N_FACILITIES =
+      'Displaying ${NUM_FACILITIES} closest facilities';
+
+  messages.DISTANCE =
+      '${MILES} miles (${KM} km)';
+
   messages.EDIT_LINK_HTML =
       HTML('${LINK_START}Edit this record${LINK_END}');
 
+  messages.FACILITIES_IN_RANGE =
+      '${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles';
+
   messages.GEOLOCATION_HTML =
       HTML('Latitude: ${LATITUDE}<br>Longitude: ${LONGITUDE}');
+
+  messages.MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
   messages.NO =
       'No';
@@ -55,9 +72,22 @@ locale = function() {
     };
   }
 
+  function array_message_renderer(name, index) {
+    return function (params) {
+      return render(messages[name][index], params);
+    };
+  }
+
   locale = {};
   for (var name in messages) {
-    locale[name] = message_renderer(name);
+    if (messages[name].constructor === Array) {
+      locale[name] = [];
+      for (var i = 0; i < messages[name].length; i++) {
+        locale[name][i] = array_message_renderer(name, i);
+      }
+    } else {
+      locale[name] = message_renderer(name);      
+    }
   }
   return locale;
 }();

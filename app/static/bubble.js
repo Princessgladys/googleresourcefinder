@@ -88,6 +88,8 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
   }
 
   var values = facility.last_report && facility.last_report.values;
+  var availability_info;
+  var address_info;
   if (values && values[attributes_by_name.total_beds]) {
     availability_info = render(AVAILABILITY_CELLS, {
       AVAILABILITY: values[attributes_by_name.available_beds],
@@ -104,9 +106,18 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
     LONGITUDE: facility.location.lon
   });
 
+  if (values && values[attributes_by_name.address]) {
+    address_info = values[attributes_by_name.address];
+  } else {
+    address_info = '\u2013';
+  }
+
   var attributes_info = [];
   for (var i = 0; i < attribute_is.length; i++) {
     var a = attribute_is[i];
+    if (a == attributes_by_name.address) {
+      continue;
+    }
     var attribute = attributes[a];
     var value = null;
     if (facility.last_report) {
@@ -146,6 +157,7 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
     EDIT_LINK: edit_link,
     AVAILABILITY_INFO: availability_info,
     FACILITY_SERVICES: rf.get_services(facility),
+    ADDRESS_INFO: address_info,
     GEOLOCATION_INFO: geolocation_info,
     ATTRIBUTES_INFO: attributes_info,
     HISTORY_INFO: history_info
