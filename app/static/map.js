@@ -92,8 +92,8 @@ var summary_columns = [
     },
     get_value: function(values) {
       var services = rf.get_services_from_values(values);
-      var total_beds = values[attributes_by_name.total_beds] || '\u2013';
-      var open_beds = values[attributes_by_name.available_beds] || '\u2013';
+      var total_beds = render(values[attributes_by_name.total_beds]);
+      var open_beds = render(values[attributes_by_name.available_beds]);
       var beds = open_beds + ' / ' + total_beds;
       var beds_div = $$('div', {'class': 'beds'}, beds);
       // WebKit rendering bug: vertical alignment is off if services is ''.
@@ -711,37 +711,37 @@ function update_print_facility_list() {
         'class': 'facility' + (i % 2 == 0 ? 'even' : 'odd')
       });
       var cells = [];
-      var total_beds = '\u2013';
-      var open_beds = '\u2013';
-      var address = '\u2013';
-      var general_info = '\u2013';
+      var total_beds;
+      var open_beds;
+      var address;
+      var general_info;
       if (facility.last_report) {
         var values = facility.last_report.values;
-        total_beds = values[attributes_by_name.total_beds] || total_beds;
-        open_beds = values[attributes_by_name.available_beds] || open_beds;
-        address = values[attributes_by_name.address] || address;
-        var gen_info = values[attributes_by_name.contact_name];
+        total_beds = values[attributes_by_name.total_beds];
+        open_beds = values[attributes_by_name.available_beds];
+        address = values[attributes_by_name.address];
+        general_info = values[attributes_by_name.contact_name];
         var phone = values[attributes_by_name.phone];
         if (phone) {
           // TODO: i18n for 'p'
-          gen_info = (gen_info ? gen_info + ' ' : '') + 'p ' + phone;
+          general_info = (general_info ? general_info + ' ' : '') + 'p ' +phone;
         }
-        general_info = gen_info || general_info;
       }
       var dist_meters = facility.distance_meters;
-      var dist = '\u2013';
+      var dist;
       if (typeof(dist_meters) === 'number') {
         dist = locale.DISTANCE({
             MILES: format_number(dist_meters * METERS_TO_MILES, 1), 
             KM: format_number(dist_meters * METERS_TO_KM, 2)});
       }
       var facility_name = facility.title + ' - ID:' + facility.name;
-      cells.push($$('td', {'class': 'facility-beds-open'}, open_beds));
-      cells.push($$('td', {'class': 'facility-beds-total'}, total_beds));
-      cells.push($$('td', {'class': 'facility-title'}, facility_name));
-      cells.push($$('td', {'class': 'facility-distance'}, dist));
-      cells.push($$('td', {'class': 'facility-address'}, address));
-      cells.push($$('td', {'class': 'facility-general-info'}, general_info));
+      cells.push($$('td', {'class': 'facility-beds-open'}, render(open_beds)));
+      cells.push($$('td', {'class': 'facility-beds-total'},render(total_beds)));
+      cells.push($$('td', {'class': 'facility-title'}, render(facility_name)));
+      cells.push($$('td', {'class': 'facility-distance'}, render(dist)));
+      cells.push($$('td', {'class': 'facility-address'}, render(address)));
+      cells.push($$('td', {'class': 'facility-general-info'},
+          render(general_info)));
       set_children(row, cells);
       rows.push(row);
     }

@@ -46,7 +46,8 @@ locale = function() {
       HTML('Latitude: ${LATITUDE}<br>Longitude: ${LONGITUDE}');
 
   // Month indices run from 0 to 11 (Jan to Dec)
-  messages.MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+  messages.MONTH_ABBRS =
+      'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
   messages.NO =
       'No';
