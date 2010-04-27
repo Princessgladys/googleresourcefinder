@@ -89,7 +89,6 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
 
   var values = facility.last_report && facility.last_report.values;
   var availability_info;
-  var address_info;
   if (values && values[attributes_by_name.total_beds]) {
     availability_info = render(AVAILABILITY_CELLS, {
       AVAILABILITY: values[attributes_by_name.available_beds],
@@ -106,7 +105,7 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
     LONGITUDE: facility.location.lon
   });
 
-  address_info = values && values[attributes_by_name.address] || '\u2013';
+  var address_info = values && values[attributes_by_name.address] || '\u2013';
 
   var attributes_info = [];
   for (var i = 0; i < attribute_is.length; i++) {
