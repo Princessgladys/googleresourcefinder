@@ -92,14 +92,8 @@ var summary_columns = [
     },
     get_value: function(values) {
       var services = rf.get_services_from_values(values);
-      var total_beds = values[attributes_by_name.total_beds];
-      if (total_beds === null) {
-        total_beds = '\u2013';
-      }
-      var open_beds = values[attributes_by_name.available_beds];
-      if (open_beds === null) {
-        open_beds = '\u2013';
-      }
+      var total_beds = values[attributes_by_name.total_beds] || '\u2013';
+      var open_beds = values[attributes_by_name.available_beds] || '\u2013';
       var beds = open_beds + ' / ' + total_beds;
       var beds_div = $$('div', {'class': 'beds'}, beds);
       // WebKit rendering bug: vertical alignment is off if services is ''.
@@ -317,7 +311,8 @@ function make_icon(title, status, detail) {
   var url = 'http://chart.apis.google.com/chart?chst=d_simple_text_icon_above&';
   // In print view, render icons as .gif's so they print correctly on older
   // browsers. In regular view, the default .pngs render better
-  return url + (print ? 'chof=gif&' : '') + 'chld=' + encodeURIComponent(params);
+  return url + (print ? 'chof=gif&' : '')
+      + 'chld=' + encodeURIComponent(params);
 }
 
 // ==== Maps API
@@ -377,7 +372,8 @@ function set_map_opacity() {
 // and the mouse target layer that obstructs the markers during printing.
 function hide_controls_for_print() {
   var mapDiv = $('map').firstChild;
-  for (var control = mapDiv.firstChild; control; control = control.nextSibling) {
+  for (var control = mapDiv.firstChild; control;
+       control = control.nextSibling) {
     if (control.style.zIndex == 10 && control.style.top) {
       control.className = 'gmnoprint';
     }
@@ -403,7 +399,8 @@ function convert_markers_for_print() {
   var duplicate_markers = 0;
   for (var pane = panes.firstChild; pane; pane = pane.nextSibling) {
     if (pane.style.zIndex == 103) {
-      for (var overlay = pane.firstChild; overlay; overlay = overlay.nextSibling) {
+      for (var overlay = pane.firstChild; overlay;
+           overlay = overlay.nextSibling) {
         // Convert background images to foreground images
         var src = overlay.style ? overlay.style.backgroundImage.toString() : '';
         if (src.indexOf('url') != -1) {
@@ -443,7 +440,7 @@ function initialize_markers() {
       title: facility.title
     });
     if (!print) {
-      google.maps.event.addListener(markers[f], 'click', facility_selector(f));      
+      google.maps.event.addListener(markers[f], 'click', facility_selector(f));
     }
     if (!print || f <= MAX_MARKERS_TO_PRINT) {
       facility.visible = true;
@@ -633,7 +630,8 @@ function update_facility_icons() {
     }
   }
   marker_clusterer.clearMarkers();
-  var to_add = print ? markers_to_keep.slice(0, MAX_MARKERS_TO_PRINT) : markers_to_keep;
+  var to_add = print ? markers_to_keep.slice(0, MAX_MARKERS_TO_PRINT)
+      : markers_to_keep;
   marker_clusterer.addMarkers(to_add);
 }
 
@@ -713,43 +711,26 @@ function update_print_facility_list() {
         'class': 'facility' + (i % 2 == 0 ? 'even' : 'odd')
       });
       var cells = [];
-      var total_beds = null;
-      var open_beds = null;
-      var address = null;
-      var general_info = null;
+      var total_beds = '\u2013';
+      var open_beds = '\u2013';
+      var address = '\u2013';
+      var general_info = '\u2013';
       if (facility.last_report) {
         var values = facility.last_report.values;
-        total_beds = values[attributes_by_name.total_beds];
-        if (total_beds === null) {
-          total_beds = '\u2013';
-        }
-        open_beds = values[attributes_by_name.available_beds];
-        if (open_beds === null) {
-          open_beds = '\u2013';
-        }
-        address = values[attributes_by_name.address];
-        if (!address) {
-          address = '\u2013';
-        }
-        var contact_name = values[attributes_by_name.contact_name];
-        if (contact_name) {
-          general_info = contact_name;
-        }
+        total_beds = values[attributes_by_name.total_beds] || total_beds;
+        open_beds = values[attributes_by_name.available_beds] || open_beds;
+        address = values[attributes_by_name.address] || address;
+        var gen_info = values[attributes_by_name.contact_name];
         var phone = values[attributes_by_name.phone];
         if (phone) {
-          if (general_info) {
-            general_info += ' p ' + phone;
-          } else {
-            general_info = ' p ' + phone;
-          }
+          // TODO: i18n for 'p'
+          gen_info = (gen_info ? gen_info + ' ' : '') + 'p ' + phone;
         }
-        if (general_info === null) {
-          general_info = '\u2013';
-        }
+        general_info = gen_info || general_info;
       }
       var dist_meters = facility.distance_meters;
       var dist = '\u2013';
-      if (dist_meters || dist_meters === 0) {
+      if (typeof(dist_meters) === 'number') {
         dist = locale.DISTANCE({
             MILES: format_number(dist_meters * METERS_TO_MILES, 1), 
             KM: format_number(dist_meters * METERS_TO_KM, 2)});
@@ -922,12 +903,9 @@ function enable_print_link() {
     return;
   }
   var f = selected_facility;
-  var PRINT_URL = '/?print=yes&facility_name=${FACILITY_NAME}'
-      + '&lat=${LAT}&lon=${LON}&rad=${RAD}';
-  print_link.href = render(PRINT_URL, {FACILITY_NAME: f.title,
-                                       LAT: f.location.lat,
-                                       LON: f.location.lon,
-                                       RAD: PRINT_RADIUS_MILES / METERS_TO_MILES});
+  var PRINT_URL = '/?print=yes&lat=${LAT}&lon=${LON}&rad=${RAD}';
+  print_link.href = render(PRINT_URL, {LAT: f.location.lat, LON: f.location.lon,
+       RAD: PRINT_RADIUS_MILES / METERS_TO_MILES});
   print_link.title = locale.PRINT_ENABLED_TOOLTIP({FACILITY_NAME: f.title});
   print_link.className = '';
   print_link.onclick = null;
@@ -941,7 +919,9 @@ function format_timestamp(t) {
 // Format a JavaScript Date object as a human-readable date string.
 function format_date(t) {
   // TODO: i18n for date str
-  return locale.MONTH_ABBRS[t.getMonth()]() + ' ' + t.getDate() + ', ' + t.getFullYear();  
+  // Note: t.getMonth() returns a number from 0-11
+  return locale.MONTH_ABBRS[t.getMonth()]()
+      + ' ' + t.getDate() + ', ' + t.getFullYear();  
 }
 
 // Format a JavaScript Date object as a human-readable time string.

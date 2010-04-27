@@ -106,16 +106,12 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
     LONGITUDE: facility.location.lon
   });
 
-  if (values && values[attributes_by_name.address]) {
-    address_info = values[attributes_by_name.address];
-  } else {
-    address_info = '\u2013';
-  }
+  address_info = values && values[attributes_by_name.address] || '\u2013';
 
   var attributes_info = [];
   for (var i = 0; i < attribute_is.length; i++) {
     var a = attribute_is[i];
-    if (a == attributes_by_name.address) {
+    if (a === attributes_by_name.address) {
       continue;
     }
     var attribute = attributes[a];

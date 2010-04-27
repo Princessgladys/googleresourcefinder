@@ -52,7 +52,7 @@ def validate_float(text):
     try:
         return float(text)
     except ValueError:
-        return False
+        return None
 
 def get_message(version, namespace, name):
     message = model.Message.all().ancestor(version).filter(

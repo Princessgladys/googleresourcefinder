@@ -22,22 +22,24 @@ class Main(Handler):
         self.require_user_role('user', 'ht')
 
         auth = self.auth
+        center = None
+        if self.params.lat is not None and self.params.lon is not None:
+            center = {'lat': self.params.lat, 'lon': self.params.lon}
         self.render('templates/map.html',
                     params=self.params,
                     authorization=auth and auth.description or 'anonymous',
                     #is_editor=access.check_user_role(auth,'editor','ht'),
                     is_editor=True,
                     #TODO(eyalf): should remove the assumption there is an email
-                    user=auth and {'email': auth.email} or {'email': 'anonymous'} ,
+                    user=(auth and {'email': auth.email}
+                        or {'email': 'anonymous'}),
                     loginout_url=(auth and users.create_logout_url('/') or
                                   users.create_login_url('/')),
                     loginout_text=(auth and _("Sign out") or _("Sign in")),
                     data=rendering.version_to_json(get_latest_version('ht'),
                                                    hide_email=not auth,
-                                                   facility_name=self.params.facility_name,
-                                                   lat=self.params.lat,
-                                                   lon=self.params.lon,
-                                                   rad=self.params.rad),
+                                                   center=center,
+                                                   radius=self.params.rad),
                     instance=self.request.host.split('.')[0])
 
 if __name__ == '__main__':

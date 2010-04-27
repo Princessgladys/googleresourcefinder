@@ -28,22 +28,27 @@
 #freshness { position: relative; left: 0; bottom: 0; padding: 2px 4px; }
 
 /* Print summary */
-.print-header { position: relative; width: 1024px; _width: 95% /* IE6 hack */; padding: 25px 2px 8px; }
+.print-header { position: relative; width: 1024px; _width: 95% /* IE6 hack */;
+                padding: 25px 2px 8px; }
 .print-summary { margin-top: 24px; }
-.print-summary th, .print-summary td { font-size: 16px; padding: 0 20px; text-align: center; font-weight: bold }
+.print-summary th, .print-summary td { font-size: 16px; padding: 0 20px; 
+                                       text-align: center; font-weight: bold }
 .print-summary td { font-size: 48px; }
 .print-title, .print-time { font-size: 16px }
 .print-subtitle, .print-date { font-size: 26px; font-weight: bold }
 
 /* Data area */
-#data { position: static; width: 1024px; _width: 95% /* IE6 hack */; margin-top: 24px }
+#data { position: static; width: 1024px; _width: 95% /* IE6 hack */;
+        margin-top: 24px }
 
 .print-datetime { text-align: right }
 .facility-background { background-color: #0a0; border: 1px solid #eee}
-#facility-list { background-color: #fff; margin-left: 8px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
+#facility-list { background-color: #fff; margin-left: 8px; 
+                 border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
 #facility-list td, #facility-list th { border-right: 1px solid #eee; }
 .facilityeven { background-color: #f8f8f8 }
 .facilityodd { background-color: #f0f0f0 }
-.facility-beds-open, .facility-beds-total { font-size: 24px; font-weight: bold; text-align: center}
+.facility-beds-open, .facility-beds-total { font-size: 24px; font-weight: bold;
+                                            text-align: center}
 .facility-beds-open { color: #888 }
 .facility-title { vertical-align: top; font-weight: bold; }
