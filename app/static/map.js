@@ -36,6 +36,8 @@ STATUS_TEXT_COLORS = [null, '040', '040', '040'];
 
 var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
+// TODO: Re-enable when monitoring is re-enabled
+var enable_freshness = false;
 
 // ==== Data loaded from the data store
 
@@ -619,8 +621,12 @@ function update_division_list() {
 
 // Update the data freshness indicator.
 function update_freshness(timestamp) {
+  if (!enable_freshness) {
+    $('freshness-text').style.display = 'none';
+  }
+
   if (!timestamp) {
-    $('freshness').innerHTML = 'No reports received';
+    $('freshness-text').innerHTML = 'No reports received';
     return;
   }
 
@@ -646,7 +652,7 @@ function update_freshness(timestamp) {
     age = Math.round(seconds) + ' seconds in the future';
   }
 
-  $('freshness').innerHTML = 'Last updated ' + age +
+  $('freshness-text').innerHTML = 'Last updated ' + age +
       ' (' + format_timestamp(t) + ')';
   window.setTimeout(function () { update_freshness(timestamp); }, timeout);
 }
@@ -902,7 +908,7 @@ function load_data(data) {
         window.location.protocol + '//' + window.location.host);
   }
 
-  // TODO: Test further and re-enable
+  // TODO: Test further and re-enable (also set enable_freshness true)
   //start_monitoring();
 }
 

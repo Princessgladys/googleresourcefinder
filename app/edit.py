@@ -208,7 +208,7 @@ class Edit(utils.Handler):
         self.facility_type, and self.attributes based on the query params."""
 
         self.require_user_role('user', self.params.cc)
-        
+
         try:
             self.version = utils.get_latest_version(self.params.cc)
         except:
@@ -222,39 +222,59 @@ class Edit(utils.Handler):
         self.attributes = dict(
             (a.key().name(), a)
             for a in model.Attribute.all().ancestor(self.version))
+        self.readonly_attribute_names = ['healthc_id',]
 
     def get(self):
         self.init()
         fields = []
+        readonly_fields = [{
+            'name': 'ID',
+            'value': self.params.facility_name
+        }]
+
         report = (model.Report.all()
             .ancestor(self.version)
             .filter('facility_name =', self.params.facility_name)
             .order('-timestamp')).get()
         for name in self.facility_type.attribute_names:
             attribute = self.attributes[name]
-            fields.append({
-                'name': get_message(self.version, 'attribute_name', name),
-                'type': attribute.type,
-                'input': make_input(self.version, report, attribute)
-            })
+            if name in self.readonly_attribute_names:
+                readonly_fields.append({
+                    'name': get_message(self.version, 'attribute_name', name),
+                    'value': getattr(report, name, None)
+                })
+            else:
+                fields.append({
+                    'name': get_message(self.version, 'attribute_name', name),
+                    'type': attribute.type,
+                    'input': make_input(self.version, report, attribute)
+                })
 
         self.render('templates/edit.html',
-            facility=self.facility, fields=fields, params=self.params,
+            facility=self.facility, fields=fields,
+            readonly_fields=readonly_fields, params=self.params,
             authorization=self.auth and self.auth.description or 'anonymous',
             logout_url=users.create_logout_url('/'))
 
     def post(self):
         self.init()
         logging.info("record by user: %s"%users.get_current_user())
+        last_report = (model.Report.all()
+            .ancestor(self.version)
+            .filter('facility_name =', self.params.facility_name)
+            .order('-timestamp')).get()
         report = model.Report(
             self.version,
             facility_name=self.facility.key().name(),
             date=utils.Date.today(),
             user=users.get_current_user(),
         )
-        for attribute_name in self.facility_type.attribute_names:
-            attribute = self.attributes[attribute_name]
-            parse_input(report, self.request, attribute)
+        for name in self.facility_type.attribute_names:
+            if name in self.readonly_attribute_names:
+                setattr(report, name, getattr(last_report, name, None))
+            else:
+                attribute = self.attributes[name]
+                parse_input(report, self.request, attribute)
         report.put()
         if self.params.embed:
             self.write(_('Record updated.'))

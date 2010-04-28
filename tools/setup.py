@@ -16,6 +16,7 @@ def setup_version(version):
         return Attribute(version, key_name=name, type=type, values=values)
 
     attributes = [
+        attr('int', 'healthc_id'),
         attr('str', 'organization'),
         attr('str', 'departemen'),
         attr('str', 'district'),
@@ -54,6 +55,7 @@ def setup_version(version):
     value_message = lambda name, **kw: message('attribute_value', name, **kw)
 
     messages = [
+        name_message('healthc_id', en='HealthC ID', fr='HealthC ID'),
         name_message('organization',
                      en='Organization name',
                      fr='Nom de l\'organisation'),
@@ -112,8 +114,8 @@ def setup_version(version):
         value_message('MOB Temp',
                       en='Temporary mobile facility',
                       fr=u'Facilit\xe9 mobile temporaire'),
-        value_message('Other', en='Other', fr='Autre'), 
-        value_message('Unknown', en='Unknown', fr='Inconnu'), 
+        value_message('Other', en='Other', fr='Autre'),
+        value_message('Unknown', en='Unknown', fr='Inconnu'),
 
         # services
         value_message('general_surgery',

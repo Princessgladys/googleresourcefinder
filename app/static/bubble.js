@@ -104,9 +104,14 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
     LONGITUDE: facility.location.lon
   });
 
+  var healthc_id = values && values[attributes_by_name.healthc_id] || '\u2013';
+
   var attributes_info = [];
   for (var i = 0; i < attribute_is.length; i++) {
     var a = attribute_is[i];
+    if (a === attributes_by_name.healthc_id) {
+      continue;
+    }
     var attribute = attributes[a];
     var value = null;
     if (facility.last_report) {
@@ -142,6 +147,7 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
   return render_template('bubble_template', {
     FACILITY_TITLE: facility.title,
     FACILITY_NAME: facility.name,
+    HEALTHC_ID: healthc_id,
     LAST_UPDATED: last_updated,
     EDIT_LINK: edit_link,
     AVAILABILITY_INFO: availability_info,

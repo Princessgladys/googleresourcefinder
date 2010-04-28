@@ -16,15 +16,25 @@
 
 {% load i18n %}
 
+{% if not params.embed %}
+<html>
+<head>
+{% endif %}
 <title>{% trans "Resource Mapper" %} ({{instance}})</title>
 <style>
 {% if not params.embed %}
   body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
+  h1 { font-size: 24px }
 {% endif %}
 tr.field { vertical-align: baseline; margin-top: 1em; }
 tr.field.text { vertical-align: top; }
+.readonly { color: #666; }
 .label { text-align: right; color: #666; }
 </style>
+{% if not params.embed %}
+</head>
+<body>
+{% endif %}
 <h1>{% trans "Edit" %} {{facility.title|escape}}</h1>
 
 <form method="post" id="edit" action="/edit">
@@ -33,6 +43,16 @@ tr.field.text { vertical-align: top; }
   <input type="hidden" name="facility_name"
       value="{{params.facility_name|escape}}">
   <table>
+    {% for field in readonly_fields %}
+      <tr class="field">
+        <td class="label">
+          {{field.name|escape}}
+        </td>
+        <td class="readonly">
+          {{field.value}}
+        </td>
+      </tr>
+    {% endfor %}
     {% for field in fields %}
       <tr class="field {{field.type}}">
         <td class="label">
@@ -54,3 +74,7 @@ tr.field.text { vertical-align: top; }
     </tr>
   </table>
 </form>
+{% if not params.embed %}
+</body>
+</html>
+{% endif %}
