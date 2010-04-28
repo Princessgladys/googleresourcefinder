@@ -38,10 +38,11 @@ tr.field.text { vertical-align: top; }
 <h1>{% trans "Edit" %} {{facility.title|escape}}</h1>
 
 <form method="post" id="edit" action="/edit">
-  <input type="hidden" name="embed" value="{{params.embed|escape}}">
-  <input type="hidden" name="cc" value="{{params.cc|escape}}">
+  <input type="hidden" name="token" value="{{token}}"/>
+  <input type="hidden" name="embed" value="{{params.embed|escape}}"/>
+  <input type="hidden" name="cc" value="{{params.cc|escape}}"/>
   <input type="hidden" name="facility_name"
-      value="{{params.facility_name|escape}}">
+      value="{{params.facility_name|escape}}"/>
   <table>
     {% for field in readonly_fields %}
       <tr class="field">
