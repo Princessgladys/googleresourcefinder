@@ -15,9 +15,13 @@
 import logging
 import model
 import utils
+from access import check_user_role
 from utils import DateTime, ErrorMessage, Redirect
 from utils import db, get_message, html_escape, users
-from access import check_user_role
+from feeds.crypto import sign, verify
+
+TOKEN_KEY_NAME = 'resource-finder-edit'
+DAY_SECS = 24 * 60 * 60
 
 # ==== Form-field generators and parsers for each attribute type =============
 
@@ -250,15 +254,23 @@ class Edit(utils.Handler):
                     'input': make_input(self.version, report, attribute)
                 })
 
+        token = sign(
+            TOKEN_KEY_NAME, users.get_current_user().user_id(), DAY_SECS)
+
         self.render('templates/edit.html',
-            facility=self.facility, fields=fields,
+            token=token, facility=self.facility, fields=fields,
             readonly_fields=readonly_fields, params=self.params,
             authorization=self.auth and self.auth.description or 'anonymous',
             logout_url=users.create_logout_url('/'))
 
     def post(self):
         self.init()
-        logging.info("record by user: %s"%users.get_current_user())
+        if not verify(TOKEN_KEY_NAME, users.get_current_user().user_id(),
+            self.request.get('token')):
+            raise ErrorMessage(403, 'Unable to submit data for %s'
+                               % users.get_current_user().email())
+
+        logging.info("record by user: %s" % users.get_current_user())
         last_report = (model.Report.all()
             .ancestor(self.version)
             .filter('facility_name =', self.params.facility_name)
