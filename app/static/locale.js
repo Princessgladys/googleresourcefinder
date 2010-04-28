@@ -24,12 +24,6 @@ locale = function() {
   messages.EDIT_LINK_HTML =
       HTML('${LINK_START}Edit this record${LINK_END}');
 
-  messages.REQUEST_EDIT_ACCESS_HTML =
-      HTML('${LINK_START}Request edit access${LINK_END}');
-
-  messages.SIGN_IN_TO_EDIT =
-      'Please sign in to edit';
-
   messages.CALL_FOR_AVAILABILITY =
       'Please call for availability information';
 

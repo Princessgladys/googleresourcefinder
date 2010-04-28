@@ -15,7 +15,6 @@
 import logging
 import model
 import utils
-from access import check_user_role
 from utils import DateTime, ErrorMessage, Redirect
 from utils import db, get_message, html_escape, users
 from feeds.crypto import sign, verify
@@ -208,10 +207,10 @@ def parse_input(report, request, attribute):
 
 class Edit(utils.Handler):
     def init(self):
-        """Checks for authentication and sets up self.version, self.facility,
+        """Checks for logged-in user and sets up self.version, self.facility,
         self.facility_type, and self.attributes based on the query params."""
 
-        self.require_user_role('user', self.params.cc)
+        self.require_logged_in_user()
 
         try:
             self.version = utils.get_latest_version(self.params.cc)
@@ -255,22 +254,21 @@ class Edit(utils.Handler):
                 })
 
         token = sign(
-            TOKEN_KEY_NAME, users.get_current_user().user_id(), DAY_SECS)
+            TOKEN_KEY_NAME, self.user.user_id(), DAY_SECS)
 
         self.render('templates/edit.html',
             token=token, facility=self.facility, fields=fields,
             readonly_fields=readonly_fields, params=self.params,
-            authorization=self.auth and self.auth.description or 'anonymous',
             logout_url=users.create_logout_url('/'))
 
     def post(self):
         self.init()
-        if not verify(TOKEN_KEY_NAME, users.get_current_user().user_id(),
+        if not verify(TOKEN_KEY_NAME, self.user.user_id(),
             self.request.get('token')):
             raise ErrorMessage(403, 'Unable to submit data for %s'
-                               % users.get_current_user().email())
+                               % self.user.email())
 
-        logging.info("record by user: %s" % users.get_current_user())
+        logging.info("record by user: %s" % self.user)
         last_report = (model.Report.all()
             .ancestor(self.version)
             .filter('facility_name =', self.params.facility_name)
@@ -279,7 +277,7 @@ class Edit(utils.Handler):
             self.version,
             facility_name=self.facility.key().name(),
             date=utils.Date.today(),
-            user=users.get_current_user(),
+            user=self.user,
         )
         for name in self.facility_type.attribute_names:
             if name in self.readonly_attribute_names:

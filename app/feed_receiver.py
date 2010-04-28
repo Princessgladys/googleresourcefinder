@@ -28,6 +28,12 @@ def datetime_to_date(dt):
 
 class Incoming(Handler):
     def post(self, token):
+
+        # TODO(shakusa) Implement an authorization token scheme
+        # This involves changes to the data model so that we can store
+        # the token along with the (maybe different) email associated with
+        # each record
+
         records = handle_feed_post(self.request, self.response)
 
         from utils import get_latest_version

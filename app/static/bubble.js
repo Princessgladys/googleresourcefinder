@@ -52,7 +52,7 @@ rf.bubble.format_attr = function(attr, value) {
 /**
  * Renders the HTML content of the InfoWindow for a given facility.
  */
-rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
+rf.bubble.get_html = function(facility, attribute_is, last_updated) {
   var EDIT_URL = '/edit?cc=ht&facility_name=${FACILITY_NAME}';
   var AVAILABILITY_CELLS = HTML(
     '<td class="availability">' +
@@ -66,27 +66,14 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
     '<td class="value" colspan="2">${VALUE}</td></tr>');
   var HISTORY_ROW = HTML(
     '<tr><td>${DATE}</td><td>${LABEL}: ${VALUE}</td><td>${AUTHOR}</td></tr>');
-  var REQUEST_ACCESS_LINK_START = HTML(
-    '<a href="#" onclick="' +
-        "request_role_handler('/request_access?cc=ht&role=editor&embed=yes')" +
-    '">');
 
-  var edit_link = '';
-  if (user && user.is_editor) {
-    var edit_url = render(EDIT_URL, {FACILITY_NAME: facility.name});
-    edit_link = locale.EDIT_LINK_HTML({
+  var edit_url = render(EDIT_URL, {FACILITY_NAME: facility.name});
+  var edit_link = locale.EDIT_LINK_HTML({
       LINK_START: render(HTML('<a href="${URL}">'), {URL: edit_url}),
       LINK_END: HTML('</a>')
     });
-  } else if (user) {
-    edit_link = locale.REQUEST_EDIT_ACCESS_HTML({
-      LINK_START: REQUEST_ACCESS_LINK_START,
-      LINK_END: HTML('</a>')
-    });
-  } else {
-    edit_link = locale.SIGN_IN_TO_EDIT();
-  }
 
+  var availability_info;
   var values = facility.last_report && facility.last_report.values;
   if (values && values[attributes_by_name.total_beds]) {
     availability_info = render(AVAILABILITY_CELLS, {
