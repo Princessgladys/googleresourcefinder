@@ -849,7 +849,7 @@ function select_facility(facility_i, ignore_current) {
   attribute_is = facility_types[selected_facility.type].attribute_is;
 
   info.setContent(to_html(rf.bubble.get_html(
-      selected_facility, attribute_is, last_updated, rf.user)));
+      selected_facility, attribute_is, last_updated)));
   info.open(map, markers[selected_facility_i]);
 
   // This call sets up the tabs and should be called after the DOM is created.
