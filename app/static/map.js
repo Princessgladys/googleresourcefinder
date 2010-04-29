@@ -548,8 +548,9 @@ function initialize_print_headers() {
   var now = new Date();
 
   set_children($('site-url'),
-    window.location.protocol + '//' + window.location.host);
-  
+    window.location.protocol + '//' + window.location.host); 
+  $('freshness').style.display = 'none';
+
   var date = format_date(now);
   var time = format_time(now);
   set_children($('header-print-date'), format_date(now));
@@ -718,12 +719,14 @@ function update_print_facility_list() {
       var open_beds;
       var address;
       var general_info;
+      var healthc_id;
       if (facility.last_report) {
         var values = facility.last_report.values;
         total_beds = values[attributes_by_name.total_beds];
         open_beds = values[attributes_by_name.available_beds];
         address = values[attributes_by_name.address];
         general_info = values[attributes_by_name.contact_name];
+        healthc_id = values[attributes_by_name.healthc_id];
         var phone = values[attributes_by_name.phone];
         if (phone) {
           // TODO: i18n for 'p'
@@ -737,7 +740,8 @@ function update_print_facility_list() {
             MILES: format_number(dist_meters * METERS_TO_MILES, 1), 
             KM: format_number(dist_meters * METERS_TO_KM, 2)});
       }
-      var facility_name = facility.title + ' - ID:' + facility.name;
+      var facility_name = facility.title + ' - ID:' + facility.name
+        + ' - HealthC ID: ' + render(healthc_id);
       cells.push($$('td', {'class': 'facility-beds-open'}, render(open_beds)));
       cells.push($$('td', {'class': 'facility-beds-total'},render(total_beds)));
       cells.push($$('td', {'class': 'facility-title'}, render(facility_name)));

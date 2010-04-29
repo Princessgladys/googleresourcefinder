@@ -34,6 +34,9 @@ class Incoming(Handler):
         # the token along with the (maybe different) email associated with
         # each record
 
+        # TODO(shakusa) Do we need to enforce read-only fields
+        # facility name (id), healthc_id, facility title ?
+
         records = handle_feed_post(self.request, self.response)
 
         from utils import get_latest_version
