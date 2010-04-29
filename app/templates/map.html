@@ -51,12 +51,6 @@
   <!-- Initialize the rf namespace -->
   <script type="text/javascript">
     rf = {};
-    {% if user %}
-      rf.user = {
-        email: '{{ user.email|escape }}',
-        is_editor: {% if is_editor %} true {% else %} false {% endif %}
-      };
-    {% endif %}
   </script>
   <script type="text/javascript" src="static/templates.js"></script>
   <script type="text/javascript" src="static/locale.js"></script>
@@ -136,7 +130,12 @@
     {% include "data.html" %}
   {% endif %}
 </div>
-<div id="freshness" class="caption"></div>
+<div id="freshness" class="caption gmnoprint">
+  <span id="freshness-text"></span>
+  <div>
+    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">Download master list</a>
+  </div>
+</div>
 {% if params.print %}
   <div id="update-instructions">
     {% trans "If any information is wrong or missing, please correct it on the web site:" %}

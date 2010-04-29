@@ -59,12 +59,6 @@ locale = function() {
   messages.PRINT_ENABLED_TOOLTIP =
       'Print a list of hospitals in order of distance from ${FACILITY_NAME}';
 
-  messages.REQUEST_EDIT_ACCESS_HTML =
-      HTML('${LINK_START}Request edit access${LINK_END}');
-
-  messages.SIGN_IN_TO_EDIT =
-      'Please sign in to edit';
-
   messages.YES =
       'Yes';
 

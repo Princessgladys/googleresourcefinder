@@ -19,7 +19,7 @@ import hashlib
 import hmac
 import pickle
 import random
-
+import time
 
 class Secret(db.Model):
     """An application-wide secret, identified by its key_name."""

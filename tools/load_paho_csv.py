@@ -40,6 +40,7 @@ def load_paho_csv(version, filename):
             version,
             facility_name=facility_name,
             date=datetime.date.today(),
+            healthc_id=record['HealthC_ID'].strip() or None,
             organization=record['Oorganisat'].strip() or None,
             departemen=record['Departemen'].strip() or None,
             district=record['DistrictNom'].strip() or None,

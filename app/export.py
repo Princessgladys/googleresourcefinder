@@ -102,6 +102,8 @@ def write_csv(out, version, facility_type, attribute_names=None):
                                 value = value.encode('utf-8')
                             if isinstance(value, str):
                                 value = value.replace('\n', ' ')
+                            if isinstance(value, list):
+                                value = ', '.join(value)
                             row.append(value)
                     else:
                         row += [None]*len(attribute_names)
@@ -109,54 +111,45 @@ def write_csv(out, version, facility_type, attribute_names=None):
 
 class Export(Handler):
     def get(self):
-        auth = access.check_and_log(self.request, users.get_current_user())
         country_code = self.request.get('cc')
-        if auth and access.check_user_role(self.auth,
-                                           'superuser',
-                                           country_code):
-            if country_code:
-                # Get the selected facility type.
-                version = get_latest_version(country_code)
-                facility_type = FacilityType.get_by_key_name(
-                    self.request.get('facility_type'), version)
+        if country_code:
+            # Get the selected facility type.
+            version = get_latest_version(country_code)
+            facility_type = FacilityType.get_by_key_name(
+                self.request.get('facility_type'), version)
 
-                # Construct a reasonable filename.
-                timestamp = version.timestamp.replace(microsecond=0)
-                country = version.parent()
-                filename = '%s.%s.%s.csv' % (
-                    country_code, facility_type.key().name(),
-                    timestamp.isoformat().replace(':', '_'))
-                self.response.headers['Content-Type'] = 'text/csv'
-                self.response.headers['Content-Disposition'] = \
-                    'attachment; filename=' + filename
+            # Construct a reasonable filename.
+            timestamp = version.timestamp.replace(microsecond=0)
+            country = version.parent()
+            filename = '%s.%s.%s.csv' % (
+                country_code, facility_type.key().name(),
+                timestamp.isoformat().replace(':', '_'))
+            self.response.headers['Content-Type'] = 'text/csv'
+            self.response.headers['Content-Disposition'] = \
+                'attachment; filename=' + filename
 
-                # Write out the CSV data.
-                write_csv(self.response.out, version, facility_type)
-            else:
-                self.write('<link rel=stylesheet href="static/style.css">')
-                for country in Country.all():
-                    version = get_latest_version(country.key().name())
-                    self.write('<h2>%s</h2>' % country.title)
-                    self.write('<p>%s %s' %
-                        (_('Last updated:'), version.timestamp))
-                    self.write('<p><form>')
-                    self.write('<input type=hidden name="cc" value="%s">' %
-                               country.key().name())
-                    self.write('<p>Select facility type to export:')
-                    self.write('<select name="facility_type">')
-                    for facility_type in FacilityType.all().ancestor(version):
-                        self.write(
-                            '<option value="%s">%s</option>' % (
-                            facility_type.key().name(),
-                            facility_type.key().name()))
-                    self.write('<p><input type=submit value="%s">' %
-                        _('Export CSV'))
-                    self.write('</form>')
-        elif not auth:
-            self.redirect(users.create_login_url(self.request.uri))
+            # Write out the CSV data.
+            write_csv(self.response.out, version, facility_type)
         else:
-            raise ErrorMessage(403, _('Unauthorized user.'))
-
+            self.write('<link rel=stylesheet href="static/style.css">')
+            for country in Country.all():
+                version = get_latest_version(country.key().name())
+                self.write('<h2>%s</h2>' % country.title)
+                self.write('<p>%s %s' %
+                    (_('Last updated:'), version.timestamp))
+                self.write('<p><form>')
+                self.write('<input type=hidden name="cc" value="%s">' %
+                           country.key().name())
+                self.write('<p>Select facility type to export:')
+                self.write('<select name="facility_type">')
+                for facility_type in FacilityType.all().ancestor(version):
+                    self.write(
+                        '<option value="%s">%s</option>' % (
+                        facility_type.key().name(),
+                        facility_type.key().name()))
+                self.write('<p><input type=submit value="%s">' %
+                    _('Export CSV'))
+                self.write('</form>')
 
 if __name__ == '__main__':
     run([('/export', Export)], debug=True)

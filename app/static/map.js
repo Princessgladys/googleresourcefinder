@@ -56,6 +56,9 @@ var METERS_TO_KM = 0.001;
 // Temporary for v1, this should be user-settable in the future
 var PRINT_RADIUS_MILES = 10;
 
+// TODO: Re-enable when monitoring is re-enabled
+var enable_freshness = false;
+
 // ==== Data loaded from the data store
 
 var attributes = [null];
@@ -846,8 +849,12 @@ function update_division_list() {
 
 // Update the data freshness indicator.
 function update_freshness(timestamp) {
+  if (!enable_freshness) {
+    $('freshness-text').style.display = 'none';
+  }
+
   if (!timestamp) {
-    $('freshness').innerHTML = 'No reports received';
+    $('freshness-text').innerHTML = 'No reports received';
     return;
   }
 
@@ -873,7 +880,7 @@ function update_freshness(timestamp) {
     age = Math.round(seconds) + ' seconds in the future';
   }
 
-  $('freshness').innerHTML = 'Last updated ' + age +
+  $('freshness-text').innerHTML = 'Last updated ' + age +
       ' (' + format_timestamp(t) + ')';
   window.setTimeout(function () { update_freshness(timestamp); }, timeout);
 }
@@ -1126,7 +1133,7 @@ function select_facility(facility_i, ignore_current) {
   attribute_is = facility_types[selected_facility.type].attribute_is;
 
   info.setContent(to_html(rf.bubble.get_html(
-      selected_facility, attribute_is, last_updated, rf.user)));
+      selected_facility, attribute_is, last_updated)));
   info.open(map, markers[selected_facility_i]);
 
   // This call sets up the tabs and should be called after the DOM is created.
