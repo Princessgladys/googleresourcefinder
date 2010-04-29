@@ -44,6 +44,12 @@ def strip(text):
 def validate_yes(text):
     return (text.lower() == 'yes') and 'yes' or ''
 
+def validate_float(text):
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
 def get_message(version, namespace, name):
     message = model.Message.all().ancestor(version).filter(
         'namespace =', namespace).filter('name =', name).get()
@@ -58,6 +64,9 @@ class Handler(webapp.RequestHandler):
         'facility_name': strip,
         'print': validate_yes,
         'embed': validate_yes,
+        'lat': validate_float,
+        'lon': validate_float,
+        'rad': validate_float
     }
 
     def require_logged_in_user(self):

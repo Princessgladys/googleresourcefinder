@@ -25,12 +25,12 @@ rf.bubble = {};
  */
 rf.bubble.format_attr = function(attr, value) {
   if (value === null || value === undefined || value === '') {
-    return '\u2013';
+    return render(value);
   }
   switch (attr.type) {
     case 'contact':
       value = (value || '').replace(/^[\s\|]+|[\s\|]+$/g, '');
-      return value ? value.replace(/\|/g, ', ') : '\u2013';
+      return render((value || '').replace(/\|/g, ', '));
     case 'date':
       return value.replace(/T.*/, '');
     case 'text':
@@ -73,9 +73,9 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
       LINK_END: HTML('</a>')
     });
 
-  var availability_info;
   var values = facility.last_report && facility.last_report.values;
-  if (values && values[attributes_by_name.total_beds]) {
+  var availability_info;
+  if (values && typeof(values[attributes_by_name.total_beds]) === 'number') {
     availability_info = render(AVAILABILITY_CELLS, {
       AVAILABILITY: values[attributes_by_name.available_beds],
       CAPACITY: values[attributes_by_name.total_beds]
@@ -91,12 +91,14 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
     LONGITUDE: facility.location.lon
   });
 
-  var healthc_id = values && values[attributes_by_name.healthc_id] || '\u2013';
+ var healthc_id = values && values[attributes_by_name.healthc_id] || '\u2013';
+ var address_info = render(values && values[attributes_by_name.address]);
 
   var attributes_info = [];
   for (var i = 0; i < attribute_is.length; i++) {
     var a = attribute_is[i];
-    if (a === attributes_by_name.healthc_id) {
+    if (a === attributes_by_name.healthc_id ||
+        a === attributes_by_name.address) {
       continue;
     }
     var attribute = attributes[a];
@@ -139,6 +141,7 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
     EDIT_LINK: edit_link,
     AVAILABILITY_INFO: availability_info,
     FACILITY_SERVICES: rf.get_services(facility),
+    ADDRESS_INFO: address_info,
     GEOLOCATION_INFO: geolocation_info,
     ATTRIBUTES_INFO: attributes_info,
     HISTORY_INFO: history_info

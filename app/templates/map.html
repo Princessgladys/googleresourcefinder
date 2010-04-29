@@ -28,7 +28,8 @@
   <!--[if lt IE 8]>
     <link rel="stylesheet" href="static/map-ie.css">
   <![endif]-->
-  <link rel="stylesheet" href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css" type="text/css" media="all"> 
+  <link rel="stylesheet" type="text/css" media="all"
+        href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css" > 
   <link rel="stylesheet" href="static/bubble.css">
 
   <!-- Google Maps API -->
@@ -43,7 +44,8 @@
   <script type="text/javascript" src="static/jquery.min.js"></script>
   <script type="text/javascript" src="static/jquery.form.js"></script>
   <script type="text/javascript">jQuery.noConflict();</script>
-  <script type="text/javascript" src="static/jquery-ui-1.8rc3.custom.min.js"></script>
+  <script type="text/javascript" src="static/jquery-ui-1.8rc3.custom.min.js">
+  </script>
   <script type="text/javascript" src="static/chain.js"></script>
 
   <!-- Initialize the rf namespace -->
@@ -70,16 +72,35 @@
     {% if params.print %}
       <a href="/">{% trans "Home" %}</a> |
     {% else %}
-      <a href="/?print=yes">{% trans "Print" %}</a> |
+      <a id="print-link" href="#"
+         class="print-link-disabled">{% trans "Print" %}</a> |
     {% endif %}
     <a href="about:blank">Help</a> |
     <a href="{{loginout_url}}">{{loginout_text}}</a>
   </div>
-  <div class="title">
-    {% trans "Resource Finder" %}
-  </div>
+  {% if params.print %}
+    <div class="print-header">
+      <table width="100%" cellspacing=0 cellpadding=0 border=0>
+        <tbody>
+          <tr>
+            <td valign=top>
+              <span class="print-title">{% trans "Resource Finder" %}</span><br/>
+              <span class="print-subtitle" id="header-print-subtitle"></span>
+            </td>
+            <td valign=top class="print-datetime">
+              <span class="print-date" id="header-print-date"></span><br/>
+              <span class="print-time" id="header-print-time"></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="title">
+      {% trans "Resource Finder" %}
+    </div>
+  {% endif %}
 </div>
-<div id="print-timestamp"></div>
 <div id="map"></div>
 <div class="hshadow hs1"></div>
 <div class="hshadow hs2"></div>
@@ -87,79 +108,27 @@
 <div class="vshadow vs1"></div>
 <div class="vshadow vs2"></div>
 <div class="vshadow vs3"></div>
+{% if params.print %}
+  <div class="print-summary">
+    <table cellspacing=0 cellpadding=0 border=0 align=center>
+      <thead>
+        <tr>
+          <th>{% trans "Total facilities" %}</th>
+          <th>{% trans "no more than 10 miles away" %}</th>
+          <th>{% trans "and with availability." %}</th>
+        </tr>
+      </thead>
+      <tbody id="print-summary-tbody">
+      </tbody>
+    </table>
+  </div>
+{% endif %}
 <div id="data">
-  <div id="supply-section" class="section">
-    <div class="table-head">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <thead id="supply-thead">
-          <tr>
-            <th>{% trans "Supplies" %}</th>
-          </tr>
-        </thead>
-      </table>
-    </div>
-    <div class="table-body">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <tbody id="supply-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-  <div id="filter-section" class="section">
-    <div class="table-head">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <thead id="filter-thead">
-          <tr>
-            <th>{% trans "Filters" %}</th>
-          </tr>
-        </thead>
-      </table>
-    </div>
-    <div class="table-body">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <tbody id="filter-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-  <div id="legend-section" class="section">
-    <div class="table-body">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <tbody id="legend-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-  <div id="division-section" class="section">
-    <div class="table-head">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <thead id="division-thead">
-          <tr>
-            <th>{% trans "Arrondissements" %}</th>
-          </tr>
-        </thead>
-      </table>
-    </div>
-    <div class="table-body" id="division-list">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <tbody id="division-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-  <div id="facility-section" class="section">
-    <div class="table-head">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <thead id="facility-thead">
-          <tr>
-            <th>{% trans "Facility" %}</th>
-          </tr>
-        </thead>
-      </table>
-    </div>
-    <div class="table-body" id="facility-list">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <tbody id="facility-tbody">
-        </tbody>
-      </table>
-    </div>
-  </div>
+  {% if params.print %}
+    {% include "print_data.html" %}
+  {% else %}
+    {% include "data.html" %}
+  {% endif %}
 </div>
 <div id="freshness" class="caption gmnoprint">
   <span id="freshness-text"></span>
@@ -169,8 +138,7 @@
 </div>
 {% if params.print %}
   <div id="update-instructions">
-    {% trans "If any information is wrong or missing,
-              please correct it on the web site:" %}
+    {% trans "If any information is wrong or missing, please correct it on the web site:" %}
     <span id="site-url"></span>
   </div>
 {% endif %}

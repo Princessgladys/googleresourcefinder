@@ -17,7 +17,7 @@ import access
 import rendering
 
 # TODO(shakusa) Issue 55: When we are ready to launch, set this to False
-VIEW_AND_PRINT_REQUIRE_LOGIN = True
+VIEW_AND_PRINT_REQUIRE_LOGIN = False
 
 class Main(Handler):
 
@@ -26,13 +26,19 @@ class Main(Handler):
             self.require_logged_in_user()
 
         user = self.user
+        center = None
+        if self.params.lat is not None and self.params.lon is not None:
+            center = {'lat': self.params.lat, 'lon': self.params.lon}
         self.render('templates/map.html',
                     params=self.params,
+                    authorization=user and user.email() or 'anonymous',
                     loginout_url=(user and users.create_logout_url('/') or
                                   users.create_login_url('/')),
                     loginout_text=(user and _("Sign out") or _("Sign in")),
-                    data=rendering.version_to_json(
-                        get_latest_version('ht'), hide_email=not user),
+                    data=rendering.version_to_json(get_latest_version('ht'),
+                                                   hide_email=not user,
+                                                   center=center,
+                                                   radius=self.params.rad),
                     instance=self.request.host.split('.')[0])
 
 if __name__ == '__main__':
