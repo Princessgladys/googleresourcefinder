@@ -102,6 +102,8 @@ def write_csv(out, version, facility_type, attribute_names=None):
                                 value = value.encode('utf-8')
                             if isinstance(value, str):
                                 value = value.replace('\n', ' ')
+                            if isinstance(value, list):
+                                value = ', '.join(value)
                             row.append(value)
                     else:
                         row += [None]*len(attribute_names)
