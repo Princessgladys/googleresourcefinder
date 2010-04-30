@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from feeds.geo import distance
 from utils import *
 from model import Attribute, Division, Facility, FacilityType, Message, Report
 import sys
@@ -25,7 +26,9 @@ def make_jobjects(entities, transformer, *args):
     indexes = {}
     for entity in entities:
         index = len(jobjects)
-        jobjects.append(transformer(index, entity, *args))
+        jobject = transformer(index, entity, *args)
+        if jobject is not None:
+            jobjects.append(jobject)
         indexes[entity.key().name()] = index
     return jobjects, indexes
 
@@ -50,9 +53,10 @@ def user_transformer(user, hide_email):
             # (up to) 3 last characters of the username with '...'.
             address = re.sub(r'^(\w+?)\w{0,3}@', r'\1...@', address)
     return {'email': address}
-                
+
 def facility_transformer(index, facility, attributes, report_map,
-                         facility_type_is, facility_map, hide_email):
+                         facility_type_is, facility_map, hide_email,
+                         center, radius):
     """Construct the JSON object for a Facility."""
     # Add the facility to the facility lists for its containing divisions.
     for name in facility.division_names:
@@ -77,10 +81,18 @@ def facility_transformer(index, facility, attributes, report_map,
         'reports': reports and reports[-10:] or None,
         'last_report': reports and reports[-1] or None
     }
-    if facility.location is not None:
+    if facility.location:
         facility_jobject['location'] = {
-            'lat': facility.location.lat, 'lon': facility.location.lon
+            'lat': facility.location.lat,
+            'lon': facility.location.lon
         }
+        if center:
+            facility_jobject['distance_meters'] = distance(
+                facility_jobject['location'], center)
+
+    if facility_jobject.get('distance_meters') > radius > 0:
+        return None
+
     return facility_jobject
 
 def division_transformer(index, division, facility_map):
@@ -99,7 +111,7 @@ def json_encode(object):
 def clean_json(json):
     return re.sub(r'"(\w+)":', r'\1:', json)
 
-def version_to_json(version, hide_email):
+def version_to_json(version, hide_email, center=None, radius=None):
     """Dump the data for a given country version as a JSON string."""
     if version is None:
         return '{}'
@@ -124,14 +136,16 @@ def version_to_json(version, hide_email):
         report_map.setdefault(report.facility_name, []).insert(0, report)
         num_reports = num_reports + 1
         #report_map.setdefault(report.facility_name, []).append(report)
-    logging.info("NUMBER OF REPORTS %d"%num_reports);
+    total_facility_count = len(report_map)
+    logging.info("NUMBER OF REPORTS %d %d" % (num_reports, total_facility_count))
 
     # Make JSON objects for the facilities, while collecting lists of the
     # facilities in each division.
     facility_map = {}
     facility_jobjects, facility_is = make_jobjects(
         Facility.all().ancestor(version).order('title'), facility_transformer,
-        attributes, report_map, facility_type_is, facility_map, hide_email)
+        attributes, report_map, facility_type_is, facility_map, hide_email,
+        center, radius)
 
     # Make JSON objects for the districts.
     division_jobjects, division_is = make_jobjects(
@@ -144,6 +158,10 @@ def version_to_json(version, hide_email):
             facility_jobject['division_i'] = division_is[
                 facility_jobject['division_i']]
 
+    # Sort by distance, if necessary.
+    if center:
+        facility_jobjects.sort(key=lambda f: f and f.get('distance_meters'))
+
     # Get all the messages.
     message_jobjects = {}
     for message in Message.all().ancestor(version):
@@ -152,6 +170,7 @@ def version_to_json(version, hide_email):
                                        for lang in message.dynamic_properties())
 
     return clean_json(simplejson.dumps({
+        'total_facility_count': total_facility_count,
         'timestamp': to_posixtime(timestamp),
         'attributes': attribute_jobjects,
         'facility_types': facility_type_jobjects,

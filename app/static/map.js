@@ -13,6 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 */
+
+/**
+ * @fileoverview Main entry point. Manages parsing data from the page on load,
+ *     displays it in the data view and map view, and sets up event handlers
+ *     to handle the interaction between views.
+ *     For now, also acts as the entry point for print view; take care to note
+ *     use of the externally-defined 'print' variable.
+ * @author kpy@google.com (Ka-Ping Yee)
+ */
+
 // ==== Constants
 
 var STATUS_GOOD = 1;
@@ -34,8 +44,17 @@ var STATUS_LABEL_TEMPLATES = [
 STATUS_ICON_COLORS = [null, '080', '080', '080'];
 STATUS_TEXT_COLORS = [null, '040', '040', '040'];
 
-var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+// In print view, limit the number of markers being printed on the map at once
+// both for display and performance concerns.
+// TODO: It would be better to instead figure out how to render markers in a
+// smart way so that they do not overlap.
+var MAX_MARKERS_TO_PRINT = 50;
 
+var METERS_TO_MILES = 0.000621371192;
+var METERS_TO_KM = 0.001;
+
+// Temporary for v1, this should be user-settable in the future
+var PRINT_RADIUS_MILES = 10;
 
 // ==== Data loaded from the data store
 
@@ -73,14 +92,8 @@ var summary_columns = [
     },
     get_value: function(values) {
       var services = rf.get_services_from_values(values);
-      var total_beds = values[attributes_by_name.total_beds];
-      if (total_beds === null) {
-        total_beds = '\u2013';
-      }
-      var open_beds = values[attributes_by_name.available_beds];
-      if (open_beds === null) {
-        open_beds = '\u2013';
-      }
+      var total_beds = render(values[attributes_by_name.total_beds]);
+      var open_beds = render(values[attributes_by_name.available_beds]);
       var beds = open_beds + ' / ' + total_beds;
       var beds_div = $$('div', {'class': 'beds'}, beds);
       // WebKit rendering bug: vertical alignment is off if services is ''.
@@ -138,6 +151,7 @@ var map = null;
 var info = null;
 var markers = [];  // marker for each facility
 var marker_clusterer = null;  // clusters markers for efficient rendering
+var converted_markers_for_print = 0; // part of a hack for print support
 
 // ==== Debugging
 
@@ -148,9 +162,11 @@ function log() {
   if (typeof console === 'undefined') {
     return;
   }
-  if (console) {
-    if (console.log) {
-      console.log.apply(console, arguments);
+  if (console && console.log) {
+    if (console.log.apply) {
+      console.log.apply(console, arguments);      
+    } else {
+      console.log(arguments[0]);
     }
   }
 }
@@ -292,8 +308,11 @@ function make_icon(title, status, detail) {
       text, text_size, text_fill,
       icon, icon_size, icon_fill, icon_outline
   ].join('|');
-  return 'http://chart.apis.google.com/chart?chst=d_simple_text_icon_above&' +
-      'chld=' + encodeURIComponent(params);
+  var url = 'http://chart.apis.google.com/chart?chst=d_simple_text_icon_above&';
+  // In print view, render icons as .gif's so they print correctly on older
+  // browsers. In regular view, the default .pngs render better
+  return url + (print ? 'chof=gif&' : '')
+      + 'chld=' + encodeURIComponent(params);
 }
 
 // ==== Maps API
@@ -312,21 +331,27 @@ function initialize_map() {
     navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL}
   });
   google.maps.event.addListener(map, 'tilesloaded', set_map_opacity);
+  if (print) {
+    google.maps.event.addListener(map, 'tilesloaded', convert_markers_for_print);
+    google.maps.event.addListener(map, 'tilesloaded', hide_controls_for_print);
+  }
 
   info = new google.maps.InfoWindow();
 
-  var marker_style = {
+  var cluster_style = {
     url: 'static/greek_cross36.png',
     height: 36,
     width: 36,
     opt_textColor: '#fff',
     Y: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
   };
+  // Turn off clustering in print view.
+  var max_zoom = print ? -1 : 14;
   marker_clusterer = new MarkerClusterer(map, [], {
-    maxZoom: 14,  // closest zoom at which clusters are shown
+    maxZoom: max_zoom,  // closest zoom at which clusters are shown
     gridSize: 40, // size of square pixels in which to cluster
     // override default styles to render all cluster sizes with our custom icon
-    styles: [marker_style, marker_style, marker_style, marker_style]
+    styles: [cluster_style, cluster_style, cluster_style, cluster_style]
   });
 }
 
@@ -341,6 +366,69 @@ function set_map_opacity() {
   }
 }
 
+// The v3 maps API does not have good print support.
+// See http://code.google.com/p/gmaps-api-issues/issues/detail?id=1343
+// The method modifies the DOM of the map to hide unwanted map controls
+// and the mouse target layer that obstructs the markers during printing.
+function hide_controls_for_print() {
+  var mapDiv = $('map').firstChild;
+  for (var control = mapDiv.firstChild; control;
+       control = control.nextSibling) {
+    if (control.style.zIndex == 10 && control.style.top) {
+      control.className = 'gmnoprint';
+    }
+  }
+  var panes = $('map').firstChild.firstChild;
+  var duplicate_markers = 0;
+  for (var pane = mapDiv.firstChild.firstChild; pane; pane = pane.nextSibling) {
+    if (pane.style.zIndex == 105) {
+      // Don't print anything in layer 105, the overlay mouse target layer.
+      pane.className = 'gmnoprint';
+      break;
+    }
+  }
+}
+
+// The v3 maps API does not have good print support.
+// See http://code.google.com/p/gmaps-api-issues/issues/detail?id=1343
+// The method converts background-image markers to actual <img> elements
+// so that markers print reasonably well across browsers. Things are still 
+// not perfect because of varying support for printing transparency.
+function convert_markers_for_print() {
+  var panes = $('map').firstChild.firstChild;
+  var duplicate_markers = 0;
+  for (var pane = panes.firstChild; pane; pane = pane.nextSibling) {
+    if (pane.style.zIndex == 103) {
+      for (var overlay = pane.firstChild; overlay;
+           overlay = overlay.nextSibling) {
+        // Convert background images to foreground images
+        var src = overlay.style ? overlay.style.backgroundImage.toString() : '';
+        if (src.indexOf('url') != -1) {
+          // Remove the surrounding 'url()'
+          src = src.substring(4, src.length - 1);
+          overlay.style.backgroundImage = '';
+          var img = document.createElement('img');
+          overlay.appendChild(img);
+          img.src = src;
+          converted_markers_for_print++;
+        } else if (overlay.style && overlay.style.zIndex) {
+          // Pane 103 contains some divs with no zIndex or backgroundImage,
+          // some divs with both zIndex and backgroundImage
+          // and some divs with zIndex and no backgroundImage (the last set
+          // are typically for markers that perfectly overlap another marker).
+          // We have to count these, to know when we're done applying the hack.
+          duplicate_markers++;
+        }
+      }
+    }
+  }
+  if (converted_markers_for_print + duplicate_markers < markers.length) {
+    // The DIVs for markers are added lazily and in batches. We don't know when
+    // that happens, so we have to poll until we've converted all we can.
+    window.setTimeout(convert_markers_for_print, 250);
+  }
+}
+
 // Construct and set up the map markers for the facilities.
 function initialize_markers() {
   for (var f = 1; f < facilities.length; f++) {
@@ -351,9 +439,18 @@ function initialize_markers() {
       icon: make_icon(facility.title, STATUS_UNKNOWN, false),
       title: facility.title
     });
-    google.maps.event.addListener(markers[f], 'click', facility_selector(f));
+    if (!print) {
+      google.maps.event.addListener(markers[f], 'click', facility_selector(f));
+    }
+    if (!print || f <= MAX_MARKERS_TO_PRINT) {
+      facility.visible = true;
+    }
   }
-  marker_clusterer.addMarkers(markers.slice(1));
+
+  var to_add = print ? markers.slice(1, MAX_MARKERS_TO_PRINT + 1)
+      : markers.slice(1);
+  marker_clusterer.addMarkers(to_add);
+  log("init markers done");
 }
 
 // ==== Display construction routines
@@ -361,6 +458,9 @@ function initialize_markers() {
 // Set up the supply selector (currently unused).
 function initialize_supply_selector() {
   var tbody = $('supply-tbody');
+  if (!tbody) {
+    return;
+  }
   var tr = $$('tr');
   var cells = [];
   for (var s = 1; s < supply_sets.length; s++) {
@@ -388,6 +488,9 @@ function add_filter_options(options, attribute_i) {
 // Set up the filter widgets.
 function initialize_filters() {
   var tbody = $('filter-tbody');
+  if (!tbody) {
+    return;
+  }
   var tr = $$('tr');
   var selector = $$('select', {
     id: 'specialty-selector',
@@ -407,6 +510,9 @@ function initialize_filters() {
 // Add the header to the division list.
 function initialize_division_header() {
   var thead = $('division-thead');
+  if (!thead) {
+    return;
+  }
   var tr = $$('tr');
   var cells = [$$('th', {}, 'Arrondissements')];
   for (var s = 1; s <= MAX_STATUS; s++) {
@@ -421,6 +527,9 @@ function initialize_division_header() {
 // Add the header to the facility list.
 function initialize_facility_header() {
   var thead = $('facility-thead');
+  if (!thead) {
+    return;
+  }
   var tr = $$('tr');
   var cells = [$$('th', {}, 'Facility')];
   for (var c = 1; c < summary_columns.length; c++) {
@@ -429,6 +538,53 @@ function initialize_facility_header() {
   }
   set_children(thead, tr);
   set_children(tr, cells);
+}
+
+// Initialize headers for print view.
+function initialize_print_headers() {
+  var now = new Date();
+
+  set_children($('site-url'),
+    window.location.protocol + '//' + window.location.host);
+  
+  var date = format_date(now);
+  var time = format_time(now);
+  set_children($('header-print-date'), format_date(now));
+  set_children($('header-print-time'), format_time(now));
+  set_children($('print-date'), format_date(now));
+  set_children($('print-time'), format_time(now));
+
+  var tbody = $('print-summary-tbody');
+  if (!tbody) {
+    return;
+  }
+  var total_facilities = total_facility_count;
+  var local_facilities = facilities.length - 1;  // ignore the selected one
+  var available_facilities = 0;
+  for (var i = 1; i < facilities.length; i++) {
+    var values = facilities[i].last_report.values;
+    if (values && values[attributes_by_name.available_beds] > 0) {
+      available_facilities++;
+    }
+  }
+
+  if (facilities.length >= MAX_MARKERS_TO_PRINT) {
+    set_children($('header-print-subtitle'),
+        locale.DISPLAYING_CLOSEST_N_FACILITIES(
+            {NUM_FACILITIES: MAX_MARKERS_TO_PRINT}));
+  } else {
+    set_children($('header-print-subtitle'),
+        locale.DISPLAYING_FACILITIES_IN_RANGE(
+            {RADIUS_MILES: PRINT_RADIUS_MILES}));    
+  }
+
+  set_children($('print-subtitle'), locale.FACILITIES_IN_RANGE(
+      {NUM_FACILITIES: local_facilities,
+       RADIUS_MILES: PRINT_RADIUS_MILES}));
+  set_children(tbody, $$('tr', {}, [
+      $$('td', {}, [total_facilities]),
+      $$('td', {}, [local_facilities]),
+      $$('td', {}, [available_facilities])]));
 }
 
 // ==== Display update routines
@@ -443,8 +599,9 @@ function update_map_bounds(division_i) {
   var facility_is = divisions[division_i].facility_is;
   var bounds = new google.maps.LatLngBounds();
   for (var i = 0; i < facility_is.length; i++) {
-    var location = facilities[facility_is[i]].location;
-    if (location) {
+    var facility = facilities[facility_is[i]];
+    var location = facility.location;
+    if (location && facility.visible) {
       bounds.extend(new google.maps.LatLng(location.lat, location.lon));
     }
   }
@@ -461,19 +618,28 @@ function update_facility_icons() {
       var facility = facilities[f];
       var s = facility_status_is[f];
       var icon_url = make_icon(facility.title, s, detail);
+      facility.visible = false;
       if (s == STATUS_GOOD) {
         markers[f].setIcon(icon_url);
         markers[f].setZIndex(STATUS_ZINDEXES[s]);
         markers_to_keep.push(markers[f]);
+        if (!print || f <= MAX_MARKERS_TO_PRINT) {
+          facility.visible = true;
+        }
       }
     }
   }
   marker_clusterer.clearMarkers();
-  marker_clusterer.addMarkers(markers_to_keep);
+  var to_add = print ? markers_to_keep.slice(0, MAX_MARKERS_TO_PRINT)
+      : markers_to_keep;
+  marker_clusterer.addMarkers(to_add);
 }
 
 // Fill in the facility legend.
 function update_facility_legend() {
+  if (!$('legend-tbody')) {
+    return;
+  }
   var rows = [];
   var stock = 'one dose';
   for (var s = 1; s <= MAX_STATUS; s++) {
@@ -492,6 +658,9 @@ function update_facility_legend() {
 
 // Repopulate the facility list based on the selected division and status.
 function update_facility_list() {
+  if (!$('facility-tbody')) {
+    return;
+  }
   var rows = [];
   for (var i = 0; i < selected_division.facility_is.length; i++) {
     var f = selected_division.facility_is[i];
@@ -522,9 +691,62 @@ function update_facility_list() {
     }
   }
   set_children($('facility-tbody'), rows);
-  if (!print) {
-    update_facility_list_size();
+  update_facility_list_size();
+}
+
+// Populate the facility list for print view.
+function update_print_facility_list() {
+  if (!$('facility-print-tbody')) {
+    return;
   }
+  var rows = [];
+  for (var i = 0; i < selected_division.facility_is.length; i++) {
+    var f = selected_division.facility_is[i];
+    var facility = facilities[f];
+    var facility_type = facility_types[facility.type];
+    if (selected_status_i === 0 ||
+        facility_status_is[f] === selected_status_i) {
+      var row = $$('tr', {
+        id: 'facility-' + f,
+        'class': 'facility' + (i % 2 == 0 ? 'even' : 'odd')
+      });
+      var cells = [];
+      var total_beds;
+      var open_beds;
+      var address;
+      var general_info;
+      if (facility.last_report) {
+        var values = facility.last_report.values;
+        total_beds = values[attributes_by_name.total_beds];
+        open_beds = values[attributes_by_name.available_beds];
+        address = values[attributes_by_name.address];
+        general_info = values[attributes_by_name.contact_name];
+        var phone = values[attributes_by_name.phone];
+        if (phone) {
+          // TODO: i18n for 'p'
+          general_info = (general_info ? general_info + ' ' : '') + 'p ' +phone;
+        }
+      }
+      var dist_meters = facility.distance_meters;
+      var dist;
+      if (typeof(dist_meters) === 'number') {
+        dist = locale.DISTANCE({
+            MILES: format_number(dist_meters * METERS_TO_MILES, 1), 
+            KM: format_number(dist_meters * METERS_TO_KM, 2)});
+      }
+      var facility_name = facility.title + ' - ID:' + facility.name;
+      cells.push($$('td', {'class': 'facility-beds-open'}, render(open_beds)));
+      cells.push($$('td', {'class': 'facility-beds-total'},render(total_beds)));
+      cells.push($$('td', {'class': 'facility-title'}, render(facility_name)));
+      cells.push($$('td', {'class': 'facility-distance'}, render(dist)));
+      cells.push($$('td', {'class': 'facility-address'}, render(address)));
+      cells.push($$('td', {'class': 'facility-general-info'},
+          render(general_info)));
+      set_children(row, cells);
+      rows.push(row);
+    }
+  }
+  set_children($('facility-print-tbody'), rows);
 }
 
 // Update the height of the facility list to exactly fit the window.
@@ -546,7 +768,9 @@ function align_header_with_table(thead, tbody) {
     while (body_cell) {
       // Subtract 8 pixels to account for td padding: 2px 4px.
       // TODO: fix for IE
-      head_cell.style.width = (body_cell.clientWidth - 8) + 'px';
+      if (body_cell.clientWidth) {
+        head_cell.style.width = (body_cell.clientWidth - 8) + 'px';
+      }
       head_cell = head_cell.nextSibling;
       body_cell = body_cell.nextSibling;
     }
@@ -577,6 +801,9 @@ function update_facility_status_is() {
 
 // Update the contents of the division list based on facility statuses. 
 function update_division_list() {
+  if (!$('division-tbody')) {
+    return;
+  }
   var rows = [];
   for (var d = 0; d < divisions.length; d++) {
     var division = divisions[d];
@@ -651,16 +878,68 @@ function update_freshness(timestamp) {
   window.setTimeout(function () { update_freshness(timestamp); }, timeout);
 }
 
+// Disable the print link in the user header.  This is done when no facilities
+// are selected
+function disable_print_link() {
+  var print_link = $('print-link');
+  if (!print_link) {
+    return;
+  }
+  print_link.href = 'javascript:void(0)';
+  print_link.title = locale.PRINT_DISABLED_TOOLTIP();
+  print_link.className = 'print-link-disabled';
+  print_link.onclick = function() {
+    // TODO: Use a nice model dialog instead of alert
+    alert(locale.PRINT_DISABLED_TOOLTIP());
+    return false;
+  };
+}
+
+// Enable the print link in the user header. This is done when a facility has
+// been selected.
+function enable_print_link() {
+  var print_link = $('print-link');
+  if (!print_link) {
+    return;
+  }
+  var f = selected_facility;
+  var PRINT_URL = '/?print=yes&lat=${LAT}&lon=${LON}&rad=${RAD}';
+  print_link.href = render(PRINT_URL, {LAT: f.location.lat, LON: f.location.lon,
+       RAD: PRINT_RADIUS_MILES / METERS_TO_MILES});
+  print_link.title = locale.PRINT_ENABLED_TOOLTIP({FACILITY_NAME: f.title});
+  print_link.className = '';
+  print_link.onclick = null;
+}
+
 // Format a JavaScript Date object as a human-readable string.
 function format_timestamp(t) {
-  var months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
-  var date = months[t.getMonth()] + ' ' + t.getDate() + ', ' + t.getFullYear();
+  return locale.DATE_AT_TIME({ DATE: format_date(t), TIME: format_time(t) });
+}
+
+// Format a JavaScript Date object as a human-readable date string.
+function format_date(t) {
+  // TODO: i18n for date str
+  // Note: t.getMonth() returns a number from 0-11
+  return locale.MONTH_ABBRS[t.getMonth()]()
+      + ' ' + t.getDate() + ', ' + t.getFullYear();  
+}
+
+// Format a JavaScript Date object as a human-readable time string.
+function format_time(t) {
+  // TODO: i18n for date str
   var hours = (t.getHours() < 10 ? '0' : '') + t.getHours();
   var minutes = (t.getMinutes() < 10 ? '0' : '') + t.getMinutes();
   var time = hours + ':' + minutes;
   var offset = - (t.getTimezoneOffset() / 60);
   var zone = 'UTC' + (offset > 0 ? '+' : '\u2212') + Math.abs(offset);
-  return date + ' at ' + time + ' ' + zone;
+  return time + ' ' + zone;
+}
+
+// Format a number to decimal_places places.
+function format_number(num, decimal_places) {
+  var integer_part = Math.floor(num);
+  var mantissa = Math.round((num % 1) * Math.pow(10, decimal_places));
+  return integer_part + '.' + mantissa;
 }
 
 // ==== UI event handlers
@@ -758,9 +1037,11 @@ function select_supply_set(supply_set_i) {
   selected_supply_set = supply_sets[supply_set_i];
 
   // Update the selection highlight.
-  for (var s = 1; s < supply_sets.length; s++) {
-    $('supply-set-' + s).className = 'supply-set' +
-        maybe_selected(s === supply_set_i);
+  if($('supply-tbody')) {
+    for (var s = 1; s < supply_sets.length; s++) {
+      $('supply-set-' + s).className = 'supply-set' +
+          maybe_selected(s === supply_set_i);
+    }
   }
 
   // Update the facility icon legend.
@@ -794,12 +1075,14 @@ function select_division_and_status(division_i, status_i) {
   selected_status_i = status_i;
   
   // Update the selection highlight.
-  for (var d = 0; d < divisions.length; d++) {
-    for (var s = 0; s <= MAX_STATUS; s++) {
-      $('division-' + d + '-status-' + s).className =
-          'facility-count status-' + s +
-          maybe_selected(d === division_i && s === status_i);
-    }
+  if ($('division-thead')) {
+    for (var d = 0; d < divisions.length; d++) {
+      for (var s = 0; s <= MAX_STATUS; s++) {
+        $('division-' + d + '-status-' + s).className =
+            'facility-count status-' + s +
+            maybe_selected(d === division_i && s === status_i);
+      }
+    }    
   }
 
   // Filter the list of facilities by the selected division and status.
@@ -835,7 +1118,7 @@ function select_facility(facility_i, ignore_current) {
   if (last_report) {
     var ymd = last_report.date.split('-');
     last_updated = 'Updated ' +
-        MONTH_ABBRS[ymd[1] - 1] + ' ' + (ymd[2] - 0) + ', ' + ymd[0];
+        locale.MONTH_ABBRS[ymd[1] - 1]() + ' ' + (ymd[2] - 0) + ', ' + ymd[0];
   }
   info.close();
 
@@ -848,6 +1131,9 @@ function select_facility(facility_i, ignore_current) {
 
   // This call sets up the tabs and should be called after the DOM is created.
   jQuery('#bubble-tabs').tabs();
+
+  // Enable the Print link
+  enable_print_link();
 }
 
 // ==== Load data
@@ -858,8 +1144,9 @@ function load_data(data) {
   facilities = data.facilities;
   divisions = data.divisions;
   messages = data.messages;
+  total_facility_count = data.total_facility_count;
 
-  attributes_by_name = {}
+  attributes_by_name = {};
   for (var a = 1; a < attributes.length; a++) {
     attributes_by_name[attributes[a].name] = a;
     switch (attributes[a].name){
@@ -879,10 +1166,16 @@ function load_data(data) {
     facility_is: facility_is
   };
 
-  initialize_supply_selector();
-  initialize_filters();
-  initialize_division_header();
-  initialize_facility_header();
+  if (!print) {
+    // The print link is not shown in print view, no need to disable it
+    disable_print_link();
+    // The supply selector, filters, division header and facility
+    // header all do not appear in print view; don't bother initializing them.
+    initialize_supply_selector();
+    initialize_filters();
+    initialize_division_header();
+    initialize_facility_header();    
+  }
 
   initialize_map();
   initialize_markers();
@@ -891,16 +1184,15 @@ function load_data(data) {
 
   select_supply_set(DEFAULT_SUPPLY_SET_I);
   select_division_and_status(0, STATUS_GOOD);
-  handle_window_resize();
-
-  log('Data loaded.');
 
   if (print) {
-    set_children($('print-timestamp'),
-        'Printed on ' + format_timestamp(new Date()));
-    set_children($('site-url'),
-        window.location.protocol + '//' + window.location.host);
+    initialize_print_headers();
+    update_print_facility_list();
+  } else {
+    handle_window_resize();
   }
+
+  log('Data loaded.');
 
   // TODO: Test further and re-enable
   //start_monitoring();
@@ -1016,7 +1308,7 @@ function request_role_handler(request_url) {
     type: 'POST',
     success: function(data) {
        // TODO(eyalf): replace with a nice blocking popup
-       alert(data)
+       alert(data);
     }
   });
   return false;

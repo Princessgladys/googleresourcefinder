@@ -48,6 +48,12 @@ def validate_yes(text):
 def validate_role(text):
     return text in access.ROLES and text
 
+def validate_float(text):
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
 def get_message(version, namespace, name):
     message = model.Message.all().ancestor(version).filter(
         'namespace =', namespace).filter('name =', name).get()
@@ -62,7 +68,10 @@ class Handler(webapp.RequestHandler):
         'facility_name': strip,
         'print': validate_yes,
         'embed': validate_yes,
-        'role': validate_role
+        'role': validate_role,
+        'lat': validate_float,
+        'lon': validate_float,
+        'rad': validate_float
     }
 
     def require_user_role(self, role, cc):
