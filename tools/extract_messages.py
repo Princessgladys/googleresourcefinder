@@ -14,7 +14,31 @@
 # limitations under the License.
 
 """Extracts translations to a .po file using django's makemessages script
-   and additional custom support for js- and python-formatted strings
+   and additional custom support for js- and python-formatted strings.
+   Also supports message descriptions and meanings provided by
+   specially-formatted comments directly above a message to be translated.
+
+   In javascript, comments look like:
+
+   // Some other comment, must not separate i18n comments from the code
+   //i18n: Label for an administrative division of a country
+   //i18n_meaning: Adminstrative division in France
+   messages.DEPARTMENT = 'Department';
+
+   In python:
+   # Some other comment, must not separate i18n comments from the code
+   #i18n: Label for an administrative division of a country
+   #i18n_meaning: Adminstrative division in France
+   dept = _('Department')
+
+   And in a Django template:
+   {% comment %}
+   #Some other comment, must not separate i18n comments from the code
+   #i18n: Label for an administrative division of a country
+   #i18n_meaning: Adminstrative division in France
+   {% endcomment %}
+   <span>{% trans "Department" %}</span>
+
    Must be run from the app/ directory for makemessages to work.
    Example:
    ../tools/extract_messages.py ../tools/setup.py static/locale.js
@@ -224,6 +248,9 @@ def find_description_meaning(refs):
         # django makemessages hacks in support for html files by appending .py
         # to the end and treating them like py files.  Remove that hack here
         file = file.replace('.html.py', '.html')
+
+        # Read from the file up to line_num, then search backwards for the
+        # comment
         current_line = 0
         lines = []
         for line in open(file):
@@ -231,6 +258,7 @@ def find_description_meaning(refs):
             if current_line >= line_num:
                 break
             lines.append(line)
+        # Hold the description and meaning, if we find them
         current_description = []
         current_meaning = []
         for line in reversed(lines):
@@ -244,6 +272,8 @@ def find_description_meaning(refs):
             if match:
                 current_meaning.insert(0, match.group(1))
                 continue
+            # The line was not part of a message description or meaning comment,
+            # so it must not exist
             break
         if current_description or current_meaning:
             return (' '.join(current_description), ' '.join(current_meaning))
