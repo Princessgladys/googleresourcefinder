@@ -54,16 +54,14 @@ DJANGO_END_COMMENT_PATTERN = '{\% endcomment \%}'
 PATTERNS = {
     'js' : {
         'start': r'\s*messages\.[A-Z_]+\s*=',
-        'array': r'''\s*['"](.*)['"]\.split\(['"](.*)['"]\)''',
-        'string': r'''\s*['"](.*)['"]''',
+        'string': r'''\s*(['"].*['"])''',
         'end': r';\s*$',
         'description': r'^\s*//i18n:\s*(.*)',
         'meaning': r'\s*//i18n_meaning:\s*(.*)'
     },
     'py' : {
         'start': r'\s*[a-z]+_message\(',
-        'array': None,
-        'string': r'''en\s*=\s*['"](.*?)['"]''',
+        'string': r'''en\s*=\s*(['"].*['"])''',
         'end': r'\),?\s*$',
         'description': r'^\s*#i18n:\s*(.*)',
         'meaning': r'^\s*#i18n_meaning:\s*(.*)'
@@ -143,12 +141,11 @@ def parse_file(input_filename):
     # Meaning lines for the current message
     current_meaning = []
     # The current messages being parsed.  This is a local var as the msg
-    # can span multiple lines, and it's an array to handle the js special-case
-    # of allowing 'a b c'.split(' ') to represent 3 messages
-    current_messages = []
+    # can span multiple lines.
+    current_message = ''
     # The line number to assign to the current message, usually the first line
     # of the statement containing the message.
-    current_messages_line_num = -1
+    current_message_line_num = -1
     # Current line number in the input file
     line_num = 0
 
@@ -165,45 +162,39 @@ def parse_file(input_filename):
 
         if re.match(patterns['start'], line):
             # Remember that we've started a message for multi-line messages
-            current_messages_line_num = line_num
-            current_messages = parse_messages(patterns, line, current_messages)
-        elif current_messages_line_num is not -1:
-            # Multi-line message support
-            current_messages = parse_messages(patterns, line, current_messages)
+            current_message_line_num = line_num
 
-        if re.search(patterns['end'], line):
-            # End of the current message
-            ref = input_filename + ':' + str(current_messages_line_num)
-            desc = ' '.join(current_description)
-            meaning = ' '.join(current_meaning)
-            for msg in current_messages:
-                ref_msg_pairs.append((ref, Message(msg, desc, meaning)))
-            current_messages_line_num = -1
-            current_messages = []
-            current_description = []
-            current_meaning = []
+        if current_message_line_num is not -1:
+            current_message += parse_message(patterns['string'], line)
+
+            if re.search(patterns['end'], line):
+                if not current_message:
+                    print input_filename, line, current_message_line_num
+                # End of the current message
+                ref = input_filename + ':' + str(current_message_line_num)
+                ref_msg_pairs.append(
+                    (ref, Message(current_message,
+                                  ' '.join(current_description),
+                                  ' '.join(current_meaning))))
+                current_message_line_num = -1
+                current_message = ''
+                current_description = []
+                current_meaning = []
     return ref_msg_pairs
 
-def parse_messages(patterns, line, current_messages):
-    """Parses a part of a message on a line. Also handles arrays of messages
-       of the form 'message1 message2 message3'.split(' ');"""
-    # Grab the part of the message from previous lines, if necessary
-    current = len(current_messages) == 1 and current_messages[0] or ''
-
-    # First try the array pattern
-    match = patterns['array'] and re.search(patterns['array'], line) or None
+def parse_message(pattern, line):
+    msg = ''
+    match = re.search(pattern, line)
     if match:
-        arr_str = current + match.group(1)
-        split = match.group(2)
-        return arr_str.split(split)
-
-    # If that fails, try the string pattern
-    match = re.search(patterns['string'], line)
-    if match:
-        return [current + match.group(1)]
-
-    # Everything failed, return what was passed in
-    return current_messages
+        # You can't actually match a string literal with a regexp,
+        # We get close here then iterate to figure out the rest
+        match_str = match.group(1)
+        for c in match_str[1:]:
+            if (c == "'" or c == '"') and not last_slash:
+                break
+            msg += c
+            last_slash = c == '\\'
+    return msg
 
 def merge(msg_to_ref, ref_msg_pairs):
     """ Merge ref_msg_pairs into msg_to_ref """
