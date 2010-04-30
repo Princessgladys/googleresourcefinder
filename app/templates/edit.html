@@ -20,7 +20,10 @@
 <html>
 <head>
 {% endif %}
-<title>{% trans "Resource Mapper" %} ({{instance}})</title>
+{% comment %}
+#i18n: Name of the application.
+{% endcomment %}
+<title>{% trans "Resource Finder" %} ({{instance}})</title>
 <style>
 {% if not params.embed %}
   body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
@@ -32,10 +35,13 @@ tr.field.text { vertical-align: top; }
 .label { text-align: right; color: #666; }
 </style>
 {% if not params.embed %}
-</head>
-<body>
+<html>
+<head>
 {% endif %}
-<h1>{% trans "Edit" %} {{facility.title|escape}}</h1>
+{% comment %}
+#i18n: Title for page to edit data about a facility
+{% endcomment %}
+<h1>{% blocktrans with facility.title|escape as title %} Edit {{title}} {% endblocktrans %}</h1>
 
 <form method="post" id="edit" action="/edit">
   <input type="hidden" name="token" value="{{token}}"/>
@@ -68,7 +74,13 @@ tr.field.text { vertical-align: top; }
       <td>
       </td>
       <td class="field">
+        {% comment %}
+        #i18n: Button text to save data
+        {% endcomment %}
         <input type="submit" value='{% trans "Save" %}'>
+        {% comment %}
+        #i18n: Button text to revert changes and keep existing data
+        {% endcomment %}
         <input type="reset" value='{% trans "Revert" %}'>
         <span id="edit-status"></span>
       </td>
