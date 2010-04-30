@@ -26,15 +26,21 @@ locale = function() {
   messages.CALL_FOR_AVAILABILITY =
       'Please call for availability information';
 
+  //i18n: Date at a give time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME =
       '${DATE} at ${TIME}';
 
+  //i18n: Displaying markers on a map for facilities within RADIUS_MILES
+  //i18n: miles of a location
   messages.DISPLAYING_FACILITIES_IN_RANGE =
       'Displaying facilities within ${RADIUS_MILES} miles';
 
+  //i18n: Displaying markers on a map for the NUM_FACILITIES closest to a 
+  //i18n: location
   messages.DISPLAYING_CLOSEST_N_FACILITIES =
       'Displaying ${NUM_FACILITIES} closest facilities';
 
+  //i18n: A distance (example: 3.11 miles (5 km))
   messages.DISTANCE =
       '${MILES} miles (${KM} km)';
 
@@ -50,6 +56,7 @@ locale = function() {
       HTML('Latitude: ${LATITUDE}<br>Longitude: ${LONGITUDE}');
 
   // Month indices run from 0 to 11 (Jan to Dec)
+  //i18n: Abbreviated month of the year.
   messages.MONTH_ABBRS =
       'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
@@ -57,10 +64,12 @@ locale = function() {
   messages.NO =
       'No';
 
+  //i18n: Tooltip explaining how to enable print mode
   messages.PRINT_DISABLED_TOOLTIP =
       'First select a hospital from the list on the left. Then Print will ' +
       'print a list of hospitals in order of distance from your selection.';
 
+  //i18n: Tooltip explaining a 'Print' link
   messages.PRINT_ENABLED_TOOLTIP =
       'Print a list of hospitals in order of distance from ${FACILITY_NAME}';
 
