@@ -729,8 +729,8 @@ function update_print_facility_list() {
         healthc_id = values[attributes_by_name.healthc_id];
         var phone = values[attributes_by_name.phone];
         if (phone) {
-          // TODO: i18n for 'p'
-          general_info = (general_info ? general_info + ' ' : '') + 'p ' +phone;
+          general_info = (general_info ? general_info + ' ' : '')
+              + locale.PHONE_ABBREVIATION({PHONE: phone});
         }
       }
       var dist_meters = facility.distance_meters;
@@ -929,21 +929,19 @@ function format_timestamp(t) {
 
 // Format a JavaScript Date object as a human-readable date string.
 function format_date(t) {
-  // TODO: i18n for date str
   // Note: t.getMonth() returns a number from 0-11
-  return locale.MONTH_ABBRS[t.getMonth()]()
-      + ' ' + t.getDate() + ', ' + t.getFullYear();  
+  return locale.DATE_FORMAT_MEDIUM({MONTH: locale.MONTH_ABBRS[t.getMonth()](),
+      DAY: t.getDate(), YEAR: t.getFullYear()});
 }
 
 // Format a JavaScript Date object as a human-readable time string.
 function format_time(t) {
-  // TODO: i18n for date str
   var hours = (t.getHours() < 10 ? '0' : '') + t.getHours();
   var minutes = (t.getMinutes() < 10 ? '0' : '') + t.getMinutes();
-  var time = hours + ':' + minutes;
   var offset = - (t.getTimezoneOffset() / 60);
   var zone = 'UTC' + (offset > 0 ? '+' : '\u2212') + Math.abs(offset);
-  return time + ' ' + zone;
+  return locale.TIME_FORMAT_MEDIUM_WITH_ZONE(
+      {HOURS: hours, MINUTES: minutes, ZONE: zone});
 }
 
 // Format a number to decimal_places places.

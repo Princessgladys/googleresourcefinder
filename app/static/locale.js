@@ -30,6 +30,10 @@ locale = function() {
   messages.DATE_AT_TIME =
       '${DATE} at ${TIME}';
 
+  //i18n: Local date format (example: Jan 21, 2010)
+  messages.DATE_FORMAT_MEDIUM =
+      '${MONTH} ${DAY}, ${YEAR}';
+
   //i18n: Displaying markers on a map for facilities within RADIUS_MILES
   //i18n: miles of a location
   messages.DISPLAYING_FACILITIES_IN_RANGE =
@@ -56,13 +60,18 @@ locale = function() {
       HTML('Latitude: ${LATITUDE}<br>Longitude: ${LONGITUDE}');
 
   // Month indices run from 0 to 11 (Jan to Dec)
-  //i18n: Abbreviated month of the year.
+  //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS =
       'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
   //i18n: Form option for disagreement.
   messages.NO =
       'No';
+
+  //i18n: Very short abbreviation for a phone number, indended to disambiguate
+  //i18n: from a fax number.  (example: p 555-555-5555)
+  messages.PHONE_ABBREVIATION =
+      'p ${PHONE}';
 
   //i18n: Tooltip explaining how to enable print mode
   messages.PRINT_DISABLED_TOOLTIP =
@@ -80,6 +89,10 @@ locale = function() {
   //i18n: Indicates a user needs to sign in to edit data on a facility.
   messages.SIGN_IN_TO_EDIT =
       'Please sign in to edit';
+
+  //i18n: Time format (example 14:32 UTC-4)
+  messages.TIME_FORMAT_MEDIUM_WITH_ZONE =
+      '${HOURS}:${MINUTES} ${ZONE}';
 
   //i18n: Form option for agreement.
   messages.YES =
