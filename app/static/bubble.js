@@ -91,8 +91,8 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
     LONGITUDE: facility.location.lon
   });
 
- var healthc_id = values && values[attributes_by_name.healthc_id] || '\u2013';
- var address_info = render(values && values[attributes_by_name.address]);
+  var healthc_id = values && values[attributes_by_name.healthc_id] || '\u2013';
+  var address_info = render(values && values[attributes_by_name.address]);
 
   var attributes_info = [];
   for (var i = 0; i < attribute_is.length; i++) {
