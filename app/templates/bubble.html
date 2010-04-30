@@ -18,11 +18,12 @@
 
 <script id="bubble_template" type="text/html">
   <div class="bubble">
-    <h1>${FACILITY_TITLE}</h1>
+    <span class="title-row">
+      <span class="title">${FACILITY_TITLE}</span> ${EDIT_LINK}
+    </span>
     <h2>
-      Facility ID: ${FACILITY_NAME} &#xb7;
-      ${LAST_UPDATED} &#xb7;
-      ${EDIT_LINK}
+      HealthC ID: ${HEALTHC_ID} &#xb7; Facility ID: ${FACILITY_NAME}<br>
+      ${LAST_UPDATED}
     </h2>
     <table class="scorecard" cellpadding="0" cellspacing="0">
       <tbody>

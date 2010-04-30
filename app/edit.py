@@ -17,7 +17,10 @@ import model
 import utils
 from utils import DateTime, ErrorMessage, Redirect
 from utils import db, get_message, html_escape, users
-from access import check_user_role
+from feeds.crypto import sign, verify
+
+XSRF_KEY_NAME = 'resource-finder-edit'
+DAY_SECS = 24 * 60 * 60
 
 # ==== Form-field generators and parsers for each attribute type =============
 
@@ -211,15 +214,21 @@ def parse_input(report, request, attribute):
     return ATTRIBUTE_TYPES[attribute.type].parse_input(
         report, name, request.get(name, None), request, attribute)
 
+def get_last_report(version, facility_name):
+    return (model.Report.all()
+            .ancestor(version)
+            .filter('facility_name =', facility_name)
+            .order('-timestamp')).get()
+
 
 # ==== Handler for the edit page =============================================
 
 class Edit(utils.Handler):
     def init(self):
-        """Checks for authentication and sets up self.version, self.facility,
+        """Checks for logged-in user and sets up self.version, self.facility,
         self.facility_type, and self.attributes based on the query params."""
 
-        self.require_user_role('user', self.params.cc)
+        self.require_logged_in_user()
 
         try:
             self.version = utils.get_latest_version(self.params.cc)
@@ -240,35 +249,54 @@ class Edit(utils.Handler):
     def get(self):
         self.init()
         fields = []
-        report = (model.Report.all()
-            .ancestor(self.version)
-            .filter('facility_name =', self.params.facility_name)
-            .order('-timestamp')).get()
+        readonly_fields = [{
+            'name': 'ID',
+            'value': self.params.facility_name
+        }]
+
+        report = get_last_report(self.version, self.params.facility_name)
         for name in self.facility_type.attribute_names:
             attribute = self.attributes[name]
-            fields.append({
-                'name': get_message(self.version, 'attribute_name', name),
-                'type': attribute.type,
-                'input': make_input(self.version, report, attribute)
-            })
+            if attribute.editable:
+                fields.append({
+                    'name': get_message(self.version, 'attribute_name', name),
+                    'type': attribute.type,
+                    'input': make_input(self.version, report, attribute)
+                })
+            else:
+                readonly_fields.append({
+                    'name': get_message(self.version, 'attribute_name', name),
+                    'value': getattr(report, name, None)
+                })
+
+        token = sign(XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
 
         self.render('templates/edit.html',
-            facility=self.facility, fields=fields, params=self.params,
-            authorization=self.auth and self.auth.description or 'anonymous',
+            token=token, facility=self.facility, fields=fields,
+            readonly_fields=readonly_fields, params=self.params,
             logout_url=users.create_logout_url('/'))
 
     def post(self):
         self.init()
-        logging.info("record by user: %s"%users.get_current_user())
+        if not verify(XSRF_KEY_NAME, self.user.user_id(),
+            self.request.get('token')):
+            raise ErrorMessage(403, 'Unable to submit data for %s'
+                               % self.user.email())
+
+        logging.info("record by user: %s" % self.user)
+        last_report = get_last_report(self.version, self.params.facility_name)
         report = model.Report(
             self.version,
             facility_name=self.facility.key().name(),
             date=utils.Date.today(),
-            user=users.get_current_user(),
+            user=self.user,
         )
-        for attribute_name in self.facility_type.attribute_names:
-            attribute = self.attributes[attribute_name]
-            parse_input(report, self.request, attribute)
+        for name in self.facility_type.attribute_names:
+            attribute = self.attributes[name]
+            if attribute.editable:
+                parse_input(report, self.request, attribute)
+            else:
+                setattr(report, name, getattr(last_report, name, None))
         report.put()
         if self.params.embed:
             #i18n: Record updated successfully.

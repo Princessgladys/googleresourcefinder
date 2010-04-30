@@ -16,6 +16,10 @@
 
 {% load i18n %}
 
+{% if not params.embed %}
+<html>
+<head>
+{% endif %}
 {% comment %}
 #i18n: Name of the application.
 {% endcomment %}
@@ -23,22 +27,39 @@
 <style>
 {% if not params.embed %}
   body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
+  h1 { font-size: 24px }
 {% endif %}
 tr.field { vertical-align: baseline; margin-top: 1em; }
 tr.field.text { vertical-align: top; }
+.readonly { color: #666; }
 .label { text-align: right; color: #666; }
 </style>
+{% if not params.embed %}
+<html>
+<head>
+{% endif %}
 {% comment %}
 #i18n: Title for page to edit data about a facility
 {% endcomment %}
 <h1>{% blocktrans with facility.title|escape as title %} Edit {{title}} {% endblocktrans %}</h1>
 
 <form method="post" id="edit" action="/edit">
-  <input type="hidden" name="embed" value="{{params.embed|escape}}">
-  <input type="hidden" name="cc" value="{{params.cc|escape}}">
+  <input type="hidden" name="token" value="{{token}}"/>
+  <input type="hidden" name="embed" value="{{params.embed|escape}}"/>
+  <input type="hidden" name="cc" value="{{params.cc|escape}}"/>
   <input type="hidden" name="facility_name"
-      value="{{params.facility_name|escape}}">
+      value="{{params.facility_name|escape}}"/>
   <table>
+    {% for field in readonly_fields %}
+      <tr class="field">
+        <td class="label">
+          {{field.name|escape}}
+        </td>
+        <td class="readonly">
+          {{field.value}}
+        </td>
+      </tr>
+    {% endfor %}
     {% for field in fields %}
       <tr class="field {{field.type}}">
         <td class="label">
@@ -66,3 +87,7 @@ tr.field.text { vertical-align: top; }
     </tr>
   </table>
 </form>
+{% if not params.embed %}
+</body>
+</html>
+{% endif %}

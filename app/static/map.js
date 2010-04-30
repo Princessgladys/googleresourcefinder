@@ -56,6 +56,9 @@ var METERS_TO_KM = 0.001;
 // Temporary for v1, this should be user-settable in the future
 var PRINT_RADIUS_MILES = 10;
 
+// TODO: Re-enable when monitoring is re-enabled
+var enable_freshness = false;
+
 // ==== Data loaded from the data store
 
 var attributes = [null];
@@ -545,8 +548,9 @@ function initialize_print_headers() {
   var now = new Date();
 
   set_children($('site-url'),
-    window.location.protocol + '//' + window.location.host);
-  
+    window.location.protocol + '//' + window.location.host); 
+  $('freshness').style.display = 'none';
+
   var date = format_date(now);
   var time = format_time(now);
   set_children($('header-print-date'), format_date(now));
@@ -715,12 +719,14 @@ function update_print_facility_list() {
       var open_beds;
       var address;
       var general_info;
+      var healthc_id;
       if (facility.last_report) {
         var values = facility.last_report.values;
         total_beds = values[attributes_by_name.total_beds];
         open_beds = values[attributes_by_name.available_beds];
         address = values[attributes_by_name.address];
         general_info = values[attributes_by_name.contact_name];
+        healthc_id = values[attributes_by_name.healthc_id];
         var phone = values[attributes_by_name.phone];
         if (phone) {
           // TODO: i18n for 'p'
@@ -734,7 +740,8 @@ function update_print_facility_list() {
             MILES: format_number(dist_meters * METERS_TO_MILES, 1), 
             KM: format_number(dist_meters * METERS_TO_KM, 2)});
       }
-      var facility_name = facility.title + ' - ID:' + facility.name;
+      var facility_name = facility.title + ' - ID:' + facility.name
+        + ' - HealthC ID: ' + render(healthc_id);
       cells.push($$('td', {'class': 'facility-beds-open'}, render(open_beds)));
       cells.push($$('td', {'class': 'facility-beds-total'},render(total_beds)));
       cells.push($$('td', {'class': 'facility-title'}, render(facility_name)));
@@ -846,8 +853,12 @@ function update_division_list() {
 
 // Update the data freshness indicator.
 function update_freshness(timestamp) {
+  if (!enable_freshness) {
+    $('freshness-text').style.display = 'none';
+  }
+
   if (!timestamp) {
-    $('freshness').innerHTML = 'No reports received';
+    $('freshness-text').innerHTML = 'No reports received';
     return;
   }
 
@@ -873,7 +884,7 @@ function update_freshness(timestamp) {
     age = Math.round(seconds) + ' seconds in the future';
   }
 
-  $('freshness').innerHTML = 'Last updated ' + age +
+  $('freshness-text').innerHTML = 'Last updated ' + age +
       ' (' + format_timestamp(t) + ')';
   window.setTimeout(function () { update_freshness(timestamp); }, timeout);
 }
@@ -1126,7 +1137,7 @@ function select_facility(facility_i, ignore_current) {
   attribute_is = facility_types[selected_facility.type].attribute_is;
 
   info.setContent(to_html(rf.bubble.get_html(
-      selected_facility, attribute_is, last_updated, rf.user)));
+      selected_facility, attribute_is, last_updated)));
   info.open(map, markers[selected_facility_i]);
 
   // This call sets up the tabs and should be called after the DOM is created.

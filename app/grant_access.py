@@ -12,6 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+NOTE: THIS MODULE IS CURRENTLY UNUSED.
+
+The current permissions scheme for resource finder is:
+- Anyone (logged-in and non-logged-in users) can view and print
+- Any logged-in user can edit data
+
+THE CODE BELOW IS UNNECESSARY WITH THIS PERMISSION SCHEME
+
+Handler for allowing a superuser to grant access using the permission scheme
+provided in access.py
+"""
+
 import logging
 import model
 import utils

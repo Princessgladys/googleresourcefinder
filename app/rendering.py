@@ -137,7 +137,8 @@ def version_to_json(version, hide_email, center=None, radius=None):
         num_reports = num_reports + 1
         #report_map.setdefault(report.facility_name, []).append(report)
     total_facility_count = len(report_map)
-    logging.info("NUMBER OF REPORTS %d %d" % (num_reports, total_facility_count))
+    logging.info("NUMBER OF FACILITIES %d, REPORTS %d"
+                 % (total_facility_count, num_reports))
 
     # Make JSON objects for the facilities, while collecting lists of the
     # facilities in each division.

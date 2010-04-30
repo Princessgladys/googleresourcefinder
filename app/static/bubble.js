@@ -52,7 +52,7 @@ rf.bubble.format_attr = function(attr, value) {
 /**
  * Renders the HTML content of the InfoWindow for a given facility.
  */
-rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
+rf.bubble.get_html = function(facility, attribute_is, last_updated) {
   var EDIT_URL = '/edit?cc=ht&facility_name=${FACILITY_NAME}';
   var AVAILABILITY_CELLS = HTML(
     '<td class="availability">' +
@@ -66,26 +66,12 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
     '<td class="value" colspan="2">${VALUE}</td></tr>');
   var HISTORY_ROW = HTML(
     '<tr><td>${DATE}</td><td>${LABEL}: ${VALUE}</td><td>${AUTHOR}</td></tr>');
-  var REQUEST_ACCESS_LINK_START = HTML(
-    '<a href="#" onclick="' +
-        "request_role_handler('/request_access?cc=ht&role=editor&embed=yes')" +
-    '">');
 
-  var edit_link = '';
-  if (user && user.is_editor) {
-    var edit_url = render(EDIT_URL, {FACILITY_NAME: facility.name});
-    edit_link = locale.EDIT_LINK_HTML({
+  var edit_url = render(EDIT_URL, {FACILITY_NAME: facility.name});
+  var edit_link = locale.EDIT_LINK_HTML({
       LINK_START: render(HTML('<a href="${URL}">'), {URL: edit_url}),
       LINK_END: HTML('</a>')
     });
-  } else if (user) {
-    edit_link = locale.REQUEST_EDIT_ACCESS_HTML({
-      LINK_START: REQUEST_ACCESS_LINK_START,
-      LINK_END: HTML('</a>')
-    });
-  } else {
-    edit_link = locale.SIGN_IN_TO_EDIT();
-  }
 
   var values = facility.last_report && facility.last_report.values;
   var availability_info;
@@ -105,12 +91,14 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
     LONGITUDE: facility.location.lon
   });
 
+  var healthc_id = values && values[attributes_by_name.healthc_id] || '\u2013';
   var address_info = render(values && values[attributes_by_name.address]);
 
   var attributes_info = [];
   for (var i = 0; i < attribute_is.length; i++) {
     var a = attribute_is[i];
-    if (a === attributes_by_name.address) {
+    if (a === attributes_by_name.healthc_id ||
+        a === attributes_by_name.address) {
       continue;
     }
     var attribute = attributes[a];
@@ -148,6 +136,7 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated, user) {
   return render_template('bubble_template', {
     FACILITY_TITLE: facility.title,
     FACILITY_NAME: facility.name,
+    HEALTHC_ID: healthc_id,
     LAST_UPDATED: last_updated,
     EDIT_LINK: edit_link,
     AVAILABILITY_INFO: availability_info,
