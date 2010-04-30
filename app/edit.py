@@ -67,8 +67,11 @@ class ContactAttributeType(AttributeType):
                     <tr><td class="label">%s</td><td>%s</td></tr>
                     <tr><td class="label">%s</td><td>%s</td></tr>
                   </table>''' % (
+            #i18n: a person's name
             _('Name'), self.text_input(name + '.name', contact_name),
+            #i18n: telephone number
             _('Phone'), self.text_input(name + '.phone', contact_phone),
+            #i18n: E-mail address
             _('E-mail'), self.text_input(name + '.email', contact_email),
         )
 
@@ -89,8 +92,10 @@ class DateAttributeType(AttributeType):
                 year, month, day = map(int, value.split('-'))
                 setattr(report, name, DateTime(year, month, day))
             except (TypeError, ValueError):
+                #i18n: Error message for invalid date entry
                 raise ErrorMessage(
-                    400, _('Invalid date: %r (need YYYY-MM-DD format)') % value)
+                    400, _('Invalid date: %(date)r (need YYYY-MM-DD format)')
+                    % value)
         else:
             setattr(report, name, None)
 
@@ -125,7 +130,12 @@ class BoolAttributeType(AttributeType):
         else:
             value = ''
         for choice, title in [
-            ('', _('(unspecified)')), ('TRUE', _('yes')), ('FALSE', _('no'))]:
+            #i18n: Form option not specified
+            ('', _('(unspecified)')),
+            #i18n: Form option for agreement
+            ('TRUE', _('Yes')),
+            #i18n: Form option for disagreement
+            ('FALSE', _('No'))]:
             selected = (value == choice) and 'selected' or ''
             options.append('<option value="%s" %s>%s</option>' %
                            (choice, selected, title))
@@ -146,6 +156,7 @@ class ChoiceAttributeType(AttributeType):
             value = ''
         for choice in [''] + attribute.values:
             message = get_message(version, 'attribute_value', choice)
+            #i18n: Form option not specified
             title = html_escape(message or _('(unspecified)'))
             selected = (value == choice) and 'selected' or ''
             options.append('<option value="%s" %s>%s</option>' %
@@ -160,6 +171,7 @@ class MultiAttributeType(AttributeType):
         checkboxes = []
         for choice in attribute.values:
             message = get_message(version, 'attribute_value', choice)
+            #i18n: Form option not specified
             title = html_escape(message or _('(unspecified)'))
             checked = (choice in value) and 'checked' or ''
             id = name + '.' + choice
@@ -208,14 +220,16 @@ class Edit(utils.Handler):
         self.facility_type, and self.attributes based on the query params."""
 
         self.require_user_role('user', self.params.cc)
-        
+
         try:
             self.version = utils.get_latest_version(self.params.cc)
         except:
+            #i18n: Error message for request missing country code.
             raise ErrorMessage(404, _('Invalid or missing country code.'))
         self.facility = model.Facility.get_by_key_name(
             self.params.facility_name, self.version)
         if not self.facility:
+            #i18n: Error message for request missing facility name.
             raise ErrorMessage(404, _('Invalid or missing facility name.'))
         self.facility_type = model.FacilityType.get_by_key_name(
             self.facility.type, self.version)
@@ -257,6 +271,7 @@ class Edit(utils.Handler):
             parse_input(report, self.request, attribute)
         report.put()
         if self.params.embed:
+            #i18n: Record updated successfully.
             self.write(_('Record updated.'))
         else:
             raise Redirect('/')
