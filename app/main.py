@@ -17,7 +17,7 @@ import access
 import rendering
 
 # TODO(shakusa) Issue 55: When we are ready to launch, set this to False
-VIEW_AND_PRINT_REQUIRE_LOGIN = False
+VIEW_AND_PRINT_REQUIRE_LOGIN = True
 
 class Main(Handler):
 

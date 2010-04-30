@@ -92,9 +92,10 @@ class Attribute(db.Model):
         'int',  # value is an integer (64-bit long)
         'float',  # value is a float (Python float, i.e. double)
         'bool',  # value is a boolean
-        'choice',  # value is a string (one of the elements in 'values')  
+        'choice',  # value is a string (one of the elements in 'values')
         'multi'  # value is a list of strings (which are elements of 'values')
     ])
+    editable = db.BooleanProperty() # Once entered, is the value editable?
     values = db.StringListProperty()  # allowed value names for choice or multi
 
 class FacilityType(db.Model):

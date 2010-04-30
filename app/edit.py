@@ -19,7 +19,7 @@ from utils import DateTime, ErrorMessage, Redirect
 from utils import db, get_message, html_escape, users
 from feeds.crypto import sign, verify
 
-TOKEN_KEY_NAME = 'resource-finder-edit'
+XSRF_KEY_NAME = 'resource-finder-edit'
 DAY_SECS = 24 * 60 * 60
 
 # ==== Form-field generators and parsers for each attribute type =============
@@ -202,6 +202,12 @@ def parse_input(report, request, attribute):
     return ATTRIBUTE_TYPES[attribute.type].parse_input(
         report, name, request.get(name, None), request, attribute)
 
+def get_last_report(version, facility_name):
+    return (model.Report.all()
+            .ancestor(version)
+            .filter('facility_name =', facility_name)
+            .order('-timestamp')).get()
+
 
 # ==== Handler for the edit page =============================================
 
@@ -225,7 +231,6 @@ class Edit(utils.Handler):
         self.attributes = dict(
             (a.key().name(), a)
             for a in model.Attribute.all().ancestor(self.version))
-        self.readonly_attribute_names = ['healthc_id',]
 
     def get(self):
         self.init()
@@ -235,26 +240,22 @@ class Edit(utils.Handler):
             'value': self.params.facility_name
         }]
 
-        report = (model.Report.all()
-            .ancestor(self.version)
-            .filter('facility_name =', self.params.facility_name)
-            .order('-timestamp')).get()
+        report = get_last_report(self.version, self.params.facility_name)
         for name in self.facility_type.attribute_names:
             attribute = self.attributes[name]
-            if name in self.readonly_attribute_names:
-                readonly_fields.append({
-                    'name': get_message(self.version, 'attribute_name', name),
-                    'value': getattr(report, name, None)
-                })
-            else:
+            if attribute.editable:
                 fields.append({
                     'name': get_message(self.version, 'attribute_name', name),
                     'type': attribute.type,
                     'input': make_input(self.version, report, attribute)
                 })
+            else:
+                readonly_fields.append({
+                    'name': get_message(self.version, 'attribute_name', name),
+                    'value': getattr(report, name, None)
+                })
 
-        token = sign(
-            TOKEN_KEY_NAME, self.user.user_id(), DAY_SECS)
+        token = sign(XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
 
         self.render('templates/edit.html',
             token=token, facility=self.facility, fields=fields,
@@ -263,16 +264,13 @@ class Edit(utils.Handler):
 
     def post(self):
         self.init()
-        if not verify(TOKEN_KEY_NAME, self.user.user_id(),
+        if not verify(XSRF_KEY_NAME, self.user.user_id(),
             self.request.get('token')):
             raise ErrorMessage(403, 'Unable to submit data for %s'
                                % self.user.email())
 
         logging.info("record by user: %s" % self.user)
-        last_report = (model.Report.all()
-            .ancestor(self.version)
-            .filter('facility_name =', self.params.facility_name)
-            .order('-timestamp')).get()
+        last_report = get_last_report(self.version, self.params.facility_name)
         report = model.Report(
             self.version,
             facility_name=self.facility.key().name(),
@@ -280,11 +278,11 @@ class Edit(utils.Handler):
             user=self.user,
         )
         for name in self.facility_type.attribute_names:
-            if name in self.readonly_attribute_names:
-                setattr(report, name, getattr(last_report, name, None))
-            else:
-                attribute = self.attributes[name]
+            attribute = self.attributes[name]
+            if attribute.editable:
                 parse_input(report, self.request, attribute)
+            else:
+                setattr(report, name, getattr(last_report, name, None))
         report.put()
         if self.params.embed:
             self.write(_('Record updated.'))
