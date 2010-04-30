@@ -60,9 +60,9 @@ class GrantAccess(utils.Handler):
         #TODO(eyalf): define auth.display_name() or something
         name = auth.email
         if not ccrole in auth.requested_roles:
-            raise ErrorMessage(404,
-                               _('no pending request for %s by %s') % (ccrole,
-                                                                       name))
+            raise ErrorMessage(404, _('No pending request for '
+                                      '%(authorization_role)s by %(user)s')
+                               % (ccrole, name))
         auth.requested_roles.remove(ccrole)
         action = self.request.get('action', 'deny')
         if action == 'approve':

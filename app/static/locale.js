@@ -21,6 +21,8 @@
 locale = function() {
   var messages = {};
 
+  //i18n: Indicates a user should call for availability of beds
+  //i18n: and services at a hospital.
   messages.CALL_FOR_AVAILABILITY =
       'Please call for availability information';
 
@@ -36,12 +38,14 @@ locale = function() {
   messages.DISTANCE =
       '${MILES} miles (${KM} km)';
 
+  //i18n: Link to edit the data for a facility record.
   messages.EDIT_LINK_HTML =
       HTML('${LINK_START}Edit this record${LINK_END}');
 
   messages.FACILITIES_IN_RANGE =
       '${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles';
 
+  //i18n: Latitude and longitude location on earth.
   messages.GEOLOCATION_HTML =
       HTML('Latitude: ${LATITUDE}<br>Longitude: ${LONGITUDE}');
 
@@ -49,6 +53,7 @@ locale = function() {
   messages.MONTH_ABBRS =
       'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
+  //i18n: Form option for disagreement.
   messages.NO =
       'No';
 
@@ -59,12 +64,15 @@ locale = function() {
   messages.PRINT_ENABLED_TOOLTIP =
       'Print a list of hospitals in order of distance from ${FACILITY_NAME}';
 
+  //i18n: Link to request access for editing a facility record.
   messages.REQUEST_EDIT_ACCESS_HTML =
       HTML('${LINK_START}Request edit access${LINK_END}');
 
+  //i18n: Indicates a user needs to sign in to edit data on a facility.
   messages.SIGN_IN_TO_EDIT =
       'Please sign in to edit';
 
+  //i18n: Form option for agreement.
   messages.YES =
       'Yes';
 
