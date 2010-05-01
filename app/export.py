@@ -136,6 +136,7 @@ class Export(Handler):
                 version = get_latest_version(country.key().name())
                 self.write('<h2>%s</h2>' % country.title)
                 self.write('<p>%s %s' %
+                    #i18n: Label for timestamp when data was last updated
                     (_('Last updated:'), version.timestamp))
                 self.write('<p><form>')
                 self.write('<input type=hidden name="cc" value="%s">' %
@@ -148,6 +149,8 @@ class Export(Handler):
                         facility_type.key().name(),
                         facility_type.key().name()))
                 self.write('<p><input type=submit value="%s">' %
+                    #i18n: Button to export data to comma-separated-values
+                    #i18n: format.
                     _('Export CSV'))
                 self.write('</form>')
 

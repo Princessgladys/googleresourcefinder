@@ -95,8 +95,8 @@ class DateAttributeType(AttributeType):
                 year, month, day = map(int, value.split('-'))
                 setattr(report, name, DateTime(year, month, day))
             except (TypeError, ValueError):
-                #i18n: Error message for invalid date entry
                 raise ErrorMessage(
+                    #i18n: Error message for invalid date entry
                     400, _('Invalid date: %(date)r (need YYYY-MM-DD format)')
                     % value)
         else:

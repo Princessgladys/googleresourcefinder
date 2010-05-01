@@ -52,6 +52,8 @@ locale = function() {
   messages.EDIT_LINK_HTML =
       HTML('${LINK_START}Edit this record${LINK_END}');
 
+  //i18n: Number of facilities within range of a location.
+  //i18n: (example: 5 Facilities within 10 miles)
   messages.FACILITIES_IN_RANGE =
       '${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles';
 

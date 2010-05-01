@@ -54,6 +54,7 @@ var METERS_TO_MILES = 0.000621371192;
 var METERS_TO_KM = 0.001;
 
 // Temporary for v1, this should be user-settable in the future
+// TODO: Also need to update message in map.html that says "10 miles"
 var PRINT_RADIUS_MILES = 10;
 
 // TODO: Re-enable when monitoring is re-enabled

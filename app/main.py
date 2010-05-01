@@ -34,7 +34,10 @@ class Main(Handler):
                     authorization=user and user.email() or 'anonymous',
                     loginout_url=(user and users.create_logout_url('/') or
                                   users.create_login_url('/')),
-                    loginout_text=(user and _("Sign out") or _("Sign in")),
+                    #i18n: Link to sign out of the app
+                    loginout_text=(user and _("Sign out")
+                                   #i18n: Link to sign into the app
+                                   or _("Sign in")),
                     data=rendering.version_to_json(get_latest_version('ht'),
                                                    hide_email=not user,
                                                    center=center,

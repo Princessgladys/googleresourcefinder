@@ -25,6 +25,7 @@ class Dump(Handler):
         if self.request.get('cc'):
             self.write_version(get_latest_version(self.request.get('cc')))
         else:
+            #i18n: Label to select a country from a list
             self.write(_('Select a country:') + '<ul>')
             for cc in sorted(country_codes):
                 self.write('<li><a href="/dump?cc=%s">%s</a>' %

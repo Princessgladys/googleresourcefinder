@@ -41,7 +41,7 @@ tr.field.text { vertical-align: top; }
 {% comment %}
 #i18n: Title for page to edit data about a facility
 {% endcomment %}
-<h1>{% blocktrans with facility.title|escape as title %} Edit {{title}} {% endblocktrans %}</h1>
+<h1>{% blocktrans with facility.title|escape as facility_name %} Edit {{facility_name}} {% endblocktrans %}</h1>
 
 <form method="post" id="edit" action="/edit">
   <input type="hidden" name="token" value="{{token}}"/>
