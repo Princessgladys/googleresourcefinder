@@ -113,6 +113,8 @@ def django_makemessages():
     # The current file:line_num ref, which occurs on a previous line to it's
     # corresponding message
     current_ref = ''
+    # The current msgid, it can span multiple lines
+    current_msgid = None
     for line in open(DJANGO_EN_PO):
         if line.startswith('#:'):
             header_done = True
@@ -123,9 +125,14 @@ def django_makemessages():
         if line.startswith('#:'):
             current_ref = line[3:]
         elif line.startswith('msgid'):
-            msgid = re.match('msgid [\'"](.*)[\'"]\s*$', line).group(1)
-            message_to_ref[Message(msgid)] = current_ref.split(' ')
+            current_msgid = re.match(
+                '''msgid ['"](.*)['"]\s*$''', line).group(1)
+        elif line.startswith('msgstr'):
+            message_to_ref[Message(current_msgid)] = current_ref.split(' ')
             current_ref = ''
+            current_msgid = None
+        elif current_msgid is not None:
+            current_msgid += re.match('''['"](.*)['"]\s*$''', line).group(1)
     return (header, message_to_ref)
 
 def parse_file(input_filename):

@@ -26,6 +26,9 @@
     <thead>
       <tr>
         <th valign=top>
+          {% comment %}
+          #i18n: Name of the application.
+          {% endcomment %}
           <span class="print-title">{% trans "Resource Finder" %}</span><br/>
           <span class="print-subtitle" id="print-subtitle"></span>
         </th>
@@ -44,11 +47,28 @@
               <thead id="facility-print-thead">
                 <tr>
                   <th colspan=2 align=center>
+                    {% comment %}
+                    #i18n: Heading for number of available beds and number
+                    #i18n: of total beds in a hospital.
+                    {% endcomment %}
                     {% trans "Beds open / total" %}
                   </th>
+                  {% comment %}
+                  #i18n: Header for a place that provides a particular service
+                  {% endcomment %}
                   <th>{% trans "Facility" %}</th>
+                  {% comment %}
+                  #i18n: Header for a distance from the current facility to
+                  #i18n: another location
+                  {% endcomment %}
                   <th>{% trans "Distance" %}</th>
+                  {% comment %}
+                  #i18n: Header for a street address
+                  {% endcomment %}
                   <th>{% trans "Address" %}</th>
+                  {% comment %}
+                  #i18n: Header for general information about a facility
+                  {% endcomment %}
                   <th>{% trans "General Info" %}</th>
                 </tr>
               </thead>

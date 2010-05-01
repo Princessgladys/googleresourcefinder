@@ -18,6 +18,9 @@
 
 <!-- No doctype: need quirks mode to get scrollbars in IE. -->
 <head>
+  {% comment %}
+  #i18n: Name of the application.
+  {% endcomment %}
   <title>{% trans "Resource Finder" %} ({{instance}})</title>
 
   <!-- Stylesheets -->
@@ -70,12 +73,21 @@
   <div class="user">
     <strong>{{authorization}}</strong> |
     {% if params.print %}
+      {% comment %}
+      #i18n: Link to return to the main page of the application
+      {% endcomment %}
       <a href="/">{% trans "Home" %}</a> |
     {% else %}
       <a id="print-link" href="#"
+         {% comment %}
+         #i18n: Link to print the current view of the application
+         {% endcomment %}
          class="print-link-disabled">{% trans "Print" %}</a> |
     {% endif %}
-    <a href="about:blank">Help</a> |
+    {% comment %}
+    #i18n: Link to go to a help page for the application
+    {% endcomment %}
+    <a href="about:blank">{% trans "Help" %}</a> |
     <a href="{{loginout_url}}">{{loginout_text}}</a>
   </div>
   {% if params.print %}
@@ -84,6 +96,9 @@
         <tbody>
           <tr>
             <td valign=top>
+              {% comment %}
+              #i18n: Name of the application.
+              {% endcomment %}
               <span class="print-title">{% trans "Resource Finder" %}</span><br/>
               <span class="print-subtitle" id="header-print-subtitle"></span>
             </td>
@@ -97,6 +112,9 @@
     </div>
   {% else %}
     <div class="title">
+      {% comment %}
+      #i18n: Name of the application.
+      {% endcomment %}
       {% trans "Resource Finder" %}
     </div>
   {% endif %}
@@ -113,8 +131,19 @@
     <table cellspacing=0 cellpadding=0 border=0 align=center>
       <thead>
         <tr>
+          {% comment %}
+          #i18n: Name of the application.
+          {% endcomment %}
           <th>{% trans "Total facilities" %}</th>
+          {% comment %}
+          #i18n: Header for the number of facilities less than 10 miles from
+          #i18n: a location.
+          {% endcomment %}
           <th>{% trans "no more than 10 miles away" %}</th>
+          {% comment %}
+          #i18n: Header for the number of facilities with available beds.
+          #i18n: OK to translate without the 'and' if it makes more sense
+          {% endcomment %}
           <th>{% trans "and with availability." %}</th>
         </tr>
       </thead>
@@ -138,6 +167,9 @@
 </div>
 {% if params.print %}
   <div id="update-instructions">
+    {% comment %}
+    #i18n: Explains how to correct incorrect information that has been printed.
+    {% endcomment %}
     {% trans "If any information is wrong or missing, please correct it on the web site:" %}
     <span id="site-url"></span>
   </div>

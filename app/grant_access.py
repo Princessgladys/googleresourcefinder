@@ -61,18 +61,19 @@ class GrantAccess(utils.Handler):
 
         ccrole = self.request.get('ccrole')
         if not ccrole:
-            raise ErrorMessage(404, _('missing ccrole (requested_role) params'))
+            raise ErrorMessage(404, 'missing ccrole (requested_role) params')
         cc, role = ccrole.split(':')
 
         self.require_user_role('superuser', cc)
 
         auth = Authorization.get(self.request.get('key'))
         if not auth:
-            raise ErrorMessage(404, _('bad key given'))
+            raise ErrorMessage(404, 'bad key given')
 
         #TODO(eyalf): define auth.display_name() or something
         name = auth.email
         if not ccrole in auth.requested_roles:
+            #i18n: Error message
             raise ErrorMessage(404, _('No pending request for '
                                       '%(authorization_role)s by %(user)s')
                                % (ccrole, name))
@@ -87,9 +88,13 @@ class GrantAccess(utils.Handler):
 
         if self.params.embed:
             if action == 'approve':
-                self.write(_('Request for becoming %s was approved.') % role)
+                self.write(
+                    #i18n: Application for the given permission role approved
+                    _('Request for becoming %(role)s was approved.') % role)
             else:
-                self.write(_('Request for becoming %s was denied.') % role)
+                self.write(
+                    #i18n: Application for the given permission role denied
+                    _('Request for becoming %(role)s was denied.') % role)
         else:
             raise Redirect('/grant_access')
 

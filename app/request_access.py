@@ -48,12 +48,16 @@ class RequestAccess(utils.Handler):
             raise Redirect(users.create_login_url(self.request.uri))
         role = "%s:%s" % (self.params.cc, self.params.role)
         if role in self.auth.user_roles:
-            message = _('You are already %s') % role
+            #i18n: Requested permission role has been previously granted
+            message = _('You are already %(role)s') % role
         elif role in self.auth.requested_roles:
-            message = _('Your request for %s is already registered') % role
+            message = _(
+                #i18n: Requested permission role has already been granted
+                'Your request for %(role)s is already registered') % role
         else:
             self.auth.requested_roles.append(role)
-            message = _('Request for becoming %s was registered.') % role
+            #i18n: Requested permission role was registered
+            message = _('Request for becoming %(role)s was registered.') % role
             self.auth.put()
 
         if self.params.embed:
