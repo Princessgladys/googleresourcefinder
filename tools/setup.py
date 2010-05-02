@@ -56,6 +56,9 @@ def setup_version(version):
     value_message = lambda name, **kw: message('attribute_value', name, **kw)
 
     messages = [
+        #i18n: Proper name of an ID for a healthcare facility, no translation
+        #i18n: necessary.
+        name_message('healthc_id', en='HealthC ID', fr='HealthC ID'),
         #i18n_meaning: referring to the name of an organization
         name_message('organization',
                      en='Organization name',
@@ -207,7 +210,7 @@ def setup_version(version):
                       en='Obstetrics and gynecology',
                       fr=u'Obst\xe9trique et gyn\xe9cologie'),
         #i18n: Service provided by a health facility.
-        value_message('dialysis', en='Dialysis', fr='Dialyse')
+        value_message('dialysis', en='Dialysis', fr='Dialyse'),
         #i18n: Service provided by a health facility.
         value_message('lab', en='Lab', fr='Laboratoire'),
         #i18n: Service provided by a health facility.

@@ -278,6 +278,10 @@ class Edit(utils.Handler):
 
     def post(self):
         self.init()
+
+        if self.request.get('submit') == _('Cancel'):
+            raise Redirect('/')
+
         if not verify(XSRF_KEY_NAME, self.user.user_id(),
             self.request.get('token')):
             raise ErrorMessage(403, 'Unable to submit data for %s'

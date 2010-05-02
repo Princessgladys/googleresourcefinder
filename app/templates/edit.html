@@ -39,9 +39,14 @@ tr.field.text { vertical-align: top; }
 <head>
 {% endif %}
 {% comment %}
+# NB: This probably should be
+# {% blocktrans with facility.title|escape as facility_name %}
+# Edit {{facility_name}} {% endblocktrans %}
+# but that causes a UnicodeDecodeError when there is unicode on the page,
+# presumably because Django is defaulting to ascii encoding for some reason.
 #i18n: Title for page to edit data about a facility
 {% endcomment %}
-<h1>{% blocktrans with facility.title|escape as facility_name %} Edit {{facility_name}} {% endblocktrans %}</h1>
+<h1>{% trans "Edit" %} {{facility.title|escape}}</h1>
 
 <form method="post" id="edit" action="/edit">
   <input type="hidden" name="token" value="{{token}}"/>
@@ -77,11 +82,11 @@ tr.field.text { vertical-align: top; }
         {% comment %}
         #i18n: Button text to save data
         {% endcomment %}
-        <input type="submit" value='{% trans "Save" %}'>
+        <input type="submit" name='submit' value='{% trans "Save" %}'>
         {% comment %}
-        #i18n: Button text to revert changes and keep existing data
+        #i18n: Button text to cancel and return to the home page
         {% endcomment %}
-        <input type="reset" value='{% trans "Revert" %}'>
+        <input type="submit" name='submit' value='{% trans "Cancel" %}'>
         <span id="edit-status"></span>
       </td>
     </tr>
