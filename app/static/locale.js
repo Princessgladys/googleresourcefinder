@@ -70,6 +70,10 @@ locale = function() {
   messages.NO =
       'No';
 
+  //i18n: Indicates there is no availability information for this hospital.
+  messages.NO_AVAILABILITY =
+      'No availability information';
+
   //i18n: Very short abbreviation for a phone number, indended to disambiguate
   //i18n: from a fax number.  (example: p 555-555-5555)
   messages.PHONE_ABBREVIATION =

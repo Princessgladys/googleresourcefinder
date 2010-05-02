@@ -39,11 +39,10 @@ tr.field.text { vertical-align: top; }
 <head>
 {% endif %}
 {% comment %}
-# NB: This probably should be
-# {% blocktrans with facility.title|escape as facility_name %}
-# Edit {{facility_name}} {% endblocktrans %}
-# but that causes a UnicodeDecodeError when there is unicode on the page,
-# presumably because Django is defaulting to ascii encoding for some reason.
+# NB: This probably should use blocktrans and include facility_name as a param
+# to the message but that causes a UnicodeDecodeError when there is unicode
+# on the page, presumably because Django is defaulting to ascii encoding for
+# some reason.
 #i18n: Title for page to edit data about a facility
 {% endcomment %}
 <h1>{% trans "Edit" %} {{facility.title|escape}}</h1>
