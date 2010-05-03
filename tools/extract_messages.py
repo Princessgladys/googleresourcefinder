@@ -128,113 +128,14 @@ def django_makemessages():
             current_msgid = re.match(
                 '''msgid ['"](.*)['"]\s*$''', line).group(1)
         elif line.startswith('msgstr'):
-            message_to_ref[Message(current_msgid)] = current_ref.split(' ')
+            refs = current_ref.split(' ')
+            (description, meaning) = find_description_meaning(refs)
+            message_to_ref[Message(current_msgid, description, meaning)] = refs
             current_ref = ''
             current_msgid = None
         elif current_msgid is not None:
             current_msgid += re.match('''['"](.*)['"]\s*$''', line).group(1)
     return (header, message_to_ref)
-
-def parse_file(input_filename):
-    """Parses the given file, extracting messages. Returns a dictionary
-       of 'input_filename:line_number' to a tuple of
-       (message string, description, meaning)."""
-    # Patterns for the given input file
-    patterns = PATTERNS[input_filename.split('.')[-1]]
-    # The return list of pairs of ref 'file:line_num' to message
-    ref_msg_pairs = []
-    # Description lines for the current message
-    current_description = []
-    # Meaning lines for the current message
-    current_meaning = []
-    # The current messages being parsed.  This is a local var as the msg
-    # can span multiple lines.
-    current_message = ''
-    # The line number to assign to the current message, usually the first line
-    # of the statement containing the message.
-    current_message_line_num = -1
-    # Current line number in the input file
-    line_num = 0
-
-    for line in file(input_filename):
-        line_num += 1
-        match = re.match(patterns['description'], line)
-        if match:
-            current_description.append(match.group(1))
-            continue
-        match = re.match(patterns['meaning'], line)
-        if match:
-            current_meaning.append(match.group(1))
-            continue
-
-        if re.match(patterns['start'], line):
-            # Remember that we've started a message for multi-line messages
-            current_message_line_num = line_num
-
-        if current_message_line_num is not -1:
-            current_message += parse_message(patterns['string'], line)
-
-            if re.search(patterns['end'], line):
-                if not current_message:
-                    print input_filename, line, current_message_line_num
-                # End of the current message
-                ref = input_filename + ':' + str(current_message_line_num)
-                ref_msg_pairs.append(
-                    (ref, Message(current_message,
-                                  ' '.join(current_description),
-                                  ' '.join(current_meaning))))
-                current_message_line_num = -1
-                current_message = ''
-                current_description = []
-                current_meaning = []
-    return ref_msg_pairs
-
-def parse_message(pattern, line):
-    msg = ''
-    match = re.search(pattern, line)
-    if match:
-        # You can't actually match a string literal with a regexp,
-        # We get close here then iterate to figure out the rest
-        match_str = match.group(1)
-        for c in match_str[1:]:
-            if (c == "'" or c == '"') and not last_slash:
-                break
-            msg += c
-            last_slash = c == '\\'
-    return msg
-
-def merge(msg_to_ref, ref_msg_pairs):
-    """ Merge ref_msg_pairs into msg_to_ref """
-    for (ref, msg) in ref_msg_pairs:
-        refs = []
-        if msg in msg_to_ref:
-            # Use the newer version of msg (the django one has no description)
-            refs = msg_to_ref[msg]
-            del msg_to_ref[msg]
-        msg_to_ref.setdefault(msg, refs).append(ref)
-
-def output_po_file(output, header, msg_to_ref):
-    """Write a po file to output from the given header and dict from message
-       to list of file:line_num references where the message appears."""
-    output.write(header)
-
-    for message, refs in sorted(msg_to_ref.items()):
-        msgid = message.msgid
-        description = message.description
-        meaning = message.meaning
-        if not description and not meaning:
-            (description, meaning) = find_description_meaning(refs)
-        print >>output, '#. %s' % description
-        print >>output, '#: %s' % ' '.join(refs)
-        if has_sh_placeholders(msgid):
-            print >>output, '#, sh-format'
-        elif has_python_placeholders(msgid):
-            print >>output, '#, python-format'
-        if meaning:
-            print >>output, '#| msgctxt %s' % meaning
-        print >>output, 'msgid "%s"' % msgid
-        print >>output, 'msgstr ""\n'
-    output.flush()
 
 def find_description_meaning(refs):
     """Horribly inefficient search for description and meaning strings,
@@ -276,7 +177,101 @@ def find_description_meaning(refs):
         if current_description or current_meaning:
             return (' '.join(current_description), ' '.join(current_meaning))
 
-    return ('TODO: Message description and/or meaning', '')
+    return ('', '')
+
+def parse_file(input_filename):
+    """Parses the given file, extracting messages. Returns a dictionary
+       of 'input_filename:line_number' to a tuple of
+       (message string, description, meaning)."""
+    # Patterns for the given input file
+    patterns = PATTERNS[input_filename.split('.')[-1]]
+    # The return list of pairs of ref 'file:line_num' to message
+    ref_msg_pairs = []
+    # Description lines for the current message
+    current_description = []
+    # Meaning lines for the current message
+    current_meaning = []
+    # The current messages being parsed.  This is a local var as the msg
+    # can span multiple lines.
+    current_message = ''
+    # The line number to assign to the current message, usually the first line
+    # of the statement containing the message.
+    current_message_line_num = -1
+    # Current line number in the input file
+    line_num = 0
+
+    for line in file(input_filename):
+        line_num += 1
+        match = re.match(patterns['description'], line)
+        if match:
+            current_description.append(match.group(1))
+            continue
+        match = re.match(patterns['meaning'], line)
+        if match:
+            current_meaning.append(match.group(1))
+            continue
+
+        if re.match(patterns['start'], line):
+            # Remember that we've started a message for multi-line messages
+            current_message_line_num = line_num
+
+        if current_message_line_num is not -1:
+            current_message += parse_message(patterns['string'], line)
+
+            if re.search(patterns['end'], line):
+                # End of the current message
+                ref = input_filename + ':' + str(current_message_line_num)
+                ref_msg_pairs.append(
+                    (ref, Message(current_message,
+                                  ' '.join(current_description),
+                                  ' '.join(current_meaning))))
+                current_message_line_num = -1
+                current_message = ''
+                current_description = []
+                current_meaning = []
+    return ref_msg_pairs
+
+def parse_message(pattern, line):
+    msg = ''
+    match = re.search(pattern, line)
+    if match:
+        # You can't actually match a string literal with a regexp,
+        # We get close here then iterate to figure out the rest
+        match_str = match.group(1)
+        for c in match_str[1:]:
+            if (c == "'" or c == '"') and not last_slash:
+                break
+            msg += c
+            last_slash = c == '\\'
+    return msg
+
+def merge(msg_to_ref, ref_msg_pairs):
+    """ Merge ref_msg_pairs into msg_to_ref """
+    for (ref, msg) in ref_msg_pairs:
+        msg_to_ref.setdefault(msg, []).append(ref)
+
+def output_po_file(output, header, msg_to_ref):
+    """Write a po file to output from the given header and dict from message
+       to list of file:line_num references where the message appears."""
+    output.write(header)
+
+    for message, refs in sorted(msg_to_ref.items()):
+        msgid = message.msgid
+        description = message.description
+        meaning = message.meaning
+        if not description and not meaning:
+            description = 'TODO: Message description and/or meaning'
+        print >>output, '#. %s' % description
+        print >>output, '#: %s' % ' '.join(refs)
+        if has_sh_placeholders(msgid):
+            print >>output, '#, sh-format'
+        elif has_python_placeholders(msgid):
+            print >>output, '#, python-format'
+        if meaning:
+            print >>output, '#| msgctxt %s' % meaning
+        print >>output, 'msgid "%s"' % msgid
+        print >>output, 'msgstr ""\n'
+    output.flush()
 
 def has_sh_placeholders(message):
     """Returns true if the message has placeholders."""
