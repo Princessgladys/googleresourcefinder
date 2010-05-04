@@ -279,7 +279,7 @@ class Edit(utils.Handler):
     def post(self):
         self.init()
 
-        if self.request.get('submit') == _('Cancel'):
+        if self.request.get('cancel'):
             raise Redirect('/')
 
         if not verify(XSRF_KEY_NAME, self.user.user_id(),

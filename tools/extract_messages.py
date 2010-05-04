@@ -50,18 +50,19 @@ import sys
 
 DJANGO_EN_PO = 'locale/en/LC_MESSAGES/django.po'
 DJANGO_END_COMMENT_PATTERN = '{\% endcomment \%}'
+STRING_LITERAL_PATTERN = r'''\s*(["'])((\\.|[^\\])*?)\1'''
 
 PATTERNS = {
     'js' : {
         'start': r'\s*(messages\.[A-Z_1-9]+)\s*=',
-        'string': r'''\s*(['"].*['"])''',
+        'string': STRING_LITERAL_PATTERN,
         'end': r';\s*$',
         'description': r'^\s*//i18n:\s*(.*)',
         'meaning': r'\s*//i18n_meaning:\s*(.*)'
     },
     'py' : {
         'start': r'\s*[a-z]+_message\(',
-        'string': r'''en\s*=\s*(['"].*['"])''',
+        'string': r'en\s*=' + STRING_LITERAL_PATTERN,
         'end': r'\),?\s*$',
         'description': r'^\s*#i18n:\s*(.*)',
         'meaning': r'^\s*#i18n_meaning:\s*(.*)'
@@ -211,7 +212,9 @@ def parse_file(input_filename):
             current_message_line_num = line_num
 
         if current_message_line_num != -1:
-            current_message += parse_message(patterns['string'], line)
+            match = re.search(patterns['string'], line)
+            if match:
+                current_message += match.group(2)
 
             if re.search(patterns['end'], line):
                 # End of the current message
@@ -225,20 +228,6 @@ def parse_file(input_filename):
                 current_description = []
                 current_meaning = []
     return ref_msg_pairs
-
-def parse_message(pattern, line):
-    msg = ''
-    match = re.search(pattern, line)
-    if match:
-        # You can't actually match a string literal with a regexp,
-        # We get close here then iterate to figure out the rest
-        match_str = match.group(1)
-        for c in match_str[1:]:
-            if (c == "'" or c == '"') and not last_slash:
-                break
-            msg += c
-            last_slash = c == '\\'
-    return msg
 
 def merge(msg_to_ref, ref_msg_pairs):
     """ Merge ref_msg_pairs into msg_to_ref """
@@ -263,7 +252,7 @@ def output_po_file(output, header, msg_to_ref):
         elif has_python_placeholders(msgid):
             print >>output, '#, python-format'
         if meaning:
-            print >>output, '#| msgctxt %s' % meaning
+            print >>output, 'msgctxt "%s"' % meaning
         print >>output, 'msgid "%s"' % msgid
         print >>output, 'msgstr ""\n'
     output.flush()

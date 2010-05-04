@@ -91,8 +91,8 @@ rf.get_services = function(facility) {
 var summary_columns = [
   null, {
     get_title: function() {
-      var beds_div = $$('div', {'class': 'beds'}, 'Open/Total Beds');
-      return $$('div', {}, [beds_div, 'Services']);
+      var beds_div = $$('div', {'class': 'beds'}, locale.OPEN_TOTAL_BEDS());
+      return $$('div', {}, [beds_div, locale.SERVICES()]);
     },
     get_value: function(values) {
       var services = rf.get_services_from_values(values);
@@ -504,7 +504,7 @@ function initialize_filters() {
     }
   });
   var options = [];
-  options.push($$('option', {value: '0 '}, 'All'));
+  options.push($$('option', {value: '0 '}, locale.ALL()));
   add_filter_options(options, attributes_by_name.services);
   set_children(selector, options);
   set_children(tr, [$$('td', {}, ['Show: ', selector])]);
@@ -518,7 +518,7 @@ function initialize_division_header() {
     return;
   }
   var tr = $$('tr');
-  var cells = [$$('th', {}, 'Arrondissements')];
+  var cells = [$$('th', {}, locale.DISTRICT())];
   for (var s = 1; s <= MAX_STATUS; s++) {
     cells.push($$('th', {'class': 'facility-count'},
         $$('img', {src: make_icon('', s, false)})));
@@ -535,7 +535,7 @@ function initialize_facility_header() {
     return;
   }
   var tr = $$('tr');
-  var cells = [$$('th', {}, 'Facility')];
+  var cells = [$$('th', {}, locale.FACILITY())];
   for (var c = 1; c < summary_columns.length; c++) {
     cells.push($$('th', {'class': 'value column_' + c},
                   summary_columns[c].get_title()));
@@ -1127,8 +1127,9 @@ function select_facility(facility_i, ignore_current) {
   var last_report = selected_facility.last_report;
   if (last_report) {
     var ymd = last_report.date.split('-');
-    last_updated = 'Updated ' +
-        locale.MONTH_ABBRS[ymd[1] - 1]() + ' ' + (ymd[2] - 0) + ', ' + ymd[0];
+    last_updated = locale.UPDATED() + ' ' + locale.DATE_FORMAT_MEDIUM(
+      {MONTH: locale.MONTH_ABBRS[ymd[1] - 1](), DAY: (ymd[2] - 0),
+       YEAR: ymd[0]});
   }
   info.close();
 

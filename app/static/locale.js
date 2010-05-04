@@ -21,6 +21,10 @@
 locale = function() {
   var messages = {};
 
+  //i18n: Label for every item in a list.
+  messages.ALL =
+      'All';
+
   //i18n: Indicates a user should call for availability of beds
   //i18n: and services at a hospital.
   messages.CALL_FOR_AVAILABILITY =
@@ -48,6 +52,10 @@ locale = function() {
   messages.DISTANCE =
       '${MILES} miles (${KM} km)';
 
+  //i18n_meaning: administrative division
+  messages.DISTRICT =
+      'District';
+
   //i18n: Link to edit the data for a facility record.
   messages.EDIT_LINK_HTML =
       HTML('${LINK_START}Edit this record${LINK_END}');
@@ -56,6 +64,10 @@ locale = function() {
   //i18n: (example: 5 Facilities within 10 miles)
   messages.FACILITIES_IN_RANGE =
       '${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles';
+
+  //i18n: A place that provides a particular service
+  messages.FACILITY =
+      'Facility';
 
   //i18n: Latitude and longitude location on earth.
   messages.GEOLOCATION_HTML =
@@ -73,6 +85,11 @@ locale = function() {
   //i18n: Indicates there is no availability information for this hospital.
   messages.NO_AVAILABILITY =
       'No availability information';
+
+  //i18n: Header showing the number of available beds out of the number of
+  //i18n: total beds that are available in a hospital
+  messages.OPEN_TOTAL_BEDS =
+     'Open/Total Beds';
 
   //i18n: Very short abbreviation for a phone number, indended to disambiguate
   //i18n: from a fax number.  (example: p 555-555-5555)
@@ -92,6 +109,10 @@ locale = function() {
   messages.REQUEST_EDIT_ACCESS_HTML =
       HTML('${LINK_START}Request edit access${LINK_END}');
 
+  //i18n: work done by someone that benefits another
+  messages.SERVICES =
+      'Services';
+
   //i18n: Indicates a user needs to sign in to edit data on a facility.
   messages.SIGN_IN_TO_EDIT =
       'Please sign in to edit';
@@ -99,6 +120,10 @@ locale = function() {
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE =
       '${HOURS}:${MINUTES} ${ZONE}';
+
+  //i18n: Label indicating a record was updated
+  messages.UPDATED =
+      'Updated';
 
   //i18n: Form option for agreement.
   messages.YES =

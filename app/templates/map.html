@@ -162,7 +162,10 @@
 <div id="freshness" class="caption gmnoprint">
   <span id="freshness-text"></span>
   <div>
-    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">Download master list</a>
+    {% comment %}
+    #i18n: Link to download the 'master' copy of the facility data
+    {% endcomment %}
+    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">{% trans "Download master list" %}</a>
   </div>
 </div>
 {% if params.print %}
