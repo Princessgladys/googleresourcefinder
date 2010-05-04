@@ -214,7 +214,13 @@ def parse_file(input_filename):
         if current_message_line_num != -1:
             match = re.search(patterns['string'], line)
             if match:
-                current_message += match.group(2)
+                # Unescape the type of quote (single or double) that surrounded
+                # the message, then escape double-quotes, which we use to
+                # surround the message in the .po file
+                unescape_pattern = r'\\([%s])' % match.group(1)
+                msg_part = re.sub(unescape_pattern, lambda m : m.group(1),
+                                  match.group(2)).replace('"', '\\"')
+                current_message += msg_part
 
             if re.search(patterns['end'], line):
                 # End of the current message
