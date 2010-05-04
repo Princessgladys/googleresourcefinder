@@ -53,7 +53,7 @@ DJANGO_END_COMMENT_PATTERN = '{\% endcomment \%}'
 
 PATTERNS = {
     'js' : {
-        'start': r'\s*messages\.[A-Z_]+\s*=',
+        'start': r'\s*(messages\.[A-Z_1-9]+)\s*=',
         'string': r'''\s*(['"].*['"])''',
         'end': r';\s*$',
         'description': r'^\s*//i18n:\s*(.*)',
@@ -148,21 +148,12 @@ def find_description_meaning(refs):
         # to the end and treating them like py files.  Remove that hack here
         file = file.replace('.html.py', '.html')
 
-        # Read from the file up to line_num, then search backwards for the
-        # comment
-        current_line = 0
-        lines = []
-        for line in open(file):
-            current_line += 1
-            if current_line >= line_num:
-                break
-            lines.append(line)
         # Hold the description and meaning, if we find them
         current_description = []
         current_meaning = []
-        for line in reversed(lines):
-            if re.search(DJANGO_END_COMMENT_PATTERN, line):
-                continue
+
+        lines = open(file).readlines()
+        for line in reversed(lines[:line_num - 1]):
             match = re.match(patterns['description'], line)
             if match:
                 current_description.insert(0, match.group(1))
@@ -170,6 +161,10 @@ def find_description_meaning(refs):
             match = re.match(patterns['meaning'], line)
             if match:
                 current_meaning.insert(0, match.group(1))
+                continue
+            # For html files, need to skip over the django end comment marker
+            # to get to the meaning lines
+            if re.search(DJANGO_END_COMMENT_PATTERN, line):
                 continue
             # The line was not part of a message description or meaning comment,
             # so it must not exist
@@ -180,7 +175,7 @@ def find_description_meaning(refs):
     return ('', '')
 
 def parse_file(input_filename):
-    """Parses the given file, extracting messages. Returns a dictionary
+    """Parses the given file, extracting messages. Returns a list of tuples
        of 'input_filename:line_number' to a tuple of
        (message string, description, meaning)."""
     # Patterns for the given input file
@@ -191,7 +186,7 @@ def parse_file(input_filename):
     current_description = []
     # Meaning lines for the current message
     current_meaning = []
-    # The current messages being parsed.  This is a local var as the msg
+    # The current message being parsed.  This is a local var as the msg
     # can span multiple lines.
     current_message = ''
     # The line number to assign to the current message, usually the first line
@@ -215,7 +210,7 @@ def parse_file(input_filename):
             # Remember that we've started a message for multi-line messages
             current_message_line_num = line_num
 
-        if current_message_line_num is not -1:
+        if current_message_line_num != -1:
             current_message += parse_message(patterns['string'], line)
 
             if re.search(patterns['end'], line):
