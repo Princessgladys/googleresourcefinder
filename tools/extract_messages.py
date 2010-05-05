@@ -217,9 +217,9 @@ def parse_file(input_filename):
                 # Unescape the type of quote (single or double) that surrounded
                 # the message, then escape double-quotes, which we use to
                 # surround the message in the .po file
-                unescape_pattern = r'\\([%s])' % match.group(1)
-                msg_part = re.sub(unescape_pattern, lambda m : m.group(1),
-                                  match.group(2)).replace('"', '\\"')
+                quote = match.group(1)
+                msg_part = match.group(2).replace('\\' + quote, quote).replace(
+                    '"', '\\"')
                 current_message += msg_part
 
             if re.search(patterns['end'], line):
