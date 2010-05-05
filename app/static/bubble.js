@@ -80,9 +80,13 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
       AVAILABILITY: values[attributes_by_name.available_beds],
       CAPACITY: values[attributes_by_name.total_beds]
     });
-  } else {
+  } else if (values && values[attributes_by_name.phone]) {
     availability_info = render(AVAILABILITY_UNKNOWN, {
       MESSAGE: locale.CALL_FOR_AVAILABILITY()
+    });
+  } else {
+    availability_info = render(AVAILABILITY_UNKNOWN, {
+      MESSAGE: locale.NO_AVAILABILITY()
     });
   }
 

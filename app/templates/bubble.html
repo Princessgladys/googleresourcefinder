@@ -22,14 +22,27 @@
       <span class="title">${FACILITY_TITLE}</span> ${EDIT_LINK}
     </span>
     <h2>
-      HealthC ID: ${HEALTHC_ID} &#xb7; Facility ID: ${FACILITY_NAME}<br>
+      {% comment %}
+      #i18n: ID for a facility
+      {% endcomment %}
+      HealthC ID: ${HEALTHC_ID} &#xb7; {% trans "Facility ID:" %} ${FACILITY_NAME}<br>
       ${LAST_UPDATED}
     </h2>
     <table class="scorecard" cellpadding="0" cellspacing="0">
       <tbody>
         <tr>
+          {% comment %}
+          #i18n: Heading for number of available beds at a hospital
+          {% endcomment %}
           <th class="availability" width="1%">{% trans "availability" %}</th>
+          {% comment %}
+          #i18n: Heading for number of total beds at a hospital
+          {% endcomment %}
           <th class="capacity" width="1%">{% trans "capacity" %}</th>
+          {% comment %}
+          #i18n: Heading for servies available at a hospital
+          #i18n: (eg, orthopedics, cardiology)
+          {% endcomment %}
           <th class="services">{% trans "services" %}</th>
         </tr>
         <tr>
@@ -43,8 +56,14 @@
     <div id="bubble-tabs">
       <ul>
         <li><a href="#bubble-tab-details">
+          {% comment %}
+          #i18n: Header for details about a facility
+          {% endcomment %}
           {% trans "Facility details" %}</a></li> 
         <li><a href="#bubble-tab-history">
+          {% comment %}
+          #i18n: Header for the history of changes in data for a facility
+          {% endcomment %}
           {% trans "Change history" %}</a></li>
       </ul>
       <div id="bubble-tab-details">
@@ -52,6 +71,9 @@
           <tbody>
             <tr class="item">
               <td class="label" width="20%">
+                {% comment %}
+                #i18n: street address
+                {% endcomment %}
                 {% trans "Address" %}
               </td>
               <td class="value">
@@ -69,8 +91,17 @@
         <table class="details" cellpadding="0" cellspacing="0">
           <thead>
             <tr>
+              {% comment %}
+              #i18n: Header for date and time of a change record
+              {% endcomment %}
               <th>{% trans "Date and time" %}</th>
+              {% comment %}
+              #i18n: Header for a record of a change to a facility detail
+              {% endcomment %}
               <th>{% trans "Change" %}</th>
+              {% comment %}
+              #i18n: Header a column of email addresses who made the edits
+              {% endcomment %}
               <th>{% trans "Edited by" %}</th>
             </tr>
           </thead>

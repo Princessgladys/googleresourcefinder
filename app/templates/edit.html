@@ -20,7 +20,10 @@
 <html>
 <head>
 {% endif %}
-<title>{% trans "Resource Mapper" %} ({{instance}})</title>
+{% comment %}
+#i18n: Name of the application.
+{% endcomment %}
+<title>{% trans "Resource Finder" %} ({{instance}})</title>
 <style>
 {% if not params.embed %}
   body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
@@ -32,9 +35,16 @@ tr.field.text { vertical-align: top; }
 .label { text-align: right; color: #666; }
 </style>
 {% if not params.embed %}
-</head>
-<body>
+<html>
+<head>
 {% endif %}
+{% comment %}
+# NB: This probably should use blocktrans and include facility_name as a param
+# to the message but that causes a UnicodeDecodeError when there is unicode
+# on the page, presumably because Django is defaulting to ascii encoding for
+# some reason.
+#i18n: Title for page to edit data about a facility
+{% endcomment %}
 <h1>{% trans "Edit" %} {{facility.title|escape}}</h1>
 
 <form method="post" id="edit" action="/edit">
@@ -68,8 +78,14 @@ tr.field.text { vertical-align: top; }
       <td>
       </td>
       <td class="field">
-        <input type="submit" value='{% trans "Save" %}'>
-        <input type="reset" value='{% trans "Revert" %}'>
+        {% comment %}
+        #i18n: Button text to save data
+        {% endcomment %}
+        <input type="submit" name='save' value='{% trans "Save" %}'>
+        {% comment %}
+        #i18n: Button text to cancel and return to the home page
+        {% endcomment %}
+        <input type="submit" name='cancel' value='{% trans "Cancel" %}'>
         <span id="edit-status"></span>
       </td>
     </tr>

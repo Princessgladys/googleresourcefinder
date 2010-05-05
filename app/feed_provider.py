@@ -35,6 +35,7 @@ class Entry(Handler):
             handle_entry_get(
                 self.request, self.response, feed_id, entry_id, URI_PREFIXES)
         except EntryNotFoundError:
+            #i18n: Error message for missing entry
             raise ErrorMessage(404, _('No such entry'))
 
 
