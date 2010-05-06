@@ -95,7 +95,7 @@ class Attribute(db.Model):
         'choice',  # value is a string (one of the elements in 'values')
         'multi'  # value is a list of strings (which are elements of 'values')
     ])
-    editable = db.BooleanProperty() # Once entered, is the value editable?
+    edit_role = db.StringProperty() # What role can edit? If empty, anyone can.
     values = db.StringListProperty()  # allowed value names for choice or multi
 
 class FacilityType(db.Model):

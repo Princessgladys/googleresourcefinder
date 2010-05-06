@@ -12,28 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-NOTE: THIS MODULE IS CURRENTLY UNUSED.
-
-The current permissions scheme for resource finder is:
-- Anyone (logged-in and non-logged-in users) can view and print
-- Any logged-in user can edit data
-
-THE CODE BELOW IS UNNECESSARY WITH THIS PERMISSION SCHEME
-
-Manages per-user permissions.  Three types of access are defined
-- user = User can view the app
-- editor = User can make changes
-- superuser = User can grant access to other users
-
-There is also a token system for allowing access to anonymous users by passing
-them a url.
-"""
-
 from google.appengine.ext import db
 import logging
 
-ROLES = ['user', 'editor', 'superuser']
+# Roles explained:
+# 'user' DEPRECATED view whitelist, we now allow anyone to view
+# 'editor' logged in user that OK'd the terms of service
+# 'supereditor' can edit restricted fields
+# 'adder' can add facilities
+# 'remover' can delete facilities
+# 'superuser' can grant access to other users
+ROLES = ['user', 'editor', 'supereditor', 'adder', 'remover', 'superuser']
 
 class Authorization(db.Model):
     timestamp = db.DateTimeProperty(auto_now_add=True)
