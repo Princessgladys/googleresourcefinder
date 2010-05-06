@@ -29,7 +29,7 @@ import logging
 import model
 import utils
 from utils import DateTime, ErrorMessage, Redirect
-from utils import db, get_message, html_escape, users
+from utils import db, html_escape, users
 from access import check_user_role
 from access import Authorization
 

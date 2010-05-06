@@ -68,7 +68,7 @@ def validate_float(text):
     except ValueError:
         return None
 
-def get_message(version, namespace, name, lang='en'):
+def get_message(version, namespace, name, lang):
     message = model.Message.all().ancestor(version).filter(
         'namespace =', namespace).filter('name =', name).get()
     return message and getattr(message, lang) or name
@@ -125,16 +125,24 @@ class Handler(webapp.RequestHandler):
 
     def select_locale(self):
         """Detect and activate the appropriate locale.  The 'lang' query
-           parameter has priority, then the django_language cookie, then the
+           parameter has priority, then the rflang cookie, then the
            default setting."""
-        self.params.lang = (self.params.lang or
-            self.request.cookies.get('django_language', None) or
+        # Using dashes in languages parameters (fr-CA) is more common
+        # than underscores, so we use self.params.langdash externally,
+        # but internally, django wants underscores (fr_CA), which is codified
+        # in self.params.lang
+        self.params.langdash = (self.params.lang or
+            self.request.cookies.get('rflang', None) or
             settings.LANGUAGE_CODE)
+        if self.params.langdash in config.ALTERNATE_LANG_CODES:
+            self.params.langdash = config.ALTERNATE_LANG_CODES[
+                self.params.langdash]
+        self.params.lang = self.params.langdash.replace('-', '_')
         self.response.headers.add_header(
-            'Set-Cookie', 'django_language=%s' % self.params.lang)
+            'Set-Cookie', 'rflang=%s' % self.params.langdash)
         django.utils.translation.activate(self.params.lang)
-        self.response.headers.add_header('Content-Language', self.params.lang)
-        self.params.langdash = self.params.lang.replace('_', '-')
+        self.response.headers.add_header('Content-Language',
+                                         self.params.langdash)
 
     def handle_exception(self, exception, debug_mode):
         if isinstance(exception, Redirect):
