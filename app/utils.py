@@ -68,10 +68,10 @@ def validate_float(text):
     except ValueError:
         return None
 
-def get_message(version, namespace, name):
+def get_message(version, namespace, name, lang='en'):
     message = model.Message.all().ancestor(version).filter(
         'namespace =', namespace).filter('name =', name).get()
-    return message and message.en or name
+    return message and getattr(message, lang) or name
 
 class Struct:
     pass
@@ -104,7 +104,8 @@ class Handler(webapp.RequestHandler):
     def initialize(self, request, response):
         webapp.RequestHandler.initialize(self, request, response)
         self.user = users.get_current_user()
-        logging.info('user:', (self.user and self.user.email() or 'anonymous'))
+        logging.info('user: %s' % (self.user and
+                                   self.user.email() or 'anonymous'))
         for name in request.headers.keys():
             if name.lower().startswith('x-appengine'):
                 logging.debug('%s: %s' % (name, request.headers[name]))
