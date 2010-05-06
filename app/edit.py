@@ -29,18 +29,11 @@ class AttributeType:
 
     def text_input(self, name, value):
         """Generates a text input field."""
-        if isinstance(value, unicode):
-            pass
-        elif isinstance(value, str):
-            value = value.decode('utf-8')
-        elif value is not None:
-            value = str(value)
-        else:
-            value = ''
+        value = decode(value)
         return u'<input name="%s" value="%s" size=%d>' % (
             html_escape(name), html_escape(value), self.input_size)
 
-    def make_input(self, version, name, value, attribute=None):
+    def make_input(self, version, name, value, lang, attribute=None):
         """Generates the HTML for an input field for the given attribute."""
         return self.text_input(name, value)
 
@@ -52,7 +45,7 @@ class StrAttributeType(AttributeType):
     input_size = 40
 
 class TextAttributeType(AttributeType):
-    def make_input(self, version, name, value, attribute):
+    def make_input(self, version, name, value, lang, attribute):
         return '<textarea name="%s" rows=5 cols=40>%s</textarea>' % (
             html_escape(name), html_escape(value or ''))
 
@@ -62,7 +55,7 @@ class TextAttributeType(AttributeType):
 class ContactAttributeType(AttributeType):
     input_size = 30
 
-    def make_input(self, version, name, value, attribute):
+    def make_input(self, version, name, value, lang, attribute):
         contact_name, contact_phone, contact_email = (
             (value or '').split('|') + ['', '', ''])[:3]
         return '''<table>
@@ -113,8 +106,8 @@ class IntAttributeType(AttributeType):
         setattr(report, name, value)
 
 class FloatAttributeType(IntAttributeType):
-    def make_input(self, version, name, value, attribute):
-        Attribute.make_input(self, version, name, '%g' % value, attribute)
+    def make_input(self, version, name, value, lang, attribute):
+        Attribute.make_input(self, version, name, '%g' % value, lang, attribute)
 
     def parse_input(self, report, name, value, request, attribute):
         if value:
@@ -124,7 +117,7 @@ class FloatAttributeType(IntAttributeType):
         setattr(report, name, value)
 
 class BoolAttributeType(AttributeType):
-    def make_input(self, version, name, value, attribute):
+    def make_input(self, version, name, value, lang, attribute):
         options = []
         if value == True:
             value = 'TRUE'
@@ -134,11 +127,11 @@ class BoolAttributeType(AttributeType):
             value = ''
         for choice, title in [
             #i18n: Form option not specified
-            ('', _('(unspecified)')),
+            ('', decode(_('(unspecified)'))),
             #i18n: Form option for agreement
-            ('TRUE', _('Yes')),
+            ('TRUE', decode(_('Yes'))),
             #i18n: Form option for disagreement
-            ('FALSE', _('No'))]:
+            ('FALSE', decode(_('No')))]:
             selected = (value == choice) and 'selected' or ''
             options.append('<option value="%s" %s>%s</option>' %
                            (choice, selected, title))
@@ -153,14 +146,14 @@ class BoolAttributeType(AttributeType):
         setattr(report, name, value)
 
 class ChoiceAttributeType(AttributeType):
-    def make_input(self, version, name, value, attribute):
+    def make_input(self, version, name, value, lang, attribute):
         options = []
         if value is None:
             value = ''
         for choice in [''] + attribute.values:
-            message = get_message(version, 'attribute_value', choice)
+            message = get_message(version, 'attribute_value', choice, lang)
             #i18n: Form option not specified
-            title = html_escape(message or _('(unspecified)'))
+            title = html_escape(message or decode(_('(unspecified)')))
             selected = (value == choice) and 'selected' or ''
             options.append('<option value="%s" %s>%s</option>' %
                            (choice, selected, title))
@@ -168,14 +161,14 @@ class ChoiceAttributeType(AttributeType):
             html_escape(name), ''.join(options))
 
 class MultiAttributeType(AttributeType):
-    def make_input(self, version, name, value, attribute):
+    def make_input(self, version, name, value, lang, attribute):
         if value is None:
             value = []
         checkboxes = []
         for choice in attribute.values:
-            message = get_message(version, 'attribute_value', choice)
+            message = get_message(version, 'attribute_value', choice, lang)
             #i18n: Form option not specified
-            title = html_escape(message or _('(unspecified)'))
+            title = html_escape(message or decode(_('(unspecified)')))
             checked = (choice in value) and 'checked' or ''
             id = name + '.' + choice
             checkboxes.append(
@@ -202,11 +195,21 @@ ATTRIBUTE_TYPES = {
     'multi': MultiAttributeType(),
 }
 
-def make_input(version, report, attribute):
+def decode(value):
+    if isinstance(value, unicode):
+        return value
+    elif isinstance(value, str):
+        return value.decode('utf-8')
+    elif value is not None:
+        return str(value)
+    else:
+        return ''
+
+def make_input(version, report, lang, attribute):
     """Generates the HTML for an input field for the given attribute."""
     name = attribute.key().name()
     return ATTRIBUTE_TYPES[attribute.type].make_input(
-        version, name, getattr(report, name, None), attribute)
+        version, name, getattr(report, name, None), lang, attribute)
 
 def parse_input(report, request, attribute):
     """Adds an attribute to the given Report based on a query parameter."""
@@ -254,18 +257,21 @@ class Edit(utils.Handler):
             'value': self.params.facility_name
         }]
 
+        lang = self.params.lang
         report = get_last_report(self.version, self.params.facility_name)
         for name in self.facility_type.attribute_names:
             attribute = self.attributes[name]
             if attribute.editable:
                 fields.append({
-                    'name': get_message(self.version, 'attribute_name', name),
+                    'name': get_message(self.version, 'attribute_name',
+                                        name, lang),
                     'type': attribute.type,
-                    'input': make_input(self.version, report, attribute)
+                    'input': make_input(self.version, report, lang, attribute)
                 })
             else:
                 readonly_fields.append({
-                    'name': get_message(self.version, 'attribute_name', name),
+                    'name': get_message(self.version, 'attribute_name',
+                                        name, lang),
                     'value': getattr(report, name, None)
                 })
 

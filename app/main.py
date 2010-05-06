@@ -40,6 +40,7 @@ class Main(Handler):
                                    or _("Sign in")),
                     data=rendering.version_to_json(get_latest_version('ht'),
                                                    hide_email=not user,
+                                                   lang=self.params.lang,
                                                    center=center,
                                                    radius=self.params.rad),
                     instance=self.request.host.split('.')[0])

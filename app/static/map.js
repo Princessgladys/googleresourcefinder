@@ -67,7 +67,7 @@ var attributes_by_name = {};  // {attribute_name: attribute_i}
 var facility_types = [null];
 var facilities = [null];
 var divisions = [null];
-var messages = {};  // {namespace: {name: {language: message}}
+var messages = {};  // {namespace: {name: message}
 
 // ==== Columns shown in the facility table
 
@@ -280,7 +280,7 @@ function is_array(thing) {
 
 function translate_value(value) {
   var message = messages.attribute_value[value];
-  return message && message[lang] || value;
+  return message && message || value;
 }
 
 function translate_values(values) {
@@ -347,7 +347,7 @@ function initialize_map() {
     height: 36,
     width: 36,
     opt_textColor: '#fff',
-    Y: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
+    Z: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
   };
   // Turn off clustering in print view.
   var max_zoom = print ? -1 : 14;
@@ -1137,7 +1137,7 @@ function select_facility(facility_i, ignore_current) {
   var last_report = selected_facility.last_report;
   if (last_report) {
     var ymd = last_report.date.split('-');
-    last_updated = locale.UPDATED() + locale.DATE_FORMAT_MEDIUM(
+    last_updated = locale.UPDATED() + ' ' + locale.DATE_FORMAT_MEDIUM(
       {MONTH: locale.MONTH_ABBRS[ymd[1] - 1](), DAY: (ymd[2] - 0),
        YEAR: ymd[0]});
   }
@@ -1147,7 +1147,7 @@ function select_facility(facility_i, ignore_current) {
   attribute_is = facility_types[selected_facility.type].attribute_is;
 
   info.setContent(to_html(rf.bubble.get_html(
-      selected_facility, attribute_is, last_updated, lang)));
+      selected_facility, attribute_is, last_updated)));
   info.open(map, markers[selected_facility_i]);
 
   // This call sets up the tabs and should be called after the DOM is created.
