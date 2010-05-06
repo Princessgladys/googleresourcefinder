@@ -20,6 +20,7 @@ import google.appengine.ext.webapp.template
 import google.appengine.ext.webapp.util
 
 import StringIO
+import access
 from calendar import timegm
 import cgitb
 from datetime import date as Date
@@ -44,6 +45,9 @@ def strip(text):
 def validate_yes(text):
     return (text.lower() == 'yes') and 'yes' or ''
 
+def validate_role(text):
+    return text in access.ROLES and text
+
 def validate_float(text):
     try:
         return float(text)
@@ -66,8 +70,18 @@ class Handler(webapp.RequestHandler):
         'embed': validate_yes,
         'lat': validate_float,
         'lon': validate_float,
-        'rad': validate_float
+        'rad': validate_float,
+        'role': validate_role
     }
+
+    def require_user_role(self, role, cc):
+        """Raise and exception in case the user don't have the given role
+           to the given country.
+           Redirect to login in case there is no user"""
+        if not self.auth:
+            raise Redirect(users.create_login_url(self.request.uri))
+        if not access.check_user_role(self.auth, role, cc):
+            raise ErrorMessage(403, _('Unauthorized user.'))
 
     def require_logged_in_user(self):
         """Redirect to login in case there is no user"""
@@ -84,7 +98,7 @@ class Handler(webapp.RequestHandler):
     def initialize(self, request, response):
         webapp.RequestHandler.initialize(self, request, response)
         self.user = users.get_current_user()
-        logging.info('user:', (self.user and self.user.email() or 'anonymous'))
+        self.auth = access.check_and_log(request, self.user)
         for name in request.headers.keys():
             if name.lower().startswith('x-appengine'):
                 logging.debug('%s: %s' % (name, request.headers[name]))

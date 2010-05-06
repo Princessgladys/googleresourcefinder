@@ -15,6 +15,8 @@
 import logging
 import model
 import utils
+from access import check_user_role
+from main import USE_WHITELISTS
 from utils import DateTime, ErrorMessage, Redirect
 from utils import db, get_message, html_escape, users
 from feeds.crypto import sign, verify
@@ -220,6 +222,11 @@ def get_last_report(version, facility_name):
             .filter('facility_name =', facility_name)
             .order('-timestamp')).get()
 
+def can_edit(attribute, auth, cc):
+    """Returns true if the user can edit the given attribute."""
+    return not attribute.edit_role or check_user_role(
+        self.auth, attribute.edit_role, self.cc):
+
 
 # ==== Handler for the edit page =============================================
 
@@ -229,6 +236,9 @@ class Edit(utils.Handler):
         self.facility_type, and self.attributes based on the query params."""
 
         self.require_logged_in_user()
+
+        if USE_WHITELISTS:
+            self.require_user_role('editor', self.params.cc)
 
         try:
             self.version = utils.get_latest_version(self.params.cc)
@@ -257,7 +267,7 @@ class Edit(utils.Handler):
         report = get_last_report(self.version, self.params.facility_name)
         for name in self.facility_type.attribute_names:
             attribute = self.attributes[name]
-            if attribute.editable:
+            if can_edit(attribute, self.auth, self.cc):
                 fields.append({
                     'name': get_message(self.version, 'attribute_name', name),
                     'type': attribute.type,
@@ -297,7 +307,9 @@ class Edit(utils.Handler):
         )
         for name in self.facility_type.attribute_names:
             attribute = self.attributes[name]
-            if attribute.editable:
+            # TODO(shakusa): Corner case: User didn't have access when edit
+            # page rendered, but does now
+            if can_edit(attribute, self.auth, self.cc):
                 parse_input(report, self.request, attribute)
             else:
                 setattr(report, name, getattr(last_report, name, None))
