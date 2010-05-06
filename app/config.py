@@ -19,5 +19,8 @@
 LANGUAGES = [('en', 'English'),
              ('fr', u'Fran\u00e7ais'), # French
              #('ht', u'Krey\u00f2l'), # Kreyol
-             ('es', u'Espa\u00F1ol'), # Spanish
+             ('es-419', u'Espa\u00F1ol'), # Spanish (Latin American)
              ]
+
+# Mapping of alternate language code to internal representation
+ALTERNATE_LANG_CODES = { 'es': 'es-419', }
