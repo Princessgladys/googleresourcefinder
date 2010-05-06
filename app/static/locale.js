@@ -113,6 +113,10 @@ locale = function() {
   messages.SERVICES =
       'Services';
 
+  //i18n: Label for a control that filters a list of facilities
+  messages.SHOW =
+      'Show: ';
+
   //i18n: Indicates a user needs to sign in to edit data on a facility.
   messages.SIGN_IN_TO_EDIT =
       'Please sign in to edit';

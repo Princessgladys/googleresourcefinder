@@ -280,7 +280,7 @@ function is_array(thing) {
 
 function translate_value(value) {
   var message = messages.attribute_value[value];
-  return message && message.en || value;
+  return message && message[lang] || value;
 }
 
 function translate_values(values) {
@@ -459,6 +459,16 @@ function initialize_markers() {
 
 // ==== Display construction routines
 
+function initialize_language_selector() {
+  var select = $('lang-select');
+  if (!select) {
+    return;
+  }
+  select.onchange = function() {
+    window.location = select.options[select.selectedIndex].value;
+  };
+}
+
 // Set up the supply selector (currently unused).
 function initialize_supply_selector() {
   var tbody = $('supply-tbody');
@@ -507,7 +517,7 @@ function initialize_filters() {
   options.push($$('option', {value: '0 '}, locale.ALL()));
   add_filter_options(options, attributes_by_name.services);
   set_children(selector, options);
-  set_children(tr, [$$('td', {}, ['Show: ', selector])]);
+  set_children(tr, [$$('td', {}, [locale.SHOW(), selector])]);
   set_children(tbody, tr);
 }
 
@@ -1127,7 +1137,7 @@ function select_facility(facility_i, ignore_current) {
   var last_report = selected_facility.last_report;
   if (last_report) {
     var ymd = last_report.date.split('-');
-    last_updated = locale.UPDATED() + ' ' + locale.DATE_FORMAT_MEDIUM(
+    last_updated = locale.UPDATED() + locale.DATE_FORMAT_MEDIUM(
       {MONTH: locale.MONTH_ABBRS[ymd[1] - 1](), DAY: (ymd[2] - 0),
        YEAR: ymd[0]});
   }
@@ -1137,7 +1147,7 @@ function select_facility(facility_i, ignore_current) {
   attribute_is = facility_types[selected_facility.type].attribute_is;
 
   info.setContent(to_html(rf.bubble.get_html(
-      selected_facility, attribute_is, last_updated)));
+      selected_facility, attribute_is, last_updated, lang)));
   info.open(map, markers[selected_facility_i]);
 
   // This call sets up the tabs and should be called after the DOM is created.
@@ -1188,6 +1198,7 @@ function load_data(data) {
     initialize_facility_header();    
   }
 
+  initialize_language_selector();
   initialize_map();
   initialize_markers();
   initialize_handlers();
