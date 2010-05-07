@@ -16,7 +16,7 @@
 
 from edxl_have import URI_PREFIXES
 from feeds.feedutils import handle_entry_get, handle_feed_get
-from utils import ErrorMessage, Handler, run
+from utils import ErrorMessage, Handler, run, _
 
 
 def get_feed_id(request, feed_name):

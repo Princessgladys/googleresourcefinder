@@ -28,7 +28,7 @@ Requests can be handled by superusers in grand_access.py
 import model
 import utils
 from utils import DateTime, ErrorMessage, Redirect
-from utils import db, html_escape, users
+from utils import db, html_escape, users, _
 from access import check_user_role
 from access import Authorization
 

@@ -661,6 +661,11 @@ msgstr "Votre demande pour devenir %(role)s  est déjà enregistrée."
 msgid "and with availability."
 msgstr "avec disponibilités"
 
+#. a user with no identity
+#: app.py:50
+msgid "anonymous"
+msgstr "anonyme"
+
 #. Heading for number of available beds at a hospital
 #: templates/bubble.html:37
 msgid "availability"
