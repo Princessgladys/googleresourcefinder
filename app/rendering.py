@@ -111,7 +111,7 @@ def json_encode(object):
 def clean_json(json):
     return re.sub(r'"(\w+)":', r'\1:', json)
 
-def version_to_json(version, hide_email, lang, center=None, radius=None):
+def version_to_json(version, hide_email, center=None, radius=None):
     """Dump the data for a given country version as a JSON string."""
     if version is None:
         return '{}'
@@ -167,7 +167,9 @@ def version_to_json(version, hide_email, lang, center=None, radius=None):
     message_jobjects = {}
     for message in Message.all().ancestor(version):
         namespace = message_jobjects.setdefault(message.namespace, {})
-        namespace[message.name] = getattr(message, lang)
+        django_locale = django.utils.translation.to_locale(
+            django.utils.translation.get_language())
+        namespace[message.name] = getattr(message, django_locale)
 
     return clean_json(simplejson.dumps({
         'total_facility_count': total_facility_count,

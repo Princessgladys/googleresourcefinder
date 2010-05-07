@@ -68,10 +68,12 @@ def validate_float(text):
     except ValueError:
         return None
 
-def get_message(version, namespace, name, lang):
+def get_message(version, namespace, name):
     message = model.Message.all().ancestor(version).filter(
         'namespace =', namespace).filter('name =', name).get()
-    return message and getattr(message, lang) or name
+    django_locale = django.utils.translation.to_locale(
+        django.utils.translation.get_language())
+    return message and getattr(message, django_locale) or name
 
 class Struct:
     pass
@@ -86,7 +88,6 @@ class Handler(webapp.RequestHandler):
         'lon': validate_float,
         'rad': validate_float,
         'lang': strip,
-        'langdash': strip,
     }
 
     def require_logged_in_user(self):
@@ -127,22 +128,19 @@ class Handler(webapp.RequestHandler):
         """Detect and activate the appropriate locale.  The 'lang' query
            parameter has priority, then the rflang cookie, then the
            default setting."""
-        # Using dashes in languages parameters (fr-CA) is more common
-        # than underscores, so we use self.params.langdash externally,
-        # but internally, django wants underscores (fr_CA), which is codified
-        # in self.params.lang
-        self.params.langdash = (self.params.lang or
-            self.request.cookies.get('rflang', None) or
+        # self.param.lang will use dashes (fr-CA), which is more common
+        # externally, but django wants underscores (fr_CA). If you need
+        # that version, use django.utils.translation.get_language()
+        self.params.lang = (self.params.lang or
+            self.request.cookies.get('django_language', None) or
             settings.LANGUAGE_CODE)
-        if self.params.langdash in config.ALTERNATE_LANG_CODES:
-            self.params.langdash = config.ALTERNATE_LANG_CODES[
-                self.params.langdash]
-        self.params.lang = self.params.langdash.replace('-', '_')
+        # Check for and potentially convert an alternate language code
+        self.params.lang = config.ALTERNATE_LANG_CODES.get(
+            self.params.lang, self.params.lang)
         self.response.headers.add_header(
-            'Set-Cookie', 'rflang=%s' % self.params.langdash)
-        django.utils.translation.activate(self.params.lang)
-        self.response.headers.add_header('Content-Language',
-                                         self.params.langdash)
+            'Set-Cookie', 'django_language=%s' % self.params.lang)
+        django.utils.translation.activate(self.params.lang.replace('-', '_'))
+        self.response.headers.add_header('Content-Language', self.params.lang)
 
     def handle_exception(self, exception, debug_mode):
         if isinstance(exception, Redirect):

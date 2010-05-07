@@ -661,6 +661,11 @@ msgstr ""
 msgid "and with availability."
 msgstr ""
 
+#. a user with no identity
+#: app.py:50
+msgid "anonymous"
+msgstr ""
+
 #. Heading for number of available beds at a hospital
 #: templates/bubble.html:37
 msgid "availability"

@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utils import Handler, Redirect, get_latest_version, run, users
+from utils import Handler, Redirect, get_latest_version, run, users, _
 import access
 import rendering
 
 # TODO(shakusa) Issue 55: When we are ready to launch, set this to False
-VIEW_AND_PRINT_REQUIRE_LOGIN = True
+VIEW_AND_PRINT_REQUIRE_LOGIN = False
 
 class Main(Handler):
 
@@ -31,16 +31,16 @@ class Main(Handler):
             center = {'lat': self.params.lat, 'lon': self.params.lon}
         self.render('templates/map.html',
                     params=self.params,
-                    authorization=user and user.email() or 'anonymous',
+                    #i18n: a user with no identity
+                    authorization=user and user.email() or _('anonymous'),
                     loginout_url=(user and users.create_logout_url('/') or
                                   users.create_login_url('/')),
                     #i18n: Link to sign out of the app
-                    loginout_text=(user and _("Sign out")
+                    loginout_text=(user and _('Sign out')
                                    #i18n: Link to sign into the app
-                                   or _("Sign in")),
+                                   or _('Sign in')),
                     data=rendering.version_to_json(get_latest_version('ht'),
                                                    hide_email=not user,
-                                                   lang=self.params.lang,
                                                    center=center,
                                                    radius=self.params.rad),
                     instance=self.request.host.split('.')[0])
