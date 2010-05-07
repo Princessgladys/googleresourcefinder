@@ -65,11 +65,12 @@ class Struct:
 class Handler(webapp.RequestHandler):
     auto_params = {
         'cc': strip,
-        'facility_name': strip,
-        'print': validate_yes,
         'embed': validate_yes,
+        'facility_name': strip,
+        'iframe': validate_yes,
         'lat': validate_float,
         'lon': validate_float,
+        'print': validate_yes,
         'rad': validate_float,
         'role': validate_role
     }

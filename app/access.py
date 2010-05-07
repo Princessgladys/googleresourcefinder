@@ -16,13 +16,17 @@ from google.appengine.ext import db
 import logging
 
 # Roles explained:
-# 'user' DEPRECATED view whitelist, we now allow anyone to view
-# 'editor' logged in user that OK'd the terms of service
-# 'supereditor' can edit restricted fields
-# 'adder' can add facilities
-# 'remover' can delete facilities
-# 'superuser' can grant access to other users
-ROLES = ['user', 'editor', 'supereditor', 'adder', 'remover', 'superuser']
+# 'user' DEPRECATED member of viewer whitelist, we now allow anyone to view
+# 'editor' DEPRECATED member of editor whitelist, we now allow anyone signed in
+#          that has accepted the terms of service to edit
+# 'accepted_tos' user has OK'd the terms of service
+# 'supereditor' user can edit restricted fields
+# 'adder' user can add facilities
+# 'remover' user can remove facilities from the user interface
+# 'superuser' user can grant access to other users (but still needs the other
+#             roles to add, remove, edit, etc)
+ROLES = ['user', 'editor', 'accepted_tos', 'supereditor', 'adder', 'remover',
+         'superuser']
 
 class Authorization(db.Model):
     timestamp = db.DateTimeProperty(auto_now_add=True)
