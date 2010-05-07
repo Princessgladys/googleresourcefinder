@@ -212,16 +212,7 @@ def parse_file(input_filename):
             current_message_line_num = line_num
 
         if current_message_line_num != -1:
-            match = re.search(patterns['string'], line)
-            if match:
-                # Unescape the type of quote (single or double) that surrounded
-                # the message, then escape double-quotes, which we use to
-                # surround the message in the .po file
-                quote = match.group(1)
-                msg_part = match.group(2).replace('\\' + quote, quote).replace(
-                    '"', '\\"')
-                current_message += msg_part
-
+            current_message += parse_message(patterns['string'], line)
             if re.search(patterns['end'], line):
                 # End of the current message
                 ref = input_filename + ':' + str(current_message_line_num)
@@ -234,6 +225,18 @@ def parse_file(input_filename):
                 current_description = []
                 current_meaning = []
     return ref_msg_pairs
+
+def parse_message(pattern, line):
+    match = re.search(pattern, line)
+    msg_part = ''
+    if match:
+        # Unescape the type of quote (single or double) that surrounded
+        # the message, then escape double-quotes, which we use to
+        # surround the message in the .po file
+        quote = match.group(1)
+        msg_part = match.group(2).replace('\\' + quote, quote).replace(
+            '"', '\\"')
+    return msg_part
 
 def merge(msg_to_ref, ref_msg_pairs):
     """ Merge ref_msg_pairs into msg_to_ref """

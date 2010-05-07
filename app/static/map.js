@@ -67,7 +67,7 @@ var attributes_by_name = {};  // {attribute_name: attribute_i}
 var facility_types = [null];
 var facilities = [null];
 var divisions = [null];
-var messages = {};  // {namespace: {name: {language: message}}
+var messages = {};  // {namespace: {name: message}
 
 // ==== Columns shown in the facility table
 
@@ -280,7 +280,7 @@ function is_array(thing) {
 
 function translate_value(value) {
   var message = messages.attribute_value[value];
-  return message && message.en || value;
+  return message && message || value;
 }
 
 function translate_values(values) {
@@ -347,7 +347,7 @@ function initialize_map() {
     height: 36,
     width: 36,
     opt_textColor: '#fff',
-    Y: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
+    Z: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
   };
   // Turn off clustering in print view.
   var max_zoom = print ? -1 : 14;
@@ -459,6 +459,16 @@ function initialize_markers() {
 
 // ==== Display construction routines
 
+function initialize_language_selector() {
+  var select = $('lang-select');
+  if (!select) {
+    return;
+  }
+  select.onchange = function() {
+    window.location = select.options[select.selectedIndex].value;
+  };
+}
+
 // Set up the supply selector (currently unused).
 function initialize_supply_selector() {
   var tbody = $('supply-tbody');
@@ -507,7 +517,7 @@ function initialize_filters() {
   options.push($$('option', {value: '0 '}, locale.ALL()));
   add_filter_options(options, attributes_by_name.services);
   set_children(selector, options);
-  set_children(tr, [$$('td', {}, ['Show: ', selector])]);
+  set_children(tr, [$$('td', {}, [locale.SHOW(), selector])]);
   set_children(tbody, tr);
 }
 
@@ -1188,6 +1198,7 @@ function load_data(data) {
     initialize_facility_header();    
   }
 
+  initialize_language_selector();
   initialize_map();
   initialize_markers();
   initialize_handlers();

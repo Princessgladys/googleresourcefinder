@@ -24,7 +24,7 @@ th { text-align: left; }
 
 /* Header line */
 .header { font-size: 13px; }
-.header .user { position: absolute; right: 0px; top: 0px; padding: 8px; 
+.header .user { position: absolute; right: 0px; top: 0px; padding: 4px 8px; 
                 z-index: 1 }
 .header .title { position: absolute: left: 0px; top: 0px; padding: 4px;
                  font-size: 18px; color: #fff; background: #333; width: 392px;
