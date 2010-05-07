@@ -16,7 +16,7 @@ import logging
 import model
 import utils
 from utils import DateTime, ErrorMessage, Redirect
-from utils import db, get_message, html_escape, users
+from utils import db, get_message, html_escape, users, _
 from feeds.crypto import sign, verify
 
 XSRF_KEY_NAME = 'resource-finder-edit'
@@ -29,14 +29,7 @@ class AttributeType:
 
     def text_input(self, name, value):
         """Generates a text input field."""
-        if isinstance(value, unicode):
-            pass
-        elif isinstance(value, str):
-            value = value.decode('utf-8')
-        elif value is not None:
-            value = str(value)
-        else:
-            value = ''
+        value = to_unicode(value)
         return u'<input name="%s" value="%s" size=%d>' % (
             html_escape(name), html_escape(value), self.input_size)
 
@@ -134,11 +127,11 @@ class BoolAttributeType(AttributeType):
             value = ''
         for choice, title in [
             #i18n: Form option not specified
-            ('', _('(unspecified)')),
+            ('', to_unicode(_('(unspecified)'))),
             #i18n: Form option for agreement
-            ('TRUE', _('Yes')),
+            ('TRUE', to_unicode(_('Yes'))),
             #i18n: Form option for disagreement
-            ('FALSE', _('No'))]:
+            ('FALSE', to_unicode(_('No')))]:
             selected = (value == choice) and 'selected' or ''
             options.append('<option value="%s" %s>%s</option>' %
                            (choice, selected, title))
@@ -160,7 +153,7 @@ class ChoiceAttributeType(AttributeType):
         for choice in [''] + attribute.values:
             message = get_message(version, 'attribute_value', choice)
             #i18n: Form option not specified
-            title = html_escape(message or _('(unspecified)'))
+            title = html_escape(message or to_unicode(_('(unspecified)')))
             selected = (value == choice) and 'selected' or ''
             options.append('<option value="%s" %s>%s</option>' %
                            (choice, selected, title))
@@ -175,7 +168,7 @@ class MultiAttributeType(AttributeType):
         for choice in attribute.values:
             message = get_message(version, 'attribute_value', choice)
             #i18n: Form option not specified
-            title = html_escape(message or _('(unspecified)'))
+            title = html_escape(message or to_unicode(_('(unspecified)')))
             checked = (choice in value) and 'checked' or ''
             id = name + '.' + choice
             checkboxes.append(
@@ -201,6 +194,18 @@ ATTRIBUTE_TYPES = {
     'choice': ChoiceAttributeType(),
     'multi': MultiAttributeType(),
 }
+
+def to_unicode(value):
+    """Converts the given value to unicode. Django does not do this
+       automatically when fetching translations."""
+    if isinstance(value, unicode):
+        return value
+    elif isinstance(value, str):
+        return value.decode('utf-8')
+    elif value is not None:
+        return str(value).decode('utf-8')
+    else:
+        return u''
 
 def make_input(version, report, attribute):
     """Generates the HTML for an input field for the given attribute."""
