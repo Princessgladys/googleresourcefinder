@@ -112,7 +112,7 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
     }
     if (value !== null && value !== '') {
       attributes_info.push(render(ATTRIBUTE_ROW, {
-        LABEL: messages.attribute_name[attribute.name].en,
+        LABEL: messages.attribute_name[attribute.name],
         VALUE: rf.bubble.format_attr(attribute, value)
       }));
     }
@@ -128,7 +128,7 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
           var attribute = attributes[a];
           history_info.push(render(HISTORY_ROW, {
             DATE: report.date,
-            LABEL: messages.attribute_name[attribute.name].en,
+            LABEL: messages.attribute_name[attribute.name],
             VALUE: rf.bubble.format_attr(attribute, report.values[a]),
             AUTHOR: report.user.email
           }));

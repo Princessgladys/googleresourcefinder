@@ -22,7 +22,9 @@ import google.appengine.ext.webapp.util
 import StringIO
 import access
 from calendar import timegm
+import cgi
 import cgitb
+import config
 from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
@@ -36,8 +38,24 @@ import re
 import simplejson
 import sys
 import unicodedata
+import urllib
+import urlparse
 
 ROOT = os.path.dirname(__file__)
+
+# Set up localization.
+from django.conf import settings
+try:
+  settings.configure()
+except:
+  pass
+settings.LANGUAGE_CODE = 'en'
+settings.USE_I18N = True
+settings.LOCALE_PATHS = (os.path.join(ROOT, 'locale'),)
+import django.utils.translation
+# We use lazy translation in this file because the locale isn't set until the
+# Handler is initialized.
+from django.utils.translation import gettext_lazy as _
 
 def strip(text):
     return text.strip()
@@ -57,7 +75,9 @@ def validate_float(text):
 def get_message(version, namespace, name):
     message = model.Message.all().ancestor(version).filter(
         'namespace =', namespace).filter('name =', name).get()
-    return message and message.en or name
+    django_locale = django.utils.translation.to_locale(
+        django.utils.translation.get_language())
+    return message and getattr(message, django_locale) or name
 
 class Struct:
     pass
@@ -68,6 +88,7 @@ class Handler(webapp.RequestHandler):
         'embed': validate_yes,
         'facility_name': strip,
         'iframe': validate_yes,
+        'lang': strip,
         'lat': validate_float,
         'lon': validate_float,
         'print': validate_yes,
@@ -107,6 +128,33 @@ class Handler(webapp.RequestHandler):
         for param in self.auto_params:
             validator = self.auto_params[param]
             setattr(self.params, param, validator(request.get(param, '')))
+        # Activate localization.
+        self.select_locale()
+
+        # Provide the non-localized URL of the current page.
+        self.params.url_no_lang = set_url_param(self.request.url, 'lang', None)
+        if '?' not in self.params.url_no_lang:
+          self.params.url_no_lang += '?'
+
+        self.params.languages = config.LANGUAGES
+
+    def select_locale(self):
+        """Detect and activate the appropriate locale.  The 'lang' query
+           parameter has priority, then the rflang cookie, then the
+           default setting."""
+        # self.param.lang will use dashes (fr-CA), which is more common
+        # externally, but django wants underscores (fr_CA). If you need
+        # that version, use django.utils.translation.get_language()
+        self.params.lang = (self.params.lang or
+            self.request.cookies.get('django_language', None) or
+            settings.LANGUAGE_CODE)
+        # Check for and potentially convert an alternate language code
+        self.params.lang = config.ALTERNATE_LANG_CODES.get(
+            self.params.lang, self.params.lang)
+        self.response.headers.add_header(
+            'Set-Cookie', 'django_language=%s' % self.params.lang)
+        django.utils.translation.activate(self.params.lang.replace('-', '_'))
+        self.response.headers.add_header('Content-Language', self.params.lang)
 
     def handle_exception(self, exception, debug_mode):
         if isinstance(exception, Redirect):
@@ -183,6 +231,36 @@ def export(Kind):
                 fields.append('%s=%r' % (key, getattr(entity, key)))
         results += '%s(%s).put()\n' % (Kind.__name__, ', '.join(fields))
     return results
+
+def to_utf8(string):
+  """If Unicode, encode to UTF-8; if 8-bit string, leave unchanged."""
+  if isinstance(string, unicode):
+    string = string.encode('utf-8')
+  return string
+
+def urlencode(params):
+  """Apply UTF-8 encoding to any Unicode strings in the parameter dict.
+  Leave 8-bit strings alone.  (urllib.urlencode doesn't support Unicode.)"""
+  keys = params.keys()
+  keys.sort()  # Sort the keys to get canonical ordering
+  return urllib.urlencode([
+      (to_utf8(key), to_utf8(params[key]))
+      for key in keys if isinstance(params[key], basestring)])
+
+def set_url_param(url, param, value):
+  """This modifies a URL, setting the given param to the specified value.  This
+  may add the param or override an existing value, or, if the value is None,
+  it will remove the param.  Note that value must be a basestring and can't be
+  an int, for example."""
+  url_parts = list(urlparse.urlparse(url))
+  params = dict(cgi.parse_qsl(url_parts[4]))
+  if value is None:
+    if param in params:
+      del(params[param])
+  else:
+    params[param] = value
+  url_parts[4] = urlencode(params)
+  return urlparse.urlunparse(url_parts)
 
 def to_posixtime(datetime):
     return timegm(datetime.utctimetuple()[:6])
