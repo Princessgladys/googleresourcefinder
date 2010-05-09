@@ -56,6 +56,10 @@ import django.utils.translation
 # Handler is initialized.
 from django.utils.translation import gettext_lazy as _
 
+# TODO(shakusa) Add these back in post-v1
+HIDDEN_ATTRIBUTE_NAMES = ['region_id', 'district_id', 'commune_id',
+                          'commune_code', 'sante_id']
+
 def strip(text):
     return text.strip()
 
@@ -258,6 +262,18 @@ def to_isotime(datetime):
     if isinstance(datetime, (int, float)):
         datetime = to_datetime(datetime)
     return datetime.isoformat() + 'Z'
+
+def to_unicode(value):
+    """Converts the given value to unicode. Django does not do this
+       automatically when fetching translations."""
+    if isinstance(value, unicode):
+        return value
+    elif isinstance(value, str):
+        return value.decode('utf-8')
+    elif value is not None:
+        return str(value).decode('utf-8')
+    else:
+        return u''
 
 def plural(n, singular='', plural='s'):
     if not isinstance(n, (int, float)):

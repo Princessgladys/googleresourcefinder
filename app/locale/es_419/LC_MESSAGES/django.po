@@ -548,6 +548,11 @@ msgstr "Guardar"
 msgid "Select a country:"
 msgstr "Selecciona un país"
 
+#. Label for a selector to export data to CSV
+#: export.py:180
+msgid "Select facility type to export:"
+msgstr "Seleccionar el tipo de instalación de la exportación:"
+
 #. work done by someone that benefits another
 #: ../tools/setup.py:95
 msgid "Services"

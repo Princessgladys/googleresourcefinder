@@ -17,6 +17,47 @@ from utils import *
 import access
 import calendar
 import csv
+import datetime
+
+# Maps a FacilityType key name to a list of tuples, one per column.
+# Each tuple has the column header and a lambda function that takes a
+# facility and a report and returns the column value
+COLUMNS_BY_FACILITY_TYPE = {
+    'hospital' : [
+        ('facility_name', lambda f, r: f.title),
+        ('facility_healthc_id', lambda f, r: getattr(r, 'healthc_id', None)),
+        ('facility_pcode', lambda f, r: re.sub(r'.*\.\.(.*)', r'\1',
+                                               f.key().name())),
+        ('available_beds', lambda f, r: getattr(r, 'available_beds', None)),
+        ('total_beds', lambda f, r: getattr(r, 'total_beds', None)),
+        ('services', lambda f, r: getattr(r, 'services', None)),
+        ('contact_name', lambda f, r: getattr(r, 'contact_name', None)),
+        ('contact_phone', lambda f, r: getattr(r, 'phone', None)),
+        ('contact_email', lambda f, r: getattr(r, 'email', None)),
+        ('department', lambda f, r: getattr(r, 'departmen', None)),
+        ('district', lambda f, r: getattr(r, 'district', None)),
+        ('commune', lambda f, r: getattr(r, 'commune', None)),
+        ('address', lambda f, r: getattr(r, 'address', None)),
+        ('latitude', lambda f, r: f.location.lat),
+        ('longitude', lambda f, r: f.location.lon),
+        ('organization', lambda f, r: getattr(r, 'organization', None)),
+        ('type', lambda f, r: getattr(r, 'type', None)),
+        ('category', lambda f, r: getattr(r, 'category', None)),
+        ('construction', lambda f, r: getattr(r, 'construction', None)),
+        ('damage', lambda f, r: getattr(r, 'damage', None)),
+        ('comments', lambda f, r: getattr(r, 'comments', None)),
+        ('reachable_by_road', lambda f, r: getattr(r, 'reachable_by_road',
+                                                   None)),
+        ('can_pick_up_patients', lambda f, r: getattr(r, 'can_pick_up_patients',
+                                                      None)),
+        ('region_id', lambda f, r: getattr(r, 'region_id', None)),
+        ('district_id', lambda f, r: getattr(r, 'district_id', None)),
+        ('commune_id', lambda f, r: getattr(r, 'commune_id', None)),
+        ('commune_code', lambda f, r: getattr(r, 'commune_code', None)),
+        ('sante_id', lambda f, r: getattr(r, 'sante_id', None)),
+        ('entry_last_updated', lambda f, r: getattr(r, 'timestamp', None))
+        ],
+    }
 
 def get_all(query_maker, batch_size=500):
     results = []
@@ -35,22 +76,14 @@ def short_date(date):
 def get_districts(version):
     return get_all(lambda: Division.all().ancestor(version))
 
-def write_csv(out, version, facility_type, attribute_names=None):
+def write_csv(out, version, facility_type):
     """Dump the stock level reports for all facilities of the given type
-    in CSV format, with a row for each facility and a group of N columns
-    for each week, where N is the number of properties."""
+       in CSV format, with a row for each facility"""
     writer = csv.writer(out)
 
     # Get the base version and its country.
-    timestamp = version.timestamp.replace(microsecond=0).isoformat() + 'Z'
     version = get_base(version)
     country = version.parent()
-
-    # Get the attribute names.
-    attribute_names = attribute_names or facility_type.attribute_names
-
-    # Get the divisions.
-    divisions = get_districts(version)
 
     # Get the facilities.
     facilities = get_all(lambda: Facility.all().ancestor(version))
@@ -58,56 +91,53 @@ def write_csv(out, version, facility_type, attribute_names=None):
     # Get the reports.
     reports = get_all(lambda: Report.all().ancestor(version))
 
-    # Determine the date range.
-    dates = [r.date for r in reports]
-    min_date, max_date = min(dates), max(dates)
-    while min_date.isoweekday() != 3:  # Find the preceding Wednesday
-        min_date -= TimeDelta(1)
-    num_weeks = (max_date + TimeDelta(7) - min_date).days / 7
-
-    # Organize the reports by facility and week.
-    reports_by_facility = dict((f.key().name(), [None]*num_weeks) 
-                               for f in facilities)
+    # Organize the reports by facility, keep only the last one
+    reports_by_facility = dict((f.key().name(), None) for f in facilities)
     for report in reports:
-        week = (report.date - min_date).days / 7
-        reports_by_facility[report.facility_name][week] = report
+        reports_by_facility[report.facility_name] = report
 
-    # Produce the header rows.
-    row = [country.title, '%s: %d reports' % (timestamp, len(reports))]
-    group = [None] * len(attribute_names)
-    d = min_date
-    for week in range(num_weeks):
-        group[0] = '%s - %s' % (short_date(d), short_date(d + TimeDelta(6)))
-        row += group
-        d += TimeDelta(7)
-    writer.writerow(row)
-
-    row = ['Districts (%d)' % len(divisions),
-           'Facilities (%d)' % len(facilities)]
-    row += attribute_names*num_weeks
+    columns = COLUMNS_BY_FACILITY_TYPE[facility_type.key().name()]
+    if columns:
+        row = list(column[0] for column in columns)
+    else:
+        row = ['Facilities (%d)' % len(facilities)]
+        row += facility_type.attribute_names
     writer.writerow(row)
 
     # Write a row for each facility.
+    country_code = country.key().name()
     sorted_facilities = sorted(facilities, key=lambda f: f.title)
-    for division in sorted(divisions, key=lambda d: d.title):
-        for facility in sorted_facilities:
-            if facility.division_name == division.key().name():
-                row = [division.key().name(), facility.key().name()]
-                reports = reports_by_facility[facility.key().name()]
-                for week in range(num_weeks):
-                    if reports[week]:
-                        for name in attribute_names:
-                            value = getattr(reports[week], name, None)
-                            if isinstance(value, unicode):
-                                value = value.encode('utf-8')
-                            if isinstance(value, str):
-                                value = value.replace('\n', ' ')
-                            if isinstance(value, list):
-                                value = ', '.join(value)
-                            row.append(value)
-                    else:
-                        row += [None]*len(attribute_names)
-                writer.writerow(row)
+    for facility in sorted_facilities:
+        report = reports_by_facility[facility.key().name()]
+        if columns:
+            row = []
+            for column in columns:
+                row.append(format(column[1](facility, report)))
+        else:
+            row = [facility.key().name()]
+            for name in facility_type.attribute_names:
+                value = getattr(report, name, None)
+                row.append(format(value))
+            else:
+                row += [None]*len(attribute_names)
+        writer.writerow(row)
+
+def format(value):
+    """Format value in a way suitable for CSV export."""
+    if isinstance(value, unicode):
+        return value.encode('utf-8')
+    if isinstance(value, str):
+        return value.replace('\n', ' ')
+    if isinstance(value, list):
+        return ', '.join(value)
+    if isinstance(value, datetime.datetime):
+        # TODO(shakusa) Use timezone of cc instead of hard-coding Haitian time
+        timestamp = value.replace(microsecond=0)
+        timestamp_ht = timestamp - datetime.timedelta(hours=5)
+        return timestamp_ht.isoformat(' ') + '-05:00'
+    if value:
+        return str(value)
+    return ''
 
 class Export(Handler):
     def get(self):
@@ -119,11 +149,9 @@ class Export(Handler):
                 self.request.get('facility_type'), version)
 
             # Construct a reasonable filename.
-            timestamp = version.timestamp.replace(microsecond=0)
+            timestamp = datetime.datetime.utcnow()
             country = version.parent()
-            filename = '%s.%s.%s.csv' % (
-                country_code, facility_type.key().name(),
-                timestamp.isoformat().replace(':', '_'))
+            filename = '%s.%s.csv' % (country_code, facility_type.key().name())
             self.response.headers['Content-Type'] = 'text/csv'
             self.response.headers['Content-Disposition'] = \
                 'attachment; filename=' + filename
@@ -131,19 +159,30 @@ class Export(Handler):
             # Write out the CSV data.
             write_csv(self.response.out, version, facility_type)
         else:
+            self.write('<html><head>')
+            self.write('<title>%s</title>' % to_unicode(_("Resource Finder")))
             self.write('<link rel=stylesheet href="static/style.css">')
+            self.write('</head><body>')
             for country in Country.all():
                 version = get_latest_version(country.key().name())
                 self.write('<h2>%s</h2>' % country.title)
-                self.write('<p>%s %s' %
+                # TODO(shakusa) Last updated timestamp is misleading; it is
+                # the last time we created a new version, which should happen
+                # rarely. What we should have here is the last time a record
+                # was updated, but that's expensive to figure out (have to
+                # iterate over all reports)
+                #self.write('<p>%s %s' %
                     #i18n: Label for timestamp when data was last updated
-                    (_('Last updated:'), version.timestamp))
+                #    (_('Last updated:'), version.timestamp))
                 self.write('<p><form>')
                 self.write('<input type=hidden name="cc" value="%s">' %
                            country.key().name())
-                self.write('<p>Select facility type to export:')
+                self.write('<p>%s' % to_unicode(_(
+                    #i18n: Label for a selector to export data to CSV
+                    'Select facility type to export:')))
                 self.write('<select name="facility_type">')
                 for facility_type in FacilityType.all().ancestor(version):
+                    # TODO: Facility Type should have translated messages
                     self.write(
                         '<option value="%s">%s</option>' % (
                         facility_type.key().name(),
@@ -151,8 +190,9 @@ class Export(Handler):
                 self.write('<p><input type=submit value="%s">' %
                     #i18n: Button to export data to comma-separated-values
                     #i18n: format.
-                    _('Export CSV'))
+                    to_unicode(_('Export CSV')))
                 self.write('</form>')
+            self.write('</body></html>')
 
 if __name__ == '__main__':
     run([('/export', Export)], debug=True)

@@ -548,6 +548,11 @@ msgstr ""
 msgid "Select a country:"
 msgstr ""
 
+#. Label for a selector to export data to CSV
+#: export.py:180
+msgid "Select facility type to export:"
+msgstr ""
+
 #. work done by someone that benefits another
 #: ../tools/setup.py:95 static/locale.js:113
 msgid "Services"

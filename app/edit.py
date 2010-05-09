@@ -15,8 +15,8 @@
 import logging
 import model
 import utils
-from utils import DateTime, ErrorMessage, Redirect
-from utils import db, get_message, html_escape, users, _
+from utils import DateTime, ErrorMessage, Redirect, HIDDEN_ATTRIBUTE_NAMES
+from utils import db, get_message, html_escape, users, _, to_unicode
 from feeds.crypto import sign, verify
 
 XSRF_KEY_NAME = 'resource-finder-edit'
@@ -195,18 +195,6 @@ ATTRIBUTE_TYPES = {
     'multi': MultiAttributeType(),
 }
 
-def to_unicode(value):
-    """Converts the given value to unicode. Django does not do this
-       automatically when fetching translations."""
-    if isinstance(value, unicode):
-        return value
-    elif isinstance(value, str):
-        return value.decode('utf-8')
-    elif value is not None:
-        return str(value).decode('utf-8')
-    else:
-        return u''
-
 def make_input(version, report, attribute):
     """Generates the HTML for an input field for the given attribute."""
     name = attribute.key().name()
@@ -261,6 +249,8 @@ class Edit(utils.Handler):
 
         report = get_last_report(self.version, self.params.facility_name)
         for name in self.facility_type.attribute_names:
+            if name in HIDDEN_ATTRIBUTE_NAMES:
+                continue
             attribute = self.attributes[name]
             if attribute.editable:
                 fields.append({
@@ -279,7 +269,8 @@ class Edit(utils.Handler):
         self.render('templates/edit.html',
             token=token, facility=self.facility, fields=fields,
             readonly_fields=readonly_fields, params=self.params,
-            logout_url=users.create_logout_url('/'))
+            logout_url=users.create_logout_url('/'),
+            instance=self.request.host.split('.')[0])
 
     def post(self):
         self.init()

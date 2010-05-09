@@ -42,7 +42,9 @@ def facility_type_transformer(index, facility_type, attribute_is):
     """Construct the JSON object for a FacilityType."""
     return {'name': facility_type.key().name(),
             'attribute_is':
-                [attribute_is[p] for p in facility_type.attribute_names]}
+                [attribute_is[p] for p in filter(
+                    lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
+                    facility_type.attribute_names)]}
 
 def user_transformer(user, hide_email):
     address = 'anonymous'
@@ -120,7 +122,8 @@ def version_to_json(version, hide_email, center=None, radius=None):
     version = get_base(version)
 
     # Get all the attributes.
-    attributes = list(Attribute.all().ancestor(version).order('__key__'))
+    attributes = filter(lambda a: a.key().name() not in HIDDEN_ATTRIBUTE_NAMES,
+                        list(Attribute.all().ancestor(version).order('__key__')))
     attribute_jobjects, attribute_is = make_jobjects(
         attributes, attribute_transformer)
 
