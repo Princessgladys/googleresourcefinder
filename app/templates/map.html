@@ -1,0 +1,200 @@
+{% comment %}
+# Copyright 2009-2010 by Ka-Ping Yee
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+{% load i18n %}
+
+<!-- No doctype: need quirks mode to get scrollbars in IE. -->
+<head>
+  {% comment %}
+  #i18n: Name of the application.
+  {% endcomment %}
+  <title>{% trans "Resource Finder" %} ({{instance}})</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="static/map.css">
+  {% if params.print %}
+    <link rel="stylesheet" href="static/map-print.css">
+  {% endif %}
+  <!--[if lt IE 8]>
+    <link rel="stylesheet" href="static/map-ie.css">
+  <![endif]-->
+  <link rel="stylesheet" type="text/css" media="all"
+        href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css" > 
+  <link rel="stylesheet" href="static/bubble.css">
+
+  <!-- Google Maps API -->
+  <script type="text/javascript"
+      src="http://maps.google.com/maps/api/js?sensor=false&language={{params.lang}}">
+  </script>
+  <script type="text/javascript"
+      src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer_compiled.js">
+  </script>
+
+  <!-- jQuery files -->
+  <script type="text/javascript" src="static/jquery.min.js"></script>
+  <script type="text/javascript" src="static/jquery.form.js"></script>
+  <script type="text/javascript">jQuery.noConflict();</script>
+  <script type="text/javascript" src="static/jquery-ui-1.8rc3.custom.min.js">
+  </script>
+  <script type="text/javascript" src="static/chain.js"></script>
+
+  <!-- Initialize the rf namespace -->
+  <script type="text/javascript">
+    rf = {};
+  </script>
+  <script type="text/javascript" src="static/templates.js"></script>
+  {% ifequal 'en' params.lang %}
+    <script type="text/javascript" src="static/locale.js"></script>
+  {% else %}
+    <script type="text/javascript" src="static/locale_{{params.lang}}.js"></script>
+  {% endifequal %}
+  <script type="text/javascript" src="static/bubble.js"></script>
+  <script type="text/javascript" src="static/map.js"></script>
+  <script type="text/javascript">
+    var print = {% if params.print %} true {% else %} false {% endif %};
+  </script>
+
+  <!-- HTML template definitions -->
+  {% include "bubble.html" %}
+</head>
+
+<!-- Main document -->
+<div id="viewport"></div>
+<div class="header">
+  <div class="user">
+    <strong>{{authorization}}</strong> |
+    {% if params.print %}
+      {% comment %}
+      #i18n: Link to return to the main page of the application
+      {% endcomment %}
+      <a href="/">{% trans "Home" %}</a> |
+    {% else %}
+      <a id="print-link" href="#"
+         {% comment %}
+         #i18n: Link to print the current view of the application
+         {% endcomment %}
+         class="print-link-disabled">{% trans "Print" %}</a> |
+    {% endif %}
+    <select id="lang-select">
+    {% for lang in params.languages %}
+      <option value="{{params.url_no_lang}}&amp;lang={{lang.0}}"
+        {% ifequal lang.0 params.lang %} selected{% endifequal %}>{{lang.1}}</option>
+    {% endfor %}
+    </select> |
+    {% comment %}
+    #i18n: Link to go to a help page for the application
+    {% endcomment %}
+    <a href="about:blank">{% trans "Help" %}</a> |
+    <a href="{{loginout_url}}">{{loginout_text}}</a>
+  </div>
+  {% if params.print %}
+    <div class="print-header">
+      <table width="100%" cellspacing=0 cellpadding=0 border=0>
+        <tbody>
+          <tr>
+            <td valign=top>
+              {% comment %}
+              #i18n: Name of the application.
+              {% endcomment %}
+              <span class="print-title">{% trans "Resource Finder" %}</span><br/>
+              <span class="print-subtitle" id="header-print-subtitle"></span>
+            </td>
+            <td valign=top class="print-datetime">
+              <span class="print-date" id="header-print-date"></span><br/>
+              <span class="print-time" id="header-print-time"></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="title">
+      {% comment %}
+      #i18n: Name of the application.
+      {% endcomment %}
+      {% trans "Resource Finder" %}
+    </div>
+  {% endif %}
+</div>
+<div id="map"></div>
+<div class="hshadow hs1"></div>
+<div class="hshadow hs2"></div>
+<div class="hshadow hs3"></div>
+<div class="vshadow vs1"></div>
+<div class="vshadow vs2"></div>
+<div class="vshadow vs3"></div>
+{% if params.print %}
+  <div class="print-summary">
+    <table cellspacing=0 cellpadding=0 border=0 align=center>
+      <thead>
+        <tr>
+          {% comment %}
+          #i18n: Name of the application.
+          {% endcomment %}
+          <th>{% trans "Total facilities" %}</th>
+          {% comment %}
+          #i18n: Header for the number of facilities less than 10 miles from
+          #i18n: a location.
+          {% endcomment %}
+          <th>{% trans "no more than 10 miles away" %}</th>
+          {% comment %}
+          #i18n: Header for the number of facilities with available beds.
+          #i18n: OK to translate without the 'and' if it makes more sense
+          {% endcomment %}
+          <th>{% trans "and with availability." %}</th>
+        </tr>
+      </thead>
+      <tbody id="print-summary-tbody">
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+<div id="data">
+  {% if params.print %}
+    {% include "print_data.html" %}
+  {% else %}
+    {% include "data.html" %}
+  {% endif %}
+</div>
+<div id="freshness" class="caption gmnoprint">
+  <span id="freshness-text"></span>
+  <div>
+    {% comment %}
+    #i18n: Button to export data to comma-separated-values format.
+    {% endcomment %}
+    <a href="/export">{% trans "Export CSV" %}</a> |
+
+    {% comment %}
+    #i18n: Link to download the 'master' copy of the facility data
+    {% endcomment %}
+    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">{% trans "Download master list" %}</a>
+  </div>
+</div>
+{% if params.print %}
+  <div id="update-instructions">
+    {% comment %}
+    #i18n: Explains how to correct incorrect information that has been printed.
+    {% endcomment %}
+    {% trans "If any information is wrong or missing, please correct it on the web site:" %}
+    <span id="site-url"></span>
+  </div>
+{% endif %}
+
+<script>
+  jQuery(document).ready(function() {
+    load_data({{data}});
+  });
+</script>
