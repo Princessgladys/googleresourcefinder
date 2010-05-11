@@ -17,9 +17,9 @@ def setup_version(version):
             version, key_name=name, type=type, editable=editable, values=values)
 
     # NB: Attributes are kept in a specific order defined by zeiger
-    #     Be careful when changing them, as you will change the order
-    #     of appearance in the map info window. Also, order here should
-    #     be kept roughly in sync with CSV column order defined in app/export.py
+    # Be careful when changing them, as you will change the order
+    # of appearance in the map info window. Also, order here should
+    # be kept roughly in sync with CSV column order defined in app/export.py
     attributes = [
         attr('int', 'healthc_id', editable=False),
         attr('int', 'available_beds'),

@@ -34,7 +34,7 @@ COLUMNS_BY_FACILITY_TYPE = {
         ('contact_name', lambda f, r: getattr(r, 'contact_name', None)),
         ('contact_phone', lambda f, r: getattr(r, 'phone', None)),
         ('contact_email', lambda f, r: getattr(r, 'email', None)),
-        ('department', lambda f, r: getattr(r, 'departmen', None)),
+        ('department', lambda f, r: getattr(r, 'departemen', None)),
         ('district', lambda f, r: getattr(r, 'district', None)),
         ('commune', lambda f, r: getattr(r, 'commune', None)),
         ('address', lambda f, r: getattr(r, 'address', None)),
@@ -182,7 +182,7 @@ class Export(Handler):
                     'Select facility type to export:')))
                 self.write('<select name="facility_type">')
                 for facility_type in FacilityType.all().ancestor(version):
-                    # TODO: Facility Type should have translated messages
+                    # TODO(shakusa) FacilityType should have translated messages
                     self.write(
                         '<option value="%s">%s</option>' % (
                         facility_type.key().name(),
