@@ -23,7 +23,7 @@ import datetime
 # Each tuple has the column header and a lambda function that takes a
 # facility and a report and returns the column value
 COLUMNS_BY_FACILITY_TYPE = {
-    'hospital' : [
+    'hospital': [
         ('facility_name', lambda f, r: f.title),
         ('facility_healthc_id', lambda f, r: getattr(r, 'healthc_id', None)),
         ('facility_pcode', lambda f, r: re.sub(r'.*\.\.(.*)', r'\1',
@@ -56,8 +56,8 @@ COLUMNS_BY_FACILITY_TYPE = {
         ('commune_code', lambda f, r: getattr(r, 'commune_code', None)),
         ('sante_id', lambda f, r: getattr(r, 'sante_id', None)),
         ('entry_last_updated', lambda f, r: getattr(r, 'timestamp', None))
-        ],
-    }
+      ],
+  }
 
 def get_all(query_maker, batch_size=500):
     results = []
@@ -106,8 +106,7 @@ def write_csv(out, version, facility_type):
 
     # Write a row for each facility.
     country_code = country.key().name()
-    sorted_facilities = sorted(facilities, key=lambda f: f.title)
-    for facility in sorted_facilities:
+    for facility in sorted(facilities, key=lambda f: f.title):
         report = reports_by_facility[facility.key().name()]
         if columns:
             row = []
@@ -118,8 +117,6 @@ def write_csv(out, version, facility_type):
             for name in facility_type.attribute_names:
                 value = getattr(report, name, None)
                 row.append(format(value))
-            else:
-                row += [None]*len(attribute_names)
         writer.writerow(row)
 
 def format(value):
@@ -135,9 +132,7 @@ def format(value):
         timestamp = value.replace(microsecond=0)
         timestamp_ht = timestamp - datetime.timedelta(hours=5)
         return timestamp_ht.isoformat(' ') + '-05:00'
-    if value:
-        return str(value)
-    return ''
+    return value
 
 class Export(Handler):
     def get(self):
@@ -166,14 +161,6 @@ class Export(Handler):
             for country in Country.all():
                 version = get_latest_version(country.key().name())
                 self.write('<h2>%s</h2>' % country.title)
-                # TODO(shakusa) Last updated timestamp is misleading; it is
-                # the last time we created a new version, which should happen
-                # rarely. What we should have here is the last time a record
-                # was updated, but that's expensive to figure out (have to
-                # iterate over all reports)
-                #self.write('<p>%s %s' %
-                    #i18n: Label for timestamp when data was last updated
-                #    (_('Last updated:'), version.timestamp))
                 self.write('<p><form>')
                 self.write('<input type=hidden name="cc" value="%s">' %
                            country.key().name())

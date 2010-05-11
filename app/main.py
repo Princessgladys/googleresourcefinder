@@ -20,13 +20,15 @@ import rendering
 # TODO(shakusa) Issue 55: When we are ready to launch, set this to False
 VIEW_AND_PRINT_REQUIRE_LOGIN = True
 
-def get_edit_link(version):
+def get_export_link(version):
     """If only one facility type, return the direct download link,
     otherwise return a link to the download page"""
     link = '/export'
     facility_type = None
     for ftype in FacilityType.all().ancestor(version):
         if facility_type is not None:
+            # We have more than one facility type, just redirect to the /export
+            # page
             return link
         facility_type = ftype.key().name()
     cc = version.parent().key().name()
@@ -57,7 +59,7 @@ class Main(Handler):
                                                    hide_email=not user,
                                                    center=center,
                                                    radius=self.params.rad),
-                    edit_link=get_edit_link(version),
+                    export_link=get_export_link(version),
                     instance=self.request.host.split('.')[0])
 
 if __name__ == '__main__':

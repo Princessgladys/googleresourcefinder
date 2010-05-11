@@ -15,8 +15,8 @@
 import logging
 import model
 import utils
-from utils import DateTime, ErrorMessage, Redirect, HIDDEN_ATTRIBUTE_NAMES
-from utils import db, get_message, html_escape, users, _, to_unicode
+from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
+from utils import db, get_message, html_escape, to_unicode, users, _
 from feeds.crypto import sign, verify
 
 XSRF_KEY_NAME = 'resource-finder-edit'
