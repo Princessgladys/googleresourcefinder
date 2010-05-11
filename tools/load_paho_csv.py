@@ -36,6 +36,16 @@ def load_paho_csv(version, filename):
             location=db.GeoPt(latitude, longitude),
             division_name=record['Departemen'].strip()
         ))
+
+        # TODO(shakusa) The following fields are not imported. Figure out why
+        # and either import them or comment why they are not imported.
+        # NUM
+        # Fac_NameEN, FacNameKr
+        # Accuracy, AlternateCoordinates, SourceHospitalCoordinates
+        # AlternateHealthCIDDeleted
+        # Comment
+        # SourceDamage, DateDamage
+        # SourceOperationalStatus, DateOperationalStatus
         reports.append(Report(
             version,
             facility_name=facility_name,

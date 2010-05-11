@@ -56,7 +56,9 @@ import django.utils.translation
 # Handler is initialized.
 from django.utils.translation import gettext_lazy as _
 
-# TODO(shakusa) Add these back in post-v1
+# Attributes exported to CSV that should currently remain hidden from the
+# info window bubble and edit view.
+# TODO(shakusa) Un-hide these post-v1 when view/edit support is better
 HIDDEN_ATTRIBUTE_NAMES = ['region_id', 'district_id', 'commune_id',
                           'commune_code', 'sante_id']
 

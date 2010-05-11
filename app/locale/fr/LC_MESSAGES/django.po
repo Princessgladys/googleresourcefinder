@@ -204,11 +204,6 @@ msgctxt "administrative division"
 msgid "District"
 msgstr "District"
 
-#. Link to download the 'master' copy of the facility data
-#: templates/map.html:169
-msgid "Download master list"
-msgstr "Télécharger la liste maître"
-
 #. E-mail address
 #: edit.py:78 ../tools/setup.py:77
 msgid "E-mail"
@@ -638,6 +633,11 @@ msgstr "Mise à jour"
 msgctxt "surgical specialty that focuses on arteries and veins"
 msgid "Vascular surgery"
 msgstr "Chirurgie vasculaire"
+
+#. Link to go to a page with past versions of the 'master' list
+#: templates/map.html:183
+msgid "View master list archive"
+msgstr "Voir les archives des listes de maître"
 
 #. Service provided by a health facility.
 #: ../tools/setup.py:217
