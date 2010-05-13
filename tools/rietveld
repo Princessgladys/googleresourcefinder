@@ -43,7 +43,8 @@ DEFAULT_CS=$(hg branches | grep "^default " | sed -e 's/^.* //')
 PARENT_CS=$(hg parent --template '{rev}:{node|short}')
 ISSUE_INDEX=$HOME/.codereview_issues
 if [ -f $ISSUE_INDEX ]; then
-  ISSUE=$(grep "^$BRANCH " $HOME/.codereview_issues | sed -e 's/^.* //')
+  ISSUE=$(grep "^$BRANCH " $HOME/.codereview_issues | sed -e 's/^[^ ][^ ]* \([0-9][0-9]*\) .*/\1/')
+  MESSAGE=$(grep "^$BRANCH " $HOME/.codereview_issues | sed -e 's/^[^ ][^ ]* \([0-9][0-9]*\) //')
 fi
 
 echo "Current branch: $BRANCH_CS ($BRANCH)"
@@ -125,6 +126,15 @@ else
   echo "Creating review: $DEFAULT_CS (default) --> $BRANCH_CS"
 fi
 
+# Add the existing message, if there is one, otherwise ask for a message.
+if [ -n "$MESSAGE" ]; then
+  echo "Adding existing patch set message: \"$MESSAGE\""
+else
+  echo -n "Message describing this patch set: "
+  read MESSAGE
+fi
+OPTIONS="$OPTIONS -m \"$MESSAGE\""
+
 # Upload the code review.
 echo
 echo $PYTHON $TOOLS_DIR/upload.py $OPTIONS
@@ -135,7 +145,7 @@ issue, patchset = upload.RealMain('upload.py $OPTIONS'.split())
 print >>open('/tmp/issue.$$', 'w'), issue
 " || exit 1
 
-# Save the issue number for future use with this branch.
+# Save the issue number and message for future use with this branch.
 NEW_ISSUE=$(cat /tmp/issue.$$)
 if [ -n "$ISSUE" ]; then
   echo
@@ -143,5 +153,5 @@ if [ -n "$ISSUE" ]; then
 else
   echo
   echo "Created review: http://codereview.appspot.com/$NEW_ISSUE"
-  echo "$BRANCH $NEW_ISSUE" >> $ISSUE_INDEX
+  echo "$BRANCH $NEW_ISSUE $MESSAGE" >> $ISSUE_INDEX
 fi
