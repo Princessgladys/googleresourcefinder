@@ -204,11 +204,6 @@ msgctxt "administrative division"
 msgid "District"
 msgstr "Distrito"
 
-#. Link to download the 'master' copy of the facility data
-#: templates/map.html:169
-msgid "Download master list"
-msgstr "Descargar lista maestra"
-
 #. E-mail address
 #: edit.py:78 ../tools/setup.py:77
 msgid "E-mail"
@@ -548,6 +543,11 @@ msgstr "Guardar"
 msgid "Select a country:"
 msgstr "Selecciona un país"
 
+#. Label for a selector to export data to CSV
+#: export.py:180
+msgid "Select facility type to export:"
+msgstr "Seleccionar el tipo de instalación de la exportación:"
+
 #. work done by someone that benefits another
 #: ../tools/setup.py:95
 msgid "Services"
@@ -633,6 +633,11 @@ msgstr "Actualizado"
 msgctxt "surgical specialty that focuses on arteries and veins"
 msgid "Vascular surgery"
 msgstr "Cirugía vascular"
+
+#. Link to go to a page with past versions of the 'master' list
+#: templates/map.html:183
+msgid "View master list archive"
+msgstr "Ver archivo de las listas de maestro"
 
 #. Service provided by a health facility.
 #: ../tools/setup.py:217

@@ -174,9 +174,14 @@
   <span id="freshness-text"></span>
   <div>
     {% comment %}
-    #i18n: Link to download the 'master' copy of the facility data
+    #i18n: Button to export data to comma-separated-values format.
     {% endcomment %}
-    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">{% trans "Download master list" %}</a>
+    <a href="{{export_link}}">{% trans "Export CSV" %}</a> |
+
+    {% comment %}
+    #i18n: Link to go to a page with past versions of the 'master' list
+    {% endcomment %}
+    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">{% trans "View master list archive" %}</a>
   </div>
 </div>
 {% if params.print %}
