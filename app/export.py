@@ -56,8 +56,8 @@ COLUMNS_BY_FACILITY_TYPE = {
         ('commune_code', lambda f, r: getattr(r, 'commune_code', None)),
         ('sante_id', lambda f, r: getattr(r, 'sante_id', None)),
         ('entry_last_updated', lambda f, r: getattr(r, 'timestamp', None))
-      ],
-  }
+    ],
+}
 
 def get_all(query_maker, batch_size=500):
     results = []
