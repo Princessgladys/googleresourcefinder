@@ -12,12 +12,12 @@ def make_version(country_code, title):
 
 def setup_version(version):
     """Sets up the attributes and facility types."""
-    def attr(type, name, values=[], edit_role=None):
-        return Attribute(version, key_name=name, type=type,
-                         edit_role=edit_role, values=values)
+    def attr(type, name, values=[], editable=True):
+        return Attribute(
+            version, key_name=name, type=type, editable=editable, values=values)
 
     attributes = [
-        attr('int', 'healthc_id', edit_role='supereditor'),
+        attr('int', 'healthc_id', editable=False),
         attr('str', 'organization'),
         attr('str', 'departemen'),
         attr('str', 'district'),

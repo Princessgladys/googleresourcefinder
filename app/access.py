@@ -12,6 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Manages per-user permissions.  Three types of access are defined
+- user = User can view the app
+- editor = User can make changes
+- superuser = User can grant access to other users
+
+There is also a token system for allowing access to anonymous users by passing
+them a url.
+"""
+
 from google.appengine.ext import db
 import logging
 
@@ -19,14 +29,9 @@ import logging
 # 'user' DEPRECATED member of viewer whitelist, we now allow anyone to view
 # 'editor' DEPRECATED member of editor whitelist, we now allow anyone signed in
 #          that has accepted the terms of service to edit
-# 'accepted_tos' user has OK'd the terms of service
-# 'supereditor' user can edit restricted fields
-# 'adder' user can add facilities
-# 'remover' user can remove facilities from the user interface
 # 'superuser' user can grant access to other users (but still needs the other
 #             roles to add, remove, edit, etc)
-ROLES = ['user', 'editor', 'accepted_tos', 'supereditor', 'adder', 'remover',
-         'superuser']
+ROLES = ['user', 'editor', 'superuser']
 
 class Authorization(db.Model):
     timestamp = db.DateTimeProperty(auto_now_add=True)

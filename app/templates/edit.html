@@ -30,15 +30,10 @@
   body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
   h1 { font-size: 24px }
 {% endif %}
-h3 { padding-top: 8px }
 tr.field { vertical-align: baseline; margin-top: 1em; }
 tr.field.text { vertical-align: top; }
 .readonly { color: #666; }
 .label { text-align: right; color: #666; }
-.invisible { visibility:hidden }
-.errorbox-good { margin:2px; padding: 2px; }
-.errorbox-bad { padding: 2px; border: 2px solid #900; }
-.errormsg { margin-left: 4px; color: #900 }
 </style>
 {% if not params.embed %}
 </head>
@@ -59,10 +54,6 @@ tr.field.text { vertical-align: top; }
   <input type="hidden" name="cc" value="{{params.cc|escape}}"/>
   <input type="hidden" name="facility_name"
       value="{{params.facility_name|escape}}"/>
-  {% if accepted_tos %}
-    <input type="hidden" name="accepted_tos" id="accepted_tos"
-           value="yes"/>
-  {% endif %}
   <table>
     {% for field in readonly_fields %}
       <tr class="field">
@@ -84,27 +75,6 @@ tr.field.text { vertical-align: top; }
         </td>
       </tr>
     {% endfor %}
-    {% if not accepted_tos %}
-    <tr>
-      <td>
-      </td>
-      <td>
-        <h3>Terms of Service</h3>
-        <p>{% blocktrans %}
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-          {% endblocktrans %}
-        </p>
-        <div id='tos_errorbox' class='errorbox-good'>
-          <input type="checkbox" name="accepted_tos" id="accepted_tos"/>
-          <label for="accepted_tos">{% trans "I accept the terms of service" %}
-          </label>
-          <div id='tos_errormsg' class='invisible'>
-            {% trans "Please accept the terms of service to save changes" %}
-          </div>
-        </div>
-      </td>
-    </tr>
-    {% endif %}
     <tr>
       <td>
       </td>
@@ -112,21 +82,18 @@ tr.field.text { vertical-align: top; }
         {% comment %}
         #i18n: Button text to save data
         {% endcomment %}
-        <input type="submit" name='save' id='save' value='{% trans "Save" %}'>
+        <input type="submit" name='save' value='{% trans "Save" %}'>
         {% comment %}
         #i18n: Button text to cancel and return to the home page
         {% endcomment %}
-        <input type="submit" name='cancel' id='cancel' value='{% trans "Cancel" %}'>
+        <input type="submit" name='cancel' value='{% trans "Cancel" %}'>
+        <a href='#'>Terms of Service</a>
         <span id="edit-status"></span>
       </td>
     </tr>
   </table>
 </form>
 {% if not params.embed %}
-{% comment %}
-# To embed the edit html, include this script at the end of the main page.
-{% endcomment %}
-<script type="text/javascript" src="static/edit.js"></script>
 </body>
 </html>
 {% endif %}
