@@ -52,7 +52,7 @@ locale = function() {
   messages.DISTANCE =
       '${MILES} miles (${KM} km)';
 
-  //i18n_meaning: administrative division
+  //i18n: Meaning: administrative division
   messages.DISTRICT =
       'District';
 
