@@ -133,15 +133,16 @@ else
   echo -n "Message describing this patch set: "
   read MESSAGE
 fi
-OPTIONS="$OPTIONS -m \"$MESSAGE\""
 
 # Upload the code review.
 echo
-echo $PYTHON $TOOLS_DIR/upload.py $OPTIONS
+echo $PYTHON $TOOLS_DIR/upload.py $OPTIONS -m "\"$MESSAGE\""
 cd $PROJECT_DIR
 PYTHONPATH=$TOOLS_DIR $PYTHON -c "
 import upload
-issue, patchset = upload.RealMain('upload.py $OPTIONS'.split())
+cmd = 'upload.py $OPTIONS'.split()
+cmd.extend(['-m', '$MESSAGE'])
+issue, patchset = upload.RealMain(cmd)
 print >>open('/tmp/issue.$$', 'w'), issue
 " || exit 1
 
