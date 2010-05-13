@@ -133,7 +133,7 @@ else
   echo -n "Message describing this patch set: "
   read MESSAGE
 fi
-OPTIONS="$OPTIONS -m \"$MESSAGE\""
+OPTIONS="$OPTIONS -m \\\"$MESSAGE\\\""
 
 # Upload the code review.
 echo
