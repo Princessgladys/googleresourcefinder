@@ -37,34 +37,46 @@ def setup_facility_types(version):
         return Attribute(
             version, key_name=name, type=type, editable=editable, values=values)
 
+    # NB: Attributes are kept in a specific order defined by zeiger
+    # Be careful when changing them, as you will change the order
+    # of appearance in the map info window. Also, order here should
+    # be kept roughly in sync with CSV column order defined in app/export.py
     attributes = [
         attr('int', 'healthc_id', editable=False),
-        attr('str', 'organization'),
-        attr('str', 'departemen'),
-        attr('str', 'district'),
-        attr('str', 'commune'),
-        attr('str', 'address'),
-        attr('str', 'phone'),
-        attr('str', 'email'),
-        attr('choice', 'type',
-             ['COM', 'MIL', 'MIX', 'NGO', 'PRI', 'PUB', 'UNI']),
-        attr('choice', 'category',
-             ['C/S', 'C/S Temp', 'CAL', 'CSL', 'DISP', 'F Hospital',
-              'HOP', 'HOP Temp', 'HOP Spec', 'MOB', 'MOB Temp',
-              'Other', 'Unknown']),
-        attr('str', 'damage'),
-        attr('str', 'comments'),
-        attr('str', 'contact_name'),
-        attr('int', 'total_beds'),
         attr('int', 'available_beds'),
+        attr('int', 'total_beds'),
         attr('multi', 'services',
              ['general_surgery', 'orthopedics', 'neurosurgery',
               'vascular_surgery', 'general_medicine', 'cardiology',
               'infectious_disease', 'pediatrics', 'postoperative_care',
               'obstetrics_gynecology', 'dialysis', 'lab',
               'x_ray', 'ct_scan', 'blood_bank', 'corpse_removal']),
+        attr('str', 'contact_name'),
+        attr('str', 'phone'),
+        attr('str', 'email'),
+        attr('str', 'departemen'),
+        attr('str', 'district'),
+        attr('str', 'commune'),
+        attr('str', 'address'),
+        attr('str', 'organization'),
+        attr('choice', 'type',
+             ['COM', 'MIL', 'MIX', 'NGO', 'PRI', 'PUB', 'UNI']),
+        attr('choice', 'category',
+             ['C/S', 'C/S Temp', 'CAL', 'CSL', 'DISP', 'F Hospital',
+              'HOP', 'HOP Temp', 'HOP Spec', 'MOB', 'MOB Temp',
+              'Other', 'Unknown']),
+        attr('choice', 'construction',
+             ['Reinforced concrete', 'Unreinforced masonry', 'Wood frame',
+              'Adobe']),
+        attr('str', 'damage'),
+        attr('str', 'comments'),
         attr('bool', 'reachable_by_road'),
         attr('bool', 'can_pick_up_patients'),
+        attr('str', 'region_id', editable=False),
+        attr('str', 'district_id', editable=False),
+        attr('str', 'commune_id', editable=False),
+        attr('str', 'commune_code', editable=False),
+        attr('str', 'sante_id', editable=False),
     ]
 
     hospital = FacilityType(
@@ -86,8 +98,18 @@ def setup_messages(version):
         #i18n: Proper name of an ID for a healthcare facility, no translation
         #i18n: necessary.
         name_message('healthc_id', en='HealthC ID'),
-        #i18n_meaning: referring to the name of an organization
-        name_message('organization', en='Organization name'),
+        #i18n: Total number of unoccupied beds at a hospital.
+        name_message('available_beds', en='Available beds'),
+        #i18n: Total number of beds at a hospital
+        name_message('total_beds', en='Total beds'),
+        #i18n: work done by someone that benefits another
+        name_message('services', en='Services'),
+        #i18n: Name of a person to contact for more information.
+        name_message('contact_name', en='Contact name'),
+        #i18n: telephone number
+        name_message('phone', en='Phone'),
+        #i18n: E-mail address
+        name_message('email', en='E-mail'),
         #i18n_meaning: administrative division
         name_message('departemen', en='Department'),
         #i18n_meaning: administrative division
@@ -96,26 +118,18 @@ def setup_messages(version):
         name_message('commune', en='Commune'),
         #i18n: street address
         name_message('address', en='Address'),
-        #i18n: telephone number
-        name_message('phone', en='Phone'),
-        #i18n: E-mail address
-        name_message('email', en='E-mail'),
+        #i18n_meaning: referring to the name of an organization
+        name_message('organization', en='Organization name'),
         #i18n: genre, subdivision of a particular kind of thing
         name_message('type', en='Type'),
         #i18n: collection of things sharing a common attribute
         name_message('category', en='Category'),
+        #i18n: the materials making up a building
+        name_message('construction', en='Construction'),
         #i18n: destruction
         name_message('damage', en='Damage'),
         #i18n: remarks
         name_message('comments', en='Comments'),
-        #i18n: Name of a person to contact for more information.
-        name_message('contact_name', en='Contact name'),
-        #i18n: Total number of beds at a hospital
-        name_message('total_beds', en='Total beds'),
-        #i18n: Total number of unoccupied beds at a hospital.
-        name_message('available_beds', en='Available beds'),
-        #i18n: work done by someone that benefits another
-        name_message('services', en='Services'),
         #i18n: Whether or not a facility can be accessed by a road.
         name_message('reachable_by_road', en='Reachable by road'),
         #i18n: Whether or not a facility can send a vehicle to pick up
@@ -149,6 +163,16 @@ def setup_messages(version):
         value_message('CAL', en='Health center with beds'),
         #i18n: Type of a facility: a health center without beds.
         value_message('CSL', en='Health center without beds'),
+        #i18n: Type of facility construction: concrete with metal and/or mesh
+        #i18n: added to provide extra support against stresses
+        value_message('Reinforced concrete', en='Reinforced concrete'),
+        #i18n: Type of facility construction: walls constructed of clay brick
+        #i18n: or concrete block
+        value_message('Unreinforced masonry', en='Unreinforced masonry'),
+        #i18n: Type of facility construction: timber jointed together with nails
+        value_message('Wood frame', en='Wood frame'),
+        #i18n: Type of facility construction: sun-dried clay bricks
+        value_message('Adobe', en='Adobe'),
 
         # category
 
