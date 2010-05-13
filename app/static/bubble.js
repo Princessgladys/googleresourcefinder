@@ -98,11 +98,16 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
   var healthc_id = values && values[attributes_by_name.healthc_id] || '\u2013';
   var address_info = render(values && values[attributes_by_name.address]);
 
+  var attributes_to_hide = {};
+  attributes_to_hide[attributes_by_name.available_beds] = true;
+  attributes_to_hide[attributes_by_name.total_beds] = true;
+  attributes_to_hide[attributes_by_name.healthc_id] = true;
+  attributes_to_hide[attributes_by_name.address] = true;
+
   var attributes_info = [];
   for (var i = 0; i < attribute_is.length; i++) {
     var a = attribute_is[i];
-    if (a === attributes_by_name.healthc_id ||
-        a === attributes_by_name.address) {
+    if (attributes_to_hide[a]) {
       continue;
     }
     var attribute = attributes[a];
