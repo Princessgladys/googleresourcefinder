@@ -136,7 +136,7 @@ fi
 
 # Upload the code review.
 echo
-echo $PYTHON $TOOLS_DIR/upload.py $OPTIONS -m $MESSAGE
+echo $PYTHON $TOOLS_DIR/upload.py $OPTIONS -m "\"$MESSAGE\""
 cd $PROJECT_DIR
 PYTHONPATH=$TOOLS_DIR $PYTHON -c "
 import upload
