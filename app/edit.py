@@ -226,11 +226,6 @@ def has_input(request, attribute):
        Does not check if that input is different than the previous value."""
     return attribute.key().name() in request
 
-def can_edit(auth, cc, attribute):
-    """Returns True if the user can edit the given attribute."""
-    return not attribute.edit_role or check_user_role(
-        auth, attribute.edit_role, cc)
-
 def get_last_report(version, facility_name):
     return (model.Report.all()
             .ancestor(version)
@@ -251,9 +246,6 @@ class Edit(utils.Handler):
         # restrict editing to editors
         if USE_WHITELISTS:
             self.require_user_role('editor', self.params.cc)
-
-        self.accepted_tos = check_user_role(self.auth, 'accepted_tos',
-                                            self.params.cc)
 
         try:
             self.version = utils.get_latest_version(self.params.cc)
@@ -282,7 +274,7 @@ class Edit(utils.Handler):
         report = get_last_report(self.version, self.params.facility_name)
         for name in self.facility_type.attribute_names:
             attribute = self.attributes[name]
-            if can_edit(self.auth, self.params.cc, attribute):
+            if attribute.editable:
                 fields.append({
                     'name': get_message(self.version, 'attribute_name', name),
                     'type': attribute.type,
@@ -295,38 +287,22 @@ class Edit(utils.Handler):
                 })
 
         token = sign(XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
-        accepted_tos = self.accepted_tos and 'yes' or ''
 
         self.render('templates/edit.html',
-                    token=token, facility=self.facility, fields=fields,
-                    accepted_tos=accepted_tos, readonly_fields=readonly_fields,
-                    params=self.params, logout_url=users.create_logout_url('/'))
+            token=token, facility=self.facility, fields=fields,
+            readonly_fields=readonly_fields, params=self.params,
+            logout_url=users.create_logout_url('/'))
 
     def post(self):
         self.init()
 
-        # If user canceled, just redirect home
         if self.request.get('cancel'):
             raise Redirect('/')
 
-        # Verify XSRF token
         if not verify(XSRF_KEY_NAME, self.user.user_id(),
             self.request.get('token')):
             raise ErrorMessage(403, 'Unable to submit data for %s'
                                % self.user.email())
-
-        # Check if user accepted terms of service
-        if not self.accepted_tos:
-            if self.request.get('accepted_tos'):
-                # Save the fact that the user accepted the TOS
-                # Note this applies for all cc's, not just the current one.
-                self.auth.user_roles.append(':accepted_tos')
-                self.auth.put()
-                logging.info('%s accepted TOS' % self.auth.email)
-            else:
-                logging.info('%s rejected TOS' % self.auth.email)
-                raise ErrorMessage(403, '%s has not accepted terms of service'
-                                   % self.user.email())
 
         logging.info("record by user: %s" % self.user)
         last_report = get_last_report(self.version, self.params.facility_name)
@@ -342,8 +318,7 @@ class Edit(utils.Handler):
             # the user did not have permission to edit, then they were granted
             # access before submitting, non-editable fields would not be present
             # in the form and we would forget the value from last_report
-            if (can_edit(self.auth, self.params.cc, attribute) and
-                has_input(self.request, attribute)):
+            if attribute.editable and has_input(self.request, attribute)):
                 parse_input(report, self.request, attribute)
             else:
                 setattr(report, name, getattr(last_report, name, None))
