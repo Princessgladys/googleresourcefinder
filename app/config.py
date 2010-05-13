@@ -18,7 +18,7 @@
 # List of languages that appear in the language menu, as (code, name) pairs.
 LANGUAGES = [('en', 'English'),
              ('fr', u'Fran\u00e7ais'), # French
-             #('ht', u'Krey\u00f2l'), # Kreyol
+             ('ht', u'Krey\u00f2l'), # Kreyol
              ('es-419', u'Espa\u00F1ol'), # Spanish (Latin American)
              ]
 

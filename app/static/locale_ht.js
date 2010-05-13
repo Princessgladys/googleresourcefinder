@@ -22,89 +22,89 @@ locale = function() {
   var messages = {};
 
   //i18n: Label for every item in a list.
-  messages.ALL = "Todos";
+  messages.ALL = "Tout";
 
   //i18n: Indicates a user should call for availability of beds
   //i18n: and services at a hospital.
-  messages.CALL_FOR_AVAILABILITY = "Llama para informarte acerca de la disponibilidad";
+  messages.CALL_FOR_AVAILABILITY = "Tanpri rele pou enfomasyon disponib";
 
   //i18n: Date at a give time (example: Jan 21, 2010 at 14:32 UTC-4)
-  messages.DATE_AT_TIME = "${DATE} a las ${TIME}";
+  messages.DATE_AT_TIME = "${DATE}   a ${TIME}";
 
   //i18n: Local date format (example: Jan 21, 2010)
   messages.DATE_FORMAT_MEDIUM = "${MONTH} ${DAY}, ${YEAR}";
 
   //i18n: Displaying markers on a map for facilities within RADIUS_MILES
   //i18n: miles of a location
-  messages.DISPLAYING_FACILITIES_IN_RANGE = "Muestra las instalaciones dentro de ${RADIUS_MILES} millas";
+  messages.DISPLAYING_FACILITIES_IN_RANGE = "Ekpoze etablisman nan ${RADIUS_MILES} mil";
 
   //i18n: Displaying markers on a map for the NUM_FACILITIES closest to a 
   //i18n: location
-  messages.DISPLAYING_CLOSEST_N_FACILITIES = "Muestra ${NUM_FACILITIES} las instalaciones m\u00e1s cercanas";
+  messages.DISPLAYING_CLOSEST_N_FACILITIES = "Ekspoze ${NUM_FACILITIES} etablisman ki pi pre";
 
   //i18n: A distance (example: 3.11 miles (5 km))
-  messages.DISTANCE = "${MILES}millas (${KM} km)";
+  messages.DISTANCE = "${MILES} mil (${KM} kilom\u00e8t)";
 
   //i18n_meaning: administrative division
   messages.DISTRICT = "District";
 
   //i18n: Link to edit the data for a facility record.
-  messages.EDIT_LINK_HTML = HTML("${LINK_START}Modifica este registro${LINK_END}");
+  messages.EDIT_LINK_HTML = HTML("${LINK_START} modifye enregistreman sa${LINK_END} ");
 
   //i18n: Number of facilities within range of a location.
   //i18n: (example: 5 Facilities within 10 miles)
-  messages.FACILITIES_IN_RANGE = "${NUM_FACILITIES} Instalaciones dentro de${RADIUS_MILES} millas";
+  messages.FACILITIES_IN_RANGE = "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil";
 
   //i18n: A place that provides a particular service
-  messages.FACILITY = "Instalaci\u00f3n";
+  messages.FACILITY = "Etablisman";
 
   //i18n: Latitude and longitude location on earth.
-  messages.GEOLOCATION_HTML = HTML("Latitud: ${LATITUDE}<br>Longitud:${LONGITUDE}");
+  messages.GEOLOCATION_HTML = HTML("Latitd: ${LATITUDE}<br>Lonjitd: ${LONGITUDE}");
 
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
-  messages.MONTH_ABBRS = "Ene feb mar abr may jun jul ago sept oct nov dic".split(' ');
+  messages.MONTH_ABBRS = "Janvye, Fevriye, Mas, Avril, Me, Jen, jiy\u00e8, Out, septanm, Okt\u00f2b, Novanm, Desanm".split(' ');
 
   //i18n: Form option for disagreement.
-  messages.NO = "No";
+  messages.NO = "Pa dak\u00f2";
 
   //i18n: Indicates there is no availability information for this hospital.
-  messages.NO_AVAILABILITY = "No hay informaci\u00f3n de disponibilidad";
+  messages.NO_AVAILABILITY = "Pa gen enf\u00f2masyon ki koresponn";
 
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
-  messages.OPEN_TOTAL_BEDS = "Camas Abrir/Total";
+  messages.OPEN_TOTAL_BEDS = "Kabann disponib ";
 
   //i18n: Very short abbreviation for a phone number, indended to disambiguate
   //i18n: from a fax number.  (example: p 555-555-5555)
   messages.PHONE_ABBREVIATION = "p ${PHONE}";
 
   //i18n: Tooltip explaining how to enable print mode
-  messages.PRINT_DISABLED_TOOLTIP = "Primero selecciona un hospital de la lista de la izquierda. Luego Imprimir imprimir\u00e1 un listado de los hospitales en orden de distancia desde tu selecci\u00f3n.";
+  messages.PRINT_DISABLED_TOOLTIP = "Premyeman chwazi yon lopital ki nan b\u00f2 goch la. L\u00e8 sa a enprimant la pral enprime yon lis lopital soti nan z\u00f2n ou ye a";
 
   //i18n: Tooltip explaining a 'Print' link
-  messages.PRINT_ENABLED_TOOLTIP = "Imprime una lista de hospitales por orden de distancia desde ${FACILITY_NAME}";
+  messages.PRINT_ENABLED_TOOLTIP = "Enprime yon list lopital nan l\u00f2d distans de ${FACILITY_NAME}";
 
   //i18n: Link to request access for editing a facility record.
-  messages.REQUEST_EDIT_ACCESS_HTML = HTML("${LINK_START}Solicita modificar el acceso ${LINK_END}");
+  messages.REQUEST_EDIT_ACCESS_HTML = HTML("${LINK_START}Mande p\u00e8misyon pou modifye${LINK_END}");
 
   //i18n: work done by someone that benefits another
-  messages.SERVICES = "Servicios";
+  messages.SERVICES = "S\u00e8vis";
 
   //i18n: Label for a control that filters a list of facilities
-  messages.SHOW = "Mostrar:";
+  messages.SHOW = "Ekspoze:";
 
   //i18n: Indicates a user needs to sign in to edit data on a facility.
-  messages.SIGN_IN_TO_EDIT = "Accede para modificar tus datos";
+  messages.SIGN_IN_TO_EDIT = "Tanpri siyen nan reekri";
 
   //i18n: Time format (example 14:32 UTC-4)
-  messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}:${MINUTES} ${ZONE}";
+  messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}: ${MINUTES} ${ZONE}";
 
   //i18n: Label indicating a record was updated
-  messages.UPDATED = "Actualizado";
+  messages.UPDATED = "Remete an fonksyon";
 
   //i18n: Form option for agreement.
-  messages.YES = "S\u00ed";
+  messages.YES = "Wi";
 
   function message_renderer(name) {
     return function (params) {
