@@ -45,18 +45,18 @@ locale = function() {
   //i18n: A distance (example: 3.11 miles (5 km))
   messages.DISTANCE = "${MILES}millas (${KM} km)";
 
-  //i18n_meaning: administrative division
-  messages.DISTRICT = "District";
+  //i18n: Meaning: administrative division
+  messages.DISTRICT = "Distrito";
 
   //i18n: Link to edit the data for a facility record.
   messages.EDIT_LINK_HTML = HTML("${LINK_START}Modifica este registro${LINK_END}");
 
   //i18n: Number of facilities within range of a location.
   //i18n: (example: 5 Facilities within 10 miles)
-  messages.FACILITIES_IN_RANGE = "${NUM_FACILITIES} Instalaciones dentro de${RADIUS_MILES} millas";
+  messages.FACILITIES_IN_RANGE = "${NUM_FACILITIES} Instituciones dentro de${RADIUS_MILES} millas";
 
   //i18n: A place that provides a particular service
-  messages.FACILITY = "Instalaci\u00f3n";
+  messages.FACILITY = "Instituci\u00f3n";
 
   //i18n: Latitude and longitude location on earth.
   messages.GEOLOCATION_HTML = HTML("Latitud: ${LATITUDE}<br>Longitud:${LONGITUDE}");
@@ -73,7 +73,7 @@ locale = function() {
 
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
-  messages.OPEN_TOTAL_BEDS = "Camas Abrir/Total";
+  messages.OPEN_TOTAL_BEDS = "Camas libres/totales";
 
   //i18n: Very short abbreviation for a phone number, indended to disambiguate
   //i18n: from a fax number.  (example: p 555-555-5555)

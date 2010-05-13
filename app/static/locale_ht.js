@@ -45,8 +45,8 @@ locale = function() {
   //i18n: A distance (example: 3.11 miles (5 km))
   messages.DISTANCE = "${MILES} mil (${KM} kilom\u00e8t)";
 
-  //i18n_meaning: administrative division
-  messages.DISTRICT = "District";
+  //i18n: Meaning: administrative division
+  messages.DISTRICT = "Distri";
 
   //i18n: Link to edit the data for a facility record.
   messages.EDIT_LINK_HTML = HTML("${LINK_START} modifye enregistreman sa${LINK_END} ");
@@ -77,7 +77,7 @@ locale = function() {
 
   //i18n: Very short abbreviation for a phone number, indended to disambiguate
   //i18n: from a fax number.  (example: p 555-555-5555)
-  messages.PHONE_ABBREVIATION = "p ${PHONE}";
+  messages.PHONE_ABBREVIATION = "t ${PHONE}";
 
   //i18n: Tooltip explaining how to enable print mode
   messages.PRINT_DISABLED_TOOLTIP = "Premyeman chwazi yon lopital ki nan b\u00f2 goch la. L\u00e8 sa a enprimant la pral enprime yon lis lopital soti nan z\u00f2n ou ye a";

@@ -27,7 +27,7 @@ def make_version(country_code, title):
     return version
 
 def setup_version(version):
-    """Sets up a new version."""
+    """Loads data for the given version."""
     setup_facility_types(version)
     setup_messages(version)
 
@@ -110,15 +110,15 @@ def setup_messages(version):
         name_message('phone', en='Phone'),
         #i18n: E-mail address
         name_message('email', en='E-mail'),
-        #i18n_meaning: administrative division
+        #i18n: Meaning: administrative division
         name_message('departemen', en='Department'),
-        #i18n_meaning: administrative division
+        #i18n: Meaning: administrative division
         name_message('district', en='District'),
-        #i18n_meaning: low-level administrative division
+        #i18n: Meaning: low-level administrative division
         name_message('commune', en='Commune'),
         #i18n: street address
         name_message('address', en='Address'),
-        #i18n_meaning: referring to the name of an organization
+        #i18n: Meaning: referring to the name of an organization
         name_message('organization', en='Organization name'),
         #i18n: genre, subdivision of a particular kind of thing
         name_message('type', en='Type'),
@@ -201,38 +201,38 @@ def setup_messages(version):
 
         # services
 
-        #i18n: Service provided by a health facility.
-        #i18n_meaning: surgical specialty that focuses on abdominal organs
+        #i18n: Service provided by a health facility. 
+        #i18n: Meaning: surgical specialty that focuses on abdominal organs
         value_message('general_surgery', en='General surgery'),
-        #i18n: Service provided by a health facility
-        #i18n_meaning: treats diseases and injury to bones, muscles, joints and
-        #i18n_meaning: tendons
+        #i18n: Service provided by a health facility 
+        #i18n: Meaning: treats diseases and injury to bones, muscles, joints and
+        #i18n: Meaning: tendons
         value_message('orthopedics', en='Orthopedics'),
-        #i18n: service provided by a health facility
-        #i18n_meaning: surgery that involves the nervous system
+        #i18n: service provided by a health facility 
+        #i18n: Meaning: surgery that involves the nervous system
         value_message('neurosurgery', en='Neurosurgery'),
-        #i18n: Service provided by a health facility.
-        #i18n_meaning: surgical specialty that focuses on arteries and veins
+        #i18n: Service provided by a health facility. 
+        #i18n: Meaning: surgical specialty that focuses on arteries and veins
         value_message('vascular_surgery', en='Vascular surgery'),
-        #i18n: Service provided by a health facility.
-        #i18n_meaning: deals with diagnosis and (non-surgical) treatment of
-        #i18n_meaning: diseases of the internal organs
+        #i18n: Service provided by a health facility. 
+        #i18n: Meaning: deals with diagnosis and (non-surgical) treatment of
+        #i18n: Meaning: diseases of the internal organs
         value_message('general_medicine', en='General medicine'),
-        #i18n: Service provided by a health facility.
-        #i18n_meaning: branch of medicine dealing with the heart and its diseases
+        #i18n: Service provided by a health facility. 
+        #i18n: Meaning: branch of medicine dealing with the heart and its diseases
         value_message('cardiology', en='Cardiology'),
-        #i18n: Service provided by a health facility.
-        #i18n_meaning: specializing in treating communicable diseases
+        #i18n: Service provided by a health facility. 
+        #i18n: Meaning: specializing in treating communicable diseases
         value_message('infectious_disease', en='Infectious disease'),
-        #i18n: Service provided by a health facility.
-        #i18n_meaning: branch of medicine dealing with infants and children
+        #i18n: Service provided by a health facility. 
+        #i18n: Meaning: branch of medicine dealing with infants and children
         value_message('pediatrics', en='Pediatrics'),
-        #i18n: Service provided by a health facility.
+        #i18n: Service provided by a health facility. 
         #i18n: care given after surgery until patient is discharged
         value_message('postoperative_care', en='Postoperative care'),
-        #i18n: services provided by a health facility
-        #i18n_meaning: Obstetrics deals with childbirth and care of the mother.
-        #i18n_meaning: Gynecology deals with diseases and hygiene of women
+        #i18n: services provided by a health facility 
+        #i18n: Meaning: Obstetrics deals with childbirth and care of the mother.
+        #i18n: Meaning: Gynecology deals with diseases and hygiene of women
         value_message('obstetrics_gynecology', en='Obstetrics and gynecology'),
         #i18n: Service provided by a health facility.
         value_message('dialysis', en='Dialysis'),
@@ -251,8 +251,14 @@ def setup_messages(version):
     for locale in os.listdir(settings.LOCALE_PATHS[0]):
         django.utils.translation.activate(locale)
         for message in messages:
-            setattr(message, locale,
-                    django.utils.translation.gettext_lazy(message.en))
+            try:
+                text = django.utils.translation.gettext_lazy(
+                    message.en).decode('utf-8')
+            except KeyError:
+                logging.warning('Translation for "%s" same as "en" for "%s"'
+                                % (locale, message.en))
+                text = message.en
+            setattr(message, locale, text)
 
     db.put(messages)
 
@@ -305,7 +311,7 @@ def to_js_string(string):
     return simplejson.dumps(string).replace("'", "\'")
 
 def setup_new_version(country_code='ht', title='Haiti'):
-    """The public interface to this module."""
+    """Sets up a new version."""
     version = make_version(country_code, title)
     setup_version(version)
     setup_js_messages()
