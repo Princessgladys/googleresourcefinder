@@ -20,6 +20,7 @@ import google.appengine.ext.webapp.template
 import google.appengine.ext.webapp.util
 
 import StringIO
+import access
 from calendar import timegm
 import cgi
 import cgitb
@@ -68,6 +69,9 @@ def strip(text):
 def validate_yes(text):
     return (text.lower() == 'yes') and 'yes' or ''
 
+def validate_role(text):
+    return text in access.ROLES and text
+
 def validate_float(text):
     try:
         return float(text)
@@ -87,14 +91,25 @@ class Struct:
 class Handler(webapp.RequestHandler):
     auto_params = {
         'cc': strip,
-        'facility_name': strip,
-        'print': validate_yes,
         'embed': validate_yes,
+        'facility_name': strip,
+        'iframe': validate_yes,
+        'lang': strip,
         'lat': validate_float,
         'lon': validate_float,
+        'print': validate_yes,
         'rad': validate_float,
-        'lang': strip,
+        'role': validate_role
     }
+
+    def require_user_role(self, role, cc):
+        """Raise and exception in case the user don't have the given role
+           to the given country.
+           Redirect to login in case there is no user"""
+        if not self.auth:
+            raise Redirect(users.create_login_url(self.request.uri))
+        if not access.check_user_role(self.auth, role, cc):
+            raise ErrorMessage(403, _('Unauthorized user.'))
 
     def require_logged_in_user(self):
         """Redirect to login in case there is no user"""
@@ -111,8 +126,7 @@ class Handler(webapp.RequestHandler):
     def initialize(self, request, response):
         webapp.RequestHandler.initialize(self, request, response)
         self.user = users.get_current_user()
-        logging.info('user: %s' % (self.user and
-                                   self.user.email() or 'anonymous'))
+        self.auth = access.check_and_log(request, self.user)
         for name in request.headers.keys():
             if name.lower().startswith('x-appengine'):
                 logging.debug('%s: %s' % (name, request.headers[name]))

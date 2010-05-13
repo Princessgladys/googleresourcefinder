@@ -83,6 +83,7 @@
       <a href="/">{% trans "Home" %}</a> |
     {% else %}
       <a id="print-link" href="#"
+         {% ifequal 'yes' params.iframe %} target="_blank" {% endifequal %}
          {% comment %}
          #i18n: Link to print the current view of the application
          {% endcomment %}

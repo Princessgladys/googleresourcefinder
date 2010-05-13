@@ -15,6 +15,8 @@
 import logging
 import model
 import utils
+from access import check_user_role
+from main import USE_WHITELISTS
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
 from utils import db, get_message, html_escape, to_unicode, users, _
 from feeds.crypto import sign, verify
@@ -207,6 +209,11 @@ def parse_input(report, request, attribute):
     return ATTRIBUTE_TYPES[attribute.type].parse_input(
         report, name, request.get(name, None), request, attribute)
 
+def has_input(request, attribute):
+    """Returns True if the request has an input for the given attribute.
+       Does not check if that input is different than the previous value."""
+    return attribute.key().name() in request
+
 def get_last_report(version, facility_name):
     return (model.Report.all()
             .ancestor(version)
@@ -222,6 +229,11 @@ class Edit(utils.Handler):
         self.facility_type, and self.attributes based on the query params."""
 
         self.require_logged_in_user()
+
+        # TODO(shakusa) Can remove after launch when we no longer want to
+        # restrict editing to editors
+        if USE_WHITELISTS:
+            self.require_user_role('editor', self.params.cc)
 
         try:
             self.version = utils.get_latest_version(self.params.cc)
@@ -293,7 +305,11 @@ class Edit(utils.Handler):
         )
         for name in self.facility_type.attribute_names:
             attribute = self.attributes[name]
-            if attribute.editable:
+            # has_input() is here for a corner case: If the form was viewed when
+            # the user did not have permission to edit, then they were granted
+            # access before submitting, non-editable fields would not be present
+            # in the form and we would forget the value from last_report
+            if attribute.editable and has_input(self.request, attribute)):
                 parse_input(report, self.request, attribute)
             else:
                 setattr(report, name, getattr(last_report, name, None))

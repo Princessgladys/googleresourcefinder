@@ -18,7 +18,7 @@ import access
 import rendering
 
 # TODO(shakusa) Issue 55: When we are ready to launch, set this to False
-VIEW_AND_PRINT_REQUIRE_LOGIN = True
+USE_WHITELISTS = True
 
 def get_export_link(version):
     """If only one facility type, return the direct download link,
@@ -37,7 +37,7 @@ def get_export_link(version):
 class Main(Handler):
 
     def get(self):
-        if VIEW_AND_PRINT_REQUIRE_LOGIN:
+        if USE_WHITELISTS:
             self.require_logged_in_user()
 
         version = get_latest_version('ht')
