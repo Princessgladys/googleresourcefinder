@@ -87,6 +87,9 @@ tr.field.text { vertical-align: top; }
         #i18n: Button text to cancel and return to the home page
         {% endcomment %}
         <input type="submit" name='cancel' value='{% trans "Cancel" %}'>
+        <a href='javascript:void(0)'
+           onclick='window.open("/tos", "tos", "width=400,height=400")'
+           >{% trans "Terms of service" %}</a>
         <span id="edit-status"></span>
       </td>
     </tr>
