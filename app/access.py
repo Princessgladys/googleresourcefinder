@@ -35,19 +35,6 @@ import logging
 
 ROLES = ['user', 'editor', 'superuser']
 
-class Authorization(db.Model):
-    timestamp = db.DateTimeProperty(auto_now_add=True)
-    description = db.StringProperty(required=True)
-    email = db.StringProperty()
-    user_id = db.StringProperty()
-    token = db.StringProperty()
-    # user roles are in the format: country_code:role
-    # where role is one of ROLES
-    # an empty country_code means the user has the role for
-    # all countries
-    user_roles = db.StringListProperty()
-    requested_roles = db.StringListProperty()
-
 def check_token(token):
     return Authorization.all().filter('token =', token).get()
 
