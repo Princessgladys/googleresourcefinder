@@ -212,7 +212,7 @@ def parse_input(report, request, attribute):
 def has_input(request, attribute):
     """Returns True if the request has an input for the given attribute.
        Does not check if that input is different than the previous value."""
-    return attribute.key().name() in request
+    return request.get(attribute.key().name()) is not None
 
 def get_last_report(version, facility_name):
     return (model.Report.all()
@@ -306,10 +306,11 @@ class Edit(utils.Handler):
         for name in self.facility_type.attribute_names:
             attribute = self.attributes[name]
             # has_input() is here for a corner case: If the form was viewed when
-            # the user did not have permission to edit, then they were granted
-            # access before submitting, non-editable fields would not be present
-            # in the form and we would forget the value from last_report
-            if attribute.editable and has_input(self.request, attribute)):
+            # the user did not have permission to edit some fields, then they
+            # were granted access before submitting, non-editable fields would
+            # not be present in the form and we would forget the value from
+            # last_report
+            if attribute.editable and has_input(self.request, attribute):
                 parse_input(report, self.request, attribute)
             else:
                 setattr(report, name, getattr(last_report, name, None))

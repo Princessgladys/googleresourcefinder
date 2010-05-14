@@ -181,7 +181,10 @@
     {% comment %}
     #i18n: Link to go to a page with past versions of the 'master' list
     {% endcomment %}
-    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">{% trans "View master list archive" %}</a>
+    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">{% trans "View master list archive" %}</a> |
+    <a href='javascript:void(0)'
+       onclick='window.open("/tos", "tos", "width=400,height=400")'
+       >{% trans "Terms of service" %}</a>
   </div>
 </div>
 {% if params.print %}
