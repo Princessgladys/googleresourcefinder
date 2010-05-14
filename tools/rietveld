@@ -140,8 +140,7 @@ echo $PYTHON $TOOLS_DIR/upload.py $OPTIONS -m "\"$MESSAGE\""
 cd $PROJECT_DIR
 PYTHONPATH=$TOOLS_DIR $PYTHON -c "
 import upload
-cmd = 'upload.py $OPTIONS'.split()
-cmd.extend(['-m', '$MESSAGE'])
+cmd = ['upload.py'] + '$OPTIONS'.split() + ['-m', '$MESSAGE']
 issue, patchset = upload.RealMain(cmd)
 print >>open('/tmp/issue.$$', 'w'), issue
 " || exit 1
