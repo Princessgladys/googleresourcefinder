@@ -18,7 +18,7 @@ import access
 import rendering
 
 # TODO(shakusa) Issue 55: When we are ready to launch, set this to False
-USE_WHITELISTS = False
+USE_WHITELISTS = True
 
 def get_export_link():
     """If only one facility type, return the direct download link,
