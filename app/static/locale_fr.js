@@ -45,7 +45,7 @@ locale = function() {
   //i18n: A distance (example: 3.11 miles (5 km))
   messages.DISTANCE = "${MILES}\u00a0miles (${KM}\u00a0km)";
 
-  //i18n_meaning: administrative division
+  //i18n: Meaning: administrative division
   messages.DISTRICT = "District";
 
   //i18n: Link to edit the data for a facility record.
@@ -73,7 +73,7 @@ locale = function() {
 
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
-  messages.OPEN_TOTAL_BEDS = "Lits Ouvrir/Total";
+  messages.OPEN_TOTAL_BEDS = "Lits libres/au total";
 
   //i18n: Very short abbreviation for a phone number, indended to disambiguate
   //i18n: from a fax number.  (example: p 555-555-5555)
@@ -92,7 +92,7 @@ locale = function() {
   messages.SERVICES = "Services";
 
   //i18n: Label for a control that filters a list of facilities
-  messages.SHOW = "Exposer:";
+  messages.SHOW = "Afficher\u00a0:";
 
   //i18n: Indicates a user needs to sign in to edit data on a facility.
   messages.SIGN_IN_TO_EDIT = "Connectez-vous pour apporter des modifications.";
@@ -101,7 +101,7 @@ locale = function() {
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}:${MINUTES} ${ZONE}";
 
   //i18n: Label indicating a record was updated
-  messages.UPDATED = "Mise \u00e0 jour";
+  messages.UPDATED = "Mise \u00e0 jour\u00a0:";
 
   //i18n: Form option for agreement.
   messages.YES = "Oui";
