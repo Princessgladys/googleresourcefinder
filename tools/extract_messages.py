@@ -22,34 +22,38 @@
 
    // Some other comment, must not separate i18n comments from the code
    //i18n: Label for an administrative division of a country
-   //i18n_meaning: Adminstrative division in France
    messages.DEPARTMENT = 'Department';
 
    In python:
    # Some other comment, must not separate i18n comments from the code
    #i18n: Label for an administrative division of a country
-   #i18n_meaning: Adminstrative division in France
    dept = _('Department')
 
    And in a Django template:
    {% comment %}
    #Some other comment, must not separate i18n comments from the code
    #i18n: Label for an administrative division of a country
-   #i18n_meaning: Adminstrative division in France
    {% endcomment %}
    <span>{% trans "Department" %}</span>
+
+   Warning: This code technically also supports an i18n_meaning tag to create
+   msgctxt lines in the .po file, but these are not supported by the current
+   django version used by appengine (if msgctxt lines appear, not only are they
+   ignored, but they prevent the correct translation from being returned),
+   so they are not used.
 
    Must be run from the app/ directory for makemessages to work.
    Example:
    ../tools/extract_messages.py ../tools/setup.py static/locale.js
 """
 
+import codecs
 import os
 import re
 import sys
 
-DJANGO_EN_PO = 'locale/en/LC_MESSAGES/django.po'
 DJANGO_END_COMMENT_PATTERN = '{\% endcomment \%}'
+DJANGO_STRING_PATTERN = '''['"](.*)['"]\s*$'''
 STRING_LITERAL_PATTERN = r'''\s*(["'])((\\.|[^\\])*?)\1'''
 
 PATTERNS = {
@@ -72,10 +76,11 @@ PATTERNS = {
 class Message:
     """ Describes a message, with optional description and meaning"""
 
-    def __init__(self, msgid, description='', meaning=''):
+    def __init__(self, msgid, description='', meaning='', msgstr=''):
         self.msgid = msgid
         self.description = description
         self.meaning = meaning
+        self.msgstr = msgstr
 
     def __eq__(self, other):
         """Only message and meaning factor into equality and hash."""
@@ -95,9 +100,7 @@ class Message:
 
 def django_makemessages():
     """Run django's makemessages routine to extract messages from python and
-       html files. Return the header from the django-generated .po file
-       and a dict from Message to a list of file:line_num references where that
-       Message was extracted."""
+       html files."""
     cmd = ('/home/build/google3/third_party/py/django/v1_1/bin/django-admin.py '
         + 'makemessages -a')
     (stdin, stdout, stderr) = os.popen3(cmd, 't')
@@ -105,6 +108,10 @@ def django_makemessages():
     if errors:
         raise SystemExit(errors)
 
+def parse_django_po(po_filename):
+    """Return the header from the django-generated .po file
+       and a dict from Message to a list of file:line_num references where that
+       Message was extracted"""
     # Holds the header at the top of the django po file
     header = ''
     # A sentinel to know when to stop considering lines part of the header
@@ -114,29 +121,64 @@ def django_makemessages():
     # The current file:line_num ref, which occurs on a previous line to it's
     # corresponding message
     current_ref = ''
-    # The current msgid, it can span multiple lines
-    current_msgid = None
-    for line in open(DJANGO_EN_PO):
+    # The current Message
+    current_msg = Message(None, None, None, None)
+
+    for line in codecs.open(po_filename, encoding='utf-8'):
         if line.startswith('#:'):
             header_done = True
         if not header_done:
             header += line
             continue
         line = line.strip()
-        if line.startswith('#:'):
-            current_ref = line[3:]
-        elif line.startswith('msgid'):
-            current_msgid = re.match(
-                '''msgid ['"](.*)['"]\s*$''', line).group(1)
-        elif line.startswith('msgstr'):
+        if not line.strip() and current_msg.msgid:
             refs = current_ref.split(' ')
-            (description, meaning) = find_description_meaning(refs)
-            message_to_ref[Message(current_msgid, description, meaning)] = refs
+            if not current_msg.description and not current_msg.meaning:
+                (desc, meaning) = find_description_meaning(refs)
+                current_msg.description = desc
+                current_msg.meaning = meaning
+            if not current_msg.description:
+                current_msg.description = ''
+            if not current_msg.meaning:
+                current_msg.meaning = ''
+            message_to_ref[current_msg] = refs
             current_ref = ''
-            current_msgid = None
-        elif current_msgid is not None:
-            current_msgid += re.match('''['"](.*)['"]\s*$''', line).group(1)
+            current_msg = Message(None, None, None, None)
+        elif line.startswith('#:'):
+            current_ref = line[3:]
+        elif line.startswith('#.'):
+            current_msg.description = line[3:]
+        elif line.startswith('msgstr'):
+            current_msg.msgstr = parse_po_tagline(line, 'msgstr')
+        elif current_msg.msgstr is not None:
+            current_msg.msgstr += parse_po_tagline(line)
+        elif line.startswith('msgid'):
+            current_msg.msgid = parse_po_tagline(line, 'msgid')
+        elif current_msg.msgid is not None:
+            current_msg.msgid += parse_po_tagline(line)
+        elif line.startswith('msgctxt'):
+            current_msg.meaning = parse_po_tagline(line, 'msgctxt')
+        elif current_msg.meaning is not None:
+            current_msg.meaning += parse_po_tagline(line)
+
+    if current_msg.msgid:
+        refs = current_ref.split(' ')
+        if not current_msg.description and not current_msg.meaning:
+            (desc, meaning) = find_description_meaning(refs)
+            current_msg.description = desc
+            current_msg.meaning = meaning
+        if not current_msg.description:
+            current_msg.description = ''
+        if not current_msg.meaning:
+            current_msg.meaning = ''
+        message_to_ref[current_msg] = refs
+
     return (header, message_to_ref)
+
+def parse_po_tagline(line, tag=''):
+    """Parse a tag line from a po file."""
+    match = re.match((tag and (tag + ' ') or '') + DJANGO_STRING_PATTERN, line)
+    return len(match.groups()) > 0 and match.group(1) or ''
 
 def find_description_meaning(refs):
     """Horribly inefficient search for description and meaning strings,
@@ -243,9 +285,10 @@ def merge(msg_to_ref, ref_msg_pairs):
     for (ref, msg) in ref_msg_pairs:
         msg_to_ref.setdefault(msg, []).append(ref)
 
-def output_po_file(output, header, msg_to_ref):
+def output_po_file(output_filename, header, msg_to_ref):
     """Write a po file to output from the given header and dict from message
        to list of file:line_num references where the message appears."""
+    output = codecs.open(output_filename, 'w', 'utf-8')
     output.write(header)
 
     for message, refs in sorted(msg_to_ref.items()):
@@ -263,8 +306,8 @@ def output_po_file(output, header, msg_to_ref):
         if meaning:
             print >>output, 'msgctxt "%s"' % meaning
         print >>output, 'msgid "%s"' % msgid
-        print >>output, 'msgstr ""\n'
-    output.flush()
+        print >>output, 'msgstr "%s"\n' % message.msgstr
+    output.close()
 
 def has_sh_placeholders(message):
     """Returns true if the message has placeholders."""
@@ -278,10 +321,35 @@ if __name__ == '__main__':
     if not os.getcwd().endswith('app'):
         raise SystemExit('Please run from the app/ diretory')
 
-    (header, msg_to_ref) = django_makemessages()
-    for input_filename in sys.argv[1:]:
-        ref_msg_pairs = parse_file(input_filename)
-        merge(msg_to_ref, ref_msg_pairs)
+    po_filenames = list(
+        os.path.join('locale', locale, 'LC_MESSAGES', 'django.po')
+        for locale in os.listdir('locale'))
 
-    output = sys.stdout
-    output_po_file(output, header, msg_to_ref)
+    # Parse input files
+    print 'Parsing input files'
+    en_ref_msg_pairs = []
+    for input_filename in sys.argv[1:]:
+        en_ref_msg_pairs.extend(parse_file(input_filename))
+
+    # For each language, grab translations for existing messages
+    # (descriptions and meanings get blown away by makemessages)
+    ref_msg_pairs = {}
+    for po_filename in po_filenames:
+        (header, message_to_ref) = parse_django_po(po_filename)
+        msgs = message_to_ref.keys()
+        ref_msg_pairs[po_filename] = []
+        for (ref, msg) in en_ref_msg_pairs:
+            msgstr = (msg in msgs) and msgs[msgs.index(msg)].msgstr or ''
+            ref_msg_pairs[po_filename].append(
+                (ref, Message(msg.msgid, msg.description, msg.meaning, msgstr)))
+
+    # Run Django's makemessages
+    print 'Running django makemessages'
+    django_makemessages()
+
+    # For each language, overwrite the django makemessages output with ours
+    for po_filename in po_filenames:
+        print 'Writing %s' % po_filename
+        (header, message_to_ref) = parse_django_po(po_filename)
+        merge(message_to_ref, ref_msg_pairs[po_filename])
+        output_po_file(po_filename, header, message_to_ref)
