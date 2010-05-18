@@ -21,22 +21,9 @@ class Dump(Handler):
 <!doctype html public "-//W3C//HTML 4.01 Transitional//EN">
 <link rel=stylesheet href="static/style.css">
 ''')
-        country_codes = [country.key().name() for country in Country.all()]
-        if self.request.get('cc'):
-            self.write_version(get_latest_version(self.request.get('cc')))
-        else:
-            #i18n: Label to select a country from a list
-            self.write(_('Select a country:') + '<ul>')
-            for cc in sorted(country_codes):
-                self.write('<li><a href="/dump?cc=%s">%s</a>' %
-                    (cc, Country.get_by_key_name(cc).title))
-            self.write('</ul>')
-
-    def write_version(self, version):
-        self.write('<p><dl><dt>' + html_repr(version))
-        if version:
-            for entity in db.Query().ancestor(version):
-                self.write('<dd>' + html_repr(entity, leaf=1))
+        self.write('<p><dl>')
+        for entity in db.Query():
+            self.write('<dd>' + html_repr(entity))
         self.write('</dl>')
 
 if __name__ == '__main__':

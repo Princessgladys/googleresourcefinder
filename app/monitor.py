@@ -15,26 +15,25 @@
 """Handler for notifying JavaScript of changes."""
 
 from model import Report
-from utils import get_latest_version, Handler, run
+from utils import Handler, run
 import datetime
 import time
 
 
 class Monitor(Handler):
     def get(self):
-        version = get_latest_version('ht')
         start = time.time()
         min_time = datetime.datetime.utcnow()
         self.response.headers['Content-Type'] = 'text/plain'
         while time.time() < start + 20:
-            report = Report.all().ancestor(version).order(
+            report = FacilityReport.all().order(
                 '-timestamp').filter('timestamp >=', min_time).get()
             if report:
                 for name in ['patient_capacity', 'patient_count']:
                     if hasattr(report, name):
                         self.write(
     'set_facility_attribute(%r, %r, %d);\n' %
-    (str(report.facility_name), str(name), int(getattr(report, name))))
+    (str(report.facility.key().name()), str(name), int(getattr(report, name))))
                 break
 
 

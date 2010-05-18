@@ -16,33 +16,20 @@ from extract_messages import parse_message, PATTERNS
 from model import *
 from utils import *
 
-def make_version(country_code, title):
-    """Creates a new version for the given country."""
-    country = Country.get_by_key_name(country_code)
-    if not country:
-        country = Country(key_name=country_code, title=title)
-        country.put()
-    version = Version(country)
-    version.put()
-    return version
-
-def setup_version(version):
-    """Loads data for the given version."""
-    setup_facility_types(version)
-    setup_messages(version)
-
-def setup_facility_types(version):
+def setup_facility_types():
     """Sets up the attributes and facility types."""
-    def attr(type, name, values=[], editable=True):
+    def attr(type, name, values=[], edit_role=None):
         return Attribute(
-            version, key_name=name, type=type, editable=editable, values=values)
+            key_name=name, type=type, edit_role=edit_role, values=values)
 
     # NB: Attributes are kept in a specific order defined by zeiger
     # Be careful when changing them, as you will change the order
     # of appearance in the map info window. Also, order here should
     # be kept roughly in sync with CSV column order defined in app/export.py
     attributes = [
-        attr('int', 'healthc_id', editable=False),
+        attr('str', 'title', edit_role='f:ht:supereditor'),
+        attr('str', 'alt_title', edit_role='f:ht:supereditor'),
+        attr('int', 'healthc_id', edit_role='f:ht:supereditor'),
         attr('int', 'available_beds'),
         attr('int', 'total_beds'),
         attr('multi', 'services',
@@ -58,8 +45,10 @@ def setup_facility_types(version):
         attr('str', 'district'),
         attr('str', 'commune'),
         attr('str', 'address'),
+        attr('geopt', 'location'),
+        attr('str', 'accuracy'),
         attr('str', 'organization'),
-        attr('choice', 'type',
+        attr('choice', 'facility_type',
              ['COM', 'MIL', 'MIX', 'NGO', 'PRI', 'PUB', 'UNI']),
         attr('choice', 'category',
              ['C/S', 'C/S Temp', 'CAL', 'CSL', 'DISP', 'F Hospital',
@@ -69,32 +58,41 @@ def setup_facility_types(version):
              ['Reinforced concrete', 'Unreinforced masonry', 'Wood frame',
               'Adobe']),
         attr('str', 'damage'),
+        attr('choice', 'operational_status',
+             ['Operational', 'No surgical capacity', 'Field hospital',
+              'Field hospital co-located with hospital']),
         attr('str', 'comments'),
         attr('bool', 'reachable_by_road'),
         attr('bool', 'can_pick_up_patients'),
-        attr('str', 'region_id', editable=False),
-        attr('str', 'district_id', editable=False),
-        attr('str', 'commune_id', editable=False),
-        attr('str', 'commune_code', editable=False),
-        attr('str', 'sante_id', editable=False),
+        attr('str', 'region_id', edit_role='f:ht:supereditor'),
+        attr('str', 'district_id', edit_role='f:ht:supereditor'),
+        attr('str', 'commune_id', edit_role='f:ht:supereditor'),
+        attr('str', 'commune_code', edit_role='f:ht:supereditor'),
+        attr('str', 'sante_id', edit_role='f:ht:supereditor'),
     ]
 
-    hospital = FacilityType(
-        version, key_name='hospital',
-        attribute_names=[a.key().name() for a in attributes])
-
     db.put(attributes)
+
+    hospital = FacilityType(
+        key_name='hospital',
+        attributes=[a.key() for a in attributes])
+
     db.put(hospital)
 
 
-def setup_messages(version):
-    """Sets up messages, pulling translatioons from the django .po files."""
+def setup_messages():
+    """Sets up messages, pulling translations from the django .po files."""
     def message(namespace, name, **kw):
-        return Message(version, namespace=namespace, name=name, **kw)
+        return Message(namespace=namespace, name=name, **kw)
     name_message = lambda name, **kw: message('attribute_name', name, **kw)
     value_message = lambda name, **kw: message('attribute_value', name, **kw)
+    fac_type_message = lambda name, **kw: message('facility_type', name, **kw)
 
     messages = [
+        #i18n: Name of a facility
+        name_message('title', en='Facility name'),
+        #i18n: Alternate name of a facility
+        name_message('alt_title', en='Alternate facility name'),
         #i18n: Proper name of an ID for a healthcare facility, no translation
         #i18n: necessary.
         name_message('healthc_id', en='HealthC ID'),
@@ -118,16 +116,22 @@ def setup_messages(version):
         name_message('commune', en='Commune'),
         #i18n: street address
         name_message('address', en='Address'),
+        #i18n: latitude, longitude location
+        name_message('location', en='Location'),
+        #i18n: Accuracy of latitude, longitude coordinates
+        name_message('accuracy', en='Accuracy'),
         #i18n: Meaning: referring to the name of an organization
         name_message('organization', en='Organization name'),
         #i18n: genre, subdivision of a particular kind of thing
-        name_message('type', en='Type'),
+        name_message('facility_type', en='Type'),
         #i18n: collection of things sharing a common attribute
         name_message('category', en='Category'),
         #i18n: the materials making up a building
         name_message('construction', en='Construction'),
         #i18n: destruction
         name_message('damage', en='Damage'),
+        #i18n: Whether or not a facility is fully operational.
+        name_message('operational_status', en='Operational status'),
         #i18n: remarks
         name_message('comments', en='Comments'),
         #i18n: Whether or not a facility can be accessed by a road.
@@ -173,6 +177,17 @@ def setup_messages(version):
         value_message('Wood frame', en='Wood frame'),
         #i18n: Type of facility construction: sun-dried clay bricks
         value_message('Adobe', en='Adobe'),
+        #i18n: Type of facility operational status: in working order
+        value_message('Operational', en='Operational'),
+        #i18n: Type of facility operational status: cannot perform surgeries
+        value_message('No surgical capacity', en='No surgical capacity'),
+        #i18n: Type of facility operational status: as functional as a field
+        #i18n: hospital
+        value_message('Field hospital', en='Field hospital'),
+        #i18n: Type of facility operational status: as functional as a field
+        #i18n: hospital next to a hospital
+        value_message('Field hospital co-located with hospital',
+                      en='Field hospital co-located with hospital'),
 
         # category
 
@@ -310,9 +325,8 @@ def to_js_string(string):
     """Escapes quotes and escapes unicode characters to \uXXXX notation"""
     return simplejson.dumps(string).replace("'", "\'")
 
-def setup_new_version(country_code='ht', title='Haiti'):
-    """Sets up a new version."""
-    version = make_version(country_code, title)
-    setup_version(version)
+def setup_new_datastore():
+    """Sets up a new datastore."""
+    setup_facility_types()
+    setup_messages()
     setup_js_messages()
-    return version

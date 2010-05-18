@@ -64,7 +64,7 @@
           {% comment %}
           #i18n: Header for the history of changes in data for a facility
           {% endcomment %}
-          {% trans "Change history" %}</a></li>
+          {% trans "Change details" %}</a></li>
       </ul>
       <div id="bubble-tab-details">
         <table class="details" cellpadding="0" cellspacing="0">
@@ -92,17 +92,21 @@
           <thead>
             <tr>
               {% comment %}
-              #i18n: Header for date and time of a change record
-              {% endcomment %}
-              <th>{% trans "Date and time" %}</th>
-              {% comment %}
               #i18n: Header for a record of a change to a facility detail
               {% endcomment %}
               <th>{% trans "Change" %}</th>
               {% comment %}
-              #i18n: Header a column of email addresses who made the edits
+              #i18n: Header a column of user who made the edits
               {% endcomment %}
               <th>{% trans "Edited by" %}</th>
+              {% comment %}
+              #i18n: Header a column of comment about why a change was made
+              {% endcomment %}
+              <th>{% trans "Change note" %}</th>
+              {% comment %}
+              #i18n: Header for date and time of a change record
+              {% endcomment %}
+              <th>{% trans "Date and time" %}</th>
             </tr>
           </thead>
           <tbody>

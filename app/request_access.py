@@ -38,26 +38,27 @@ class RequestAccess(utils.Handler):
         if not self.auth:
             raise Redirect(users.create_login_url(self.request.uri))
 
-        self.render('templates/request_access.html',
-                    role='user',
-                    cc='ht');
+        self.render('templates/request_access.html', role='user');
 
 
     def post(self):
         if not self.auth:
             raise Redirect(users.create_login_url(self.request.uri))
-        role = "%s:%s" % (self.params.cc, self.params.role)
+        role = "f:%s" % self.params.role
+
         if role in self.auth.user_roles:
             #i18n: Requested permission role has been previously granted
-            message = _('You are already %(role)s') % role
+            message = _('You are already %(role)s' % {'role': role})
         elif role in self.auth.requested_roles:
             message = _(
                 #i18n: Requested permission role has already been granted
-                'Your request for %(role)s is already registered') % role
+                'Your request for %(role)s is already registered'
+                % {'role': role})
         else:
             self.auth.requested_roles.append(role)
             #i18n: Requested permission role was registered
-            message = _('Request for becoming %(role)s was registered.') % role
+            message = _('Request for becoming %(role)s was registered.'
+                        % {'role': role})
             self.auth.put()
 
         if self.params.embed:
