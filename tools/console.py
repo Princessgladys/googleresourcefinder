@@ -20,6 +20,7 @@ Use common.sh to set PYTHONPATH and APPENGINE_DIR before running this tool."""
 import code
 import getpass
 import logging
+import os
 import sys
 
 from google.appengine.ext.remote_api import remote_api_stub
@@ -56,6 +57,7 @@ def init(app_id, host=None, username=None, password=None):
         username = raw_input('Username: ')
     else:
         print 'Username: %s' % username
+    os.environ['USER_EMAIL'] = username
     if not password:
         password = getpass.getpass('Password: ')
     remote_api_stub.ConfigureRemoteDatastore(

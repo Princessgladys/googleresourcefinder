@@ -42,25 +42,25 @@ class Facility(db.Expando):
     Key name: government or internationally established facility ID."""
     timestamp = db.DateTimeProperty(auto_now_add=True) # creation time
     type = db.StringProperty(required=True)  # key_name of a FacilityType
-    user = db.UserProperty(required=True) # who created this facility
-    user_affiliation = db.StringProperty() # affiliation of creator
+    user = db.UserProperty() # who created this facility
     # additional properties for the current value of each attribute
     # (named by Attribute's key_name).  This denormalization is for read speed.
-    # Consider an attribute named 'foo'. We will store 5 values here:
-    # __foo           various, the attribute value
-    # __foo_timestamp db.DateTimeProperty, observation timestamp when the
-    #                                      value was valid
-    # __foo_nickname  db.StringProperty, the user who changed the value
-    # __foo_user_affiliation db.StringProperty, affiliation of the user
-    # __foo_comment   db.StringProperty, a comment left by the user making the
-    #                                    change
+    # Consider an attribute named 'foo'. We will store 6 values here:
+    # foo              various, the attribute value
+    # foo__timestamp   db.DateTimeProperty, observation timestamp when the
+    #                                       value was valid
+    # foo__user        db.UserProperty, the user who changed the value
+    # foo__nickname    db.StringProperty, nickname of the user
+    # foo__affiliation db.StringProperty, affiliation of the user
+    # foo__comment     db.StringProperty, a comment left by the user making the
+    #                                     change
 
 class FacilityType(db.Model):
     """A type of Facility, e.g. hospital, warehouse, charity, camp.
     Top-level entity, has no parent.
     Key name: an identifier used as the value of Facility.type."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
-    attribute_names = db.StringListProperty()  # key_names of Attribute entities
+    attributes = db.ListProperty(db.Key)  # keys of Attribute entities
 
 class Attribute(db.Model):
     """An attribute of a facility or resource, e.g. services available, # of
@@ -88,41 +88,13 @@ class FacilityReport(db.Expando):
     Parent: Facility."""
     arrival_timestamp = db.DateTimeProperty(auto_now_add=True) # date we
                                                                # received report
-    Facility_name = db.StringProperty()  # a Facility's key_name
+    user = db.UserProperty()
     observation_timestamp = db.DateTimeProperty()  # date that report contents
                                                    # were valid
-    user = db.UserProperty()
-    user_affiliation = db.StringProperty()
     # additional properties for each Attribute (named by Attribute's key_name)
     # Consider an attribute named 'foo'. We will store 2 values here:
-    # __foo           various, the attribute value
-    # __foo_comment   db.StringProperty, a comment from user making the change
-
-class Authorization(db.Model):
-    """Represents an authorization for an Account to have a specific role.
-    Parent: Account."""
-    timestamp = db.DateTimeProperty(auto_now_add=True)
-    comment = db.StringProperty(required=True) # Reason for granting this authoriazation
-    granted_by_user = db.UserProperty(required=True)
-    user_id = db.StringProperty()
-    # user_role is of the form type:type_name:role
-    # type is always 'f' for now, role is one of ROLES (defined in access.py),
-    # and type_name is the name of a facility type. If type_name is
-    # blank, the user has authorization to any item of this type and role.
-    # Wildcards are also accepted: f:ht*:role will grant access to any
-    # FacilityType with name starting in 'ht'.
-    # '*:*:role' is treated the same as ':role'
-    user_role = db.StringListProperty()
-
-class Account(db.Model):
-    """Any application-specific information about an AppEngine user. Top-level
-    entity, has no parent. Key name: user.user_id() """
-    timestamp = db.DateTimeProperty(auto_now_add=True)
-    user = db.UserProperty(required=true)
-    nickname = db.StringProperty(required=true)
-    affiliation = db.StringProperty(required=true)
-    roles = db.StringListProperty() # see definition of Authorization.role
-    requested_roles = db.StringListProperty()
+    # foo           various, the attribute value
+    # foo__comment   db.StringProperty, a comment from user making the change
 
 class Message(db.Expando):
     """Internationalized strings for value identifiers.  Top-level entity,

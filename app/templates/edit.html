@@ -33,7 +33,11 @@
 tr.field { vertical-align: baseline; margin-top: 1em; }
 tr.field.text { vertical-align: top; }
 .readonly { color: #666; }
+.title { font-weight: bold }
 .label { text-align: right; color: #666; }
+.invisible { display:none }
+.errorbox-bad { padding: 2px; border: 2px solid #900; }
+.errormsg { margin-left: 4px; color: #900 }
 </style>
 {% if not params.embed %}
 </head>
@@ -75,6 +79,71 @@ tr.field.text { vertical-align: top; }
         </td>
       </tr>
     {% endfor %}
+    {% if not auth.nickname %}
+      <tr class="auth">
+        <td>
+        </td>
+        <td>
+          <br/>
+          <span class="title">
+            {% comment %}
+            #i18n: Instructions to enter a person's name and organizational
+            #i18n: affiliation.
+            {% endcomment %}
+            {% trans "Enter your name and affiliation." %}
+          </span>
+          <br/>
+          <span class="readonly">
+            {% comment %}
+            #i18n: Message on how name and affiliation will be used
+            {% endcomment %}
+          {% trans "Other users will be able to see your name and affiliation along with your changes." %}
+          </span>
+        </td>
+      </tr>
+      <tr class="field">
+        <td class="label">
+          {% comment %}
+          #i18n: Label for a required text box to enter a person's name
+          {% endcomment %}
+          {% trans "Name (required)" %}
+        </td>
+        <td class="input">
+          <div id="nickname_errorbox" class="errorbox-good">
+            <input type="text" name="auth_nickname" id="auth_nickname" 
+                   value="{{user.nickname}}"/>
+            <div id="nickname_errormsg" class="invisible">
+              {% comment %}
+              #i18n: Error message for required field
+              {% endcomment %}
+              {% trans "Field is required." %}
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr class="field">
+        <td class="label">
+          {% comment %}
+          #i18n: Label for a required text box to enter organizational
+          #i18n: affiliation.
+          {% endcomment %}
+          {% trans "Affiliation (required)" %}
+        </td>
+        <td class="input">
+          <div id="affiliation_errorbox" class="errorbox-good">
+            <input type="text" name="auth_affiliation" id="auth_affiliation"
+                   value=""/>
+            <div id="affiliation_errormsg" class="invisible">
+              {% comment %}
+              #i18n: Error message for required field
+              {% endcomment %}
+              {% trans "Field is required." %}
+            </div>
+          </div>
+          <br/>
+        </td>
+      </tr>
+    {% endif %}
     <tr>
       <td>
       </td>
@@ -82,17 +151,21 @@ tr.field.text { vertical-align: top; }
         {% comment %}
         #i18n: Button text to save data
         {% endcomment %}
-        <input type="submit" name='save' value='{% trans "Save" %}'>
+        <input type="submit" name="save" id="save" value="{% trans 'Save' %}">
         {% comment %}
         #i18n: Button text to cancel and return to the home page
         {% endcomment %}
-        <input type="submit" name='cancel' value='{% trans "Cancel" %}'>
+        <input type="submit" name="cancel" id="cancel" value="{% trans 'Cancel' %}">
         <span id="edit-status"></span>
       </td>
     </tr>
   </table>
 </form>
 {% if not params.embed %}
+{% comment %}
+# To embed the edit html, include this script at the end of the main page.
+{% endcomment %}
+<script type="text/javascript" src="static/edit.js"></script>
 </body>
 </html>
 {% endif %}

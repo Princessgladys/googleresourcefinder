@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
+import sys
 from feeds.geo import distance
 from utils import *
-from model import Attribute, Division, Facility, FacilityType, Message, Report
-import sys
+from model import Attribute, Facility, FacilityType, Message
 
 def make_jobjects(entities, transformer, *args):
     """Run a sequence of entities through a transformer function that produces
@@ -42,125 +43,85 @@ def facility_type_transformer(index, facility_type, attribute_is):
     """Construct the JSON object for a FacilityType."""
     return {'name': facility_type.key().name(),
             'attribute_is':
-                [attribute_is[p] for p in filter(
-                    lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
-                    facility_type.attribute_names)]}
+                [attribute_is[p.name()] for p in filter(
+                    lambda a: a.name() not in HIDDEN_ATTRIBUTE_NAMES,
+                    facility_type.attributes)]}
 
-def user_transformer(user, hide_email):
-    address = 'anonymous'
-    if user:
-        address = user.email()
-        if hide_email:
-            # Preserve the first letter of the username, then replace the
-            # (up to) 3 last characters of the username with '...'.
-            address = re.sub(r'^(\w+?)\w{0,3}@', r'\1...@', address)
-    return {'email': address}
-
-def facility_transformer(index, facility, attributes, report_map,
-                         facility_type_is, facility_map, hide_email,
+def facility_transformer(index, facility, attributes, facility_type_is,
                          center, radius):
     """Construct the JSON object for a Facility."""
-    # Add the facility to the facility lists for its containing divisions.
-    for name in facility.division_names:
-        facility_map.setdefault(name, []).append(index)
+    # Gather all the attributes
+    values = [None]
+    nicknames = [None]
+    affiliations = [None]
+    timestamps = [None]
+    comments = [None]
 
-    # Gather all the reports.
-    reports = []
-    for report in report_map.get(facility.key().name(), []):
-        values = [None]
-        for attribute in attributes:
-            values.append(getattr(report, attribute.key().name(), None))
-        reports.append({'date': report.date,
-                        'values': values,
-                        'user': user_transformer(report.user, hide_email)})
+    # TODO(shakusa) It's probably too much data to send to include
+    # all the change details. We should delay until an info bubble expansion.
+
+    for attribute in attributes:
+        name = attribute.key().name()
+        values.append(getattr(facility, name, None))
+        nicknames.append(getattr(facility, '%s__nickname' % name, None))
+        affiliations.append(getattr(facility, '%s__affiliation' % name, None))
+        timestamps.append(getattr(facility, '%s__timestamp' % name, None))
+        comments.append(getattr(facility, '%s__comment' % name, None))
 
     # Pack the results into an object suitable for JSON serialization.
     facility_jobject = {
-        'title': facility.title,
         'name': facility.key().name(),
         'type': facility_type_is[facility.type],
-        'division_i': facility.division_name,
-        'reports': reports and reports[-10:] or None,
-        'last_report': reports and reports[-1] or None
+        'values' : values,
+        'nicknames': nicknames,
+        'affiliations': affiliations,
+        'timestamps': timestamps,
+        'comments': comments
     }
-    if facility.location:
-        facility_jobject['location'] = {
+    if hasattr(facility, 'location'):
+        location = {
             'lat': facility.location.lat,
             'lon': facility.location.lon
         }
         if center:
-            facility_jobject['distance_meters'] = distance(
-                facility_jobject['location'], center)
+            facility_jobject['distance_meters'] = distance(location, center)
 
     if facility_jobject.get('distance_meters') > radius > 0:
         return None
 
     return facility_jobject
 
-def division_transformer(index, division, facility_map):
-    """Construct the JSON object for a division."""
-    return {
-        'title': division.title,
-        'facility_is': facility_map.get(division.key().name(), [])
-    }
-
 def json_encode(object):
     """Handle JSON encoding for non-primitive objects."""
-    if isinstance(object, Date):
-        return object.isoformat()
+    if isinstance(object, Date) or isinstance(object, datetime.datetime):
+        return to_local_isotime(object)
+    if isinstance(object, db.GeoPt):
+        return {'lat': object.lat, 'lon': object.lon}
     raise TypeError(repr(object) + ' is not JSON serializable')
 
 def clean_json(json):
     return re.sub(r'"(\w+)":', r'\1:', json)
 
-def version_to_json(version, hide_email, center=None, radius=None):
-    """Dump the data for a given country version as a JSON string."""
-    if version is None:
-        return '{}'
-
-    timestamp = version.timestamp
-    version = get_base(version)
+def to_json(center=None, radius=None):
+    """Dump the data as a JSON string."""
 
     # Get all the attributes.
     attributes = filter(lambda a: a.key().name() not in HIDDEN_ATTRIBUTE_NAMES,
-                        list(Attribute.all().ancestor(version).order('__key__')))
+                        list(Attribute.all().order('__key__')))
     attribute_jobjects, attribute_is = make_jobjects(
         attributes, attribute_transformer)
 
     # Make JSON objects for the facility types.
     facility_type_jobjects, facility_type_is = make_jobjects(
-        FacilityType.all().ancestor(version),
-        facility_type_transformer, attribute_is)
-
-    # Gather all the reports by facility ID.
-    report_map = {}
-    num_reports = 0
-    for report in Report.all().ancestor(version).order('-timestamp'):
-        report_map.setdefault(report.facility_name, []).insert(0, report)
-        num_reports = num_reports + 1
-        #report_map.setdefault(report.facility_name, []).append(report)
-    total_facility_count = len(report_map)
-    logging.info("NUMBER OF FACILITIES %d, REPORTS %d"
-                 % (total_facility_count, num_reports))
+        FacilityType.all(), facility_type_transformer, attribute_is)
 
     # Make JSON objects for the facilities, while collecting lists of the
     # facilities in each division.
-    facility_map = {}
     facility_jobjects, facility_is = make_jobjects(
-        Facility.all().ancestor(version).order('title'), facility_transformer,
-        attributes, report_map, facility_type_is, facility_map, hide_email,
-        center, radius)
-
-    # Make JSON objects for the districts.
-    division_jobjects, division_is = make_jobjects(
-        Division.all().ancestor(version).filter('type =', 'departemen'),
-        division_transformer, facility_map)
-
-    # Fix up the facilities to point at the districts.
-    for facility_jobject in facility_jobjects:
-        if facility_jobject:
-            facility_jobject['division_i'] = division_is[
-                facility_jobject['division_i']]
+        Facility.all().order('title'), facility_transformer,
+        attributes, facility_type_is, center, radius)
+    total_facility_count = len(facility_jobjects) - 1
+    logging.info("NUMBER OF FACILITIES %d" % total_facility_count)
 
     # Sort by distance, if necessary.
     if center:
@@ -168,7 +129,7 @@ def version_to_json(version, hide_email, center=None, radius=None):
 
     # Get all the messages for the current language.
     message_jobjects = {}
-    for message in Message.all().ancestor(version):
+    for message in Message.all():
         namespace = message_jobjects.setdefault(message.namespace, {})
         django_locale = django.utils.translation.to_locale(
             django.utils.translation.get_language())
@@ -176,10 +137,8 @@ def version_to_json(version, hide_email, center=None, radius=None):
 
     return clean_json(simplejson.dumps({
         'total_facility_count': total_facility_count,
-        'timestamp': to_posixtime(timestamp),
         'attributes': attribute_jobjects,
         'facility_types': facility_type_jobjects,
         'facilities': facility_jobjects,
-        'divisions': division_jobjects,
         'messages': message_jobjects
     }, indent=2, default=json_encode))
