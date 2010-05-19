@@ -33,7 +33,7 @@ class Monitor(Handler):
                     if hasattr(report, name):
                         self.write(
     'set_facility_attribute(%r, %r, %d);\n' %
-    (str(report.facility.key().name()), str(name), int(getattr(report, name))))
+    (str(report.parent_key().name()), str(name), int(getattr(report, name))))
                 break
 
 

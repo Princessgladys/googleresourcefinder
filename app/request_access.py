@@ -44,7 +44,7 @@ class RequestAccess(utils.Handler):
     def post(self):
         if not self.auth:
             raise Redirect(users.create_login_url(self.request.uri))
-        role = "f:%s" % self.params.role
+        role = self.params.role
 
         if role in self.auth.user_roles:
             #i18n: Requested permission role has been previously granted

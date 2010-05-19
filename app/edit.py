@@ -15,6 +15,7 @@
 import datetime
 import logging
 import model
+import re
 import utils
 from access import check_user_role
 from main import USE_WHITELISTS
@@ -26,6 +27,15 @@ from feeds.crypto import sign, verify
 
 XSRF_KEY_NAME = 'resource-finder-edit'
 DAY_SECS = 24 * 60 * 60
+
+class ChangeMetadata:
+    """Simple struct to hold metadata for a change and reduce the number of
+    arguments passed around to various functions."""
+    def __init__(self, user, source, affiliation, observed):
+        self.user = user
+        self.source = source
+        self.affiliation = affiliation
+        self.observed = observed
 
 # ==== Form-field generators and parsers for each attribute type =============
 
@@ -42,40 +52,41 @@ class AttributeType:
         """Generates the HTML for an input field for the given attribute."""
         return self.text_input(name, value)
 
-    def to_stored_value(self, value, request, attribute):
+    def to_stored_value(self, name, value, request, attribute):
         """Converts args into the storage value for this attribute type."""
         if value or value == 0:
             return value
         return None
 
-    def has_changed(self, facility, value, request, attribute):
+    def has_changed(self, facility, name, value, request, attribute):
         """Returns True if the request has an input for the given attribute
         and that attribute has changed from the previous value in facility."""
-        value = self.to_stored_value(value, request, attribute)
-        old_value = getattr(facility, attribute.key().name(), None)
+        value = self.to_stored_value(name, value, request, attribute)
+        old_value = get_value(facility, name)
         return value != old_value
 
-    def parse_change_history(self, facility, report, name, request, attribute,
-                             user, nickname, affiliation, timestamp):
+    def apply_change(self, facility, report, name, value, request, attribute,
+                     change_metadata):
+        """Adds an attribute to the given Facility and Report based on a query
+        parameter. Also adds the required change history fields."""
+        value = self.to_stored_value(name, value, request, attribute)
+        setattr(facility, '%s__' % name, value)
+        setattr(report, '%s__' % name, value)
+
         comment_key = '%s__comment' % name
         comment_value = request.get(comment_key, None)
         if comment_value:
             setattr(report, comment_key, comment_value)
             setattr(facility, comment_key, comment_value)
-        if user:
-            setattr(facility, '%s__user' % name, user)
-        if nickname:
-            setattr(facility, '%s__nickname' % name, nickname)
-        if affiliation:
-            setattr(facility, '%s__affiliation' % name, affiliation)
-        if timestamp:
-            setattr(facility, '%s__timestamp' % name, timestamp)
-
-    def parse_input(self, facility, report, name, value, request, attribute):
-        """Adds an attribute to the given Report based on a query parameter."""
-        value = self.to_stored_value(value, request, attribute)
-        setattr(facility, name, value)
-        setattr(report, name, value)
+        if change_metadata.user:
+            setattr(facility, '%s__user' % name, change_metadata.user)
+        if change_metadata.source:
+            setattr(facility, '%s__source' % name, change_metadata.source)
+        if change_metadata.affiliation:
+            setattr(facility, '%s__affiliation' % name,
+                    change_metadata.affiliation)
+        if change_metadata.observed:
+            setattr(facility, '%s__observed' % name, change_metadata.observed)
 
 class StrAttributeType(AttributeType):
     input_size = 40
@@ -85,9 +96,10 @@ class TextAttributeType(AttributeType):
         return '<textarea name="%s" rows=5 cols=40>%s</textarea>' % (
             html_escape(name), html_escape(value or ''))
 
-    def parse_input(self, facility, report, name, value, request, attribute):
-        setattr(report, name, db.Text(value))
-        setattr(facility, name, db.Text(value))
+    def to_stored_value(self, name, value, request, attribute):
+        if value or value == 0:
+            return db.Text(value)
+        return None
 
 class ContactAttributeType(AttributeType):
     input_size = 30
@@ -108,7 +120,7 @@ class ContactAttributeType(AttributeType):
             _('E-mail'), self.text_input(name + '.email', contact_email),
         )
 
-    def to_stored_value(self, value, request, attribute):
+    def to_stored_value(self, name, value, request, attribute):
         contact = (request.get(name + '.name', '') + '|' +
                    request.get(name + '.phone', '') + '|' +
                    request.get(name + '.email', ''))
@@ -118,7 +130,7 @@ class ContactAttributeType(AttributeType):
 class DateAttributeType(AttributeType):
     input_size = 10
 
-    def to_stored_value(self, value, request, attribute):
+    def to_stored_value(self, name, value, request, attribute):
         if not value or not value.strip():
             return None
         try:
@@ -133,7 +145,7 @@ class DateAttributeType(AttributeType):
 class IntAttributeType(AttributeType):
     input_size = 10
 
-    def to_stored_value(self, value, request, attribute):
+    def to_stored_value(self, name, value, request, attribute):
         if value or value == 0:
             return int(float(value))
         return None
@@ -142,7 +154,7 @@ class FloatAttributeType(IntAttributeType):
     def make_input(self, name, value, attribute):
         Attribute.make_input(self, name, '%g' % value, attribute)
 
-    def to_stored_value(self, value, request, attribute):
+    def to_stored_value(self, name, value, request, attribute):
         if value or value == 0:
             return float(value)
         return None
@@ -169,8 +181,12 @@ class BoolAttributeType(AttributeType):
         return '<select name="%s">%s</select>' % (
             html_escape(name), ''.join(options))
 
-    def to_stored_value(self, value, request, attribute):
-        return value and value == 'TRUE' or None
+    def to_stored_value(self, name, value, request, attribute):
+        # Note: There are 3 states here to account for, 'True', 'False',
+        # or 'None' (aka no answer)
+        if value:
+            return (value == 'TRUE')
+        return None
 
 class ChoiceAttributeType(AttributeType):
     def make_input(self, name, value, attribute):
@@ -203,28 +219,28 @@ class MultiAttributeType(AttributeType):
                  '<label for="%s">%s</label>') % (id, id, checked, id, title))
         return '<br>\n'.join(checkboxes)
 
-    def to_stored_value(self, value, request, attribute):
+    def to_stored_value(self, name, value, request, attribute):
         value = []
         for choice in attribute.values:
-            if request.get(attribute.key().name() + '.' + choice):
+            if request.get(name + '.' + choice):
                 value.append(choice)
         return value or None
 
 class GeoPtAttributeType(AttributeType):
     def make_input(self, name, value, attribute):
-        if value is None:
-            value = []
+        lat = value and value.lat or ''
+        lon = value and value.lon or ''
 
         #i18n: Label for text input
         return (to_unicode(_('Latitude')) + ' '
-                + self.text_input('lat', value.lat) +
+                + self.text_input('%s.lat' % name, lat) +
                 #i18n: Label for text input
                 to_unicode(_('Longitude')) + ' '
-                + self.text_input('lon', value.lon))
+                + self.text_input('%s.lon' % name, lon))
 
-    def to_stored_value(self, value, request, attribute):
-        lat = float(request.get('lat', None))
-        lon = float(request.get('lon', None))
+    def to_stored_value(self, name, value, request, attribute):
+        lat = float(request.get('%s.lat' % name, None))
+        lon = float(request.get('%s.lon' % name, None))
         return db.GeoPt(lat, lon)
 
 ATTRIBUTE_TYPES = {
@@ -240,40 +256,47 @@ ATTRIBUTE_TYPES = {
     'geopt': GeoPtAttributeType(),
 }
 
+def get_value(facility, name, default=None):
+    """Returns a dynamic property of the given name from the facility."""
+    return getattr(facility, '%s__' % name, default)
+
 def make_input(facility, attribute):
     """Generates the HTML for an input field for the given attribute."""
     name = attribute.key().name()
     return ATTRIBUTE_TYPES[attribute.type].make_input(
-        name, getattr(facility, name, None), attribute)
+        name, get_value(facility, name), attribute)
 
-def parse_input(facility, report, request, attribute, user, nickname,
-                affiliation, timestamp):
-    """Adds an attribute to the given Report based on a query parameter."""
+def apply_change(facility, report, request, attribute, change_metadata):
+    """Adds an attribute to the given Facility and Report based on
+    a query parameter."""
     name = attribute.key().name()
+    value = request.get(name, None)
     attribute_type = ATTRIBUTE_TYPES[attribute.type]
-    attribute_type.parse_input(
-        facility, report, name, request.get(name, None), request, attribute)
-    attribute_type.parse_change_history(
-        facility, report, name, request, attribute, user, nickname, affiliation,
-        timestamp)
+    attribute_type.apply_change(facility, report, name, value, request,
+                                attribute, change_metadata)
 
 def has_changed(facility, request, attribute):
     """Returns True if the request has an input for the given attribute
     and that attribute has changed from the previous value in facility."""
     name = attribute.key().name()
-    return ATTRIBUTE_TYPES[attribute.type].has_changed(
-        facility, request.get(name, None), request, attribute)
+    value = request.get(name, None)
+    attribute_type = ATTRIBUTE_TYPES[attribute.type]
+    return attribute_type.has_changed(facility, name, value, request, attribute)
 
 def can_edit(auth, attribute):
     """Returns True if the user can edit the given attribute."""
     return not attribute.edit_role or check_user_role(
         auth, attribute.edit_role)
 
+def get_suggested_nickname(user):
+    """Returns the suggested Authorization.nickname based on a user.nickname"""
+    return re.sub('@.*', '', user and user.nickname() or '')
+
 # ==== Handler for the edit page =============================================
 
 class Edit(utils.Handler):
     def init(self):
-        """Checks for logged-in user and sets up self.self.facility,
+        """Checks for logged-in user and sets up self.facility,
         self.facility_type, and self.attributes based on the query params."""
 
         self.require_logged_in_user()
@@ -291,7 +314,7 @@ class Edit(utils.Handler):
         self.facility_type = model.FacilityType.get_by_key_name(
             self.facility.type)
         self.attributes = dict(
-            (a.key(), a) for a in db.get(self.facility_type.attributes))
+            (a.key().name(), a) for a in model.Attribute.all())
 
     def get(self):
         self.init()
@@ -302,27 +325,28 @@ class Edit(utils.Handler):
             'value': self.params.facility_name
         }]
 
-        for key in self.facility_type.attributes:
-            if key.name() in HIDDEN_ATTRIBUTE_NAMES:
+        for name in self.facility_type.attribute_names:
+            if name in HIDDEN_ATTRIBUTE_NAMES:
                 continue
-            attribute = self.attributes[key]
+            attribute = self.attributes[name]
             if can_edit(self.auth, attribute):
                 fields.append({
-                    'name': get_message('attribute_name', key.name()),
+                    'name': get_message('attribute_name', name),
                     'type': attribute.type,
                     'input': make_input(self.facility, attribute)
                 })
             else:
                 readonly_fields.append({
-                    'name': get_message('attribute_name', key.name()),
-                    'value': getattr(self.facility, key.name(), None)
+                    'name': get_message('attribute_name', name),
+                    'value': get_value(self.facility, name)
                 })
 
         token = sign(XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
 
         self.render('templates/edit.html',
             token=token, facility=self.facility, fields=fields,
-            readonly_fields=readonly_fields, auth=self.auth, user=self.user,
+            readonly_fields=readonly_fields, auth=self.auth,
+            suggested_nickname=get_suggested_nickname(self.user),
             params=self.params, logout_url=users.create_logout_url('/'),
             instance=self.request.host.split('.')[0])
 
@@ -358,20 +382,22 @@ class Edit(utils.Handler):
 
         logging.info("record by user: %s" % self.user)
         utcnow = datetime.datetime.utcnow().replace(microsecond=0)
-        report = model.FacilityReport(
+        change_metadata = ChangeMetadata(
+            self.user, self.auth.nickname, self.auth.affiliation, utcnow)
+        report = model.Report(
             self.facility,
-            observation_timestamp=utcnow,
+            arrived=utcnow,
+            observed=utcnow,
             user=self.user)
 
         has_changes = False
-        for key in self.facility_type.attributes:
-            attribute = self.attributes[key]
+        for name in self.facility_type.attribute_names:
+            attribute = self.attributes[name]
             if (can_edit(self.auth, attribute) and
                 has_changed(self.facility, self.request, attribute)):
                 has_changes = True
-                parse_input(self.facility, report, self.request, attribute,
-                            self.user, self.auth.nickname,
-                            self.auth.affiliation, utcnow)
+                apply_change(self.facility, report, self.request, attribute,
+                             change_metadata)
 
         if has_changes:
             db.put([report, self.facility])

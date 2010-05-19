@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-17 23:27-0400\n"
+"POT-Creation-Date: 2010-05-19 19:11-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,7 +59,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
 
 #. Form option not specified
-#: edit.py:161 edit.py:183 edit.py:198
+#: edit.py:173 edit.py:199 edit.py:214
 msgid "(unspecified)"
 msgstr "(pa espesifye)"
 
@@ -79,7 +79,7 @@ msgid "Adobe"
 msgstr "Adobe"
 
 #. Label for a required text box to enter organizational affiliation.
-#: templates/edit.html:130
+#: templates/edit.html:99
 msgid "Affiliation (required)"
 msgstr "Afilyasyon (egzije)"
 
@@ -124,7 +124,7 @@ msgid "Can pick up patients"
 msgstr "Ka al chache malad"
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:158
+#: templates/edit.html:152
 msgid "Cancel"
 msgstr "Anile"
 
@@ -236,12 +236,12 @@ msgid "District"
 msgstr "Distri"
 
 #. E-mail address
-#: edit.py:108 ../tools/setup.py:110
+#: edit.py:120 ../tools/setup.py:110
 msgid "E-mail"
 msgstr "Adrès elektronik"
 
 #. Title for page to edit data about a facility
-#: templates/edit.html:53
+#: templates/edit.html:54
 msgid "Edit"
 msgstr "Reekri"
 
@@ -249,11 +249,6 @@ msgstr "Reekri"
 #: templates/bubble.html:101
 msgid "Edited by"
 msgstr "Moun ki reekri a"
-
-#. Instructions to enter a person's name and organizational affiliation.
-#: templates/edit.html:93
-msgid "Enter your name and affiliation."
-msgstr "Ekri non ou ak afilyasyon"
 
 #. Header for an error message.
 #: templates/error.html:28
@@ -271,7 +266,7 @@ msgid "Facility"
 msgstr "Etablisman"
 
 #. Identifier for a facility
-#: edit.py:301
+#: edit.py:323
 msgid "Facility ID"
 msgstr "Idantite etablisman"
 
@@ -301,7 +296,7 @@ msgid "Field hospital co-located with hospital"
 msgstr "Field lopital ko-chita ak lopital"
 
 #. Error message for required field
-#: templates/edit.html:119 templates/edit.html.py:140
+#: templates/edit.html:88 templates/edit.html.py:109
 msgid "Field is required."
 msgstr "Field se yo mande yo."
 
@@ -376,12 +371,12 @@ msgid "Infectious disease"
 msgstr "Maladi enfektyez"
 
 #. Error message for invalid date entry
-#: edit.py:130
+#: edit.py:142
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Dat envalid : %(dat)r (bezwen ane-mwa-jou fòma)"
 
 #. Error message for request missing facility name.
-#: edit.py:290
+#: edit.py:312
 msgid "Invalid or missing facility name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -396,7 +391,7 @@ msgid "Lab"
 msgstr "Laboratwa"
 
 #. Label for text input
-#: edit.py:219
+#: edit.py:235
 msgid "Latitude"
 msgstr "Latitd"
 
@@ -422,7 +417,7 @@ msgid "Location"
 msgstr "Kote"
 
 #. Label for text input
-#: edit.py:222
+#: edit.py:238
 msgid "Longitude"
 msgstr "Lonjitd"
 
@@ -447,12 +442,12 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: edit.py:104
+#: edit.py:116
 msgid "Name"
 msgstr "Non"
 
 #. Label for a required text box to enter a person's name
-#: templates/edit.html:109
+#: templates/edit.html:78
 msgid "Name (required)"
 msgstr "Non (egzije)"
 
@@ -462,7 +457,7 @@ msgid "Neurosurgery"
 msgstr "Nerochiriji"
 
 #. Form option for disagreement
-#: edit.py:165 static/locale.js:82
+#: edit.py:177 static/locale.js:82
 msgid "No"
 msgstr "Pa dakò"
 
@@ -522,11 +517,6 @@ msgstr "Otopedik"
 msgid "Other"
 msgstr "Lòt"
 
-#. Message on how name and affiliation will be used
-#: templates/edit.html:100
-msgid "Other users will be able to see your name and affiliation along with your changes."
-msgstr "Lòt itilizatè yo pral kapab wè non w ak afilye ansanm ak chanjman ou."
-
 #. the data being loaded
 #: templates/load.html:48
 msgid "Payload:"
@@ -538,7 +528,7 @@ msgid "Pediatrics"
 msgstr "Pedyatrik"
 
 #. telephone number
-#: edit.py:106 ../tools/setup.py:108
+#: edit.py:118 ../tools/setup.py:108
 msgid "Phone"
 msgstr "Telefòn"
 
@@ -584,7 +574,7 @@ msgid "Reachable by road"
 msgstr "Aksesib pa wout"
 
 #. Record updated successfully.
-#: edit.py:380
+#: edit.py:405
 msgid "Record updated."
 msgstr "Done a jou"
 
@@ -617,7 +607,7 @@ msgid "Resource Finder"
 msgstr "Chèche resous"
 
 #. Button text to save data
-#: templates/edit.html:154
+#: templates/edit.html:148
 msgid "Save"
 msgstr "Anrejistre"
 
@@ -670,6 +660,11 @@ msgstr "Lopital mobil"
 #: ../tools/setup.py:211
 msgid "Temporary mobile facility"
 msgstr "Mobil ki kapab deplase"
+
+#. Instructions to enter a person's name and organizational affiliation.
+#: templates/edit.html:70
+msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited."
+msgstr "Mèsi pou ajoute kontni Chèche resous. Pou jwenn tanpri te kòmanse kreye yon non itilizatè ak di nou afilyasyon ou. pral enfòmasyon sa a ka parèt pwochen enfòmasyon ou te ajoute oswa korije."
 
 #. Total number of beds at a hospital
 #: ../tools/setup.py:102
@@ -737,7 +732,7 @@ msgid "X-ray"
 msgstr "Reyon X"
 
 #. Form option for agreement
-#: edit.py:163 static/locale.js:133
+#: edit.py:175 static/locale.js:133
 msgid "Yes"
 msgstr "Wi"
 
