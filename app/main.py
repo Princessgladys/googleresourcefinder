@@ -53,7 +53,7 @@ class Main(Handler):
                     loginout_text=(user and _('Sign out')
                                    #i18n: Link to sign into the app
                                    or _('Sign in')),
-                    data=rendering.to_json(center, self.params.rad),
+                    data=rendering.render_json(center, self.params.rad),
                     export_link=get_export_link(),
                     instance=self.request.host.split('.')[0])
 

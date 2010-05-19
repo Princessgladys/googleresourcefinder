@@ -18,26 +18,27 @@ import csv
 import datetime
 import logging
 
-def load_paho_csv(filename,
-                  user=users.get_current_user(),
-                  account_nickname=users.get_current_user().nickname(),
-                  account_affiliation=''):
-    """Loads the PAHO master list as a CSV file."""
+def load_paho_csv(
+    filename, observed, user, source, source_affiliation):
+    """Loads the PAHO master list as a CSV file.
+
+    Args:
+      filename: name of the file
+      observed: datetime.datetime when the data was observed to be valid
+      user: users.User who will own the changes made during loading
+      source: source of the changes, may just be nickname for the user
+      source_affiliation: if source is a proper name, this is the
+                          organizational affiliation of the source, otherwise
+                          can be empty"""
+
+    if not filename or not observed or not user or not source:
+        raise Exception('filename, observed, user, and source are required')
+
     facilities = []
     reports = []
 
-    # TODO: Create a Dump record with the filename?
-
-    def strip_or_none(value):
-        if isinstance(value, basestring):
-            value = value.strip()
-        return value or None
-
-    def attr(value, date=None, source=None, comment=None):
-        return {'value': strip_or_none(value),
-                'date': strip_or_none(date),
-                'source': strip_or_none(source),
-                'comment': strip_or_none(comment)}
+    # Create a dump of the raw file
+    Dump(source=filename, data=open(filename, 'rb').read()).put()
 
     for record in csv.DictReader(open(filename)):
         for key in record:
@@ -57,34 +58,36 @@ def load_paho_csv(filename,
             continue
 
         attrs = {
-            'title': attr(title),
-            'alt_title': attr(alt_title),
-            'healthc_id': attr(record['HealthC_ID'],
-                               comment=record['AlternateHealthCIDDeleted']),
-            'organization': attr(record['Oorganisat']),
-            'departemen': attr(record['Departemen']),
-            'district': attr(record['DistrictNom']),
-            'commune': attr(record['Commune']),
-            'address': attr(record['Address']),
-            'location': attr(db.GeoPt(latitude, longitude),
-                                source=record['SourceHospitalCoordinates'],
-                                comment=record['AlternateCoordinates']),
-            'accuracy': attr(record['Accuracy']),
-            'phone': attr(record['Telephone']),
-            'email': attr(record['email']),
-            'facility_type': attr(record['Type']),
-            'category': attr(record['Categorie']),
-            'damage': attr(record['Damage'], date=record['DateDamage'],
-                           source=record['SourceDamage']),
-            'operational_status': attr(record['OperationalStatus'],
-                                       date=record['DateOperationalStatus'],
-                                       source=record['SourceOperationalStatus']),
-            'comments': attr(record['Comment']),
-            'region_id': attr(record['RegionId']),
-            'district_id': attr(record['DistrictId']),
-            'commune_id': attr(record['CommuneId']),
-            'commune_code': attr(record['CodeCommun']),
-            'sante_id': attr(record['SanteID'])
+            'title': Attribute(title),
+            'alt_title': Attribute(alt_title),
+            'healthc_id': Attribute(
+                record['HealthC_ID'],
+                comment=record['AlternateHealthCIDDeleted']),
+            'organization': Attribute(record['Oorganisat']),
+            'departemen': Attribute(record['Departemen']),
+            'district': Attribute(record['DistrictNom']),
+            'commune': Attribute(record['Commune']),
+            'address': Attribute(record['Address']),
+            'location': Attribute(db.GeoPt(latitude, longitude),
+                                  source=record['SourceHospitalCoordinates'],
+                                  comment=record['AlternateCoordinates']),
+            'accuracy': Attribute(record['Accuracy']),
+            'phone': Attribute(record['Telephone']),
+            'email': Attribute(record['email']),
+            'facility_type': Attribute(record['Type']),
+            'category': Attribute(record['Categorie']),
+            'damage': Attribute(record['Damage'], observed=record['DateDamage'],
+                                source=record['SourceDamage']),
+            'operational_status': Attribute(
+                record['OperationalStatus'],
+                observed=record['DateOperationalStatus'],
+                source=record['SourceOperationalStatus']),
+            'comments': Attribute(record['Comment']),
+            'region_id': Attribute(record['RegionId']),
+            'district_id': Attribute(record['DistrictId']),
+            'commune_id': Attribute(record['CommuneId']),
+            'commune_code': Attribute(record['CodeCommun']),
+            'sante_id': Attribute(record['SanteID'])
         }
 
         facility = Facility(
@@ -96,43 +99,71 @@ def load_paho_csv(filename,
 
         utcnow = datetime.datetime.utcnow().replace(microsecond=0)
 
-        report = FacilityReport(
+        # Create a report for this row. Attributes that have a different
+        # observed date than 'observed' will be reported in a separate report
+        report = Report(
             facility,
-            observation_timestamp=utcnow,
-            user=user)
+            arrived=utcnow,
+            observed=observed,
+            user=user,
+            source=source,
+            source_affiliation=source_affiliation)
         reports.append(report)
 
-        for (name, attrib) in attrs.items():
-            if not attrib['value'] and attrib['value'] != 0:
+        for (name, attr) in attrs.items():
+            if not attr.value and attr.value != 0:
                 continue
 
-            setattr(report, name, attrib['value'])
-            setattr(facility, name, attrib['value'])
+            current_report = report
+            if ((attr.source and source != attr.source)
+                or (attr.observed and observed != attr.observed)):
+                # Separate out this change into a new report
+                current_report = Report(
+                    facility,
+                    arrived=utcnow,
+                    observed=attr.observed or observed,
+                    user=user,
+                    source=attr.source or source,
+                    source_affiliation=(
+                        not attr.source and source_affiliation or None))
+                reports.append(current_report)
 
-            if attrib['comment']:
-                setattr(report, '%s__comment' % name, attrib['comment'])
-                setattr(facility, '%s__comment' % name, attrib['comment'])
+            setattr(current_report, '%s__' % name, attr.value)
+            setattr(facility, '%s__' % name, attr.value)
 
-            if attrib['source']:
-                setattr(facility, '%s__nickname' % name, attrib['source'])
-            else:
-                if account_nickname:
-                    setattr(facility, '%s__nickname' % name, account_nickname)
-                if account_affiliation:
-                    setattr(facility, '%s__affiliation' % name,
-                            account_affiliation)
+            if attr.comment:
+                setattr(current_report, '%s__comment' % name, attr.comment)
+                setattr(facility, '%s__comment' % name, attr.comment)
 
+            if not attr.source:
+                setattr(facility, '%s__affiliation' % name, source_affiliation)
+
+            setattr(facility, '%s__source' % name, attr.source or source)
             setattr(facility, '%s__user' % name, user)
-
-            if attrib['date']:
-                (month, day, year) = attrib['date'].split('.')
-                timestamp = datetime.datetime(int(year), int(month), int(day))
-                setattr(report, '%s__timestamp' % name, timestamp)
-            else:
-                timestamp = utcnow
-            setattr(facility, '%s__timestamp' % name, timestamp)
+            setattr(facility, '%s__observed' % name, attr.observed or observed)
 
     put_batches(facilities + reports)
+
+class Attribute:
+    """Keeps track of an attribute value and metadata."""
+    def __init__(self, value, observed=None, source=None, comment=None):
+        self.value = strip_or_none(value)
+        self.observed = parse_paho_date(strip_or_none(observed))
+        self.source = strip_or_none(source)
+        self.comment = strip_or_none(comment)
+
+def strip_or_none(value):
+    if isinstance(value, basestring):
+        value = value.strip()
+    return value or None
+
+def parse_paho_date(date):
+    """Parses a period-separated (month.day.year) date.
+    For example, May 19, 2010 would be represented as '05.19.2010'"""
+    if date is not None:
+        (month, day, year) = date.split('.')
+        date = datetime.datetime(int(year), int(month), int(day))
+    return date
 
 def put_batches(entities):
     """Works around annoying limitations of App Engine's datastore."""

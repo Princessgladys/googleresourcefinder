@@ -1155,7 +1155,7 @@ function select_facility(facility_i, ignore_current) {
     if (max_date) {
       last_updated = locale.UPDATED() + ' ' + locale.DATE_FORMAT_MEDIUM(
         {MONTH: locale.MONTH_ABBRS[max_date.getMonth()](),
-         DAY: (max_date.getDay()),
+         DAY: max_date.getDate(),
          YEAR: max_date.getYear() + 1900});
     }
   }

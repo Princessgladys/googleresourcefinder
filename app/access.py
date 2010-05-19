@@ -44,8 +44,7 @@ class Authorization(db.Model):
     nickname = db.StringProperty()
     affiliation = db.StringProperty()
     token = db.StringProperty()
-    # user_role is of the form type:role
-    # type is either 'f' or '' for now, role is one of ROLES,
+    # user_roles is a list of ROLES
     user_roles = db.StringListProperty()
     requested_roles = db.StringListProperty()
 
@@ -64,10 +63,9 @@ def check_request(request, user):
     if user:
         return check_email(user.email()) or check_user_id(user.user_id())
 
-def check_user_role(auth, role, type='f'):
+def check_user_role(auth, role):
     """Return True if the auth user has the given role"""
-    return auth and ("%s:%s" % (type, role) in auth.user_roles or
-                     ":%s" % role in auth.user_roles)
+    return auth and (role in auth.user_roles or ":%s" % role in auth.user_roles)
 
 def check_and_log(request, user):
     auth = check_request(request, user)

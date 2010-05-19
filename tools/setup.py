@@ -27,9 +27,9 @@ def setup_facility_types():
     # of appearance in the map info window. Also, order here should
     # be kept roughly in sync with CSV column order defined in app/export.py
     attributes = [
-        attr('str', 'title', edit_role='f:ht:supereditor'),
-        attr('str', 'alt_title', edit_role='f:ht:supereditor'),
-        attr('int', 'healthc_id', edit_role='f:ht:supereditor'),
+        attr('str', 'title', edit_role='supereditor'),
+        attr('str', 'alt_title', edit_role='supereditor'),
+        attr('int', 'healthc_id', edit_role='supereditor'),
         attr('int', 'available_beds'),
         attr('int', 'total_beds'),
         attr('multi', 'services',
@@ -64,18 +64,18 @@ def setup_facility_types():
         attr('str', 'comments'),
         attr('bool', 'reachable_by_road'),
         attr('bool', 'can_pick_up_patients'),
-        attr('str', 'region_id', edit_role='f:ht:supereditor'),
-        attr('str', 'district_id', edit_role='f:ht:supereditor'),
-        attr('str', 'commune_id', edit_role='f:ht:supereditor'),
-        attr('str', 'commune_code', edit_role='f:ht:supereditor'),
-        attr('str', 'sante_id', edit_role='f:ht:supereditor'),
+        attr('str', 'region_id', edit_role='supereditor'),
+        attr('str', 'district_id', edit_role='supereditor'),
+        attr('str', 'commune_id', edit_role='supereditor'),
+        attr('str', 'commune_code', edit_role='supereditor'),
+        attr('str', 'sante_id', edit_role='supereditor'),
     ]
 
     db.put(attributes)
 
     hospital = FacilityType(
         key_name='hospital',
-        attributes=[a.key() for a in attributes])
+        attribute_names=[a.key().name() for a in attributes])
 
     db.put(hospital)
 

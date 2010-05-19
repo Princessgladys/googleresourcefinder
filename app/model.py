@@ -46,24 +46,23 @@ class Facility(db.Expando):
     # additional properties for the current value of each attribute
     # (named by Attribute's key_name).  This denormalization is for read speed.
     # Consider an attribute named 'foo'. We will store 6 values here:
-    # foo              various, the attribute value
-    # foo__timestamp   db.DateTimeProperty, observation timestamp when the
+    # foo__            various, the attribute value
+    # foo__observed    db.DateTimeProperty, observation timestamp when the
     #                                       value was valid
-    # foo__user        db.UserProperty, the user who changed the value
-    # foo__nickname    db.StringProperty, nickname of the user
-    # foo__affiliation db.StringProperty, affiliation of the user
-    # foo__comment     db.StringProperty, a comment left by the user making the
-    #                                     change
+    # foo__user        db.UserProperty, the user who provided the change
+    # foo__source      db.StringProperty, source of the change
+    # foo__affiliation db.StringProperty, affiliation of the source
+    # foo__comment     db.StringProperty, a comment about the change
 
 class FacilityType(db.Model):
     """A type of Facility, e.g. hospital, warehouse, charity, camp.
     Top-level entity, has no parent.
     Key name: an identifier used as the value of Facility.type."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
-    attributes = db.ListProperty(db.Key)  # keys of Attribute entities
+    attribute_names = db.StringListProperty()  # key_names of Attribute entities
 
 class Attribute(db.Model):
-    """An attribute of a facility or resource, e.g. services available, # of
+    """An attribute of a facility, e.g. services available, # of
     patients. Top-level entity, has no parent.  Key name: name of a property
     in a FacilityReport,and also the name of the Message providing the
     UI-displayable attribute name."""
@@ -83,17 +82,22 @@ class Attribute(db.Model):
     edit_role = db.StringProperty() # What Authorization role can edit?
     values = db.StringListProperty()  # allowed value names for choice or multi
 
-class FacilityReport(db.Expando):
+class Report(db.Expando):
     """A report on the attributes and resources of a Facility.
     Parent: Facility."""
-    arrival_timestamp = db.DateTimeProperty(auto_now_add=True) # date we
-                                                               # received report
-    user = db.UserProperty()
-    observation_timestamp = db.DateTimeProperty()  # date that report contents
-                                                   # were valid
+    arrived = db.DateTimeProperty(auto_now_add=True) # date we received report
+    user = db.UserProperty() # user doing the reporting
+    source = db.StringProperty() # source of the report, if different from
+                                 # the Authorization.nickname of the user
+                                 # associated with the Report
+    source_affiliation = db.StringProperty() # affiliation of the source, if
+                                             # different than the
+                                             # Authorization.affiliation of the
+                                             # user
+    observed = db.DateTimeProperty()  # date that report contents were valid
     # additional properties for each Attribute (named by Attribute's key_name)
     # Consider an attribute named 'foo'. We will store 2 values here:
-    # foo           various, the attribute value
+    # foo__          various, the attribute value
     # foo__comment   db.StringProperty, a comment from user making the change
 
 class Message(db.Expando):

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-17 23:27-0400\n"
+"POT-Creation-Date: 2010-05-19 19:11-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,7 +59,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} établissements dans un rayon de ${RADIUS_MILES} miles"
 
 #. Form option not specified
-#: edit.py:161 edit.py:183 edit.py:198
+#: edit.py:173 edit.py:199 edit.py:214
 msgid "(unspecified)"
 msgstr "(non spécifié)"
 
@@ -79,7 +79,7 @@ msgid "Adobe"
 msgstr "Adobe"
 
 #. Label for a required text box to enter organizational affiliation.
-#: templates/edit.html:130
+#: templates/edit.html:99
 msgid "Affiliation (required)"
 msgstr "Affiliation (obligatoire)"
 
@@ -124,7 +124,7 @@ msgid "Can pick up patients"
 msgstr "Peut passer prendre les patients"
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:158
+#: templates/edit.html:152
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -236,12 +236,12 @@ msgid "District"
 msgstr "District"
 
 #. E-mail address
-#: edit.py:108 ../tools/setup.py:110
+#: edit.py:120 ../tools/setup.py:110
 msgid "E-mail"
 msgstr "E-mail"
 
 #. Title for page to edit data about a facility
-#: templates/edit.html:53
+#: templates/edit.html:54
 msgid "Edit"
 msgstr "Modifier"
 
@@ -249,11 +249,6 @@ msgstr "Modifier"
 #: templates/bubble.html:101
 msgid "Edited by"
 msgstr "Modifié par"
-
-#. Instructions to enter a person's name and organizational affiliation.
-#: templates/edit.html:93
-msgid "Enter your name and affiliation."
-msgstr "Entrez votre nom et affiliation"
 
 #. Header for an error message.
 #: templates/error.html:28
@@ -271,7 +266,7 @@ msgid "Facility"
 msgstr "Établissement"
 
 #. Identifier for a facility
-#: edit.py:301
+#: edit.py:323
 msgid "Facility ID"
 msgstr "Identifiant de l'établissement :"
 
@@ -301,7 +296,7 @@ msgid "Field hospital co-located with hospital"
 msgstr "Hôpital de campagne du co-localisés avec l'hôpital"
 
 #. Error message for required field
-#: templates/edit.html:119 templates/edit.html.py:140
+#: templates/edit.html:88 templates/edit.html.py:109
 msgid "Field is required."
 msgstr "Ce champ est obligatoire."
 
@@ -376,12 +371,12 @@ msgid "Infectious disease"
 msgstr "Maladies infectieuses"
 
 #. Error message for invalid date entry
-#: edit.py:130
+#: edit.py:142
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Date incorrecte : %(date)r  (format AAAA-MM-JJ requis)"
 
 #. Error message for request missing facility name.
-#: edit.py:290
+#: edit.py:312
 msgid "Invalid or missing facility name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -396,7 +391,7 @@ msgid "Lab"
 msgstr "Laboratoire"
 
 #. Label for text input
-#: edit.py:219
+#: edit.py:235
 msgid "Latitude"
 msgstr "Latitude"
 
@@ -422,7 +417,7 @@ msgid "Location"
 msgstr "Emplacement"
 
 #. Label for text input
-#: edit.py:222
+#: edit.py:238
 msgid "Longitude"
 msgstr "Longitude"
 
@@ -447,12 +442,12 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: edit.py:104
+#: edit.py:116
 msgid "Name"
 msgstr "Nom"
 
 #. Label for a required text box to enter a person's name
-#: templates/edit.html:109
+#: templates/edit.html:78
 msgid "Name (required)"
 msgstr "Nom (obligatoire)"
 
@@ -462,7 +457,7 @@ msgid "Neurosurgery"
 msgstr "Neurochirurgie"
 
 #. Form option for disagreement
-#: edit.py:165 static/locale.js:82
+#: edit.py:177 static/locale.js:82
 msgid "No"
 msgstr "Non"
 
@@ -522,11 +517,6 @@ msgstr "Orthopédie"
 msgid "Other"
 msgstr "Autre"
 
-#. Message on how name and affiliation will be used
-#: templates/edit.html:100
-msgid "Other users will be able to see your name and affiliation along with your changes."
-msgstr "Les autres utilisateurs seront en mesure de voir votre nom et votre affiliation avec vos modifications."
-
 #. the data being loaded
 #: templates/load.html:48
 msgid "Payload:"
@@ -538,7 +528,7 @@ msgid "Pediatrics"
 msgstr "Pédiatrie"
 
 #. telephone number
-#: edit.py:106 ../tools/setup.py:108
+#: edit.py:118 ../tools/setup.py:108
 msgid "Phone"
 msgstr "Téléphone"
 
@@ -584,7 +574,7 @@ msgid "Reachable by road"
 msgstr "Accessible en voiture"
 
 #. Record updated successfully.
-#: edit.py:380
+#: edit.py:405
 msgid "Record updated."
 msgstr "Enregistrement mis à jour"
 
@@ -617,7 +607,7 @@ msgid "Resource Finder"
 msgstr "Localisation de ressources"
 
 #. Button text to save data
-#: templates/edit.html:154
+#: templates/edit.html:148
 msgid "Save"
 msgstr "Enregistrer"
 
@@ -670,6 +660,11 @@ msgstr "Hôpital temporaire"
 #: ../tools/setup.py:211
 msgid "Temporary mobile facility"
 msgstr "Installation mobile temporaire"
+
+#. Instructions to enter a person's name and organizational affiliation.
+#: templates/edit.html:70
+msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited."
+msgstr "Merci pour l'ajout de contenu à des Localisation de ressources. Pour commencer s'il vous plaît de créer un nom d'utilisateur et nous indiquer votre affiliation. Cette information sera affichée à côté de l'information que vous avez ajouté ou modifié."
 
 #. Total number of beds at a hospital
 #: ../tools/setup.py:102
@@ -737,7 +732,7 @@ msgid "X-ray"
 msgstr "Radiographie"
 
 #. Form option for agreement
-#: edit.py:163 static/locale.js:133
+#: edit.py:175 static/locale.js:133
 msgid "Yes"
 msgstr "Oui"
 
