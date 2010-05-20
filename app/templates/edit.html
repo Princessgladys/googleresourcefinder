@@ -34,7 +34,7 @@ tr.field { vertical-align: baseline; margin-top: 1em; }
 tr.field.text { vertical-align: top; }
 .readonly { color: #666; }
 .label { text-align: right; color: #666; }
-.invisible { display:none }
+.hidden { display:none }
 .errorbox-bad { padding: 2px; border: 2px solid #900; }
 .errormsg { margin-left: 4px; color: #900 }
 .instructions { width: 500px }
@@ -81,7 +81,7 @@ tr.field.text { vertical-align: top; }
           <div id="nickname_errorbox" class="errorbox-good">
             <input type="text" name="auth_nickname" id="auth_nickname" 
                    value="{{suggested_nickname}}"/>
-            <div id="nickname_errormsg" class="invisible">
+            <div id="nickname_errormsg" class="hidden">
               {% comment %}
               #i18n: Error message for required field
               {% endcomment %}
@@ -102,7 +102,7 @@ tr.field.text { vertical-align: top; }
           <div id="affiliation_errorbox" class="errorbox-good">
             <input type="text" name="auth_affiliation" id="auth_affiliation"
                    value=""/>
-            <div id="affiliation_errormsg" class="invisible">
+            <div id="affiliation_errormsg" class="hidden">
               {% comment %}
               #i18n: Error message for required field
               {% endcomment %}
