@@ -64,7 +64,7 @@ class FacilityType(db.Model):
 class Attribute(db.Model):
     """An attribute of a facility, e.g. services available, # of
     patients. Top-level entity, has no parent.  Key name: name of a property
-    in a FacilityReport,and also the name of the Message providing the
+    in a Report,and also the name of the Message providing the
     UI-displayable attribute name."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
     type = db.StringProperty(required=True, choices=[

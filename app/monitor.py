@@ -26,7 +26,7 @@ class Monitor(Handler):
         min_time = datetime.datetime.utcnow()
         self.response.headers['Content-Type'] = 'text/plain'
         while time.time() < start + 20:
-            report = FacilityReport.all().order(
+            report = Report.all().order(
                 '-timestamp').filter('timestamp >=', min_time).get()
             if report:
                 for name in ['patient_capacity', 'patient_count']:
