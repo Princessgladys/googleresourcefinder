@@ -367,14 +367,14 @@ class Edit(utils.Handler):
                 logging.error("Missing editor nickname")
                 #i18n: Error message for request missing nickname
                 raise ErrorMessage(403, 'Missing editor nickname.')
-            self.auth.nickname = nickname
+            self.auth.nickname = nickname.strip()
 
             affiliation = self.request.get('auth_affiliation', None)
             if not affiliation:
                 logging.error("Missing editor affiliation")
                 #i18n: Error message for request missing affiliation
                 raise ErrorMessage(403, 'Missing editor affiliation.')
-            self.auth.affiliation = affiliation
+            self.auth.affiliation = affiliation.strip()
             self.auth.user_roles.append('editor')
             self.auth.put()
             logging.info('Assigning nickname "%s" and affiliation "%s" to %s'

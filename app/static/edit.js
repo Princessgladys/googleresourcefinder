@@ -34,26 +34,28 @@
   }
 
   function validate_name_affil() {
-    var valid = true;
     if (button_click !== 'save') {
-      return valid;
+      return true;
     }
     var nickname = $('auth_nickname');
     var affiliation = $('auth_affiliation');
     if (!nickname) {
-      return valid;
+      return true;
     }
     
+    var nickname_value = nickname.value ? nickname.value.trim() : null;
+    var affiliation_value = affiliation.value ? affiliation.value.trim() : null;
+
     $('nickname_errorbox').className =
-        nickname.value ? 'errorbox-good' : 'errorbox-bad';
+        nickname_value ? 'errorbox-good' : 'errorbox-bad';
     $('nickname_errormsg').className =
-        nickname.value ? 'invisible' : 'errormsg';
+        nickname_value ? 'hidden' : 'errormsg';
     $('affiliation_errorbox').className =
-        affiliation.value ? 'errorbox-good' : 'errorbox-bad';
+        affiliation_value ? 'errorbox-good' : 'errorbox-bad';
     $('affiliation_errormsg').className =
-        affiliation.value ? 'invisible' : 'errormsg';
+        affiliation_value ? 'hidden' : 'errormsg';
     
-    return nickname.value && affiliation.value ? true : false;
+    return nickname_value && affiliation_value ? true : false;
   }
 
   function init() {
