@@ -30,10 +30,11 @@ class Monitor(Handler):
                 '-timestamp').filter('timestamp >=', min_time).get()
             if report:
                 for name in ['patient_capacity', 'patient_count']:
-                    if hasattr(report, name):
+                    if hasattr(report, '%s__' % name):
                         self.write(
-    'set_facility_attribute(%r, %r, %d);\n' %
-    (str(report.parent_key().name()), str(name), int(getattr(report, name))))
+                            'set_facility_attribute(%r, %r, %d);\n' %
+                            (str(report.parent_key().name()), str(name),
+                             int(getattr(report, '%s__' % name))))
                 break
 
 
