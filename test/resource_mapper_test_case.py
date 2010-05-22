@@ -59,12 +59,16 @@ class ResourceMapperTestCase(unittest.TestCase):
         self.environment = ENV_OPTIONS[envType]
 
     def open_path(self, path):
+        """Navigates to a given path under the server's base URL."""
         self.s.open(self.environment['base_url'] + path) 
 
     def wait_for_load(self):
+        """Waits for a page to load, timing out after 30 seconds."""
         self.s.wait_for_page_to_load('30000')
 
     def wait_until(self, function, *args, **kwargs):
+        """Waits until the given function (called with the given arguments and
+        keyword arguments) returns a true value, timing out after 30 seconds."""
         start = time.time()
         while not function(*args, **kwargs):
             if time.time() - start > 30:
