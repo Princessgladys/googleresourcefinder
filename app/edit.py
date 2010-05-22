@@ -21,8 +21,9 @@ import utils
 import wsgiref
 from access import check_user_role
 from main import USE_WHITELISTS
+from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
-from utils import db, get_message, html_escape, to_unicode, users, _
+from utils import db, get_message, html_escape, simplejson, to_unicode, users, _
 from feeds.crypto import sign, verify
 
 # TODO(shakusa) Add per-attribute comment fields
@@ -56,26 +57,11 @@ class AttributeType:
 
     def to_stored_value(self, name, value, request, attribute):
         """Converts args into the storage value for this attribute type."""
+        if isinstance(value, basestring):
+            value = value.strip()
         if value or value == 0:
             return value
         return None
-
-    def is_in_request(self, name, request, attribute):
-        """Returns True if the attribute is specified in the request."""
-        return request.get(name, None) is not None
-
-    def has_changed(self, facility, request, attribute):
-        """Returns True if the request has an input for the given attribute
-        and that attribute has changed from the previous value in facility."""
-        name = attribute.key().name()
-
-        if not self.is_in_request(name, request, attribute):
-            return False
-
-        value = self.to_stored_value(name, request.get(name, None),
-                                     request, attribute)
-        old_value = facility.get_value(name)
-        return value != old_value
 
     def apply_change(self, facility, report, request, attribute,
                      change_metadata):
@@ -126,9 +112,6 @@ class ContactAttributeType(AttributeType):
             #i18n: E-mail address
             _('E-mail'), self.text_input(name + '.email', contact_email),
         )
-
-    def is_in_request(self, name, request, attribute):
-        return request.get(name + '.name', None) is not None
 
     def to_stored_value(self, name, value, request, attribute):
         contact = (request.get(name + '.name', '') + '|' +
@@ -229,12 +212,6 @@ class MultiAttributeType(AttributeType):
                  '<label for="%s">%s</label>') % (id, id, checked, id, title))
         return '<br>\n'.join(checkboxes)
 
-    def is_in_request(self, name, request, attribute):
-        for choice in attribute.values:
-            if request.get(name + '.' + choice, None) is not None:
-                return True
-        return False
-
     def to_stored_value(self, name, value, request, attribute):
         value = []
         for choice in attribute.values:
@@ -278,6 +255,15 @@ def make_input(facility, attribute):
     return ATTRIBUTE_TYPES[attribute.type].make_input(
         name, facility.get_value(name), attribute)
 
+def render_json(value):
+    """Renders the given value as json"""
+    return clean_json(simplejson.dumps(value, indent=None, default=json_encode))
+
+def render_attribute_as_json(facility, attribute):
+    """Returns the value of this attribute as a JSON string"""
+    name = attribute.key().name()
+    return render_json(facility.get_value(name))
+
 def apply_change(facility, report, request, attribute, change_metadata):
     """Adds an attribute to the given Facility and Report based on
     a query parameter."""
@@ -288,8 +274,18 @@ def apply_change(facility, report, request, attribute, change_metadata):
 def has_changed(facility, request, attribute):
     """Returns True if the request has an input for the given attribute
     and that attribute has changed from the previous value in facility."""
-    attribute_type = ATTRIBUTE_TYPES[attribute.type]
-    return attribute_type.has_changed(facility, request, attribute)
+    name = attribute.key().name()
+    value = ATTRIBUTE_TYPES[attribute.type].to_stored_value(
+        name, request.get(name, None), request, attribute)
+    current = render_json(value)
+    previous = request.get('editable.%s' % name, None)
+    return previous != current
+
+def is_editable(request, attribute):
+    """Returns true if the special hidden 'editable.name' field is set in
+    the request, indicating that the given field was editable by the user
+    at the time the edit page was rendered."""
+    return request.get('editable.%s' % attribute.key().name(), None) is not None
 
 def can_edit(auth, attribute):
     """Returns True if the user can edit the given attribute."""
@@ -334,7 +330,7 @@ class Edit(utils.Handler):
         fields = []
         readonly_fields = [{
             #i18n: Identifier for a facility
-            'name': to_unicode(_('Facility ID')),
+            'title': to_unicode(_('Facility ID')),
             'value': self.params.facility_name
         }]
 
@@ -344,13 +340,15 @@ class Edit(utils.Handler):
             attribute = self.attributes[name]
             if can_edit(self.auth, attribute):
                 fields.append({
-                    'name': get_message('attribute_name', name),
+                    'name': name,
+                    'title': get_message('attribute_name', name),
                     'type': attribute.type,
-                    'input': make_input(self.facility, attribute)
+                    'input': make_input(self.facility, attribute),
+                    'json': render_attribute_as_json(self.facility, attribute)
                 })
             else:
                 readonly_fields.append({
-                    'name': get_message('attribute_name', name),
+                    'title': get_message('attribute_name', name),
                     'value': self.facility.get_value(name)
                 })
 
@@ -407,7 +405,12 @@ class Edit(utils.Handler):
         has_changes = False
         for name in self.facility_type.attribute_names:
             attribute = self.attributes[name]
-            if has_changed(self.facility, self.request, attribute):
+            # To change an attribute, it has to have been marked editable
+            # at the time the page was rendered, the new value has to be
+            # different than the one in the facility at the time the page was
+            # rendered, and the user has to have permission to edit it now.
+            if (is_editable(self.request, attribute) and
+                has_changed(self.facility, self.request, attribute)):
                 if not can_edit(self.auth, attribute):
                     raise ErrorMessage(
                         403, _(

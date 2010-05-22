@@ -103,13 +103,14 @@ class Facility(db.Expando):
     def set_attribute(self, name, value, observed, author, author_nickname,
                       author_affiliation, comment):
         """Sets the value for the Attribute with the given key_name."""
-        setattr(self, '%s__' % name, value or None)
-        setattr(self, '%s__observed' % name, observed or None)
-        setattr(self, '%s__author' % name, author or None)
-        setattr(self, '%s__author_nickname' % name, author_nickname or None)
+        setattr(self, '%s__' % name, value_or_none(value))
+        setattr(self, '%s__observed' % name, value_or_none(observed))
+        setattr(self, '%s__author' % name, value_or_none(author))
+        setattr(self, '%s__author_nickname' % name,
+                value_or_none(author_nickname))
         setattr(self, '%s__author_affiliation' % name,
-                author_affiliation or None)
-        setattr(self, '%s__comment' % name, comment or None)
+                value_or_none(author_affiliation))
+        setattr(self, '%s__comment' % name, value_or_none(comment))
 
 class FacilityType(db.Model):
     """A type of Facility, e.g. hospital, warehouse, charity, camp.
@@ -171,8 +172,8 @@ class Report(db.Expando):
 
     def set_attribute(self, name, value, comment):
         """Sets the value for the Attribute with the given key_name."""
-        setattr(self, '%s__' % name, value or None)
-        setattr(self, '%s__comment' % name, comment or None)
+        setattr(self, '%s__' % name, value_or_none(value))
+        setattr(self, '%s__comment' % name, value_or_none(comment))
 
 class Message(db.Expando):
     """Internationalized strings for value identifiers.  Top-level entity,
@@ -194,3 +195,8 @@ class Dump(db.Model):
     base = db.SelfReference()  # if present, this dump is a clone of base
     source = db.StringProperty()  # URL identifying the source
     data = db.BlobProperty()  # received raw data
+
+def value_or_none(value):
+    if value or value == 0:
+        return value
+    return None
