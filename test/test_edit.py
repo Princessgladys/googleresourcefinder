@@ -55,8 +55,8 @@ class EditTests(ResourceMapperTestCase):
 
         # Fill in the form
         text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
-        text_fields['available_beds'] = '1'
-        text_fields['total_beds'] = '2'
+        text_fields['available_beds'] = '   1'
+        text_fields['total_beds'] = '2\t  '
         checkbox_fields = dict(('services.' + name, True) for name in SERVICES)
         select_fields = {'type': 'COM', 'category': 'C/S',
                          'construction': 'Adobe', 'reachable_by_road': 'TRUE',
@@ -67,12 +67,57 @@ class EditTests(ResourceMapperTestCase):
         self.s.click('//input[@name="save"]')
         self.wait_for_load()
 
+        # Check that we got back to the main map
+        self.assertEquals(
+            self.environment['base_url'] + '/', self.s.get_location())
+
         # Return to the edit page
         self.open_path('/edit?cc=ht&facility_name=mspphaiti.org..95644')
         self.assertTrue(self.s.get_text('//h1').startswith('Edit'))
 
         # Check that the new values were saved, and are pre-filled in the form
+        text_fields['available_beds'] = '1'  # whitespace should be gone
+        text_fields['total_beds'] = '2'  # whitespace should be gone
         self.verify_fields(text_fields, checkbox_fields, select_fields)
+
+        # Now empty everything
+        text_fields = dict((name, '') for name in STR_FIELDS)
+        text_fields['available_beds'] = ''
+        text_fields['total_beds'] = ''
+        checkbox_fields = dict(('services.' + name, False) for name in SERVICES)
+        select_fields = {'type': '', 'category': '',
+                         'construction': '', 'reachable_by_road': '',
+                         'can_pick_up_patients': ''}
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+
+        # Submit the form
+        self.s.click('//input[@name="save"]')
+        self.wait_for_load()
+
+        # Return to the edit page
+        self.open_path('/edit?cc=ht&facility_name=mspphaiti.org..95644')
+        self.assertTrue(self.s.get_text('//h1').startswith('Edit'))
+
+        # Check that everything is now empty or deselected
+        self.verify_fields(text_fields, checkbox_fields, select_fields)
+
+        # Set the integer fields to zero
+        self.s.type('//input[@name="available_beds"]', '  0')
+        self.s.type('//input[@name="total_beds"]', '0  ')
+
+        # Submit the form
+        self.s.click('//input[@name="save"]')
+        self.wait_for_load()
+
+        # Return to the edit page
+        self.open_path('/edit?cc=ht&facility_name=mspphaiti.org..95644')
+        self.assertTrue(self.s.get_text('//h1').startswith('Edit'))
+
+        # Check that the integer fields are actually zero, not empty
+        text_fields['available_beds'] = '0'
+        text_fields['total_beds'] = '0'
+        self.verify_fields(text_fields, checkbox_fields, select_fields)
+
 
     def fill_fields(self, text_fields, checkbox_fields, select_fields):
         """Fills in text fields, selects or deselects checkboxes, and
