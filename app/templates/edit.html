@@ -136,7 +136,7 @@ tr.field.text { vertical-align: top; }
         <td class="input">
           {{field.input}}
           <input type="hidden" name="editable.{{field.name}}"
-                 value='{{field.json}}'/>
+                 value="{{field.json|escape}}"/>
         </td>
       </tr>
     {% endfor %}

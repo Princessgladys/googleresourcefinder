@@ -285,7 +285,7 @@ def is_editable(request, attribute):
     """Returns true if the special hidden 'editable.name' field is set in
     the request, indicating that the given field was editable by the user
     at the time the edit page was rendered."""
-    return request.get('editable.%s' % attribute.key().name(), None) is not None
+    return 'editable.%s' % attribute.key().name() in request.arguments()
 
 def can_edit(auth, attribute):
     """Returns True if the user can edit the given attribute."""
