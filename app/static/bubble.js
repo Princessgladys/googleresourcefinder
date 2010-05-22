@@ -139,7 +139,7 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
           DATE: facility.timestamps[a],
           LABEL: messages.attribute_name[attribute.name],
           VALUE: rf.bubble.format_attr(attribute, facility.values[a]),
-          AUTHOR: facility.sources[a],
+          AUTHOR: facility.nicknames[a],
           AFFILIATION: facility.affiliations[a],
           COMMENT: facility.comments[a]
         }));

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-19 19:11-0400\n"
+"POT-Creation-Date: 2010-05-21 20:48-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,8 +58,14 @@ msgstr "${MONTH} ${DAY}, ${YEAR}"
 msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Instituciones dentro de${RADIUS_MILES} millas"
 
+#. TODO: Message description and/or meaning
+#: edit.py:399
+#, python-format
+msgid "%(user)s does not have permission to edit %(attr)s"
+msgstr "%(user)s no tiene permiso para editar %(attr)s"
+
 #. Form option not specified
-#: edit.py:173 edit.py:199 edit.py:214
+#: edit.py:172 edit.py:198 edit.py:213
 msgid "(unspecified)"
 msgstr "(No especificado)"
 
@@ -109,7 +115,7 @@ msgid "Blood bank"
 msgstr "Banco de sangre"
 
 #. Save a copy of the data in CSV format
-#: export.py:144
+#: export.py:141
 msgid "CSV Export"
 msgstr "Exportar CSV"
 
@@ -236,7 +242,7 @@ msgid "District"
 msgstr "Distrito"
 
 #. E-mail address
-#: edit.py:120 ../tools/setup.py:110
+#: edit.py:119 ../tools/setup.py:110
 msgid "E-mail"
 msgstr "Correo electrónico"
 
@@ -256,7 +262,7 @@ msgid "Error"
 msgstr "Error"
 
 #. Button to export data to comma-separated-values format.
-#: export.py:160 templates/map.html:178
+#: export.py:157 templates/map.html:178
 msgid "Export CSV"
 msgstr "Exportar CSV"
 
@@ -266,7 +272,7 @@ msgid "Facility"
 msgstr "Institución"
 
 #. Identifier for a facility
-#: edit.py:323
+#: edit.py:320
 msgid "Facility ID"
 msgstr "ID de la institución"
 
@@ -371,12 +377,12 @@ msgid "Infectious disease"
 msgstr "Enfermedad infecciosa"
 
 #. Error message for invalid date entry
-#: edit.py:142
+#: edit.py:141
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Fecha no válida: %(date)r (requiere un formato de DD-MM-AAAA)"
 
 #. Error message for request missing facility name.
-#: edit.py:312
+#: edit.py:309
 msgid "Invalid or missing facility name."
 msgstr "Nombre de la instalación no válido o no especificado"
 
@@ -391,7 +397,7 @@ msgid "Lab"
 msgstr "Laboratorio"
 
 #. Label for text input
-#: edit.py:235
+#: edit.py:234
 msgid "Latitude"
 msgstr "Latitud"
 
@@ -417,7 +423,7 @@ msgid "Location"
 msgstr "Ubicación"
 
 #. Label for text input
-#: edit.py:238
+#: edit.py:237
 msgid "Longitude"
 msgstr "Longitud"
 
@@ -442,7 +448,7 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: edit.py:116
+#: edit.py:115
 msgid "Name"
 msgstr "Nombre"
 
@@ -457,7 +463,7 @@ msgid "Neurosurgery"
 msgstr "Neurocirugía"
 
 #. Form option for disagreement
-#: edit.py:177 static/locale.js:82
+#: edit.py:176 static/locale.js:82
 msgid "No"
 msgstr "No"
 
@@ -528,7 +534,7 @@ msgid "Pediatrics"
 msgstr "Pediatría"
 
 #. telephone number
-#: edit.py:118 ../tools/setup.py:108
+#: edit.py:117 ../tools/setup.py:108
 msgid "Phone"
 msgstr "Teléfono"
 
@@ -574,7 +580,7 @@ msgid "Reachable by road"
 msgstr "Acceso a través de carretera"
 
 #. Record updated successfully.
-#: edit.py:405
+#: edit.py:411
 msgid "Record updated."
 msgstr "Registro actualizado."
 
@@ -612,7 +618,7 @@ msgid "Save"
 msgstr "Guardar"
 
 #. Label for a selector to export data to CSV
-#: export.py:149
+#: export.py:146
 msgid "Select facility type to export:"
 msgstr "Seleccionar el tipo de instalación de la exportación:"
 
@@ -732,7 +738,7 @@ msgid "X-ray"
 msgstr "Rayos X"
 
 #. Form option for agreement
-#: edit.py:175 static/locale.js:133
+#: edit.py:174 static/locale.js:133
 msgid "Yes"
 msgstr "Sí"
 

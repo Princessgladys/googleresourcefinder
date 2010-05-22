@@ -51,7 +51,7 @@ tr.field.text { vertical-align: top; }
 # some reason.
 #i18n: Title for page to edit data about a facility
 {% endcomment %}
-<h1>{% trans "Edit" %} {{facility.title__|escape}}</h1>
+<h1>{% trans "Edit" %} {{facility_title|escape}}</h1>
 
 <form method="post" id="edit" action="/edit">
   <input type="hidden" name="token" value="{{token}}"/>

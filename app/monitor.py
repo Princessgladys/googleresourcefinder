@@ -34,7 +34,7 @@ class Monitor(Handler):
                         self.write(
                             'set_facility_attribute(%r, %r, %d);\n' %
                             (str(report.parent_key().name()), str(name),
-                             int(getattr(report, '%s__' % name))))
+                             int(report.get_value(name))))
                 break
 
 
