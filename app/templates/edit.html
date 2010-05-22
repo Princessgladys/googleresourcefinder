@@ -121,7 +121,7 @@ tr.field.text { vertical-align: top; }
     {% for field in readonly_fields %}
       <tr class="field">
         <td class="label">
-          {{field.name|escape}}
+          {{field.title|escape}}
         </td>
         <td class="readonly">
           {{field.value}}
@@ -131,10 +131,12 @@ tr.field.text { vertical-align: top; }
     {% for field in fields %}
       <tr class="field {{field.type}}">
         <td class="label">
-          {{field.name|escape}}
+          {{field.title|escape}}
         </td>
         <td class="input">
           {{field.input}}
+          <input type="hidden" name="editable.{{field.name}}"
+                 value='{{field.json}}'/>
         </td>
       </tr>
     {% endfor %}
