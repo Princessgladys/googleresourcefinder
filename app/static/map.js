@@ -1267,14 +1267,14 @@ function set_facility_attribute(facility_name, attribute_name, value) {
   var attribute_i = attributes_by_name[attribute_name];
   if (facility_i) {
     var facility = facilities[facility_i];
-    if (!facility.last_report) {
+    if (!facility) {
       var nulls = [];
       for (var a = 0; a < attributes.length; a++) {
         nulls.push(null);
       }
-      facility.last_report = {values: nulls};
+      facility.values = nulls;
     }
-    facility.last_report.values[attribute_i] = value;
+    facility.values[attribute_i] = value;
   }
   update_facility_row(facility_i);
 }
@@ -1313,7 +1313,7 @@ function update_facility_row(facility_i) {
   var facility = facilities[facility_i];
   for (var c = 1; c < summary_columns.length; c++) {
     cell = cell.nextSibling;
-    var value = summary_columns[c].get_value(facility.last_report.values);
+    var value = summary_columns[c].get_value(facility.values);
     set_children(cell, value);
     cell.className = 'value column_' + c;
   }
