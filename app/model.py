@@ -197,6 +197,7 @@ class Dump(db.Model):
     data = db.BlobProperty()  # received raw data
 
 def value_or_none(value):
+    """Converts any false value other than 0 or 0.0 to None."""
     if value or value == 0:
         return value
     return None
