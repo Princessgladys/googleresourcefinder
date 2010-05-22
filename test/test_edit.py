@@ -1,6 +1,7 @@
 from resource_mapper_test_case import ResourceMapperTestCase
 import unittest
 
+# "name" attributes of the checkboxes for available services in the edit form.
 SERVICES = [
     'general_surgery',
     'orthopedics',
@@ -20,6 +21,7 @@ SERVICES = [
     'corpse_removal',
 ]
 
+# "name" attributes of the string input fields in the edit form.
 STR_FIELDS = [
     'contact_name',
     'phone',
@@ -35,7 +37,8 @@ STR_FIELDS = [
 
 class EditTests(ResourceMapperTestCase):
     def test_edit_link(self):
-        return
+        """Confirms that the "Edit this record" link in the detail bubble
+        goes to the edit form."""
         self.login('/')
         self.s.click('id=facility-1')
         self.wait_until(self.s.is_element_present, 'link=Edit this record')
@@ -44,6 +47,8 @@ class EditTests(ResourceMapperTestCase):
         self.assertTrue('/edit?' in self.s.get_location())
 
     def test_edit_page(self):
+        """Confirms that all the fields in the edit form save the entered
+        values, and these values appear pre-filled when the form is loaded."""
         # Go to the edit page
         self.login('/edit?cc=ht&facility_name=mspphaiti.org..95644')
         self.assertTrue(self.s.get_text('//h1').startswith('Edit'))
@@ -70,6 +75,9 @@ class EditTests(ResourceMapperTestCase):
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
     def fill_fields(self, text_fields, checkbox_fields, select_fields):
+        """Fills in text fields, selects or deselects checkboxes, and
+        makes drop-down selections.  Each of the arguments should be a
+        dictionary of field names to values."""
         for name, value in text_fields.items():
             input_xpath = '//input[@name="%s"]' % name
             self.s.type(input_xpath, value)
@@ -81,6 +89,9 @@ class EditTests(ResourceMapperTestCase):
             self.s.select(select_xpath, 'value=' + value)
 
     def verify_fields(self, text_fields, checkbox_fields, select_fields):
+        """Checks the values of text fields, state of checkboxes, and
+        selection state of options.  Each of the arguments should be a
+        dictionary of field names to values."""
         for name, value in text_fields.items():
             input_xpath = '//input[@name="%s"]' % name
             self.assertEquals(value, self.s.get_value(input_xpath))
