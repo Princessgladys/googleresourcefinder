@@ -34,6 +34,11 @@ tr.field { vertical-align: baseline; margin-top: 1em; }
 tr.field.text { vertical-align: top; }
 .readonly { color: #666; }
 .label { text-align: right; color: #666; }
+.hidden { display:none }
+.errorbox-bad { padding: 2px; border: 2px solid #900; }
+.errormsg { margin-left: 4px; color: #900 }
+.instructions { width: 500px }
+.dash { border-top: 3px dotted #000; margin: 12px; }
 </style>
 {% if not params.embed %}
 </head>
@@ -46,7 +51,7 @@ tr.field.text { vertical-align: top; }
 # some reason.
 #i18n: Title for page to edit data about a facility
 {% endcomment %}
-<h1>{% trans "Edit" %} {{facility.title|escape}}</h1>
+<h1>{% trans "Edit" %} {{facility_title|escape}}</h1>
 
 <form method="post" id="edit" action="/edit">
   <input type="hidden" name="token" value="{{token}}"/>
@@ -55,10 +60,68 @@ tr.field.text { vertical-align: top; }
   <input type="hidden" name="facility_name"
       value="{{params.facility_name|escape}}"/>
   <table>
+    {% if not auth.nickname %}
+      <tr class="auth">
+        <td colspan="2" class="instructions">
+          {% comment %}
+          #i18n: Instructions to enter a person's name and organizational
+          #i18n: affiliation.
+          {% endcomment %}
+          {% blocktrans %}Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited.{% endblocktrans %}
+        </td>
+      </tr>
+      <tr class="field">
+        <td class="label">
+          {% comment %}
+          #i18n: Label for a required text box to enter a person's name
+          {% endcomment %}
+          {% trans "Name (required)" %}
+        </td>
+        <td class="input">
+          <div id="nickname_errorbox" class="errorbox-good">
+            <input type="text" name="auth_nickname" id="auth_nickname" 
+                   value="{{suggested_nickname}}"/>
+            <div id="nickname_errormsg" class="hidden">
+              {% comment %}
+              #i18n: Error message for required field
+              {% endcomment %}
+              {% trans "Field is required." %}
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr class="field">
+        <td class="label">
+          {% comment %}
+          #i18n: Label for a required text box to enter organizational
+          #i18n: affiliation.
+          {% endcomment %}
+          {% trans "Affiliation (required)" %}
+        </td>
+        <td class="input">
+          <div id="affiliation_errorbox" class="errorbox-good">
+            <input type="text" name="auth_affiliation" id="auth_affiliation"
+                   value=""/>
+            <div id="affiliation_errormsg" class="hidden">
+              {% comment %}
+              #i18n: Error message for required field
+              {% endcomment %}
+              {% trans "Field is required." %}
+            </div>
+          </div>
+          <br/>
+        </td>
+      </tr>
+      <tr>
+        <td colspan=2 class="dash">
+          <br/>
+        </td>
+      </tr>
+    {% endif %}
     {% for field in readonly_fields %}
       <tr class="field">
         <td class="label">
-          {{field.name|escape}}
+          {{field.title|escape}}
         </td>
         <td class="readonly">
           {{field.value}}
@@ -68,10 +131,12 @@ tr.field.text { vertical-align: top; }
     {% for field in fields %}
       <tr class="field {{field.type}}">
         <td class="label">
-          {{field.name|escape}}
+          {{field.title|escape}}
         </td>
         <td class="input">
           {{field.input}}
+          <input type="hidden" name="editable.{{field.name}}"
+                 value="{{field.json|escape}}"/>
         </td>
       </tr>
     {% endfor %}
@@ -82,17 +147,22 @@ tr.field.text { vertical-align: top; }
         {% comment %}
         #i18n: Button text to save data
         {% endcomment %}
-        <input type="submit" name='save' value='{% trans "Save" %}'>
+        <input type="submit" name="save" id="save" value="{% trans 'Save' %}">
         {% comment %}
         #i18n: Button text to cancel and return to the home page
         {% endcomment %}
-        <input type="submit" name='cancel' value='{% trans "Cancel" %}'>
+        <input type="submit" name="cancel" id="cancel" value="{% trans 'Cancel' %}">
         <span id="edit-status"></span>
       </td>
     </tr>
   </table>
 </form>
 {% if not params.embed %}
+{% comment %}
+# If params.embed is true, this should be included in the page where this html
+# is embedded.
+{% endcomment %}
+<script type="text/javascript" src="static/edit.js"></script>
 </body>
 </html>
 {% endif %}

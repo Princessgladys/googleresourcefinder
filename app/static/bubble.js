@@ -41,6 +41,8 @@ rf.bubble.format_attr = function(attr, value) {
       return translate_value(value);
     case 'multi':
       return translate_values(value).join(', ');
+    case 'geopt':
+      return '(' + value.lat + ', ' + value.lon + ')';
     case 'str':
     case 'int':
     case 'float':
@@ -53,7 +55,7 @@ rf.bubble.format_attr = function(attr, value) {
  * Renders the HTML content of the InfoWindow for a given facility.
  */
 rf.bubble.get_html = function(facility, attribute_is, last_updated) {
-  var EDIT_URL = '/edit?cc=ht&facility_name=${FACILITY_NAME}';
+  var EDIT_URL = '/edit?facility_name=${FACILITY_NAME}';
   var AVAILABILITY_CELLS = HTML(
     '<td class="availability">' +
     '  <div class="number">${AVAILABILITY}</div></td>' +
@@ -65,7 +67,8 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
     '<tr class="item"><td class="label">${LABEL}</td>' +
     '<td class="value" colspan="2">${VALUE}</td></tr>');
   var HISTORY_ROW = HTML(
-    '<tr><td>${DATE}</td><td>${LABEL}: ${VALUE}</td><td>${AUTHOR}</td></tr>');
+    '<tr><td>${LABEL}: ${VALUE}</td><td>${AUTHOR}, ' + 
+    '${AFFILIATION}</td><td>${COMMENT}</td><td>${DATE}</td></tr>');
 
   var edit_url = render(EDIT_URL, {FACILITY_NAME: facility.name});
   var edit_link = locale.EDIT_LINK_HTML({
@@ -73,7 +76,7 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
       LINK_END: HTML('</a>')
     });
 
-  var values = facility.last_report && facility.last_report.values;
+  var values = facility && facility.values;
   var availability_info;
   if (values && typeof(values[attributes_by_name.total_beds]) === 'number') {
     availability_info = render(AVAILABILITY_CELLS, {
@@ -90,15 +93,18 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
     });
   }
 
+  var location = facility.values[attributes_by_name.location];
   var geolocation_info = locale.GEOLOCATION_HTML({
-    LATITUDE: facility.location.lat,
-    LONGITUDE: facility.location.lon
+    LATITUDE: location.lat,
+    LONGITUDE: location.lon
   });
 
   var healthc_id = values && values[attributes_by_name.healthc_id] || '\u2013';
   var address_info = render(values && values[attributes_by_name.address]);
 
   var attributes_to_hide = {};
+  attributes_to_hide[attributes_by_name.title] = true;
+  attributes_to_hide[attributes_by_name.location] = true;
   attributes_to_hide[attributes_by_name.available_beds] = true;
   attributes_to_hide[attributes_by_name.total_beds] = true;
   attributes_to_hide[attributes_by_name.healthc_id] = true;
@@ -112,8 +118,8 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
     }
     var attribute = attributes[a];
     var value = null;
-    if (facility.last_report) {
-      value = facility.last_report.values[a];
+    if (facility) {
+      value = facility.values[a];
     }
     if (value !== null && value !== '') {
       attributes_info.push(render(ATTRIBUTE_ROW, {
@@ -124,26 +130,25 @@ rf.bubble.get_html = function(facility, attribute_is, last_updated) {
   }
 
   var history_info = [];
-  if (facility.reports) {
-    for (var i = facility.reports.length-1; i >= 0; i--) {
-      var report = facility.reports[i];
-      for (var j = 0; j < attribute_is.length; j++) {
-        var a = attribute_is[j];
-        if (report.values[a] || report.values[a] == 0) {
-          var attribute = attributes[a];
-          history_info.push(render(HISTORY_ROW, {
-            DATE: report.date,
-            LABEL: messages.attribute_name[attribute.name],
-            VALUE: rf.bubble.format_attr(attribute, report.values[a]),
-            AUTHOR: report.user.email
-          }));
-        } 
+  if (facility) {
+    for (var j = 0; j < attribute_is.length; j++) {
+      var a = attribute_is[j];
+      if (facility.timestamps && facility.timestamps[a]) {
+        var attribute = attributes[a];
+        history_info.push(render(HISTORY_ROW, {
+          DATE: facility.timestamps[a],
+          LABEL: messages.attribute_name[attribute.name],
+          VALUE: rf.bubble.format_attr(attribute, facility.values[a]),
+          AUTHOR: facility.nicknames[a],
+          AFFILIATION: facility.affiliations[a],
+          COMMENT: facility.comments[a]
+        }));
       } 
     } 
   }
 
   return render_template('bubble_template', {
-    FACILITY_TITLE: facility.title,
+    FACILITY_TITLE: facility.values[attributes_by_name.title],
     FACILITY_NAME: facility.name,
     HEALTHC_ID: healthc_id,
     LAST_UPDATED: last_updated,

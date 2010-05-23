@@ -1,5 +1,5 @@
 #!/usr/bin/python2.5
-# Copyright 2009-2010 by Steve Hakusa
+# Copyright 2009-2010 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 # List of languages that appear in the language menu, as (code, name) pairs.
 LANGUAGES = [('en', 'English'),
              ('fr', u'Fran\u00e7ais'), # French
-             #('ht', u'Krey\u00f2l'), # Kreyol
+             ('ht', u'Krey\u00f2l'), # Kreyol
              ('es-419', u'Espa\u00F1ol'), # Spanish (Latin American)
              ]
 
