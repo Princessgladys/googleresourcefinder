@@ -25,6 +25,28 @@
     return document.getElementById(id);
   }
 
+  function ensure_array_indexOf() {
+    // Array.prototype.indexOf is not implemented in all browsers
+    if (!Array.prototype.indexOf) {
+      Array.prototype.indexOf = function(elt /*, from*/) {
+        var len = this.length;
+
+        var from = Number(arguments[1]) || 0;
+        from = (from < 0) ? Math.ceil(from) : Math.floor(from);
+        if (from < 0) {
+          from += len;          
+        }
+
+        for (; from < len; from++) {
+          if (from in this && this[from] === elt) {
+            return from;            
+          }
+        }
+        return -1;
+      };
+    }
+  }
+
   function set_error(name, valid, error) {
     $(name + '_errorbox').className =
         valid ? 'errorbox-good' : 'errorbox-bad';
@@ -46,7 +68,7 @@
   function validate_required_string(input, opt_error) {
     var value = input.value ? input.value.trim() : null;
     set_error(input.name, value, locale.ERROR_FIELD_IS_REQUIRED());
-    return value;
+    return value ? true : false;
   }
 
   function is_valid_number(value) {
@@ -102,13 +124,15 @@
     var trs = document.getElementsByTagName('tr');
     for (var i = 0; i < trs.length; i++) {
       var tr = trs[i];
-      var cssClass = tr.className;
-      if (cssClass.indexOf('int') != -1 || cssClass.indexOf('float') != -1) {
+      var classes = tr.className.split(' ');
+      ensure_array_indexOf();
+      if (classes.indexOf('int') != -1 || classes.indexOf('float') != -1) {
         valid &= validate_number(tr.getElementsByTagName('input')[0]);
-      } else if (cssClass.indexOf('geopt') != -1) {
-        valid &= validate_geopt(tr.getElementsByTagName('input'));
+      } else if (classes.indexOf('geopt') != -1) {
+        var inputs = tr.getElementsByTagName('input');
+        valid &= validate_geopt([inputs[0], inputs[1]]);
       }
-    }
+    }      
 
     return valid ? true : false;
   }

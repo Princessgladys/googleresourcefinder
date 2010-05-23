@@ -19,26 +19,26 @@ import datetime
 import logging
 
 def load_paho_csv(
-    filename, observed, user, source, source_affiliation):
+    filename, source_url, observed, author, author_nickname, author_affiliation):
     """Loads the PAHO master list as a CSV file.
 
     Args:
-      filename: name of the file
+      filename: name of the csv file to load
+      source_url: where filename was downloaded, stored in Report.source
       observed: datetime.datetime when the data was observed to be valid
-      user: users.User who will own the changes made during loading
-      source: source of the changes, may just be nickname for the user
-      source_affiliation: if source is a proper name, this is the
-                          organizational affiliation of the source, otherwise
-                          can be empty"""
+      author: users.User who will own the changes made during loading
+      author_nickname: nickname for the author
+      author_affiliation: organizational affiliation of the author"""
 
-    if not filename or not observed or not user or not source:
-        raise Exception('filename, observed, user, and source are required')
+    if (not filename or not source_url or not observed or not author or
+        not author_nickname or not author_affiliation):
+        raise Exception('All arguments must be non-empty.')
 
     facilities = []
     reports = []
 
     # Create a dump of the raw file
-    Dump(source=filename, data=open(filename, 'rb').read()).put()
+    Dump(source=source_url, data=open(filename, 'rb').read()).put()
 
     for record in csv.DictReader(open(filename)):
         for key in record:
@@ -51,8 +51,7 @@ def load_paho_csv(
             latitude = float(record['X_DDS'])
             longitude = float(record['Y_DDS'])
         except ValueError:
-            # TODO(shakusa) There are ~70 that cause this warning. Isn't this
-            # a problem?
+            # TODO(shakusa) Fix this. We should be importing all facilities.
             logging.warning('Ignoring facility "%s" (%s) with invalid lat,lon',
                             title, facility_name)
             continue
@@ -93,9 +92,9 @@ def load_paho_csv(
         facility = Facility(
             key_name=facility_name,
             type='hospital',
-            user=user)
+            author=author)
         facilities.append(facility)
-        Facility.user.validate(user)
+        Facility.author.validate(author)
 
         utcnow = datetime.datetime.utcnow().replace(microsecond=0)
 
@@ -104,10 +103,9 @@ def load_paho_csv(
         report = Report(
             facility,
             arrived=utcnow,
-            observed=observed,
-            user=user,
-            source=source,
-            source_affiliation=source_affiliation)
+            source=source_url,
+            author=author,
+            observed=observed)
         reports.append(report)
 
         for (name, attr) in attrs.items():
@@ -115,32 +113,20 @@ def load_paho_csv(
                 continue
 
             current_report = report
-            if ((attr.source and source != attr.source)
-                or (attr.observed and observed != attr.observed)):
+            if attr.observed and observed != attr.observed:
                 # Separate out this change into a new report
                 current_report = Report(
                     facility,
                     arrived=utcnow,
-                    observed=attr.observed or observed,
-                    user=user,
-                    source=attr.source or source,
-                    source_affiliation=(
-                        not attr.source and source_affiliation or None))
+                    source=source_url,
+                    author=author,
+                    observed=attr.observed)
                 reports.append(current_report)
 
-            setattr(current_report, '%s__' % name, attr.value)
-            setattr(facility, '%s__' % name, attr.value)
-
-            if attr.comment:
-                setattr(current_report, '%s__comment' % name, attr.comment)
-                setattr(facility, '%s__comment' % name, attr.comment)
-
-            if not attr.source:
-                setattr(facility, '%s__affiliation' % name, source_affiliation)
-
-            setattr(facility, '%s__source' % name, attr.source or source)
-            setattr(facility, '%s__user' % name, user)
-            setattr(facility, '%s__observed' % name, attr.observed or observed)
+            facility.set_attribute(name, attr.value, observed, author,
+                                   author_nickname, author_affiliation,
+                                   attr.comment)
+            current_report.set_attribute(name, attr.value, attr.comment)
 
     put_batches(facilities + reports)
 
@@ -149,8 +135,15 @@ class Attribute:
     def __init__(self, value, observed=None, source=None, comment=None):
         self.value = strip_or_none(value)
         self.observed = parse_paho_date(strip_or_none(observed))
-        self.source = strip_or_none(source)
-        self.comment = strip_or_none(comment)
+        self.comment = self.combine_comment(source, comment)
+
+    def combine_comment(self, source, comment):
+        source = strip_or_none(source)
+        comment = strip_or_none(comment)
+        if source is not None:
+            source = 'Source: %s' % source
+            comment = comment and '%s; %s' % (source, comment) or source
+        return comment
 
 def strip_or_none(value):
     if isinstance(value, basestring):
@@ -158,7 +151,7 @@ def strip_or_none(value):
     return value or None
 
 def parse_paho_date(date):
-    """Parses a period-separated (month.day.year) date.
+    """Parses a period-separated (month.day.year) date, passes through None.
     For example, May 19, 2010 would be represented as '05.19.2010'"""
     if date is not None:
         (month, day, year) = date.split('.')

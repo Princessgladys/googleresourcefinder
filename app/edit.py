@@ -16,11 +16,14 @@ import datetime
 import logging
 import model
 import re
+import urlparse
 import utils
+import wsgiref
 from access import check_user_role
 from main import USE_WHITELISTS
+from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
-from utils import db, get_message, html_escape, to_unicode, users, _
+from utils import db, get_message, html_escape, simplejson, to_unicode, users, _
 from feeds.crypto import sign, verify
 
 # TODO(shakusa) Add per-attribute comment fields
@@ -31,11 +34,11 @@ DAY_SECS = 24 * 60 * 60
 class ChangeMetadata:
     """Simple struct to hold metadata for a change and reduce the number of
     arguments passed around to various functions."""
-    def __init__(self, user, source, affiliation, observed):
-        self.user = user
-        self.source = source
-        self.affiliation = affiliation
+    def __init__(self, observed, author, author_nickname, author_affiliation):
         self.observed = observed
+        self.author = author
+        self.author_nickname = author_nickname
+        self.author_affiliation = author_affiliation
 
 # ==== Form-field generators and parsers for each attribute type =============
 
@@ -54,39 +57,29 @@ class AttributeType:
 
     def to_stored_value(self, name, value, request, attribute):
         """Converts args into the storage value for this attribute type."""
+        if isinstance(value, basestring):
+            value = value.strip()
         if value or value == 0:
             return value
         return None
 
-    def has_changed(self, facility, name, value, request, attribute):
-        """Returns True if the request has an input for the given attribute
-        and that attribute has changed from the previous value in facility."""
-        value = self.to_stored_value(name, value, request, attribute)
-        old_value = get_value(facility, name)
-        return value != old_value
-
-    def apply_change(self, facility, report, name, value, request, attribute,
+    def apply_change(self, facility, report, request, attribute,
                      change_metadata):
         """Adds an attribute to the given Facility and Report based on a query
-        parameter. Also adds the required change history fields."""
-        value = self.to_stored_value(name, value, request, attribute)
-        setattr(facility, '%s__' % name, value)
-        setattr(report, '%s__' % name, value)
+        parameter. Also adds the required change history fields according
+        to the invariants in model.py."""
+        name = attribute.key().name()
+        value = self.to_stored_value(name, request.get(name, None),
+                                     request, attribute)
+        comment = request.get('%s__comment' % name, None)
 
-        comment_key = '%s__comment' % name
-        comment_value = request.get(comment_key, None)
-        if comment_value:
-            setattr(report, comment_key, comment_value)
-            setattr(facility, comment_key, comment_value)
-        if change_metadata.user:
-            setattr(facility, '%s__user' % name, change_metadata.user)
-        if change_metadata.source:
-            setattr(facility, '%s__source' % name, change_metadata.source)
-        if change_metadata.affiliation:
-            setattr(facility, '%s__affiliation' % name,
-                    change_metadata.affiliation)
-        if change_metadata.observed:
-            setattr(facility, '%s__observed' % name, change_metadata.observed)
+        report.set_attribute(name, value, comment)
+        facility.set_attribute(name, value,
+                               change_metadata.observed,
+                               change_metadata.author,
+                               change_metadata.author_nickname,
+                               change_metadata.author_affiliation,
+                               comment)
 
 class StrAttributeType(AttributeType):
     input_size = 40
@@ -124,7 +117,7 @@ class ContactAttributeType(AttributeType):
         contact = (request.get(name + '.name', '') + '|' +
                    request.get(name + '.phone', '') + '|' +
                    request.get(name + '.email', ''))
-        # make sure we put empty string of all three are empty
+        # make sure we put None if all three are empty
         return contact != '||' and contact or None
 
 class DateAttributeType(AttributeType):
@@ -256,32 +249,43 @@ ATTRIBUTE_TYPES = {
     'geopt': GeoPtAttributeType(),
 }
 
-def get_value(facility, name, default=None):
-    """Returns a dynamic property of the given name from the facility."""
-    return getattr(facility, '%s__' % name, default)
-
 def make_input(facility, attribute):
     """Generates the HTML for an input field for the given attribute."""
     name = attribute.key().name()
     return ATTRIBUTE_TYPES[attribute.type].make_input(
-        name, get_value(facility, name), attribute)
+        name, facility.get_value(name), attribute)
+
+def render_json(value):
+    """Renders the given value as json"""
+    return clean_json(simplejson.dumps(value, indent=None, default=json_encode))
+
+def render_attribute_as_json(facility, attribute):
+    """Returns the value of this attribute as a JSON string"""
+    name = attribute.key().name()
+    return render_json(facility.get_value(name))
 
 def apply_change(facility, report, request, attribute, change_metadata):
     """Adds an attribute to the given Facility and Report based on
     a query parameter."""
-    name = attribute.key().name()
-    value = request.get(name, None)
     attribute_type = ATTRIBUTE_TYPES[attribute.type]
-    attribute_type.apply_change(facility, report, name, value, request,
-                                attribute, change_metadata)
+    attribute_type.apply_change(facility, report, request, attribute,
+                                change_metadata)
 
 def has_changed(facility, request, attribute):
     """Returns True if the request has an input for the given attribute
     and that attribute has changed from the previous value in facility."""
     name = attribute.key().name()
-    value = request.get(name, None)
-    attribute_type = ATTRIBUTE_TYPES[attribute.type]
-    return attribute_type.has_changed(facility, name, value, request, attribute)
+    value = ATTRIBUTE_TYPES[attribute.type].to_stored_value(
+        name, request.get(name, None), request, attribute)
+    current = render_json(value)
+    previous = request.get('editable.%s' % name, None)
+    return previous != current
+
+def is_editable(request, attribute):
+    """Returns true if the special hidden 'editable.name' field is set in
+    the request, indicating that the given field was editable by the user
+    at the time the edit page was rendered."""
+    return 'editable.%s' % attribute.key().name() in request.arguments()
 
 def can_edit(auth, attribute):
     """Returns True if the user can edit the given attribute."""
@@ -291,6 +295,11 @@ def can_edit(auth, attribute):
 def get_suggested_nickname(user):
     """Returns the suggested Authorization.nickname based on a user.nickname"""
     return re.sub('@.*', '', user and user.nickname() or '')
+
+def get_source_url(request):
+    source_url = wsgiref.util.request_uri(request.environ)
+    parsed_url = urlparse.urlparse(source_url)
+    return len(parsed_url) > 1 and '://'.join(parsed_url[:2]) or None
 
 # ==== Handler for the edit page =============================================
 
@@ -334,19 +343,20 @@ class Edit(utils.Handler):
                     'name': name,
                     'title': get_message('attribute_name', name),
                     'type': attribute.type,
-                    'input': make_input(self.facility, attribute)
+                    'input': make_input(self.facility, attribute),
+                    'json': render_attribute_as_json(self.facility, attribute)
                 })
             else:
                 readonly_fields.append({
                     'title': get_message('attribute_name', name),
-                    'value': get_value(self.facility, name)
+                    'value': self.facility.get_value(name)
                 })
 
         token = sign(XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
 
         self.render('templates/edit.html',
-            token=token, facility=self.facility, fields=fields,
-            readonly_fields=readonly_fields, auth=self.auth,
+            token=token, facility_title=self.facility.get_value('title'),
+            fields=fields, readonly_fields=readonly_fields, auth=self.auth,
             suggested_nickname=get_suggested_nickname(self.user),
             params=self.params, logout_url=users.create_logout_url('/'),
             instance=self.request.host.split('.')[0])
@@ -368,14 +378,14 @@ class Edit(utils.Handler):
                 logging.error("Missing editor nickname")
                 #i18n: Error message for request missing nickname
                 raise ErrorMessage(403, 'Missing editor nickname.')
-            self.auth.nickname = nickname
+            self.auth.nickname = nickname.strip()
 
             affiliation = self.request.get('auth_affiliation', None)
             if not affiliation:
                 logging.error("Missing editor affiliation")
                 #i18n: Error message for request missing affiliation
                 raise ErrorMessage(403, 'Missing editor affiliation.')
-            self.auth.affiliation = affiliation
+            self.auth.affiliation = affiliation.strip()
             self.auth.user_roles.append('editor')
             self.auth.put()
             logging.info('Assigning nickname "%s" and affiliation "%s" to %s'
@@ -384,18 +394,31 @@ class Edit(utils.Handler):
         logging.info("record by user: %s" % self.user)
         utcnow = datetime.datetime.utcnow().replace(microsecond=0)
         change_metadata = ChangeMetadata(
-            self.user, self.auth.nickname, self.auth.affiliation, utcnow)
+            utcnow, self.user, self.auth.nickname, self.auth.affiliation)
         report = model.Report(
             self.facility,
             arrived=utcnow,
-            observed=utcnow,
-            user=self.user)
+            source=get_source_url(self.request),
+            author=self.user,
+            observed=utcnow)
 
         has_changes = False
         for name in self.facility_type.attribute_names:
             attribute = self.attributes[name]
-            if (can_edit(self.auth, attribute) and
+            # To change an attribute, it has to have been marked editable
+            # at the time the page was rendered, the new value has to be
+            # different than the one in the facility at the time the page was
+            # rendered, and the user has to have permission to edit it now.
+            if (is_editable(self.request, attribute) and
                 has_changed(self.facility, self.request, attribute)):
+                if not can_edit(self.auth, attribute):
+                    raise ErrorMessage(
+                        403, _(
+                        #i18n: Error message for lacking edit permissions
+                        '%(user)s does not have permission to edit %(attr)s')
+                        % {'user': self.user.email(),
+                           'attr': get_message('attribute_name',
+                                               attribute.key().name())})
                 has_changes = True
                 apply_change(self.facility, report, self.request, attribute,
                              change_metadata)

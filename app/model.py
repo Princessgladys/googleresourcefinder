@@ -42,17 +42,75 @@ class Facility(db.Expando):
     Key name: government or internationally established facility ID."""
     timestamp = db.DateTimeProperty(auto_now_add=True) # creation time
     type = db.StringProperty(required=True)  # key_name of a FacilityType
-    user = db.UserProperty() # who created this facility
+    author = db.UserProperty() # who created this facility
     # additional properties for the current value of each attribute
     # (named by Attribute's key_name).  This denormalization is for read speed.
     # Consider an attribute named 'foo'. We will store 6 values here:
-    # foo__            various, the attribute value
-    # foo__observed    db.DateTimeProperty, observation timestamp when the
-    #                                       value was valid
-    # foo__user        db.UserProperty, the user who provided the change
-    # foo__source      db.StringProperty, source of the change
-    # foo__affiliation db.StringProperty, affiliation of the source
-    # foo__comment     db.StringProperty, a comment about the change
+    # foo__                various, the attribute value
+    # foo__observed           db.DateTimeProperty, observation timestamp when
+    #                                              the value was valid
+    # foo__author             db.UserProperty, the user who provided the change
+    # foo__author_nickname    db.StringProperty, source of the change
+    # foo__author_affiliation db.StringProperty, affiliation of the source
+    # foo__comment            db.StringProperty, a comment about the change
+    # These properties will exist with the following invariants:
+    # 1. If facility.foo__ is not present, that means attribute "foo" has never
+    # existed on this facility at any point in the past.
+    # 2. If facility.foo__ is None, that means some user actually set the
+    # attribute to "(unspecified)".
+    # 3. All six fields are always written together at the same time, and
+    # are never removed.  (Hence either all are present or none are present.)
+
+    @staticmethod
+    def get_stored_name(attribute_name):
+        return '%s__' % attribute_name
+
+    def has_value(self, attribute_name):
+        """Returns the value of the Attribute with the given key_name,
+           or default if it does not exist."""
+        return hasattr(self, '%s__' % attribute_name)
+
+    def get_value(self, attribute_name, default=None):
+        """Returns the value of the Attribute with the given key_name,
+           or default if it does not exist."""
+        return getattr(self, '%s__' % attribute_name, default)
+
+    def get_observed(self, attribute_name, default=None):
+        """Returns the timestamp when the Attribute with the given key_name
+           was valid, or default if it does not exist."""
+        return getattr(self, '%s__observed' % attribute_name, default)
+
+    def get_author(self, attribute_name, default=None):
+        """Returns the author of the Attribute value with the given key_name,
+           or default if it does not exist."""
+        return getattr(self, '%s__author' % attribute_name, default)
+
+    def get_author_nickname(self, attribute_name, default=None):
+        """Returns the author nickname of the Attribute value with the given
+           key_name, or default if it does not exist."""
+        return getattr(self, '%s__author_nickname' % attribute_name, default)
+
+    def get_author_affiliation(self, attribute_name, default=None):
+        """Returns the affiliation of the author of the Attribute value
+           with the given key_name, or default if it does not exist."""
+        return getattr(self, '%s__author_affiliation' % attribute_name, default)
+
+    def get_comment(self, attribute_name, default=None):
+        """Returns the author's comment about the Attribute value with the
+           given key_name, or default if it does not exist."""
+        return getattr(self, '%s__comment' % attribute_name, default)
+
+    def set_attribute(self, name, value, observed, author, author_nickname,
+                      author_affiliation, comment):
+        """Sets the value for the Attribute with the given key_name."""
+        setattr(self, '%s__' % name, value_or_none(value))
+        setattr(self, '%s__observed' % name, value_or_none(observed))
+        setattr(self, '%s__author' % name, value_or_none(author))
+        setattr(self, '%s__author_nickname' % name,
+                value_or_none(author_nickname))
+        setattr(self, '%s__author_affiliation' % name,
+                value_or_none(author_affiliation))
+        setattr(self, '%s__comment' % name, value_or_none(comment))
 
 class FacilityType(db.Model):
     """A type of Facility, e.g. hospital, warehouse, charity, camp.
@@ -64,41 +122,58 @@ class FacilityType(db.Model):
 class Attribute(db.Model):
     """An attribute of a facility, e.g. services available, # of
     patients. Top-level entity, has no parent.  Key name: name of a property
-    in a FacilityReport,and also the name of the Message providing the
+    in a Report,and also the name of the Message providing the
     UI-displayable attribute name."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
     type = db.StringProperty(required=True, choices=[
-        'str',  # value is a single-line string (Python unicode)
-        'text',  # value is a string, shown as long text (Python unicode)
-        'contact',  # value is a 3-line string (name, phone, e-mail address)
-        'date',  # value is a date (Python datetime with time 00:00:00)
-        'int',  # value is an integer (64-bit long)
-        'float',  # value is a float (Python float, i.e. double)
-        'bool',  # value is a boolean
+        'str',     # value is a single-line string (Python unicode)
+        'text',    # value is a string, shown as long text (Python unicode)
+        'contact', # value is a 3-line string (name, phone, e-mail address)
+        'date',    # value is a date (Python datetime with time 00:00:00)
+        'int',     # value is an integer (64-bit long)
+        'float',   # value is a float (Python float, i.e. double)
+        'bool',    # value is a boolean
         'choice',  # value is a string (one of the elements in 'values')
-        'multi',  # value is a list of strings (which are elements of 'values')
-        'geopt', # value is a db.GeoPt with latitude and longitude
+        'multi',   # value is a list of strings (which are elements of 'values')
+        'geopt',   # value is a db.GeoPt with latitude and longitude
     ])
     edit_role = db.StringProperty() # What Authorization role can edit?
     values = db.StringListProperty()  # allowed value names for choice or multi
 
 class Report(db.Expando):
     """A report on the attributes and resources of a Facility.
-    Parent: Facility."""
+    Parent: Facility. A Report may represent a partial update of the
+    attributes of the facility."""
     arrived = db.DateTimeProperty(auto_now_add=True) # date we received report
-    user = db.UserProperty() # user doing the reporting
-    source = db.StringProperty() # source of the report, if different from
-                                 # the Authorization.nickname of the user
-                                 # associated with the Report
-    source_affiliation = db.StringProperty() # affiliation of the source, if
-                                             # different than the
-                                             # Authorization.affiliation of the
-                                             # user
+    source = db.StringProperty() # a URL, the source of the report
+    author = db.UserProperty() # author of the report
     observed = db.DateTimeProperty()  # date that report contents were valid
     # additional properties for each Attribute (named by Attribute's key_name)
     # Consider an attribute named 'foo'. We will store 2 values here:
     # foo__          various, the attribute value
     # foo__comment   db.StringProperty, a comment from user making the change
+    # These properties will exist with the following invariants:
+    # 1. If report.foo__ is not present, that means attribute "foo" should
+    # not change its value from the previous report.
+    # 2. If report.foo__ is None, that means some user actually set the
+    # attribute to "(unspecified)".
+    # 3. Both fields are always written together at the same time, and
+    # are never removed.  (Hence either all are present or none are present.)
+
+    def get_value(self, attribute_name, default=None):
+        """Returns the value of the Attribute with the given key_name,
+           or default if it does not exist."""
+        return getattr(self, '%s__' % attribute_name, default)
+
+    def get_comment(self, attribute_name, default=None):
+        """Returns the author's comment about the Attribute value with the
+           given key_name, or default if it does not exist."""
+        return getattr(self, '%s__comment' % attribute_name, default)
+
+    def set_attribute(self, name, value, comment):
+        """Sets the value for the Attribute with the given key_name."""
+        setattr(self, '%s__' % name, value_or_none(value))
+        setattr(self, '%s__comment' % name, value_or_none(comment))
 
 class Message(db.Expando):
     """Internationalized strings for value identifiers.  Top-level entity,
@@ -120,3 +195,9 @@ class Dump(db.Model):
     base = db.SelfReference()  # if present, this dump is a clone of base
     source = db.StringProperty()  # URL identifying the source
     data = db.BlobProperty()  # received raw data
+
+def value_or_none(value):
+    """Converts any false value other than 0 or 0.0 to None."""
+    if value or value == 0:
+        return value
+    return None

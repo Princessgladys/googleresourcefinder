@@ -52,7 +52,7 @@ def facility_transformer(index, facility, attributes, facility_type_is,
     """Construct the JSON object for a Facility."""
     # Gather all the attributes
     values = [None]
-    sources = [None]
+    nicknames = [None]
     affiliations = [None]
     timestamps = [None]
     comments = [None]
@@ -62,26 +62,26 @@ def facility_transformer(index, facility, attributes, facility_type_is,
 
     for attribute in attributes:
         name = attribute.key().name()
-        values.append(getattr(facility, '%s__' % name, None))
-        sources.append(getattr(facility, '%s__source' % name, None))
-        affiliations.append(getattr(facility, '%s__affiliation' % name, None))
-        timestamps.append(getattr(facility, '%s__observed' % name, None))
-        comments.append(getattr(facility, '%s__comment' % name, None))
+        values.append(facility.get_value(name))
+        nicknames.append(facility.get_author_nickname(name))
+        affiliations.append(facility.get_author_affiliation(name))
+        timestamps.append(facility.get_observed(name))
+        comments.append(facility.get_comment(name))
 
     # Pack the results into an object suitable for JSON serialization.
     facility_jobject = {
         'name': facility.key().name(),
         'type': facility_type_is[facility.type],
         'values' : values,
-        'sources': sources,
+        'nicknames': nicknames,
         'affiliations': affiliations,
         'timestamps': timestamps,
         'comments': comments
     }
-    if hasattr(facility, 'location__'):
+    if facility.has_value('location'):
         location = {
-            'lat': getattr(facility, 'location__').lat,
-            'lon': getattr(facility, 'location__').lon
+            'lat': facility.get_value('location').lat,
+            'lon': facility.get_value('location').lon
         }
         if center:
             facility_jobject['distance_meters'] = distance(location, center)
@@ -118,8 +118,8 @@ def render_json(center=None, radius=None):
     # Make JSON objects for the facilities, while collecting lists of the
     # facilities in each division.
     facility_jobjects, facility_is = make_jobjects(
-        Facility.all().order('title__'), facility_transformer,
-        attributes, facility_type_is, center, radius)
+        Facility.all().order(Facility.get_stored_name('title')),
+        facility_transformer, attributes, facility_type_is, center, radius)
     total_facility_count = len(facility_jobjects) - 1
     logging.info("NUMBER OF FACILITIES %d" % total_facility_count)
 
@@ -141,5 +141,5 @@ def render_json(center=None, radius=None):
         'facility_types': facility_type_jobjects,
         'facilities': facility_jobjects,
         'messages': message_jobjects
-    # set indent=2 to pretty-print
+    # set indent=2 to pretty-print; it blows up download size, so defaults off
     }, indent=None, default=json_encode))

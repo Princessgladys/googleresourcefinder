@@ -24,45 +24,42 @@ import datetime
 # facility and a report and returns the column value
 COLUMNS_BY_FACILITY_TYPE = {
     'hospital': [
-        ('facility_name', lambda f: get_value(f, 'title')),
-        ('alt_facility_name', lambda f: get_value(f, 'alt_title')),
-        ('facility_healthc_id', lambda f: get_value(f, 'healthc_id')),
+        ('facility_name', lambda f: f.get_value('title')),
+        ('alt_facility_name', lambda f: f.get_value('alt_title')),
+        ('facility_healthc_id', lambda f: f.get_value('healthc_id')),
         ('facility_pcode', lambda f: re.sub(r'.*\.\.(.*)', r'\1',
                                             f.key().name())),
-        ('available_beds', lambda f: get_value(f, 'available_beds')),
-        ('total_beds', lambda f: get_value(f, 'total_beds')),
-        ('services', lambda f: get_value(f, 'services')),
-        ('contact_name', lambda f: get_value(f, 'contact_name')),
-        ('contact_phone', lambda f: get_value(f, 'phone')),
-        ('contact_email', lambda f: get_value(f, 'email')),
-        ('department', lambda f: get_value(f, 'departemen')),
-        ('district', lambda f: get_value(f, 'district')),
-        ('commune', lambda f: get_value(f, 'commune')),
-        ('address', lambda f: get_value(f, 'address')),
-        ('latitude', lambda f: (get_value(f, 'location') and
-                                get_value(f, 'location')).lat),
-        ('longitude', lambda f: (get_value(f, 'location') and
-                                 get_value(f, 'location')).lon),
-        ('organization', lambda f: get_value(f, 'organization')),
-        ('type', lambda f: get_value(f, 'facility_type')),
-        ('category', lambda f: get_value(f, 'category')),
-        ('construction', lambda f: get_value(f, 'construction')),
-        ('damage', lambda f: get_value(f, 'damage')),
-        ('operational_status', lambda f: get_value(f, 'operational_status')),
-        ('comments', lambda f: get_value(f, 'comments')),
-        ('reachable_by_road', lambda f: get_value(f, 'reachable_by_road')),
-        ('can_pick_up_patients', lambda f: get_value(f, 'can_pick_up_patients')),
-        ('region_id', lambda f: get_value(f, 'region_id')),
-        ('district_id', lambda f: get_value(f, 'district_id')),
-        ('commune_id', lambda f: get_value(f, 'commune_id')),
-        ('commune_code', lambda f: get_value(f, 'commune_code')),
-        ('sante_id', lambda f: get_value(f, 'sante_id')),
-        ('entry_last_updated', lambda f: get_value(f, 'timestamp'))
+        ('available_beds', lambda f: f.get_value('available_beds')),
+        ('total_beds', lambda f: f.get_value('total_beds')),
+        ('services', lambda f: f.get_value('services')),
+        ('contact_name', lambda f: f.get_value('contact_name')),
+        ('contact_phone', lambda f: f.get_value('phone')),
+        ('contact_email', lambda f: f.get_value('email')),
+        ('department', lambda f: f.get_value('departemen')),
+        ('district', lambda f: f.get_value('district')),
+        ('commune', lambda f: f.get_value('commune')),
+        ('address', lambda f: f.get_value('address')),
+        ('latitude', lambda f: (f.get_value('location') and
+                                f.get_value('location')).lat),
+        ('longitude', lambda f: (f.get_value('location') and
+                                 f.get_value('location')).lon),
+        ('organization', lambda f: f.get_value('organization')),
+        ('type', lambda f: f.get_value('facility_type')),
+        ('category', lambda f: f.get_value('category')),
+        ('construction', lambda f: f.get_value('construction')),
+        ('damage', lambda f: f.get_value('damage')),
+        ('operational_status', lambda f: f.get_value('operational_status')),
+        ('comments', lambda f: f.get_value('comments')),
+        ('reachable_by_road', lambda f: f.get_value('reachable_by_road')),
+        ('can_pick_up_patients', lambda f: f.get_value('can_pick_up_patients')),
+        ('region_id', lambda f: f.get_value('region_id')),
+        ('district_id', lambda f: f.get_value('district_id')),
+        ('commune_id', lambda f: f.get_value('commune_id')),
+        ('commune_code', lambda f: f.get_value('commune_code')),
+        ('sante_id', lambda f: f.get_value('sante_id')),
+        ('entry_last_updated', lambda f: f.get_value('timestamp'))
     ],
 }
-
-def get_value(facility, name, default=None):
-    return getattr(facility, '%s__' % name, default)
 
 def get_all(query_maker, batch_size=500):
     results = []
@@ -95,7 +92,7 @@ def write_csv(out, facility_type):
     writer.writerow(row)
 
     # Write a row for each facility.
-    for facility in sorted(facilities, key=lambda f: get_value(f, 'title')):
+    for facility in sorted(facilities, key=lambda f: f.get_value('title')):
         if columns:
             row = []
             for column in columns:

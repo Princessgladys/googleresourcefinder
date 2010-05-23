@@ -57,6 +57,7 @@ def init(app_id, host=None, username=None, password=None):
         username = raw_input('Username: ')
     else:
         print 'Username: %s' % username
+    # Sets up users.get_current_user() inside of the console
     os.environ['USER_EMAIL'] = username
     if not password:
         password = getpass.getpass('Password: ')
