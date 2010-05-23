@@ -125,7 +125,6 @@
     for (var i = 0; i < trs.length; i++) {
       var tr = trs[i];
       var classes = tr.className.split(' ');
-      ensure_array_indexOf();
       if (classes.indexOf('int') != -1 || classes.indexOf('float') != -1) {
         valid &= validate_number(tr.getElementsByTagName('input')[0]);
       } else if (classes.indexOf('geopt') != -1) {
@@ -146,6 +145,7 @@
   }
 
   function init() {
+    ensure_array_indexOf();
     $('edit').onsubmit = validate;
     $('save').onclick = save;
     $('cancel').onclick = cancel;
