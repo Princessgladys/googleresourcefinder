@@ -55,19 +55,19 @@ locale = function() {
   messages.ERROR_FIELD_IS_REQUIRED = "Ce champ est obligatoire.";
 
   //i18n: Error message for invalid latitude.
-  messages.ERROR_LATITUDE_INVALID = "Latitude must be between -90 and 90.";
+  messages.ERROR_LATITUDE_INVALID = "Latitude doit \u00eatre comprise entre -90 et 90";
 
   //i18n: Error message for invalid latitude.
-  messages.ERROR_LATITUDE_MUST_BE_NUMBER = "Latitude must be a number.";
+  messages.ERROR_LATITUDE_MUST_BE_NUMBER = "Latitude doit \u00eatre un nombre";
 
   //i18n: Error message for invalid longitude.
-  messages.ERROR_LONGITUDE_INVALID = "Longitude must be between -180 and 180.";
+  messages.ERROR_LONGITUDE_INVALID = "Longitude doit \u00eatre comprise entre -180 et 180";
 
   //i18n: Error message for invalid longitude.
-  messages.ERROR_LONGITUDE_MUST_BE_NUMBER = "Longitude must be a number.";
+  messages.ERROR_LONGITUDE_MUST_BE_NUMBER = "Longitude doit \u00eatre un nombre";
 
   //i18n: Error message for a value that is not a number
-  messages.ERROR_VALUE_MUST_BE_NUMBER = "Value must be a number.";
+  messages.ERROR_VALUE_MUST_BE_NUMBER = "La valeur doit \u00eatre un nombre";
 
   //i18n: Number of facilities within range of a location.
   //i18n: (example: 5 Facilities within 10 miles)

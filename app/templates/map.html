@@ -108,6 +108,9 @@
     <a href="about:blank">{% trans "Help" %}</a> <span class="sep">|</span>
     <a href='javascript:void(0)'
        onclick='window.open("/tos", "tos", "width=400,height=400")'
+       {% comment %}
+       #i18n: Link to terms of service for the application
+       {% endcomment %}
        >{% trans "Terms of service" %}</a> <span class="sep">|</span>
     <a href="{{loginout_url}}">{{loginout_text}}</a>
   </div>
