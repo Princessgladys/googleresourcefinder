@@ -1,4 +1,3 @@
-/*
 # Copyright 2010 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-*/
-body { font-family: helvetica, arial, sans-serif; font-size: 12px }
-.path { font-size: 16px }
-.kind, .name, .id, .separator { font-weight: bold }
-.kind { color: blue }
-.name, .id { color: green }
-.property { padding-left: 20px }
-.value { padding-left: 10px; color: green }
-.entity {}
-.index {}
-.item {}
-.list {}
-.date {}
+
+import utils
+
+class TermsOfService(utils.Handler):
+    def get(self):
+        self.render('templates/tos.html',
+                    instance=self.request.host.split('.')[0])
+
+if __name__ == '__main__':
+    utils.run([('/tos', TermsOfService)], debug=True)

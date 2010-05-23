@@ -34,7 +34,7 @@ tr.field { vertical-align: baseline; margin-top: 1em; }
 tr.field.text { vertical-align: top; }
 .readonly { color: #666; }
 .label { text-align: right; color: #666; }
-.invisible { display:none }
+.hidden { display:none }
 .errorbox-bad { padding: 2px; border: 2px solid #900; }
 .errormsg { margin-left: 4px; color: #900 }
 .instructions { width: 500px }
@@ -43,6 +43,7 @@ tr.field.text { vertical-align: top; }
 {% if not params.embed %}
 </head>
 <body>
+{% include "analytics.html" %}
 {% endif %}
 {% comment %}
 # NB: This probably should use blocktrans and include facility_name as a param
@@ -81,12 +82,7 @@ tr.field.text { vertical-align: top; }
           <div id="nickname_errorbox" class="errorbox-good">
             <input type="text" name="auth_nickname" id="auth_nickname" 
                    value="{{suggested_nickname}}"/>
-            <div id="nickname_errormsg" class="invisible">
-              {% comment %}
-              #i18n: Error message for required field
-              {% endcomment %}
-              {% trans "Field is required." %}
-            </div>
+            <div id="nickname_errormsg" class="hidden"></div>
           </div>
         </td>
       </tr>
@@ -102,12 +98,7 @@ tr.field.text { vertical-align: top; }
           <div id="affiliation_errorbox" class="errorbox-good">
             <input type="text" name="auth_affiliation" id="auth_affiliation"
                    value=""/>
-            <div id="affiliation_errormsg" class="invisible">
-              {% comment %}
-              #i18n: Error message for required field
-              {% endcomment %}
-              {% trans "Field is required." %}
-            </div>
+            <div id="affiliation_errormsg" class="hidden"></div>
           </div>
           <br/>
         </td>
@@ -121,7 +112,7 @@ tr.field.text { vertical-align: top; }
     {% for field in readonly_fields %}
       <tr class="field">
         <td class="label">
-          {{field.name|escape}}
+          {{field.title|escape}}
         </td>
         <td class="readonly">
           {{field.value}}
@@ -131,10 +122,13 @@ tr.field.text { vertical-align: top; }
     {% for field in fields %}
       <tr class="field {{field.type}}">
         <td class="label">
-          {{field.name|escape}}
+          {{field.title|escape}}
         </td>
         <td class="input">
-          {{field.input}}
+          <div id="{{field.name}}_errorbox" class="errorbox-good">
+            {{field.input}}
+            <div id="{{field.name}}_errormsg" class="hidden"></div>
+          </div>
         </td>
       </tr>
     {% endfor %}
@@ -161,6 +155,12 @@ tr.field.text { vertical-align: top; }
 # is embedded.
 {% endcomment %}
 <script type="text/javascript" src="static/edit.js"></script>
+<script type="text/javascript" src="static/templates.js"></script>
+{% ifequal 'en' params.lang %}
+  <script type="text/javascript" src="static/locale.js"></script>
+{% else %}
+  <script type="text/javascript" src="static/locale_{{params.lang}}.js"></script>
+{% endifequal %}
 </body>
 </html>
 {% endif %}

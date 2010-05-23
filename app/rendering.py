@@ -141,4 +141,5 @@ def render_json(center=None, radius=None):
         'facility_types': facility_type_jobjects,
         'facilities': facility_jobjects,
         'messages': message_jobjects
-    }, indent=2, default=json_encode))
+    # set indent=2 to pretty-print
+    }, indent=None, default=json_encode))

@@ -1,4 +1,4 @@
-/*
+{% comment %}
 # Copyright 2010 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-*/
-body { font-family: helvetica, arial, sans-serif; font-size: 12px }
-.path { font-size: 16px }
-.kind, .name, .id, .separator { font-weight: bold }
-.kind { color: blue }
-.name, .id { color: green }
-.property { padding-left: 20px }
-.value { padding-left: 10px; color: green }
-.entity {}
-.index {}
-.item {}
-.list {}
-.date {}
+{% endcomment %}
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-16489001-1']);
+  _gaq.push(['_setDomainName', '.appspot.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>

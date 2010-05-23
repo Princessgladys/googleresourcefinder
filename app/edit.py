@@ -321,7 +321,7 @@ class Edit(utils.Handler):
         fields = []
         readonly_fields = [{
             #i18n: Identifier for a facility
-            'name': to_unicode(_('Facility ID')),
+            'title': to_unicode(_('Facility ID')),
             'value': self.params.facility_name
         }]
 
@@ -331,13 +331,14 @@ class Edit(utils.Handler):
             attribute = self.attributes[name]
             if can_edit(self.auth, attribute):
                 fields.append({
-                    'name': get_message('attribute_name', name),
+                    'name': name,
+                    'title': get_message('attribute_name', name),
                     'type': attribute.type,
                     'input': make_input(self.facility, attribute)
                 })
             else:
                 readonly_fields.append({
-                    'name': get_message('attribute_name', name),
+                    'title': get_message('attribute_name', name),
                     'value': get_value(self.facility, name)
                 })
 
