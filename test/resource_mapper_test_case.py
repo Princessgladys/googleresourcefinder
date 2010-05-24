@@ -7,7 +7,7 @@ ENV_OPTIONS = {
     'local': {
         'base_url': 'http://localhost:8080',
         'is_local': True, 
-        'user_name': 'testuser@gmail.com',
+        'user_name': 'test@example.com',
         'login_form': '//form[@action="/_ah/login"]',
         'login_email': '//input[@id="email"]',
         'login_submit': '//input[@id="submit-login"]'
@@ -15,7 +15,7 @@ ENV_OPTIONS = {
     'dev': {
         'base_url': 'http://resourcemapper.appspot.com',
         'is_local': False, 
-        'user_name': 'testuser@gmail.com',
+        'user_name': 'test@example.com',
         'password': '',
         'login_form': '//form[@id="gaia_loginform"]',
         'login_email': '//input[@id="Email"]',
@@ -74,3 +74,18 @@ class ResourceMapperTestCase(unittest.TestCase):
             if time.time() - start > 30:
                 self.fail('timed out: %r %r %r' % (function, args, kwargs))
             time.sleep(0.2)
+
+    def wait_for_element(self, locator):
+       self.wait_until(self.s.is_element_present, locator)
+
+    def assert_element(self, locator):
+       self.assertTrue(self.s.is_element_present(locator))
+
+    def assert_no_element(self, locator):
+       self.assertFalse(self.s.is_element_present(locator))
+
+    def assert_text(self, text, locator):
+       self.assertEquals(text, self.s.get_text(locator))
+
+    def assert_value(self, value, locator):
+       self.assertEquals(value, self.s.get_value(locator))
