@@ -115,7 +115,7 @@ fi
 
 # Get the e-mail addresses for the CC list.
 if [ -n "$2" ]; then
-  OPTIONS="$OPTIONS -cc="$(get_email_addresses "$2")
+  OPTIONS="$OPTIONS --cc="$(get_email_addresses "$2")
 fi
 
 # Add the existing issue number, if there is one.
