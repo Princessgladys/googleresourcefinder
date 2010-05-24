@@ -43,6 +43,7 @@ tr.field.text { vertical-align: top; }
 {% if not params.embed %}
 </head>
 <body>
+{% include "analytics.html" %}
 {% endif %}
 {% comment %}
 # NB: This probably should use blocktrans and include facility_name as a param
@@ -78,15 +79,10 @@ tr.field.text { vertical-align: top; }
           {% trans "Name (required)" %}
         </td>
         <td class="input">
-          <div id="nickname_errorbox" class="errorbox-good">
+          <div id="auth_nickname_errorbox" class="errorbox-good">
             <input type="text" name="auth_nickname" id="auth_nickname" 
                    value="{{suggested_nickname}}"/>
-            <div id="nickname_errormsg" class="hidden">
-              {% comment %}
-              #i18n: Error message for required field
-              {% endcomment %}
-              {% trans "Field is required." %}
-            </div>
+            <div id="auth_nickname_errormsg" class="hidden"></div>
           </div>
         </td>
       </tr>
@@ -99,15 +95,10 @@ tr.field.text { vertical-align: top; }
           {% trans "Affiliation (required)" %}
         </td>
         <td class="input">
-          <div id="affiliation_errorbox" class="errorbox-good">
+          <div id="auth_affiliation_errorbox" class="errorbox-good">
             <input type="text" name="auth_affiliation" id="auth_affiliation"
                    value=""/>
-            <div id="affiliation_errormsg" class="hidden">
-              {% comment %}
-              #i18n: Error message for required field
-              {% endcomment %}
-              {% trans "Field is required." %}
-            </div>
+            <div id="auth_affiliation_errormsg" class="hidden"></div>
           </div>
           <br/>
         </td>
@@ -134,9 +125,12 @@ tr.field.text { vertical-align: top; }
           {{field.title|escape}}
         </td>
         <td class="input">
-          {{field.input}}
-          <input type="hidden" name="editable.{{field.name}}"
-                 value="{{field.json|escape}}"/>
+          <div id="{{field.name}}_errorbox" class="errorbox-good">
+            {{field.input}}
+            <input type="hidden" name="editable.{{field.name}}"
+                   value="{{field.json|escape}}"/>
+            <div id="{{field.name}}_errormsg" class="hidden"></div>
+          </div>
         </td>
       </tr>
     {% endfor %}
@@ -162,7 +156,14 @@ tr.field.text { vertical-align: top; }
 # If params.embed is true, this should be included in the page where this html
 # is embedded.
 {% endcomment %}
+<script type="text/javascript" src="static/jquery.min.js"></script>
 <script type="text/javascript" src="static/edit.js"></script>
+<script type="text/javascript" src="static/templates.js"></script>
+{% ifequal 'en' params.lang %}
+  <script type="text/javascript" src="static/locale.js"></script>
+{% else %}
+  <script type="text/javascript" src="static/locale_{{params.lang}}.js"></script>
+{% endifequal %}
 </body>
 </html>
 {% endif %}
