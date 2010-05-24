@@ -24,11 +24,11 @@ ENV_OPTIONS = {
     } 
 } 
 
-class ResourceMapperTestCase(unittest.TestCase):         
+class ResourceMapperTestCase(unittest.TestCase):
     def setUp(self):
         self.initEnvironment()
         self.verificationErrors = []
-        self.s = selenium('localhost', 4444, '*chrome', 
+        self.s = selenium('localhost', 4444, '*chrome',
                           'https://www.google.com/')
         self.s.start()
 

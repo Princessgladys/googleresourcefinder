@@ -51,6 +51,24 @@ locale = function() {
   //i18n: Link to edit the data for a facility record.
   messages.EDIT_LINK_HTML = HTML("${LINK_START}Modifica este registro${LINK_END}");
 
+  //i18n: Error message for required field.
+  messages.ERROR_FIELD_IS_REQUIRED = "Este campo es obligatorio.";
+
+  //i18n: Error message for invalid latitude.
+  messages.ERROR_LATITUDE_INVALID = "La latitud debe estar entre -90 y 90";
+
+  //i18n: Error message for invalid latitude.
+  messages.ERROR_LATITUDE_MUST_BE_NUMBER = "La latitud debe ser un n\u00famero";
+
+  //i18n: Error message for invalid longitude.
+  messages.ERROR_LONGITUDE_INVALID = "La longitud debe estar entre -180 y 180";
+
+  //i18n: Error message for invalid longitude.
+  messages.ERROR_LONGITUDE_MUST_BE_NUMBER = "La longitud debe ser un n\u00famero";
+
+  //i18n: Error message for a value that is not a number
+  messages.ERROR_VALUE_MUST_BE_NUMBER = "El valor debe ser un n\u00famero";
+
   //i18n: Number of facilities within range of a location.
   //i18n: (example: 5 Facilities within 10 miles)
   messages.FACILITIES_IN_RANGE = "${NUM_FACILITIES} Instituciones dentro de${RADIUS_MILES} millas";
