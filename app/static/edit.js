@@ -31,31 +31,6 @@
   }
 
   /**
-   * Array.prototype.indexOf is not implemented in all browsers.  This adds
-   * an implementation if there isn't one.
-   */
-  function ensure_array_indexOf() {
-    if (!Array.prototype.indexOf) {
-      Array.prototype.indexOf = function(elt /*, from*/) {
-        var len = this.length;
-
-        var from = Number(arguments[1]) || 0;
-        from = (from < 0) ? Math.ceil(from) : Math.floor(from);
-        if (from < 0) {
-          from += len;          
-        }
-
-        for (; from < len; from++) {
-          if (from in this && this[from] === elt) {
-            return from;            
-          }
-        }
-        return -1;
-      };
-    }
-  }
-
-  /**
    * Sets the error state of an attribute with the given name by toggling the
    * css class an error border with id <name>_errorbox and an error message with
    * id <name>_errormsg.
@@ -67,7 +42,7 @@
     $(name + '_errorbox').className =
         valid ? 'errorbox-good' : 'errorbox-bad';
     var errormsg = $(name + '_errormsg');
-    errormsg.innerText = valid ? '' : error;      
+    errormsg.innerHTML = valid ? '' : to_html(error);
     errormsg.className = valid ? 'hidden' : 'errormsg';    
   }
 
@@ -93,7 +68,7 @@
    * missing, a generic "Field is required" message is used.
    */
   function validate_required_string(input, opt_error) {
-    var value = input.value ? input.value.trim() : null;
+    var value = input.value ? jQuery.trim(input.value) : null;
     set_error(input.name, value, locale.ERROR_FIELD_IS_REQUIRED());
     return value ? true : false;
   }
@@ -105,7 +80,7 @@
    * @return {boolean} - true if the value is valid
    */
   function is_valid_number(value) {
-    return value.trim().match('^[0-9-\.]+$') ? true : false;
+    return jQuery.trim(value).match('^[0-9-\.]+$') ? true : false;
   }
 
   /**
@@ -141,22 +116,23 @@
       var coord = name_coord[1];
       var input_valid = is_valid_number(input.value);
       if (input_valid) {
-        var value = parseFloat(input.value.trim());
+        var value = parseFloat(jQuery.trim(input.value));
         if (coord == 'lat' && value < -90 || value > 90) {
           input_valid = false;
           error.push(locale.ERROR_LATITUDE_INVALID());
         } else if (coord == 'lon' && value < -180 || value > 180) {
           input_valid = false;
-          error.push(locale.ERROR_LONGITUDE_INVALID());
+          error.push(to_html(locale.ERROR_LONGITUDE_INVALID()));
         }
       } else {
-        error.push(coord == 'lat' ? locale.ERROR_LATITUDE_MUST_BE_NUMBER()
-                   : locale.ERROR_LONGITUDE_MUST_BE_NUMBER());
+        error.push(to_html(
+                     coord == 'lat' ? locale.ERROR_LATITUDE_MUST_BE_NUMBER()
+                       : locale.ERROR_LONGITUDE_MUST_BE_NUMBER()));
       }
       valid = valid && input_valid;
     }
 
-    set_error(name, valid, error.join('\n'));
+    set_error(name, valid, HTML(error.join('<br>')));
     return valid;
   }
 
@@ -179,15 +155,16 @@
     for (var i = 0; i < trs.length; i++) {
       var tr = trs[i];
       var classes = tr.className.split(' ');
-      if (classes.indexOf('int') != -1 || classes.indexOf('float') != -1) {
+      if (jQuery.inArray('int', classes) != -1
+          || jQuery.inArray('float', classes) != -1) {
         valid_arr.push(validate_number(tr.getElementsByTagName('input')[0]));
-      } else if (classes.indexOf('geopt') != -1) {
+      } else if (jQuery.inArray('geopt', classes) != -1) {
         var inputs = tr.getElementsByTagName('input');
         valid_arr.push(validate_geopt([inputs[0], inputs[1]]));
       }
     }      
 
-    return valid_arr.indexOf(false) == -1;
+    return jQuery.inArray(false, valid_arr) == -1;
   }
 
   /**
@@ -208,7 +185,6 @@
    * Initializes event handlers for the page.
    */
   function init() {
-    ensure_array_indexOf();
     $('edit').onsubmit = validate;
     $('save').onclick = save;
     $('cancel').onclick = cancel;
