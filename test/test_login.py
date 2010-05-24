@@ -3,8 +3,8 @@ import unittest
 
 class LoginTestCase(ResourceMapperTestCase):
     def test_map_loaded(self):
-        self.login()
-        self.failUnless(self.s.is_element_present('map'), 'login failed')        
+        self.assertTrue(self.login('/'))
+        self.assertTrue(self.s.is_element_present('map'))
 
 if __name__ == "__main__":
     unittest.main()

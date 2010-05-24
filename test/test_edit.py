@@ -41,6 +41,8 @@ class EditTests(ResourceMapperTestCase):
         goes to the edit form."""
         self.login('/')
         self.s.click('id=facility-1')
+        # For some reason, this wait doesn't always work unless we do it twice.
+        self.wait_until(self.s.is_element_present, 'link=Edit this record')
         self.wait_until(self.s.is_element_present, 'link=Edit this record')
         self.s.click('link=Edit this record')
         self.wait_for_load()
@@ -50,17 +52,25 @@ class EditTests(ResourceMapperTestCase):
         """Confirms that all the fields in the edit form save the entered
         values, and these values appear pre-filled when the form is loaded."""
         # Go to the edit page
-        self.login('/edit?cc=ht&facility_name=mspphaiti.org..95644')
+        self.login('/edit?facility_name=mspphaiti.org..11130')
         self.assertTrue(self.s.get_text('//h1').startswith('Edit'))
+
+        # First-time edit should show nickname and affiliation fields
+        self.assert_element('//input[@name="auth_nickname"]')
+        self.assert_element('//input[@name="auth_affiliation"]')
 
         # Fill in the form
         text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
+        text_fields['auth_affiliation'] = 'Test'
         text_fields['available_beds'] = '   1'
         text_fields['total_beds'] = '2\t  '
+        text_fields['location.lat'] = '18.537207 '
+        text_fields['location.lon'] = '\t-72.349663'
         checkbox_fields = dict(('services.' + name, True) for name in SERVICES)
-        select_fields = {'type': 'COM', 'category': 'C/S',
+        select_fields = {'facility_type': 'COM', 'category': 'C/S',
                          'construction': 'Adobe', 'reachable_by_road': 'TRUE',
-                         'can_pick_up_patients': 'FALSE'}
+                         'can_pick_up_patients': 'FALSE',
+                         'operational_status': 'No surgical capacity'}
         self.fill_fields(text_fields, checkbox_fields, select_fields)
 
         # Submit the form
@@ -72,12 +82,19 @@ class EditTests(ResourceMapperTestCase):
             self.environment['base_url'] + '/', self.s.get_location())
 
         # Return to the edit page
-        self.open_path('/edit?cc=ht&facility_name=mspphaiti.org..95644')
+        self.open_path('/edit?facility_name=mspphaiti.org..11130')
         self.assertTrue(self.s.get_text('//h1').startswith('Edit'))
+
+        # Nickname and affiliation fields should not be shown this time
+        self.assert_no_element('//input[@name="auth_nickname"]')
+        self.assert_no_element('//input[@name="auth_affiliation"]')
+        del text_fields['auth_affiliation']
 
         # Check that the new values were saved, and are pre-filled in the form
         text_fields['available_beds'] = '1'  # whitespace should be gone
         text_fields['total_beds'] = '2'  # whitespace should be gone
+        text_fields['location.lat'] = '18.537207'  # whitespace should be gone
+        text_fields['location.lon'] = '-72.349663'  # whitespace should be gone
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
         # Now empty everything
@@ -85,9 +102,9 @@ class EditTests(ResourceMapperTestCase):
         text_fields['available_beds'] = ''
         text_fields['total_beds'] = ''
         checkbox_fields = dict(('services.' + name, False) for name in SERVICES)
-        select_fields = {'type': '', 'category': '',
+        select_fields = {'facility_type': '', 'category': '',
                          'construction': '', 'reachable_by_road': '',
-                         'can_pick_up_patients': ''}
+                         'can_pick_up_patients': '', 'operational_status': ''}
         self.fill_fields(text_fields, checkbox_fields, select_fields)
 
         # Submit the form
@@ -95,7 +112,7 @@ class EditTests(ResourceMapperTestCase):
         self.wait_for_load()
 
         # Return to the edit page
-        self.open_path('/edit?cc=ht&facility_name=mspphaiti.org..95644')
+        self.open_path('/edit?facility_name=mspphaiti.org..11130')
         self.assertTrue(self.s.get_text('//h1').startswith('Edit'))
 
         # Check that everything is now empty or deselected
@@ -110,7 +127,7 @@ class EditTests(ResourceMapperTestCase):
         self.wait_for_load()
 
         # Return to the edit page
-        self.open_path('/edit?cc=ht&facility_name=mspphaiti.org..95644')
+        self.open_path('/edit?facility_name=mspphaiti.org..11130')
         self.assertTrue(self.s.get_text('//h1').startswith('Edit'))
 
         # Check that the integer fields are actually zero, not empty
