@@ -62,6 +62,15 @@ handlers:
 - url: /monitor
   script: monitor.py
 
+- url: /TOS
+  script: tos.py
+
+- url: /privacy
+  script: privacy.py
+
+- url: /help
+  script: help.py
+
 - url: /
   script: main.py
 
@@ -69,5 +78,3 @@ handlers:
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin
 
-- url: /tos
-  script: tos.py

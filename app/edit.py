@@ -310,8 +310,6 @@ class Edit(utils.Handler):
 
         self.require_logged_in_user()
 
-        # TODO(shakusa) Can remove after launch when we no longer want to
-        # restrict editing to editors
         if USE_WHITELISTS:
             self.require_user_role('editor')
 

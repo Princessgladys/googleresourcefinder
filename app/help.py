@@ -14,9 +14,9 @@
 
 import utils
 
-class TermsOfService(utils.Handler):
+class Help(utils.Handler):
     def get(self):
-        self.render('locale/en/terms.html', params=self.params)
+        self.render('locale/en/help.html', params=self.params)
 
 if __name__ == '__main__':
-    utils.run([('/TOS', TermsOfService)], debug=True)
+    utils.run([('/help', Help)], debug=True)
