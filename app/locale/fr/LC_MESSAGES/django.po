@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-24 22:49-0400\n"
+"POT-Creation-Date: 2010-05-24 23:53-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,7 +23,7 @@ msgid "${DATE} at ${TIME}"
 msgstr "${DATE} à ${TIME}"
 
 #. Time format (example 14:32 UTC-4)
-#: static/locale.js:120
+#: static/locale.js:124
 #, sh-format
 msgid "${HOURS}:${MINUTES} ${ZONE}"
 msgstr "${HOURS}:${MINUTES} ${ZONE}"
@@ -41,7 +41,7 @@ msgid "${MONTH} ${DAY}, ${YEAR}"
 msgstr "${DAY} ${MONTH} ${YEAR}"
 
 #. Number of facilities within range of a location. (example: 5 Facilities within 10 miles)
-#: static/locale.js:80
+#: static/locale.js:84
 #, sh-format
 msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} établissements dans un rayon de ${RADIUS_MILES} miles"
@@ -254,13 +254,18 @@ msgstr "Modifié par"
 msgid "Error"
 msgstr "Erreur"
 
+#. Error message for not loading facility information successfully
+#: static/locale.js:67
+msgid "Error loading facility information."
+msgstr "informations sur l'erreur installation de chargement"
+
 #. Button to export data to comma-separated-values format.
 #: export.py:157 templates/map.html:190
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
 #. A place that provides a particular service
-#: templates/data.html:92 templates/print_data.html:59 static/locale.js:84
+#: templates/data.html:92 templates/print_data.html:59 static/locale.js:88
 msgid "Facility"
 msgstr "Établissement"
 
@@ -305,7 +310,7 @@ msgid "Filters"
 msgstr "Filtres"
 
 #. Tooltip explaining how to enable print mode
-#: static/locale.js:103
+#: static/locale.js:107
 msgid "First select a hospital from the list on the left. Then Print will print a list of hospitals in order of distance from your selection."
 msgstr "Sélectionnez d'abord un hôpital dans la liste de gauche, puis cliquez sur \"Imprimer\" pour imprimer une liste d'hôpitaux triés en fonction de la distance qui les sépare de votre sélection."
 
@@ -375,12 +380,12 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Date incorrecte : %(date)r  (format AAAA-MM-JJ requis)"
 
 #. Error message for request missing facility name.
-#: bubble.py:132 edit.py:325
+#: bubble.py:131 edit.py:325
 msgid "Invalid or missing facility name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
 #. Abbreviated months of the year.
-#: static/locale.js:89
+#: static/locale.js:93
 msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
 msgstr "janv. févr. mars avr. mai juin juil. août sept. oct. nov. déc."
 
@@ -440,12 +445,12 @@ msgid "Longitude"
 msgstr "Longitude"
 
 #. Error message for invalid longitude.
-#: static/locale.js:71
+#: static/locale.js:75
 msgid "Longitude must be a number."
 msgstr "Longitude doit être un nombre"
 
 #. Error message for invalid longitude.
-#: static/locale.js:67
+#: static/locale.js:71
 msgid "Longitude must be between -180 and 180."
 msgstr "Longitude doit être comprise entre -180 et 180"
 
@@ -521,7 +526,7 @@ msgid "Obstetrics and gynecology"
 msgstr "Obstétrique et gynécologie"
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
-#: static/locale.js:94
+#: static/locale.js:98
 msgid "Open/Total Beds"
 msgstr "Lits libres/au total"
 
@@ -581,7 +586,7 @@ msgid "Print"
 msgstr "Imprimer"
 
 #. Tooltip explaining a 'Print' link
-#: static/locale.js:108
+#: static/locale.js:112
 #, sh-format
 msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Imprimer une liste d'hôpitaux triés selon la distance qui les sépare de ${FACILITY_NAME}"
@@ -650,12 +655,12 @@ msgid "Select facility type to export:"
 msgstr "Sélectionnez le type d'établissement à l'exportation:"
 
 #. work done by someone that benefits another
-#: ../tools/setup.py:106 static/locale.js:112
+#: ../tools/setup.py:106 static/locale.js:116
 msgid "Services"
 msgstr "Services"
 
 #. Label for a control that filters a list of facilities
-#: static/locale.js:116
+#: static/locale.js:120
 msgid "Show:"
 msgstr "Afficher :"
 
@@ -745,12 +750,12 @@ msgid "Unreinforced masonry"
 msgstr "Maçonnerie non armée"
 
 #. Label indicating a record was updated
-#: static/locale.js:124
+#: static/locale.js:128
 msgid "Updated"
 msgstr "Mise à jour :"
 
 #. Error message for a value that is not a number
-#: static/locale.js:75
+#: static/locale.js:79
 msgid "Value must be a number."
 msgstr "La valeur doit être un nombre"
 
@@ -822,7 +827,7 @@ msgid "no more than 10 miles away"
 msgstr "à moins de 10 miles"
 
 #. Very short abbreviation for a phone number, indended to disambiguate from a fax number.  (example: p 555-555-5555)
-#: static/locale.js:99
+#: static/locale.js:103
 #, sh-format
 msgid "p ${PHONE}"
 msgstr "t ${PHONE}"

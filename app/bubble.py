@@ -69,8 +69,7 @@ class Attributes:
 
         Returns:
           A 3-tuple of specially-handled Attributes, non-special Attributes,
-          and Attributes to be displayed in change details
-          """
+          and Attributes to be displayed in change details"""
         special = dict(
             (a, Attribute(get_message('attribute_name', a), None))
             for a in self.special_attribute_names)

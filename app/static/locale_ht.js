@@ -53,6 +53,9 @@ locale = function() {
   //i18n: Error message for invalid latitude.
   messages.ERROR_LATITUDE_MUST_BE_NUMBER = "Latitd dwe yon nimewo";
 
+  //i18n: Error message for not loading facility information successfully
+  messages.ERROR_LOADING_FACILITY_INFORMATION = "Er\u00e8 transp\u00f2te etablisman enf\u00f2masyon.";
+
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_INVALID = "Lonjitd dwe ant -180 ak 180";
 

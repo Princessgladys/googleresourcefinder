@@ -153,7 +153,7 @@ def render_json(center=None, radius=None):
 
 def check_cache(key, miss_function, *args):
     ret = memcache.get(key)
-    if ret is None:
+    if not ret:
         ret = miss_function(*args)
         if not memcache.add(key, ret):
             logging.error('Memcache set of %s failed' % key)
