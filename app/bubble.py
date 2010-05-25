@@ -27,7 +27,7 @@ def format(value):
     if isinstance(value, str):
         return value.replace('\n', ' ')
     if isinstance(value, list):
-        return ', '.join(value)
+        return ', '.join(get_message('attribute_value', v) for v in value)
     if isinstance(value, datetime.datetime):
         return to_local_isotime(value.replace(microsecond=0))
     if isinstance(value, db.GeoPt):
@@ -36,9 +36,9 @@ def format(value):
         return value and format(_('Yes')) or format(_('No'))
     if value is not None and value != 0:
         return value
-    return '&ndash;'
+    return u'\u2013'.encode('utf-8')
 
-class Attribute:
+class ValueInfo:
     """Simple struct used by the django template to extract values"""
     def __init__(self, label, value, author=None, affiliation=None,
                  comment=None, date=None):
@@ -50,10 +50,10 @@ class Attribute:
         self.comment = format(comment)
         self.date = format(date)
 
-class Attributes:
+class ValueInfoExtractor:
     """Base class to determine attributes to display in the bubble"""
     def __init__(self, special_attribute_names):
-        """Initializes Attributes.
+        """Initializes the ValueInfo Extractor.
 
         Args:
           special_attribute_names: attribute names that are rendered
@@ -68,10 +68,10 @@ class Attributes:
           attribute_names: key_name of attributes to display for the facility
 
         Returns:
-          A 3-tuple of specially-handled Attributes, non-special Attributes,
-          and Attributes to be displayed in change details"""
+          A 3-tuple of specially-handled ValueInfos, non-special ValueInfos,
+          and ValueInfos to be displayed in change details"""
         special = dict(
-            (a, Attribute(get_message('attribute_name', a), None))
+            (a, ValueInfo(get_message('attribute_name', a), None))
             for a in self.special_attribute_names)
         general = []
         details = []
@@ -80,7 +80,7 @@ class Attributes:
             value = facility.get_value(name)
             if not value:
                 continue
-            attribute = Attribute(
+            attribute = ValueInfo(
                 get_message('attribute_name', name),
                 value,
                 facility.get_author_nickname(name),
@@ -88,28 +88,24 @@ class Attributes:
                 facility.get_comment(name),
                 facility.get_observed(name))
             if name in special:
-              special[name] = attribute
+                special[name] = attribute
             else:
-              general.append(attribute)
+                general.append(attribute)
             details.append(attribute)
         return (special, general, details)
 
-class HospitalAttributes(Attributes):
+class HospitalValueInfoExtractor(ValueInfoExtractor):
     template_name = 'templates/hospital_bubble.html'
 
     def __init__(self):
-        Attributes.__init__(self, ['title', 'location', 'available_beds',
-                                   'total_beds', 'healthc_id', 'address',
-                                   'services'])
+        ValueInfoExtractor.__init__(
+            self, ['title', 'location', 'available_beds', 'total_beds',
+                   'healthc_id', 'address', 'services'])
 
     def extract(self, facility, attribute_names):
-        (special, general, details) = Attributes.extract(
+        return ValueInfoExtractor.extract(
             self, facility, filter(lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
                                    attribute_names))
-        # Convert services message keys to messages
-        special['services'].value = self.format_services(
-            special['services'].value)
-        return (special, general, details)
 
     def format_services(self, services):
         if services == '&ndash;':
@@ -119,8 +115,8 @@ class HospitalAttributes(Attributes):
             service_titles.append(get_message('attribute_value', name))
         return ', '.join(service_titles)
 
-ATTRIBUTES = {
-    'hospital': HospitalAttributes(),
+VALUE_INFO_EXTRACTORS = {
+    'hospital': HospitalValueInfoExtractor(),
 }
 
 class Bubble(Handler):
@@ -131,7 +127,7 @@ class Bubble(Handler):
             raise ErrorMessage(404, _('Invalid or missing facility name.'))
         facility_type = model.FacilityType.get_by_key_name(facility.type)
 
-        attributes = ATTRIBUTES[facility.type]
+        attributes = VALUE_INFO_EXTRACTORS[facility.type]
         (special, general, details) = attributes.extract(
             facility, facility_type.attribute_names)
         edit_link = '/edit?facility_name=%s' % self.params.facility_name

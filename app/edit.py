@@ -63,8 +63,8 @@ class AttributeType:
             return value
         return None
 
-    def apply_change(self, facility, minimal_facility, report, request,
-                     attribute, change_metadata):
+    def apply_change(self, facility, minimal_facility, report, facility_type,
+                     request, attribute, change_metadata):
         """Adds an attribute to the given Facility, MinimalFacility, and
         Report based on a query parameter. Also adds the required change
         history fields according to the invariants in model.py."""
@@ -80,7 +80,7 @@ class AttributeType:
                                change_metadata.author_nickname,
                                change_metadata.author_affiliation,
                                comment)
-        if minimal_facility is not None:
+        if name in facility_type.minimal_attribute_names:
             minimal_facility.set_attribute(name, value)
 
 class StrAttributeType(AttributeType):
@@ -266,13 +266,14 @@ def render_attribute_as_json(facility, attribute):
     name = attribute.key().name()
     return render_json(facility.get_value(name))
 
-def apply_change(
-    facility, minimal_facility, report, request, attribute, change_metadata):
+def apply_change(facility, minimal_facility, report, facility_type,
+                 request, attribute, change_metadata):
     """Adds an attribute to the given Facility, MinimalFacility and Report
     based on a query parameter."""
     attribute_type = ATTRIBUTE_TYPES[attribute.type]
-    attribute_type.apply_change(facility, minimal_facility, report, request,
-                                attribute, change_metadata)
+    attribute_type.apply_change(facility, minimal_facility, report,
+                                facility_type, request, attribute,
+                                change_metadata)
 
 def has_changed(facility, request, attribute):
     """Returns True if the request has an input for the given attribute
@@ -427,9 +428,8 @@ class Edit(utils.Handler):
                                'a': get_message('attribute_name',
                                                 attribute.key().name())})
                     has_changes = True
-                    mf = (name in facility_type.minimal_attribute_names and
-                          minimal_facility or None)
-                    apply_change(facility, mf, report, request, attribute,
+                    apply_change(facility, minimal_facility, report,
+                                 facility_type, request, attribute,
                                  change_metadata)
             if has_changes:
                 db.put([report, facility, minimal_facility])
