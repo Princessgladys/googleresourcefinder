@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-24 23:53-0400\n"
+"POT-Creation-Date: 2010-05-25 15:59-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,7 +47,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} établissements dans un rayon de ${RADIUS_MILES} miles"
 
 #. Error message for lacking edit permissions
-#: edit.py:425
+#: edit.py:426
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s n'a pas l'autorisation de modifier %(a)s"
@@ -63,7 +63,7 @@ msgid "Accuracy"
 msgstr "Précision"
 
 #. street address
-#: templates/hospital_bubble.html:104 templates/print_data.html:68 ../tools/setup.py:120
+#: templates/hospital_bubble.html:111 templates/print_data.html:68 ../tools/setup.py:120
 msgid "Address"
 msgstr "Adresse"
 
@@ -85,7 +85,7 @@ msgstr "Tous"
 #. Alternate name of a facility
 #: ../tools/setup.py:97
 msgid "Alternate facility name"
-msgstr "Autre nom do l'établissement"
+msgstr "Autre nom de l'établissement"
 
 #. Total number of unoccupied beds at a hospital.
 #: ../tools/setup.py:102
@@ -95,7 +95,7 @@ msgstr "Lits disponibles"
 #. Heading for number of available beds and number of total beds in a hospital.
 #: templates/print_data.html:54
 msgid "Beds open / total"
-msgstr "Lits libres/au total"
+msgstr "Lits libres/total"
 
 #. Service provided by a health facility.
 #: ../tools/setup.py:263
@@ -133,17 +133,17 @@ msgid "Category"
 msgstr "Catégorie"
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:136
+#: templates/hospital_bubble.html:143
 msgid "Change"
 msgstr "Modification"
 
 #. Header for the history of changes in data for a facility
-#: templates/hospital_bubble.html:94
+#: templates/hospital_bubble.html:101
 msgid "Change details"
-msgstr "Historique des modifications"
+msgstr "Détails des modifications"
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:144
+#: templates/hospital_bubble.html:151
 msgid "Change note"
 msgstr "Modification"
 
@@ -190,10 +190,10 @@ msgstr "Pays :"
 #. destruction
 #: ../tools/setup.py:134
 msgid "Damage"
-msgstr "Dommages"
+msgstr "Degats"
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:148
+#: templates/hospital_bubble.html:155
 msgid "Date and time"
 msgstr "Date et heure"
 
@@ -244,8 +244,13 @@ msgstr "E-mail"
 msgid "Edit"
 msgstr "Modifier"
 
+#. Link to edit the data for a facility record.
+#: templates/hospital_bubble.html:25
+msgid "Edit this record"
+msgstr "Modifier cet enregistrement"
+
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:140
+#: templates/hospital_bubble.html:147
 msgid "Edited by"
 msgstr "Modifié par"
 
@@ -270,17 +275,17 @@ msgid "Facility"
 msgstr "Établissement"
 
 #. Identifier for a facility
-#: edit.py:336
+#: edit.py:337
 msgid "Facility ID"
-msgstr "Identifiant de l'établissement :"
+msgstr "ID établissement :"
 
-#. ID for a facility
-#: templates/hospital_bubble.html:29
+#. Identifier for a facility
+#: templates/hospital_bubble.html:36
 msgid "Facility ID:"
-msgstr "Identifiant de l'établissement :"
+msgstr "ID établissement :"
 
 #. Header for details about a facility
-#: templates/hospital_bubble.html:89
+#: templates/hospital_bubble.html:96
 msgid "Facility details"
 msgstr "Infos sur l'établissement"
 
@@ -297,7 +302,7 @@ msgstr "Hôpital de campagne"
 #. Type of facility operational status: as functional as a field hospital next to a hospital
 #: ../tools/setup.py:191
 msgid "Field hospital co-located with hospital"
-msgstr "Hôpital de campagne du co-localisés avec l'hôpital"
+msgstr "Hôpital de campagne co-localisés avec un hôpital"
 
 #. Error message for required field.
 #: static/locale.js:55
@@ -347,7 +352,12 @@ msgstr "Centre de soins sans lits"
 #. Proper name of an ID for a healthcare facility, no translation necessary.
 #: ../tools/setup.py:100
 msgid "HealthC ID"
-msgstr "HealthC ID"
+msgstr "ID HealthC"
+
+#. Proper name of an ID for a healthcare facility, no translation necessary.
+#: templates/hospital_bubble.html:32
+msgid "HealthC ID:"
+msgstr "HealthC ID :"
 
 #. Link to go to a help page for the application
 #: templates/map.html:102
@@ -380,7 +390,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Date incorrecte : %(date)r  (format AAAA-MM-JJ requis)"
 
 #. Error message for request missing facility name.
-#: bubble.py:131 edit.py:325
+#: bubble.py:127 edit.py:326
 msgid "Invalid or missing facility name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -394,8 +404,13 @@ msgstr "janv. févr. mars avr. mai juin juil. août sept. oct. nov. déc."
 msgid "Lab"
 msgstr "Laboratoire"
 
+#. Label for a language selector
+#: templates/map.html:77
+msgid "Language:"
+msgstr "Langue :"
+
 #. Label for a date-time when the data was last updated
-#: templates/hospital_bubble.html:33
+#: templates/hospital_bubble.html:40
 msgid "Last updated:"
 msgstr "Mise à jour :"
 
@@ -415,7 +430,7 @@ msgid "Latitude must be between -90 and 90."
 msgstr "Latitude doit être comprise entre -90 et 90"
 
 #. Latitude of a location on earth.
-#: templates/hospital_bubble.html:113
+#: templates/hospital_bubble.html:120
 msgid "Latitude:"
 msgstr "Latitude"
 
@@ -455,7 +470,7 @@ msgid "Longitude must be between -180 and 180."
 msgstr "Longitude doit être comprise entre -180 et 180"
 
 #. Longitude of a location on earth.
-#: templates/hospital_bubble.html:117
+#: templates/hospital_bubble.html:124
 msgid "Longitude:"
 msgstr "Longitude"
 
@@ -500,7 +515,7 @@ msgid "No"
 msgstr "Non"
 
 #. Indicates there is no availability information for this  hospital.
-#: templates/hospital_bubble.html:73
+#: templates/hospital_bubble.html:80
 msgid "No availability information"
 msgstr "Aucune information concernant les disponibilités"
 
@@ -528,7 +543,7 @@ msgstr "Obstétrique et gynécologie"
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
 #: static/locale.js:98
 msgid "Open/Total Beds"
-msgstr "Lits libres/au total"
+msgstr "Lits libres/total"
 
 #. Type of facility operational status: in working order
 #: ../tools/setup.py:183
@@ -571,7 +586,7 @@ msgid "Phone"
 msgstr "Téléphone"
 
 #. Indicates a user should call for availability of beds and services at a hospital.
-#: templates/hospital_bubble.html:67
+#: templates/hospital_bubble.html:74
 msgid "Please call for availability information."
 msgstr "Merci d'appeler pour connaître les disponibilités."
 
@@ -652,7 +667,7 @@ msgstr "Enregistrer"
 #. Label for a selector to export data to CSV
 #: export.py:146
 msgid "Select facility type to export:"
-msgstr "Sélectionnez le type d'établissement à l'exportation:"
+msgstr "Sélectionnez le type d'établissement à l'exportation :"
 
 #. work done by someone that benefits another
 #: ../tools/setup.py:106 static/locale.js:116
@@ -707,7 +722,7 @@ msgstr "Conditions d'utilisation"
 #. Instructions to enter a person's name and organizational affiliation.
 #: templates/edit.html:71
 msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited."
-msgstr "Merci pour l'ajout de contenu à des Localisation de ressources. Pour commencer s'il vous plaît de créer un nom d'utilisateur et nous indiquer votre affiliation. Cette information sera affichée à côté de l'information que vous avez ajouté ou modifié."
+msgstr "Merci pour l'ajout de contenu à l'application \"Localisation de ressources\". Pour commencer, merci de créer un nom d'utilisateur et nous indiquer votre affiliation. Cette information sera affichée à côté de l'information que vous avez ajoutée ou modifiée."
 
 #. Total number of beds at a hospital
 #: ../tools/setup.py:104
@@ -812,12 +827,12 @@ msgid "anonymous"
 msgstr "anonyme"
 
 #. Heading for number of available beds at a hospital
-#: templates/hospital_bubble.html:41
+#: templates/hospital_bubble.html:48
 msgid "availability"
 msgstr "disponibilités"
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:45
+#: templates/hospital_bubble.html:52
 msgid "capacity"
 msgstr "capacité"
 
@@ -833,7 +848,7 @@ msgid "p ${PHONE}"
 msgstr "t ${PHONE}"
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:50
+#: templates/hospital_bubble.html:57
 msgid "services"
 msgstr "services"
 

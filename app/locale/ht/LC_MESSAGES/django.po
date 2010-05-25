@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-24 23:53-0400\n"
+"POT-Creation-Date: 2010-05-25 15:59-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,7 +47,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
 
 #. Error message for lacking edit permissions
-#: edit.py:425
+#: edit.py:426
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s pa gen pèmisyon edite %(a)s"
@@ -63,7 +63,7 @@ msgid "Accuracy"
 msgstr "Presizyon"
 
 #. street address
-#: templates/hospital_bubble.html:104 templates/print_data.html:68 ../tools/setup.py:120
+#: templates/hospital_bubble.html:111 templates/print_data.html:68 ../tools/setup.py:120
 msgid "Address"
 msgstr "Adrès"
 
@@ -95,7 +95,7 @@ msgstr "Kabann disponib "
 #. Heading for number of available beds and number of total beds in a hospital.
 #: templates/print_data.html:54
 msgid "Beds open / total"
-msgstr "Total kabann disponib "
+msgstr "Kabann disponib/total"
 
 #. Service provided by a health facility.
 #: ../tools/setup.py:263
@@ -133,17 +133,17 @@ msgid "Category"
 msgstr "Kategori"
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:136
+#: templates/hospital_bubble.html:143
 msgid "Change"
 msgstr "Chanje"
 
 #. Header for the history of changes in data for a facility
-#: templates/hospital_bubble.html:94
+#: templates/hospital_bubble.html:101
 msgid "Change details"
 msgstr "Chanje done"
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:144
+#: templates/hospital_bubble.html:151
 msgid "Change note"
 msgstr "Chanje"
 
@@ -193,7 +193,7 @@ msgid "Damage"
 msgstr "Domaj"
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:148
+#: templates/hospital_bubble.html:155
 msgid "Date and time"
 msgstr "Jou  ak  lè"
 
@@ -244,8 +244,13 @@ msgstr "Adrès elektronik"
 msgid "Edit"
 msgstr "Reekri"
 
+#. Link to edit the data for a facility record.
+#: templates/hospital_bubble.html:25
+msgid "Edit this record"
+msgstr "modifye enregistreman sa"
+
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:140
+#: templates/hospital_bubble.html:147
 msgid "Edited by"
 msgstr "Moun ki reekri a"
 
@@ -270,17 +275,17 @@ msgid "Facility"
 msgstr "Etablisman"
 
 #. Identifier for a facility
-#: edit.py:336
+#: edit.py:337
 msgid "Facility ID"
-msgstr "Idantite etablisman"
+msgstr "ID etablisman"
 
-#. ID for a facility
-#: templates/hospital_bubble.html:29
+#. Identifier for a facility
+#: templates/hospital_bubble.html:36
 msgid "Facility ID:"
-msgstr "Idantite etablisman"
+msgstr "ID etablisman"
 
 #. Header for details about a facility
-#: templates/hospital_bubble.html:89
+#: templates/hospital_bubble.html:96
 msgid "Facility details"
 msgstr "Enfòmasyon sou etablisman "
 
@@ -292,12 +297,12 @@ msgstr "Etablisman non"
 #. Type of facility operational status: as functional as a field hospital
 #: ../tools/setup.py:188 ../tools/setup.py:200
 msgid "Field hospital"
-msgstr "Sèvis Lopital la bay"
+msgstr "Terren lopital"
 
 #. Type of facility operational status: as functional as a field hospital next to a hospital
 #: ../tools/setup.py:191
 msgid "Field hospital co-located with hospital"
-msgstr "Field lopital ko-chita ak lopital"
+msgstr "Terren lopital ki chita ka lopital"
 
 #. Error message for required field.
 #: static/locale.js:55
@@ -347,7 +352,12 @@ msgstr "Sant sante ki pa gen kabann"
 #. Proper name of an ID for a healthcare facility, no translation necessary.
 #: ../tools/setup.py:100
 msgid "HealthC ID"
-msgstr "HealthC ID"
+msgstr "ID HealthC"
+
+#. Proper name of an ID for a healthcare facility, no translation necessary.
+#: templates/hospital_bubble.html:32
+msgid "HealthC ID:"
+msgstr "ID HealthC:"
 
 #. Link to go to a help page for the application
 #: templates/map.html:102
@@ -380,7 +390,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Dat envalid : %(dat)r (bezwen ane-mwa-jou fòma)"
 
 #. Error message for request missing facility name.
-#: bubble.py:131 edit.py:325
+#: bubble.py:127 edit.py:326
 msgid "Invalid or missing facility name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -394,10 +404,15 @@ msgstr "Janvye, Fevriye, Mas, Avril, Me, Jen, jiyè, Out, septanm, Oktòb, Novan
 msgid "Lab"
 msgstr "Laboratwa"
 
+#. Label for a language selector
+#: templates/map.html:77
+msgid "Language:"
+msgstr "Lang:"
+
 #. Label for a date-time when the data was last updated
-#: templates/hospital_bubble.html:33
+#: templates/hospital_bubble.html:40
 msgid "Last updated:"
-msgstr "Remete an fonksyon"
+msgstr "Misajou"
 
 #. Label for text input
 #: edit.py:230
@@ -415,7 +430,7 @@ msgid "Latitude must be between -90 and 90."
 msgstr "Latitd dwe ant -90 ak 90"
 
 #. Latitude of a location on earth.
-#: templates/hospital_bubble.html:113
+#: templates/hospital_bubble.html:120
 msgid "Latitude:"
 msgstr "Latitd"
 
@@ -455,7 +470,7 @@ msgid "Longitude must be between -180 and 180."
 msgstr "Lonjitd dwe ant -180 ak 180"
 
 #. Longitude of a location on earth.
-#: templates/hospital_bubble.html:117
+#: templates/hospital_bubble.html:124
 msgid "Longitude:"
 msgstr "Lonjitd"
 
@@ -500,7 +515,7 @@ msgid "No"
 msgstr "Pa dakò"
 
 #. Indicates there is no availability information for this  hospital.
-#: templates/hospital_bubble.html:73
+#: templates/hospital_bubble.html:80
 msgid "No availability information"
 msgstr "Pa gen enfòmasyon ki koresponn"
 
@@ -528,7 +543,7 @@ msgstr "Obstetrik ak jinekoloji"
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
 #: static/locale.js:98
 msgid "Open/Total Beds"
-msgstr "Kabann disponib "
+msgstr "Kabann disponib/total"
 
 #. Type of facility operational status: in working order
 #: ../tools/setup.py:183
@@ -571,7 +586,7 @@ msgid "Phone"
 msgstr "Telefòn"
 
 #. Indicates a user should call for availability of beds and services at a hospital.
-#: templates/hospital_bubble.html:67
+#: templates/hospital_bubble.html:74
 msgid "Please call for availability information."
 msgstr "Tanpri rele pou enfomasyon disponib"
 
@@ -672,7 +687,7 @@ msgstr "Mete Anprent"
 #. Link to sign out of the app
 #: main.py:53
 msgid "Sign out"
-msgstr "Retire anprent"
+msgstr "Sòti"
 
 #. Category of a health facility with a particular specialty.
 #: ../tools/setup.py:208
@@ -722,7 +737,7 @@ msgstr "Kantite disponib"
 #. genre, subdivision of a particular kind of thing
 #: ../tools/setup.py:128
 msgid "Type"
-msgstr "Fom"
+msgstr "Tip"
 
 #. URL to load data from
 #: templates/load.html:41
@@ -812,12 +827,12 @@ msgid "anonymous"
 msgstr "anonim"
 
 #. Heading for number of available beds at a hospital
-#: templates/hospital_bubble.html:41
+#: templates/hospital_bubble.html:48
 msgid "availability"
 msgstr "Disponibilite"
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:45
+#: templates/hospital_bubble.html:52
 msgid "capacity"
 msgstr "Kapasite"
 
@@ -833,7 +848,7 @@ msgid "p ${PHONE}"
 msgstr "t ${PHONE}"
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:50
+#: templates/hospital_bubble.html:57
 msgid "services"
 msgstr "sèvis"
 

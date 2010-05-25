@@ -19,12 +19,19 @@
 <div class="bubble">
   <span class="title-row">
     <span class="title">{{special.title.value|escape}}</span>
-    <a href='{{edit_link|escape}}'>Edit this record</a>
+    {% comment %}
+    #i18n: Link to edit the data for a facility record.
+    {% endcomment %}
+    <a href='{{edit_link|escape}}'>{% trans "Edit this record" %}</a>
   </span>
   <h2>
-    HealthC ID: {{special.healthc_id.value|escape}} &#xb7;
     {% comment %}
-    #i18n: ID for a facility
+    #i18n: Proper name of an ID for a healthcare facility, no translation
+    #i18n: necessary.
+    {% endcomment %}
+    {% trans "HealthC ID:" %}: {{special.healthc_id.value|escape}} &#xb7;
+    {% comment %}
+    #i18n: Identifier for a facility
     {% endcomment %}
     {% trans "Facility ID:" %} {{facility_name|escape}}<br>
     {% comment %}
