@@ -49,7 +49,7 @@ def load_paho_csv(
         count += 1
         for key in record:
             record[key] = record[key].decode('utf-8')
-        facility_name = 'mspphaiti.org..' + record['PCode']
+        facility_name = 'mspphaiti.org/' + record['PCode']
         title = (record['Fac_NameFr'].strip() or record['NomInstitu'].strip())
         alt_title = (title == record['Fac_NameFr'].strip() and
                      record['NomInstitu'].strip() or '')
