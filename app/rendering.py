@@ -13,10 +13,12 @@
 # limitations under the License.
 
 import datetime
+import sets
 import sys
+from google.appengine.api import memcache
 from feeds.geo import distance
 from utils import *
-from model import Attribute, Facility, FacilityType, Message
+from model import Attribute, Facility, FacilityType, Message, MinimalFacility
 
 def make_jobjects(entities, transformer, *args):
     """Run a sequence of entities through a transformer function that produces
@@ -45,38 +47,29 @@ def facility_type_transformer(index, facility_type, attribute_is):
             'attribute_is':
                 [attribute_is[p] for p in filter(
                     lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
-                    facility_type.attribute_names)]}
+                    facility_type.minimal_attribute_names)]}
 
-def facility_transformer(index, facility, attributes, facility_type_is,
-                         center, radius):
+def minimal_facility_transformer(index, facility, attributes, facility_types,
+                                 facility_type_is, center, radius):
     """Construct the JSON object for a Facility."""
     # Gather all the attributes
     values = [None]
-    nicknames = [None]
-    affiliations = [None]
-    timestamps = [None]
-    comments = [None]
 
-    # TODO(shakusa) It's probably too much data to send to include
-    # all the change details. We should delay until an info bubble expansion.
+    facility_type = filter(lambda f: f.key().name() == facility.type,
+                           facility_types)[0]
 
     for attribute in attributes:
         name = attribute.key().name()
-        values.append(facility.get_value(name))
-        nicknames.append(facility.get_author_nickname(name))
-        affiliations.append(facility.get_author_affiliation(name))
-        timestamps.append(facility.get_observed(name))
-        comments.append(facility.get_comment(name))
+        if name in facility_type.minimal_attribute_names:
+            values.append(facility.get_value(name))
+        else:
+            values.append(None)
 
     # Pack the results into an object suitable for JSON serialization.
     facility_jobject = {
-        'name': facility.key().name(),
+        'name': facility.parent_key().name(),
         'type': facility_type_is[facility.type],
         'values' : values,
-        'nicknames': nicknames,
-        'affiliations': affiliations,
-        'timestamps': timestamps,
-        'comments': comments
     }
     if facility.has_value('location'):
         location = {
@@ -105,21 +98,31 @@ def clean_json(json):
 def render_json(center=None, radius=None):
     """Dump the data as a JSON string."""
 
-    # Get all the attributes.
-    attributes = filter(lambda a: a.key().name() not in HIDDEN_ATTRIBUTE_NAMES,
+    # TODO(shakusa) Use memcache more!
+
+    facility_types = list(FacilityType.all())
+
+    # Get the set of attributes to return
+    attr_names = sets.Set()
+    for facility_type in facility_types:
+        attr_names = attr_names.union(facility_type.minimal_attribute_names)
+    attr_names = attr_names.difference(HIDDEN_ATTRIBUTE_NAMES)
+
+    # Get the subset of attributes to render.
+    attributes = filter(lambda a: a.key().name() in attr_names,
                         list(Attribute.all().order('__key__')))
     attribute_jobjects, attribute_is = make_jobjects(
         attributes, attribute_transformer)
 
     # Make JSON objects for the facility types.
     facility_type_jobjects, facility_type_is = make_jobjects(
-        FacilityType.all(), facility_type_transformer, attribute_is)
+        facility_types, facility_type_transformer, attribute_is)
 
-    # Make JSON objects for the facilities, while collecting lists of the
-    # facilities in each division.
+    # Make JSON objects for the facilities
     facility_jobjects, facility_is = make_jobjects(
-        Facility.all().order(Facility.get_stored_name('title')),
-        facility_transformer, attributes, facility_type_is, center, radius)
+        MinimalFacility.all().order(MinimalFacility.get_stored_name('title')),
+        minimal_facility_transformer, attributes, facility_types, facility_type_is,
+        center, radius)
     total_facility_count = len(facility_jobjects) - 1
     logging.info("NUMBER OF FACILITIES %d" % total_facility_count)
 
@@ -128,12 +131,16 @@ def render_json(center=None, radius=None):
         facility_jobjects.sort(key=lambda f: f and f.get('distance_meters'))
 
     # Get all the messages for the current language.
-    message_jobjects = {}
-    for message in Message.all():
-        namespace = message_jobjects.setdefault(message.namespace, {})
-        django_locale = django.utils.translation.to_locale(
-            django.utils.translation.get_language())
-        namespace[message.name] = getattr(message, django_locale)
+    django_locale = django.utils.translation.to_locale(
+        django.utils.translation.get_language())
+    def load_messages(django_locale):
+        message_jobjects = {}
+        for message in Message.all():
+            namespace = message_jobjects.setdefault(message.namespace, {})
+            namespace[message.name] = getattr(message, django_locale)
+        return message_jobjects
+    message_jobjects = check_cache(
+        'messages_%s' % django_locale, load_messages, django_locale)
 
     return clean_json(simplejson.dumps({
         'total_facility_count': total_facility_count,
@@ -143,3 +150,11 @@ def render_json(center=None, radius=None):
         'messages': message_jobjects
     # set indent=2 to pretty-print; it blows up download size, so defaults off
     }, indent=None, default=json_encode))
+
+def check_cache(key, miss_function, *args):
+    ret = memcache.get(key)
+    if ret is None:
+        ret = miss_function(*args)
+        if not memcache.add(key, ret):
+            logging.error('Memcache set of %s failed' % key)
+    return ret

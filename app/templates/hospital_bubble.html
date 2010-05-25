@@ -1,0 +1,147 @@
+{% comment %}
+# Copyright 2010 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+{% load i18n %}
+
+<div class="bubble">
+  <span class="title-row">
+    <span class="title">{{special.title.value}}</span>
+    <a href='{{edit_link}}'>Edit this record</a>
+  </span>
+  <h2>
+    {% comment %}
+    #i18n: ID for a facility
+    {% endcomment %}
+    HealthC ID: {{special.healthc_id.value}} &#xb7;
+    {% trans "Facility ID:" %} {{facility_name}}<br>
+    {{last_updated}}
+  </h2>
+  <table class="scorecard" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        {% comment %}
+        #i18n: Heading for number of available beds at a hospital
+        {% endcomment %}
+        <th class="availability" width="1%">{% trans "availability" %}</th>
+        {% comment %}
+        #i18n: Heading for number of total beds at a hospital
+        {% endcomment %}
+        <th class="capacity" width="1%">{% trans "capacity" %}</th>
+        {% comment %}
+        #i18n: Heading for servies available at a hospital
+        #i18n: (eg, orthopedics, cardiology)
+        {% endcomment %}
+        <th class="services">{% trans "services" %}</th>
+      </tr>
+      <tr>
+        {% if special.total_beds.raw %}
+          <td class="availability">
+            <div class="number">{{special.available_beds.value}}</div>
+          </td>
+          <td class="capacity">
+            <div class="number">{{special.total_beds.value}}</div>
+          </td>
+        {% else %}
+        <td class="no-information" colspan="2">
+          {% if general.phone and general.phone.raw %}
+          {% trans "Please call for availability information." %}
+          {% else %}
+          {% trans "No availability information" %}
+          {% endif %}
+        </td>
+        {% endif %}
+        <td class="services">
+          {{special.services.value}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div id="bubble-tabs">
+    <ul>
+      <li><a href="#bubble-tab-details">
+          {% comment %}
+          #i18n: Header for details about a facility
+          {% endcomment %}
+          {% trans "Facility details" %}</a></li> 
+      <li><a href="#bubble-tab-history">
+          {% comment %}
+          #i18n: Header for the history of changes in data for a facility
+          {% endcomment %}
+          {% trans "Change details" %}</a></li>
+    </ul>
+    <div id="bubble-tab-details">
+      <table class="details" cellpadding="0" cellspacing="0">
+        <tbody>
+          <tr class="item">
+            <td class="label" width="20%">
+              {% comment %}
+              #i18n: street address
+              {% endcomment %}
+              {% trans "Address" %}
+            </td>
+            <td class="value">
+              {{special.address.value}}
+            </td>
+            <td class="value">
+              {% trans "Latitude:" %} {{special.location.raw.lat}}<br>
+              {% trans "Longitude:" %} {{special.location.raw.lon}}
+            </td>
+          </tr>
+          {% for attribute in general %}
+          <tr class="item">
+            <td class="label">{{attribute.label}}</td>
+            <td class="value" colspan="2">{{attribute.value}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div id="bubble-tab-history">
+      <table class="details" cellpadding="0" cellspacing="0">
+        <thead>
+          <tr>
+            {% comment %}
+            #i18n: Header for a record of a change to a facility detail
+            {% endcomment %}
+            <th>{% trans "Change" %}</th>
+            {% comment %}
+            #i18n: Header a column of user who made the edits
+            {% endcomment %}
+            <th>{% trans "Edited by" %}</th>
+            {% comment %}
+            #i18n: Header a column of comment about why a change was made
+            {% endcomment %}
+            <th>{% trans "Change note" %}</th>
+            {% comment %}
+            #i18n: Header for date and time of a change record
+            {% endcomment %}
+            <th>{% trans "Date and time" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for attribute in details %}
+          <tr>
+            <td>{{attribute.label}}: {{attribute.value}}</td>
+            <td>{{attribute.author}}, {{attribute.affiliation}}</td>
+            <td>{{attribute.comment}}</td>
+            <td>{{attribute.date}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
