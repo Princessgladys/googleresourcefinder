@@ -17,6 +17,7 @@
 {% load i18n %}
 
 <!-- No doctype: need quirks mode to get scrollbars in IE. -->
+<html>
 <head>
   {% comment %}
   #i18n: Name of the application.
@@ -64,34 +65,47 @@
     var print = {% if params.print %} true {% else %} false {% endif %};
   </script>
 </head>
-
+<body>
+{% include "analytics.html" %}
 <!-- Main document -->
 <div id="viewport"></div>
 <div class="header">
-  <div class="user">
-    <strong>{{authorization}}</strong> |
-    {% if params.print %}
-      {% comment %}
-      #i18n: Link to return to the main page of the application
-      {% endcomment %}
-      <a href="/">{% trans "Home" %}</a> |
-    {% else %}
-      <a id="print-link" href="#"
-         {% comment %}
-         #i18n: Link to print the current view of the application
-         {% endcomment %}
-         class="print-link-disabled">{% trans "Print" %}</a> |
-    {% endif %}
+  <div class="lang gmnoprint">
+    {% comment %}
+    #i18n: Label for a language selector
+    {% endcomment %}
+    Language: 
     <select id="lang-select">
     {% for lang in params.languages %}
       <option value="{{params.url_no_lang}}&amp;lang={{lang.0}}"
         {% ifequal lang.0 params.lang %} selected{% endifequal %}>{{lang.1}}</option>
     {% endfor %}
-    </select> |
+    </select>
+  </div>
+  <div class="user">
+    <strong>{{authorization}}</strong> <span class="sep">|</span>
+    {% if params.print %}
+      {% comment %}
+      #i18n: Link to return to the main page of the application
+      {% endcomment %}
+      <a href="/">{% trans "Home" %}</a> <span class="sep">|</span>
+    {% else %}
+      <a id="print-link" href="#" target="_blank"
+         {% comment %}
+         #i18n: Link to print the current view of the application
+         {% endcomment %}
+         class="print-link-disabled">{% trans "Print" %}</a> <span class="sep">|</span>
+    {% endif %}
     {% comment %}
     #i18n: Link to go to a help page for the application
     {% endcomment %}
-    <a href="about:blank">{% trans "Help" %}</a> |
+    <a href="about:blank">{% trans "Help" %}</a> <span class="sep">|</span>
+    <a href='javascript:void(0)'
+       onclick='window.open("/tos", "tos", "width=400,height=400")'
+       {% comment %}
+       #i18n: Link to terms of service for the application
+       {% endcomment %}
+       >{% trans "Terms of service" %}</a> <span class="sep">|</span>
     <a href="{{loginout_url}}">{{loginout_text}}</a>
   </div>
   {% if params.print %}
@@ -167,18 +181,18 @@
     {% include "data.html" %}
   {% endif %}
 </div>
-<div id="freshness" class="caption gmnoprint">
+<div id="freshness" class="gmnoprint">
   <span id="freshness-text"></span>
   <div>
     {% comment %}
     #i18n: Button to export data to comma-separated-values format.
     {% endcomment %}
-    <a href="{{export_link}}">{% trans "Export CSV" %}</a> |
+    <a href="{{export_link}}">{% trans "Export CSV" %}</a> <span class="sep">|</span>
 
     {% comment %}
     #i18n: Link to go to a page with past versions of the 'master' list
     {% endcomment %}
-    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">{% trans "View master list archive" %}</a>
+    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">{% trans "View Master List archive" %}</a>
   </div>
 </div>
 {% if params.print %}
@@ -196,3 +210,5 @@
     load_data({{data}});
   });
 </script>
+</body>
+</html>

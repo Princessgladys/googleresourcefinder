@@ -277,7 +277,12 @@ def setup_messages():
                 text = message.en
             setattr(message, locale, text)
 
+    existing = list(m for m in Message.all(keys_only=True))
     db.put(messages)
+    # Clean up obsolete existing messages
+    while existing:
+        batch, existing = existing[:200], existing[200:]
+        db.delete(batch)
 
 def setup_js_messages():
     """Sets up translated versions of app/static/locale.js"""

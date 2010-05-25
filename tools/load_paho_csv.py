@@ -19,7 +19,8 @@ import datetime
 import logging
 
 def load_paho_csv(
-    filename, source_url, observed, author, author_nickname, author_affiliation):
+    filename, source_url, observed, author, author_nickname,
+    author_affiliation, limit=None):
     """Loads the PAHO master list as a CSV file.
 
     Args:
@@ -28,7 +29,8 @@ def load_paho_csv(
       observed: datetime.datetime when the data was observed to be valid
       author: users.User who will own the changes made during loading
       author_nickname: nickname for the author
-      author_affiliation: organizational affiliation of the author"""
+      author_affiliation: organizational affiliation of the author
+      limit: maximum number of records to load (default: load all)"""
 
     if (not filename or not source_url or not observed or not author or
         not author_nickname or not author_affiliation):
@@ -41,9 +43,11 @@ def load_paho_csv(
     # Create a dump of the raw file
     Dump(source=source_url, data=open(filename, 'rb').read()).put()
 
-    facility_type = FacilityType.get_by_key_name('hospital')
-
+    count = 0
     for record in csv.DictReader(open(filename)):
+        if limit and count >= limit:
+            break
+        count += 1
         for key in record:
             record[key] = record[key].decode('utf-8')
         facility_name = 'mspphaiti.org..' + record['PCode']
