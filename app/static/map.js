@@ -1143,10 +1143,10 @@ function select_facility(facility_i, ignore_current) {
   jQuery.ajax({
     url: 'bubble?facility_name=' + selected_facility.name,
     type: 'GET',
-    timeout: 1000,
-    error: function(){
-      // TODO(shakusa) i18n
-      alert('Error loading facility information');
+    timeout: 10000,
+    error: function(request, textStatus, errorThrown){
+      log(textStatus + ', ' + errorThrown);
+      alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
       show_loading(false);
     },
     success: function(result){

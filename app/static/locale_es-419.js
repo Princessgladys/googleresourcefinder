@@ -53,6 +53,9 @@ locale = function() {
   //i18n: Error message for invalid latitude.
   messages.ERROR_LATITUDE_MUST_BE_NUMBER = "La latitud debe ser un n\u00famero";
 
+  //i18n: Error message for not loading facility information successfully
+  messages.ERROR_LOADING_FACILITY_INFORMATION = "Error al cargar servicio de informaci\u00f3n.";
+
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_INVALID = "La longitud debe estar entre -180 y 180";
 
