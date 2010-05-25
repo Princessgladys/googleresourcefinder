@@ -24,3 +24,7 @@ LANGUAGES = [('en', 'English'),
 
 # Mapping of alternate language code to internal representation
 ALTERNATE_LANG_CODES = { 'es': 'es-419', }
+
+# Google maps is not available in all languages. This maps from unavailable
+# languages to the best available fallback language.
+GOOGLE_MAPS_ALTERNATE_LANG_CODES = { 'ht' : 'fr', }

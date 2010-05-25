@@ -156,11 +156,13 @@ class Handler(webapp.RequestHandler):
         self.params.lang = (self.params.lang or
             self.request.cookies.get('django_language', None) or
             settings.LANGUAGE_CODE)
+        # Check for and potentially convert an alternate language code
+        self.params.lang = config.ALTERNATE_LANG_CODES.get(
+            self.params.lang, self.params.lang)
         if self.params.lang not in list(lang[0] for lang in config.LANGUAGES):
           self.params.lang = settings.LANGUAGE_CODE
 
-        # Check for and potentially convert an alternate language code
-        self.params.lang = config.ALTERNATE_LANG_CODES.get(
+        self.params.maps_lang = config.GOOGLE_MAPS_ALTERNATE_LANG_CODES.get(
             self.params.lang, self.params.lang)
         self.response.headers.add_header(
             'Set-Cookie', 'django_language=%s' % self.params.lang)

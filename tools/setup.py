@@ -75,8 +75,10 @@ def setup_facility_types():
 
     hospital = FacilityType(
         key_name='hospital',
-        attribute_names=[a.key().name() for a in attributes])
-
+        attribute_names=[a.key().name() for a in attributes],
+        minimal_attribute_names=['title', 'healthc_id', 'available_beds',
+                                 'total_beds', 'services', 'contact_name',
+                                 'phone', 'address', 'location'])
     db.put(hospital)
 
 

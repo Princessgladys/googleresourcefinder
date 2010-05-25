@@ -49,6 +49,10 @@ class EditTests(SeleniumTestCase):
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
         f.put()
+        mf = MinimalFacility(f, type='hospital')
+        mf.set_attribute('title', 'title_foo')
+        mf.set_attribute('location', db.GeoPt(51.5, 0))
+        mf.put()
 
     def tearDown(self):
         Facility.get_by_key_name('example.org/123').delete()
