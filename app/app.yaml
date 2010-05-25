@@ -62,6 +62,9 @@ handlers:
 - url: /monitor
   script: monitor.py
 
+- url: /bubble
+  script: bubble.py
+
 - url: /TOS
   script: tos.py
 

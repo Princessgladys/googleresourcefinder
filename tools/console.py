@@ -15,7 +15,8 @@
 
 """An interactive Python console connected to an app's datastore.
 
-Use common.sh to set PYTHONPATH and APPENGINE_DIR before running this tool."""
+Instead of running this script directly, use the 'console' shell script,
+which sets up the PYTHONPATH and other necessary environment variables."""
 
 import code
 import getpass
