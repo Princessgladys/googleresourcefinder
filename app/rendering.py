@@ -109,8 +109,7 @@ def render_json(center=None, radius=None):
     attr_names = attr_names.difference(HIDDEN_ATTRIBUTE_NAMES)
 
     # Get the subset of attributes to render.
-    attributes = filter(lambda a: a.key().name() in attr_names,
-                        list(Attribute.all().order('__key__')))
+    attributes = [a for a in Attribute.all() if a.key().name() in attr_names]
     attribute_jobjects, attribute_is = make_jobjects(
         attributes, attribute_transformer)
 
@@ -121,8 +120,8 @@ def render_json(center=None, radius=None):
     # Make JSON objects for the facilities
     facility_jobjects, facility_is = make_jobjects(
         MinimalFacility.all().order(MinimalFacility.get_stored_name('title')),
-        minimal_facility_transformer, attributes, facility_types, facility_type_is,
-        center, radius)
+        minimal_facility_transformer, attributes, facility_types,
+        facility_type_is, center, radius)
     total_facility_count = len(facility_jobjects) - 1
     logging.info("NUMBER OF FACILITIES %d" % total_facility_count)
 
