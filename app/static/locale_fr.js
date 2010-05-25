@@ -78,7 +78,7 @@ locale = function() {
 
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
-  messages.OPEN_TOTAL_BEDS = "Lits libres/au total";
+  messages.OPEN_TOTAL_BEDS = "Lits libres/total";
 
   //i18n: Very short abbreviation for a phone number, indended to disambiguate
   //i18n: from a fax number.  (example: p 555-555-5555)

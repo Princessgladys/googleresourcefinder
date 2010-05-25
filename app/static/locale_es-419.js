@@ -32,11 +32,11 @@ locale = function() {
 
   //i18n: Displaying markers on a map for facilities within RADIUS_MILES
   //i18n: miles of a location
-  messages.DISPLAYING_FACILITIES_IN_RANGE = "Muestra las instalaciones dentro de ${RADIUS_MILES} millas";
+  messages.DISPLAYING_FACILITIES_IN_RANGE = "Muestra las instituciones dentro de ${RADIUS_MILES} millas";
 
   //i18n: Displaying markers on a map for the NUM_FACILITIES closest to a 
   //i18n: location
-  messages.DISPLAYING_CLOSEST_N_FACILITIES = "Muestra ${NUM_FACILITIES} las instalaciones m\u00e1s cercanas";
+  messages.DISPLAYING_CLOSEST_N_FACILITIES = "Muestra ${NUM_FACILITIES} las instituciones m\u00e1s cercanas";
 
   //i18n: A distance (example: 3.11 miles (5 km))
   messages.DISTANCE = "${MILES}millas (${KM} km)";
@@ -45,7 +45,7 @@ locale = function() {
   messages.DISTRICT = "Distrito";
 
   //i18n: Error message for required field.
-  messages.ERROR_FIELD_IS_REQUIRED = "Este campo es obligatorio.";
+  messages.ERROR_FIELD_IS_REQUIRED = "Este campo es requerido.";
 
   //i18n: Error message for invalid latitude.
   messages.ERROR_LATITUDE_INVALID = "La latitud debe estar entre -90 y 90";
