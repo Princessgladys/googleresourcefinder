@@ -24,10 +24,6 @@ locale = function() {
   //i18n: Label for every item in a list.
   messages.ALL = "Todos";
 
-  //i18n: Indicates a user should call for availability of beds
-  //i18n: and services at a hospital.
-  messages.CALL_FOR_AVAILABILITY = "Llama para informarte acerca de la disponibilidad";
-
   //i18n: Date at a give time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME = "${DATE} a las ${TIME}";
 
@@ -47,9 +43,6 @@ locale = function() {
 
   //i18n: Meaning: administrative division
   messages.DISTRICT = "Distrito";
-
-  //i18n: Link to edit the data for a facility record.
-  messages.EDIT_LINK_HTML = HTML("${LINK_START}Modifica este registro${LINK_END}");
 
   //i18n: Error message for required field.
   messages.ERROR_FIELD_IS_REQUIRED = "Este campo es obligatorio.";
@@ -76,18 +69,9 @@ locale = function() {
   //i18n: A place that provides a particular service
   messages.FACILITY = "Instituci\u00f3n";
 
-  //i18n: Latitude and longitude location on earth.
-  messages.GEOLOCATION_HTML = HTML("Latitud: ${LATITUDE}<br>Longitud:${LONGITUDE}");
-
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "Ene feb mar abr may jun jul ago sept oct nov dic".split(' ');
-
-  //i18n: Form option for disagreement.
-  messages.NO = "No";
-
-  //i18n: Indicates there is no availability information for this hospital.
-  messages.NO_AVAILABILITY = "No hay informaci\u00f3n de disponibilidad";
 
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
@@ -103,26 +87,17 @@ locale = function() {
   //i18n: Tooltip explaining a 'Print' link
   messages.PRINT_ENABLED_TOOLTIP = "Imprime una lista de hospitales por orden de distancia desde ${FACILITY_NAME}";
 
-  //i18n: Link to request access for editing a facility record.
-  messages.REQUEST_EDIT_ACCESS_HTML = HTML("${LINK_START}Solicita modificar el acceso ${LINK_END}");
-
   //i18n: work done by someone that benefits another
   messages.SERVICES = "Servicios";
 
   //i18n: Label for a control that filters a list of facilities
   messages.SHOW = "Mostrar:";
 
-  //i18n: Indicates a user needs to sign in to edit data on a facility.
-  messages.SIGN_IN_TO_EDIT = "Accede para modificar tus datos";
-
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}:${MINUTES} ${ZONE}";
 
   //i18n: Label indicating a record was updated
   messages.UPDATED = "Actualizado";
-
-  //i18n: Form option for agreement.
-  messages.YES = "S\u00ed";
 
   function message_renderer(name) {
     return function (params) {

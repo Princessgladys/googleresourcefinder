@@ -43,6 +43,7 @@ def load_paho_csv(
     # Create a dump of the raw file
     Dump(source=source_url, data=open(filename, 'rb').read()).put()
 
+    facility_type = FacilityType.get_by_key_name('hospital')
     count = 0
     for record in csv.DictReader(open(filename)):
         if limit and count >= limit:

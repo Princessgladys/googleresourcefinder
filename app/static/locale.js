@@ -25,11 +25,6 @@ locale = function() {
   messages.ALL =
       'All';
 
-  //i18n: Indicates a user should call for availability of beds
-  //i18n: and services at a hospital.
-  messages.CALL_FOR_AVAILABILITY =
-      'Please call for availability information';
-
   //i18n: Date at a give time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME =
       '${DATE} at ${TIME}';
@@ -55,10 +50,6 @@ locale = function() {
   //i18n: Meaning: administrative division
   messages.DISTRICT =
       'District';
-
-  //i18n: Link to edit the data for a facility record.
-  messages.EDIT_LINK_HTML =
-      HTML('${LINK_START}Edit this record${LINK_END}');
 
   //i18n: Error message for required field.
   messages.ERROR_FIELD_IS_REQUIRED =
@@ -93,22 +84,10 @@ locale = function() {
   messages.FACILITY =
       'Facility';
 
-  //i18n: Latitude and longitude location on earth.
-  messages.GEOLOCATION_HTML =
-      HTML('Latitude: ${LATITUDE}<br>Longitude: ${LONGITUDE}');
-
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS =
       'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
-
-  //i18n: Form option for disagreement.
-  messages.NO =
-      'No';
-
-  //i18n: Indicates there is no availability information for this hospital.
-  messages.NO_AVAILABILITY =
-      'No availability information';
 
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
@@ -129,10 +108,6 @@ locale = function() {
   messages.PRINT_ENABLED_TOOLTIP =
       'Print a list of hospitals in order of distance from ${FACILITY_NAME}';
 
-  //i18n: Link to request access for editing a facility record.
-  messages.REQUEST_EDIT_ACCESS_HTML =
-      HTML('${LINK_START}Request edit access${LINK_END}');
-
   //i18n: work done by someone that benefits another
   messages.SERVICES =
       'Services';
@@ -141,10 +116,6 @@ locale = function() {
   messages.SHOW =
       'Show:';
 
-  //i18n: Indicates a user needs to sign in to edit data on a facility.
-  messages.SIGN_IN_TO_EDIT =
-      'Please sign in to edit';
-
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE =
       '${HOURS}:${MINUTES} ${ZONE}';
@@ -152,10 +123,6 @@ locale = function() {
   //i18n: Label indicating a record was updated
   messages.UPDATED =
       'Updated';
-
-  //i18n: Form option for agreement.
-  messages.YES =
-      'Yes';
 
   function message_renderer(name) {
     return function (params) {
