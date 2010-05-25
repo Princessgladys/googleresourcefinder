@@ -15,7 +15,8 @@
 
 """Starts up an appserver and runs end-to-end tests against it.
 
-Use common.sh to set PYTHONPATH and APPENGINE_DIR before running this tool."""
+Instead of running this script directly, use the 'server_tests' shell script,
+which sets up the PYTHONPATH and other necessary environment variables."""
 
 import access
 import console
