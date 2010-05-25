@@ -145,11 +145,11 @@ if __name__ == '__main__':
             # Start up a clean new appserver for testing.
             runners.append(AppServerRunner(options.port))
             # TODO(kpy): Find a cleaner way to pass settings through to
-            # the ResourceMapperTestCase.
+            # the SeleniumTestCase.
             os.environ['TEST_CONFIG'] = 'local'
         else:
             # TODO(kpy): Pass options.address and options.port through to
-            # the ResourceMapperTestCase.
+            # the SeleniumTestCase.
             os.environ['TEST_CONFIG'] = 'dev'
         runners.append(SeleniumRunner())
         for runner in runners:

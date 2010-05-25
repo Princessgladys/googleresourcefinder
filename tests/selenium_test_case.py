@@ -66,7 +66,7 @@ def match(expected_string_or_regex, actual_string):
         return actual_string == expected_string_or_regex
 
 
-class ResourceMapperTestCase(unittest.TestCase):
+class SeleniumTestCase(unittest.TestCase, selenium.selenium):
     def setUp(self):
         # Select a test config based on the TEST_CONFIG environment variable.
         config_name = os.environ.get('TEST_CONFIG', '')
@@ -74,23 +74,23 @@ class ResourceMapperTestCase(unittest.TestCase):
             raise Exception('TEST_CONFIG must be one of: %r' % CONFIGS.keys())
         self.config = CONFIGS[config_name]
 
-        self.s = selenium.selenium(
-            'localhost', 4444, '*chrome', 'https://www.google.com/')
-        self.s.start()
+        selenium.selenium.__init__(
+            self, 'localhost', 4444, '*chrome', 'https://www.google.com/')
+        self.start()
 
     def tearDown(self):
-        self.s.stop()
+        self.stop()
     
     def login(self, path):
         """Attempts to open the given path, logging in if necessary.  Use
         this method to load the first page in a test.  Returns True if the
         login form was submitted, or False if no login form appeared."""
         self.open_path(path)
-        if self.s.is_element_present(self.config.login_form):
-            self.s.type(self.config.login_email, self.config.user_name)
+        if self.is_element_present(self.config.login_form):
+            self.type(self.config.login_email, self.config.user_name)
             if 'password' in self.config:
-                self.s.type(self.config.login_password, self.config.password)
-            self.s.click(self.config.login_submit)
+                self.type(self.config.login_password, self.config.password)
+            self.click(self.config.login_submit)
             self.wait_for_load()
             return True
         return False
@@ -99,11 +99,11 @@ class ResourceMapperTestCase(unittest.TestCase):
 
     def open_path(self, path):
         """Navigates to a given path under the server's base URL."""
-        self.s.open(self.config.base_url + path) 
+        self.open(self.config.base_url + path) 
 
     def wait_for_load(self):
         """Waits for a page to load, timing out after 30 seconds."""
-        self.s.wait_for_page_to_load(str(self.config.timeout * 1000))
+        self.wait_for_page_to_load(str(self.config.timeout * 1000))
 
     def wait_until(self, function, *args, **kwargs):
         """Waits until the given function (called with the given arguments and
@@ -116,22 +116,22 @@ class ResourceMapperTestCase(unittest.TestCase):
 
     def wait_for_element(self, locator):
        """Waits until the given element is present."""
-       self.wait_until(self.s.is_element_present, locator)
+       self.wait_until(self.is_element_present, locator)
 
     def assert_element(self, locator):
        """Asserts that the given element is present."""
-       self.assertTrue(self.s.is_element_present(locator),
+       self.assertTrue(self.is_element_present(locator),
            'Element %s is unexpectedly missing' % locator)
 
     def assert_no_element(self, locator):
        """Asserts that the given element is not present."""
-       self.assertFalse(self.s.is_element_present(locator),
+       self.assertFalse(self.is_element_present(locator),
            'Element %s is unexpectedly present' % locator)
 
     def assert_text(self, string_or_regex, locator):
        """Asserts that the text of the given element entirely matches the
        given string or regular expression."""
-       text = self.s.get_text(locator)
+       text = self.get_text(locator)
        self.assertTrue(
            match(string_or_regex, text),
            'Element %s: actual text %r does not match %r' %
@@ -140,7 +140,7 @@ class ResourceMapperTestCase(unittest.TestCase):
     def assert_value(self, string_or_regex, locator):
        """Asserts that the entire value of the given element exactly matches
        the given string, or matches the given regular expression."""
-       value = self.s.get_value(locator)
+       value = self.get_value(locator)
        self.assertTrue(
            match(string_or_regex, value),
            'Element %s: actual value %r does not match %r' %

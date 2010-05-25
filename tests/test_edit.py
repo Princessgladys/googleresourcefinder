@@ -1,6 +1,6 @@
 from google.appengine.api import users
 from model import *
-from resource_mapper_test_case import Regex, ResourceMapperTestCase
+from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import unittest
 
@@ -38,9 +38,9 @@ STR_FIELDS = [
     'comments',
 ]
 
-class EditTests(ResourceMapperTestCase):
+class EditTests(SeleniumTestCase):
     def setUp(self):
-        ResourceMapperTestCase.setUp(self)
+        SeleniumTestCase.setUp(self)
         f = Facility(key_name='example.org..123', type='hospital')
         f.set_attribute('title', 'title_foo', datetime.datetime.now(),
                         users.User('test@example.com'),
@@ -52,19 +52,19 @@ class EditTests(ResourceMapperTestCase):
 
     def tearDown(self):
         Facility.get_by_key_name('example.org..123').delete()
-        ResourceMapperTestCase.tearDown(self)
+        SeleniumTestCase.tearDown(self)
 
     def test_edit_link(self):
         """Confirms that the "Edit this record" link in the detail bubble
         goes to the edit form."""
         self.login('/')
-        self.s.click('id=facility-1')
+        self.click('id=facility-1')
         # For some reason, this wait doesn't always work unless we do it twice.
         self.wait_for_element('link=Edit this record')
         self.wait_for_element('link=Edit this record')
-        self.s.click('link=Edit this record')
+        self.click('link=Edit this record')
         self.wait_for_load()
-        self.assertTrue('/edit?' in self.s.get_location())
+        self.assertTrue('/edit?' in self.get_location())
 
     def test_edit_page(self):
         """Confirms that all the fields in the edit form save the entered
@@ -86,7 +86,7 @@ class EditTests(ResourceMapperTestCase):
         text_fields['location.lat'] = '91'
         text_fields['location.lon'] = '-181'
         self.fill_fields(text_fields, {}, {})
-        self.s.click('//input[@name="save"]')
+        self.click('//input[@name="save"]')
         self.verify_errors(text_fields)
 
         # Fill in the form
@@ -105,11 +105,11 @@ class EditTests(ResourceMapperTestCase):
         self.fill_fields(text_fields, checkbox_fields, select_fields)
 
         # Submit the form
-        self.s.click('//input[@name="save"]')
+        self.click('//input[@name="save"]')
         self.wait_for_load()
 
         # Check that we got back to the main map
-        self.assertEquals(self.config.base_url + '/', self.s.get_location())
+        self.assertEquals(self.config.base_url + '/', self.get_location())
 
         # Return to the edit page
         self.open_path('/edit?facility_name=example.org..123')
@@ -139,7 +139,7 @@ class EditTests(ResourceMapperTestCase):
         self.fill_fields(text_fields, checkbox_fields, select_fields)
 
         # Submit the form
-        self.s.click('//input[@name="save"]')
+        self.click('//input[@name="save"]')
         self.wait_for_load()
 
         # Return to the edit page
@@ -150,11 +150,11 @@ class EditTests(ResourceMapperTestCase):
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
         # Set the integer fields to zero
-        self.s.type('//input[@name="available_beds"]', '  0')
-        self.s.type('//input[@name="total_beds"]', '0  ')
+        self.type('//input[@name="available_beds"]', '  0')
+        self.type('//input[@name="total_beds"]', '0  ')
 
         # Submit the form
-        self.s.click('//input[@name="save"]')
+        self.click('//input[@name="save"]')
         self.wait_for_load()
 
         # Return to the edit page
@@ -173,13 +173,13 @@ class EditTests(ResourceMapperTestCase):
         dictionary of field names to values."""
         for name, value in text_fields.items():
             input_xpath = '//input[@name="%s"]' % name
-            self.s.type(input_xpath, value)
+            self.type(input_xpath, value)
         for name, value in checkbox_fields.items():
             checkbox_xpath = '//input[@name="%s"]' % name
-            (value and self.s.check or self.s.uncheck)(checkbox_xpath)
+            (value and self.check or self.uncheck)(checkbox_xpath)
         for name, value in select_fields.items():
             select_xpath = '//select[@name="%s"]' % name
-            self.s.select(select_xpath, 'value=' + value)
+            self.select(select_xpath, 'value=' + value)
 
     def verify_fields(self, text_fields, checkbox_fields, select_fields):
         """Checks the values of text fields, state of checkboxes, and
@@ -190,17 +190,17 @@ class EditTests(ResourceMapperTestCase):
             self.assert_value(value, input_xpath)
         for name, value in checkbox_fields.items():
             checkbox_xpath = '//input[@name="%s"]' % name
-            self.assertEquals(value, self.s.is_checked(checkbox_xpath))
+            self.assertEquals(value, self.is_checked(checkbox_xpath))
         for name, value in select_fields.items():
             select_xpath = '//select[@name="%s"]' % name
-            self.assertEquals([value], self.s.get_selected_values(select_xpath))
+            self.assertEquals([value], self.get_selected_values(select_xpath))
 
     def verify_errors(self, text_fields):
         """Checks that all the given text fields have visible error messages.
         Argument should be a dictionary of field names to values."""
         for name, value in text_fields.items():
             error_xpath = '//div[@id="%s_errormsg"]' % name.split('.')[0]
-            self.assertTrue(self.s.is_visible(error_xpath))
+            self.assertTrue(self.is_visible(error_xpath))
 
 if __name__ == '__main__':
     unittest.main()
