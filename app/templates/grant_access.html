@@ -1,0 +1,103 @@
+{% comment %}
+# Copyright 2009-2010 by Ka-Ping Yee
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+<title>Resource Finder ({{instance}})</title>
+<style>
+{% if not params.embed %}
+  body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
+{% endif %}
+.rm-table {
+      border:1px solid #C5D7EF;
+      border-collapse:collapse;
+      width:100%;
+      text-align:left;
+      color:#000000;
+}
+input, select, textarea, option {
+      font-family:inherit;
+      font-size:inherit;
+}
+.rm-table thead th {
+      -moz-background-clip:border;
+      -moz-background-inline-policy:continuous;
+      -moz-background-origin:padding;
+      background:#C5D7EF none repeat scroll 0 0;
+      font-weight:bold;
+      text-align:left;
+      vertical-align:bottom;
+}
+.rm-table th, .rm-table td {
+      background-color:#FFFFFF;
+      margin:0;
+      padding:0.35em 1em 0.25em 0.35em;
+}
+.rm-even {
+      background-color:#E9E9E9;
+      border:0 none;
+      empty-cells:show;
+}
+.rm-even td, .rm-even th, .rm-even-top td, .rm-even-tween td, .rm-even-bottom td, ol.rm-even {
+      background-color:#E9E9E9;
+      border-bottom:1px solid #C5D7EF;
+      border-top:1px solid #C5D7EF;
+}
+
+</style>
+<h1>Requests Awaiting Approval</h1>
+
+    <table class="rm-table ae-table-striped" >
+      <thead>
+        <tr>
+          <th scope="col">Google Account</th>
+          <th scope="col">Requested Role</th>
+          <th scope="col">Grant Access</th>
+          <th scope="col">Delete Request</th>
+        </tr>
+      </thead>
+      <tbody>
+    {% for req in requests %}
+        {% if forloop.counter|divisibleby:2 %}
+        <tr class="rm-even">
+        {% else %}
+        <tr >
+        {% endif %}
+          <td>
+            {{req.email|escape}}
+          </td>
+          <td>
+            {{req.requested_role|escape}}
+          </td>
+          <td>
+            <form method="post" action="/grant_access">
+              <input type="hidden" value="{{ req.key }}" name="key">
+              <input type="hidden" value="{{ req.requested_role }}" name="role">
+              <input type="hidden" value="approve" name="action">
+              <input type="submit" value="Approve">
+            </form>
+          </td>
+          <td>
+            <form method="post" action="/grant_access">
+              <input type="hidden" value="{{ req.key }}" name="key">
+              <input type="hidden" value="{{ req.requested_role }}" name="role">
+              <input type="hidden" value="deny" name="action">
+              <input type="submit" value="Delete">
+            </form>
+          </td>
+        </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
