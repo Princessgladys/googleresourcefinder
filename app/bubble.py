@@ -80,7 +80,7 @@ class ValueInfoExtractor:
             value = facility.get_value(name)
             if not value:
                 continue
-            attribute = ValueInfo(
+            value_info = ValueInfo(
                 get_message('attribute_name', name),
                 value,
                 facility.get_author_nickname(name),
@@ -88,10 +88,10 @@ class ValueInfoExtractor:
                 facility.get_comment(name),
                 facility.get_observed(name))
             if name in special:
-                special[name] = attribute
+                special[name] = value_info
             else:
-                general.append(attribute)
-            details.append(attribute)
+                general.append(value_info)
+            details.append(value_info)
         return (special, general, details)
 
 class HospitalValueInfoExtractor(ValueInfoExtractor):
@@ -127,12 +127,12 @@ class Bubble(Handler):
             raise ErrorMessage(404, _('Invalid or missing facility name.'))
         facility_type = model.FacilityType.get_by_key_name(facility.type)
 
-        attributes = VALUE_INFO_EXTRACTORS[facility.type]
-        (special, general, details) = attributes.extract(
+        value_info_extractor = VALUE_INFO_EXTRACTORS[facility.type]
+        (special, general, details) = value_info_extractor.extract(
             facility, facility_type.attribute_names)
         edit_link = '/edit?facility_name=%s' % self.params.facility_name
 
-        self.render(attributes.template_name,
+        self.render(value_info_extractor.template_name,
                     edit_link=edit_link,
                     facility_name=self.params.facility_name,
                     last_updated=max(detail.date for detail in details),
