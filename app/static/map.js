@@ -1139,40 +1139,33 @@ function select_facility(facility_i, ignore_current) {
   }
 
   // Pop up the InfoWindow on the selected clinic.
-  var last_updated = 'No reports received';
-  if (selected_facility && selected_facility.timestamps) {
-    var max_date = null;
-    for (var i = 1; i < selected_facility.timestamps.length; i++) {
-      var timestamp = selected_facility.timestamps[i];
-      if (!timestamp) {
-        continue;
-      }
-      var date = new Date(timestamp);
-      if (date > max_date) {
-        max_date = date;
-      }
-    }
-    if (max_date) {
-      last_updated = locale.UPDATED() + ' ' + locale.DATE_FORMAT_MEDIUM(
-        {MONTH: locale.MONTH_ABBRS[max_date.getMonth()](),
-         DAY: max_date.getDate(),
-         YEAR: max_date.getYear() + 1900});
-    }
-  }
   info.close();
 
-  division_title = divisions[0].title;
-  attribute_is = facility_types[selected_facility.type].attribute_is;
-
-  info.setContent(to_html(rf.bubble.get_html(
-      selected_facility, attribute_is, last_updated)));
-  info.open(map, markers[selected_facility_i]);
-
-  // This call sets up the tabs and should be called after the DOM is created.
-  jQuery('#bubble-tabs').tabs();
+  show_loading(true);
+  jQuery.ajax({
+    url: 'bubble?facility_name=' + selected_facility.name,
+    type: 'GET',
+    timeout: 1000,
+    error: function(){
+      // TODO(shakusa) i18n
+      alert('Error loading facility information');
+      show_loading(false);
+    },
+    success: function(result){
+      info.setContent(result);
+      info.open(map, markers[selected_facility_i]);
+      // Sets up the tabs and should be called after the DOM is created.
+      jQuery('#bubble-tabs').tabs();
+      show_loading(false);
+    }
+  });
 
   // Enable the Print link
   enable_print_link();
+}
+
+function show_loading(show) {
+  $('loading').style.display = show ? '' : 'none';
 }
 
 // ==== Load data
@@ -1231,6 +1224,7 @@ function load_data(data) {
     handle_window_resize();
   }
 
+  show_loading(false);
   log('Data loaded.');
 
   // TODO: Test further and re-enable
