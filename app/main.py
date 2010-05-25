@@ -13,12 +13,15 @@
 # limitations under the License.
 
 from model import FacilityType
-from utils import Handler, Redirect, run, users, _
+from utils import Handler, Redirect, get_key, run, users, _
 import access
 import rendering
 
-# TODO(shakusa) Issue 55: When we are ready to launch, set this to False
-USE_WHITELISTS = True
+# We use a Secret in the db to determine whether or not the app should be
+# configured to require login to view and 'editor' role to edit. Whitelists
+# are on by default. To allow anyone to view and logged-in users to edit, run
+# Secret(key_name='use_whitelists', value='FALSE').put() in a console
+USE_WHITELISTS = get_key('use_whitelists') != 'FALSE'
 
 def get_export_link():
     """If only one facility type, return the direct download link,

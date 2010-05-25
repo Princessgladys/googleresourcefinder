@@ -99,13 +99,15 @@
     {% comment %}
     #i18n: Link to go to a help page for the application
     {% endcomment %}
-    <a href="about:blank">{% trans "Help" %}</a> <span class="sep">|</span>
-    <a href='javascript:void(0)'
-       onclick='window.open("/tos", "tos", "width=400,height=400")'
-       {% comment %}
-       #i18n: Link to terms of service for the application
-       {% endcomment %}
-       >{% trans "Terms of service" %}</a> <span class="sep">|</span>
+    <a target="_blank" href="/help">{% trans "Help" %}</a> <span class="sep">|</span>
+    {% comment %}
+    #i18n: Link to terms of service for the application
+    {% endcomment %}
+    <a target="_blank" href="/TOS">{% trans "Terms of Service" %}</a> <span class="sep">|</span>
+    {% comment %}
+    #i18n: Link to privacy policy for the application
+    {% endcomment %}
+    <a target="_blank" href="/privacy">{% trans "Privacy" %}</a> <span class="sep">|</span>
     <a href="{{loginout_url}}">{{loginout_text}}</a>
   </div>
   {% if params.print %}
