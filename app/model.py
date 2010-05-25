@@ -112,12 +112,42 @@ class Facility(db.Expando):
                 value_or_none(author_affiliation))
         setattr(self, '%s__comment' % name, value_or_none(comment))
 
+class MinimalFacility(db.Expando):
+    """Minimal version of Facility that loads fast from the datastore.
+    Parent: Facility. Wouldn't be necessary if we could select columns
+    from the datastore."""
+    type = db.StringProperty(required=True)  # key_name of a FacilityType
+    # properties for the current value of ONLY the most critically important
+    # attributes of Facility (named by Attribute's key_name).
+    # An attribute named foo will be stored as 'foo__' to match Facility.
+
+    @staticmethod
+    def get_stored_name(attribute_name):
+        return '%s__' % attribute_name
+
+    def has_value(self, attribute_name):
+        """Returns the value of the Attribute with the given key_name,
+           or default if it does not exist."""
+        return hasattr(self, '%s__' % attribute_name)
+
+    def get_value(self, attribute_name, default=None):
+        """Returns the value of the Attribute with the given key_name,
+           or default if it does not exist."""
+        return getattr(self, '%s__' % attribute_name, default)
+
+    def set_attribute(self, name, value):
+        """Sets the value for the Attribute with the given key_name."""
+        setattr(self, '%s__' % name, value_or_none(value))
+
 class FacilityType(db.Model):
     """A type of Facility, e.g. hospital, warehouse, charity, camp.
     Top-level entity, has no parent.
     Key name: an identifier used as the value of Facility.type."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
     attribute_names = db.StringListProperty()  # key_names of Attribute entities
+    minimal_attribute_names = db.StringListProperty() # key_names of Attribute
+                                                      # entities for
+                                                      # MinimalFacility
 
 class Attribute(db.Model):
     """An attribute of a facility, e.g. services available, # of

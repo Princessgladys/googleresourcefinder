@@ -37,6 +37,7 @@ def load_paho_csv(
         raise Exception('All arguments must be non-empty.')
 
     facilities = []
+    minimal_facilities = []
     reports = []
 
     # Create a dump of the raw file
@@ -102,6 +103,9 @@ def load_paho_csv(
         facilities.append(facility)
         Facility.author.validate(author)
 
+        minimal_facility = MinimalFacility(facility, type='hospital')
+        minimal_facilities.append(minimal_facility)
+
         utcnow = datetime.datetime.utcnow().replace(microsecond=0)
 
         # Create a report for this row. Attributes that have a different
@@ -133,8 +137,10 @@ def load_paho_csv(
                                    author_nickname, author_affiliation,
                                    attr.comment)
             current_report.set_attribute(name, attr.value, attr.comment)
+            if name in facility_type.minimal_attribute_names:
+                minimal_facility.set_attribute(name, attr.value)
 
-    put_batches(facilities + reports)
+    put_batches(facilities + minimal_facilities + reports)
 
 class Attribute:
     """Keeps track of an attribute value and metadata."""

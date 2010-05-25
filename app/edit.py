@@ -63,11 +63,11 @@ class AttributeType:
             return value
         return None
 
-    def apply_change(self, facility, report, request, attribute,
-                     change_metadata):
-        """Adds an attribute to the given Facility and Report based on a query
-        parameter. Also adds the required change history fields according
-        to the invariants in model.py."""
+    def apply_change(self, facility, minimal_facility, report, request,
+                     attribute, change_metadata):
+        """Adds an attribute to the given Facility, MinimalFacility, and
+        Report based on a query parameter. Also adds the required change
+        history fields according to the invariants in model.py."""
         name = attribute.key().name()
         value = self.to_stored_value(name, request.get(name, None),
                                      request, attribute)
@@ -80,6 +80,8 @@ class AttributeType:
                                change_metadata.author_nickname,
                                change_metadata.author_affiliation,
                                comment)
+        if minimal_facility is not None:
+            minimal_facility.set_attribute(name, value)
 
 class StrAttributeType(AttributeType):
     input_size = 40
@@ -264,12 +266,13 @@ def render_attribute_as_json(facility, attribute):
     name = attribute.key().name()
     return render_json(facility.get_value(name))
 
-def apply_change(facility, report, request, attribute, change_metadata):
-    """Adds an attribute to the given Facility and Report based on
-    a query parameter."""
+def apply_change(
+    facility, minimal_facility, report, request, attribute, change_metadata):
+    """Adds an attribute to the given Facility, MinimalFacility and Report
+    based on a query parameter."""
     attribute_type = ATTRIBUTE_TYPES[attribute.type]
-    attribute_type.apply_change(facility, report, request, attribute,
-                                change_metadata)
+    attribute_type.apply_change(facility, minimal_facility, report, request,
+                                attribute, change_metadata)
 
 def has_changed(facility, request, attribute):
     """Returns True if the request has an input for the given attribute
@@ -392,39 +395,48 @@ class Edit(utils.Handler):
                          % (nickname, affiliation, self.auth.email))
 
         logging.info("record by user: %s" % self.user)
-        utcnow = datetime.datetime.utcnow().replace(microsecond=0)
-        change_metadata = ChangeMetadata(
-            utcnow, self.user, self.auth.nickname, self.auth.affiliation)
-        report = model.Report(
-            self.facility,
-            arrived=utcnow,
-            source=get_source_url(self.request),
-            author=self.user,
-            observed=utcnow)
 
-        has_changes = False
-        for name in self.facility_type.attribute_names:
-            attribute = self.attributes[name]
-            # To change an attribute, it has to have been marked editable
-            # at the time the page was rendered, the new value has to be
-            # different than the one in the facility at the time the page was
-            # rendered, and the user has to have permission to edit it now.
-            if (is_editable(self.request, attribute) and
-                has_changed(self.facility, self.request, attribute)):
-                if not can_edit(self.auth, attribute):
-                    raise ErrorMessage(
-                        403, _(
-                        #i18n: Error message for lacking edit permissions
-                        '%(user)s does not have permission to edit %(attr)s')
-                        % {'user': self.user.email(),
-                           'attr': get_message('attribute_name',
-                                               attribute.key().name())})
-                has_changes = True
-                apply_change(self.facility, report, self.request, attribute,
-                             change_metadata)
+        def update(key, facility_type, attributes, request, user, auth):
+            facility = db.get(key)
+            minimal_facility = model.MinimalFacility.all().ancestor(
+                facility).get()
+            utcnow = datetime.datetime.utcnow().replace(microsecond=0)
+            report = model.Report(
+                facility,
+                arrived=utcnow,
+                source=get_source_url(request),
+                author=user,
+                observed=utcnow)
+            change_metadata = ChangeMetadata(
+                utcnow, user, auth.nickname, auth.affiliation)
+            has_changes = False
+            for name in facility_type.attribute_names:
+                attribute = attributes[name]
+                # To change an attribute, it has to have been marked editable
+                # at the time the page was rendered, the new value has to be
+                # different than the one in the facility at the time the page
+                # rendered, and the user has to have permission to edit it now.
+                if (is_editable(request, attribute) and
+                    has_changed(facility, request, attribute)):
+                    if not can_edit(auth, attribute):
+                        raise ErrorMessage(
+                            403, _(
+                            #i18n: Error message for lacking edit permissions
+                            '%(user)s does not have permission to edit %(a)s')
+                            % {'user': user.email(),
+                               'a': get_message('attribute_name',
+                                                attribute.key().name())})
+                    has_changes = True
+                    mf = (name in facility_type.minimal_attribute_names and
+                          minimal_facility or None)
+                    apply_change(facility, mf, report, request, attribute,
+                                 change_metadata)
+            if has_changes:
+                db.put([report, facility, minimal_facility])
 
-        if has_changes:
-            db.put([report, self.facility])
+        db.run_in_transaction(update, self.facility.key(), self.facility_type,
+                              self.attributes, self.request,
+                              self.user, self.auth)
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
