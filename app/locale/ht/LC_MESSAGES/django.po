@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-25 20:20-0400\n"
+"POT-Creation-Date: 2010-05-26 19:43-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -716,7 +716,7 @@ msgstr "Kondisyon yo pou itilizasyon"
 
 #. Instructions to enter a person's name and organizational affiliation.
 #: templates/edit.html:71
-msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/TOS\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
+msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/terms\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
 msgstr "Mesi paske ou ajoute enfòmasyon sou Chèche Resous. Pou kòmanse tanpri kreye yon kont epi di nou afilyasyon ou. Enfòmasyon sa a pral parèt a kote enfòmasyon ou ajoute oswa korije. Epitou wè <a target=\"_blank\" href=\"/TOS\">Kondisyon yo pou itilizasyon</a> ak <a target=\"_blank\" href=\"/privacy\">Pwoteksyon vi prive</a> (nan lang angle)."
 
 #. Total number of beds at a hospital

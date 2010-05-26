@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-25 20:20-0400\n"
+"POT-Creation-Date: 2010-05-26 19:43-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -716,7 +716,7 @@ msgstr "Conditions d'utilisation"
 
 #. Instructions to enter a person's name and organizational affiliation.
 #: templates/edit.html:71
-msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/TOS\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
+msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/terms\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
 msgstr "Merci pour l'ajout de contenu à l'application \"Localisation de ressources\". Pour commencer, merci de créer un nom d'utilisateur et nous indiquer votre affiliation. Cette information sera affichée à côté de l'information que vous avez ajoutée ou modifiée. Voir aussi les <a target=\"_blank\" href=\"/TOS\">Conditions d'utilisation</a> and <a target=\"_blank\" href=\"/privacy\">Règles de confidentialité</a> (en anglais)."
 
 #. Total number of beds at a hospital
