@@ -97,3 +97,33 @@ locale = function() {
   messages.SHOW = "Mostrar:";
 
   //i18n: Time format (example 14:32 UTC-4)
+  messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}:${MINUTES} ${ZONE}";
+
+  //i18n: Label indicating a record was updated
+  messages.UPDATED = "Actualizado";
+
+  function message_renderer(name) {
+    return function (params) {
+      return render(messages[name], params);
+    };
+  }
+
+  function array_message_renderer(name, index) {
+    return function (params) {
+      return render(messages[name][index], params);
+    };
+  }
+
+  locale = {};
+  for (var name in messages) {
+    if (messages[name].constructor === Array) {
+      locale[name] = [];
+      for (var i = 0; i < messages[name].length; i++) {
+        locale[name][i] = array_message_renderer(name, i);
+      }
+    } else {
+      locale[name] = message_renderer(name);      
+    }
+  }
+  return locale;
+}();
