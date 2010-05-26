@@ -300,12 +300,12 @@ function maybe_selected(selected) {
   return selected ? ' selected' : '';
 }
 
-function make_icon(title, status, detail) {
+function make_icon(title, status, detail, opt_icon, opt_icon_size) {
   var text = detail ? title : '';
   var text_size = detail ? 10 : 0;
   var text_fill = STATUS_TEXT_COLORS[status];
-  var icon = 'greek_cross_4w10';
-  var icon_size = '12';
+  var icon = opt_icon || 'greek_cross_6w14';
+  var icon_size = opt_icon_size || '16';
   var icon_fill = STATUS_ICON_COLORS[status];
   var icon_outline = 'fff';
   var params = [
@@ -343,9 +343,9 @@ function initialize_map() {
   info = new google.maps.InfoWindow();
 
   var cluster_style = {
-    url: 'static/greek_cross36.png',
-    height: 36,
-    width: 36,
+    url: make_icon(null, 1, null, 'greek_cross_12w30', '32'),
+    height: 32,
+    width: 32,
     opt_textColor: '#fff',
     Z: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
   };
