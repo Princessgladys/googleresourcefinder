@@ -41,7 +41,7 @@ STR_FIELDS = [
 class EditTests(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
-        f = Facility(key_name='example.org..123', type='hospital')
+        f = Facility(key_name='example.org/123', type='hospital')
         f.set_attribute('title', 'title_foo', datetime.datetime.now(),
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
@@ -55,7 +55,7 @@ class EditTests(SeleniumTestCase):
         mf.put()
 
     def tearDown(self):
-        Facility.get_by_key_name('example.org..123').delete()
+        Facility.get_by_key_name('example.org/123').delete()
         SeleniumTestCase.tearDown(self)
 
     def test_edit_link(self):
@@ -74,7 +74,7 @@ class EditTests(SeleniumTestCase):
         """Confirms that all the fields in the edit form save the entered
         values, and these values appear pre-filled when the form is loaded."""
         # Go to the edit page
-        self.login('/edit?facility_name=example.org..123')
+        self.login('/edit?facility_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
 
         # First-time edit should show nickname and affiliation fields
@@ -116,7 +116,7 @@ class EditTests(SeleniumTestCase):
         self.assertEquals(self.config.base_url + '/', self.get_location())
 
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org..123')
+        self.open_path('/edit?facility_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
 
         # Nickname and affiliation fields should not be shown this time
@@ -147,7 +147,7 @@ class EditTests(SeleniumTestCase):
         self.wait_for_load()
 
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org..123')
+        self.open_path('/edit?facility_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
 
         # Check that everything is now empty or deselected
@@ -162,7 +162,7 @@ class EditTests(SeleniumTestCase):
         self.wait_for_load()
 
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org..123')
+        self.open_path('/edit?facility_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
 
         # Check that the integer fields are actually zero, not empty
