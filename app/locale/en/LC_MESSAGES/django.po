@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-25 15:59-0400\n"
+"POT-Creation-Date: 2010-05-25 20:20-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,7 +47,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Error message for lacking edit permissions
-#: edit.py:426
+#: edit.py:424
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr ""
@@ -145,11 +145,6 @@ msgstr ""
 #. Header a column of comment about why a change was made
 #: templates/hospital_bubble.html:151
 msgid "Change note"
-msgstr ""
-
-#. Button to close a window
-#: templates/tos.html:42
-msgid "Close"
 msgstr ""
 
 #. remarks
@@ -265,7 +260,7 @@ msgid "Error loading facility information."
 msgstr ""
 
 #. Button to export data to comma-separated-values format.
-#: export.py:157 templates/map.html:190
+#: export.py:157 templates/map.html:192
 msgid "Export CSV"
 msgstr ""
 
@@ -275,7 +270,7 @@ msgid "Facility"
 msgstr ""
 
 #. Identifier for a facility
-#: edit.py:337
+#: edit.py:335
 msgid "Facility ID"
 msgstr ""
 
@@ -375,7 +370,7 @@ msgid "Hospital"
 msgstr ""
 
 #. Explains how to correct incorrect information that has been printed.
-#: templates/map.html:203
+#: templates/map.html:205
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr ""
 
@@ -390,7 +385,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr ""
 
 #. Error message for request missing facility name.
-#: bubble.py:127 edit.py:326
+#: bubble.py:127 edit.py:324
 msgid "Invalid or missing facility name."
 msgstr ""
 
@@ -445,7 +440,7 @@ msgid "Loader:"
 msgstr ""
 
 #. Indicator that the application is loading.
-#: templates/map.html:142
+#: templates/map.html:144
 msgid "Loading..."
 msgstr ""
 
@@ -606,6 +601,11 @@ msgstr ""
 msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr ""
 
+#. Link to privacy policy for the application
+#: templates/map.html:110
+msgid "Privacy"
+msgstr ""
+
 #. Type of a facility confined to particular persons
 #: ../tools/setup.py:156
 msgid "Private"
@@ -622,7 +622,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:442
+#: edit.py:440
 msgid "Record updated."
 msgstr ""
 
@@ -650,13 +650,8 @@ msgid "Request for becoming %(role)s was registered."
 msgstr ""
 
 #. Name of the application.
-#: templates/print_data.html:32 templates/tos.html:25
+#: templates/print_data.html:32
 msgid "Resource Finder"
-msgstr ""
-
-#. Header for terms of service for the Resource Finder app
-#: templates/tos.html:35
-msgid "Resource Finder Terms of Service"
 msgstr ""
 
 #. Button text to save data
@@ -680,12 +675,12 @@ msgid "Show:"
 msgstr ""
 
 #. Link to sign into the app
-#: main.py:55
+#: main.py:58
 msgid "Sign in"
 msgstr ""
 
 #. Link to sign out of the app
-#: main.py:53
+#: main.py:56
 msgid "Sign out"
 msgstr ""
 
@@ -715,13 +710,13 @@ msgid "Temporary mobile facility"
 msgstr ""
 
 #. Link to terms of service for the application
-#: templates/map.html:108
-msgid "Terms of service"
+#: templates/map.html:106
+msgid "Terms of Service"
 msgstr ""
 
 #. Instructions to enter a person's name and organizational affiliation.
 #: templates/edit.html:71
-msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited."
+msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/TOS\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
 msgstr ""
 
 #. Total number of beds at a hospital
@@ -730,7 +725,7 @@ msgid "Total beds"
 msgstr ""
 
 #. Name of the application.
-#: templates/map.html:159
+#: templates/map.html:161
 msgid "Total facilities"
 msgstr ""
 
@@ -780,7 +775,7 @@ msgid "Vascular surgery"
 msgstr ""
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:195
+#: templates/map.html:197
 msgid "View Master List archive"
 msgstr ""
 
@@ -811,18 +806,13 @@ msgstr ""
 msgid "Your request for %(role)s is already registered"
 msgstr ""
 
-#. TODO: Message description and/or meaning
-#: templates/tos.html:36
-msgid "\nLorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n"
-msgstr ""
-
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
-#: templates/map.html:169
+#: templates/map.html:171
 msgid "and with availability."
 msgstr ""
 
 #. a user with no identity
-#: main.py:49
+#: main.py:52
 msgid "anonymous"
 msgstr ""
 
@@ -837,7 +827,7 @@ msgid "capacity"
 msgstr ""
 
 #. Header for the number of facilities less than 10 miles from a location.
-#: templates/map.html:164
+#: templates/map.html:166
 msgid "no more than 10 miles away"
 msgstr ""
 
