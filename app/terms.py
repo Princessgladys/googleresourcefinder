@@ -19,4 +19,4 @@ class TermsOfService(utils.Handler):
         self.render('locale/en/terms.html', params=self.params)
 
 if __name__ == '__main__':
-    utils.run([('/TOS', TermsOfService)], debug=True)
+    utils.run([('/terms', TermsOfService)], debug=True)

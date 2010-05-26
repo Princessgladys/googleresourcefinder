@@ -65,8 +65,8 @@ handlers:
 - url: /bubble
   script: bubble.py
 
-- url: /TOS
-  script: tos.py
+- url: /terms
+  script: terms.py
 
 - url: /privacy
   script: privacy.py
