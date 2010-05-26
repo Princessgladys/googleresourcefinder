@@ -33,15 +33,15 @@ import time
 import traceback
 import unittest
 
-APP_ID = 'resourcemapper'
+APP_ID = 'resource-finder'
 
 
 class ProcessRunner(threading.Thread):
     """A thread that starts a subprocess, collects its output, and stops it."""
 
     READY_RE = re.compile('')  # this output means the process is ready
-    OMIT_RE = re.compile('INFO')  # omit these lines from the displayed output
-    ERROR_RE = re.compile('ERROR')  # this output means something failed
+    OMIT_RE = re.compile('a^')  # omit these lines from the displayed output
+    ERROR_RE = re.compile('ERROR|CRITICAL')  # this output indicates failure
 
     def __init__(self, name, args):
         threading.Thread.__init__(self)
@@ -53,6 +53,7 @@ class ProcessRunner(threading.Thread):
         self.output = []
 
     def run(self):
+        """Starts the subprocess and collects its output while it runs."""
         self.process = subprocess.Popen(
             self.args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             close_fds=True)
@@ -70,7 +71,7 @@ class ProcessRunner(threading.Thread):
             if self.ERROR_RE.search(line):  # something went wrong
                 self.failed = True
             if line.strip():
-                self.output.append('%s: %s' % (self.name, line.strip()))
+                self.output.append(line.strip())
 
     def stop(self):
         """Terminates the subprocess and returns its status code."""
@@ -81,15 +82,29 @@ class ProcessRunner(threading.Thread):
                 self.failed = self.process.returncode != 0
         self.clean_up()
         if self.failed:
-            print >>sys.stderr, '\n%s\n%s failed (status %s).\n' % (
-                '\n'.join(self.output), self.name, self.process.returncode)
+            self.flush_output()
+            print >>sys.stderr, '%s failed (status %s).\n' % (
+                self.name, self.process.returncode)
         else:
             print >>sys.stderr, '%s stopped.' % self.name
 
+    def flush_output(self):
+        """Flushes the buffered output from this subprocess to stderr."""
+        self.output, lines_to_print = [], self.output
+        if lines_to_print:
+            print >>sys.stderr
+        for line in lines_to_print:
+            print >>sys.stderr, self.name + ': ' + line
+
     def wait_until_ready(self, timeout=10):
         """Waits until the subprocess has logged that it is ready."""
-        while self.isAlive() and not self.ready:
-            time.sleep(0.1)
+        fail_time = time.time() + timeout
+        while self.isAlive() and not self.ready and time.time() < fail_time:
+            for jiffy in range(10):  # wait one second, aborting early if ready
+                if not self.ready:
+                    time.sleep(0.1)
+            if not self.ready:
+                self.flush_output()  # after each second, show output
         if self.ready:
             print >>sys.stderr, '%s started.' % self.name
         else:
@@ -103,7 +118,6 @@ class AppServerRunner(ProcessRunner):
     """Manages a dev_appserver subprocess."""
 
     READY_RE = re.compile('Running application ' + APP_ID)
-    ERROR_RE = re.compile('^(ERROR|CRITICAL) ')
 
     def __init__(self, port):
         self.datastore_path = '/tmp/dev_appserver.datastore.%d' % os.getpid()
@@ -126,7 +140,7 @@ class SeleniumRunner(ProcessRunner):
     """Manages a Selenium server subprocess."""
 
     READY_RE = re.compile('Started org.openqa.jetty.jetty.Server')
-    ERROR_RE = re.compile(r'(ERROR|CRITICAL|Exception)')
+    ERROR_RE = re.compile(r'ERROR|CRITICAL|Exception')
 
     def __init__(self):
         ProcessRunner.__init__(
