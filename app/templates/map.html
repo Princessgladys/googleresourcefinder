@@ -17,67 +17,132 @@
 {% load i18n %}
 
 <!-- No doctype: need quirks mode to get scrollbars in IE. -->
+<html>
 <head>
-  <title>{% trans "Resource Mapper" %} ({{instance}})</title>
-    <link rel="stylesheet" href="static/map.css">
+  {% comment %}
+  #i18n: Name of the application.
+  {% endcomment %}
+  <title>{% trans "Resource Finder" %} ({{instance}})</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="static/map.css">
   {% if params.print %}
     <link rel="stylesheet" href="static/map-print.css">
   {% endif %}
   <!--[if lt IE 8]>
     <link rel="stylesheet" href="static/map-ie.css">
   <![endif]-->
-  <script type="text/javascript"
-      src="http://maps.google.com/maps/api/js?sensor=false">
-  </script>
-  <script type="text/javascript"
-      src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js">
-  </script>
-  <script type="text/javascript" src="static/jquery.form.js"></script>
-  <script type="text/javascript">
-    // Do we have a namespace already?
-    // shouldn't
-    // rmapper =  rmapper || {};
-    // work? it fails for me
+  <link rel="stylesheet" type="text/css" media="all"
+        href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css" > 
+  <link rel="stylesheet" href="static/bubble.css">
 
-    rmapper = {};
-    {% if user %}
-      rmapper.user = {};
-      rmapper.user.email = '{{ user.email|escape }}';
-      rmapper.user.is_editor = function() {
-        return {% if is_editor %} true {% else %} false {% endif %};
-      }
-    {% endif %}
-    
+  <!-- Google Maps API -->
+  <script type="text/javascript"
+      src="http://maps.google.com/maps/api/js?sensor=false&language={{params.maps_lang}}">
   </script>
+  <script type="text/javascript"
+      src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer_compiled.js">
+  </script>
+
+  <!-- jQuery files -->
+  <script type="text/javascript" src="static/jquery.min.js"></script>
+  <script type="text/javascript">jQuery.noConflict();</script>
+  <script type="text/javascript" src="static/jquery-ui-1.8rc3.custom.min.js">
+  </script>
+
+  <!-- Initialize the rf namespace -->
+  <script type="text/javascript">
+    rf = {};
+  </script>
+  <script type="text/javascript" src="static/templates.js"></script>
+  {% ifequal 'en' params.lang %}
+    <script type="text/javascript" src="static/locale.js"></script>
+  {% else %}
+    <script type="text/javascript" src="static/locale_{{params.lang}}.js"></script>
+  {% endifequal %}
+  <script type="text/javascript" src="static/map.js"></script>
   <script type="text/javascript">
     var print = {% if params.print %} true {% else %} false {% endif %};
-    jQuery(document).ready(function() {
-      jQuery.noConflict();
-      jQuery.getScript('static/map.js', function() {
-        load_data({{data}});
-      });
-    });
   </script>
-
 </head>
-
+<body>
+{% include "analytics.html" %}
+<!-- Main document -->
 <div id="viewport"></div>
 <div class="header">
+  <div class="lang gmnoprint">
+    {% comment %}
+    #i18n: Label for a language selector
+    {% endcomment %}
+    {% trans "Language:" %} 
+    <select id="lang-select">
+    {% for lang in params.languages %}
+      <option value="{{params.url_no_lang}}&amp;lang={{lang.0}}"
+        {% ifequal lang.0 params.lang %} selected{% endifequal %}>{{lang.1}}</option>
+    {% endfor %}
+    </select>
+  </div>
   <div class="user">
-    <strong>{{authorization}}</strong> |
+    <strong>{{authorization}}</strong> <span class="sep">|</span>
     {% if params.print %}
-      <a href="/">{% trans "Home" %}</a> |
+      {% comment %}
+      #i18n: Link to return to the main page of the application
+      {% endcomment %}
+      <a href="/">{% trans "Home" %}</a> <span class="sep">|</span>
     {% else %}
-      <a href="/?print=yes">{% trans "Print" %}</a> |
+      <a id="print-link" href="#" target="_blank"
+         {% comment %}
+         #i18n: Link to print the current view of the application
+         {% endcomment %}
+         class="print-link-disabled">{% trans "Print" %}</a> <span class="sep">|</span>
     {% endif %}
-    <a href="about:blank">Help</a> |
+    {% comment %}
+    #i18n: Link to go to a help page for the application
+    {% endcomment %}
+    <a target="_blank" href="/help">{% trans "Help" %}</a> <span class="sep">|</span>
+    {% comment %}
+    #i18n: Link to terms of service for the application
+    {% endcomment %}
+    <a target="_blank" href="/terms">{% trans "Terms of Service" %}</a> <span class="sep">|</span>
+    {% comment %}
+    #i18n: Link to privacy policy for the application
+    {% endcomment %}
+    <a target="_blank" href="/privacy">{% trans "Privacy" %}</a> <span class="sep">|</span>
     <a href="{{loginout_url}}">{{loginout_text}}</a>
   </div>
-  <div class="title">
-    {% trans "Resource Mapper" %}
-  </div>
+  {% if params.print %}
+    <div class="print-header">
+      <table width="100%" cellspacing=0 cellpadding=0 border=0>
+        <tbody>
+          <tr>
+            <td valign=top>
+              {% comment %}
+              #i18n: Name of the application.
+              {% endcomment %}
+              <span class="print-title">{% trans "Resource Finder" %}</span><br/>
+              <span class="print-subtitle" id="header-print-subtitle"></span>
+            </td>
+            <td valign=top class="print-datetime">
+              <span class="print-date" id="header-print-date"></span><br/>
+              <span class="print-time" id="header-print-time"></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="title">
+      {% comment %}
+      #i18n: Name of the application.
+      {% endcomment %}
+      {% trans "Resource Finder" %}
+    </div>
+  {% endif %}
+  {% comment %}
+  #i18n: Indicator that the application is loading.
+  {% endcomment %}
+  <div id="loading" class="loading">{% trans "Loading..." %}</div>
 </div>
-<div id="print-timestamp"></div>
 <div id="map"></div>
 <div class="hshadow hs1"></div>
 <div class="hshadow hs2"></div>
@@ -85,85 +150,67 @@
 <div class="vshadow vs1"></div>
 <div class="vshadow vs2"></div>
 <div class="vshadow vs3"></div>
+{% if params.print %}
+  <div class="print-summary">
+    <table cellspacing=0 cellpadding=0 border=0 align=center>
+      <thead>
+        <tr>
+          {% comment %}
+          #i18n: Name of the application.
+          {% endcomment %}
+          <th>{% trans "Total facilities" %}</th>
+          {% comment %}
+          #i18n: Header for the number of facilities less than 10 miles from
+          #i18n: a location.
+          {% endcomment %}
+          <th>{% trans "no more than 10 miles away" %}</th>
+          {% comment %}
+          #i18n: Header for the number of facilities with available beds.
+          #i18n: OK to translate without the 'and' if it makes more sense
+          {% endcomment %}
+          <th>{% trans "and with availability." %}</th>
+        </tr>
+      </thead>
+      <tbody id="print-summary-tbody">
+      </tbody>
+    </table>
+  </div>
+{% endif %}
 <div id="data">
-  <div id="supply-section" class="section">
-    <div class="table-head">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <thead id="supply-thead">
-          <tr>
-            <th>{% trans "Supplies" %}</th>
-          </tr>
-        </thead>
-      </table>
-    </div>
-    <div class="table-body">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <tbody id="supply-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-  <div id="filter-section" class="section">
-    <div class="table-head">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <thead id="filter-thead">
-          <tr>
-            <th>{% trans "Filters" %}</th>
-          </tr>
-        </thead>
-      </table>
-    </div>
-    <div class="table-body">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <tbody id="filter-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-  <div id="legend-section" class="section">
-    <div class="table-body">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <tbody id="legend-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-  <div id="division-section" class="section">
-    <div class="table-head">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <thead id="division-thead">
-          <tr>
-            <th>{% trans "Arrondissements" %}</th>
-          </tr>
-        </thead>
-      </table>
-    </div>
-    <div class="table-body" id="division-list">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <tbody id="division-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-  <div id="facility-section" class="section">
-    <div class="table-head">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <thead id="facility-thead">
-          <tr>
-            <th>{% trans "Facility" %}</th>
-          </tr>
-        </thead>
-      </table>
-    </div>
-    <div class="table-body" id="facility-list">
-      <table width="100%" cellspacing=0 cellpadding=0 border=0>
-        <tbody id="facility-tbody">
-        </tbody>
-      </table>
-    </div>
+  {% if params.print %}
+    {% include "print_data.html" %}
+  {% else %}
+    {% include "data.html" %}
+  {% endif %}
+</div>
+<div id="freshness" class="gmnoprint">
+  <span id="freshness-text"></span>
+  <div>
+    {% comment %}
+    #i18n: Button to export data to comma-separated-values format.
+    {% endcomment %}
+    <a href="{{export_link}}">{% trans "Export CSV" %}</a> <span class="sep">|</span>
+
+    {% comment %}
+    #i18n: Link to go to a page with past versions of the 'master' list
+    {% endcomment %}
+    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">{% trans "View Master List archive" %}</a>
   </div>
 </div>
-<div id="freshness" class="caption"></div>
 {% if params.print %}
   <div id="update-instructions">
-    {% trans "If any information is wrong or missing,
-              please correct it on the web site:" %}
+    {% comment %}
+    #i18n: Explains how to correct incorrect information that has been printed.
+    {% endcomment %}
+    {% trans "If any information is wrong or missing, please correct it on the web site:" %}
     <span id="site-url"></span>
   </div>
 {% endif %}
+
+<script>
+  jQuery(document).ready(function() {
+    load_data({{data}});
+  });
+</script>
+</body>
+</html>

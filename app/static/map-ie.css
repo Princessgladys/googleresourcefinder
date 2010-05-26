@@ -16,6 +16,6 @@
 /* These CSS rules are only for IE 7 and earlier. */
 body { width: 100%; height: 100%; }
 #map, .vshadow { width:expression(document.body.clientWidth-400); }
-#data, #map, .hshadow { height:expression(document.body.clientHeight-24); }
+#data, #map, .hshadow { height:expression(document.body.clientHeight-30); }
 #supply-section { margin-top: 0; }
 #freshness { position: absolute; left: 0; bottom: 0; padding: 6px 4px 0px; }

@@ -15,8 +15,8 @@
 """Handler for feed retrieval requests."""
 
 from edxl_have import URI_PREFIXES
-from feeds import handle_entry_get, handle_feed_get
-from utils import ErrorMessage, Handler, run
+from feeds.feedutils import handle_entry_get, handle_feed_get
+from utils import ErrorMessage, Handler, run, _
 
 
 def get_feed_id(request, feed_name):
@@ -35,7 +35,8 @@ class Entry(Handler):
             handle_entry_get(
                 self.request, self.response, feed_id, entry_id, URI_PREFIXES)
         except EntryNotFoundError:
-            raise ErrorMessage(404, 'No such entry')
+            #i18n: Error message for missing entry
+            raise ErrorMessage(404, _('No such entry'))
 
 
 if __name__ == '__main__':

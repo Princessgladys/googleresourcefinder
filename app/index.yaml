@@ -24,33 +24,6 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-- kind: Attribute
-  ancestor: yes
-  properties:
-  - name: name
-
-- kind: Division
-  ancestor: yes
-  properties:
-  - name: division_type
-  - name: name
-
-- kind: Division
-  ancestor: yes
-  properties:
-  - name: name
-
-- kind: Division
-  ancestor: yes
-  properties:
-  - name: type
-  - name: name
-
-- kind: Facility
-  ancestor: yes
-  properties:
-  - name: name
-
 - kind: Record
   properties:
   - name: feed
@@ -61,30 +34,4 @@ indexes:
   properties:
   - name: feed_id
   - name: arrival_time
-    direction: desc
-
-- kind: Report
-  ancestor: yes
-  properties:
-  - name: facility_id
-  - name: timestamp
-    direction: desc
-
-- kind: Report
-  ancestor: yes
-  properties:
-  - name: facility_name
-  - name: timestamp
-    direction: desc
-
-- kind: Report
-  ancestor: yes
-  properties:
-  - name: timestamp
-    direction: desc
-
-- kind: Version
-  ancestor: yes
-  properties:
-  - name: timestamp
     direction: desc

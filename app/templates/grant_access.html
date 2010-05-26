@@ -14,7 +14,7 @@
 # limitations under the License.
 {% endcomment %}
 
-<title>Resource Mapper ({{instance}})</title>
+<title>Resource Finder ({{instance}})</title>
 <style>
 {% if not params.embed %}
   body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
@@ -83,7 +83,7 @@ input, select, textarea, option {
           <td>
             <form method="post" action="/grant_access">
               <input type="hidden" value="{{ req.key }}" name="key">
-              <input type="hidden" value="{{ req.requested_role }}" name="ccrole">
+              <input type="hidden" value="{{ req.requested_role }}" name="role">
               <input type="hidden" value="approve" name="action">
               <input type="submit" value="Approve">
             </form>
@@ -91,7 +91,7 @@ input, select, textarea, option {
           <td>
             <form method="post" action="/grant_access">
               <input type="hidden" value="{{ req.key }}" name="key">
-              <input type="hidden" value="{{ req.requested_role }}" name="ccrole">
+              <input type="hidden" value="{{ req.requested_role }}" name="role">
               <input type="hidden" value="deny" name="action">
               <input type="submit" value="Delete">
             </form>

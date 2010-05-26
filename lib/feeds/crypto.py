@@ -15,15 +15,20 @@
 """Storage for secrets and cryptographic operations."""
 
 from google.appengine.ext import db
+import hashlib
 import hmac
 import pickle
 import random
-
+import time
 
 class Secret(db.Model):
     """An application-wide secret, identified by its key_name."""
     value = db.ByteStringProperty(required=True)
 
+
+def sha256_hmac(key, bytes):
+    """Computes a hexadecimal HMAC using the SHA256 digest algorithm."""
+    return hmac.new(key, bytes, digestmod=hashlib.sha256).hexdigest()
 
 def generate_random_key():
     """Generates a random 20-byte key."""
@@ -42,7 +47,7 @@ def sign(key_name, data, lifetime=None):
     the signature expires in 'lifetime' seconds."""
     expiry = lifetime and int(time.time() + lifetime) or 0
     bytes = pickle.dumps((data, expiry))
-    return hmac.new(get_key(key_name), bytes).hexdigest() + '.' + str(expiry)
+    return sha256_hmac(get_key(key_name), bytes) + '.' + str(expiry)
 
 def verify(key_name, data, signature):
     """Checks that a signature matches the given data and hasn't expired."""
@@ -53,4 +58,4 @@ def verify(key_name, data, signature):
         return False
     if expiry == 0 or time.time() < expiry:
         bytes = pickle.dumps((data, expiry))
-        return hmac.new(get_key(key_name), bytes).hexdigest() == mac
+        return sha256_hmac(get_key(key_name), bytes) == mac

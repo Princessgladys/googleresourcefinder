@@ -1,7 +1,7 @@
 """XML conversion for EDXL-HAVE."""
 
-import time_formats
-import xmlutils
+from feeds import time_formats
+from feeds import xmlutils
 
 
 EDXL_HAVE_NS = 'urn:oasis:names:tc:emergency:EDXL:HAVE:1.0'
@@ -54,6 +54,12 @@ class Hospital(xmlutils.Converter):
                 value.update(GeoLocation.struct_from_children(org_loc,
                     'OrganizationGeoLocation',
                 ))
+        patient_capacity = element.find(self.qualify('patient_capacity'))
+        if patient_capacity is not None:
+            value['patient_capacity'] = int(patient_capacity.text)
+        patient_count = element.find(self.qualify('patient_count'))
+        if patient_count is not None:
+            value['patient_count'] = int(patient_count.text)
         value.update(DateTime.struct_from_children(element, 'LastUpdateTime'))
         return value
 

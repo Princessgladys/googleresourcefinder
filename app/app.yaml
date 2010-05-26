@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-application: resourcemapper
+application: resource-finder
 version: 1
 runtime: python
 api_version: 1
@@ -23,12 +23,6 @@ handlers:
 
 - url: /edit
   script: edit.py
-
-- url: /request_access
-  script: request_access.py
-
-- url: /grant_access
-  script: grant_access.py
 
 - url: /request_access
   script: request_access.py
@@ -65,9 +59,25 @@ handlers:
 - url: /incoming/.*
   script: feed_receiver.py
 
+- url: /monitor
+  script: monitor.py
+
+- url: /bubble
+  script: bubble.py
+
+- url: /terms
+  script: terms.py
+
+- url: /privacy
+  script: privacy.py
+
+- url: /help
+  script: help.py
+
 - url: /
   script: main.py
 
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin
+

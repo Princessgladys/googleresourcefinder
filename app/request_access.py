@@ -12,28 +12,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+NOTE: THIS MODULE IS CURRENTLY UNUSED.
+
+The current permissions scheme for resource finder is:
+- Anyone (logged-in and non-logged-in users) can view and print
+- Any logged-in user can edit data
+
+THE CODE BELOW IS UNNECESSARY WITH THIS PERMISSION SCHEME
+
+Handler for allowing a logged-in user to request access to view the app.
+Requests can be handled by superusers in grand_access.py
+"""
+
 import model
 import utils
 from utils import DateTime, ErrorMessage, Redirect
-from utils import db, get_message, html_escape, users
+from utils import db, html_escape, users, _
 from access import check_user_role
 from access import Authorization
 
 
 class RequestAccess(utils.Handler):
+    def get(self):
+        if not self.auth:
+            raise Redirect(users.create_login_url(self.request.uri))
+
+        self.render('templates/request_access.html', role='user');
+
+
     def post(self):
         if not self.auth:
             raise Redirect(users.create_login_url(self.request.uri))
-        role = "%s:%s" % (self.params.cc, self.params.role)
+        role = self.params.role
+
         if role in self.auth.user_roles:
-            message = 'You are already %s' % role
+            #i18n: Requested permission role has been previously granted
+            message = _('You are already %(role)s' % {'role': role})
         elif role in self.auth.requested_roles:
-            message = 'Your request for %s is already registered' % role
+            message = _(
+                #i18n: Requested permission role has already been granted
+                'Your request for %(role)s is already registered'
+                % {'role': role})
         else:
             self.auth.requested_roles.append(role)
-            message = 'Request for becoming %s was registered.' % role
+            #i18n: Requested permission role was registered
+            message = _('Request for becoming %(role)s was registered.'
+                        % {'role': role})
             self.auth.put()
-        
+
         if self.params.embed:
             self.write(message)
         else:
