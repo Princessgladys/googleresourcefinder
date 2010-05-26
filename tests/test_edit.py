@@ -6,22 +6,22 @@ import unittest
 
 # "name" attributes of the checkboxes for available services in the edit form.
 SERVICES = [
-    'general_surgery',
-    'orthopedics',
-    'neurosurgery',
-    'vascular_surgery',
-    'general_medicine',
-    'cardiology',
-    'infectious_disease',
-    'pediatrics',
-    'postoperative_care',
-    'obstetrics_gynecology',
-    'dialysis',
-    'lab',
-    'x_ray',
-    'ct_scan',
-    'blood_bank',
-    'corpse_removal',
+    'GENERAL_SURGERY',
+    'ORTHOPEDICS',
+    'NEUROSURGERY',
+    'VASCULAR_SURGERY',
+    'GENERAL_MEDICINE',
+    'CARDIOLOGY',
+    'INFECTIOUS_DISEASE',
+    'PEDIATRICS',
+    'POSTOPERATIVE_CARE',
+    'OBSTETRICS_GYNECOLOGY',
+    'DIALYSIS',
+    'LAB',
+    'X_RAY',
+    'CT_SCAN',
+    'BLOOD_BANK',
+    'CORPSE_REMOVAL',
 ]
 
 # "name" attributes of the string input fields in the edit form.
@@ -29,7 +29,7 @@ STR_FIELDS = [
     'contact_name',
     'phone',
     'email',
-    'departemen',
+    'department',
     'district',
     'commune',
     'address',
@@ -102,10 +102,10 @@ class EditTests(SeleniumTestCase):
         text_fields['location.lat'] = '18.537207 '
         text_fields['location.lon'] = '\t-72.349663'
         checkbox_fields = dict(('services.' + name, True) for name in SERVICES)
-        select_fields = {'facility_type': 'COM', 'category': 'C/S',
-                         'construction': 'Adobe', 'reachable_by_road': 'TRUE',
+        select_fields = {'organization_type': 'COM', 'category': 'C/S',
+                         'construction': 'ADOBE', 'reachable_by_road': 'TRUE',
                          'can_pick_up_patients': 'FALSE',
-                         'operational_status': 'No surgical capacity'}
+                         'operational_status': 'NO_SURGICAL_CAPACITY'}
         self.fill_fields(text_fields, checkbox_fields, select_fields)
 
         # Submit the form
@@ -137,7 +137,7 @@ class EditTests(SeleniumTestCase):
         text_fields['available_beds'] = ''
         text_fields['total_beds'] = ''
         checkbox_fields = dict(('services.' + name, False) for name in SERVICES)
-        select_fields = {'facility_type': '', 'category': '',
+        select_fields = {'organization_type': '', 'category': '',
                          'construction': '', 'reachable_by_road': '',
                          'can_pick_up_patients': '', 'operational_status': ''}
         self.fill_fields(text_fields, checkbox_fields, select_fields)
