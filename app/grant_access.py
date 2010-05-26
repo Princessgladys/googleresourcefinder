@@ -12,11 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+NOTE: THIS MODULE IS CURRENTLY UNUSED.
+
+The current permissions scheme for resource finder is:
+- Anyone (logged-in and non-logged-in users) can view and print
+- Any logged-in user can edit data
+
+THE CODE BELOW IS UNNECESSARY WITH THIS PERMISSION SCHEME
+
+Handler for allowing a superuser to grant access using the permission scheme
+provided in access.py
+"""
+
 import logging
 import model
 import utils
 from utils import DateTime, ErrorMessage, Redirect
-from utils import db, get_message, html_escape, users
+from utils import db, html_escape, users, _
 from access import check_user_role
 from access import Authorization
 
@@ -25,18 +38,17 @@ class GrantAccess(utils.Handler):
     def get(self):
         """ Shows all requests for waiting for approval"""
 
-        self.require_user_role('superuser', self.params.cc)
+        self.require_user_role('superuser')
 
         q = Authorization.all().filter('requested_roles !=', None)
 
         requests = []
         for auth in q.fetch(100):
-          for ccrole in auth.requested_roles:
-            cc, role = ccrole.split(':')
-            if check_user_role(self.auth, 'superuser', cc):
-              requests.append({'email': auth.email,
-                               'requested_role': ccrole,
-                               'key': auth.key()})
+          for role in auth.requested_roles:
+              if check_user_role(self.auth, 'superuser'):
+                  requests.append({'email': auth.email,
+                                   'requested_role': role,
+                                   'key': auth.key()})
 
         self.render('templates/grant_access.html',
                     requests=requests,
@@ -44,37 +56,43 @@ class GrantAccess(utils.Handler):
                     logout_url=users.create_logout_url('/'))
 
     def post(self):
-        """ Shows all requests for waiting fro approval"""
+        """ Shows all requests for waiting for approval"""
 
-        ccrole = self.request.get('ccrole')
-        if not ccrole:
-            raise ErrorMessage(404,'missing ccrole (requested_role) params')
-        cc, role = ccrole.split(':')
+        role = self.request.get('role')
+        if not role:
+            raise ErrorMessage(404, 'missing role (requested_role) params')
 
-        self.require_user_role('superuser', cc)
+        self.require_user_role('superuser')
 
         auth = Authorization.get(self.request.get('key'))
         if not auth:
-            raise ErrorMessage(404,'bad key given')
+            raise ErrorMessage(404, 'bad key given')
 
         #TODO(eyalf): define auth.display_name() or something
         name = auth.email
-        if not ccrole in auth.requested_roles:
-            raise ErrorMessage(404,
-                               'no pending request for %s by %s' % (ccrole,
-                                                                    name))
-        auth.requested_roles.remove(ccrole)
-        action = 'deny'
-        if self.request.get('action') == 'approve':
-            auth.user_roles.append(ccrole)
-            action = 'approve'
+        if not role in auth.requested_roles:
+            #i18n: Error message
+            raise ErrorMessage(404, _('No pending request for '
+                                      '%(authorization_role)s by %(user)s')
+                               % (role, name))
+        auth.requested_roles.remove(role)
+        action = self.request.get('action', 'deny')
+        if action == 'approve':
+            auth.user_roles.append(role)
         auth.put()
         logging.info('%s request for %s was %s' % (auth.email,
-                                                   ccrole,
+                                                   role,
                                                    action))
 
         if self.params.embed:
-            self.write('Request for becoming %s was %s.' % (role,action))
+            if action == 'approve':
+                self.write(
+                    #i18n: Application for the given permission role approved
+                    _('Request for becoming %(role)s was approved.') % role)
+            else:
+                self.write(
+                    #i18n: Application for the given permission role denied
+                    _('Request for becoming %(role)s was denied.') % role)
         else:
             raise Redirect('/grant_access')
 

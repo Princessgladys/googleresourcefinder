@@ -12,23 +12,52 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utils import Handler, Redirect, get_latest_version, run, users
+from model import FacilityType
+from utils import Handler, Redirect, get_key, run, users, _
 import access
 import rendering
 
+# We use a Secret in the db to determine whether or not the app should be
+# configured to require login to view and 'editor' role to edit. Whitelists
+# are on by default. To allow anyone to view and logged-in users to edit, run
+# Secret(key_name='use_whitelists', value='FALSE').put() in a console
+USE_WHITELISTS = get_key('use_whitelists') != 'FALSE'
+
+def get_export_link():
+    """If only one facility type, return the direct download link,
+    otherwise return a link to the download page"""
+    link = '/export'
+    facility_type = None
+    for ftype in FacilityType.all():
+        if facility_type is not None:
+            # We have more than one facility type, just redirect to the /export
+            # page
+            return link
+        facility_type = ftype.key().name()
+    return link + '?facility_type=%s' % facility_type
+
 class Main(Handler):
+
     def get(self):
-        auth = self.auth
+        if USE_WHITELISTS:
+            self.require_logged_in_user()
+
+        user = self.user
+        center = None
+        if self.params.lat is not None and self.params.lon is not None:
+            center = {'lat': self.params.lat, 'lon': self.params.lon}
         self.render('templates/map.html',
                     params=self.params,
-                    authorization=auth and auth.description or 'anonymous',
-                    is_editor=access.check_user_role(auth,'editor','ht'),
-                    #TODO(eyalf): should remove the assumtio there is an email
-                    user=auth and {'email': auth.email} or None,
-                    loginout_url=(auth and users.create_logout_url('/') or
+                    #i18n: a user with no identity
+                    authorization=user and user.email() or _('anonymous'),
+                    loginout_url=(user and users.create_logout_url('/') or
                                   users.create_login_url('/')),
-                    loginout_text=(auth and "Sign out" or "Sign in"),
-                    data=rendering.version_to_json(get_latest_version('ht')),
+                    #i18n: Link to sign out of the app
+                    loginout_text=(user and _('Sign out')
+                                   #i18n: Link to sign into the app
+                                   or _('Sign in')),
+                    data=rendering.render_json(center, self.params.rad),
+                    export_link=get_export_link(),
                     instance=self.request.host.split('.')[0])
 
 if __name__ == '__main__':

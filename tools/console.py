@@ -15,11 +15,13 @@
 
 """An interactive Python console connected to an app's datastore.
 
-Use common.sh to set PYTHONPATH and APPENGINE_DIR before running this tool."""
+Instead of running this script directly, use the 'console' shell script,
+which sets up the PYTHONPATH and other necessary environment variables."""
 
 import code
 import getpass
 import logging
+import os
 import sys
 
 from google.appengine.ext.remote_api import remote_api_stub
@@ -56,6 +58,8 @@ def init(app_id, host=None, username=None, password=None):
         username = raw_input('Username: ')
     else:
         print 'Username: %s' % username
+    # Sets up users.get_current_user() inside of the console
+    os.environ['USER_EMAIL'] = username
     if not password:
         password = getpass.getpass('Password: ')
     remote_api_stub.ConfigureRemoteDatastore(

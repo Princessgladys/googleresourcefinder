@@ -12,24 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Manages per-user permissions.  Three types of access are defined
+- user = User can view the app
+- editor = User can make changes
+- superuser = User can grant access to other users
+
+There is also a token system for allowing access to anonymous users by passing
+them a url.
+"""
+
 from google.appengine.ext import db
 import logging
 
-ROLES = ['editor', 'superuser']
+# Roles explained:
+# 'viewer' user can view the UI (unnecessary if default is 'anyone can view')
+# 'editor' user can edit basic fields of facilities (unnecessary if default is
+#          'any signed in user can make edits')
+# 'supereditor' user can edit all fields of facilities
+# 'adder' user can add new facilities
+# 'remover' user can remove facilities from the UI (not delete them entirely)
+# 'superuser' user can grant access to other users (but still needs the other
+#             roles to add, remove, edit, etc)
+ROLES = ['viewer', 'adder', 'remover', 'editor', 'supereditor', 'superuser']
 
 class Authorization(db.Model):
     timestamp = db.DateTimeProperty(auto_now_add=True)
     description = db.StringProperty(required=True)
     email = db.StringProperty()
     user_id = db.StringProperty()
+    nickname = db.StringProperty()
+    affiliation = db.StringProperty()
     token = db.StringProperty()
-    # user roles are in the format: country_code:role
-    # where role is one of ROLES
-    # an empty country_code means the user has the role for
-    # all countries
+    # user_roles is a list of ROLES
     user_roles = db.StringListProperty()
     requested_roles = db.StringListProperty()
-    
+
 def check_token(token):
     return Authorization.all().filter('token =', token).get()
 
@@ -40,22 +58,22 @@ def check_user_id(user_id):
     return Authorization.all().filter('user_id =', user_id).get()
 
 def check_request(request, user):
-    if request.get('token'):
-        return check_token(request.get('token'))
+    if request.get('access_token'):
+        return check_token(request.get('access_token'))
     if user:
         return check_email(user.email()) or check_user_id(user.user_id())
 
-def check_user_role(auth, role, cc):
-    """Return True if the auth user has the given role for the given country"""
-    return auth and ("%s:%s" % (cc or '',role) in auth.user_roles or
-                     ":%s" % role in auth.user_roles)
+def check_user_role(auth, role):
+    """Return True if the auth user has the given role"""
+    return auth and (role in auth.user_roles or ":%s" % role in auth.user_roles)
 
 def check_and_log(request, user):
     auth = check_request(request, user)
     logging.info(
         'access.py: ' +
         (auth and 'authorized %s' % auth.description or 'not authorized') +
-        ' (token=%r, user=%r)' % (request.get('token'), user and user.email()))
+        ' (access_token=%r, user=%r)'
+        % (request.get('access_token'), user and user.email()))
     if not auth and user:
         # we create an auth for a login user with no roles and don't save it
         auth = Authorization(description=user.nickname(),

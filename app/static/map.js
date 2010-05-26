@@ -13,6 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 */
+
+/**
+ * @fileoverview Main entry point. Manages parsing data from the page on load,
+ *     displays it in the data view and map view, and sets up event handlers
+ *     to handle the interaction between views.
+ *     For now, also acts as the entry point for print view; take care to note
+ *     use of the externally-defined 'print' variable.
+ * @author kpy@google.com (Ka-Ping Yee)
+ */
+
 // ==== Constants
 
 var STATUS_GOOD = 1;
@@ -23,29 +33,32 @@ var MAX_STATUS = 3;
 var STATUS_ICON_COLORS = [null, '080', 'a00', '444'];
 var STATUS_TEXT_COLORS = [null, '040', 'a00', '444'];
 var STATUS_ZINDEXES = [null, 3, 2, 1];
-var STATUS_LABELS = [
+var STATUS_LABEL_TEMPLATES = [
   null,
-  'One or more ${all_supplies}',
-  'No ${any_supply}',
-  'Data missing for ${any_supply}'
+  'One or more ${ALL_SUPPLIES}',
+  'No ${ANY_SUPPLY}',
+  'Data missing for ${ANY_SUPPLY}'
 ];
 
-var MONTH_ABBRS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+// Temporary tweak for Health 2.0 demo (icons are always green).
+STATUS_ICON_COLORS = [null, '080', '080', '080'];
+STATUS_TEXT_COLORS = [null, '040', '040', '040'];
 
-var INFO_TEMPLATE =
-    '<div class="facility-info">' +
-    '  <h1>${facility_title}</h1>' +
-    '  <div class="caption">' +
-    '    ${user_action_html}' +
-    '  </div>' +
-    '  <div class="attributes">${attributes}</div>' +
-    '</div>';
+// In print view, limit the number of markers being printed on the map at once
+// both for display and performance concerns.
+// TODO: It would be better to instead figure out how to render markers in a
+// smart way so that they do not overlap.
+var MAX_MARKERS_TO_PRINT = 50;
 
-var ATTRIBUTE_TEMPLATE =
-    '<div class="attribute">' +
-    '  <span class="title">${attribute_title}</span>: ' +
-    '  <span class="value">${attribute_value}</span>' +
-    '</div>';
+var METERS_TO_MILES = 0.000621371192;
+var METERS_TO_KM = 0.001;
+
+// Temporary for v1, this should be user-settable in the future
+// TODO: Also need to update message in map.html that says "10 miles"
+var PRINT_RADIUS_MILES = 10;
+
+// TODO: Re-enable when monitoring is re-enabled
+var enable_freshness = false;
 
 // ==== Data loaded from the data store
 
@@ -54,30 +67,38 @@ var attributes_by_name = {};  // {attribute_name: attribute_i}
 var facility_types = [null];
 var facilities = [null];
 var divisions = [null];
-var messages = {};  // {namespace: {name: {language: message}}
+var messages = {};  // {namespace: {name: message}
 
 // ==== Columns shown in the facility table
 
+rf.get_services_from_values = function(values) {
+  services = translate_values(
+      [].concat(values[attributes_by_name.services] || []))
+  .join(', ');
+  return services;
+}
+
+rf.get_services = function(facility) {
+  var services = '';
+  if (facility) {
+    var values = facility.values;
+    services = rf.get_services_from_values(values);
+  }
+  return services;
+}
+
+  
 var summary_columns = [
   null, {
     get_title: function() {
-      var beds_div = $$('div', {'class': 'beds'}, 'Open/Total Beds');
-      return $$('div', {}, [beds_div, 'Services']);
+      var beds_div = $$('div', {'class': 'beds'}, locale.OPEN_TOTAL_BEDS());
+      return $$('div', {}, [beds_div, locale.SERVICES()]);
     },
     get_value: function(values) {
-      var services = translate_values(
-          [].concat(values[attributes_by_name.specialty_care] || [])
-            .concat(values[attributes_by_name.medical_equipment] || []))
-            .join(', ');
-      var capacity = values[attributes_by_name.patient_capacity];
-      var patients = values[attributes_by_name.patient_count];
-      var open_beds = '\u2013';
-      if (capacity === null) {
-        capacity = '\u2013';
-      } else if (patients !== null) {
-        open_beds = capacity - patients;
-      }
-      var beds = open_beds + ' / ' + capacity;
+      var services = rf.get_services_from_values(values);
+      var total_beds = render(values[attributes_by_name.total_beds]);
+      var open_beds = render(values[attributes_by_name.available_beds]);
+      var beds = open_beds + ' / ' + total_beds;
       var beds_div = $$('div', {'class': 'beds'}, beds);
       // WebKit rendering bug: vertical alignment is off if services is ''.
       return $$('div', {}, [beds_div, services || '\u00a0']);
@@ -133,13 +154,24 @@ var bounds_match_selected_division = false;  // to skip redundant redraws
 var map = null;
 var info = null;
 var markers = [];  // marker for each facility
+var marker_clusterer = null;  // clusters markers for efficient rendering
+var converted_markers_for_print = 0; // part of a hack for print support
 
 // ==== Debugging
 
 // Print a message to the Safari or Firebug console.
 function log() {
-  if (typeof console !== 'undefined' && console.log) {
-    console.log.apply(console, arguments);
+  // The strange way this function is written seems to be the only one
+  // working on IE
+  if (typeof console === 'undefined') {
+    return;
+  }
+  if (console && console.log) {
+    if (console.log.apply) {
+      console.log.apply(console, arguments);      
+    } else {
+      console.log(arguments[0]);
+    }
   }
 }
 
@@ -248,7 +280,7 @@ function is_array(thing) {
 
 function translate_value(value) {
   var message = messages.attribute_value[value];
-  return message && message.en || value;
+  return message && message || value;
 }
 
 function translate_values(values) {
@@ -268,25 +300,6 @@ function maybe_selected(selected) {
   return selected ? ' selected' : '';
 }
 
-function render_template(template, params) {
-  var result = template;
-  for (var name in params) {
-    var placeholder = new RegExp('\\$\\{' + name + '\\}', 'g');
-    var substitution;
-    if (name === '$') {
-      substitution = '$';
-    } else if (params[name] === undefined || params[name] === null) {
-      substitution = '\u2013';
-    } else if (typeof params[name] === 'object') {
-      substitution = params[name].html;
-    } else {
-      substitution = html_escape(params[name]);
-    }
-    result = result.replace(placeholder, substitution);
-  }
-  return result;
-}
-
 function make_icon(title, status, detail) {
   var text = detail ? title : '';
   var text_size = detail ? 10 : 0;
@@ -299,8 +312,11 @@ function make_icon(title, status, detail) {
       text, text_size, text_fill,
       icon, icon_size, icon_fill, icon_outline
   ].join('|');
-  return 'http://chart.apis.google.com/chart?chst=d_simple_text_icon_above&' +
-      'chld=' + encodeURIComponent(params);
+  var url = 'http://chart.apis.google.com/chart?chst=d_simple_text_icon_above&';
+  // In print view, render icons as .gif's so they print correctly on older
+  // browsers. In regular view, the default .pngs render better
+  return url + (print ? 'chof=gif&' : '')
+      + 'chld=' + encodeURIComponent(params);
 }
 
 // ==== Maps API
@@ -319,8 +335,28 @@ function initialize_map() {
     navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL}
   });
   google.maps.event.addListener(map, 'tilesloaded', set_map_opacity);
+  if (print) {
+    google.maps.event.addListener(map, 'tilesloaded', convert_markers_for_print);
+    google.maps.event.addListener(map, 'tilesloaded', hide_controls_for_print);
+  }
 
   info = new google.maps.InfoWindow();
+
+  var cluster_style = {
+    url: 'static/greek_cross36.png',
+    height: 36,
+    width: 36,
+    opt_textColor: '#fff',
+    Z: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
+  };
+  // Turn off clustering in print view.
+  var max_zoom = print ? -1 : 14;
+  marker_clusterer = new MarkerClusterer(map, [], {
+    maxZoom: max_zoom,  // closest zoom at which clusters are shown
+    gridSize: 40, // size of square pixels in which to cluster
+    // override default styles to render all cluster sizes with our custom icon
+    styles: [cluster_style, cluster_style, cluster_style, cluster_style]
+  });
 }
 
 // Reduce the opacity of the map layer to make markers stand out.
@@ -334,26 +370,112 @@ function set_map_opacity() {
   }
 }
 
+// The v3 maps API does not have good print support.
+// See http://code.google.com/p/gmaps-api-issues/issues/detail?id=1343
+// The method modifies the DOM of the map to hide unwanted map controls
+// and the mouse target layer that obstructs the markers during printing.
+function hide_controls_for_print() {
+  var mapDiv = $('map').firstChild;
+  for (var control = mapDiv.firstChild; control;
+       control = control.nextSibling) {
+    if (control.style.zIndex == 10 && control.style.top) {
+      control.className = 'gmnoprint';
+    }
+  }
+  var panes = $('map').firstChild.firstChild;
+  var duplicate_markers = 0;
+  for (var pane = mapDiv.firstChild.firstChild; pane; pane = pane.nextSibling) {
+    if (pane.style.zIndex == 105) {
+      // Don't print anything in layer 105, the overlay mouse target layer.
+      pane.className = 'gmnoprint';
+      break;
+    }
+  }
+}
+
+// The v3 maps API does not have good print support.
+// See http://code.google.com/p/gmaps-api-issues/issues/detail?id=1343
+// The method converts background-image markers to actual <img> elements
+// so that markers print reasonably well across browsers. Things are still 
+// not perfect because of varying support for printing transparency.
+function convert_markers_for_print() {
+  var panes = $('map').firstChild.firstChild;
+  var duplicate_markers = 0;
+  for (var pane = panes.firstChild; pane; pane = pane.nextSibling) {
+    if (pane.style.zIndex == 103) {
+      for (var overlay = pane.firstChild; overlay;
+           overlay = overlay.nextSibling) {
+        // Convert background images to foreground images
+        var src = overlay.style ? overlay.style.backgroundImage.toString() : '';
+        if (src.indexOf('url') != -1) {
+          // Remove the surrounding 'url()'
+          src = src.substring(4, src.length - 1);
+          overlay.style.backgroundImage = '';
+          var img = document.createElement('img');
+          overlay.appendChild(img);
+          img.src = src;
+          converted_markers_for_print++;
+        } else if (overlay.style && overlay.style.zIndex) {
+          // Pane 103 contains some divs with no zIndex or backgroundImage,
+          // some divs with both zIndex and backgroundImage
+          // and some divs with zIndex and no backgroundImage (the last set
+          // are typically for markers that perfectly overlap another marker).
+          // We have to count these, to know when we're done applying the hack.
+          duplicate_markers++;
+        }
+      }
+    }
+  }
+  if (converted_markers_for_print + duplicate_markers < markers.length) {
+    // The DIVs for markers are added lazily and in batches. We don't know when
+    // that happens, so we have to poll until we've converted all we can.
+    window.setTimeout(convert_markers_for_print, 250);
+  }
+}
+
 // Construct and set up the map markers for the facilities.
 function initialize_markers() {
   for (var f = 1; f < facilities.length; f++) {
     var facility = facilities[f];
-    var location = facility.location;
+    var location = facility.values[attributes_by_name.location];
+    var title = facility.values[attributes_by_name.title];
     markers[f] = new google.maps.Marker({
       position: new google.maps.LatLng(location.lat, location.lon),
-      map: map,
-      icon: make_icon(facility.title, STATUS_UNKNOWN, false),
-      title: facility.title
+      icon: make_icon(title, STATUS_UNKNOWN, false),
+      title: title
     });
-    google.maps.event.addListener(markers[f], 'click', facility_selector(f));
+    if (!print) {
+      google.maps.event.addListener(markers[f], 'click', facility_selector(f));
+    }
+    if (!print || f <= MAX_MARKERS_TO_PRINT) {
+      facility.visible = true;
+    }
   }
+
+  var to_add = print ? markers.slice(1, MAX_MARKERS_TO_PRINT + 1)
+      : markers.slice(1);
+  marker_clusterer.addMarkers(to_add);
+  log("init markers done");
 }
 
 // ==== Display construction routines
 
+function initialize_language_selector() {
+  var select = $('lang-select');
+  if (!select) {
+    return;
+  }
+  select.onchange = function() {
+    window.location = select.options[select.selectedIndex].value;
+  };
+}
+
 // Set up the supply selector (currently unused).
 function initialize_supply_selector() {
   var tbody = $('supply-tbody');
+  if (!tbody) {
+    return;
+  }
   var tr = $$('tr');
   var cells = [];
   for (var s = 1; s < supply_sets.length; s++) {
@@ -381,6 +503,9 @@ function add_filter_options(options, attribute_i) {
 // Set up the filter widgets.
 function initialize_filters() {
   var tbody = $('filter-tbody');
+  if (!tbody) {
+    return;
+  }
   var tr = $$('tr');
   var selector = $$('select', {
     id: 'specialty-selector',
@@ -390,19 +515,21 @@ function initialize_filters() {
     }
   });
   var options = [];
-  options.push($$('option', {value: '0 '}, 'All'));
-  add_filter_options(options, attributes_by_name.specialty_care);
-  add_filter_options(options, attributes_by_name.medical_equipment);
+  options.push($$('option', {value: '0 '}, locale.ALL()));
+  add_filter_options(options, attributes_by_name.services);
   set_children(selector, options);
-  set_children(tr, [$$('td', {}, ['Show: ', selector])]);
+  set_children(tr, [$$('td', {}, [locale.SHOW(), selector])]);
   set_children(tbody, tr);
 }
 
 // Add the header to the division list.
 function initialize_division_header() {
   var thead = $('division-thead');
+  if (!thead) {
+    return;
+  }
   var tr = $$('tr');
-  var cells = [$$('th', {}, 'Arrondissements')];
+  var cells = [$$('th', {}, locale.DISTRICT())];
   for (var s = 1; s <= MAX_STATUS; s++) {
     cells.push($$('th', {'class': 'facility-count'},
         $$('img', {src: make_icon('', s, false)})));
@@ -415,14 +542,65 @@ function initialize_division_header() {
 // Add the header to the facility list.
 function initialize_facility_header() {
   var thead = $('facility-thead');
+  if (!thead) {
+    return;
+  }
   var tr = $$('tr');
-  var cells = [$$('th', {}, 'Facility')];
+  var cells = [$$('th', {}, locale.FACILITY())];
   for (var c = 1; c < summary_columns.length; c++) {
     cells.push($$('th', {'class': 'value column_' + c},
                   summary_columns[c].get_title()));
   }
   set_children(thead, tr);
   set_children(tr, cells);
+}
+
+// Initialize headers for print view.
+function initialize_print_headers() {
+  var now = new Date();
+
+  set_children($('site-url'),
+    window.location.protocol + '//' + window.location.host); 
+  $('freshness').style.display = 'none';
+
+  var date = format_date(now);
+  var time = format_time(now);
+  set_children($('header-print-date'), format_date(now));
+  set_children($('header-print-time'), format_time(now));
+  set_children($('print-date'), format_date(now));
+  set_children($('print-time'), format_time(now));
+
+  var tbody = $('print-summary-tbody');
+  if (!tbody) {
+    return;
+  }
+  var total_facilities = total_facility_count;
+  var local_facilities = facilities.length - 1;  // ignore the selected one
+  var available_facilities = 0;
+  for (var i = 1; i < facilities.length; i++) {
+    var values = facilities[i].values;
+    if (values && values[attributes_by_name.available_beds] > 0) {
+      available_facilities++;
+    }
+  }
+
+  if (facilities.length >= MAX_MARKERS_TO_PRINT) {
+    set_children($('header-print-subtitle'),
+        locale.DISPLAYING_CLOSEST_N_FACILITIES(
+            {NUM_FACILITIES: MAX_MARKERS_TO_PRINT}));
+  } else {
+    set_children($('header-print-subtitle'),
+        locale.DISPLAYING_FACILITIES_IN_RANGE(
+            {RADIUS_MILES: PRINT_RADIUS_MILES}));    
+  }
+
+  set_children($('print-subtitle'), locale.FACILITIES_IN_RANGE(
+      {NUM_FACILITIES: local_facilities,
+       RADIUS_MILES: PRINT_RADIUS_MILES}));
+  set_children(tbody, $$('tr', {}, [
+      $$('td', {}, [total_facilities]),
+      $$('td', {}, [local_facilities]),
+      $$('td', {}, [available_facilities])]));
 }
 
 // ==== Display update routines
@@ -437,8 +615,9 @@ function update_map_bounds(division_i) {
   var facility_is = divisions[division_i].facility_is;
   var bounds = new google.maps.LatLngBounds();
   for (var i = 0; i < facility_is.length; i++) {
-    var location = facilities[facility_is[i]].location;
-    if (location) {
+    var facility = facilities[facility_is[i]];
+    var location = facility.values[attributes_by_name.location];
+    if (location && facility.visible) {
       bounds.extend(new google.maps.LatLng(location.lat, location.lon));
     }
   }
@@ -449,18 +628,35 @@ function update_map_bounds(division_i) {
 // Update the facility map icons based on their status and the zoom level.
 function update_facility_icons() {
   var detail = map.getZoom() > 10;
+  var markers_to_keep = [];
   for (var f = 1; f < facilities.length; f++) {
     if (markers[f]) {
       var facility = facilities[f];
       var s = facility_status_is[f];
-      markers[f].setIcon(make_icon(facility.title, s, detail));
-      markers[f].setZIndex(STATUS_ZINDEXES[s]);
+      var title = facility.values[attributes_by_name.title];
+      var icon_url = make_icon(title, s, detail);
+      facility.visible = false;
+      if (s == STATUS_GOOD) {
+        markers[f].setIcon(icon_url);
+        markers[f].setZIndex(STATUS_ZINDEXES[s]);
+        markers_to_keep.push(markers[f]);
+        if (!print || f <= MAX_MARKERS_TO_PRINT) {
+          facility.visible = true;
+        }
+      }
     }
   }
+  marker_clusterer.clearMarkers();
+  var to_add = print ? markers_to_keep.slice(0, MAX_MARKERS_TO_PRINT)
+      : markers_to_keep;
+  marker_clusterer.addMarkers(to_add);
 }
 
 // Fill in the facility legend.
 function update_facility_legend() {
+  if (!$('legend-tbody')) {
+    return;
+  }
   var rows = [];
   var stock = 'one dose';
   for (var s = 1; s <= MAX_STATUS; s++) {
@@ -468,9 +664,9 @@ function update_facility_legend() {
       $$('th', {'class': 'legend-icon'},
         $$('img', {src: make_icon('', s, false)})),
       $$('td', {'class': 'legend-label status-' + s},
-        render_template(STATUS_LABELS[s], {
-          all_supplies: selected_supply_set.description_all,
-          any_supply: selected_supply_set.description_any
+        render(STATUS_LABEL_TEMPLATES[s], {
+          ALL_SUPPLIES: selected_supply_set.description_all,
+          ANY_SUPPLY: selected_supply_set.description_any
         }))
     ]));
   }
@@ -479,6 +675,9 @@ function update_facility_legend() {
 
 // Repopulate the facility list based on the selected division and status.
 function update_facility_list() {
+  if (!$('facility-tbody')) {
+    return;
+  }
   var rows = [];
   for (var i = 0; i < selected_division.facility_is.length; i++) {
     var f = selected_division.facility_is[i];
@@ -493,10 +692,11 @@ function update_facility_list() {
         onmouseover: hover_activator('facility-' + f),
         onmouseout: hover_deactivator('facility-' + f)
       });
-      var cells = [$$('td', {'class': 'facility-title'}, facility.title)];
-      if (facility.last_report) {
+      var title = facility.values[attributes_by_name.title];
+      var cells = [$$('td', {'class': 'facility-title'}, title)];
+      if (facility) {
         for (var c = 1; c < summary_columns.length; c++) {
-          var value = summary_columns[c].get_value(facility.last_report.values);
+          var value = summary_columns[c].get_value(facility.values);
           cells.push($$('td', {'class': 'value column_' + c}, value));
         }
       } else {
@@ -509,9 +709,66 @@ function update_facility_list() {
     }
   }
   set_children($('facility-tbody'), rows);
-  if (!print) {
-    update_facility_list_size();
+  update_facility_list_size();
+}
+
+// Populate the facility list for print view.
+function update_print_facility_list() {
+  if (!$('facility-print-tbody')) {
+    return;
   }
+  var rows = [];
+  for (var i = 0; i < selected_division.facility_is.length; i++) {
+    var f = selected_division.facility_is[i];
+    var facility = facilities[f];
+    var facility_type = facility_types[facility.type];
+    if (selected_status_i === 0 ||
+        facility_status_is[f] === selected_status_i) {
+      var row = $$('tr', {
+        id: 'facility-' + f,
+        'class': 'facility' + (i % 2 == 0 ? 'even' : 'odd')
+      });
+      var cells = [];
+      var total_beds;
+      var open_beds;
+      var address;
+      var general_info;
+      var healthc_id;
+      if (facility) {
+        var values = facility.values;
+        total_beds = values[attributes_by_name.total_beds];
+        open_beds = values[attributes_by_name.available_beds];
+        address = values[attributes_by_name.address];
+        general_info = values[attributes_by_name.contact_name];
+        healthc_id = values[attributes_by_name.healthc_id];
+        var phone = values[attributes_by_name.phone];
+        if (phone) {
+          general_info = (general_info ? general_info + ' ' : '')
+              + locale.PHONE_ABBREVIATION({PHONE: phone});
+        }
+      }
+      var dist_meters = facility.distance_meters;
+      var dist;
+      if (typeof(dist_meters) === 'number') {
+        dist = locale.DISTANCE({
+            MILES: format_number(dist_meters * METERS_TO_MILES, 1), 
+            KM: format_number(dist_meters * METERS_TO_KM, 2)});
+      }
+      var title = facility.values[attributes_by_name.title];
+      var facility_name = title + ' - ID:' + facility.name
+        + ' - HealthC ID: ' + render(healthc_id);
+      cells.push($$('td', {'class': 'facility-beds-open'}, render(open_beds)));
+      cells.push($$('td', {'class': 'facility-beds-total'},render(total_beds)));
+      cells.push($$('td', {'class': 'facility-title'}, render(facility_name)));
+      cells.push($$('td', {'class': 'facility-distance'}, render(dist)));
+      cells.push($$('td', {'class': 'facility-address'}, render(address)));
+      cells.push($$('td', {'class': 'facility-general-info'},
+          render(general_info)));
+      set_children(row, cells);
+      rows.push(row);
+    }
+  }
+  set_children($('facility-print-tbody'), rows);
 }
 
 // Update the height of the facility list to exactly fit the window.
@@ -532,7 +789,10 @@ function align_header_with_table(thead, tbody) {
     var body_cell = tbody.firstChild.firstChild;
     while (body_cell) {
       // Subtract 8 pixels to account for td padding: 2px 4px.
-      head_cell.style.width = (body_cell.clientWidth - 8) + 'px';
+      // TODO: fix for IE
+      if (body_cell.clientWidth) {
+        head_cell.style.width = (body_cell.clientWidth - 8) + 'px';
+      }
       head_cell = head_cell.nextSibling;
       body_cell = body_cell.nextSibling;
     }
@@ -542,16 +802,16 @@ function align_header_with_table(thead, tbody) {
 // Determine the status of each facility according to the user's filters.
 function update_facility_status_is() {
   for (var f = 1; f < facilities.length; f++) {
-    var report = facilities[f].last_report;
+    var facility = facilities[f];
     if (selected_filter_attribute_i <= 0) {
       facility_status_is[f] = STATUS_GOOD;
-    } else if (!report) {
+    } else if (!facility) {
       facility_status_is[f] = STATUS_UNKNOWN;
     } else {
       facility_status_is[f] = STATUS_BAD;
       var a = selected_filter_attribute_i;
       if (attributes[a].type === 'multi') {
-        if (contains(report.values[a] || [], selected_filter_value)) {
+        if (contains(facility.values[a] || [], selected_filter_value)) {
           facility_status_is[f] = STATUS_GOOD;
         }
       } else if (report.values[a] === selected_filter_value) {
@@ -563,6 +823,9 @@ function update_facility_status_is() {
 
 // Update the contents of the division list based on facility statuses. 
 function update_division_list() {
+  if (!$('division-tbody')) {
+    return;
+  }
   var rows = [];
   for (var d = 0; d < divisions.length; d++) {
     var division = divisions[d];
@@ -605,8 +868,12 @@ function update_division_list() {
 
 // Update the data freshness indicator.
 function update_freshness(timestamp) {
+  if (!enable_freshness) {
+    $('freshness-text').style.display = 'none';
+  }
+
   if (!timestamp) {
-    $('freshness').innerHTML = 'No reports received';
+    $('freshness-text').innerHTML = 'No reports received';
     return;
   }
 
@@ -632,21 +899,71 @@ function update_freshness(timestamp) {
     age = Math.round(seconds) + ' seconds in the future';
   }
 
-  $('freshness').innerHTML = 'Last updated ' + age +
+  $('freshness-text').innerHTML = 'Last updated ' + age +
       ' (' + format_timestamp(t) + ')';
   window.setTimeout(function () { update_freshness(timestamp); }, timeout);
 }
 
+// Disable the print link in the user header.  This is done when no facilities
+// are selected
+function disable_print_link() {
+  var print_link = $('print-link');
+  if (!print_link) {
+    return;
+  }
+  print_link.href = 'javascript:void(0)';
+  print_link.title = locale.PRINT_DISABLED_TOOLTIP();
+  print_link.onclick = function() {
+    // TODO: Use a nice model dialog instead of alert
+    alert(locale.PRINT_DISABLED_TOOLTIP());
+    return false;
+  };
+}
+
+// Enable the print link in the user header. This is done when a facility has
+// been selected.
+function enable_print_link() {
+  var print_link = $('print-link');
+  if (!print_link) {
+    return;
+  }
+  var f = selected_facility;
+  var PRINT_URL = '/?print=yes&lat=${LAT}&lon=${LON}&rad=${RAD}';
+  var location = f.values[attributes_by_name.location];
+  var title = f.values[attributes_by_name.title];
+  print_link.href = render(PRINT_URL, {LAT: location.lat, LON: location.lon,
+       RAD: PRINT_RADIUS_MILES / METERS_TO_MILES});
+  print_link.title = locale.PRINT_ENABLED_TOOLTIP({FACILITY_NAME: title});
+  print_link.onclick = null;
+}
+
 // Format a JavaScript Date object as a human-readable string.
 function format_timestamp(t) {
-  var months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
-  var date = months[t.getMonth()] + ' ' + t.getDate() + ', ' + t.getFullYear();
+  return locale.DATE_AT_TIME({ DATE: format_date(t), TIME: format_time(t) });
+}
+
+// Format a JavaScript Date object as a human-readable date string.
+function format_date(t) {
+  // Note: t.getMonth() returns a number from 0-11
+  return locale.DATE_FORMAT_MEDIUM({MONTH: locale.MONTH_ABBRS[t.getMonth()](),
+      DAY: t.getDate(), YEAR: t.getFullYear()});
+}
+
+// Format a JavaScript Date object as a human-readable time string.
+function format_time(t) {
   var hours = (t.getHours() < 10 ? '0' : '') + t.getHours();
   var minutes = (t.getMinutes() < 10 ? '0' : '') + t.getMinutes();
-  var time = hours + ':' + minutes;
   var offset = - (t.getTimezoneOffset() / 60);
   var zone = 'UTC' + (offset > 0 ? '+' : '\u2212') + Math.abs(offset);
-  return date + ' at ' + time + ' ' + zone;
+  return locale.TIME_FORMAT_MEDIUM_WITH_ZONE(
+      {HOURS: hours, MINUTES: minutes, ZONE: zone});
+}
+
+// Format a number to decimal_places places.
+function format_number(num, decimal_places) {
+  var integer_part = Math.floor(num);
+  var mantissa = Math.round((num % 1) * Math.pow(10, decimal_places));
+  return integer_part + '.' + mantissa;
 }
 
 // ==== UI event handlers
@@ -744,9 +1061,11 @@ function select_supply_set(supply_set_i) {
   selected_supply_set = supply_sets[supply_set_i];
 
   // Update the selection highlight.
-  for (var s = 1; s < supply_sets.length; s++) {
-    $('supply-set-' + s).className = 'supply-set' +
-        maybe_selected(s === supply_set_i);
+  if($('supply-tbody')) {
+    for (var s = 1; s < supply_sets.length; s++) {
+      $('supply-set-' + s).className = 'supply-set' +
+          maybe_selected(s === supply_set_i);
+    }
   }
 
   // Update the facility icon legend.
@@ -780,12 +1099,14 @@ function select_division_and_status(division_i, status_i) {
   selected_status_i = status_i;
   
   // Update the selection highlight.
-  for (var d = 0; d < divisions.length; d++) {
-    for (var s = 0; s <= MAX_STATUS; s++) {
-      $('division-' + d + '-status-' + s).className =
-          'facility-count status-' + s +
-          maybe_selected(d === division_i && s === status_i);
-    }
+  if ($('division-thead')) {
+    for (var d = 0; d < divisions.length; d++) {
+      for (var s = 0; s <= MAX_STATUS; s++) {
+        $('division-' + d + '-status-' + s).className =
+            'facility-count status-' + s +
+            maybe_selected(d === division_i && s === status_i);
+      }
+    }    
   }
 
   // Filter the list of facilities by the selected division and status.
@@ -816,94 +1137,33 @@ function select_facility(facility_i, ignore_current) {
   }
 
   // Pop up the InfoWindow on the selected clinic.
-  var last_report_date = 'No reports received';
-  var last_report = selected_facility.last_report;
-  if (last_report) {
-    var ymd = last_report.date.split('-');
-    last_report_date = 'Updated ' +
-        MONTH_ABBRS[ymd[1] - 1] + ' ' + (ymd[2] - 0) + ', ' + ymd[0];
-  }
-  var report_display = '';
-  var facility_type = facility_types[selected_facility.type];
-  for (var i = 0; i < facility_type.attribute_is.length; i++) {
-    var a = facility_type.attribute_is[i];
-    var attribute = attributes[a];
-    var value = '\u2013';
-    if (last_report) {
-      value = last_report.values[a];
-      switch (attributes[a].type) {
-        case 'contact':
-          value = (value || '').replace(/^[\s\|]+|[\s\|]+$/g, '');
-          value = value ? value.replace(/\|/g, ', ') : '\u2013';
-          break;
-        case 'date':
-          value = (value || '').replace(/T.*/, '') || '\u2013';
-          break;
-        case 'str':
-          value = value || '\u2013';
-          break;
-        case 'text':
-          value = {html: render_template('<div class="text">${text}</div>',
-                                         {text: {html: value || ''}})};
-          break;
-        case 'choice':
-          value = translate_value(value) || '\u2013';
-          break;
-        case 'multi':
-          value = translate_values(value || ['\u2013']).join(', ');
-          break;
-        case 'int':
-        case 'float':
-          if (value === null || value === undefined) {
-            value = '\u2013';
-          }
-          if (value === 0) {
-            value = {html: '<span class="stockout">0</span>'};
-          }
-          break;
-      }
-    }
-    report_display += render_template(ATTRIBUTE_TEMPLATE, {
-      attribute_title: messages.attribute_name[attribute.name].en,
-      attribute_value: value
-    });
-  }
-  if (rmapper.user && rmapper.user.is_editor()) {
-    var user_action_html = 
-    '    <div class="edit-links">' + 
-    '      <a href="/edit?cc=ht&facility_name=' + selected_facility.name +
-    '">' +
-    '        Edit this record</a> \u00b7 ' +
-    '      <a href="#" class="edit-ip-link" ' +
-    '          onclick="edit_handler(' +
-    '           \'/edit?cc=ht&facility_name=' + selected_facility.name +
-    '&embed=yes\');">' +
-    '      Edit in place</a>' +
-    '    </div>';
-  } else if (rmapper.user) {
-    var user_action_html = 
-    '    <div class="request-edit" >' +
-    '      <a href="#" class="edit-ip-link" ' +
-    '          onclick="request_role_handler(' +
-    '           \'/request_access?cc=ht&role=editor&embed=yes\');">' +
-    '      Request to become editor </a>' +
-    '    </div>';
-  } else {
-    var user_action_html = 
-    '    <div class="please-signin">' +
-    '      Please sign in as editor to edit' +
-    '    </div>';
-  }
-  info.setContent(render_template(INFO_TEMPLATE, {
-    facility_title: selected_facility.title,
-    facility_name: selected_facility.name,
-    division_title: divisions[selected_facility.division_i].title,
-    user_action_html: {html: user_action_html},
-    attributes: {html: report_display},
-    last_report_date: last_report_date
-  }));
+  info.close();
 
-  info.open(map, markers[selected_facility_i]);
+  show_loading(true);
+  jQuery.ajax({
+    url: 'bubble?facility_name=' + selected_facility.name,
+    type: 'GET',
+    timeout: 10000,
+    error: function(request, textStatus, errorThrown){
+      log(textStatus + ', ' + errorThrown);
+      alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
+      show_loading(false);
+    },
+    success: function(result){
+      info.setContent(result);
+      info.open(map, markers[selected_facility_i]);
+      // Sets up the tabs and should be called after the DOM is created.
+      jQuery('#bubble-tabs').tabs();
+      show_loading(false);
+    }
+  });
+
+  // Enable the Print link
+  enable_print_link();
+}
+
+function show_loading(show) {
+  $('loading').style.display = show ? '' : 'none';
 }
 
 // ==== Load data
@@ -912,10 +1172,10 @@ function load_data(data) {
   attributes = data.attributes;
   facility_types = data.facility_types;
   facilities = data.facilities;
-  divisions = data.divisions;
   messages = data.messages;
+  total_facility_count = data.total_facility_count;
 
-  attributes_by_name = {}
+  attributes_by_name = {};
   for (var a = 1; a < attributes.length; a++) {
     attributes_by_name[attributes[a].name] = a;
     switch (attributes[a].name){
@@ -930,16 +1190,23 @@ function load_data(data) {
   for (var i = 1; i < facilities.length; i++) {
     facility_is.push(i);
   }
-  divisions[0] = {
+  divisions = [{
     title: 'All arrondissements',
     facility_is: facility_is
-  };
+  }];
 
-  initialize_supply_selector();
-  initialize_filters();
-  initialize_division_header();
-  initialize_facility_header();
+  if (!print) {
+    // The print link is not shown in print view, no need to disable it
+    disable_print_link();
+    // The supply selector, filters, division header and facility
+    // header all do not appear in print view; don't bother initializing them.
+    initialize_supply_selector();
+    initialize_filters();
+    initialize_division_header();
+    initialize_facility_header();    
+  }
 
+  initialize_language_selector();
   initialize_map();
   initialize_markers();
   initialize_handlers();
@@ -947,16 +1214,102 @@ function load_data(data) {
 
   select_supply_set(DEFAULT_SUPPLY_SET_I);
   select_division_and_status(0, STATUS_GOOD);
-  handle_window_resize();
-
-  log('Data loaded.');
 
   if (print) {
-    set_children($('print-timestamp'),
-        'Printed on ' + format_timestamp(new Date()));
-    set_children($('site-url'),
-        window.location.protocol + '//' + window.location.host);
+    initialize_print_headers();
+    update_print_facility_list();
+  } else {
+    handle_window_resize();
   }
+
+  show_loading(false);
+  log('Data loaded.');
+
+  // TODO: Test further and re-enable
+  //start_monitoring();
+}
+
+// ==== In-place update
+
+function start_monitoring() {
+  // TODO: fix for IE
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = handle_monitor_notification;
+  xhr.open('GET', '/monitor');
+  xhr.send('');
+}
+
+function handle_monitor_notification() {
+  if (this.readyState == 4 && this.status == 200) {
+    if (this.responseText != null && this.responseText.length) {
+      eval(this.responseText);
+    }
+    start_monitoring();
+  }
+}
+
+function set_facility_attribute(facility_name, attribute_name, value) {
+  log(facility_name, attribute_name, value);
+  var facility_i = 0;
+  for (var f = 1; f < facilities.length; f++) {
+    if (facilities[f].name == facility_name) {
+      facility_i = f;
+    }
+  }
+  var attribute_i = attributes_by_name[attribute_name];
+  if (facility_i) {
+    var facility = facilities[facility_i];
+    if (!facility) {
+      var nulls = [];
+      for (var a = 0; a < attributes.length; a++) {
+        nulls.push(null);
+      }
+      facility.values = nulls;
+    }
+    facility.values[attribute_i] = value;
+  }
+  update_facility_row(facility_i);
+}
+
+var GLOW_COLORS = ['#ff4', '#ff4', '#ff5', '#ff6', '#ff8', '#ffa',
+                   '#ffb', '#ffc', '#ffd', '#ffe', '#fffff8'];
+var glow_element = null;
+var glow_step = -1;
+
+function glow(element) {
+  if (glow_element) {
+    glow_element.style.backgroundColor = '';
+  }
+  glow_element = element;
+  glow_step = 0;
+  glow_next();
+}
+
+function glow_next() {
+  if (glow_element && glow_step < GLOW_COLORS.length) {
+    glow_element.style.backgroundColor = GLOW_COLORS[glow_step];
+    glow_step++;
+    window.setTimeout(glow_next, 200);
+  } else {
+    if (glow_element) {
+      glow_element.style.backgroundColor = '';
+    }
+    glow_element = null;
+    glow_step = -1;
+  }
+}
+
+function update_facility_row(facility_i) {
+  var row = $('facility-' + facility_i);
+  var cell = row.firstChild;
+  var facility = facilities[facility_i];
+  for (var c = 1; c < summary_columns.length; c++) {
+    cell = cell.nextSibling;
+    var value = summary_columns[c].get_value(facility.values);
+    set_children(cell, value);
+    cell.className = 'value column_' + c;
+  }
+  glow(row);
 }
 
 // ==== In-place editing
@@ -971,6 +1324,7 @@ function edit_handler(edit_url) {
       info.close();
       info.setContent('<div class="facility-info">' + data + '</div>');
       info.open(map, markers[selected_facility_i]);
+      $j('#edit').ajaxForm({target: '#edit-status'});
     }
   });
   return false;
@@ -985,7 +1339,7 @@ function request_role_handler(request_url) {
     type: 'POST',
     success: function(data) {
        // TODO(eyalf): replace with a nice blocking popup
-       alert(data)
+       alert(data);
     }
   });
   return false;

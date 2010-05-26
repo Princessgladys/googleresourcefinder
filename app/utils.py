@@ -22,11 +22,14 @@ import google.appengine.ext.webapp.util
 import StringIO
 import access
 from calendar import timegm
+import cgi
 import cgitb
+import config
 from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
-from errors import ErrorMessage, Redirect
+from feeds.crypto import get_key
+from feeds.errors import ErrorMessage, Redirect
 import gzip
 from html import html_escape
 import logging
@@ -36,8 +39,30 @@ import re
 import simplejson
 import sys
 import unicodedata
+import urllib
+import urlparse
 
 ROOT = os.path.dirname(__file__)
+
+# Set up localization.
+from django.conf import settings
+try:
+  settings.configure()
+except:
+  pass
+settings.LANGUAGE_CODE = 'en'
+settings.USE_I18N = True
+settings.LOCALE_PATHS = (os.path.join(ROOT, 'locale'),)
+import django.utils.translation
+# We use lazy translation in this file because the locale isn't set until the
+# Handler is initialized.
+from django.utils.translation import gettext_lazy as _
+
+# Attributes exported to CSV that should currently remain hidden from the
+# info window bubble and edit view.
+# TODO(shakusa) Un-hide these post-v1 when view/edit support is better
+HIDDEN_ATTRIBUTE_NAMES = ['accuracy', 'region_id', 'district_id', 'commune_id',
+                          'commune_code', 'sante_id']
 
 def strip(text):
     return text.strip()
@@ -48,31 +73,47 @@ def validate_yes(text):
 def validate_role(text):
     return text in access.ROLES and text
 
-def get_message(version, namespace, name):
-    message = model.Message.all().ancestor(version).filter(
+def validate_float(text):
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+def get_message(namespace, name):
+    message = model.Message.all().filter(
         'namespace =', namespace).filter('name =', name).get()
-    return message and message.en or name
+    django_locale = django.utils.translation.to_locale(
+        django.utils.translation.get_language())
+    return message and getattr(message, django_locale) or name
 
 class Struct:
     pass
 
 class Handler(webapp.RequestHandler):
     auto_params = {
-        'cc': strip,
-        'facility_name': strip,
-        'print': validate_yes,
         'embed': validate_yes,
-        'role': validate_role
+        'facility_name': strip,
+        'lang': strip,
+        'lat': validate_float,
+        'lon': validate_float,
+        'print': validate_yes,
+        'rad': validate_float,
+        'role': validate_role,
     }
 
-    def require_user_role(self, role, cc):
-        """Raise and exception in case the user don't have the given role
-        to the given country.
-        Redirect to login in case there is no user"""
+    def require_user_role(self, role):
+        """Raise and exception in case the user don't have the given role.
+           Redirect to login in case there is no user"""
         if not self.auth:
             raise Redirect(users.create_login_url(self.request.uri))
-        if not access.check_user_role(self.auth, role, cc):
-            raise ErrorMessage(403, 'Unauthorized user.')
+        if not access.check_user_role(self.auth, role):
+            #i18n: Error message
+            raise ErrorMessage(403, _('Unauthorized user.'))
+
+    def require_logged_in_user(self):
+        """Redirect to login in case there is no user"""
+        if not self.user:
+            raise Redirect(users.create_login_url(self.request.uri))
 
     def render(self, path, **params):
         """Renders the template at the given path with the given parameters."""
@@ -83,14 +124,50 @@ class Handler(webapp.RequestHandler):
 
     def initialize(self, request, response):
         webapp.RequestHandler.initialize(self, request, response)
+        self.user = users.get_current_user()
+        self.auth = access.check_and_log(request, self.user)
         for name in request.headers.keys():
             if name.lower().startswith('x-appengine'):
                 logging.debug('%s: %s' % (name, request.headers[name]))
-        self.auth = access.check_and_log(request, users.get_current_user())
         self.params = Struct()
         for param in self.auto_params:
             validator = self.auto_params[param]
             setattr(self.params, param, validator(request.get(param, '')))
+        # Activate localization.
+        self.select_locale()
+
+        # Provide the non-localized URL of the current page.
+        self.params.url_no_lang = set_url_param(self.request.url, 'lang', None)
+        if '?' not in self.params.url_no_lang:
+          self.params.url_no_lang += '?'
+
+        self.params.languages = config.LANGUAGES
+
+        # Google Analytics account id
+        self.params.analytics_id = get_key('analytics_id')
+
+    def select_locale(self):
+        """Detect and activate the appropriate locale.  The 'lang' query
+           parameter has priority, then the rflang cookie, then the
+           default setting."""
+        # self.param.lang will use dashes (fr-CA), which is more common
+        # externally, but django wants underscores (fr_CA). If you need
+        # that version, use django.utils.translation.get_language()
+        self.params.lang = (self.params.lang or
+            self.request.cookies.get('django_language', None) or
+            settings.LANGUAGE_CODE)
+        # Check for and potentially convert an alternate language code
+        self.params.lang = config.ALTERNATE_LANG_CODES.get(
+            self.params.lang, self.params.lang)
+        if self.params.lang not in list(lang[0] for lang in config.LANGUAGES):
+          self.params.lang = settings.LANGUAGE_CODE
+
+        self.params.maps_lang = config.GOOGLE_MAPS_ALTERNATE_LANG_CODES.get(
+            self.params.lang, self.params.lang)
+        self.response.headers.add_header(
+            'Set-Cookie', 'django_language=%s' % self.params.lang)
+        django.utils.translation.activate(self.params.lang.replace('-', '_'))
+        self.response.headers.add_header('Content-Language', self.params.lang)
 
     def handle_exception(self, exception, debug_mode):
         if isinstance(exception, Redirect):
@@ -124,32 +201,16 @@ def get_base(entity):
         entity = entity.base
     return entity
 
-def get_latest_version(cc):
-    country = get(None, model.Country, cc)
-    versions = model.Version.all().ancestor(country).order('-timestamp')
-    if versions.count():
-        return versions[0]
-
-def fetch(cc, url, payload=None, previous_data=None):
-    country = get(None, model.Country, cc)
+def fetch(url, payload=None, previous_data=None):
     method = (payload is None) and urlfetch.GET or urlfetch.POST
     response = urlfetch.fetch(url, payload, method, deadline=10)
     data = response.content
     logging.info('utils.py: received %d bytes of data' % len(data))
     if data == previous_data:
         return None
-    dump = model.Dump(country, source=url, data=data)
+    dump = model.Dump(source=url, data=data)
     dump.put()
     return dump
-
-def load(loader, dump):
-    logging.info('load started')
-    version = model.Version(dump.parent(), dump=dump)
-    version.put()
-    logging.info('new version: %r' % version)
-    loader.put_dump(version, decompress(dump.data))
-    logging.info('load finished: %r' % version)
-    return version
 
 def decompress(data):
     file = gzip.GzipFile(fileobj=StringIO.StringIO(data))
@@ -168,6 +229,36 @@ def export(Kind):
         results += '%s(%s).put()\n' % (Kind.__name__, ', '.join(fields))
     return results
 
+def to_utf8(string):
+  """If Unicode, encode to UTF-8; if 8-bit string, leave unchanged."""
+  if isinstance(string, unicode):
+    string = string.encode('utf-8')
+  return string
+
+def urlencode(params):
+  """Apply UTF-8 encoding to any Unicode strings in the parameter dict.
+  Leave 8-bit strings alone.  (urllib.urlencode doesn't support Unicode.)"""
+  keys = params.keys()
+  keys.sort()  # Sort the keys to get canonical ordering
+  return urllib.urlencode([
+      (to_utf8(key), to_utf8(params[key]))
+      for key in keys if isinstance(params[key], basestring)])
+
+def set_url_param(url, param, value):
+  """This modifies a URL, setting the given param to the specified value.  This
+  may add the param or override an existing value, or, if the value is None,
+  it will remove the param.  Note that value must be a basestring and can't be
+  an int, for example."""
+  url_parts = list(urlparse.urlparse(url))
+  params = dict(cgi.parse_qsl(url_parts[4]))
+  if value is None:
+    if param in params:
+      del(params[param])
+  else:
+    params[param] = value
+  url_parts[4] = urlencode(params)
+  return urlparse.urlunparse(url_parts)
+
 def to_posixtime(datetime):
     return timegm(datetime.utctimetuple()[:6])
 
@@ -178,6 +269,23 @@ def to_isotime(datetime):
     if isinstance(datetime, (int, float)):
         datetime = to_datetime(datetime)
     return datetime.isoformat() + 'Z'
+
+def to_local_isotime(utc_datetime):
+  # TODO(shakusa) Use local timezone instead of hard-coding Haitian time
+  utc_datetime = utc_datetime - TimeDelta(hours=5)
+  return utc_datetime.isoformat(' ') + ' -05:00'
+
+def to_unicode(value):
+    """Converts the given value to unicode. Django does not do this
+       automatically when fetching translations."""
+    if isinstance(value, unicode):
+        return value
+    elif isinstance(value, str):
+        return value.decode('utf-8')
+    elif value is not None:
+        return str(value).decode('utf-8')
+    else:
+        return u''
 
 def plural(n, singular='', plural='s'):
     if not isinstance(n, (int, float)):
