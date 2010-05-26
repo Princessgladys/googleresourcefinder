@@ -48,7 +48,7 @@ class ResourceMapperTestCase(unittest.TestCase):
                 self.s.type(self.environment['login_password'],
                             self.environment['password'])
             self.s.click(self.environment['login_submit'])
-            self.s.wait_for_page_to_load('30000')
+            self.s.wait_for_page_to_load('40000')
             return True
         return False
 
