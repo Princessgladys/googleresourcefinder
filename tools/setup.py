@@ -218,6 +218,7 @@ def setup_messages():
         #i18n: next to a hospital
         value_message('FIELD_WITH_HOSPITAL',
                       en='Field hospital co-located with hospital'),
+        #i18n: Facility operational status: closed or in the process of closing
         value_message('CLOSED_OR_CLOSING', en='Closed or closing'),
 
         # services
