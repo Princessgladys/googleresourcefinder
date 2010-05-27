@@ -15,7 +15,7 @@
 import datetime
 import sets
 import sys
-from google.appengine.api import memcache
+from cache import *
 from feeds.geo import distance
 from utils import *
 from model import Attribute, Facility, FacilityType, Message, MinimalFacility
@@ -98,9 +98,7 @@ def clean_json(json):
 def render_json(center=None, radius=None):
     """Dump the data as a JSON string."""
 
-    # TODO(shakusa) Use memcache more!
-
-    facility_types = list(FacilityType.all())
+    facility_types = FacilityTypeCache.values()
 
     # Get the set of attributes to return
     attr_names = sets.Set()
@@ -109,7 +107,8 @@ def render_json(center=None, radius=None):
     attr_names = attr_names.difference(HIDDEN_ATTRIBUTE_NAMES)
 
     # Get the subset of attributes to render.
-    attributes = [a for a in Attribute.all() if a.key().name() in attr_names]
+    attributes = [a for a in AttributeCache.values()
+                  if a.key().name() in attr_names]
     attribute_jobjects, attribute_is = make_jobjects(
         attributes, attribute_transformer)
 
@@ -119,7 +118,7 @@ def render_json(center=None, radius=None):
 
     # Make JSON objects for the facilities
     facility_jobjects, facility_is = make_jobjects(
-        MinimalFacility.all().order(MinimalFacility.get_stored_name('title')),
+        MinimalFacilityCache.values(),
         minimal_facility_transformer, attributes, facility_types,
         facility_type_is, center, radius)
     total_facility_count = len(facility_jobjects) - 1
@@ -132,14 +131,10 @@ def render_json(center=None, radius=None):
     # Get all the messages for the current language.
     django_locale = django.utils.translation.to_locale(
         django.utils.translation.get_language())
-    def load_messages(django_locale):
-        message_jobjects = {}
-        for message in Message.all():
-            namespace = message_jobjects.setdefault(message.namespace, {})
-            namespace[message.name] = getattr(message, django_locale)
-        return message_jobjects
-    message_jobjects = check_cache(
-        'messages_%s' % django_locale, load_messages, django_locale)
+    message_jobjects = {}
+    for message in MessageCache.values():
+        namespace = message_jobjects.setdefault(message.namespace, {})
+        namespace[message.name] = getattr(message, django_locale)
 
     return clean_json(simplejson.dumps({
         'total_facility_count': total_facility_count,
@@ -149,11 +144,3 @@ def render_json(center=None, radius=None):
         'messages': message_jobjects
     # set indent=2 to pretty-print; it blows up download size, so defaults off
     }, indent=None, default=json_encode))
-
-def check_cache(key, miss_function, *args):
-    ret = memcache.get(key)
-    if not ret:
-        ret = miss_function(*args)
-        if not memcache.add(key, ret):
-            logging.error('Memcache set of %s failed' % key)
-    return ret
