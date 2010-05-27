@@ -21,7 +21,9 @@ from utils import db, get_message, run, to_local_isotime
 from utils import Handler, HIDDEN_ATTRIBUTE_NAMES
 
 def format(value, localize=False):
-    """Formats values in a way that is suitable to display in the bubble."""
+    """Formats values in a way that is suitable to display in the bubble.
+    If 'localize' is true, the value is treated as a localizable message key or
+    list of message keys to be looked up in the 'attribute_value' namespace."""
     if localize:
         if isinstance(value, list):
             value = [get_message('attribute_value', item) for item in value]
@@ -49,9 +51,9 @@ def format(value, localize=False):
 
 class ValueInfo:
     """Simple struct used by the django template to extract values"""
-    def __init__(self, label, value, localize, author=None, affiliation=None,
+    def __init__(self, name, value, localize, author=None, affiliation=None,
                  comment=None, date=None):
-        self.label = get_message('attribute_name', label)
+        self.label = get_message('attribute_name', name)
         self.raw = value
         self.value = format(value, localize)
         self.author = format(author)
@@ -121,6 +123,7 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
             self,
             ['title', 'location', 'available_beds', 'total_beds',
              'healthc_id', 'address', 'services'],
+    # TODO(kpy): This list is redundant; see comment in ValueInfoExtractor.
             ['services', 'organization_type', 'category', 'construction',
              'operational_status']
         )
