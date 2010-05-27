@@ -35,7 +35,7 @@ COLUMNS_BY_FACILITY_TYPE = {
         ('contact_name', lambda f: f.get_value('contact_name')),
         ('contact_phone', lambda f: f.get_value('phone')),
         ('contact_email', lambda f: f.get_value('email')),
-        ('department', lambda f: f.get_value('departemen')),
+        ('department', lambda f: f.get_value('department')),
         ('district', lambda f: f.get_value('district')),
         ('commune', lambda f: f.get_value('commune')),
         ('address', lambda f: f.get_value('address')),
@@ -44,7 +44,7 @@ COLUMNS_BY_FACILITY_TYPE = {
         ('longitude', lambda f: (f.get_value('location') and
                                  f.get_value('location')).lon),
         ('organization', lambda f: f.get_value('organization')),
-        ('type', lambda f: f.get_value('facility_type')),
+        ('organization_type', lambda f: f.get_value('organization_type')),
         ('category', lambda f: f.get_value('category')),
         ('construction', lambda f: f.get_value('construction')),
         ('damage', lambda f: f.get_value('damage')),
@@ -82,8 +82,8 @@ def write_csv(out, facility_type):
 
     # Get the facilities.
     facilities = get_all(lambda: Facility.all())
-
-    columns = COLUMNS_BY_FACILITY_TYPE[facility_type.key().name()]
+ 
+    columns= COLUMNS_BY_FACILITY_TYPE[facility_type.key().name()]
     if columns:
         row = list(column[0] for column in columns)
     else:
