@@ -131,7 +131,7 @@ def parse_django_po(po_filename):
     current_msg = Message(None, None, None, None)
 
     for line in codecs.open(po_filename, encoding='utf-8'):
-        if line.startswith('#:'):
+        if line.startswith('#:') or line.startswith('#.'):
             header_done = True
         if not header_done:
             header += line

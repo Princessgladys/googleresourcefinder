@@ -24,7 +24,7 @@ locale = function() {
   //i18n: Label for every item in a list.
   messages.ALL = "Tous";
 
-  //i18n: Date at a give time (example: Jan 21, 2010 at 14:32 UTC-4)
+  //i18n: Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME = "${DATE} \u00e0 ${TIME}";
 
   //i18n: Local date format (example: Jan 21, 2010)

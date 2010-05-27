@@ -123,7 +123,8 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
             self,
             ['title', 'location', 'available_beds', 'total_beds',
              'healthc_id', 'address', 'services'],
-    # TODO(kpy): This list is redundant; see comment in ValueInfoExtractor.
+            # TODO(kpy): This list is redundant; see the comment above
+            # in ValueInfoExtractor.
             ['services', 'organization_type', 'category', 'construction',
              'operational_status']
         )

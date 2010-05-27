@@ -3,36 +3,18 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: resourcefinder\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-05-26 19:43-0400\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2010-05-27 00:08-0800\n"
+"Last-Translator: Ka-Ping Yee <kpy@google.com>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. Date at a give time (example: Jan 21, 2010 at 14:32 UTC-4)
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
-#. TODO: Message description and/or meaning
 #. TODO: Message description and/or meaning
 #: static/locale.js:29
 #, sh-format
@@ -70,7 +52,9 @@ msgid "%(user)s does not have permission to edit %(a)s"
 msgstr ""
 
 #. Form option not specified
-#: edit.py:168 edit.py:194 edit.py:209
+#: edit.py:168
+#: edit.py:194
+#: edit.py:209
 msgid "(unspecified)"
 msgstr ""
 
@@ -80,12 +64,15 @@ msgid "Accuracy"
 msgstr ""
 
 #. street address
-#: ../tools/setup.py:120 templates/hospital_bubble.html:111 templates/print_data.html:68
+#: ../tools/setup.py:120
+#: templates/hospital_bubble.html:111
+#: templates/print_data.html:68
 msgid "Address"
 msgstr ""
 
 #. Type of facility construction: sun-dried clay bricks
-#: ../tools/setup.py:207 ../tools/setup.py:181
+#: ../tools/setup.py:207
+#: ../tools/setup.py:181
 msgid "Adobe"
 msgstr ""
 
@@ -115,7 +102,8 @@ msgid "Beds open / total"
 msgstr ""
 
 #. Service provided by a health facility.
-#: ../tools/setup.py:263 ../tools/setup.py:267
+#: ../tools/setup.py:263
+#: ../tools/setup.py:267
 msgid "Blood bank"
 msgstr ""
 
@@ -125,7 +113,8 @@ msgid "CSV Export"
 msgstr ""
 
 #. Service provided by a health facility.
-#: ../tools/setup.py:261 ../tools/setup.py:265
+#: ../tools/setup.py:261
+#: ../tools/setup.py:265
 msgid "CT scan"
 msgstr ""
 
@@ -140,7 +129,8 @@ msgid "Cancel"
 msgstr ""
 
 #. Service provided by a health facility.  Meaning: branch of medicine dealing with the heart and its diseases
-#: ../tools/setup.py:240 ../tools/setup.py:244
+#: ../tools/setup.py:240
+#: ../tools/setup.py:244
 msgid "Cardiology"
 msgstr ""
 
@@ -165,7 +155,7 @@ msgid "Change note"
 msgstr ""
 
 #. TODO: Message description and/or meaning
-#:  ../tools/setup.py:221
+#: ../tools/setup.py:221
 msgid "Closed or closing"
 msgstr ""
 
@@ -195,7 +185,8 @@ msgid "Contact name"
 msgstr ""
 
 #. Service provided by a health facility.
-#: ../tools/setup.py:269 ../tools/setup.py:265
+#: ../tools/setup.py:269
+#: ../tools/setup.py:265
 msgid "Corpse removal"
 msgstr ""
 
@@ -220,12 +211,14 @@ msgid "Department"
 msgstr ""
 
 #. Service provided by a health facility.
-#: ../tools/setup.py:255 ../tools/setup.py:259
+#: ../tools/setup.py:255
+#: ../tools/setup.py:259
 msgid "Dialysis"
 msgstr ""
 
 #. Category of a health facility where medicine and medical supplies are given out.
-#: ../tools/setup.py:198 ../tools/setup.py:176
+#: ../tools/setup.py:198
+#: ../tools/setup.py:176
 msgid "Dispensary"
 msgstr ""
 
@@ -247,12 +240,15 @@ msgid "Distance"
 msgstr ""
 
 #. Meaning: administrative division
-#: templates/data.html:73 ../tools/setup.py:116 static/locale.js:51
+#: templates/data.html:73
+#: ../tools/setup.py:116
+#: static/locale.js:51
 msgid "District"
 msgstr ""
 
 #. E-mail address
-#: ../tools/setup.py:112 edit.py:115
+#: ../tools/setup.py:112
+#: edit.py:115
 msgid "E-mail"
 msgstr ""
 
@@ -282,12 +278,15 @@ msgid "Error loading facility information."
 msgstr ""
 
 #. Button to export data to comma-separated-values format.
-#: export.py:157 templates/map.html:192
+#: export.py:157
+#: templates/map.html:192
 msgid "Export CSV"
 msgstr ""
 
 #. A place that provides a particular service
-#: templates/data.html:92 templates/print_data.html:59 static/locale.js:88
+#: templates/data.html:92
+#: templates/print_data.html:59
+#: static/locale.js:88
 msgid "Facility"
 msgstr ""
 
@@ -312,12 +311,16 @@ msgid "Facility name"
 msgstr ""
 
 #. Type of facility operational status: as functional as a field hospital
-#: ../tools/setup.py:200 ../tools/setup.py:216 ../tools/setup.py:178 ../tools/setup.py:188
+#: ../tools/setup.py:200
+#: ../tools/setup.py:216
+#: ../tools/setup.py:178
+#: ../tools/setup.py:188
 msgid "Field hospital"
 msgstr ""
 
 #. Type of facility operational status: as functional as a field hospital next to a hospital
-#: ../tools/setup.py:191 ../tools/setup.py:219
+#: ../tools/setup.py:191
+#: ../tools/setup.py:219
 msgid "Field hospital co-located with hospital"
 msgstr ""
 
@@ -342,27 +345,32 @@ msgid "General Info"
 msgstr ""
 
 #. Service provided by a health facility.  Meaning: deals with diagnosis and (non-surgical) treatment of Meaning: diseases of the internal organs
-#: ../tools/setup.py:241 ../tools/setup.py:237
+#: ../tools/setup.py:241
+#: ../tools/setup.py:237
 msgid "General medicine"
 msgstr ""
 
 #. Service provided by a health facility.  Meaning: surgical specialty that focuses on abdominal organs
-#: ../tools/setup.py:227 ../tools/setup.py:223
+#: ../tools/setup.py:227
+#: ../tools/setup.py:223
 msgid "General surgery"
 msgstr ""
 
 #. Type of a facility committed to improving the health of a community
-#: ../tools/setup.py:165 ../tools/setup.py:163
+#: ../tools/setup.py:165
+#: ../tools/setup.py:163
 msgid "Health center"
 msgstr ""
 
 #. Type of a facility: a health center with available beds, as a hospital has.
-#: ../tools/setup.py:169 ../tools/setup.py:171
+#: ../tools/setup.py:169
+#: ../tools/setup.py:171
 msgid "Health center with beds"
 msgstr ""
 
 #. Type of a facility: a health center without beds.
-#: ../tools/setup.py:173 ../tools/setup.py:171
+#: ../tools/setup.py:173
+#: ../tools/setup.py:171
 msgid "Health center without beds"
 msgstr ""
 
@@ -387,7 +395,8 @@ msgid "Home"
 msgstr ""
 
 #. Category of a health facility where patients receive treatment.
-#: ../tools/setup.py:203 ../tools/setup.py:180
+#: ../tools/setup.py:203
+#: ../tools/setup.py:180
 msgid "Hospital"
 msgstr ""
 
@@ -397,7 +406,8 @@ msgid "If any information is wrong or missing, please correct it on the web site
 msgstr ""
 
 #. Service provided by a health facility.  Meaning: specializing in treating communicable diseases
-#: ../tools/setup.py:243 ../tools/setup.py:247
+#: ../tools/setup.py:243
+#: ../tools/setup.py:247
 msgid "Infectious disease"
 msgstr ""
 
@@ -407,7 +417,8 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr ""
 
 #. Error message for request missing facility name.
-#: edit.py:324 bubble.py:127
+#: edit.py:324
+#: bubble.py:127
 msgid "Invalid or missing facility name."
 msgstr ""
 
@@ -417,7 +428,8 @@ msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
 msgstr ""
 
 #. Service provided by a health facility.
-#: ../tools/setup.py:257 ../tools/setup.py:261
+#: ../tools/setup.py:257
+#: ../tools/setup.py:261
 msgid "Lab"
 msgstr ""
 
@@ -502,7 +514,8 @@ msgid "Mixed"
 msgstr ""
 
 #. Category of a moveable unit that provides a service.
-#: ../tools/setup.py:187 ../tools/setup.py:210
+#: ../tools/setup.py:187
+#: ../tools/setup.py:210
 msgid "Mobile facility"
 msgstr ""
 
@@ -522,12 +535,14 @@ msgid "Name (required)"
 msgstr ""
 
 #. service provided by a health facility  Meaning: surgery that involves the nervous system
-#: ../tools/setup.py:234 ../tools/setup.py:230
+#: ../tools/setup.py:234
+#: ../tools/setup.py:230
 msgid "Neurosurgery"
 msgstr ""
 
 #. Form option for disagreement
-#: bubble.py:36 edit.py:172
+#: bubble.py:36
+#: edit.py:172
 msgid "No"
 msgstr ""
 
@@ -548,12 +563,14 @@ msgid "No such entry"
 msgstr ""
 
 #. Type of facility operational status: cannot perform surgeries
-#: ../tools/setup.py:185 ../tools/setup.py:214
+#: ../tools/setup.py:185
+#: ../tools/setup.py:214
 msgid "No surgical capacity"
 msgstr ""
 
 #. services provided by a health facility  Meaning: Obstetrics deals with childbirth and care of the mother. Meaning: Gynecology deals with diseases and hygiene of women
-#: ../tools/setup.py:257 ../tools/setup.py:253
+#: ../tools/setup.py:257
+#: ../tools/setup.py:253
 msgid "Obstetrics and gynecology"
 msgstr ""
 
@@ -563,7 +580,8 @@ msgid "Open/Total Beds"
 msgstr ""
 
 #. Type of facility operational status: in working order
-#: ../tools/setup.py:212 ../tools/setup.py:183
+#: ../tools/setup.py:212
+#: ../tools/setup.py:183
 msgid "Operational"
 msgstr ""
 
@@ -578,17 +596,19 @@ msgid "Organization name"
 msgstr ""
 
 #. Type of organization (public, private, military, NGO, etc.)
-#:  ../tools/setup.py:128
+#: ../tools/setup.py:128
 msgid "Organization type"
 msgstr ""
 
 #. Service provided by a health facility  Meaning: treats diseases and injury to bones, muscles, joints and Meaning: tendons
-#: ../tools/setup.py:227 ../tools/setup.py:231
+#: ../tools/setup.py:227
+#: ../tools/setup.py:231
 msgid "Orthopedics"
 msgstr ""
 
 #. Category of a facility.
-#: ../tools/setup.py:192 ../tools/setup.py:215
+#: ../tools/setup.py:192
+#: ../tools/setup.py:215
 msgid "Other"
 msgstr ""
 
@@ -598,12 +618,14 @@ msgid "Payload:"
 msgstr ""
 
 #. Service provided by a health facility.  Meaning: branch of medicine dealing with infants and children
-#: ../tools/setup.py:246 ../tools/setup.py:250
+#: ../tools/setup.py:246
+#: ../tools/setup.py:250
 msgid "Pediatrics"
 msgstr ""
 
 #. telephone number
-#: ../tools/setup.py:110 edit.py:113
+#: ../tools/setup.py:110
+#: edit.py:113
 msgid "Phone"
 msgstr ""
 
@@ -613,7 +635,8 @@ msgid "Please call for availability information."
 msgstr ""
 
 #. Service provided by a health facility.  care given after surgery until patient is discharged
-#: ../tools/setup.py:249 ../tools/setup.py:253
+#: ../tools/setup.py:249
+#: ../tools/setup.py:253
 msgid "Postoperative care"
 msgstr ""
 
@@ -654,7 +677,8 @@ msgid "Record updated."
 msgstr ""
 
 #. Type of facility construction: concrete with metal and/or mesh added to provide extra support against stresses
-#: ../tools/setup.py:174 ../tools/setup.py:200
+#: ../tools/setup.py:174
+#: ../tools/setup.py:200
 msgid "Reinforced concrete"
 msgstr ""
 
@@ -692,7 +716,8 @@ msgid "Select facility type to export:"
 msgstr ""
 
 #. work done by someone that benefits another
-#: static/locale.js:116 ../tools/setup.py:106
+#: static/locale.js:116
+#: ../tools/setup.py:106
 msgid "Services"
 msgstr ""
 
@@ -712,7 +737,8 @@ msgid "Sign out"
 msgstr ""
 
 #. Category of a health facility with a particular specialty.
-#: ../tools/setup.py:185 ../tools/setup.py:208
+#: ../tools/setup.py:185
+#: ../tools/setup.py:208
 msgid "Specialized hospital"
 msgstr ""
 
@@ -722,17 +748,20 @@ msgid "Supplies"
 msgstr ""
 
 #. Type of a facility: a health center that exists for a finite period of time.
-#: ../tools/setup.py:166 ../tools/setup.py:168
+#: ../tools/setup.py:166
+#: ../tools/setup.py:168
 msgid "Temporary health center"
 msgstr ""
 
 #. Category of a health facility, existing for a finite period of time.
-#: ../tools/setup.py:206 ../tools/setup.py:183
+#: ../tools/setup.py:206
+#: ../tools/setup.py:183
 msgid "Temporary hospital"
 msgstr ""
 
 #. Category of a moveable unit that provides a particular service for a finite period of time
-#: ../tools/setup.py:213 ../tools/setup.py:190
+#: ../tools/setup.py:213
+#: ../tools/setup.py:190
 msgid "Temporary mobile facility"
 msgstr ""
 
@@ -777,12 +806,14 @@ msgid "University"
 msgstr ""
 
 #. Category of a facility.
-#: ../tools/setup.py:217 ../tools/setup.py:194
+#: ../tools/setup.py:217
+#: ../tools/setup.py:194
 msgid "Unknown"
 msgstr ""
 
 #. Type of facility construction: walls constructed of clay brick or concrete block
-#: ../tools/setup.py:177 ../tools/setup.py:203
+#: ../tools/setup.py:177
+#: ../tools/setup.py:203
 msgid "Unreinforced masonry"
 msgstr ""
 
@@ -797,7 +828,8 @@ msgid "Value must be a number."
 msgstr ""
 
 #. Service provided by a health facility.  Meaning: surgical specialty that focuses on arteries and veins
-#: ../tools/setup.py:237 ../tools/setup.py:233
+#: ../tools/setup.py:237
+#: ../tools/setup.py:233
 msgid "Vascular surgery"
 msgstr ""
 
@@ -807,17 +839,20 @@ msgid "View Master List archive"
 msgstr ""
 
 #. Type of facility construction: timber jointed together with nails
-#: ../tools/setup.py:205 ../tools/setup.py:179
+#: ../tools/setup.py:205
+#: ../tools/setup.py:179
 msgid "Wood frame"
 msgstr ""
 
 #. Service provided by a health facility.
-#: ../tools/setup.py:263 ../tools/setup.py:259
+#: ../tools/setup.py:263
+#: ../tools/setup.py:259
 msgid "X-ray"
 msgstr ""
 
 #. Form option for agreement
-#: bubble.py:36 edit.py:170
+#: bubble.py:36
+#: edit.py:170
 msgid "Yes"
 msgstr ""
 
