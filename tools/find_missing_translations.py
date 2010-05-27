@@ -15,9 +15,8 @@
 
 """Finds the messages that are missing translations in the locale *.po files.
 
-Usage:
-  From the resourcemapper/app directory:
-  ../tools/find_missing_translations.py
+Instead of running this script directly, use 'find_missing_translations',
+which sets up the PYTHONPATH and other necessary environment variables.
 
 PO file format:
   http://www.gnu.org/software/hello/manual/gettext/PO-Files.html
@@ -88,7 +87,7 @@ def get_untranslated_msg_ids_from_file(po_file, fuzzy_ok):
         # completed a block
         if msg_id:
           yield msg_id, msg_str, comment, is_fuzzy
-          msg_id, msg_str, comment, is_fuzzy = '', '', '', False
+        msg_id, msg_str, comment, is_fuzzy = '', '', '', False
         if line.startswith(FUZZY_TOKEN):
           is_fuzzy = True
         else:
@@ -143,6 +142,7 @@ def find_missing_translations(locale_dir, template, fuzzy_ok, excluded_files):
 def main():
   options, args = OptParseDefinitions()
   assert not args
+  os.chdir(os.environ['APP_DIR'])
   find_missing_translations(options.locale_dir, options.template,
                             options.fuzzy_ok, options.exclude)
 

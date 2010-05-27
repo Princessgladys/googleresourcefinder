@@ -12,11 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.appengine.api import users
 from model import *
-from setup import *
 import csv
 import datetime
 import logging
+import re
+
+SHORELAND_URL = 'http://shoreland.com/'
+SHORELAND_EMAIL = 'admin@shoreland.com'
+SHORELAND_NICKNAME = 'Shoreland Contact Name'
+SHORELAND_AFFILIATION = 'Shoreland Inc.'
 
 def convert_paho_record(record):
     """Converts a dictionary of values from one row of a PAHO CSV file
@@ -51,7 +57,7 @@ def convert_paho_record(record):
         'accuracy': ValueInfo(record['Accuracy']),
         'phone': ValueInfo(record['Telephone']),
         'email': ValueInfo(record['email']),
-        'facility_type': ValueInfo(record['Type']),
+        'organization_type': ValueInfo(record['Type']),
         'category': ValueInfo(record['Categorie']),
         'damage': ValueInfo(record['Damage'], observed=record['DateDamage'],
                             source=record['SourceDamage']),
@@ -95,8 +101,8 @@ def convert_shoreland_record(record):
         # TODO(kpy): What happened to all the other values that were in v7?
     }
 
-    # The CSV 'category' column corresponds to our 'facility_type' attribute.
-    FACILITY_TYPE_MAP = {
+    # The CSV 'category' column corresponds to our 'organization_type' attribute.
+    ORGANIZATION_TYPE_MAP = {
         '': '',
         'Faith-Based Org': '???',  # TODO
         'For Profit': 'PRI',
@@ -121,7 +127,8 @@ def convert_shoreland_record(record):
             record['available_beds'] and int(record['available_beds'])),
         'total_beds': ValueInfo(
             record['total_beds'] and int(record['total_beds'])),
-        # The 'services' column is always empty.
+        # Didn't bother to convert the 'services' field because it's empty
+        # in the CSV from Shoreland.
         'contact_name': ValueInfo(record['contact_name']),
         'phone': ValueInfo(record['contact_phone']),
         'email': ValueInfo(record['contact_email']),
@@ -134,9 +141,11 @@ def convert_shoreland_record(record):
             # TODO(kpy) comment=record['AlternateCoordinates']
         'organization': ValueInfo(record['organization']),
         # The 'type' and 'category' columns are swapped.
-        'facility_type': ValueInfo(FACILITY_TYPE_MAP[record['category']]),
+        'organization_type':
+            ValueInfo(ORGANIZATION_TYPE_MAP[record['category']]),
         'category': ValueInfo(CATEGORY_MAP[record['type']]),
-        # The 'construction' column is always empty.
+        # Didn't bother to convert the 'construction' field because it's empty
+        # in the CSV from Shoreland.
         'damage': ValueInfo(record['damage']),
             # TODO(kpy) observed=record['DateDamage']
             # TODO(kpy) source=record['SourceDamage']
@@ -283,3 +292,27 @@ def put_batches(entities):
     while entities:
         batch, entities = entities[:200], entities[200:]
         db.put(batch)
+
+def parse_datetime(timestamp):
+    """Parses a UTC timestamp in YYYY-MM-DD HH:MM:SS format.  Acceptable
+    examples are "2010-02-07", "2010-02-07 19:31", "2010-02-07T13:02:03Z"."""
+    match = re.match(r'(\d+)-(\d+)-(\d+)([ T](\d+):(\d+)(:(\d+))?)?', timestamp)
+    year, month, day, time = match.groups()[:4]
+    hour = match.group(5) or 0
+    minute = match.group(6) or 0
+    second = match.group(8) or 0
+    return datetime.datetime(
+        int(year), int(month), int(day), int(hour), int(minute), int(second))
+
+def load_shoreland(filename, observed)
+    """Loads a Shoreland CSV file using defaults for thee URL and author."""
+    user = users.User(SHORELAND_EMAIL)
+    load_csv(filename, convert_shoreland_record, SHORELAND_URL, observed, user,
+             SHORELAND_NICKNAME, SHORELAND_AFFILIATION)
+
+def wipe_and_load_shoreland(filename, observed):
+    """Wipes the entire datastore and then loads a Shoreland CSV file."""
+    open(filename)  # Ensure the file is readable before wiping the datastore.
+    import setup
+    setup.reset_datastore()
+    load_shoreland(filename, observed)

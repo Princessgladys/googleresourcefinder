@@ -341,3 +341,21 @@ def setup_new_datastore():
     setup_facility_types()
     setup_messages()
     setup_js_messages()
+
+def wipe_datastore(*kinds):
+    """Deletes everything in the datastore except Authorizations and Secrets.
+    If 'kinds' is given, deletes only those kinds of entities."""
+    for kind in kinds or [Attribute, FacilityType, Message, Dump,
+                          MinimalFacility, Facility, Report]:
+        while True:
+            keys = kind.all(keys_only=True).fetch(200)
+            if not keys:
+                break
+            logging.info('Deleting %s entities...' % kind.kind())
+            db.delete(keys)
+
+def reset_datastore():
+    """Wipes everything in the datastore except Authorizations and Secrets,
+    then sets up the datastore for new data."""
+    wipe_datastore()
+    setup_new_datastore()
