@@ -45,6 +45,9 @@ so they are not used.
 Instead of running this script directly, use the 'extract_messages' shell
 script, which sets up the PYTHONPATH and other necessary environment variables.
 
+Although this can be run from any directory, the filenames on the command
+line must be specified relative to the app/ directory.
+
 Example:
     ../tools/extract_messages ../tools/setup.py static/locale.js
 """
@@ -105,13 +108,11 @@ def django_makemessages():
     """Run django's makemessages routine to extract messages from python and
        html files."""
     cwd = os.getcwd()
-    os.chdir(os.environ['APP_DIR'])
     (stdin, stdout, stderr) = os.popen3(
         os.path.join(DJANGO_BIN, 'make-messages.py') + ' -a', 't')
     errors = stderr.read()
     if errors:
         raise SystemExit(errors)
-    os.chdir(cwd)
 
 def parse_django_po(po_filename):
     """Return the header from the django-generated .po file
@@ -146,7 +147,7 @@ def parse_django_po(po_filename):
                 current_msg.description = ''
             if not current_msg.meaning:
                 current_msg.meaning = ''
-            message_to_ref[current_msg] = refs
+            message_to_ref[current_msg] = set(refs)
             current_ref = ''
             current_msg = Message(None, None, None, None)
         elif line.startswith('#:'):
@@ -200,7 +201,7 @@ def find_description_meaning(refs):
         current_description = []
         current_meaning = []
 
-        lines = open(os.path.join(os.environ['APP_DIR'], file)).readlines()
+        lines = open(file).readlines()
         for line in reversed(lines[:line_num - 1]):
             match = re.match(patterns['description'], line)
             if match:
@@ -288,7 +289,7 @@ def parse_message(pattern, line):
 def merge(msg_to_ref, ref_msg_pairs):
     """ Merge ref_msg_pairs into msg_to_ref """
     for (ref, msg) in ref_msg_pairs:
-        msg_to_ref.setdefault(msg, []).append(ref)
+        msg_to_ref.setdefault(msg, set()).add(ref)
 
 def output_po_file(output_filename, header, msg_to_ref):
     """Write a po file to output from the given header and dict from message
@@ -323,10 +324,10 @@ def has_python_placeholders(message):
     return re.search(r'%\(\w+\)s', message) is not None
 
 if __name__ == '__main__':
+    os.chdir(os.environ['APP_DIR'])
     po_filenames = [
-        os.path.join(os.environ['APP_DIR'], 'locale', locale,
-                     'LC_MESSAGES', 'django.po')
-        for locale in os.listdir(os.path.join(os.environ['APP_DIR'], 'locale'))]
+        os.path.join('locale', locale, 'LC_MESSAGES', 'django.po')
+        for locale in os.listdir('locale')]
 
     # Parse input files
     print 'Parsing input files'
