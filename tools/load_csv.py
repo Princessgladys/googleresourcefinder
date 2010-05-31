@@ -306,6 +306,8 @@ def parse_datetime(timestamp):
 
 def load_shoreland(filename, observed)
     """Loads a Shoreland CSV file using defaults for thee URL and author."""
+    if isinstance(observed, basestring):
+        observed = parse_datetime(observed)
     user = users.User(SHORELAND_EMAIL)
     load_csv(filename, convert_shoreland_record, SHORELAND_URL, observed, user,
              SHORELAND_NICKNAME, SHORELAND_AFFILIATION)

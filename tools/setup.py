@@ -360,3 +360,8 @@ def reset_datastore():
     then sets up the datastore for new data."""
     wipe_datastore()
     setup_new_datastore()
+
+def add_auth(email='test@example.com', description='Test'):
+    """Adds an Authorization entity to the datastore."""
+    Authorization(email=email, description=description, nickname='Test',
+        affiliation='Test', user_roles=[':user', ':editor']).put()
