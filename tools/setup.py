@@ -33,34 +33,34 @@ def setup_facility_types():
         attr('int', 'available_beds'),
         attr('int', 'total_beds'),
         attr('multi', 'services',
-             ['general_surgery', 'orthopedics', 'neurosurgery',
-              'vascular_surgery', 'general_medicine', 'cardiology',
-              'infectious_disease', 'pediatrics', 'postoperative_care',
-              'obstetrics_gynecology', 'dialysis', 'lab',
-              'x_ray', 'ct_scan', 'blood_bank', 'corpse_removal']),
+             ['GENERAL_SURGERY', 'ORTHOPEDICS', 'NEUROSURGERY',
+              'VASCULAR_SURGERY', 'GENERAL_MEDICINE', 'CARDIOLOGY',
+              'INFECTIOUS_DISEASE', 'PEDIATRICS', 'POSTOPERATIVE_CARE',
+              'OBSTETRICS_GYNECOLOGY', 'DIALYSIS', 'LAB',
+              'X_RAY', 'CT_SCAN', 'BLOOD_BANK', 'CORPSE_REMOVAL']),
         attr('str', 'contact_name'),
         attr('str', 'phone'),
         attr('str', 'email'),
-        attr('str', 'departemen'),
+        attr('str', 'department'),
         attr('str', 'district'),
         attr('str', 'commune'),
         attr('str', 'address'),
         attr('geopt', 'location'),
         attr('str', 'accuracy'),
         attr('str', 'organization'),
-        attr('choice', 'facility_type',
+        attr('choice', 'organization_type',
              ['COM', 'MIL', 'MIX', 'NGO', 'PRI', 'PUB', 'UNI']),
         attr('choice', 'category',
              ['C/S', 'C/S Temp', 'CAL', 'CSL', 'DISP', 'F Hospital',
               'HOP', 'HOP Temp', 'HOP Spec', 'MOB', 'MOB Temp',
               'Other', 'Unknown']),
         attr('choice', 'construction',
-             ['Reinforced concrete', 'Unreinforced masonry', 'Wood frame',
-              'Adobe']),
+             ['REINFORCED_CONCRETE', 'UNREINFORCED_MASONRY', 'WOOD_FRAME',
+              'ADOBE']),
         attr('str', 'damage'),
         attr('choice', 'operational_status',
-             ['Operational', 'No surgical capacity', 'Field hospital',
-              'Field hospital co-located with hospital']),
+             ['OPERATIONAL', 'NO_SURGICAL_CAPACITY', 'FIELD_HOSPITAL',
+              'FIELD_WITH_HOSPITAL', 'CLOSED_OR_CLOSING']),
         attr('str', 'comments'),
         attr('bool', 'reachable_by_road'),
         attr('bool', 'can_pick_up_patients'),
@@ -111,7 +111,7 @@ def setup_messages():
         #i18n: E-mail address
         name_message('email', en='E-mail'),
         #i18n: Meaning: administrative division
-        name_message('departemen', en='Department'),
+        name_message('department', en='Department'),
         #i18n: Meaning: administrative division
         name_message('district', en='District'),
         #i18n: Meaning: low-level administrative division
@@ -124,13 +124,13 @@ def setup_messages():
         name_message('accuracy', en='Accuracy'),
         #i18n: Meaning: referring to the name of an organization
         name_message('organization', en='Organization name'),
-        #i18n: genre, subdivision of a particular kind of thing
-        name_message('facility_type', en='Type'),
-        #i18n: collection of things sharing a common attribute
+        #i18n: Type of organization (public, private, military, NGO, etc.)
+        name_message('organization_type', en='Organization type'),
+        #i18n: Category of facility (hospital, clinic, field team, etc.)
         name_message('category', en='Category'),
-        #i18n: the materials making up a building
+        #i18n: Materials making up a building
         name_message('construction', en='Construction'),
-        #i18n: destruction
+        #i18n: Level of destruction
         name_message('damage', en='Damage'),
         #i18n: Whether or not a facility is fully operational.
         name_message('operational_status', en='Operational status'),
@@ -142,127 +142,132 @@ def setup_messages():
         #i18n: patients
         name_message('can_pick_up_patients', en='Can pick up patients'),
 
-        # type
+        # organization_type
 
-        #i18n: Type of a facility working with a residential district
+        #i18n: Type of organization: Local community organization
         value_message('COM', en='Community'),
-        #i18n: Type of a facility associated with armed forces
+        #i18n: Type of organization: Organization associated with armed forces
         value_message('MIL', en='Military'),
-        #i18n: Type of a facility with mixed function
+        #i18n: Type of organization: Organization with mixed function
         value_message('MIX', en='Mixed'),
-        #i18n: Type of a facility: non-governmental organization
+        #i18n: Type of organization: Non-governmental organization
         value_message('NGO', en='NGO'),
-        #i18n: Type of a facility confined to particular persons
+        #i18n: Type of organization: Private organization
         value_message('PRI', en='Private'),
-        #i18n: Type of a facility open to the public
+        #i18n: Type of organization: Public (government) organization
         value_message('PUB', en='Public'),
-        #i18n: Type of a facility: establishment of higher learning
+        #i18n: Type of organization: Organization associated with a university
         value_message('UNI', en='University'),
-        #i18n: Type of a facility committed to improving the health of
-        #i18n: a community
-        value_message('C/S', en='Health center'),
-        #i18n: Type of a facility: a health center that exists for a
-        #i18n: finite period of time.
-        value_message('C/S Temp', en='Temporary health center'),
-        #i18n: Type of a facility: a health center with available beds,
-        #i18n: as a hospital has.
-        value_message('CAL', en='Health center with beds'),
-        #i18n: Type of a facility: a health center without beds.
-        value_message('CSL', en='Health center without beds'),
-        #i18n: Type of facility construction: concrete with metal and/or mesh
-        #i18n: added to provide extra support against stresses
-        value_message('Reinforced concrete', en='Reinforced concrete'),
-        #i18n: Type of facility construction: walls constructed of clay brick
-        #i18n: or concrete block
-        value_message('Unreinforced masonry', en='Unreinforced masonry'),
-        #i18n: Type of facility construction: timber jointed together with nails
-        value_message('Wood frame', en='Wood frame'),
-        #i18n: Type of facility construction: sun-dried clay bricks
-        value_message('Adobe', en='Adobe'),
-        #i18n: Type of facility operational status: in working order
-        value_message('Operational', en='Operational'),
-        #i18n: Type of facility operational status: cannot perform surgeries
-        value_message('No surgical capacity', en='No surgical capacity'),
-        #i18n: Type of facility operational status: as functional as a field
-        #i18n: hospital
-        value_message('Field hospital', en='Field hospital'),
-        #i18n: Type of facility operational status: as functional as a field
-        #i18n: hospital next to a hospital
-        value_message('Field hospital co-located with hospital',
-                      en='Field hospital co-located with hospital'),
 
         # category
 
-        #i18n: Category of a health facility where medicine and medical
+        #i18n: Category of facility: Health center
+        value_message('C/S', en='Health center'),
+        #i18n: Category of facility: health center that exists for a
+        #i18n: finite period of time.
+        value_message('C/S Temp', en='Temporary health center'),
+        #i18n: Category of facility: a health center with available beds,
+        #i18n: as a hospital has.
+        value_message('CAL', en='Health center with beds'),
+        #i18n: Category of facility: a health center without beds.
+        value_message('CSL', en='Health center without beds'),
+        #i18n: Category of facility: a dispensary where medicine and medical
         #i18n: supplies are given out.
         value_message('DISP', en='Dispensary'),
-        #i18n: Category of a mobile self-sufficient health care facility.
+        #i18n: Category of facility: A mobile self-sufficient health facility.
         value_message('F Hospital', en='Field hospital'),
-        #i18n: Category of a health facility where patients receive
-        #i18n: treatment.
+        #i18n: Category of facility: Hospital
         value_message('HOP', en='Hospital'),
-        #i18n: Category of a health facility, existing for a finite
+        #i18n: Category of facility: Hospital existing for a finite
         #i18n: period of time.
         value_message('HOP Temp', en='Temporary hospital'),
-        #i18n: Category of a health facility with a particular specialty.
+        #i18n: Category of facility: A hospital with a particular specialty.
         value_message('HOP Spec', en='Specialized hospital'),
-        #i18n: Category of a moveable unit that provides a service.
+        #i18n: Category of facility: A moveable unit that provides a service.
         value_message('MOB', en='Mobile facility',),
-        #i18n: Category of a moveable unit that provides a particular
-        #i18n: service for a finite period of time
+        #i18n: Category of facility: A moveable unit that provides a particular
+        #i18n: service for a finite period of time.
         value_message('MOB Temp', en='Temporary mobile facility'),
-        #i18n: Category of a facility.
+        #i18n: Category of facility: Other.
         value_message('Other', en='Other'),
-        #i18n: Category of a facility.
+        #i18n: Category of facility: Unknown.
         value_message('Unknown', en='Unknown'),
+
+        # construction
+
+        #i18n: Type of facility construction: concrete with metal and/or mesh
+        #i18n: added to provide extra support against stresses
+        value_message('REINFORCED_CONCRETE', en='Reinforced concrete'),
+        #i18n: Type of facility construction: walls constructed of clay brick
+        #i18n: or concrete block
+        value_message('UNREINFORCED_MASONRY', en='Unreinforced masonry'),
+        #i18n: Type of facility construction: timber jointed together with nails
+        value_message('WOOD_FRAME', en='Wood frame'),
+        #i18n: Type of facility construction: sun-dried clay bricks
+        value_message('ADOBE', en='Adobe'),
+
+        # operational_status
+
+        #i18n: Facility operational status: in working order
+        value_message('OPERATIONAL', en='Operational'),
+        #i18n: Facility operational status: cannot perform surgeries
+        value_message('NO_SURGICAL_CAPACITY', en='No surgical capacity'),
+        #i18n: Facility operational status: as functional as a field hospital
+        value_message('FIELD_HOSPITAL', en='Field hospital'),
+        #i18n: Facility operational status: as functional as a field hospital
+        #i18n: next to a hospital
+        value_message('FIELD_WITH_HOSPITAL',
+                      en='Field hospital co-located with hospital'),
+        #i18n: Facility operational status: closed or in the process of closing
+        value_message('CLOSED_OR_CLOSING', en='Closed or closing'),
 
         # services
 
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: surgical specialty that focuses on abdominal organs
-        value_message('general_surgery', en='General surgery'),
+        value_message('GENERAL_SURGERY', en='General surgery'),
         #i18n: Service provided by a health facility 
         #i18n: Meaning: treats diseases and injury to bones, muscles, joints and
         #i18n: Meaning: tendons
-        value_message('orthopedics', en='Orthopedics'),
+        value_message('ORTHOPEDICS', en='Orthopedics'),
         #i18n: service provided by a health facility 
         #i18n: Meaning: surgery that involves the nervous system
-        value_message('neurosurgery', en='Neurosurgery'),
+        value_message('NEUROSURGERY', en='Neurosurgery'),
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: surgical specialty that focuses on arteries and veins
-        value_message('vascular_surgery', en='Vascular surgery'),
+        value_message('VASCULAR_SURGERY', en='Vascular surgery'),
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: deals with diagnosis and (non-surgical) treatment of
         #i18n: Meaning: diseases of the internal organs
-        value_message('general_medicine', en='General medicine'),
+        value_message('GENERAL_MEDICINE', en='General medicine'),
         #i18n: Service provided by a health facility. 
-        #i18n: Meaning: branch of medicine dealing with the heart and its diseases
-        value_message('cardiology', en='Cardiology'),
+        #i18n: Meaning: branch of medicine dealing with the heart
+        value_message('CARDIOLOGY', en='Cardiology'),
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: specializing in treating communicable diseases
-        value_message('infectious_disease', en='Infectious disease'),
+        value_message('INFECTIOUS_DISEASE', en='Infectious disease'),
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: branch of medicine dealing with infants and children
-        value_message('pediatrics', en='Pediatrics'),
+        value_message('PEDIATRICS', en='Pediatrics'),
         #i18n: Service provided by a health facility. 
         #i18n: care given after surgery until patient is discharged
-        value_message('postoperative_care', en='Postoperative care'),
+        value_message('POSTOPERATIVE_CARE', en='Postoperative care'),
         #i18n: services provided by a health facility 
         #i18n: Meaning: Obstetrics deals with childbirth and care of the mother.
         #i18n: Meaning: Gynecology deals with diseases and hygiene of women
-        value_message('obstetrics_gynecology', en='Obstetrics and gynecology'),
+        value_message('OBSTETRICS_GYNECOLOGY', en='Obstetrics and gynecology'),
         #i18n: Service provided by a health facility.
-        value_message('dialysis', en='Dialysis'),
+        value_message('DIALYSIS', en='Dialysis'),
         #i18n: Service provided by a health facility.
-        value_message('lab', en='Lab'),
+        value_message('LAB', en='Lab'),
         #i18n: Service provided by a health facility.
-        value_message('x_ray', en='X-ray'),
+        value_message('X_RAY', en='X-ray'),
         #i18n: Service provided by a health facility.
-        value_message('ct_scan', en='CT scan'),
+        value_message('CT_SCAN', en='CT scan'),
         #i18n: Service provided by a health facility.
-        value_message('blood_bank', en='Blood bank'),
+        value_message('BLOOD_BANK', en='Blood bank'),
         #i18n: Service provided by a health facility.
-        value_message('corpse_removal', en='Corpse removal'),
+        value_message('CORPSE_REMOVAL', en='Corpse removal'),
     ]
 
     for locale in os.listdir(settings.LOCALE_PATHS[0]):
@@ -337,3 +342,26 @@ def setup_new_datastore():
     setup_facility_types()
     setup_messages()
     setup_js_messages()
+
+def wipe_datastore(*kinds):
+    """Deletes everything in the datastore except Authorizations and Secrets.
+    If 'kinds' is given, deletes only those kinds of entities."""
+    for kind in kinds or [Attribute, FacilityType, Message, Dump,
+                          MinimalFacility, Facility, Report]:
+        while True:
+            keys = kind.all(keys_only=True).fetch(200)
+            if not keys:
+                break
+            logging.info('Deleting %s entities...' % kind.kind())
+            db.delete(keys)
+
+def reset_datastore():
+    """Wipes everything in the datastore except Authorizations and Secrets,
+    then sets up the datastore for new data."""
+    wipe_datastore()
+    setup_new_datastore()
+
+def add_auth(email='test@example.com', description='Test'):
+    """Adds an Authorization entity to the datastore."""
+    Authorization(email=email, description=description, nickname='Test',
+        affiliation='Test', user_roles=[':user', ':editor']).put()
