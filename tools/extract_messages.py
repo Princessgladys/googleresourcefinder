@@ -134,6 +134,11 @@ def parse_django_po(po_filename):
         if line.startswith('#:') or line.startswith('#.'):
             header_done = True
         if not header_done:
+            if line.startswith('"POT-Creation-Date'):
+                # The POT-Creation-Date line changes on every run to include
+                # the current date and time, creating unnecessary changesets.
+                # Skipping this line makes extract_messages idempotent.
+                continue
             header += line
             continue
         line = line.strip()
