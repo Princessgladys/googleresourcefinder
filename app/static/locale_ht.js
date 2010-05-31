@@ -24,8 +24,8 @@ locale = function() {
   //i18n: Label for every item in a list.
   messages.ALL = "Tout";
 
-  //i18n: Date at a give time (example: Jan 21, 2010 at 14:32 UTC-4)
-  messages.DATE_AT_TIME = "${DATE}   a ${TIME}";
+  //i18n: Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
+  messages.DATE_AT_TIME = "${DATE} a ${TIME}";
 
   //i18n: Local date format (example: Jan 21, 2010)
   messages.DATE_FORMAT_MEDIUM = "${MONTH} ${DAY}, ${YEAR}";
@@ -45,7 +45,7 @@ locale = function() {
   messages.DISTRICT = "Distri";
 
   //i18n: Error message for required field.
-  messages.ERROR_FIELD_IS_REQUIRED = "Field se yo mande yo.";
+  messages.ERROR_FIELD_IS_REQUIRED = "Dom\u00e8n sa obligatwa.";
 
   //i18n: Error message for invalid latitude.
   messages.ERROR_LATITUDE_INVALID = "Latitd dwe ant -90 ak 90";
