@@ -4,4 +4,14 @@ pushd "$(dirname $0)" >/dev/null && source common.sh && popd >/dev/null
 set_up_symlinks
 update_hgignore
 
+echo
+echo "--- Updating translations"
+cd $APP_DIR
+../tools/extract_messages ../tools/setup.py static/locale.js
+cd $PROJECT_DIR
+tools/compile_messages
+tools/find_missing_translations
+
+echo
+echo "--- Running Selenium tests"
 $PYTHON $TOOLS_DIR/server_tests.py "$@"

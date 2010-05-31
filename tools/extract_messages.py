@@ -45,8 +45,8 @@ so they are not used.
 Instead of running this script directly, use the 'extract_messages' shell
 script, which sets up the PYTHONPATH and other necessary environment variables.
 
-Although this can be run from any directory, the filenames on the command
-line must be specified relative to the app/ directory.
+NOTE: Although this can be run from any directory, the filenames on the
+command line must be specified relative to the app/ directory.
 
 Example:
     ../tools/extract_messages ../tools/setup.py static/locale.js
@@ -71,12 +71,16 @@ PATTERNS = {
         'meaning': r'\s*//i18n_meaning:\s*(.*)'
     },
     'py' : {
-        'start': r'\s*[a-z]+_message\(',
+        'start': r'\s*[a-z]+_message\(',  # precedes a message in setup.py
         'string': r'en\s*=' + STRING_LITERAL_PATTERN,
         'end': r'\),?\s*$',
         'description': r'^\s*#i18n:\s*(.*)',
         'meaning': r'^\s*#i18n_meaning:\s*(.*)'
-    }
+    },
+    'html': {
+        'description': r'^\s*#i18n:\s*(.*)',
+        'meaning': r'^\s*#i18n_meaning:\s*(.*)'
+    },
 }
 
 class Message:
@@ -107,12 +111,8 @@ class Message:
 def django_makemessages():
     """Run django's makemessages routine to extract messages from python and
        html files."""
-    cwd = os.getcwd()
-    (stdin, stdout, stderr) = os.popen3(
-        os.path.join(DJANGO_BIN, 'make-messages.py') + ' -a', 't')
-    errors = stderr.read()
-    if errors:
-        raise SystemExit(errors)
+    if os.system(os.path.join(DJANGO_BIN, 'make-messages.py') + ' -a'):
+        raise SystemExit('make-messages.py failed')
 
 def parse_django_po(po_filename):
     """Return the header from the django-generated .po file
@@ -182,34 +182,42 @@ def parse_django_po(po_filename):
     return (header, message_to_ref)
 
 def parse_po_tagline(line, tag=''):
-    """Parse a tag line from a po file."""
+    """Parses a line consisting of the given tag followed by a quoted string."""
     match = re.match((tag and (tag + ' ') or '') + DJANGO_STRING_PATTERN, line)
-    return len(match.groups()) > 0 and match.group(1) or ''
+    return match and match.group(1) or ''
 
 def find_description_meaning(refs):
-    """Horribly inefficient search for description and meaning strings,
-       required because django makemessages doesn't parse them out for us"""
-    patterns = PATTERNS['py']
+    """Given a list of references (in the form "filename:line_num") to where a
+    message occurs, find the description and meaning in comments preceding any
+    occurrence of the message and returns a (description, meaning) pair.
+    (Horribly inefficient, but needed because django makemessages doesn't
+    parse them out for us.)"""
+    description = meaning = ''
     for ref in refs:
         (file, line_num) = ref.split(':')
         line_num = int(line_num)
+
         # django makemessages hacks in support for html files by appending .py
-        # to the end and treating them like py files.  Remove that hack here
+        # to the end and treating them like py files.  Remove that hack here.
         file = file.replace('.html.py', '.html')
 
-        # Hold the description and meaning, if we find them
-        current_description = []
-        current_meaning = []
+        # Look for description/meaning patterns appropriate for the file type.
+        patterns = PATTERNS[file.split('.')[-1]]
 
+        # Hold the description and meaning, if we find them
+        description_lines = []
+        meaning_lines = []
+
+        # Start at the line before the message and proceed backwards.
         lines = open(file).readlines()
         for line in reversed(lines[:line_num - 1]):
             match = re.match(patterns['description'], line)
             if match:
-                current_description.insert(0, match.group(1))
+                description_lines.insert(0, match.group(1))
                 continue
             match = re.match(patterns['meaning'], line)
             if match:
-                current_meaning.insert(0, match.group(1))
+                meaning_lines.insert(0, match.group(1))
                 continue
             # For html files, need to skip over the django end comment marker
             # to get to the meaning lines
@@ -218,10 +226,10 @@ def find_description_meaning(refs):
             # The line was not part of a message description or meaning comment,
             # so it must not exist
             break
-        if current_description or current_meaning:
-            return (' '.join(current_description), ' '.join(current_meaning))
+        description = description or ' '.join(description_lines)
+        meaning = meaning or ' '.join(meaning_lines)
 
-    return ('', '')
+    return (description, meaning)
 
 def parse_file(input_filename):
     """Parses the given file, extracting messages. Returns a list of tuples
@@ -292,8 +300,9 @@ def merge(msg_to_ref, ref_msg_pairs):
         msg_to_ref.setdefault(msg, set()).add(ref)
 
 def output_po_file(output_filename, header, msg_to_ref):
-    """Write a po file to output from the given header and dict from message
-       to list of file:line_num references where the message appears."""
+    """Write a po file to the file specified by output_filename, using the
+    given header text and a msg_to_ref dictionary that maps each message to
+    a list of "filename:line_num" references where the message appears."""
     output = codecs.open(output_filename, 'w', 'utf-8')
     output.write(header)
 
@@ -302,7 +311,7 @@ def output_po_file(output_filename, header, msg_to_ref):
         description = message.description
         meaning = message.meaning
         if not description and not meaning:
-            description = 'TODO: Message description and/or meaning'
+            description = 'TODO: Add missing message description or meaning'
         print >>output, '#. %s' % description
         print >>output, '#: %s' % ' '.join(refs)
         if has_sh_placeholders(msgid):
