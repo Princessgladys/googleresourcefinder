@@ -6,11 +6,7 @@ update_hgignore
 
 echo
 echo "--- Updating translations"
-cd $APP_DIR
-../tools/extract_messages ../tools/setup.py static/locale.js
-cd $PROJECT_DIR
-tools/compile_messages
-tools/find_missing_translations
+$TOOLS_DIR/update_messages
 
 echo
 echo "--- Running Selenium tests"
