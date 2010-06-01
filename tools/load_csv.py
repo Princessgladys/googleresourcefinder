@@ -304,7 +304,7 @@ def parse_datetime(timestamp):
     return datetime.datetime(
         int(year), int(month), int(day), int(hour), int(minute), int(second))
 
-def load_shoreland(filename, observed)
+def load_shoreland(filename, observed):
     """Loads a Shoreland CSV file using defaults for thee URL and author."""
     if isinstance(observed, basestring):
         observed = parse_datetime(observed)

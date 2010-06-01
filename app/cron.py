@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utils import *
 from google.appengine.api.labs import taskqueue
+
+from utils import *
 
 class Job(db.Model):
     """A periodically running job."""
@@ -40,8 +41,9 @@ def get_datetimes():
     that cron.py has been run for every minute up to and including t."""
     now = truncate_to_minute(DateTime.utcnow())
     last_run = Timestamp.get_by_key_name('cron')
+    
     if last_run is None:
-        logging.debug('cron.py: initializing timestamp to %s' % to_isotime(now))
+        logging.info('cron.py: initializing timestamp to %s' % to_isotime(now))
         last = now
     else:
         last = truncate_to_minute(last_run.timestamp)
@@ -69,15 +71,16 @@ def make_task_name(text):
 class Cron(Handler):
     def get(self):
         headers={'Content-Type': 'application/x-www-form-urlencoded'}
+        taskqueue.add(url='/send_mail_updates')
         for datetime in db.run_in_transaction(get_datetimes):
-            logging.debug('cron.py: checking %s' % to_isotime(datetime))
-            for job in Job.all():
-                if job_should_run(job, datetime):
-                    name = make_task_name('cron-%s--%s' % (
-                        to_isotime(datetime), job.description))
-                    taskqueue.add(name=name, url=job.url, payload=job.payload,
-                                  method=job.method, headers=headers)
-                    logging.info('cron.py: queued %s' % name)
+			logging.info('cron.py: checking %s' % to_isotime(datetime))
+			for job in Job.all():
+				if job_should_run(job, datetime):
+					name = make_task_name('cron-%s--%s' % (
+						to_isotime(datetime), job.description))
+					taskqueue.add(name=name, url=job.url, payload=job.payload,
+								  method=job.method, headers=headers)
+					logging.info('cron.py: queued %s' % name)
 
 if __name__ == '__main__':
     run([('/cron', Cron)], debug=True)
