@@ -115,13 +115,9 @@
             </td>
             <td class="value">
               {% comment %}
-              #i18n: Latitude of a location on earth.
+              #i18n: Geographic coordinates of a location on earth.
               {% endcomment %}
-              {% trans "Latitude:" %} {{special.location.raw.lat|escape}}<br>
-              {% comment %}
-              #i18n: Longitude of a location on earth.
-              {% endcomment %}
-              {% trans "Longitude:" %} {{special.location.raw.lon|escape}}
+              {% trans "Location:" %} {{special.location.value|escape}}
             </td>
           </tr>
           {% for attribute in general %}
