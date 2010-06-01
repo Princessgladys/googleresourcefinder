@@ -303,6 +303,7 @@ def setup_js_messages():
         django.utils.translation.activate(locale)
         output_file = os.path.join(js_path, 'locale_%s.js'
                                    % django.utils.translation.get_language())
+        print >>sys.stderr, 'Writing ' + output_file
         output = open(output_file, 'w')
         current_msg = ''
         current_msg_line = ''
