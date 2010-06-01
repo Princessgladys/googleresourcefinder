@@ -18,6 +18,8 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 
+from utils import _
+
 import datetime
 import email
 import logging
@@ -28,22 +30,24 @@ def send_updates():
 	""" Sends out updates to users based on what facilities they are
 		subscribed to and which ones have been updated.
 	"""
-	users = get_users_to_email()
+	(users, locale) = get_users_to_email()
 	if not users: return
 	
 	for email, facilities in users.iteritems():
-		send_update(email, facilities)
+		send_update(email, facilities, locale[email])
 	
 def get_users_to_email():
 	""" Gathers a list of the facilities that users are subscribed to
 		and checks if it is time to e-mail them yet.
 	""" 
 	users = {}
+	locale = {}
 	
 	for alert in model.Alert.all(): # compile list of facility names per user
 		fac = model.db.Model.get(alert.facility_id)
 		(updated, values) = has_update(alert, fac)
 		if updated:
+			locale[alert.user_email] = alert.locale
 			if alert.user_email not in users.keys():
 				users[alert.user_email] = {}
 			if fac.get_value('title') not in users[alert.user_email].keys():
@@ -54,10 +58,12 @@ def get_users_to_email():
 		else:
 			continue
 
-	return users
+	return users, locale
 	
-def send_update(email, facilities):
+def send_update(email, facilities, locale):
 	""" Sends an update to a specific user. """
+	django.utils.translation.activate(locale)
+	
 	body = ''
 	for key in facilities.keys():
 		# will work with jeromy to fix UI; for testing purposes:
@@ -69,7 +75,7 @@ def send_update(email, facilities):
 	message = mail.EmailMessage()
 	message.sender = 'updates@resource-finder.appspotmail.com'
 	message.to = email
-	message.subject = 'Resource Finder Facility Updates'
+	message.subject = _('Resource Finder Facility Updates')
 	message.body = body
 
 	message.send()	

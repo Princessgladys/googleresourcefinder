@@ -229,6 +229,7 @@ class Dump(db.Model):
 class Alert(db.Model):
 	"""A record of the all users with active subscriptions to facilities."""
 	user_email = db.StringProperty(required=True) # user to alert
+	locale = db.StringProperty(required=True) # user locale
 	facility_id = db.StringProperty(required=True) # key of facility
 	last_sent = db.DateTimeProperty(required=True, auto_now_add=True) # last send time
 	frequency = db.StringProperty(required=True, choices=[
