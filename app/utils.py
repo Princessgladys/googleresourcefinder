@@ -72,12 +72,12 @@ def validate_yes(text):
 
 def validate_role(text):
     return text in access.ROLES and text
-
+    	
 def validate_float(text):
-    try:
-        return float(text)
-    except ValueError:
-        return None
+	try:
+		return float(text)
+	except ValueError:
+		return None
 
 def get_message(namespace, name):
     message = model.Message.all().filter(
