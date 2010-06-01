@@ -45,7 +45,7 @@ locale = function() {
   messages.DISTRICT = "Distri";
 
   //i18n: Error message for required field.
-  messages.ERROR_FIELD_IS_REQUIRED = "Field se yo mande yo.";
+  messages.ERROR_FIELD_IS_REQUIRED = "Dom\u00e8n sa obligatwa.";
 
   //i18n: Error message for invalid latitude.
   messages.ERROR_LATITUDE_INVALID = "Latitd dwe ant -90 ak 90";

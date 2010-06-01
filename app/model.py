@@ -213,7 +213,7 @@ class Message(db.Expando):
       'attribute_name',  # name is an Attribute's key_name
       'attribute_value', # name is a value name in a choice or multi attribute
       'facility_type' # name is a FacilityType's key name
-    ])
+    ])	
     name = db.StringProperty()
     # additional properties for each language (named by language code)
 
@@ -225,6 +225,18 @@ class Dump(db.Model):
     base = db.SelfReference()  # if present, this dump is a clone of base
     source = db.StringProperty()  # URL identifying the source
     data = db.BlobProperty()  # received raw data
+    
+class Alert(db.Model):
+	"""A record of the all users with active subscriptions to facilities."""
+	user_email = db.StringProperty(required=True) # user to alert
+	facility_id = db.StringProperty(required=True) # key of facility
+	last_sent = db.DateTimeProperty(required=True, auto_now_add=True) # last send time
+	frequency = db.StringProperty(required=True, choices=[
+		'1/min',
+		'1/day',
+		'1/week',
+		'1/month'
+	]) # frequency at which to send updates
 
 def value_or_none(value):
     """Converts any false value other than 0 or 0.0 to None."""
