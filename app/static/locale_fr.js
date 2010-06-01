@@ -72,6 +72,13 @@ locale = function() {
   //i18n: A place that provides a particular service
   messages.FACILITY = "\u00c9tablissement";
 
+  //i18n: Identifier for a facility
+  messages.FACILITY_ID = "ID \u00e9tablissement\u00a0:";
+
+  //i18n: Proper name of an ID for a healthcare facility, no translation
+  //i18n: necessary.
+  messages.HEALTHC_ID = "HealthC ID\u00a0:";
+
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "janv. f\u00e9vr. mars avr. mai juin juil. ao\u00fbt sept. oct. nov. d\u00e9c.".split(' ');

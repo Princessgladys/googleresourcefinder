@@ -734,6 +734,7 @@ function update_print_facility_list() {
       var address;
       var general_info;
       var healthc_id;
+      var pcode;
       if (facility) {
         var values = facility.values;
         total_beds = values[attributes_by_name.total_beds];
@@ -741,6 +742,7 @@ function update_print_facility_list() {
         address = values[attributes_by_name.address];
         general_info = values[attributes_by_name.contact_name];
         healthc_id = values[attributes_by_name.healthc_id];
+        pcode = values[attributes_by_name.pcode];
         var phone = values[attributes_by_name.phone];
         if (phone) {
           general_info = (general_info ? general_info + ' ' : '')
@@ -755,8 +757,9 @@ function update_print_facility_list() {
             KM: format_number(dist_meters * METERS_TO_KM, 2)});
       }
       var title = facility.values[attributes_by_name.title];
-      var facility_name = title + ' - ID:' + facility.name
-        + ' - HealthC ID: ' + render(healthc_id);
+      var facility_name = title + ' - '
+        + locale.HEALTHC_ID() + ' ' + render(healthc_id)
+        + ' - ' + locale.FACILITY_ID() + ' ' + render(pcode);
       cells.push($$('td', {'class': 'facility-beds-open'}, render(open_beds)));
       cells.push($$('td', {'class': 'facility-beds-total'},render(total_beds)));
       cells.push($$('td', {'class': 'facility-title'}, render(facility_name)));
