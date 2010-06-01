@@ -426,9 +426,11 @@ class Edit(utils.Handler):
                                'a': get_message('attribute_name',
                                                 attribute.key().name())})
                     has_changes = True
+                    				  			 
                     apply_change(facility, minimal_facility, report,
                                  facility_type, request, attribute,
                                  change_metadata)
+                    	
             if has_changes:
                 db.put([report, facility, minimal_facility])
 

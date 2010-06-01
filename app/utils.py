@@ -72,12 +72,12 @@ def validate_yes(text):
 
 def validate_role(text):
     return text in access.ROLES and text
-
+    	
 def validate_float(text):
-    try:
-        return float(text)
-    except ValueError:
-        return None
+	try:
+		return float(text)
+	except ValueError:
+		return None
 
 def get_message(namespace, name):
     message = model.Message.all().filter(
@@ -166,7 +166,8 @@ class Handler(webapp.RequestHandler):
             self.params.lang, self.params.lang)
         self.response.headers.add_header(
             'Set-Cookie', 'django_language=%s' % self.params.lang)
-        django.utils.translation.activate(self.params.lang.replace('-', '_'))
+        django.utils.translation.activate(django.utils.translation.to_locale(
+        	self.params.lang))
         self.response.headers.add_header('Content-Language', self.params.lang)
 
     def handle_exception(self, exception, debug_mode):
