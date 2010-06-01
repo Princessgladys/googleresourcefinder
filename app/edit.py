@@ -165,11 +165,11 @@ class BoolAttributeType(AttributeType):
         else:
             value = ''
         for choice, title in [
-            #i18n: Form option not specified
+            #i18n: Form option to indicate that a value is not specified
             ('', to_unicode(_('(unspecified)'))),
-            #i18n: Form option for agreement
+            #i18n: Form option for a true Boolean value
             ('TRUE', to_unicode(_('Yes'))),
-            #i18n: Form option for disagreement
+            #i18n: Form option for a false Boolean value
             ('FALSE', to_unicode(_('No')))]:
             selected = (value == choice) and 'selected' or ''
             options.append('<option value="%s" %s>%s</option>' %
@@ -191,7 +191,7 @@ class ChoiceAttributeType(AttributeType):
             value = ''
         for choice in [''] + attribute.values:
             message = get_message('attribute_value', choice)
-            #i18n: Form option not specified
+            #i18n: Form option to indicate that a value is not specified
             title = html_escape(message or to_unicode(_('(unspecified)')))
             selected = (value == choice) and 'selected' or ''
             options.append('<option value="%s" %s>%s</option>' %
@@ -206,7 +206,7 @@ class MultiAttributeType(AttributeType):
         checkboxes = []
         for choice in attribute.values:
             message = get_message('attribute_value', choice)
-            #i18n: Form option not specified
+            #i18n: Form option to indicate that a value is not specified
             title = html_escape(message or to_unicode(_('(unspecified)')))
             checked = (choice in value) and 'checked' or ''
             id = name + '.' + choice
