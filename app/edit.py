@@ -115,7 +115,7 @@ class ContactAttributeType(AttributeType):
             _('E-mail'), self.text_input(name + '.email', contact_email),
         )
 
-    def to_stored_value(self, name, value, request, attribute):
+    def parse_input(self, report, name, value, request, attribute):
         contact = (request.get(name + '.name', '') + '|' +
                    request.get(name + '.phone', '') + '|' +
                    request.get(name + '.email', ''))
