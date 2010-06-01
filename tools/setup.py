@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from access import *
 from extract_messages import parse_message, PATTERNS
 from model import *
 from utils import *
@@ -30,6 +31,7 @@ def setup_facility_types():
         attr('str', 'title', edit_role='supereditor'),
         attr('str', 'alt_title', edit_role='supereditor'),
         attr('int', 'healthc_id', edit_role='supereditor'),
+        attr('int', 'pcode', edit_role='supereditor'),
         attr('int', 'available_beds'),
         attr('int', 'total_beds'),
         attr('multi', 'services',
@@ -76,9 +78,10 @@ def setup_facility_types():
     hospital = FacilityType(
         key_name='hospital',
         attribute_names=[a.key().name() for a in attributes],
-        minimal_attribute_names=['title', 'healthc_id', 'available_beds',
-                                 'total_beds', 'services', 'contact_name',
-                                 'phone', 'address', 'location'])
+        minimal_attribute_names=['title', 'pcode', 'healthc_id',
+                                 'available_beds', 'total_beds', 'services',
+                                 'contact_name', 'phone', 'address',
+                                 'location'])
     db.put(hospital)
 
 
@@ -95,6 +98,9 @@ def setup_messages():
         name_message('title', en='Facility name'),
         #i18n: Alternate name of a facility
         name_message('alt_title', en='Alternate facility name'),
+        #i18n: Proper name of an ID for a healthcare facility defined by the
+        #i18n: Ministry of Health in Haiti, no translation necessary.
+        name_message('pcode', en='Facility ID'),
         #i18n: Proper name of an ID for a healthcare facility, no translation
         #i18n: necessary.
         name_message('healthc_id', en='HealthC ID'),

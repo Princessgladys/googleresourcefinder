@@ -27,7 +27,16 @@ SHORELAND_AFFILIATION = 'Shoreland Inc.'
 def convert_paho_record(record):
     """Converts a dictionary of values from one row of a PAHO CSV file
     into a dictionary of ValueInfo objects for our datastore."""
-    key_name = 'mspphaiti.org/' + record['PCode']
+
+    title = (record['Fac_NameFr'].strip() or record['NomInstitu'].strip())
+
+    if not record.get('HealthC_ID'):
+        # TODO(shakusa) Fix this. We should be importing all facilities.
+        logging.warn('Skipping %r (%s): Invalid HealthC_ID: "%s"' % (
+            title, record.get('PCode'), record.get('HealthC_ID')))
+        return None, None, None
+
+    key_name = 'mspphaiti.org/' + record['HealthC_ID']
     title = (record['Fac_NameFr'].strip() or record['NomInstitu'].strip())
     alt_title = (title == record['Fac_NameFr'].strip() and
                  record['NomInstitu'].strip() or '')
@@ -46,6 +55,7 @@ def convert_paho_record(record):
         'healthc_id': ValueInfo(
             record['HealthC_ID'],
             comment=record['AlternateHealthCIDDeleted']),
+        'pcode': ValueInfo(record['PCode']),
         'organization': ValueInfo(record['Oorganisat']),
         'department': ValueInfo(record['Departemen']),
         'district': ValueInfo(record['DistrictNom']),
@@ -76,8 +86,16 @@ def convert_paho_record(record):
 def convert_shoreland_record(record):
     """Converts a dictionary of values from one row of a Shoreland CSV file
     into a dictionary of ValueInfo objects for our datastore."""
-    key_name = 'mspphaiti.org/' + record['facility_pcode']
     title = record['facility_name'].strip()
+
+    if not record.get('facility_healthc_id'):
+        # TODO(shakusa) Fix this. We should be importing all facilities.
+        logging.warn('Skipping %r (%s): Invalid HealthC_ID: "%s"' % (
+            title, record.get('facility_pcode'),
+            record.get('facility_healthc_id')))
+        return None, None, None
+
+    key_name = 'mspphaiti.org/' + record['facility_healthc_id']
     alt_title = record['alt_facility_name'].strip()
     try:
         latitude = float(record['latitude'])
@@ -123,6 +141,7 @@ def convert_shoreland_record(record):
         'alt_title': ValueInfo(alt_title),
         'healthc_id': ValueInfo(record['facility_healthc_id']),
             # TODO(kpy) comment=record['AlternateHealthCIDDeleted']
+        'pcode': ValueInfo(record['facility_pcode']),
         'available_beds': ValueInfo(
             record['available_beds'] and int(record['available_beds'])),
         'total_beds': ValueInfo(
@@ -304,7 +323,7 @@ def parse_datetime(timestamp):
     return datetime.datetime(
         int(year), int(month), int(day), int(hour), int(minute), int(second))
 
-def load_shoreland(filename, observed)
+def load_shoreland(filename, observed):
     """Loads a Shoreland CSV file using defaults for thee URL and author."""
     if isinstance(observed, basestring):
         observed = parse_datetime(observed)
