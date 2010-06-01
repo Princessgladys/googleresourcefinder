@@ -80,8 +80,8 @@ rf.get_services_from_values = function(values) {
 
 rf.get_services = function(facility) {
   var services = '';
-  if (facility.last_report) {
-    var values = facility.last_report.values;
+  if (facility) {
+    var values = facility.values;
     services = rf.get_services_from_values(values);
   }
   return services;
@@ -300,12 +300,12 @@ function maybe_selected(selected) {
   return selected ? ' selected' : '';
 }
 
-function make_icon(title, status, detail) {
+function make_icon(title, status, detail, opt_icon, opt_icon_size) {
   var text = detail ? title : '';
   var text_size = detail ? 10 : 0;
   var text_fill = STATUS_TEXT_COLORS[status];
-  var icon = 'greek_cross_4w10';
-  var icon_size = '12';
+  var icon = opt_icon || 'greek_cross_6w14';
+  var icon_size = opt_icon_size || '16';
   var icon_fill = STATUS_ICON_COLORS[status];
   var icon_outline = 'fff';
   var params = [
@@ -343,9 +343,9 @@ function initialize_map() {
   info = new google.maps.InfoWindow();
 
   var cluster_style = {
-    url: 'static/greek_cross36.png',
-    height: 36,
-    width: 36,
+    url: make_icon(null, 1, null, 'greek_cross_12w30', '32'),
+    height: 32,
+    width: 32,
     opt_textColor: '#fff',
     Z: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
   };
@@ -437,11 +437,12 @@ function convert_markers_for_print() {
 function initialize_markers() {
   for (var f = 1; f < facilities.length; f++) {
     var facility = facilities[f];
-    var location = facility.location;
+    var location = facility.values[attributes_by_name.location];
+    var title = facility.values[attributes_by_name.title];
     markers[f] = new google.maps.Marker({
       position: new google.maps.LatLng(location.lat, location.lon),
-      icon: make_icon(facility.title, STATUS_UNKNOWN, false),
-      title: facility.title
+      icon: make_icon(title, STATUS_UNKNOWN, false),
+      title: title
     });
     if (!print) {
       google.maps.event.addListener(markers[f], 'click', facility_selector(f));
@@ -577,7 +578,7 @@ function initialize_print_headers() {
   var local_facilities = facilities.length - 1;  // ignore the selected one
   var available_facilities = 0;
   for (var i = 1; i < facilities.length; i++) {
-    var values = facilities[i].last_report.values;
+    var values = facilities[i].values;
     if (values && values[attributes_by_name.available_beds] > 0) {
       available_facilities++;
     }
@@ -615,7 +616,7 @@ function update_map_bounds(division_i) {
   var bounds = new google.maps.LatLngBounds();
   for (var i = 0; i < facility_is.length; i++) {
     var facility = facilities[facility_is[i]];
-    var location = facility.location;
+    var location = facility.values[attributes_by_name.location];
     if (location && facility.visible) {
       bounds.extend(new google.maps.LatLng(location.lat, location.lon));
     }
@@ -632,7 +633,8 @@ function update_facility_icons() {
     if (markers[f]) {
       var facility = facilities[f];
       var s = facility_status_is[f];
-      var icon_url = make_icon(facility.title, s, detail);
+      var title = facility.values[attributes_by_name.title];
+      var icon_url = make_icon(title, s, detail);
       facility.visible = false;
       if (s == STATUS_GOOD) {
         markers[f].setIcon(icon_url);
@@ -690,10 +692,11 @@ function update_facility_list() {
         onmouseover: hover_activator('facility-' + f),
         onmouseout: hover_deactivator('facility-' + f)
       });
-      var cells = [$$('td', {'class': 'facility-title'}, facility.title)];
-      if (facility.last_report) {
+      var title = facility.values[attributes_by_name.title];
+      var cells = [$$('td', {'class': 'facility-title'}, title)];
+      if (facility) {
         for (var c = 1; c < summary_columns.length; c++) {
-          var value = summary_columns[c].get_value(facility.last_report.values);
+          var value = summary_columns[c].get_value(facility.values);
           cells.push($$('td', {'class': 'value column_' + c}, value));
         }
       } else {
@@ -731,8 +734,8 @@ function update_print_facility_list() {
       var address;
       var general_info;
       var healthc_id;
-      if (facility.last_report) {
-        var values = facility.last_report.values;
+      if (facility) {
+        var values = facility.values;
         total_beds = values[attributes_by_name.total_beds];
         open_beds = values[attributes_by_name.available_beds];
         address = values[attributes_by_name.address];
@@ -751,7 +754,8 @@ function update_print_facility_list() {
             MILES: format_number(dist_meters * METERS_TO_MILES, 1), 
             KM: format_number(dist_meters * METERS_TO_KM, 2)});
       }
-      var facility_name = facility.title + ' - ID:' + facility.name
+      var title = facility.values[attributes_by_name.title];
+      var facility_name = title + ' - ID:' + facility.name
         + ' - HealthC ID: ' + render(healthc_id);
       cells.push($$('td', {'class': 'facility-beds-open'}, render(open_beds)));
       cells.push($$('td', {'class': 'facility-beds-total'},render(total_beds)));
@@ -798,16 +802,16 @@ function align_header_with_table(thead, tbody) {
 // Determine the status of each facility according to the user's filters.
 function update_facility_status_is() {
   for (var f = 1; f < facilities.length; f++) {
-    var report = facilities[f].last_report;
+    var facility = facilities[f];
     if (selected_filter_attribute_i <= 0) {
       facility_status_is[f] = STATUS_GOOD;
-    } else if (!report) {
+    } else if (!facility) {
       facility_status_is[f] = STATUS_UNKNOWN;
     } else {
       facility_status_is[f] = STATUS_BAD;
       var a = selected_filter_attribute_i;
       if (attributes[a].type === 'multi') {
-        if (contains(report.values[a] || [], selected_filter_value)) {
+        if (contains(facility.values[a] || [], selected_filter_value)) {
           facility_status_is[f] = STATUS_GOOD;
         }
       } else if (report.values[a] === selected_filter_value) {
@@ -909,7 +913,6 @@ function disable_print_link() {
   }
   print_link.href = 'javascript:void(0)';
   print_link.title = locale.PRINT_DISABLED_TOOLTIP();
-  print_link.className = 'print-link-disabled';
   print_link.onclick = function() {
     // TODO: Use a nice model dialog instead of alert
     alert(locale.PRINT_DISABLED_TOOLTIP());
@@ -926,10 +929,11 @@ function enable_print_link() {
   }
   var f = selected_facility;
   var PRINT_URL = '/?print=yes&lat=${LAT}&lon=${LON}&rad=${RAD}';
-  print_link.href = render(PRINT_URL, {LAT: f.location.lat, LON: f.location.lon,
+  var location = f.values[attributes_by_name.location];
+  var title = f.values[attributes_by_name.title];
+  print_link.href = render(PRINT_URL, {LAT: location.lat, LON: location.lon,
        RAD: PRINT_RADIUS_MILES / METERS_TO_MILES});
-  print_link.title = locale.PRINT_ENABLED_TOOLTIP({FACILITY_NAME: f.title});
-  print_link.className = '';
+  print_link.title = locale.PRINT_ENABLED_TOOLTIP({FACILITY_NAME: title});
   print_link.onclick = null;
 }
 
@@ -1133,28 +1137,33 @@ function select_facility(facility_i, ignore_current) {
   }
 
   // Pop up the InfoWindow on the selected clinic.
-  var last_updated = 'No reports received';
-  var last_report = selected_facility.last_report;
-  if (last_report) {
-    var ymd = last_report.date.split('-');
-    last_updated = locale.UPDATED() + ' ' + locale.DATE_FORMAT_MEDIUM(
-      {MONTH: locale.MONTH_ABBRS[ymd[1] - 1](), DAY: (ymd[2] - 0),
-       YEAR: ymd[0]});
-  }
   info.close();
 
-  division_title = divisions[selected_facility.division_i].title;
-  attribute_is = facility_types[selected_facility.type].attribute_is;
-
-  info.setContent(to_html(rf.bubble.get_html(
-      selected_facility, attribute_is, last_updated)));
-  info.open(map, markers[selected_facility_i]);
-
-  // This call sets up the tabs and should be called after the DOM is created.
-  jQuery('#bubble-tabs').tabs();
+  show_loading(true);
+  jQuery.ajax({
+    url: 'bubble?facility_name=' + selected_facility.name,
+    type: 'GET',
+    timeout: 10000,
+    error: function(request, textStatus, errorThrown){
+      log(textStatus + ', ' + errorThrown);
+      alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
+      show_loading(false);
+    },
+    success: function(result){
+      info.setContent(result);
+      info.open(map, markers[selected_facility_i]);
+      // Sets up the tabs and should be called after the DOM is created.
+      jQuery('#bubble-tabs').tabs();
+      show_loading(false);
+    }
+  });
 
   // Enable the Print link
   enable_print_link();
+}
+
+function show_loading(show) {
+  $('loading').style.display = show ? '' : 'none';
 }
 
 // ==== Load data
@@ -1163,7 +1172,6 @@ function load_data(data) {
   attributes = data.attributes;
   facility_types = data.facility_types;
   facilities = data.facilities;
-  divisions = data.divisions;
   messages = data.messages;
   total_facility_count = data.total_facility_count;
 
@@ -1182,10 +1190,10 @@ function load_data(data) {
   for (var i = 1; i < facilities.length; i++) {
     facility_is.push(i);
   }
-  divisions[0] = {
+  divisions = [{
     title: 'All arrondissements',
     facility_is: facility_is
-  };
+  }];
 
   if (!print) {
     // The print link is not shown in print view, no need to disable it
@@ -1214,6 +1222,7 @@ function load_data(data) {
     handle_window_resize();
   }
 
+  show_loading(false);
   log('Data loaded.');
 
   // TODO: Test further and re-enable
@@ -1250,14 +1259,14 @@ function set_facility_attribute(facility_name, attribute_name, value) {
   var attribute_i = attributes_by_name[attribute_name];
   if (facility_i) {
     var facility = facilities[facility_i];
-    if (!facility.last_report) {
+    if (!facility) {
       var nulls = [];
       for (var a = 0; a < attributes.length; a++) {
         nulls.push(null);
       }
-      facility.last_report = {values: nulls};
+      facility.values = nulls;
     }
-    facility.last_report.values[attribute_i] = value;
+    facility.values[attribute_i] = value;
   }
   update_facility_row(facility_i);
 }
@@ -1296,7 +1305,7 @@ function update_facility_row(facility_i) {
   var facility = facilities[facility_i];
   for (var c = 1; c < summary_columns.length; c++) {
     cell = cell.nextSibling;
-    var value = summary_columns[c].get_value(facility.last_report.values);
+    var value = summary_columns[c].get_value(facility.values);
     set_children(cell, value);
     cell.className = 'value column_' + c;
   }

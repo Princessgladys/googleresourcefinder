@@ -1,4 +1,4 @@
-# Copyright 2009-2010 by Ka-Ping Yee
+# Copyright 2010 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,19 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utils import *
-from html import *
+import utils
 
-class Dump(Handler):
+class Help(utils.Handler):
     def get(self):
-        self.write('''
-<!doctype html public "-//W3C//HTML 4.01 Transitional//EN">
-<link rel=stylesheet href="static/dump.css">
-''')
-        self.write('<p><dl>')
-        for entity in db.Query():
-            self.write('<dd>' + html_repr(entity))
-        self.write('</dl>')
+        self.render('locale/en/help.html', params=self.params)
 
 if __name__ == '__main__':
-    run([('/dump', Dump)], debug=True)
+    utils.run([('/help', Help)], debug=True)

@@ -21,14 +21,19 @@ tr { vertical-align: baseline; }
 th { text-align: left; }
 .facility-info, .facility-info td, .legend-label { font-size: 11px; }
 .caption { font-size: 11px; font-weight: normal; color: #aaa; }
+.sep { padding: 0 2px }
 
 /* Header line */
 .header { font-size: 13px; }
 .header .user { position: absolute; right: 0px; top: 0px; padding: 4px 8px; 
                 z-index: 1 }
+.header .lang { position: absolute; left: 400px; top: 0px; padding: 2px 8px;
+                z-index: 1 }
 .header .title { position: absolute: left: 0px; top: 0px; padding: 4px;
                  font-size: 18px; color: #fff; background: #333; width: 392px;
                  height: 30px; }
+.loading { position: absolute; left:48%; top: 0px; padding: 3px; z-index: 5;
+           background-color:#FFF1A8; font-size: 13px; font-weight: bold; }
 
 /* Data area */
 #data { position: absolute; left: 0px; width: 400px; top: 30px; bottom: 0; }
@@ -88,7 +93,8 @@ td.facility-count.selected { color: #fff; }
 .vs1 { height: 2px; opacity: 0.09; filter:alpha(opacity=9); }
 .vs2 { height: 3px; opacity: 0.06; filter:alpha(opacity=6); }
 .vs3 { height: 4px; opacity: 0.03; filter:alpha(opacity=3); }
-#freshness { position: absolute; left: 0; bottom: 0; padding: 2px 4px; }
+#freshness { position: absolute; left: 0; bottom: 0; padding: 4px;
+             font-size: 13px; background: #eee; width: 392px; }
 
 /* Map info windows */
 .facility-info h1 { font-size: 13px; }
@@ -96,6 +102,3 @@ td.facility-count.selected { color: #fff; }
 .facility-info .attributes { margin: 1em 0; color: #666; }
 .facility-info .attribute .value { color: #000; }
 .facility-info .text { margin-left: 2em; }
-
-/* Print view */
-.print-link-disabled { color: #cdcdcd }

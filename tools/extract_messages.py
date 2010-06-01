@@ -1,5 +1,5 @@
 #!/usr/bin/python2.5
-# Copyright 2010 by Steve Hakusa
+# Copyright 2010 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,38 +13,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Extracts translations to a .po file using django's makemessages script
-   and additional custom support for js- and python-formatted strings.
-   Also supports message descriptions and meanings provided by
-   specially-formatted comments directly above a message to be translated.
+"""
+Extracts translations to a .po file using django's makemessages script
+and additional custom support for js- and python-formatted strings.
+Also supports message descriptions and meanings provided by
+specially-formatted comments directly above a message to be translated.
 
-   In javascript, comments look like:
+In javascript, comments look like:
+    // Some other comment, must not separate i18n comments from the code
+    //i18n: Label for an administrative division of a country
+    messages.DEPARTMENT = 'Department';
 
-   // Some other comment, must not separate i18n comments from the code
-   //i18n: Label for an administrative division of a country
-   messages.DEPARTMENT = 'Department';
+In python:
+    # Some other comment, must not separate i18n comments from the code
+    #i18n: Label for an administrative division of a country
+    dept = _('Department')
 
-   In python:
-   # Some other comment, must not separate i18n comments from the code
-   #i18n: Label for an administrative division of a country
-   dept = _('Department')
+And in a Django template:
+    {% comment %}
+    #Some other comment, must not separate i18n comments from the code
+    #i18n: Label for an administrative division of a country
+    {% endcomment %}
+    <span>{% trans "Department" %}</span>
 
-   And in a Django template:
-   {% comment %}
-   #Some other comment, must not separate i18n comments from the code
-   #i18n: Label for an administrative division of a country
-   {% endcomment %}
-   <span>{% trans "Department" %}</span>
+Warning: This code technically also supports an i18n_meaning tag to create
+msgctxt lines in the .po file, but these are not supported by the current
+django version used by appengine (if msgctxt lines appear, not only are they
+ignored, but they prevent the correct translation from being returned),
+so they are not used.
 
-   Warning: This code technically also supports an i18n_meaning tag to create
-   msgctxt lines in the .po file, but these are not supported by the current
-   django version used by appengine (if msgctxt lines appear, not only are they
-   ignored, but they prevent the correct translation from being returned),
-   so they are not used.
+Instead of running this script directly, use the 'extract_messages' shell
+script, which sets up the PYTHONPATH and other necessary environment variables.
 
-   Must be run from the app/ directory for makemessages to work.
-   Example:
-   ../tools/extract_messages.py ../tools/setup.py static/locale.js
+NOTE: Although this can be run from any directory, the filenames on the
+command line must be specified relative to the app/ directory.
+
+Example:
+    ../tools/extract_messages ../tools/setup.py static/locale.js
 """
 
 import codecs
@@ -55,6 +60,7 @@ import sys
 DJANGO_END_COMMENT_PATTERN = '{\% endcomment \%}'
 DJANGO_STRING_PATTERN = '''['"](.*)['"]\s*$'''
 STRING_LITERAL_PATTERN = r'''\s*(["'])((\\.|[^\\])*?)\1'''
+DJANGO_BIN = os.environ['APPENGINE_DIR'] + '/lib/django/django/bin'
 
 PATTERNS = {
     'js' : {
@@ -65,12 +71,16 @@ PATTERNS = {
         'meaning': r'\s*//i18n_meaning:\s*(.*)'
     },
     'py' : {
-        'start': r'\s*[a-z]+_message\(',
+        'start': r'\s*[a-z]+_message\(',  # precedes a message in setup.py
         'string': r'en\s*=' + STRING_LITERAL_PATTERN,
         'end': r'\),?\s*$',
         'description': r'^\s*#i18n:\s*(.*)',
         'meaning': r'^\s*#i18n_meaning:\s*(.*)'
-    }
+    },
+    'html': {
+        'description': r'^\s*#i18n:\s*(.*)',
+        'meaning': r'^\s*#i18n_meaning:\s*(.*)'
+    },
 }
 
 class Message:
@@ -101,12 +111,8 @@ class Message:
 def django_makemessages():
     """Run django's makemessages routine to extract messages from python and
        html files."""
-    cmd = ('/home/build/google3/third_party/py/django/v1_1/bin/django-admin.py '
-        + 'makemessages -a')
-    (stdin, stdout, stderr) = os.popen3(cmd, 't')
-    errors = stderr.read()
-    if errors:
-        raise SystemExit(errors)
+    if os.system(os.path.join(DJANGO_BIN, 'make-messages.py') + ' -a'):
+        raise SystemExit('make-messages.py failed')
 
 def parse_django_po(po_filename):
     """Return the header from the django-generated .po file
@@ -125,9 +131,14 @@ def parse_django_po(po_filename):
     current_msg = Message(None, None, None, None)
 
     for line in codecs.open(po_filename, encoding='utf-8'):
-        if line.startswith('#:'):
+        if line.startswith('#:') or line.startswith('#.'):
             header_done = True
         if not header_done:
+            if line.startswith('"POT-Creation-Date'):
+                # The POT-Creation-Date line changes on every run to include
+                # the current date and time, creating unnecessary changesets.
+                # Skipping this line makes extract_messages idempotent.
+                continue
             header += line
             continue
         line = line.strip()
@@ -141,7 +152,7 @@ def parse_django_po(po_filename):
                 current_msg.description = ''
             if not current_msg.meaning:
                 current_msg.meaning = ''
-            message_to_ref[current_msg] = refs
+            message_to_ref[current_msg] = set(refs)
             current_ref = ''
             current_msg = Message(None, None, None, None)
         elif line.startswith('#:'):
@@ -176,34 +187,42 @@ def parse_django_po(po_filename):
     return (header, message_to_ref)
 
 def parse_po_tagline(line, tag=''):
-    """Parse a tag line from a po file."""
+    """Parses a line consisting of the given tag followed by a quoted string."""
     match = re.match((tag and (tag + ' ') or '') + DJANGO_STRING_PATTERN, line)
-    return len(match.groups()) > 0 and match.group(1) or ''
+    return match and match.group(1) or ''
 
 def find_description_meaning(refs):
-    """Horribly inefficient search for description and meaning strings,
-       required because django makemessages doesn't parse them out for us"""
-    patterns = PATTERNS['py']
+    """Given a list of references (in the form "filename:line_num") to where a
+    message occurs, find the description and meaning in comments preceding any
+    occurrence of the message and returns a (description, meaning) pair.
+    (Horribly inefficient, but needed because django makemessages doesn't
+    parse them out for us.)"""
+    description = meaning = ''
     for ref in refs:
         (file, line_num) = ref.split(':')
         line_num = int(line_num)
+
         # django makemessages hacks in support for html files by appending .py
-        # to the end and treating them like py files.  Remove that hack here
+        # to the end and treating them like py files.  Remove that hack here.
         file = file.replace('.html.py', '.html')
 
-        # Hold the description and meaning, if we find them
-        current_description = []
-        current_meaning = []
+        # Look for description/meaning patterns appropriate for the file type.
+        patterns = PATTERNS[file.split('.')[-1]]
 
+        # Hold the description and meaning, if we find them
+        description_lines = []
+        meaning_lines = []
+
+        # Start at the line before the message and proceed backwards.
         lines = open(file).readlines()
         for line in reversed(lines[:line_num - 1]):
             match = re.match(patterns['description'], line)
             if match:
-                current_description.insert(0, match.group(1))
+                description_lines.insert(0, match.group(1))
                 continue
             match = re.match(patterns['meaning'], line)
             if match:
-                current_meaning.insert(0, match.group(1))
+                meaning_lines.insert(0, match.group(1))
                 continue
             # For html files, need to skip over the django end comment marker
             # to get to the meaning lines
@@ -212,10 +231,10 @@ def find_description_meaning(refs):
             # The line was not part of a message description or meaning comment,
             # so it must not exist
             break
-        if current_description or current_meaning:
-            return (' '.join(current_description), ' '.join(current_meaning))
+        description = description or ' '.join(description_lines)
+        meaning = meaning or ' '.join(meaning_lines)
 
-    return ('', '')
+    return (description, meaning)
 
 def parse_file(input_filename):
     """Parses the given file, extracting messages. Returns a list of tuples
@@ -283,11 +302,12 @@ def parse_message(pattern, line):
 def merge(msg_to_ref, ref_msg_pairs):
     """ Merge ref_msg_pairs into msg_to_ref """
     for (ref, msg) in ref_msg_pairs:
-        msg_to_ref.setdefault(msg, []).append(ref)
+        msg_to_ref.setdefault(msg, set()).add(ref)
 
 def output_po_file(output_filename, header, msg_to_ref):
-    """Write a po file to output from the given header and dict from message
-       to list of file:line_num references where the message appears."""
+    """Write a po file to the file specified by output_filename, using the
+    given header text and a msg_to_ref dictionary that maps each message to
+    a list of "filename:line_num" references where the message appears."""
     output = codecs.open(output_filename, 'w', 'utf-8')
     output.write(header)
 
@@ -296,7 +316,7 @@ def output_po_file(output_filename, header, msg_to_ref):
         description = message.description
         meaning = message.meaning
         if not description and not meaning:
-            description = 'TODO: Message description and/or meaning'
+            description = 'TODO: Add missing message description or meaning'
         print >>output, '#. %s' % description
         print >>output, '#: %s' % ' '.join(refs)
         if has_sh_placeholders(msgid):
@@ -318,12 +338,10 @@ def has_python_placeholders(message):
     return re.search(r'%\(\w+\)s', message) is not None
 
 if __name__ == '__main__':
-    if not os.getcwd().endswith('app'):
-        raise SystemExit('Please run from the app/ diretory')
-
-    po_filenames = list(
+    os.chdir(os.environ['APP_DIR'])
+    po_filenames = [
         os.path.join('locale', locale, 'LC_MESSAGES', 'django.po')
-        for locale in os.listdir('locale'))
+        for locale in os.listdir('locale')]
 
     # Parse input files
     print 'Parsing input files'

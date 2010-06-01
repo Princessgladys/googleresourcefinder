@@ -22,25 +22,25 @@ class Record(db.Model):
     """Entity representing one received or provided XML document entry."""
     feed_id = db.StringProperty(required=True)  # URI of parent feed
     type_name = db.StringProperty(required=True)  # XML type in Clark notation
-    record_id = db.StringProperty(required=True)  # non-unique record ID
+    subject_id = db.StringProperty(required=True)  # thing this record is about
     title = db.StringProperty()  # title or summary string
     author_email = db.StringProperty(required=True)  # author identifier
-    observation_time = db.DateTimeProperty(required=True)  # UTC timestamp
-    arrival_time = db.DateTimeProperty(auto_now=True)  # UTC timestamp
+    observed = db.DateTimeProperty(required=True)  # UTC timestamp
+    arrived = db.DateTimeProperty(auto_now=True)  # UTC timestamp
     content = db.TextProperty()  # serialized XML document 
 
 
 class RecordType:
-    def get_identifier(self, element):
-        """Extracts the record_id string from an XML Element."""
+    def get_subject_id(self, element):
+        """Extracts the subject_id string from an XML document."""
         raise NotImplementedError
 
-    def get_observation_time(self, element):
-        """Extracts the observation time from an XML Element."""
+    def get_observed(self, element):
+        """Extracts the observed time from an XML document."""
         raise NotImplementedError
 
     def get_title(self, element):
-        """Gets or fashions an Atom entry title for an XML Element."""
+        """Gets or fashions an Atom entry title for an XML document."""
         return ''
 
 
@@ -60,26 +60,26 @@ def put_record(feed_id, author_email, element):
     record = Record(
         feed_id=feed_id,
         type_name=element.tag,
-        record_id=record_type.get_identifier(element),
+        subject_id=record_type.get_subject_id(element),
         title=record_type.get_title(element),
         author_email=author_email,
-        observation_time=record_type.get_observation_time(element),
+        observed=record_type.get_observed(element),
         content=xmlutils.serialize(element))
     record.put()
     return record
 
 def get_latest_observed(type_name, record_id):
-    """Gets the record with the given record ID and latest observation_time."""
+    """Gets the record with the given record ID and latest observed time."""
     return (Record.all().filter('type_name =', type_name)
                         .filter('record_id =', record_id)
-                        .order('-observation_time')).get()
+                        .order('-observed')).get()
 
-def get_latest_arrived(feed_id, limit=None, after_arrival_time=None):
+def get_latest_arrived(feed_id, limit=None, arrived_after=None):
     """Gets a list of records in the given feed in order of decreasing
-    arrival_time, with an arrival_time greater than 'after_arrival_time' if
+    arrived time, with an arrived time greater than 'arrived_after' if
     specified, up to a maximum of 'limit' records if specified."""
     query = (Record.all().filter('feed_id =', feed_id)
-                         .order('-arrival_time'))
-    if after_arrival_time:
-        query = query.filter('arrival_time >', after_arrival_time)
+                         .order('-arrived'))
+    if arrived_after:
+        query = query.filter('arrived >', arrived_after)
     return query.fetch(min(limit or 100, 100))

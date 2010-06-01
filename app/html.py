@@ -26,7 +26,7 @@ def span(text, klass):
 def leaf_html_repr(key):
     kind_repr = span(key.kind(), 'kind') + ' '
     if key.id() is not None:
-        return kind_repr + span(key.id(), 'id')
+        return kind_repr + span(str(key.id()), 'id')
     else:
         return kind_repr + span(key.name(), 'name')
 

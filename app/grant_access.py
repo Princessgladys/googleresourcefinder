@@ -38,18 +38,17 @@ class GrantAccess(utils.Handler):
     def get(self):
         """ Shows all requests for waiting for approval"""
 
-        self.require_user_role('superuser', self.params.cc)
+        self.require_user_role('superuser')
 
         q = Authorization.all().filter('requested_roles !=', None)
 
         requests = []
         for auth in q.fetch(100):
-          for ccrole in auth.requested_roles:
-            cc, role = ccrole.split(':')
-            if check_user_role(self.auth, 'superuser', cc):
-              requests.append({'email': auth.email,
-                               'requested_role': ccrole,
-                               'key': auth.key()})
+          for role in auth.requested_roles:
+              if check_user_role(self.auth, 'superuser'):
+                  requests.append({'email': auth.email,
+                                   'requested_role': role,
+                                   'key': auth.key()})
 
         self.render('templates/grant_access.html',
                     requests=requests,
@@ -57,14 +56,13 @@ class GrantAccess(utils.Handler):
                     logout_url=users.create_logout_url('/'))
 
     def post(self):
-        """ Shows all requests for waiting fro approval"""
+        """ Shows all requests for waiting for approval"""
 
-        ccrole = self.request.get('ccrole')
-        if not ccrole:
-            raise ErrorMessage(404, 'missing ccrole (requested_role) params')
-        cc, role = ccrole.split(':')
+        role = self.request.get('role')
+        if not role:
+            raise ErrorMessage(404, 'missing role (requested_role) params')
 
-        self.require_user_role('superuser', cc)
+        self.require_user_role('superuser')
 
         auth = Authorization.get(self.request.get('key'))
         if not auth:
@@ -72,18 +70,18 @@ class GrantAccess(utils.Handler):
 
         #TODO(eyalf): define auth.display_name() or something
         name = auth.email
-        if not ccrole in auth.requested_roles:
+        if not role in auth.requested_roles:
             #i18n: Error message
             raise ErrorMessage(404, _('No pending request for '
                                       '%(authorization_role)s by %(user)s')
-                               % (ccrole, name))
-        auth.requested_roles.remove(ccrole)
+                               % (role, name))
+        auth.requested_roles.remove(role)
         action = self.request.get('action', 'deny')
         if action == 'approve':
-            auth.user_roles.append(ccrole)
+            auth.user_roles.append(role)
         auth.put()
         logging.info('%s request for %s was %s' % (auth.email,
-                                                   ccrole,
+                                                   role,
                                                    action))
 
         if self.params.embed:

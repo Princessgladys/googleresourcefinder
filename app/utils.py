@@ -28,6 +28,7 @@ import config
 from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
+from feeds.crypto import get_key
 from feeds.errors import ErrorMessage, Redirect
 import gzip
 from html import html_escape
@@ -60,7 +61,7 @@ from django.utils.translation import gettext_lazy as _
 # Attributes exported to CSV that should currently remain hidden from the
 # info window bubble and edit view.
 # TODO(shakusa) Un-hide these post-v1 when view/edit support is better
-HIDDEN_ATTRIBUTE_NAMES = ['region_id', 'district_id', 'commune_id',
+HIDDEN_ATTRIBUTE_NAMES = ['accuracy', 'region_id', 'district_id', 'commune_id',
                           'commune_code', 'sante_id']
 
 def strip(text):
@@ -78,8 +79,8 @@ def validate_float(text):
     except ValueError:
         return None
 
-def get_message(version, namespace, name):
-    message = model.Message.all().ancestor(version).filter(
+def get_message(namespace, name):
+    message = model.Message.all().filter(
         'namespace =', namespace).filter('name =', name).get()
     django_locale = django.utils.translation.to_locale(
         django.utils.translation.get_language())
@@ -90,25 +91,23 @@ class Struct:
 
 class Handler(webapp.RequestHandler):
     auto_params = {
-        'cc': strip,
         'embed': validate_yes,
         'facility_name': strip,
-        'iframe': validate_yes,
         'lang': strip,
         'lat': validate_float,
         'lon': validate_float,
         'print': validate_yes,
         'rad': validate_float,
-        'role': validate_role
+        'role': validate_role,
     }
 
-    def require_user_role(self, role, cc):
-        """Raise and exception in case the user don't have the given role
-           to the given country.
+    def require_user_role(self, role):
+        """Raise and exception in case the user don't have the given role.
            Redirect to login in case there is no user"""
         if not self.auth:
             raise Redirect(users.create_login_url(self.request.uri))
-        if not access.check_user_role(self.auth, role, cc):
+        if not access.check_user_role(self.auth, role):
+            #i18n: Error message
             raise ErrorMessage(403, _('Unauthorized user.'))
 
     def require_logged_in_user(self):
@@ -144,6 +143,9 @@ class Handler(webapp.RequestHandler):
 
         self.params.languages = config.LANGUAGES
 
+        # Google Analytics account id
+        self.params.analytics_id = get_key('analytics_id')
+
     def select_locale(self):
         """Detect and activate the appropriate locale.  The 'lang' query
            parameter has priority, then the rflang cookie, then the
@@ -156,6 +158,11 @@ class Handler(webapp.RequestHandler):
             settings.LANGUAGE_CODE)
         # Check for and potentially convert an alternate language code
         self.params.lang = config.ALTERNATE_LANG_CODES.get(
+            self.params.lang, self.params.lang)
+        if self.params.lang not in list(lang[0] for lang in config.LANGUAGES):
+          self.params.lang = settings.LANGUAGE_CODE
+
+        self.params.maps_lang = config.GOOGLE_MAPS_ALTERNATE_LANG_CODES.get(
             self.params.lang, self.params.lang)
         self.response.headers.add_header(
             'Set-Cookie', 'django_language=%s' % self.params.lang)
@@ -194,32 +201,16 @@ def get_base(entity):
         entity = entity.base
     return entity
 
-def get_latest_version(cc):
-    country = get(None, model.Country, cc)
-    versions = model.Version.all().ancestor(country).order('-timestamp')
-    if versions.count():
-        return versions[0]
-
-def fetch(cc, url, payload=None, previous_data=None):
-    country = get(None, model.Country, cc)
+def fetch(url, payload=None, previous_data=None):
     method = (payload is None) and urlfetch.GET or urlfetch.POST
     response = urlfetch.fetch(url, payload, method, deadline=10)
     data = response.content
     logging.info('utils.py: received %d bytes of data' % len(data))
     if data == previous_data:
         return None
-    dump = model.Dump(country, source=url, data=data)
+    dump = model.Dump(source=url, data=data)
     dump.put()
     return dump
-
-def load(loader, dump):
-    logging.info('load started')
-    version = model.Version(dump.parent(), dump=dump)
-    version.put()
-    logging.info('new version: %r' % version)
-    loader.put_dump(version, decompress(dump.data))
-    logging.info('load finished: %r' % version)
-    return version
 
 def decompress(data):
     file = gzip.GzipFile(fileobj=StringIO.StringIO(data))
@@ -278,6 +269,11 @@ def to_isotime(datetime):
     if isinstance(datetime, (int, float)):
         datetime = to_datetime(datetime)
     return datetime.isoformat() + 'Z'
+
+def to_local_isotime(utc_datetime):
+  # TODO(shakusa) Use local timezone instead of hard-coding Haitian time
+  utc_datetime = utc_datetime - TimeDelta(hours=5)
+  return utc_datetime.isoformat(' ') + ' -05:00'
 
 def to_unicode(value):
     """Converts the given value to unicode. Django does not do this

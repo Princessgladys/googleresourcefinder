@@ -26,23 +26,25 @@ from google.appengine.ext import db
 import logging
 
 # Roles explained:
-# 'user' DEPRECATED member of viewer whitelist, we now allow anyone to view
-# 'editor' DEPRECATED member of editor whitelist, we now allow anyone signed in
-#          that has accepted the terms of service to edit
+# 'viewer' user can view the UI (unnecessary if default is 'anyone can view')
+# 'editor' user can edit basic fields of facilities (unnecessary if default is
+#          'any signed in user can make edits')
+# 'supereditor' user can edit all fields of facilities
+# 'adder' user can add new facilities
+# 'remover' user can remove facilities from the UI (not delete them entirely)
 # 'superuser' user can grant access to other users (but still needs the other
 #             roles to add, remove, edit, etc)
-ROLES = ['user', 'editor', 'superuser']
+ROLES = ['viewer', 'adder', 'remover', 'editor', 'supereditor', 'superuser']
 
 class Authorization(db.Model):
     timestamp = db.DateTimeProperty(auto_now_add=True)
     description = db.StringProperty(required=True)
     email = db.StringProperty()
     user_id = db.StringProperty()
+    nickname = db.StringProperty()
+    affiliation = db.StringProperty()
     token = db.StringProperty()
-    # user roles are in the format: country_code:role
-    # where role is one of ROLES
-    # an empty country_code means the user has the role for
-    # all countries
+    # user_roles is a list of ROLES
     user_roles = db.StringListProperty()
     requested_roles = db.StringListProperty()
 
@@ -61,10 +63,9 @@ def check_request(request, user):
     if user:
         return check_email(user.email()) or check_user_id(user.user_id())
 
-def check_user_role(auth, role, cc):
-    """Return True if the auth user has the given role for the given country"""
-    return auth and ("%s:%s" % (cc or '',role) in auth.user_roles or
-                     ":%s" % role in auth.user_roles)
+def check_user_role(auth, role):
+    """Return True if the auth user has the given role"""
+    return auth and (role in auth.user_roles or ":%s" % role in auth.user_roles)
 
 def check_and_log(request, user):
     auth = check_request(request, user)

@@ -1,5 +1,5 @@
 {% comment %}
-# Copyright 2009-2010 by Ka-Ping Yee
+# Copyright 2010 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,13 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 {% endcomment %}
+<script type="text/javascript">
 
-<title>Resource Finder ({{instance}})</title>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', '{{params.analytics_id}}']);
+  _gaq.push(['_setDomainName', '.appspot.com']);
+  _gaq.push(['_trackPageview']);
 
-    <h1>Requests Approval</h1>
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
 
-    <form method="post" action="/request_access">
-      <input type="text" value="{{ role }}" name="role">
-      <input type="submit" value="Request">
-    </form>
-
+</script>

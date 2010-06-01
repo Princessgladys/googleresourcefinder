@@ -1,5 +1,5 @@
 #!/usr/bin/python2.5
-# Copyright 2009-2010 by Steve Hakusa
+# Copyright 2009-2010 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,3 +24,7 @@ LANGUAGES = [('en', 'English'),
 
 # Mapping of alternate language code to internal representation
 ALTERNATE_LANG_CODES = { 'es': 'es-419', }
+
+# Google maps is not available in all languages. This maps from unavailable
+# languages to the best available fallback language.
+GOOGLE_MAPS_ALTERNATE_LANG_CODES = { 'ht' : 'fr', }
