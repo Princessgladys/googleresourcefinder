@@ -31,9 +31,10 @@
     {% endcomment %}
     {% trans "HealthC ID:" %} {{special.healthc_id.value|escape}} &#xb7;
     {% comment %}
-    #i18n: Identifier for a facility
+    #i18n: Proper name of an ID for a healthcare facility defined by the
+    #i18n: Pan-American Health Organization, no translation necessary.
     {% endcomment %}
-    {% trans "Facility ID:" %} {{special.pcode.value|escape}}<br>
+    {% trans "PCode:" %} {{special.pcode.value|escape}}<br>
     {% comment %}
     #i18n: Label for a date-time when the data was last updated
     {% endcomment %}
