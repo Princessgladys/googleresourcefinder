@@ -290,7 +290,7 @@ def setup_messages():
         db.delete(batch)
 
 def setup_js_messages():
-    """Sets up translated versions of app/static/locale.js"""
+    """Writes translated messages into app/static/locale_XX.js."""
     js_path = os.path.join(ROOT, 'static')
     js_template = open(os.path.join(js_path, 'locale.js')).readlines()
     patterns = PATTERNS['js']
@@ -339,10 +339,9 @@ def to_js_string(string):
     return simplejson.dumps(string).replace("'", "\'")
 
 def setup_new_datastore():
-    """Sets up a new datastore."""
+    """Sets up a new datastore with facility types and translations."""
     setup_facility_types()
     setup_messages()
-    setup_js_messages()
 
 def wipe_datastore(*kinds):
     """Deletes everything in the datastore except Authorizations and Secrets.

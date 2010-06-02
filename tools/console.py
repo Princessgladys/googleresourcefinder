@@ -24,6 +24,7 @@ import logging
 import optparse
 import os
 import sys
+import urllib
 import yaml
 
 from google.appengine.ext.remote_api import remote_api_stub
@@ -114,7 +115,8 @@ number, and application ID.  For example:
 
     # Handle shorthand for address, port number, and app ID.
     if args:
-        default_address, default_port = (args[0].split(':') + [80])[:2]
+        default_address, default_port = urllib.splitport(args[0])
+        default_port = int(default_port or 80)
         if default_address != 'localhost':
             default_app_id = default_address.split('.')[0]
 
