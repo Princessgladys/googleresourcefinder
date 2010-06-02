@@ -182,7 +182,7 @@ if __name__ == '__main__':
         loader = unittest.defaultTestLoader
         suites = []
         for filename in os.listdir(os.environ['TESTS_DIR']):
-            if filename.startswith('test_') and filename.endswith('.py'):
+            if filename.endswith('_test.py'):
                 module = filename[:-3]
                 suites.append(loader.loadTestsFromName(module))
 
