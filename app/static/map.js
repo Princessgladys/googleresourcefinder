@@ -759,7 +759,7 @@ function update_print_facility_list() {
       var title = facility.values[attributes_by_name.title];
       var facility_name = title + ' - '
         + locale.HEALTHC_ID() + ' ' + render(healthc_id)
-        + ' - ' + locale.FACILITY_ID() + ' ' + render(pcode);
+        + ' - ' + locale.FACILITY_PCODE() + ' ' + render(pcode);
       cells.push($$('td', {'class': 'facility-beds-open'}, render(open_beds)));
       cells.push($$('td', {'class': 'facility-beds-total'},render(total_beds)));
       cells.push($$('td', {'class': 'facility-title'}, render(facility_name)));

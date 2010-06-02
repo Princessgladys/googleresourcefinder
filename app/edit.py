@@ -330,11 +330,7 @@ class Edit(utils.Handler):
     def get(self):
         self.init()
         fields = []
-        readonly_fields = [{
-            #i18n: Identifier for a facility
-            'title': to_unicode(_('Facility ID')),
-            'value': self.params.facility_name
-        }]
+        readonly_fields = []
 
         for name in self.facility_type.attribute_names:
             if name in HIDDEN_ATTRIBUTE_NAMES:

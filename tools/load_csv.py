@@ -30,13 +30,13 @@ def convert_paho_record(record):
 
     title = (record['Fac_NameFr'].strip() or record['NomInstitu'].strip())
 
-    if not record.get('HealthC_ID'):
+    if not record.get('HealthC_ID').strip():
         # TODO(shakusa) Fix this. We should be importing all facilities.
         logging.warn('Skipping %r (%s): Invalid HealthC_ID: "%s"' % (
             title, record.get('PCode'), record.get('HealthC_ID')))
         return None, None, None
 
-    key_name = 'mspphaiti.org/' + record['HealthC_ID']
+    key_name = 'paho.org/HealthC_ID/' + record['HealthC_ID']
     title = (record['Fac_NameFr'].strip() or record['NomInstitu'].strip())
     alt_title = (title == record['Fac_NameFr'].strip() and
                  record['NomInstitu'].strip() or '')
@@ -88,14 +88,14 @@ def convert_shoreland_record(record):
     into a dictionary of ValueInfo objects for our datastore."""
     title = record['facility_name'].strip()
 
-    if not record.get('facility_healthc_id'):
+    if not record.get('facility_healthc_id').strip():
         # TODO(shakusa) Fix this. We should be importing all facilities.
         logging.warn('Skipping %r (%s): Invalid HealthC_ID: "%s"' % (
             title, record.get('facility_pcode'),
             record.get('facility_healthc_id')))
         return None, None, None
 
-    key_name = 'mspphaiti.org/' + record['facility_healthc_id']
+    key_name = 'paho.org/HealthC_ID/' + record['facility_healthc_id']
     alt_title = record['alt_facility_name'].strip()
     try:
         latitude = float(record['latitude'])

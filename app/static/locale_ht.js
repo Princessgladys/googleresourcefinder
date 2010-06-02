@@ -72,8 +72,9 @@ locale = function() {
   //i18n: A place that provides a particular service
   messages.FACILITY = "Etablisman";
 
-  //i18n: Identifier for a facility
-  messages.FACILITY_ID = "ID etablisman";
+  //i18n: Proper name of an ID for a healthcare facility defined by the
+  //i18n: Pan-American Health Organization, no translation necessary.
+  messages.FACILITY_PCODE = "PCode:";
 
   //i18n: Proper name of an ID for a healthcare facility, no translation
   //i18n: necessary.

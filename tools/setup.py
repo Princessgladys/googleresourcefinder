@@ -99,8 +99,8 @@ def setup_messages():
         #i18n: Alternate name of a facility
         name_message('alt_title', en='Alternate facility name'),
         #i18n: Proper name of an ID for a healthcare facility defined by the
-        #i18n: Ministry of Health in Haiti, no translation necessary.
-        name_message('pcode', en='Facility ID'),
+        #i18n: Pan-American Health Organization, no translation necessary.
+        name_message('pcode', en='PCode'),
         #i18n: Proper name of an ID for a healthcare facility, no translation
         #i18n: necessary.
         name_message('healthc_id', en='HealthC ID'),
