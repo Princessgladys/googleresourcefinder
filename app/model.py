@@ -167,7 +167,7 @@ class Attribute(db.Model):
         'multi',   # value is a list of strings (which are elements of 'values')
         'geopt',   # value is a db.GeoPt with latitude and longitude
     ])
-    edit_role = db.StringProperty() # What Authorization role can edit?
+    edit_action = db.StringProperty() # What Account action can edit?
     values = db.StringListProperty()  # allowed value names for choice or multi
 
 class Report(db.Expando):
@@ -204,6 +204,23 @@ class Report(db.Expando):
         """Sets the value for the Attribute with the given key_name."""
         setattr(self, '%s__' % name, value_or_none(value))
         setattr(self, '%s__comment' % name, value_or_none(comment))
+
+class Account(db.Model):
+    """User account. Top-level entity, has no parent.
+    A user only obtains an Account record when they modify the application
+    in some way, either by editing data or subscribing to alerts."""
+    timestamp = db.DateTimeProperty(auto_now_add=True) # Creation time
+    description = db.StringProperty(required=True)
+    email = db.StringProperty() # Email of the account, not users.User().email()
+                                # for ease of indexing
+    user_id = db.StringProperty() # users.User.id() of the account.
+    nickname = db.StringProperty() # User nickname,
+                                   # may be different than users.User.nickname()
+    affiliation = db.StringProperty() # User affiliation
+    token = db.StringProperty() # A way of looking up the account without id
+                                # or email available
+    actions = db.StringListProperty() # what the account is permitted to do
+    requested_actions = db.StringListProperty()
 
 class Message(db.Expando):
     """Internationalized strings for value identifiers.  Top-level entity,

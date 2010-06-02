@@ -78,13 +78,13 @@ class EditTest(SeleniumTestCase):
         self.assert_text(Regex('Edit.*'), '//h1')
 
         # First-time edit should show nickname and affiliation fields
-        self.assert_element('//input[@name="auth_nickname"]')
-        self.assert_element('//input[@name="auth_affiliation"]')
+        self.assert_element('//input[@name="account_nickname"]')
+        self.assert_element('//input[@name="account_affiliation"]')
 
         # Test javascript error checking
         text_fields = {}
-        text_fields['auth_nickname'] = '   '
-        text_fields['auth_affiliation'] = '\t'
+        text_fields['account_nickname'] = '   '
+        text_fields['account_affiliation'] = '\t'
         text_fields['available_beds'] = 'available'
         text_fields['total_beds'] = 'total'
         text_fields['location.lat'] = '91'
@@ -95,8 +95,8 @@ class EditTest(SeleniumTestCase):
 
         # Fill in the form
         text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
-        text_fields['auth_nickname'] = 'Test'
-        text_fields['auth_affiliation'] = 'Test'
+        text_fields['account_nickname'] = 'Test'
+        text_fields['account_affiliation'] = 'Test'
         text_fields['available_beds'] = '   1'
         text_fields['total_beds'] = '2\t  '
         text_fields['location.lat'] = '18.537207 '
@@ -120,10 +120,10 @@ class EditTest(SeleniumTestCase):
         self.assert_text(Regex('Edit.*'), '//h1')
 
         # Nickname and affiliation fields should not be shown this time
-        self.assert_no_element('//input[@name="auth_nickname"]')
-        self.assert_no_element('//input[@name="auth_affiliation"]')
-        del text_fields['auth_nickname']
-        del text_fields['auth_affiliation']
+        self.assert_no_element('//input[@name="account_nickname"]')
+        self.assert_no_element('//input[@name="account_affiliation"]')
+        del text_fields['account_nickname']
+        del text_fields['account_affiliation']
 
         # Check that the new values were saved, and are pre-filled in the form
         text_fields['available_beds'] = '1'  # whitespace should be gone
