@@ -1333,10 +1333,10 @@ function edit_handler(edit_url) {
   return false;
 }
 
-function request_role_handler(request_url) {
+function request_action_handler(request_url) {
   // Use AJAX to load the form in the InfoWindow, then reopen the
   // InfoWindow so that it resizes correctly.
-  log('reqest role:', request_url);
+  log('reqest action:', request_url);
   $j.ajax({
     url: request_url,
     type: 'POST',
