@@ -70,8 +70,8 @@ def strip(text):
 def validate_yes(text):
     return (text.lower() == 'yes') and 'yes' or ''
 
-def validate_role(text):
-    return text in access.ROLES and text
+def validate_action(text):
+    return text in access.ACTIONS and text
 
 def validate_float(text):
     try:
@@ -98,15 +98,15 @@ class Handler(webapp.RequestHandler):
         'lon': validate_float,
         'print': validate_yes,
         'rad': validate_float,
-        'role': validate_role,
+        'action': validate_action,
     }
 
-    def require_user_role(self, role):
-        """Raise and exception in case the user don't have the given role.
+    def require_action_permitted(self, action):
+        """Raise and exception in case the user don't have the given action.
            Redirect to login in case there is no user"""
-        if not self.auth:
+        if not self.account:
             raise Redirect(users.create_login_url(self.request.uri))
-        if not access.check_user_role(self.auth, role):
+        if not access.check_action_permitted(self.account, action):
             #i18n: Error message
             raise ErrorMessage(403, _('Unauthorized user.'))
 
@@ -125,7 +125,7 @@ class Handler(webapp.RequestHandler):
     def initialize(self, request, response):
         webapp.RequestHandler.initialize(self, request, response)
         self.user = users.get_current_user()
-        self.auth = access.check_and_log(request, self.user)
+        self.account = access.check_and_log(request, self.user)
         for name in request.headers.keys():
             if name.lower().startswith('x-appengine'):
                 logging.debug('%s: %s' % (name, request.headers[name]))
