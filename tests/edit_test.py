@@ -2,7 +2,6 @@ from google.appengine.api import users
 from model import *
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
-import unittest
 
 # "name" attributes of the checkboxes for available services in the edit form.
 SERVICES = [
@@ -38,7 +37,8 @@ STR_FIELDS = [
     'comments',
 ]
 
-class EditTests(SeleniumTestCase):
+
+class EditTest(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
         f = Facility(key_name='example.org/123', type='hospital')
@@ -205,6 +205,3 @@ class EditTests(SeleniumTestCase):
         for name, value in text_fields.items():
             error_xpath = '//div[@id="%s_errormsg"]' % name.split('.')[0]
             self.assertTrue(self.is_visible(error_xpath))
-
-if __name__ == '__main__':
-    unittest.main()
