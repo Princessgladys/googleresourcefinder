@@ -88,6 +88,16 @@ locale = function() {
   messages.FACILITY =
       'Facility';
 
+  //i18n: Proper name of an ID for a healthcare facility defined by the
+  //i18n: Pan-American Health Organization, no translation necessary.
+  messages.FACILITY_PCODE =
+      'PCode:';
+
+  //i18n: Proper name of an ID for a healthcare facility, no translation
+  //i18n: necessary.
+  messages.HEALTHC_ID =
+      'HealthC ID:';
+
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS =

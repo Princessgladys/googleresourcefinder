@@ -115,7 +115,7 @@ class ContactAttributeType(AttributeType):
             _('E-mail'), self.text_input(name + '.email', contact_email),
         )
 
-    def to_stored_value(self, name, value, request, attribute):
+    def parse_input(self, report, name, value, request, attribute):
         contact = (request.get(name + '.name', '') + '|' +
                    request.get(name + '.phone', '') + '|' +
                    request.get(name + '.email', ''))
@@ -330,11 +330,7 @@ class Edit(utils.Handler):
     def get(self):
         self.init()
         fields = []
-        readonly_fields = [{
-            #i18n: Identifier for a facility
-            'title': to_unicode(_('Facility ID')),
-            'value': self.params.facility_name
-        }]
+        readonly_fields = []
 
         for name in self.facility_type.attribute_names:
             if name in HIDDEN_ATTRIBUTE_NAMES:
