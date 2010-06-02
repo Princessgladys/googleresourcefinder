@@ -509,7 +509,7 @@ msgid "No pending request for %(account_action)s by %(user)s"
 msgstr "Pa gen demand an atant pou %(authorization_role)s de %(user)s"
 
 #. Error message for missing entry
-#: feed_provider.py:39
+#: feed_provider.py:40
 msgid "No such entry"
 msgstr "Pa gen oken antre"
 

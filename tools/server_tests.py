@@ -174,7 +174,6 @@ if __name__ == '__main__':
         console.connect(
             '%s:%d' % (options.address, options.port), None, 'test', 'test')
         setup.setup_new_datastore()
-        setup.add_analytics_id('FAKE')
         setup.add_account(email='test@example.com', description='Test',
                           nickname='', affiliation='',
                           actions=[':view', ':edit', 'grant'])
