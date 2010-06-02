@@ -509,7 +509,7 @@ msgid "No pending request for %(account_action)s by %(user)s"
 msgstr "No hay solicitud pendiente %(authorization_role)s para%(user)s "
 
 #. Error message for missing entry
-#: feed_provider.py:39
+#: feed_provider.py:40
 msgid "No such entry"
 msgstr "No existe tal entrada"
 
