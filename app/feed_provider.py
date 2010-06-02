@@ -22,6 +22,7 @@ from utils import ErrorMessage, Handler, run, _
 def get_feed_id(request, feed_name):
     return request.host_url + '/feeds/' + feed_name
 
+
 class Feed(Handler):
     def get(self, feed_name):
         feed_id = get_feed_id(self.request, feed_name)
