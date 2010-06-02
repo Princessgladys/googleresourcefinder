@@ -33,8 +33,6 @@ import time
 import traceback
 import unittest
 
-APP_ID = 'resource-finder'
-
 
 class ProcessRunner(threading.Thread):
     """A thread that starts a subprocess, collects its output, and stops it."""
@@ -173,8 +171,8 @@ if __name__ == '__main__':
             runner.wait_until_ready()
 
         # Initialize the datastore.
-        console.init(
-            APP_ID, '%s:%d' % (options.address, options.port), 'test', 'test')
+        console.connect(
+            '%s:%d' % (options.address, options.port), None, 'test', 'test')
         setup.setup_new_datastore()
         access.Authorization(
             email='test@example.com', description='Test',

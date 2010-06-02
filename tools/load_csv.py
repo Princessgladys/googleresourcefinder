@@ -18,6 +18,7 @@ import csv
 import datetime
 import logging
 import re
+import setup
 
 SHORELAND_URL = 'http://shoreland.com/'
 SHORELAND_EMAIL = 'admin@shoreland.com'
@@ -324,7 +325,8 @@ def parse_datetime(timestamp):
         int(year), int(month), int(day), int(hour), int(minute), int(second))
 
 def load_shoreland(filename, observed):
-    """Loads a Shoreland CSV file using defaults for thee URL and author."""
+    """Loads a Shoreland CSV file using defaults for the URL and author."""
+    setup.setup_new_datastore()
     if isinstance(observed, basestring):
         observed = parse_datetime(observed)
     user = users.User(SHORELAND_EMAIL)
@@ -334,6 +336,5 @@ def load_shoreland(filename, observed):
 def wipe_and_load_shoreland(filename, observed):
     """Wipes the entire datastore and then loads a Shoreland CSV file."""
     open(filename)  # Ensure the file is readable before wiping the datastore.
-    import setup
-    setup.reset_datastore()
+    setup.wipe_datastore()
     load_shoreland(filename, observed)
