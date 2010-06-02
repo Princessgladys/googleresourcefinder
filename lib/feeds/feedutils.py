@@ -32,7 +32,7 @@ def notify_hub(feed_url):
     file.close()
 
 def check_request_etag(headers):
-    """Determines etag, limit, after_arrival_time based on request headers."""
+    """Determines etag, limit, arrived_after based on request headers."""
     # TODO: If records A and B are written to different data centers,
     # and clock skew causes B to be written with an arrival_time earlier
     # than A, after a subscriber has previously fetched the feed with A
@@ -55,8 +55,8 @@ def create_response_etag(latest):
 
 def handle_feed_get(request, response, feed_id, uri_prefixes={}):
     """Handles a request for an Atom feed of XML records."""
-    etag, limit, after_arrival_time = check_request_etag(request.headers)
-    latest = records.get_latest_arrived(feed_id, limit, after_arrival_time)
+    etag, limit, arrived_after = check_request_etag(request.headers)
+    latest = records.get_latest_arrived(feed_id, limit, arrived_after)
 
     response.headers['Content-Type'] = 'application/atom+xml'
     if latest:  # Deliver the new entries.

@@ -14,6 +14,7 @@
 
 from access import *
 from extract_messages import parse_message, PATTERNS
+from feeds import crypto
 from model import *
 from utils import *
 
@@ -348,18 +349,19 @@ def setup_new_datastore():
     """Sets up a new datastore with facility types and translations."""
     setup_facility_types()
     setup_messages()
+    # Ensure that an 'analytics_id' secret exists, without overwriting it.
+    crypto.Secret.get_or_insert('analytics_id', value='dummy')
 
 def wipe_datastore(*kinds):
     """Deletes everything in the datastore except Authorizations and Secrets.
     If 'kinds' is given, deletes only those kinds of entities."""
     for kind in kinds or [Attribute, FacilityType, Message, Dump,
                           MinimalFacility, Facility, Report]:
-        while True:
-            keys = kind.all(keys_only=True).fetch(200)
-            if not keys:
-                break
-            logging.info('Deleting %s entities...' % kind.kind())
+        keys = kind.all(keys_only=True).fetch(200)
+        while keys:
+            logging.info('%s: deleting %d...' % (kind.kind(), len(keys)))
             db.delete(keys)
+            keys = kind.all(keys_only=True).fetch(200)
 
 def reset_datastore():
     """Wipes everything in the datastore except Authorizations and Secrets,
