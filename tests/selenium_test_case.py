@@ -13,6 +13,7 @@ class Struct:
     def __contains__(self, key):
         return key in self.__dict__
 
+
 # Configuration profiles for Selenium testing.
 CONFIGS = {
     'local': Struct(
