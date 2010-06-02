@@ -1,5 +1,4 @@
 from selenium_test_case import SeleniumTestCase
-import unittest
 
 
 class DocsTest(SeleniumTestCase):
@@ -16,7 +15,3 @@ class DocsTest(SeleniumTestCase):
         self.click('link=Google Resource Finder Privacy Policy')
         self.wait_for_load()
         self.assertTrue(self.is_text_present('Google Privacy Policy'))
-
-
-if __name__ == "__main__":
-    unittest.main()

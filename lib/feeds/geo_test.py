@@ -24,4 +24,4 @@ NEW_YORK = {'lat': 37.7750, 'lon': -122.4180}
 class GeoTest(unittest.TestCase):
     def test_distance(self):
         assert 4128000 < geo.distance(SAN_FRANCISCO, NEW_YORK) < 4130000
-        assert 4128000 < geo.distance(SAN_FRANCISCO, NEW_YORK) < 4130000
+        assert 4128000 < geo.distance(NEW_YORK, SAN_FRANCISCO) < 4130000
