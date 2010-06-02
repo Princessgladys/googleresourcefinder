@@ -14,7 +14,7 @@
 
 from access import *
 from extract_messages import parse_message, PATTERNS
-from feeds.crypto import Secret
+from feeds import crypto
 from model import *
 from utils import *
 
@@ -355,22 +355,17 @@ def wipe_datastore(*kinds):
     If 'kinds' is given, deletes only those kinds of entities."""
     for kind in kinds or [Attribute, FacilityType, Message, Dump,
                           MinimalFacility, Facility, Report]:
-        while True:
-            keys = kind.all(keys_only=True).fetch(200)
-            if not keys:
-                break
-            logging.info('Deleting %s entities...' % kind.kind())
+        keys = kind.all(keys_only=True).fetch(200)
+        while keys:
+            logging.info('%s: deleting %d...' % (kind.kind(), len(keys)))
             db.delete(keys)
+            keys = kind.all(keys_only=True).fetch(200)
 
 def reset_datastore():
     """Wipes everything in the datastore except Accounts and Secrets,
     then sets up the datastore for new data."""
     wipe_datastore()
     setup_new_datastore()
-
-def add_analytics_id(analytics_id):
-    """Adds the analytics id to this datastore."""
-    Secret(key_name='analytics_id', value=analytics_id)
 
 def add_account(email='test@example.com', description='Test',
                 nickname='Test', affiliation='Test',
