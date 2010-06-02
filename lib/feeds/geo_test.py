@@ -25,7 +25,3 @@ class GeoTest(unittest.TestCase):
     def test_distance(self):
         assert 4128000 < geo.distance(SAN_FRANCISCO, NEW_YORK) < 4130000
         assert 4128000 < geo.distance(SAN_FRANCISCO, NEW_YORK) < 4130000
-
-
-if __name__ == '__main__':
-    unittest.main()
