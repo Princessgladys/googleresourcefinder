@@ -309,9 +309,12 @@ def parse_shoreland_datetime(timestamp):
 
 def put_batches(entities):
     """Works around annoying limitations of App Engine's datastore."""
+    count, total = 0, len(entities)
     while entities:
         batch, entities = entities[:200], entities[200:]
         db.put(batch)
+        count += len(batch)
+        logging.info('Stored %d of %d entities.' % (count, total))
 
 def parse_datetime(timestamp):
     """Parses a UTC timestamp in YYYY-MM-DD HH:MM:SS format.  Acceptable
