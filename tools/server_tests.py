@@ -115,7 +115,7 @@ class ProcessRunner(threading.Thread):
 class AppServerRunner(ProcessRunner):
     """Manages a dev_appserver subprocess."""
 
-    READY_RE = re.compile('Running application ' + APP_ID)
+    READY_RE = re.compile('Running application ' + console.get_app_id())
 
     def __init__(self, port):
         self.datastore_path = '/tmp/dev_appserver.datastore.%d' % os.getpid()
@@ -182,7 +182,7 @@ if __name__ == '__main__':
         loader = unittest.defaultTestLoader
         suites = []
         for filename in os.listdir(os.environ['TESTS_DIR']):
-            if filename.startswith('test_') and filename.endswith('.py'):
+            if filename.endswith('_test.py'):
                 module = filename[:-3]
                 suites.append(loader.loadTestsFromName(module))
 
