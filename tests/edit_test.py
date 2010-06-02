@@ -38,7 +38,8 @@ STR_FIELDS = [
     'comments',
 ]
 
-class EditTests(SeleniumTestCase):
+
+class EditTest(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
         f = Facility(key_name='example.org/123', type='hospital')
@@ -68,7 +69,7 @@ class EditTests(SeleniumTestCase):
         self.wait_for_element('link=Edit this record')
         self.click('link=Edit this record')
         self.wait_for_load()
-        self.assertTrue('/edit?' in self.get_location())
+        assert '/edit?' in self.get_location()
 
     def test_edit_page(self):
         """Confirms that all the fields in the edit form save the entered
@@ -113,7 +114,7 @@ class EditTests(SeleniumTestCase):
         self.wait_for_load()
 
         # Check that we got back to the main map
-        self.assertEquals(self.config.base_url + '/', self.get_location())
+        assert self.config.base_url + '/' == self.get_location()
 
         # Return to the edit page
         self.open_path('/edit?facility_name=example.org/123')
@@ -194,17 +195,18 @@ class EditTests(SeleniumTestCase):
             self.assert_value(value, input_xpath)
         for name, value in checkbox_fields.items():
             checkbox_xpath = '//input[@name="%s"]' % name
-            self.assertEquals(value, self.is_checked(checkbox_xpath))
+            assert value == self.is_checked(checkbox_xpath)
         for name, value in select_fields.items():
             select_xpath = '//select[@name="%s"]' % name
-            self.assertEquals([value], self.get_selected_values(select_xpath))
+            assert [value] == self.get_selected_values(select_xpath)
 
     def verify_errors(self, text_fields):
         """Checks that all the given text fields have visible error messages.
         Argument should be a dictionary of field names to values."""
         for name, value in text_fields.items():
             error_xpath = '//div[@id="%s_errormsg"]' % name.split('.')[0]
-            self.assertTrue(self.is_visible(error_xpath))
+            assert self.is_visible(error_xpath)
+
 
 if __name__ == '__main__':
     unittest.main()

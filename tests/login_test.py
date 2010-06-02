@@ -1,10 +1,12 @@
 from selenium_test_case import SeleniumTestCase
 import unittest
 
-class LoginTestCase(SeleniumTestCase):
+
+class LoginTest(SeleniumTestCase):
     def test_map_loaded(self):
-        self.assertTrue(self.login('/'))
-        self.assertTrue(self.is_element_present('map'))
+        assert self.login('/')
+        self.assert_element('map')
+
 
 if __name__ == "__main__":
     unittest.main()

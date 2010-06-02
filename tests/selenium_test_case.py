@@ -120,28 +120,26 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
 
     def assert_element(self, locator):
        """Asserts that the given element is present."""
-       self.assertTrue(self.is_element_present(locator),
-           'Element %s is unexpectedly missing' % locator)
+       assert self.is_element_present(locator), \
+           'Element %s is unexpectedly missing' % locator
 
     def assert_no_element(self, locator):
        """Asserts that the given element is not present."""
-       self.assertFalse(self.is_element_present(locator),
-           'Element %s is unexpectedly present' % locator)
+       assert not self.is_element_present(locator), \
+           'Element %s is unexpectedly present' % locator
 
     def assert_text(self, string_or_regex, locator):
        """Asserts that the text of the given element entirely matches the
        given string or regular expression."""
        text = self.get_text(locator)
-       self.assertTrue(
-           match(string_or_regex, text),
-           'Element %s: actual text %r does not match %r' %
-           (locator, text, string_or_regex))
+       assert match(string_or_regex, text), \
+           'Element %s: actual text %r does not match %r' % \
+           (locator, text, string_or_regex)
 
     def assert_value(self, string_or_regex, locator):
        """Asserts that the entire value of the given element exactly matches
        the given string, or matches the given regular expression."""
        value = self.get_value(locator)
-       self.assertTrue(
-           match(string_or_regex, value),
-           'Element %s: actual value %r does not match %r' %
-           (locator, value, string_or_regex))
+       assert match(string_or_regex, value), \
+           'Element %s: actual value %r does not match %r' % \
+           (locator, value, string_or_regex)
