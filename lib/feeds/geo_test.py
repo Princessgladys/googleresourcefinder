@@ -16,7 +16,6 @@
 
 import geo
 import unittest
-import nose
 
 SAN_FRANCISCO = {'lat': 40.7142, 'lon': -74.0064}
 NEW_YORK = {'lat': 37.7750, 'lon': -122.4180}
