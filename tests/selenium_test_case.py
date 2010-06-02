@@ -83,9 +83,9 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         self.stop()
     
     def login(self, path):
-        """Attempts to open the given path, logging in if necessary.  Use
-        this method to load the first page in a test.  Returns True if the
-        login form was submitted, or False if no login form appeared."""
+        """Navigates to the given path, logging in if necessary, and waits for
+        the page to load.  Use this method to load the first page in a test.
+        Returns True if a login form appeared and was submitted."""
         self.open_path(path)
         if self.is_element_present(self.config.login_form):
             self.type(self.config.login_email, self.config.user_name)
@@ -99,7 +99,8 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
     # ----------------------------------------- Selenium convenience methods
 
     def open_path(self, path):
-        """Navigates to a given path under the server's base URL."""
+        """Navigates to a given path under the server's base URL, then
+        waits for the page to load."""
         self.open(self.config.base_url + path) 
 
     def wait_for_load(self):

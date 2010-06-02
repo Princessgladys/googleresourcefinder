@@ -2,7 +2,6 @@ from google.appengine.api import users
 from model import *
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
-import unittest
 
 # "name" attributes of the checkboxes for available services in the edit form.
 SERVICES = [
@@ -206,7 +205,3 @@ class EditTest(SeleniumTestCase):
         for name, value in text_fields.items():
             error_xpath = '//div[@id="%s_errormsg"]' % name.split('.')[0]
             self.assertTrue(self.is_visible(error_xpath))
-
-
-if __name__ == '__main__':
-    unittest.main()
