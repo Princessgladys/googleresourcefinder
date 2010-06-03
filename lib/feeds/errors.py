@@ -14,8 +14,6 @@
 
 """Common exception classes."""
 
-import logging
-
 class ErrorMessage(Exception):
     """Raise this exception to show an error message to the user."""
     def __init__(self, status, message):
