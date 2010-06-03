@@ -10,6 +10,7 @@ msgstr ""
 "PO-Revision-Date: 2010-05-27 00:08-0800\n"
 "Last-Translator: Ka-Ping Yee <kpy@google.com>\n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -60,7 +61,7 @@ msgstr ""
 msgid "Accuracy"
 msgstr ""
 
-#. Header for a street address
+#. street address
 #: templates/hospital_bubble.html:112 templates/print_data.html:68 ../tools/setup.py:127
 msgid "Address"
 msgstr ""
@@ -788,7 +789,7 @@ msgid "X-ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: bubble.py:47 edit.py:170
+#: edit.py:170 bubble.py:47
 msgid "Yes"
 msgstr ""
 

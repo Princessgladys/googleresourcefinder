@@ -15,6 +15,7 @@
 import datetime
 import logging
 import model
+import pickle
 import re
 import urlparse
 import utils
@@ -23,8 +24,10 @@ from access import check_action_permitted
 from main import USE_WHITELISTS
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
-from utils import db, get_message, html_escape, simplejson, to_unicode, users, _
+from utils import db, get_message, html_escape, simplejson, taskqueue, to_unicode, users, _
 from feeds.crypto import sign, verify
+import edxl_have
+from feeds import xmlutils, records
 
 # TODO(shakusa) Add per-attribute comment fields
 
@@ -397,15 +400,18 @@ class Edit(utils.Handler):
             minimal_facility = model.MinimalFacility.all().ancestor(
                 facility).get()
             utcnow = datetime.datetime.utcnow().replace(microsecond=0)
+            observed=utcnow
             report = model.Report(
                 facility,
                 arrived=utcnow,
                 source=get_source_url(request),
                 author=user,
-                observed=utcnow)
+                observed=observed)
             change_metadata = ChangeMetadata(
                 utcnow, user, account.nickname, account.affiliation)
             has_changes = False
+            changed_attributes_dict = {}
+
             for name in facility_type.attribute_names:
                 attribute = attributes[name]
                 # To change an attribute, it has to have been marked editable
@@ -426,7 +432,22 @@ class Edit(utils.Handler):
                     apply_change(facility, minimal_facility, report,
                                  facility_type, request, attribute,
                                  change_metadata)
+                    # TODO: geo properties
+                    changed_attributes_dict[name] = attribute
+
             if has_changes:
+                edxl_change = edxl_have.serialize(changed_attributes_dict)
+                record = records.create_record(
+                    self.request.host_url + '/feeds/delta',
+                    user.email(),
+                    'some_title',
+                    'some_subject_id',
+                    observed,
+                    edxl_change)
+
+                taskqueue.add(url='/tasks/add_feed_record',
+                    payload=pickle.dumps(record),
+                    transactional=True)
                 db.put([report, facility, minimal_facility])
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,

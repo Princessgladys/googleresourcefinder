@@ -14,8 +14,10 @@
 
 """Handler for feed retrieval requests."""
 
+import logging
+import pickle
 from edxl_have import URI_PREFIXES
-from feeds.feedutils import handle_entry_get, handle_feed_get
+from feeds.feedutils import handle_entry_get, handle_feed_get, handle_feed_post, notify_hub
 from utils import ErrorMessage, Handler, run, _
 
 
@@ -32,14 +34,20 @@ class Feed(Handler):
 class Entry(Handler):
     def get(self, feed_name, entry_id):
         feed_id = get_feed_id(self.request, feed_name)
-        try:
-            handle_entry_get(
-                self.request, self.response, feed_id, entry_id, URI_PREFIXES)
-        except EntryNotFoundError:
-            #i18n: Error message for missing entry
-            raise ErrorMessage(404, _('No such entry'))
+        handle_entry_get(
+            self.request, self.response, feed_id, entry_id, URI_PREFIXES)
+
+
+class AddRecord(Handler):
+    def post(self):
+        # todo: idempotence
+        record = pickle.loads(self.request.body)
+        record.put()
+        notify_hub(self.request.host_url + record.feed_id)
 
 
 if __name__ == '__main__':
     run([('/feeds/([^/]+)', Feed),
-         ('/feeds/([^/]+)/([^/]+)', Entry)], debug=True)
+         ('/feeds/([^/]+)/([^/]+)', Entry),
+         ('/tasks/add_feed_record', AddRecord),
+         ], debug=True)

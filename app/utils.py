@@ -14,6 +14,7 @@
 
 from google.appengine.api import urlfetch
 from google.appengine.api import users
+from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 import google.appengine.ext.webapp.template

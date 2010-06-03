@@ -14,6 +14,8 @@
 
 """Atom feed input and output."""
 
+import datetime
+import logging
 import time_formats
 import xmlutils
 
@@ -32,23 +34,37 @@ def create_entry(record):
         xmlutils.element('{%s}id' % ATOM_NS, atom_id),
         xmlutils.element('{%s}title' % ATOM_NS, record.title),
         xmlutils.element('{%s}updated' % ATOM_NS,
-            time_formats.to_rfc3339(record.arrival_time)),
+            time_formats.to_rfc3339(record.arrived)),
         xmlutils.parse(record.content)
     )
 
-def create_feed(records, hub=None):
+def __create_feed(records, feed_id, hub=None):
     """Constructs an Element for an Atom feed containing the given records."""
-    feed = xmlutils.element('{%s}feed' % ATOM_NS, map(create_entry, records))
+    updated = None
+    if records:
+      updated = records[0].arrived
+    else:
+      updated = datetime.datetime.utcnow()
+    elements = [
+        xmlutils.element('{%s}title' % ATOM_NS, feed_id),
+        xmlutils.element('{%s}id' % ATOM_NS, feed_id),
+        xmlutils.element('{%s}updated' % ATOM_NS,
+            time_formats.to_rfc3339(updated))
+        ]
     if hub:
-        feed.append(xmlutils.element('{%s}link' % ATOM_NS,
-                                     {'rel': 'hub', 'href': hub}))
-    return feed
+        elements.append(xmlutils.element('{%s}link' % ATOM_NS,
+            {'rel': 'hub', 'href': hub}))
+    elements.extend(map(create_entry, records))
+    return xmlutils.element('{%s}feed' % ATOM_NS, elements)
 
 def write_entry(file, record, uri_prefixes={}):
     """Writes an Atom entry for the given record to the given file."""
     xmlutils.write(file, create_entry(record), add_atom_prefix(uri_prefixes))
 
-def write_feed(file, records, uri_prefixes={}, hub=None):
+def write_feed(file, records, feed_id, uri_prefixes={}, hub=None):
     """Writes an Atom feed containing the given records to the given file."""
-    xmlutils.write(
-        file, create_feed(records, hub), add_atom_prefix(uri_prefixes))
+
+
+    feed = __create_feed(records, feed_id, hub)
+
+    xmlutils.write(file, feed, add_atom_prefix(uri_prefixes))
