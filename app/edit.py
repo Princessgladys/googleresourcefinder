@@ -376,14 +376,14 @@ class Edit(utils.Handler):
             if not nickname:
                 logging.error("Missing editor nickname")
                 #i18n: Error message for request missing nickname
-                raise ErrorMessage(403, 'Missing editor nickname.')
+                raise ErrorMessage(400, 'Missing editor nickname.')
             self.account.nickname = nickname.strip()
 
             affiliation = self.request.get('account_affiliation', None)
             if not affiliation:
                 logging.error("Missing editor affiliation")
                 #i18n: Error message for request missing affiliation
-                raise ErrorMessage(403, 'Missing editor affiliation.')
+                raise ErrorMessage(400, 'Missing editor affiliation.')
             self.account.affiliation = affiliation.strip()
             self.account.actions.append('edit')
             self.account.put()
