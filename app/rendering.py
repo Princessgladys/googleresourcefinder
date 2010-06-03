@@ -118,8 +118,10 @@ def render_json(center=None, radius=None):
         facility_types, facility_type_transformer, attribute_is)
 
     # Make JSON objects for the facilities
+    query = MinimalFacility.all().order(MinimalFacility.get_stored_name('title'))
+    all_facilities = query.fetch(10000)  # Force loading all records
     facility_jobjects, facility_is = make_jobjects(
-        MinimalFacility.all().order(MinimalFacility.get_stored_name('title')),
+        all_facilities,
         minimal_facility_transformer, attributes, facility_types,
         facility_type_is, center, radius)
     total_facility_count = len(facility_jobjects) - 1

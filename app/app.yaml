@@ -24,6 +24,9 @@ handlers:
 - url: /edit
   script: edit.py
 
+- url: /stats.*
+  script: $PYTHON_LIB/google/appengine/ext/appstats/ui.py
+
 - url: /request_access
   script: request_access.py
 
