@@ -51,12 +51,12 @@ fi
 export SELENIUM_PYTHON_DIR=$(dirname $(find $SELENIUM_DIR -name selenium.py))
 
 if [ -z "$SELENIUM_PYTHON_DIR" ]; then
-    $(python -m selenium)
-    if [ $? -ne 0 ]; then
+    #if [ $(python -m selenium) ]; then
+    if python -m selenium; then
+        export SELENIUM_PYTHON_DIR=""
+    else
         echo "Could not find selenium.py in $SELENIUM_DIR nor egg in site-packages."
         exit 1
-    else
-        export SELENIUM_PYTHON_DIR=""
     fi
 fi
 
