@@ -40,7 +40,6 @@ class Hospital(xmlutils.Converter):
                 'OrganizationTypeText',
                 'CommentText'
             ))
-        print 'Hospital element:', xmlutils.serialize(element)
         value.update(GeoLocation.struct_from_children(element,
             'OrganizationGeoLocation',
         ))
