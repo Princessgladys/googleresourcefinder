@@ -216,6 +216,9 @@ class Account(db.Model):
     user_id = db.StringProperty() # users.User.id() of the account.
     nickname = db.StringProperty() # User nickname,
                                    # may be different than users.User.nickname()
+    location = db.GeoPtProperty() # The lat/long coordinates of the users's 
+                                  # default location
+    location_text = db.StringProperty() # A description of the user's location.
     affiliation = db.StringProperty() # User affiliation
     token = db.StringProperty() # A way of looking up the account without id
                                 # or email available. This allows us to have
