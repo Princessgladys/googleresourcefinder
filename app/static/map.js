@@ -339,6 +339,7 @@ function initialize_map() {
     navigationControl: true,
     navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL}
   });
+  geocoder = new google.maps.Geocoder();
   google.maps.event.addListener(map, 'tilesloaded', set_map_opacity);
   if (print) {
     google.maps.event.addListener(map, 'tilesloaded', convert_markers_for_print);
@@ -1353,26 +1354,22 @@ function request_action_handler(request_url) {
   return false;
 }
 
-function initialize_geocoder() {
-  geocoder = new google.maps.Geocoder();
-  return;
-}
 
 function handle_default_location_error(){
   alert('Error');
 }
 
 function update_user_location(lat, lng, address) {
-  alert('Updated');
+  alert(lat + lng + address);
   return true;
 }
 
-function handle_default_location(second_try) {
+function handle_default_location() {
   var user_entered_location = $('user_address').value;
-  var lat;
-  var lng;
+  var bounds = map.getBounds();
   if (geocoder) {
-    geocoder.geocode( { 'address': user_entered_location},
+    geocoder.geocode( { 'address': user_entered_location,
+                        'bounds': bounds},
                       function(results, status) {
       if (status == google.maps.GeocoderStatus.OK) {
         lat = results[0].geometry.location.lat();
@@ -1386,19 +1383,22 @@ function handle_default_location(second_try) {
           return;
         }
       } else {
-        handle_default_location_error()
+        handle_default_location_error();
         return;
       }
     });
   } else {
-    if (second_try) {
-      alert('Error');
-    } else {
-      initialize_geocoder();
-      handle_default_location(true);    
-    }
+      handle_default_location_error();
   }
   return;
+}
+
+function render_location_form(loc_message) {
+  section = $('default-location-form');
+  section.style.display = "inline";
+  msg = $('location_link').innerHTML;
+  location_msg = $('default-location-message');
+  location_msg.innerHTML = msg + "<br />"
 }
 
 log('map.js finished loading.');

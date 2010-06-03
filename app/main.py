@@ -39,8 +39,10 @@ def get_export_link():
 class Main(Handler):
 
     def get(self):
+        account = None
         if USE_WHITELISTS:
             self.require_logged_in_user()
+            account = self.account
 
         user = self.user
         center = None
@@ -50,6 +52,7 @@ class Main(Handler):
                     params=self.params,
                     #i18n: a user with no identity
                     authorization=user and user.email() or _('anonymous'),
+                    account=account,
                     loginout_url=(user and users.create_logout_url('/') or
                                   users.create_login_url('/')),
                     #i18n: Link to sign out of the app
