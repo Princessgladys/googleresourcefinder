@@ -188,7 +188,11 @@ def fetch(url, data='', agent=None, referrer=None, charset=None, verbose=0,
             path += '?' + query
         headers = {'host': host, 'accept': '*/*'}
         if data:
-            headers['content-type'] = 'application/x-www-form-urlencoded'
+            # When we're clearly submitting XML, say so.
+            if data.startswith('<?xml'):
+                headers['content-type'] = 'text/xml'
+            else:
+                headers['content-type'] = 'application/x-www-form-urlencoded'
             headers['content-length'] = len(data)
         if agent:
             headers['user-agent'] = agent
