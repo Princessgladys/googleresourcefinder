@@ -143,7 +143,7 @@ function make_visible(id) {
   /**
    * If the save button is clicked, validate relevant inputs on the page,
    * and display error messages if fields are invalid.
-   * input elements are discovered by checking for marker class names on
+   * Input elements are discovered by checking for marker class names on
    * parent 'tr' elements.
    * @return {boolean} - true if the "save" button was not pressed or all 
    * inputs are valid, otherwise false
