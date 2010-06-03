@@ -46,13 +46,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Instituciones dentro de${RADIUS_MILES} millas"
 
 #. Error message for lacking edit permissions
-#: edit.py:421
+#: edit.py:427
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s no tiene permiso para editar %(a)s"
 
 #. Form option to indicate that a value is not specified
-#: edit.py:168 edit.py:194 edit.py:209
+#: edit.py:212 edit.py:197 edit.py:171
 msgid "(unspecified)"
 msgstr "(No especificado)"
 
@@ -234,7 +234,7 @@ msgid "District"
 msgstr "Distrito"
 
 #. E-mail address
-#: ../tools/setup.py:119 edit.py:115
+#: edit.py:118 ../tools/setup.py:119
 msgid "E-mail"
 msgstr "Correo electrónico"
 
@@ -374,12 +374,12 @@ msgid "Infectious disease"
 msgstr "Enfermedades infecciosas"
 
 #. Error message for invalid date entry
-#: edit.py:137
+#: edit.py:140
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Fecha no válida: %(date)r (requiere un formato de DD-MM-AAAA)"
 
 #. Error message for request missing facility name.
-#: edit.py:324 bubble.py:146
+#: edit.py:327 bubble.py:146
 msgid "Invalid or missing facility name."
 msgstr "Nombre de la institución no válido o no especificado"
 
@@ -404,7 +404,7 @@ msgid "Last updated:"
 msgstr "Actualizado"
 
 #. Label for text input
-#: edit.py:230
+#: edit.py:233
 msgid "Latitude"
 msgstr "Latitud"
 
@@ -444,7 +444,7 @@ msgid "Location:"
 msgstr "Ubicación"
 
 #. Label for text input
-#: edit.py:233
+#: edit.py:236
 msgid "Longitude"
 msgstr "Longitud"
 
@@ -479,7 +479,7 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: edit.py:111
+#: edit.py:114
 msgid "Name"
 msgstr "Nombre"
 
@@ -494,7 +494,7 @@ msgid "Neurosurgery"
 msgstr "Neurocirugía"
 
 #. Form option for a false Boolean value
-#: edit.py:172 bubble.py:47
+#: edit.py:175 bubble.py:47
 msgid "No"
 msgstr "No"
 
@@ -508,11 +508,6 @@ msgstr "No hay información de disponibilidad"
 #, python-format
 msgid "No pending request for %(account_action)s by %(user)s"
 msgstr "No hay solicitud pendiente %(authorization_role)s para%(user)s "
-
-#. Error message for missing entry
-#: feed_provider.py:40
-msgid "No such entry"
-msgstr "No existe tal entrada"
 
 #. Facility operational status: cannot perform surgeries
 #: ../tools/setup.py:221
@@ -580,7 +575,7 @@ msgid "Pediatrics"
 msgstr "Pediatría"
 
 #. telephone number
-#: edit.py:113 ../tools/setup.py:117
+#: edit.py:116 ../tools/setup.py:117
 msgid "Phone"
 msgstr "Teléfono"
 
@@ -626,7 +621,7 @@ msgid "Reachable by road"
 msgstr "Acceso a través de carretera"
 
 #. Record updated successfully.
-#: edit.py:437
+#: edit.py:447
 msgid "Record updated."
 msgstr "Registro actualizado."
 
@@ -739,7 +734,7 @@ msgid "URL:"
 msgstr "URL:"
 
 #. Error message
-#: utils.py:111
+#: utils.py:112
 msgid "Unauthorized user."
 msgstr "Sin autorización del usuario"
 
@@ -789,7 +784,7 @@ msgid "X-ray"
 msgstr "Rayos X"
 
 #. Form option for a true Boolean value
-#: edit.py:170 bubble.py:47
+#: edit.py:173 bubble.py:47
 msgid "Yes"
 msgstr "Sí"
 
