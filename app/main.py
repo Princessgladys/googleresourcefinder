@@ -52,9 +52,6 @@ class Main(Handler):
             account = self.account
             user_location_token = sign(USER_LOCATION_XSRF_KEY_NAME, self.user.user_id(),
                                        DAY_SECS)
-            logging.error('%s %s %s %s' % (USER_LOCATION_XSRF_KEY_NAME, self.user.user_id(),
-                                           DAY_SECS, user_location_token))
-                                       
 
         center = None
         if self.params.lat is not None and self.params.lon is not None:
@@ -65,6 +62,7 @@ class Main(Handler):
                     params=self.params,
                     #i18n: a user with no identity
                     authorization=user and user.email() or _('anonymous'),
+                    account=account,
                     loginout_url=(user and users.create_logout_url('/') or
                                   users.create_login_url('/')),
                     #i18n: Link to sign out of the app
