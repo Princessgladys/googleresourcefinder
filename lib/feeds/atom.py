@@ -23,11 +23,11 @@ import edxl_have
 ATOM_NS = 'http://www.w3.org/2005/Atom'
 STATUS_NS = 'http://schemas.google.com/2010/status'
 
-def add_atom_prefix(uri_prefixes):
+def __add_atom_prefix(uri_prefixes):
     """Adds an entry for the Atom namespace to a prefix dictionary."""
     return dict([(ATOM_NS, 'atom'), (STATUS_NS, 'status')], **uri_prefixes)
 
-def create_entry(record):
+def __create_entry(record):
     """Constructs an Element for an Atom entry for the given record."""
     atom_id = record.feed_id + '/' + str(record.key().id())
     return xmlutils.element('{%s}entry' % ATOM_NS,
@@ -61,17 +61,14 @@ def __create_feed(records, feed_id, hub=None):
     if hub:
         elements.append(xmlutils.element('{%s}link' % ATOM_NS,
             {'rel': 'hub', 'href': hub}))
-    elements.extend(map(create_entry, records))
+    elements.extend(map(__create_entry, records))
     return xmlutils.element('{%s}feed' % ATOM_NS, elements)
 
 def write_entry(file, record, uri_prefixes={}):
     """Writes an Atom entry for the given record to the given file."""
-    xmlutils.write(file, create_entry(record), add_atom_prefix(uri_prefixes))
+    xmlutils.write(file, create_entry(record), __add_atom_prefix(uri_prefixes))
 
 def write_feed(file, records, feed_id, uri_prefixes={}, hub=None):
     """Writes an Atom feed containing the given records to the given file."""
-
-
     feed = __create_feed(records, feed_id, hub)
-
-    xmlutils.write(file, feed, add_atom_prefix(uri_prefixes))
+    xmlutils.write(file, feed, __add_atom_prefix(uri_prefixes))
