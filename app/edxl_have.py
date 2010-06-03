@@ -5,13 +5,12 @@ from feeds import xmlutils
 
 
 EDXL_HAVE_NS = 'urn:oasis:names:tc:emergency:EDXL:HAVE:1.0'
-GEO_OASIS_NS = 'http://www.opengis.net/gml/geo-oasis/10'
 GML_NS = 'http://opengis.net/gml'
 URI_PREFIXES = {
     EDXL_HAVE_NS: 'have',
-    GEO_OASIS_NS: 'geo-oasis',
     GML_NS: 'gml'
 }
+
 
 class HospitalStatus(xmlutils.Converter):
     __metaclass__ = xmlutils.Singleton
@@ -41,25 +40,10 @@ class Hospital(xmlutils.Converter):
                 'OrganizationTypeText',
                 'CommentText'
             ))
-            org_loc = org_info.find(self.qualify('OrganizationLocation'))
-            if org_loc is not None:
-                value.update(Text.struct_from_children(org_loc,
-                    'StreetFullText',
-                    'LocationCityName',
-                    'LocationCountyName',
-                    'LocationStateName',
-                    'LocationPostalCodeID',
-                    'LocationCountryName',
-                ))
-                value.update(GeoLocation.struct_from_children(org_loc,
-                    'OrganizationGeoLocation',
-                ))
-        patient_capacity = element.find(self.qualify('patient_capacity'))
-        if patient_capacity is not None:
-            value['patient_capacity'] = int(patient_capacity.text)
-        patient_count = element.find(self.qualify('patient_count'))
-        if patient_count is not None:
-            value['patient_count'] = int(patient_count.text)
+        print 'Hospital element:', xmlutils.serialize(element)
+        value.update(GeoLocation.struct_from_children(element,
+            'OrganizationGeoLocation',
+        ))
         value.update(DateTime.struct_from_children(element, 'LastUpdateTime'))
         return value
 
@@ -73,20 +57,8 @@ class Hospital(xmlutils.Converter):
                     'OrganizationTypeText',
                     'CommentText',
                 ),
-                self.element('OrganizationLocation',
-                    Text.struct_to_elements(value,
-                        'StreetFullText',
-                        'LocationCityName',
-                        'LocationCountyName',
-                        'LocationStateName',
-                        'LocationPostalCodeID',
-                        'LocationCountryName',
-                    ),
-                    GeoLocation.struct_to_elements(value,
-                        'OrganizationGeoLocation',
-                    )
-                ),
             ),
+            GeoLocation.struct_to_elements(value, 'OrganizationGeoLocation'),
             DateTime.struct_to_elements(value, 'LastUpdateTime')
         )
 
@@ -116,20 +88,20 @@ class DateTime(xmlutils.Converter):
 
 class GeoLocation(xmlutils.Converter):
     __metaclass__ = xmlutils.Singleton
-    NS = GEO_OASIS_NS
+    NS = EDXL_HAVE_NS
 
     def from_element(self, element):
-        where = element.find(self.qualify('where'))
-        if where is not None:
-            point = where.find(qualify(GML_NS, 'Point'))
-            if point is not None:
-                latitude, longitude = map(float, point.text.split())
+        point = element.find(xmlutils.qualify(GML_NS, 'Point'))
+        if point is not None:
+            pos = point.find(xmlutils.qualify(GML_NS, 'pos'))
+            if pos is not None:
+                latitude, longitude = map(float, pos.text.split())
                 return (latitude, longitude)
 
     def to_element(self, name, value):
         return self.element(name,
-            self.element('where',
-                xmlutils.element(qualify(GML_NS, 'Point'),
+            xmlutils.element(xmlutils.qualify(GML_NS, 'Point'),
+                xmlutils.element(xmlutils.qualify(GML_NS, 'pos'),
                     '%g %g' % (latitude, longitude)
                 )
             )
