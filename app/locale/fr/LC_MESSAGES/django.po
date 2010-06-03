@@ -45,13 +45,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} établissements dans un rayon de ${RADIUS_MILES} miles"
 
 #. Error message for lacking edit permissions
-#: edit.py:421
+#: edit.py:436
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s n'a pas l'autorisation de modifier %(a)s"
 
 #. Form option to indicate that a value is not specified
-#: edit.py:168 edit.py:194 edit.py:209
+#: edit.py:208 edit.py:193 edit.py:167
 msgid "(unspecified)"
 msgstr "(non spécifié)"
 
@@ -116,7 +116,7 @@ msgid "Can pick up patients"
 msgstr "Peut passer prendre les patients"
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:148
+#: templates/edit.html:154
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -233,7 +233,7 @@ msgid "District"
 msgstr "District"
 
 #. E-mail address
-#: ../tools/setup.py:119 edit.py:115
+#: ../tools/setup.py:119 edit.py:114
 msgid "E-mail"
 msgstr "E-mail"
 
@@ -373,12 +373,12 @@ msgid "Infectious disease"
 msgstr "Maladies infectieuses"
 
 #. Error message for invalid date entry
-#: edit.py:137
+#: edit.py:136
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Date incorrecte : %(date)r  (format AAAA-MM-JJ requis)"
 
 #. Error message for request missing facility name.
-#: edit.py:324 bubble.py:146
+#: bubble.py:146 edit.py:332
 msgid "Invalid or missing facility name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -403,7 +403,7 @@ msgid "Last updated:"
 msgstr "Mise à jour :"
 
 #. Label for text input
-#: edit.py:230
+#: edit.py:229
 msgid "Latitude"
 msgstr "Latitude"
 
@@ -478,7 +478,7 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: edit.py:111
+#: edit.py:110
 msgid "Name"
 msgstr "Nom"
 
@@ -493,7 +493,7 @@ msgid "Neurosurgery"
 msgstr "Neurochirurgie"
 
 #. Form option for a false Boolean value
-#: edit.py:172 bubble.py:47
+#: bubble.py:47 edit.py:171
 msgid "No"
 msgstr "Non"
 
@@ -579,7 +579,7 @@ msgid "Pediatrics"
 msgstr "Pédiatrie"
 
 #. telephone number
-#: edit.py:113 ../tools/setup.py:117
+#: edit.py:112 ../tools/setup.py:117
 msgid "Phone"
 msgstr "Téléphone"
 
@@ -625,7 +625,7 @@ msgid "Reachable by road"
 msgstr "Accessible en voiture"
 
 #. Record updated successfully.
-#: edit.py:437
+#: edit.py:452
 msgid "Record updated."
 msgstr "Enregistrement mis à jour"
 
@@ -658,7 +658,7 @@ msgid "Resource Finder"
 msgstr "Localisation de ressources"
 
 #. Button text to save data
-#: templates/edit.html:144
+#: templates/edit.html:150
 msgid "Save"
 msgstr "Enregistrer"
 
@@ -788,7 +788,7 @@ msgid "X-ray"
 msgstr "Radiographie"
 
 #. Form option for a true Boolean value
-#: edit.py:170 bubble.py:47
+#: edit.py:169 bubble.py:47
 msgid "Yes"
 msgstr "Oui"
 
@@ -823,6 +823,11 @@ msgstr "disponibilités"
 #: templates/hospital_bubble.html:53
 msgid "capacity"
 msgstr "capacité"
+
+#. TODO: Add missing message description or meaning
+#: templates/edit.html:137
+msgid "comment:"
+msgstr "Commentaires"
 
 #. Header for the number of facilities less than 10 miles from a location.
 #: templates/map.html:166
