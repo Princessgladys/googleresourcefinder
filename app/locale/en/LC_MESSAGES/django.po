@@ -45,13 +45,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Error message for lacking edit permissions
-#: edit.py:436
+#: edit.py:434
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr ""
 
 #. Form option to indicate that a value is not specified
-#: edit.py:169 edit.py:210 edit.py:195
+#: edit.py:192 edit.py:207 edit.py:166
 msgid "(unspecified)"
 msgstr ""
 
@@ -378,7 +378,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr ""
 
 #. Error message for request missing facility name.
-#: edit.py:334 bubble.py:146
+#: bubble.py:146 edit.py:331
 msgid "Invalid or missing facility name."
 msgstr ""
 
@@ -403,7 +403,7 @@ msgid "Last updated:"
 msgstr ""
 
 #. Label for text input
-#: edit.py:231
+#: edit.py:228
 msgid "Latitude"
 msgstr ""
 
@@ -443,7 +443,7 @@ msgid "Location:"
 msgstr ""
 
 #. Label for text input
-#: edit.py:235
+#: edit.py:232
 msgid "Longitude"
 msgstr ""
 
@@ -493,7 +493,7 @@ msgid "Neurosurgery"
 msgstr ""
 
 #. Form option for a false Boolean value
-#: edit.py:173 bubble.py:47
+#: edit.py:170 bubble.py:47
 msgid "No"
 msgstr ""
 
@@ -625,7 +625,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:452
+#: edit.py:450
 msgid "Record updated."
 msgstr ""
 
@@ -788,7 +788,7 @@ msgid "X-ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: bubble.py:47 edit.py:171
+#: edit.py:168 bubble.py:47
 msgid "Yes"
 msgstr ""
 
