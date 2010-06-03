@@ -70,7 +70,6 @@ class AttributeType:
         value = self.to_stored_value(name, request.get(name, None),
                                      request, attribute)
         comment = request.get('%s__comment' % name, None)
-        logging.info('apply_change ' + comment)
 
         report.set_attribute(name, value, comment)
         facility.set_attribute(name, value,

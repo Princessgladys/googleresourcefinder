@@ -50,9 +50,6 @@ def check_request(request, user):
 
 def check_action_permitted(account, action):
     """Return True if the account is allowed to perform the given action"""
-    logging.info(account)
-    logging.info(action)
-    logging.info(account.actions)
     return account and (action in account.actions
                         or ":%s" % action in account.actions)
 
