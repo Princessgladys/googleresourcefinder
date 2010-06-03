@@ -19,7 +19,7 @@ import re
 import urlparse
 import utils
 import wsgiref
-from access import check_user_role
+from access import check_action_permitted
 from main import USE_WHITELISTS
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
@@ -291,13 +291,13 @@ def is_editable(request, attribute):
     at the time the edit page was rendered."""
     return 'editable.%s' % attribute.key().name() in request.arguments()
 
-def can_edit(auth, attribute):
+def can_edit(account, attribute):
     """Returns True if the user can edit the given attribute."""
-    return not attribute.edit_role or check_user_role(
-        auth, attribute.edit_role)
+    return not attribute.edit_action or check_action_permitted(
+        account, attribute.edit_action)
 
 def get_suggested_nickname(user):
-    """Returns the suggested Authorization.nickname based on a user.nickname"""
+    """Returns the suggested Account.nickname based on a user.nickname"""
     return re.sub('@.*', '', user and user.nickname() or '')
 
 def get_source_url(request):
@@ -315,7 +315,7 @@ class Edit(utils.Handler):
         self.require_logged_in_user()
 
         if USE_WHITELISTS:
-            self.require_user_role('editor')
+            self.require_action_permitted('edit')
 
         self.facility = model.Facility.get_by_key_name(
             self.params.facility_name)
@@ -336,7 +336,7 @@ class Edit(utils.Handler):
             if name in HIDDEN_ATTRIBUTE_NAMES:
                 continue
             attribute = self.attributes[name]
-            if can_edit(self.auth, attribute):
+            if can_edit(self.account, attribute):
                 fields.append({
                     'name': name,
                     'title': get_message('attribute_name', name),
@@ -354,7 +354,8 @@ class Edit(utils.Handler):
 
         self.render('templates/edit.html',
             token=token, facility_title=self.facility.get_value('title'),
-            fields=fields, readonly_fields=readonly_fields, auth=self.auth,
+            fields=fields, readonly_fields=readonly_fields,
+            account=self.account,
             suggested_nickname=get_suggested_nickname(self.user),
             params=self.params, logout_url=users.create_logout_url('/'),
             instance=self.request.host.split('.')[0])
@@ -370,28 +371,28 @@ class Edit(utils.Handler):
             raise ErrorMessage(403, 'Unable to submit data for %s'
                                % self.user.email())
 
-        if not self.auth.nickname:
-            nickname = self.request.get('auth_nickname', None)
+        if not self.account.nickname:
+            nickname = self.request.get('account_nickname', None)
             if not nickname:
                 logging.error("Missing editor nickname")
                 #i18n: Error message for request missing nickname
-                raise ErrorMessage(403, 'Missing editor nickname.')
-            self.auth.nickname = nickname.strip()
+                raise ErrorMessage(400, 'Missing editor nickname.')
+            self.account.nickname = nickname.strip()
 
-            affiliation = self.request.get('auth_affiliation', None)
+            affiliation = self.request.get('account_affiliation', None)
             if not affiliation:
                 logging.error("Missing editor affiliation")
                 #i18n: Error message for request missing affiliation
-                raise ErrorMessage(403, 'Missing editor affiliation.')
-            self.auth.affiliation = affiliation.strip()
-            self.auth.user_roles.append('editor')
-            self.auth.put()
+                raise ErrorMessage(400, 'Missing editor affiliation.')
+            self.account.affiliation = affiliation.strip()
+            self.account.actions.append('edit')
+            self.account.put()
             logging.info('Assigning nickname "%s" and affiliation "%s" to %s'
-                         % (nickname, affiliation, self.auth.email))
+                         % (nickname, affiliation, self.account.email))
 
         logging.info("record by user: %s" % self.user)
 
-        def update(key, facility_type, attributes, request, user, auth):
+        def update(key, facility_type, attributes, request, user, account):
             facility = db.get(key)
             minimal_facility = model.MinimalFacility.all().ancestor(
                 facility).get()
@@ -403,7 +404,7 @@ class Edit(utils.Handler):
                 author=user,
                 observed=utcnow)
             change_metadata = ChangeMetadata(
-                utcnow, user, auth.nickname, auth.affiliation)
+                utcnow, user, account.nickname, account.affiliation)
             has_changes = False
             for name in facility_type.attribute_names:
                 attribute = attributes[name]
@@ -413,7 +414,7 @@ class Edit(utils.Handler):
                 # rendered, and the user has to have permission to edit it now.
                 if (is_editable(request, attribute) and
                     has_changed(facility, request, attribute)):
-                    if not can_edit(auth, attribute):
+                    if not can_edit(account, attribute):
                         raise ErrorMessage(
                             403, _(
                             #i18n: Error message for lacking edit permissions
@@ -430,7 +431,7 @@ class Edit(utils.Handler):
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
                               self.attributes, self.request,
-                              self.user, self.auth)
+                              self.user, self.account)
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))

@@ -45,7 +45,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Error message for lacking edit permissions
-#: edit.py:420
+#: edit.py:421
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr ""
@@ -60,7 +60,7 @@ msgstr ""
 msgid "Accuracy"
 msgstr ""
 
-#. street address
+#. Header for a street address
 #: templates/hospital_bubble.html:112 templates/print_data.html:68 ../tools/setup.py:127
 msgid "Address"
 msgstr ""
@@ -503,9 +503,9 @@ msgid "No availability information"
 msgstr ""
 
 #. Error message
-#: grant_access.py:75
+#: grant_access.py:74
 #, python-format
-msgid "No pending request for %(authorization_role)s by %(user)s"
+msgid "No pending request for %(account_action)s by %(user)s"
 msgstr ""
 
 #. Error message for missing entry
@@ -625,7 +625,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:436
+#: edit.py:437
 msgid "Record updated."
 msgstr ""
 
@@ -634,22 +634,22 @@ msgstr ""
 msgid "Reinforced concrete"
 msgstr ""
 
-#. Application for the given permission role approved
-#: grant_access.py:91
+#. Application for the given permission action approved
+#: grant_access.py:90
 #, python-format
-msgid "Request for becoming %(role)s was approved."
+msgid "Request for becoming %(action)s was approved."
 msgstr ""
 
-#. Application for the given permission role denied
-#: grant_access.py:95
+#. Application for the given permission action denied
+#: grant_access.py:94
 #, python-format
-msgid "Request for becoming %(role)s was denied."
+msgid "Request for becoming %(action)s was denied."
 msgstr ""
 
-#. Requested permission role was registered
-#: request_access.py:60
+#. Requested permission action was registered
+#: request_access.py:59
 #, python-format
-msgid "Request for becoming %(role)s was registered."
+msgid "Request for becoming %(action)s was registered."
 msgstr ""
 
 #. Name of the application.
@@ -788,20 +788,20 @@ msgid "X-ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: edit.py:170 bubble.py:47
+#: bubble.py:47 edit.py:170
 msgid "Yes"
 msgstr ""
 
-#. Requested permission role has been previously granted
-#: request_access.py:51
+#. Requested permission action has been previously granted
+#: request_access.py:50
 #, python-format
-msgid "You are already %(role)s"
+msgid "You are already %(action)s"
 msgstr ""
 
-#. Requested permission role has already been granted
-#: request_access.py:55
+#. Requested permission action has already been granted
+#: request_access.py:54
 #, python-format
-msgid "Your request for %(role)s is already registered"
+msgid "Your request for %(action)s is already registered"
 msgstr ""
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense

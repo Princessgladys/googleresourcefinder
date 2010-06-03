@@ -174,9 +174,9 @@ if __name__ == '__main__':
         console.connect(
             '%s:%d' % (options.address, options.port), None, 'test', 'test')
         setup.setup_new_datastore()
-        access.Authorization(
-            email='test@example.com', description='Test',
-            user_roles=[':user', ':editor', ':superuser']).put()
+        setup.add_account(email='test@example.com', description='Test',
+                          nickname='', affiliation='',
+                          actions=[':view', ':edit', 'grant'])
 
         # Gather all the tests.
         loader = unittest.defaultTestLoader
