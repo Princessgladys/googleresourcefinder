@@ -32,10 +32,6 @@ class Record(db.Model):
 
 def put_record(feed_id, author_email, title, subject_id, observed, element):
     """Stores an XML Element as a record."""
-    try:
-        record_type = type_registry[element.tag]
-    except KeyError:
-        raise TypeError('unknown XML type %r' % element.tag)
     record = Record(
         feed_id=feed_id,
         type_name=element.tag,
