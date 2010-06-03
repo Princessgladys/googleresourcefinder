@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from model import FacilityType
+from cache import FacilityTypeCache
 from utils import Handler, Redirect, get_key, run, users, _
 import access
 import rendering
@@ -28,7 +28,7 @@ def get_export_link():
     otherwise return a link to the download page"""
     link = '/export'
     facility_type = None
-    for ftype in FacilityType.all():
+    for ftype in FacilityTypeCache.values():
         if facility_type is not None:
             # We have more than one facility type, just redirect to the /export
             # page
