@@ -18,7 +18,7 @@ import unittest
 import xmlutils
 
 TAG = 'testing'
-ATTRIBUTES_DICT = {'attr1':'hey', 'attr2':'you'}
+ATTRIBUTES_DICT = {'attr1': 'hey', 'attr2': 'you'}
 ATTRIBUTES_LIST = ['hi', 'you']
 E1 = xmlutils.element(TAG, ATTRIBUTES_DICT)
 E2 = xmlutils.element(TAG, ATTRIBUTES_LIST)
