@@ -22,44 +22,43 @@ The current permissions scheme for resource finder is:
 THE CODE BELOW IS UNNECESSARY WITH THIS PERMISSION SCHEME
 
 Handler for allowing a logged-in user to request access to view the app.
-Requests can be handled by superusers in grand_access.py
+Requests can be handled by accounts with 'grant' action permission
+in grant_access.py
 """
 
 import model
 import utils
 from utils import DateTime, ErrorMessage, Redirect
 from utils import db, html_escape, users, _
-from access import check_user_role
-from access import Authorization
 
 
 class RequestAccess(utils.Handler):
     def get(self):
-        if not self.auth:
+        if not self.account:
             raise Redirect(users.create_login_url(self.request.uri))
 
-        self.render('templates/request_access.html', role='user');
+        self.render('templates/request_access.html', action='edit');
 
 
     def post(self):
-        if not self.auth:
+        if not self.account:
             raise Redirect(users.create_login_url(self.request.uri))
-        role = self.params.role
+        action = self.params.action
 
-        if role in self.auth.user_roles:
-            #i18n: Requested permission role has been previously granted
-            message = _('You are already %(role)s' % {'role': role})
-        elif role in self.auth.requested_roles:
+        if action in self.account.actions:
+            #i18n: Requested permission action has been previously granted
+            message = _('You are already %(action)s' % {'action': action})
+        elif action in self.account.requested_actions:
             message = _(
-                #i18n: Requested permission role has already been granted
-                'Your request for %(role)s is already registered'
-                % {'role': role})
+                #i18n: Requested permission action has already been granted
+                'Your request for %(action)s is already registered'
+                % {'action': action})
         else:
-            self.auth.requested_roles.append(role)
-            #i18n: Requested permission role was registered
-            message = _('Request for becoming %(role)s was registered.'
-                        % {'role': role})
-            self.auth.put()
+            self.account.requested_actions.append(action)
+            #i18n: Requested permission action was registered
+            message = _('Request for becoming %(action)s was registered.'
+                        % {'action': action})
+            self.account.put()
 
         if self.params.embed:
             self.write(message)

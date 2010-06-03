@@ -20,19 +20,19 @@ from utils import *
 
 def setup_facility_types():
     """Sets up the attributes and facility types."""
-    def attr(type, name, values=[], edit_role=None):
+    def attr(type, name, values=[], edit_action=None):
         return Attribute(
-            key_name=name, type=type, edit_role=edit_role, values=values)
+            key_name=name, type=type, edit_action=edit_action, values=values)
 
     # NB: Attributes are kept in a specific order defined by zeiger
     # Be careful when changing them, as you will change the order
     # of appearance in the map info window. Also, order here should
     # be kept roughly in sync with CSV column order defined in app/export.py
     attributes = [
-        attr('str', 'title', edit_role='supereditor'),
-        attr('str', 'alt_title', edit_role='supereditor'),
-        attr('int', 'healthc_id', edit_role='supereditor'),
-        attr('int', 'pcode', edit_role='supereditor'),
+        attr('str', 'title', edit_action='advanced_edit'),
+        attr('str', 'alt_title', edit_action='advanced_edit'),
+        attr('int', 'healthc_id', edit_action='advanced_edit'),
+        attr('int', 'pcode', edit_action='advanced_edit'),
         attr('int', 'available_beds'),
         attr('int', 'total_beds'),
         attr('multi', 'services',
@@ -67,11 +67,11 @@ def setup_facility_types():
         attr('str', 'comments'),
         attr('bool', 'reachable_by_road'),
         attr('bool', 'can_pick_up_patients'),
-        attr('str', 'region_id', edit_role='supereditor'),
-        attr('str', 'district_id', edit_role='supereditor'),
-        attr('str', 'commune_id', edit_role='supereditor'),
-        attr('str', 'commune_code', edit_role='supereditor'),
-        attr('str', 'sante_id', edit_role='supereditor'),
+        attr('str', 'region_id', edit_action='advanced_edit'),
+        attr('str', 'district_id', edit_action='advanced_edit'),
+        attr('str', 'commune_id', edit_action='advanced_edit'),
+        attr('str', 'commune_code', edit_action='advanced_edit'),
+        attr('str', 'sante_id', edit_action='advanced_edit'),
     ]
 
     db.put(attributes)
@@ -349,11 +349,9 @@ def setup_new_datastore():
     """Sets up a new datastore with facility types and translations."""
     setup_facility_types()
     setup_messages()
-    # Ensure that an 'analytics_id' secret exists, without overwriting it.
-    crypto.Secret.get_or_insert('analytics_id', value='dummy')
 
 def wipe_datastore(*kinds):
-    """Deletes everything in the datastore except Authorizations and Secrets.
+    """Deletes everything in the datastore except Accounts and Secrets.
     If 'kinds' is given, deletes only those kinds of entities."""
     for kind in kinds or [Attribute, FacilityType, Message, Dump,
                           MinimalFacility, Facility, Report]:
@@ -364,12 +362,14 @@ def wipe_datastore(*kinds):
             keys = kind.all(keys_only=True).fetch(200)
 
 def reset_datastore():
-    """Wipes everything in the datastore except Authorizations and Secrets,
+    """Wipes everything in the datastore except Accounts and Secrets,
     then sets up the datastore for new data."""
     wipe_datastore()
     setup_new_datastore()
 
-def add_auth(email='test@example.com', description='Test'):
-    """Adds an Authorization entity to the datastore."""
-    Authorization(email=email, description=description, nickname='Test',
-        affiliation='Test', user_roles=[':user', ':editor']).put()
+def add_account(email='test@example.com', description='Test',
+                nickname='Test', affiliation='Test',
+                actions=[':view', ':edit']):
+    """Adds an Account entity to the datastore."""
+    Account(email=email, description=description, nickname=nickname,
+            affiliation=affiliation, actions=actions).put()
