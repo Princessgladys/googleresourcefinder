@@ -113,7 +113,7 @@ def read(file):
     return map(Hospital.from_element, hospitals)
 
 def serialize(hospitals):
-    """Serializes list of hospicals to EDXL-HAVE document."""
+    """Serializes list of hospitals to EDXL-HAVE document."""
     return HospitalStatus.to_element('HospitalStatus', hospitals)
 
 def write(file, hospitals):

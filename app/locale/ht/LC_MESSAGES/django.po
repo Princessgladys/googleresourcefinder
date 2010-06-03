@@ -46,7 +46,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
 
 #. Error message for lacking edit permissions
-#: edit.py:427
+#: edit.py:426
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s pa gen pèmisyon edite %(a)s"
@@ -621,7 +621,7 @@ msgid "Reachable by road"
 msgstr "Aksesib pa wout"
 
 #. Record updated successfully.
-#: edit.py:447
+#: edit.py:450
 msgid "Record updated."
 msgstr "Done a jou"
 
