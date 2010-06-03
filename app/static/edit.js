@@ -183,18 +183,18 @@ function make_visible(id) {
       if (classes.length > 1) {
         var divs = tr.getElementsByTagName('div');
         var attribute_name = "";
-        for (var div_index = 0; div_index < inputs.length; div_index++) {
+        for (var div_index = 0; div_index < divs.length; div_index++) {
           var div = divs[div_index];
           if (div.className == "comment") {
             tr.onclick = new Function(
               'make_visible("' + div.id + '");');
-            var inputs = input.getElementsByTagName('input');
+            var inputs = div.getElementsByTagName('input');
             if (inputs.length > 0) {
-              var input = divs[0];
+              var input = inputs[0];
               if (input.value == '') {
-                input.style.visibility = "hidden";
+                div.style.visibility = "hidden";
               } else {
-                input.style.visibility = "visible";                
+                div.style.visibility = "visible";                
               }
             }
           }
