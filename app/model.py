@@ -218,7 +218,9 @@ class Account(db.Model):
                                    # may be different than users.User.nickname()
     affiliation = db.StringProperty() # User affiliation
     token = db.StringProperty() # A way of looking up the account without id
-                                # or email available
+                                # or email available. This allows us to have
+                                # Account entities corresponding to nonexistant
+                                # google accounts.
     actions = db.StringListProperty() # what the account is permitted to do
     requested_actions = db.StringListProperty()
 
