@@ -38,10 +38,23 @@ def fake_get_message(ns, n):
     return message and getattr(message, django_locale) or n
 
 class BubbleTest(unittest.TestCase):
+    def setUp(self):
+        self.val = os.environ.get('AUTH_DOMAIN')
+        os.environ['AUTH_DOMAIN'] = 'test'
+        self.real_get_message = bubble.get_message
+        bubble.get_message = fake_get_message   
+
+    def tearDown(self):
+        bubble.get_message = self.real_get_message
+        if self.val:
+            os.environ['AUTH_DOMAIN'] = self.val
+        else:
+            os.environ['AUTH_DOMAIN'] = ''
+
     def test_format(self):
         time = datetime.datetime(2010, 6, 2, 13, 21, 13, 97435)
         pt = utils.db.GeoPt(SAN_FRANCISCO['lat'], SAN_FRANCISCO['lon'])
-        assert bubble.format(u'123') == u'123'.encode('utf-8') == '123'
+        assert bubble.format(u'123\u26CC') == '123\xe2\x9b\x8c'
         assert bubble.format('12\n3') == bubble.format('12 3')
         assert bubble.format('123') == '123'
         assert bubble.format(['1', '2', '3']) == bubble.format('1, 2, 3') \
@@ -56,11 +69,6 @@ class BubbleTest(unittest.TestCase):
         assert bubble.format(13) == 13
 
     def test_value_info_extractor(self):
-        val = os.environ.get('AUTH_DOMAIN')
-        os.environ['AUTH_DOMAIN'] = 'test'
-        real_get_message = bubble.get_message
-        bubble.get_message = fake_get_message
-    
         f = model.Facility(key_name='example.org/123', type='hospital')
         f.set_attribute('title', 'title_foo', datetime.datetime.now(),
                         users.User('test@example.com'),
@@ -72,9 +80,3 @@ class BubbleTest(unittest.TestCase):
         assert special.get('title').raw == 'title_foo'
         assert general == []
         assert details[0].raw == 'title_foo'
-    
-        bubble.get_message = real_get_message
-        if val:
-            os.environ['AUTH_DOMAIN'] = val
-        else:
-            os.environ['AUTH_DOMAIN'] = ''

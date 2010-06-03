@@ -14,28 +14,23 @@
 
 """Tests for access.py."""
 
-from access import ROLES
+from access import ACTIONS
 from feeds.xmlutils import Struct
+from model import Account
 
 import access
 import datetime
 import unittest
-        
-AUTH = Struct()
-AUTH.timestamp = datetime.datetime.now()
-AUTH.description = 'description'
-AUTH.email = 'test@example.com'
-AUTH.user_id = 'test'
-AUTH.nickname = 'test'
-AUTH.affiliation = 'test'
-AUTH.token = 'test'
-AUTH.user_roles = ['user', 'editor']
-AUTH.requested_roles = ['supereditor']
+
+AUTH = Account(timestamp=datetime.datetime.now(), description='description',
+               email='test@example.com', user_id='test', nickname='test',
+               affiliation='test', token='test', actions=[ACTIONS[0], 
+               ACTIONS[1]], requested_actions=[ACTIONS[2]])
         
 class AccessTest(unittest.TestCase):
     def test_check_user_role(self):
-        for role in ROLES:
-            if role in AUTH.user_roles:
-                assert access.check_user_role(AUTH, role) == True
+        for action in ACTIONS:
+            if action in AUTH.actions:
+                assert access.check_action_permitted(AUTH, action) == True
             else:
-                assert access.check_user_role(AUTH, role) == False
+                assert access.check_action_permitted(AUTH, action) == False
