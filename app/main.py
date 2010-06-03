@@ -14,14 +14,20 @@
 
 from model import FacilityType
 from utils import Handler, Redirect, get_key, run, users, _
+from feeds.crypto import sign
 import access
 import rendering
+import logging
+
 
 # We use a Secret in the db to determine whether or not the app should be
 # configured to require login to view and 'editor' role to edit. Whitelists
 # are on by default. To allow anyone to view and logged-in users to edit, run
 # Secret(key_name='use_whitelists', value='FALSE').put() in a console
 USE_WHITELISTS = get_key('use_whitelists') != 'FALSE'
+
+USER_LOCATION_XSRF_KEY_NAME = 'resource-finder-user-location'
+DAY_SECS = 24 * 60 * 60
 
 def get_export_link():
     """If only one facility type, return the direct download link,
@@ -39,13 +45,22 @@ def get_export_link():
 class Main(Handler):
 
     def get(self):
+        account = None
+        user = self.user
         if USE_WHITELISTS:
             self.require_logged_in_user()
+            account = self.account
+            user_location_token = sign(USER_LOCATION_XSRF_KEY_NAME, self.user.user_id(),
+                                       DAY_SECS)
+            logging.error('%s %s %s %s' % (USER_LOCATION_XSRF_KEY_NAME, self.user.user_id(),
+                                           DAY_SECS, user_location_token))
+                                       
 
-        user = self.user
         center = None
         if self.params.lat is not None and self.params.lon is not None:
             center = {'lat': self.params.lat, 'lon': self.params.lon}
+        
+        
         self.render('templates/map.html',
                     params=self.params,
                     #i18n: a user with no identity
@@ -56,6 +71,8 @@ class Main(Handler):
                     loginout_text=(user and _('Sign out')
                                    #i18n: Link to sign into the app
                                    or _('Sign in')),
+                    account=account,
+                    user_location_token=user_location_token,
                     data=rendering.render_json(center, self.params.rad),
                     export_link=get_export_link(),
                     instance=self.request.host.split('.')[0])
