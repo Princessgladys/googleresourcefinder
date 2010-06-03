@@ -41,3 +41,4 @@ indexes:
   - name: feed_id
   - name: arrived
     direction: desc
+
