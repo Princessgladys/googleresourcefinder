@@ -1,0 +1,9 @@
+#!/bin/bash
+
+pushd "$(dirname $0)" >/dev/null && source common.sh && popd >/dev/null
+set_up_symlinks
+update_hgignore
+
+echo
+echo "--- Running unit tests"
+nosetests -d $APP_DIR
