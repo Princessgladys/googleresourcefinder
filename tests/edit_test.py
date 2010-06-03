@@ -160,6 +160,9 @@ class EditTest(SeleniumTestCase):
         # Set the integer fields to zero
         self.type('//input[@name="available_beds"]', '  0')
         self.type('//input[@name="total_beds"]', '0  ')
+        
+        # And clear out a comment.
+        self.type('//input[@name="location__comment"]', '')
 
         # Submit the form
         self.click('//input[@name="save"]')
@@ -172,6 +175,8 @@ class EditTest(SeleniumTestCase):
         # Check that the integer fields are actually zero, not empty
         text_fields['available_beds'] = '0'
         text_fields['total_beds'] = '0'
+        text_fields['total_beds__comment'] = 'comment1'
+        text_fields['location__comment'] = ''
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
 

@@ -67,13 +67,13 @@ function make_visible(id) {
   /**
    * Validates a string that is required, meaning that empty or whitespace
    * is considered an error.
-   * @param div {Element} div - the div element to validate
+   * @param input {Element} input - the input element to validate
    * @param opt_error {string|null} opt_error - optional error message. If
    * missing, a generic "Field is required" message is used.
    */
-  function validate_required_string(div, opt_error) {
-    var value = div.value ? jQuery.trim(div.value) : null;
-    set_error(div.name, value, locale.ERROR_FIELD_IS_REQUIRED());
+  function validate_required_string(input, opt_error) {
+    var value = input.value ? jQuery.trim(input.value) : null;
+    set_error(input.name, value, locale.ERROR_FIELD_IS_REQUIRED());
     return value ? true : false;
   }
 
@@ -88,44 +88,44 @@ function make_visible(id) {
   }
 
   /**
-   * Validates a numeric div field.
-   * @param {Element} div - div field to validate
-   * @return {boolean} - true if the value of the div is valid. If false, has
+   * Validates a numeric input field.
+   * @param {Element} input - input field to validate
+   * @return {boolean} - true if the value of the input is valid. If false, has
    * a side effect of displaying a "Value must be a number" error message
    */
-  function validate_number(div) {
+  function validate_number(input) {
     var valid = true;
-    if (div.value) {
-      valid = is_valid_number(div.value);
+    if (input.value) {
+      valid = is_valid_number(input.value);
     }
-    set_error(div.name, valid, locale.ERROR_VALUE_MUST_BE_NUMBER());
+    set_error(input.name, valid, locale.ERROR_VALUE_MUST_BE_NUMBER());
     return valid;    
   }
 
  /**
   * Validates fields representing (latitude, longitude) coordinates.
-  * @param {Array.<Element>} divs - an array of 2 elements, one with name
+  * @param {Array.<Element>} inputs - an array of 2 elements, one with name
   * <name>.lat and the other with name <name>.lon
   * @return {boolean} - true if the pair is a valid pair of coordinates, meaning
   * both values are numbers in the valid ranges, otherwise false
   */
-  function validate_geopt(divs) {
+  function validate_geopt(inputs) {
     var valid = true;
     var name = '';
     var error = [];
-    for (var i = 0; i < divs.length; i++) {
-      var div = divs[i];
-      var name_coord = div.name.split('.');
+    for (var i = 0; i < inputs.length; i++) {
+      var input = inputs[i];
+      var name_coord = input.name.split('.');
       name = name_coord[0];
       var coord = name_coord[1];
-      var div_valid = is_valid_number(div.value);
-      if (div_valid) {
-        var value = parseFloat(jQuery.trim(div.value));
+      var input_valid = is_valid_number(input.value);
+      if (input_valid) {
+        var value = parseFloat(jQuery.trim(input.value));
         if (coord == 'lat' && value < -90 || value > 90) {
-          div_valid = false;
+          input_valid = false;
           error.push(locale.ERROR_LATITUDE_INVALID());
         } else if (coord == 'lon' && value < -180 || value > 180) {
-          div_valid = false;
+          input_valid = false;
           error.push(to_html(locale.ERROR_LONGITUDE_INVALID()));
         }
       } else {
@@ -133,7 +133,7 @@ function make_visible(id) {
                      coord == 'lat' ? locale.ERROR_LATITUDE_MUST_BE_NUMBER()
                        : locale.ERROR_LONGITUDE_MUST_BE_NUMBER()));
       }
-      valid = valid && div_valid;
+      valid = valid && input_valid;
     }
 
     set_error(name, valid, HTML(error.join('<br>')));
@@ -141,12 +141,12 @@ function make_visible(id) {
   }
 
   /**
-   * If the save button is clicked, validate relevant divs on the page,
+   * If the save button is clicked, validate relevant inputs on the page,
    * and display error messages if fields are invalid.
-   * div elements are discovered by checking for marker class names on
+   * input elements are discovered by checking for marker class names on
    * parent 'tr' elements.
    * @return {boolean} - true if the "save" button was not pressed or all 
-   * divs are valid, otherwise false
+   * inputs are valid, otherwise false
    */
   function validate() {
     if (button_click !== 'save') {
@@ -161,10 +161,10 @@ function make_visible(id) {
       var classes = tr.className.split(' ');
       if (jQuery.inArray('int', classes) != -1
           || jQuery.inArray('float', classes) != -1) {
-        valid_arr.push(validate_number(tr.getElementsByTagName('div')[0]));
+        valid_arr.push(validate_number(tr.getElementsByTagName('input')[0]));
       } else if (jQuery.inArray('geopt', classes) != -1) {
-        var divs = tr.getElementsByTagName('div');
-        valid_arr.push(validate_geopt([divs[0], divs[1]]));
+        var inputs = tr.getElementsByTagName('input');
+        valid_arr.push(validate_geopt([inputs[0], inputs[1]]));
       }
     }      
 
@@ -183,18 +183,18 @@ function make_visible(id) {
       if (classes.length > 1) {
         var divs = tr.getElementsByTagName('div');
         var attribute_name = "";
-        for (var div_index = 0; div_index < divs.length; div_index++) {
+        for (var div_index = 0; div_index < inputs.length; div_index++) {
           var div = divs[div_index];
           if (div.className == "comment") {
             tr.onclick = new Function(
               'make_visible("' + div.id + '");');
-            var inputs = div.getElementsByTagName('input');
+            var inputs = input.getElementsByTagName('input');
             if (inputs.length > 0) {
-              var input = inputs[0];
+              var input = divs[0];
               if (input.value == '') {
-                div.style.visibility = "hidden";
+                input.style.visibility = "hidden";
               } else {
-                div.style.visibility = "visible";                
+                input.style.visibility = "visible";                
               }
             }
           }
