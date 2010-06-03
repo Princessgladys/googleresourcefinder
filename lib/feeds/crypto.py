@@ -35,12 +35,19 @@ def generate_random_key():
     return ''.join(chr(random.randrange(256)) for i in range(20))
 
 def get_key(name):
-    """Gets a secret key with the given name, or creates a new one."""
+    """Gets a secret key with the given name, or creates a new random key."""
     secret = Secret.get_by_key_name(name)
     if not secret:
         secret = Secret(key_name=name, value=generate_random_key())
         secret.put()
     return secret.value
+
+def get_secret(name, default=''):
+    """Gets the secret with the given name, or returns the default value."""
+    secret = Secret.get_by_key_name(name)
+    if secret:
+        return secret.value
+    return default
 
 def sign(key_name, data, lifetime=None):
     """Produces a signature for the given data.  If 'lifetime' is specified,
