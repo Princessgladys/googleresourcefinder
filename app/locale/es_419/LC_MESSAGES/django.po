@@ -1,0 +1,842 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2010-05-27 00:07-0800\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
+#: static/locale.js:29
+#, sh-format
+msgid "${DATE} at ${TIME}"
+msgstr "${DATE} a las ${TIME}"
+
+#. Time format (example 14:32 UTC-4)
+#: static/locale.js:134
+#, sh-format
+msgid "${HOURS}:${MINUTES} ${ZONE}"
+msgstr "${HOURS}:${MINUTES} ${ZONE}"
+
+#. A distance (example: 3.11 miles (5 km))
+#: static/locale.js:47
+#, sh-format
+msgid "${MILES} miles (${KM} km)"
+msgstr "${MILES}millas (${KM} km)"
+
+#. Local date format (example: Jan 21, 2010)
+#: static/locale.js:33
+#, sh-format
+msgid "${MONTH} ${DAY}, ${YEAR}"
+msgstr "${MONTH} ${DAY}, ${YEAR}"
+
+#. Number of facilities within range of a location. (example: 5 Facilities within 10 miles)
+#: static/locale.js:84
+#, sh-format
+msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
+msgstr "${NUM_FACILITIES} Instituciones dentro de${RADIUS_MILES} millas"
+
+#. Error message for lacking edit permissions
+#: edit.py:420
+#, python-format
+msgid "%(user)s does not have permission to edit %(a)s"
+msgstr "%(user)s no tiene permiso para editar %(a)s"
+
+#. Form option to indicate that a value is not specified
+#: edit.py:168 edit.py:194 edit.py:209
+msgid "(unspecified)"
+msgstr "(No especificado)"
+
+#. Accuracy of latitude, longitude coordinates
+#: ../tools/setup.py:131
+msgid "Accuracy"
+msgstr "Precisión"
+
+#. street address
+#: templates/hospital_bubble.html:112 templates/print_data.html:68 ../tools/setup.py:127
+msgid "Address"
+msgstr "Dirección"
+
+#. Type of facility construction: sun-dried clay bricks
+#: ../tools/setup.py:214
+msgid "Adobe"
+msgstr "Adobe"
+
+#. Label for a required text box to enter organizational affiliation.
+#: templates/edit.html:95
+msgid "Affiliation (required)"
+msgstr "Afiliación (requerido)"
+
+#. Label for every item in a list.
+#: static/locale.js:25
+msgid "All"
+msgstr "Todos"
+
+#. Alternate name of a facility
+#: ../tools/setup.py:101
+msgid "Alternate facility name"
+msgstr "Nombre de la institución alternativo"
+
+#. Total number of unoccupied beds at a hospital.
+#: ../tools/setup.py:109
+msgid "Available beds"
+msgstr "Camas disponibles"
+
+#. Heading for number of available beds and number of total beds in a hospital.
+#: templates/print_data.html:54
+msgid "Beds open / total"
+msgstr "Camas libres/totales"
+
+#. Service provided by a health facility.
+#: ../tools/setup.py:275
+msgid "Blood bank"
+msgstr "Banco de sangre"
+
+#. Save a copy of the data in CSV format
+#: export.py:140
+msgid "CSV Export"
+msgstr "Exportar CSV"
+
+#. Service provided by a health facility.
+#: ../tools/setup.py:273
+msgid "CT scan"
+msgstr "Tomografía computada"
+
+#. Whether or not a facility can send a vehicle to pick up patients
+#: ../tools/setup.py:150
+msgid "Can pick up patients"
+msgstr "Puedes buscar pacientes"
+
+#. Button text to cancel and return to the home page
+#: templates/edit.html:148
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. Service provided by a health facility.  Meaning: branch of medicine dealing with the heart
+#: ../tools/setup.py:252
+msgid "Cardiology"
+msgstr "Cardiología"
+
+#. Category of facility (hospital, clinic, field team, etc.)
+#: ../tools/setup.py:137
+msgid "Category"
+msgstr "Categoría"
+
+#. Header for a record of a change to a facility detail
+#: templates/hospital_bubble.html:140
+msgid "Change"
+msgstr "Cambio"
+
+#. Header for the history of changes in data for a facility
+#: templates/hospital_bubble.html:102
+msgid "Change details"
+msgstr "Detalles de cambios"
+
+#. Header a column of comment about why a change was made
+#: templates/hospital_bubble.html:148
+msgid "Change note"
+msgstr "Nota"
+
+#. Facility operational status: closed or in the process of closing
+#: ../tools/setup.py:229
+msgid "Closed or closing"
+msgstr "Cerrados o de cierre"
+
+#. remarks
+#: ../tools/setup.py:145
+msgid "Comments"
+msgstr "Comentarios"
+
+#. Meaning: low-level administrative division
+#: ../tools/setup.py:125
+msgid "Commune"
+msgstr "Comuna"
+
+#. Type of organization: Local community organization
+#: ../tools/setup.py:155
+msgid "Community"
+msgstr "Comunidad"
+
+#. Materials making up a building
+#: ../tools/setup.py:139
+msgid "Construction"
+msgstr "Construcción"
+
+#. Name of a person to contact for more information.
+#: ../tools/setup.py:115
+msgid "Contact name"
+msgstr "Nombre de contacto"
+
+#. Service provided by a health facility.
+#: ../tools/setup.py:277
+msgid "Corpse removal"
+msgstr "Retiro de cadáver"
+
+#. Country code to load data for
+#: templates/load.html:34
+msgid "Country:"
+msgstr "País:"
+
+#. Level of destruction
+#: ../tools/setup.py:141
+msgid "Damage"
+msgstr "Daño"
+
+#. Header for date and time of a change record
+#: templates/hospital_bubble.html:152
+msgid "Date and time"
+msgstr "Fecha y hora"
+
+#. Meaning: administrative division
+#: ../tools/setup.py:121
+msgid "Department"
+msgstr "Departamento"
+
+#. Service provided by a health facility.
+#: ../tools/setup.py:267
+msgid "Dialysis"
+msgstr "Diálisis"
+
+#. Category of facility: a dispensary where medicine and medical supplies are given out.
+#: ../tools/setup.py:183
+msgid "Dispensary"
+msgstr "Dispensario"
+
+#. Displaying markers on a map for the NUM_FACILITIES closest to a  location
+#: static/locale.js:43
+#, sh-format
+msgid "Displaying ${NUM_FACILITIES} closest facilities"
+msgstr "Muestra ${NUM_FACILITIES} las instituciones más cercanas"
+
+#. Displaying markers on a map for facilities within RADIUS_MILES miles of a location
+#: static/locale.js:38
+#, sh-format
+msgid "Displaying facilities within ${RADIUS_MILES} miles"
+msgstr "Muestra las instituciones dentro de ${RADIUS_MILES} millas"
+
+#. Header for a distance from the current facility to another location
+#: templates/print_data.html:64
+msgid "Distance"
+msgstr "Distancia"
+
+#. Meaning: administrative division
+#: templates/data.html:73 ../tools/setup.py:123 static/locale.js:51
+msgid "District"
+msgstr "Distrito"
+
+#. E-mail address
+#: ../tools/setup.py:119 edit.py:115
+msgid "E-mail"
+msgstr "Correo electrónico"
+
+#. Title for page to edit data about a facility
+#: templates/edit.html:55
+msgid "Edit"
+msgstr "Modificar"
+
+#. Link to edit the data for a facility record.
+#: templates/hospital_bubble.html:25
+msgid "Edit this record"
+msgstr "Modifica este registro"
+
+#. Header a column of user who made the edits
+#: templates/hospital_bubble.html:144
+msgid "Edited by"
+msgstr "Modificado por"
+
+#. Header for an error message.
+#: templates/error.html:28
+msgid "Error"
+msgstr "Error"
+
+#. Error message for not loading facility information successfully
+#: static/locale.js:67
+msgid "Error loading facility information."
+msgstr "Error al cargar servicio de información."
+
+#. Button to export data to comma-separated-values format.
+#: export.py:156 templates/map.html:192
+msgid "Export CSV"
+msgstr "Exportar CSV"
+
+#. A place that provides a particular service
+#: templates/data.html:92 static/locale.js:88 templates/print_data.html:59
+msgid "Facility"
+msgstr "Institución"
+
+#. Header for details about a facility
+#: templates/hospital_bubble.html:97
+msgid "Facility details"
+msgstr "Detalles de la institución"
+
+#. Name of a facility
+#: ../tools/setup.py:99
+msgid "Facility name"
+msgstr "Nombre de la institución"
+
+#. Category of facility: A mobile self-sufficient health facility.
+#: ../tools/setup.py:185 ../tools/setup.py:223
+msgid "Field hospital"
+msgstr "Hospital de campo"
+
+#. Facility operational status: as functional as a field hospital next to a hospital
+#: ../tools/setup.py:226
+msgid "Field hospital co-located with hospital"
+msgstr "Hospital de campo al lado de un hospital"
+
+#. Error message for required field.
+#: static/locale.js:55
+msgid "Field is required."
+msgstr "Este campo es requerido."
+
+#. Header for a list of filters to restrict a list of data being viewed.
+#: templates/data.html:47
+msgid "Filters"
+msgstr "Filtros"
+
+#. Tooltip explaining how to enable print mode
+#: static/locale.js:117
+msgid "First select a hospital from the list on the left. Then Print will print a list of hospitals in order of distance from your selection."
+msgstr "Primero selecciona un hospital de la lista de la izquierda. Luego Imprimir imprimirá un listado de los hospitales en orden de distancia desde tu selección."
+
+#. Header for general information about a facility
+#: templates/print_data.html:72
+msgid "General Info"
+msgstr "Información general"
+
+#. Service provided by a health facility.  Meaning: deals with diagnosis and (non-surgical) treatment of Meaning: diseases of the internal organs
+#: ../tools/setup.py:249
+msgid "General medicine"
+msgstr "Medicina general"
+
+#. Service provided by a health facility.  Meaning: surgical specialty that focuses on abdominal organs
+#: ../tools/setup.py:235
+msgid "General surgery"
+msgstr "Cirugía general"
+
+#. Category of facility: Health center
+#: ../tools/setup.py:172
+msgid "Health center"
+msgstr "Centro de salud"
+
+#. Category of facility: a health center with available beds, as a hospital has.
+#: ../tools/setup.py:178
+msgid "Health center with beds"
+msgstr "Centro de salud con camas"
+
+#. Category of facility: a health center without beds.
+#: ../tools/setup.py:180
+msgid "Health center without beds"
+msgstr "Centro de salud sin camas"
+
+#. Proper name of an ID for a healthcare facility, no translation necessary.
+#: ../tools/setup.py:107
+msgid "HealthC ID"
+msgstr "ID HealthC"
+
+#. Proper name of an ID for a healthcare facility, no translation necessary.
+#: templates/hospital_bubble.html:32 static/locale.js:98
+msgid "HealthC ID:"
+msgstr "ID HealthC:"
+
+#. Link to go to a help page for the application
+#: templates/map.html:102
+msgid "Help"
+msgstr "Ayuda"
+
+#. Link to return to the main page of the application
+#: templates/map.html:91
+msgid "Home"
+msgstr "Página principal"
+
+#. Category of facility: Hospital
+#: ../tools/setup.py:187
+msgid "Hospital"
+msgstr "Hospital"
+
+#. Explains how to correct incorrect information that has been printed.
+#: templates/map.html:205
+msgid "If any information is wrong or missing, please correct it on the web site:"
+msgstr "Si la información es incorrecta o no está especificada, modificala en el sitio web:"
+
+#. Service provided by a health facility.  Meaning: specializing in treating communicable diseases
+#: ../tools/setup.py:255
+msgid "Infectious disease"
+msgstr "Enfermedades infecciosas"
+
+#. Error message for invalid date entry
+#: edit.py:137
+msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
+msgstr "Fecha no válida: %(date)r (requiere un formato de DD-MM-AAAA)"
+
+#. Error message for request missing facility name.
+#: edit.py:324 bubble.py:146
+msgid "Invalid or missing facility name."
+msgstr "Nombre de la institución no válido o no especificado"
+
+#. Abbreviated months of the year.
+#: static/locale.js:103
+msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
+msgstr "Ene feb mar abr may jun jul ago sept oct nov dic"
+
+#. Service provided by a health facility.
+#: ../tools/setup.py:269
+msgid "Lab"
+msgstr "Laboratorio"
+
+#. Label for a language selector
+#: templates/map.html:77
+msgid "Language:"
+msgstr "Idioma:"
+
+#. Label for a date-time when the data was last updated
+#: templates/hospital_bubble.html:41
+msgid "Last updated:"
+msgstr "Actualizado"
+
+#. Label for text input
+#: edit.py:230
+msgid "Latitude"
+msgstr "Latitud"
+
+#. Error message for invalid latitude.
+#: static/locale.js:63
+msgid "Latitude must be a number."
+msgstr "La latitud debe ser un número"
+
+#. Error message for invalid latitude.
+#: static/locale.js:59
+msgid "Latitude must be between -90 and 90."
+msgstr "La latitud debe estar entre -90 y 90"
+
+#. Button text to load data
+#: templates/load.html:57
+msgid "Load"
+msgstr "Cargar"
+
+#. A program that can load data
+#: templates/load.html:27
+msgid "Loader:"
+msgstr "Cargador:"
+
+#. Indicator that the application is loading.
+#: templates/map.html:144
+msgid "Loading..."
+msgstr "Cargando..."
+
+#. latitude, longitude location
+#: ../tools/setup.py:129
+msgid "Location"
+msgstr "Ubicación"
+
+#. Geographic coordinates of a location on earth.
+#: templates/hospital_bubble.html:121
+msgid "Location:"
+msgstr "Ubicación"
+
+#. Label for text input
+#: edit.py:233
+msgid "Longitude"
+msgstr "Longitud"
+
+#. Error message for invalid longitude.
+#: static/locale.js:75
+msgid "Longitude must be a number."
+msgstr "La longitud debe ser un número"
+
+#. Error message for invalid longitude.
+#: static/locale.js:71
+msgid "Longitude must be between -180 and 180."
+msgstr "La longitud debe estar entre -180 y 180"
+
+#. Type of organization: Organization associated with armed forces
+#: ../tools/setup.py:157
+msgid "Military"
+msgstr "Militar"
+
+#. Type of organization: Organization with mixed function
+#: ../tools/setup.py:159
+msgid "Mixed"
+msgstr "Variada"
+
+#. Category of facility: A moveable unit that provides a service.
+#: ../tools/setup.py:194
+msgid "Mobile facility"
+msgstr "Institución móvil"
+
+#. Type of organization: Non-governmental organization
+#: ../tools/setup.py:161
+msgid "NGO"
+msgstr "ONG"
+
+#. a person's name
+#: edit.py:111
+msgid "Name"
+msgstr "Nombre"
+
+#. Label for a required text box to enter a person's name
+#: templates/edit.html:79
+msgid "Name (required)"
+msgstr "Nombre (requerido)"
+
+#. service provided by a health facility  Meaning: surgery that involves the nervous system
+#: ../tools/setup.py:242
+msgid "Neurosurgery"
+msgstr "Neurocirugía"
+
+#. Form option for a false Boolean value
+#: edit.py:172 bubble.py:47
+msgid "No"
+msgstr "No"
+
+#. Indicates there is no availability information for this  hospital.
+#: templates/hospital_bubble.html:81
+msgid "No availability information"
+msgstr "No hay información de disponibilidad"
+
+#. Error message
+#: grant_access.py:75
+#, python-format
+msgid "No pending request for %(authorization_role)s by %(user)s"
+msgstr "No hay solicitud pendiente %(authorization_role)s para%(user)s "
+
+#. Error message for missing entry
+#: feed_provider.py:40
+msgid "No such entry"
+msgstr "No existe tal entrada"
+
+#. Facility operational status: cannot perform surgeries
+#: ../tools/setup.py:221
+msgid "No surgical capacity"
+msgstr "No hay capacidad quirúrgica"
+
+#. services provided by a health facility  Meaning: Obstetrics deals with childbirth and care of the mother. Meaning: Gynecology deals with diseases and hygiene of women
+#: ../tools/setup.py:265
+msgid "Obstetrics and gynecology"
+msgstr "Obstetricia y ginecología"
+
+#. Header showing the number of available beds out of the number of total beds that are available in a hospital
+#: static/locale.js:108
+msgid "Open/Total Beds"
+msgstr "Camas libres/totales"
+
+#. Facility operational status: in working order
+#: ../tools/setup.py:219
+msgid "Operational"
+msgstr "Operacional"
+
+#. Whether or not a facility is fully operational.
+#: ../tools/setup.py:143
+msgid "Operational status"
+msgstr "Estado operativo"
+
+#. Meaning: referring to the name of an organization
+#: ../tools/setup.py:133
+msgid "Organization name"
+msgstr "Nombre de la organización"
+
+#. Type of organization (public, private, military, NGO, etc.)
+#: ../tools/setup.py:135
+msgid "Organization type"
+msgstr "Tipo de organización"
+
+#. Service provided by a health facility  Meaning: treats diseases and injury to bones, muscles, joints and Meaning: tendons
+#: ../tools/setup.py:239
+msgid "Orthopedics"
+msgstr "Ortopedia"
+
+#. Category of facility: Other.
+#: ../tools/setup.py:199
+msgid "Other"
+msgstr "Otro"
+
+#. Proper name of an ID for a healthcare facility defined by the Pan-American Health Organization, no translation necessary.
+#: ../tools/setup.py:104
+msgid "PCode"
+msgstr "PCode"
+
+#. Proper name of an ID for a healthcare facility defined by the Pan-American Health Organization, no translation necessary.
+#: templates/hospital_bubble.html:37 static/locale.js:93
+msgid "PCode:"
+msgstr "PCode:"
+
+#. the data being loaded
+#: templates/load.html:48
+msgid "Payload:"
+msgstr "Carga:"
+
+#. Service provided by a health facility.  Meaning: branch of medicine dealing with infants and children
+#: ../tools/setup.py:258
+msgid "Pediatrics"
+msgstr "Pediatría"
+
+#. telephone number
+#: edit.py:113 ../tools/setup.py:117
+msgid "Phone"
+msgstr "Teléfono"
+
+#. Indicates a user should call for availability of beds and services at a hospital.
+#: templates/hospital_bubble.html:75
+msgid "Please call for availability information."
+msgstr "Llama para informarte acerca de la disponibilidad"
+
+#. Service provided by a health facility.  care given after surgery until patient is discharged
+#: ../tools/setup.py:261
+msgid "Postoperative care"
+msgstr "Cuidados posoperatorios"
+
+#. Link to print the current view of the application
+#: templates/map.html:97
+msgid "Print"
+msgstr "Imprimir"
+
+#. Tooltip explaining a 'Print' link
+#: static/locale.js:122
+#, sh-format
+msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
+msgstr "Imprime una lista de hospitales por orden de distancia desde ${FACILITY_NAME}"
+
+#. Link to privacy policy for the application
+#: templates/map.html:110
+msgid "Privacy"
+msgstr "Privado"
+
+#. Type of organization: Private organization
+#: ../tools/setup.py:163
+msgid "Private"
+msgstr "Privado"
+
+#. Type of organization: Public (government) organization
+#: ../tools/setup.py:165
+msgid "Public"
+msgstr "Público"
+
+#. Whether or not a facility can be accessed by a road.
+#: ../tools/setup.py:147
+msgid "Reachable by road"
+msgstr "Acceso a través de carretera"
+
+#. Record updated successfully.
+#: edit.py:436
+msgid "Record updated."
+msgstr "Registro actualizado."
+
+#. Type of facility construction: concrete with metal and/or mesh added to provide extra support against stresses
+#: ../tools/setup.py:207
+msgid "Reinforced concrete"
+msgstr "De hormigón armado"
+
+#. Application for the given permission role approved
+#: grant_access.py:91
+#, python-format
+msgid "Request for becoming %(role)s was approved."
+msgstr "La solicitud para ser %(role)s se aprobó."
+
+#. Application for the given permission role denied
+#: grant_access.py:95
+#, python-format
+msgid "Request for becoming %(role)s was denied."
+msgstr "La solicitud para ser %(role)s se denegó."
+
+#. Requested permission role was registered
+#: request_access.py:60
+#, python-format
+msgid "Request for becoming %(role)s was registered."
+msgstr "La solicitud para ser %(role)s se registró."
+
+#. Name of the application.
+#: templates/print_data.html:32
+msgid "Resource Finder"
+msgstr "Localizador de recursos"
+
+#. Button text to save data
+#: templates/edit.html:144
+msgid "Save"
+msgstr "Guardar"
+
+#. Label for a selector to export data to CSV
+#: export.py:145
+msgid "Select facility type to export:"
+msgstr "Seleccionar el tipo de institución de la exportación:"
+
+#. work done by someone that benefits another
+#: ../tools/setup.py:113 static/locale.js:126
+msgid "Services"
+msgstr "Servicios"
+
+#. Label for a control that filters a list of facilities
+#: static/locale.js:130
+msgid "Show:"
+msgstr "Mostrar:"
+
+#. Link to sign into the app
+#: main.py:58
+msgid "Sign in"
+msgstr "Acceder"
+
+#. Link to sign out of the app
+#: main.py:56
+msgid "Sign out"
+msgstr "Cerrar sesión"
+
+#. Category of facility: A hospital with a particular specialty.
+#: ../tools/setup.py:192
+msgid "Specialized hospital"
+msgstr "Hospital especializado"
+
+#. Header for a list of provisions
+#: templates/data.html:27
+msgid "Supplies"
+msgstr "Suministros"
+
+#. Category of facility: health center that exists for a finite period of time.
+#: ../tools/setup.py:175
+msgid "Temporary health center"
+msgstr "Centro de salud transitorio"
+
+#. Category of facility: Hospital existing for a finite period of time.
+#: ../tools/setup.py:190
+msgid "Temporary hospital"
+msgstr "Hospital transitorio"
+
+#. Category of facility: A moveable unit that provides a particular service for a finite period of time.
+#: ../tools/setup.py:197
+msgid "Temporary mobile facility"
+msgstr "Institución transitoria móvil"
+
+#. Link to terms of service for the application
+#: templates/map.html:106
+msgid "Terms of Service"
+msgstr "Condiciones del servicio"
+
+#. Instructions to enter a person's name and organizational affiliation.
+#: templates/edit.html:71
+msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/terms\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
+msgstr "Gracias por añadir contenido al Localizador de recursos. Para empezar por favor crea un nombre de usuario y dinos cual es tu afiliación. Esta información se mostrará junto a la información que has añadido o editado. También vea las <a target=\"_blank\" href=\"/TOS\">Condiciones de servicio </a> y <a target=\"_blank\" href=\"/privacy\">Política de privacidad</a> (en Inglés)."
+
+#. Total number of beds at a hospital
+#: ../tools/setup.py:111
+msgid "Total beds"
+msgstr "Cantidad total de camas"
+
+#. Name of the application.
+#: templates/map.html:161
+msgid "Total facilities"
+msgstr "Cantidad total de instituciones"
+
+#. URL to load data from
+#: templates/load.html:41
+msgid "URL:"
+msgstr "URL:"
+
+#. Error message
+#: utils.py:111
+msgid "Unauthorized user."
+msgstr "Sin autorización del usuario"
+
+#. Type of organization: Organization associated with a university
+#: ../tools/setup.py:167
+msgid "University"
+msgstr "Universidad"
+
+#. Category of facility: Unknown.
+#: ../tools/setup.py:201
+msgid "Unknown"
+msgstr "Desconocido"
+
+#. Type of facility construction: walls constructed of clay brick or concrete block
+#: ../tools/setup.py:210
+msgid "Unreinforced masonry"
+msgstr "Mampostería no reforzada"
+
+#. Label indicating a record was updated
+#: static/locale.js:138
+msgid "Updated"
+msgstr "Actualizado"
+
+#. Error message for a value that is not a number
+#: static/locale.js:79
+msgid "Value must be a number."
+msgstr "El valor debe ser un número"
+
+#. Service provided by a health facility.  Meaning: surgical specialty that focuses on arteries and veins
+#: ../tools/setup.py:245
+msgid "Vascular surgery"
+msgstr "Cirugía vascular"
+
+#. Link to go to a page with past versions of the 'master' list
+#: templates/map.html:197
+msgid "View Master List archive"
+msgstr "Ver archivo de la lista maestra"
+
+#. Type of facility construction: timber jointed together with nails
+#: ../tools/setup.py:212
+msgid "Wood frame"
+msgstr "Marco de madera"
+
+#. Service provided by a health facility.
+#: ../tools/setup.py:271
+msgid "X-ray"
+msgstr "Rayos X"
+
+#. Form option for a true Boolean value
+#: edit.py:170 bubble.py:47
+msgid "Yes"
+msgstr "Sí"
+
+#. Requested permission role has been previously granted
+#: request_access.py:51
+#, python-format
+msgid "You are already %(role)s"
+msgstr "Ya eres %(role)s "
+
+#. Requested permission role has already been granted
+#: request_access.py:55
+#, python-format
+msgid "Your request for %(role)s is already registered"
+msgstr "Tu solicitud de %(role)s ya se registró"
+
+#. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
+#: templates/map.html:171
+msgid "and with availability."
+msgstr "y con disponibilidad."
+
+#. a user with no identity
+#: main.py:52
+msgid "anonymous"
+msgstr "anónimo"
+
+#. Heading for number of available beds at a hospital
+#: templates/hospital_bubble.html:49
+msgid "availability"
+msgstr "disponibilidad"
+
+#. Heading for number of total beds at a hospital
+#: templates/hospital_bubble.html:53
+msgid "capacity"
+msgstr "capacidad"
+
+#. Header for the number of facilities less than 10 miles from a location.
+#: templates/map.html:166
+msgid "no more than 10 miles away"
+msgstr "a no más de 10 millas"
+
+#. Very short abbreviation for a phone number, indended to disambiguate from a fax number.  (example: p 555-555-5555)
+#: static/locale.js:113
+#, sh-format
+msgid "p ${PHONE}"
+msgstr "p ${PHONE}"
+
+#. Heading for servies available at a hospital (eg, orthopedics, cardiology)
+#: templates/hospital_bubble.html:58
+msgid "services"
+msgstr "servicios"
+
