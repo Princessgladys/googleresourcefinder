@@ -290,7 +290,7 @@ def has_comment_changed(facility, request, attribute):
     name = attribute.key().name()
     old_comment = facility.get_comment(name)
     new_comment = request.get('%s__comment' % name)
-    return old_comment != new_comment
+    return new_comment and (old_comment != new_comment)
 
 def is_editable(request, attribute):
     """Returns true if the special hidden 'editable.name' field is set in
@@ -353,7 +353,7 @@ class Edit(utils.Handler):
                     'type': attribute.type,
                     'input': make_input(self.facility, attribute),
                     'json': render_attribute_as_json(self.facility, attribute),
-                    'comment': comment,
+                    'comment': '',
                 })
             else:
                 readonly_fields.append({
@@ -423,9 +423,10 @@ class Edit(utils.Handler):
                 # at the time the page was rendered, the new value has to be
                 # different than the one in the facility at the time the page
                 # rendered, and the user has to have permission to edit it now.
+                value_changed = has_changed(facility, request, attribute)
+                comment_changed = has_comment_changed(facility, request, attribute)
                 if (is_editable(request, attribute) and
-                    (has_changed(facility, request, attribute) or
-                     has_comment_changed(facility, request, attribute))):
+                    (value_changed or comment_changed)):
                     if not can_edit(account, attribute):
                         raise ErrorMessage(
                             403, _(

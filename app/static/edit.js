@@ -18,10 +18,6 @@
  * @fileoverview Functions for the edit page
  */
 
-function make_visible(id) {
-  document.getElementById(id).style.visibility = "visible";
-}
-
 (function() {
   var button_click = '';
 
@@ -170,6 +166,16 @@ function make_visible(id) {
 
     return jQuery.inArray(false, valid_arr) == -1;
   }
+  
+  function make_visible(id) {
+    $(id).style.visibility = "visible";
+  }
+  
+  function make_visible_closure(div) {
+    return function() {
+      make_visible(div.id);
+    }
+  }
 
   /**
    * Initializes comment visibility and installs onclick handlers to make
@@ -186,17 +192,8 @@ function make_visible(id) {
         for (var div_index = 0; div_index < divs.length; div_index++) {
           var div = divs[div_index];
           if (div.className == "comment") {
-            tr.onclick = new Function(
-              'make_visible("' + div.id + '");');
-            var inputs = div.getElementsByTagName('input');
-            if (inputs.length > 0) {
-              var input = inputs[0];
-              if (input.value == '') {
-                div.style.visibility = "hidden";
-              } else {
-                div.style.visibility = "visible";                
-              }
-            }
+            tr.onclick = make_visible_closure(div);
+            div.style.visibility = "hidden";
           }
         }
       }
