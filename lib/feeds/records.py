@@ -30,28 +30,7 @@ class Record(db.Model):
     content = db.TextProperty()  # serialized XML document 
 
 
-class RecordType:
-    def get_subject_id(self, element):
-        """Extracts the subject_id string from an XML document."""
-        raise NotImplementedError
-
-    def get_observed(self, element):
-        """Extracts the observed time from an XML document."""
-        raise NotImplementedError
-
-    def get_title(self, element):
-        """Gets or fashions an Atom entry title for an XML document."""
-        return ''
-
-
-# A map of XML type strings to RecordType objects.
-type_registry = {}
-
-def register_type(type_name, record_type):
-    """Adds a RecordType instance to the XML type registry."""
-    type_registry[type_name] = record_type
-
-def put_record(feed_id, author_email, element):
+def put_record(feed_id, author_email, title, subject_id, observed, element):
     """Stores an XML Element as a record."""
     try:
         record_type = type_registry[element.tag]
@@ -60,10 +39,10 @@ def put_record(feed_id, author_email, element):
     record = Record(
         feed_id=feed_id,
         type_name=element.tag,
-        subject_id=record_type.get_subject_id(element),
-        title=record_type.get_title(element),
+        subject_id=subject_id,
+        title=title,
         author_email=author_email,
-        observed=record_type.get_observed(element),
+        observed=observed,
         content=xmlutils.serialize(element))
     record.put()
     return record
