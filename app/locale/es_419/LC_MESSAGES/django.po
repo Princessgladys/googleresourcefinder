@@ -60,7 +60,7 @@ msgstr "(No especificado)"
 msgid "Accuracy"
 msgstr "Precisión"
 
-#. Header for a street address
+#. street address
 #: templates/hospital_bubble.html:112 templates/print_data.html:68 ../tools/setup.py:127
 msgid "Address"
 msgstr "Dirección"
@@ -788,7 +788,7 @@ msgid "X-ray"
 msgstr "Rayos X"
 
 #. Form option for a true Boolean value
-#: bubble.py:47 edit.py:170
+#: edit.py:170 bubble.py:47
 msgid "Yes"
 msgstr "Sí"
 
