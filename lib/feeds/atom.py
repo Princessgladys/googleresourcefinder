@@ -32,7 +32,9 @@ def __create_entry(record):
     atom_id = record.feed_id + '/' + str(record.key().id())
     return xmlutils.element('{%s}entry' % ATOM_NS,
         xmlutils.element('{%s}author' % ATOM_NS,
-            xmlutils.element('{%s}email' % ATOM_NS, record.author_email)),
+            xmlutils.element('{%s}email' % ATOM_NS, record.author_email),
+            xmlutils.element('{%s}name' % ATOM_NS, record.author_email),
+            ),
         xmlutils.element('{%s}id' % ATOM_NS, atom_id),
         xmlutils.element('{%s}title' % ATOM_NS, record.title),
         xmlutils.element('{%s}updated' % ATOM_NS,
