@@ -343,11 +343,9 @@ class Edit(utils.Handler):
             if name in HIDDEN_ATTRIBUTE_NAMES:
                 continue
             attribute = self.attributes[name]
-            logging.info(attribute.key().name())
             comment = self.facility.get_comment(attribute.key().name())
             if not comment:
                 comment = ''
-            logging.info(comment)
             if can_edit(self.account, attribute):
                 fields.append({
                     'name': name,
