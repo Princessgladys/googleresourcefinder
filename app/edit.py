@@ -400,13 +400,12 @@ class Edit(utils.Handler):
             minimal_facility = model.MinimalFacility.all().ancestor(
                 facility).get()
             utcnow = datetime.datetime.utcnow().replace(microsecond=0)
-            observed=utcnow
             report = model.Report(
                 facility,
                 arrived=utcnow,
                 source=get_source_url(request),
                 author=user,
-                observed=observed)
+                observed=utcnow)
             change_metadata = ChangeMetadata(
                 utcnow, user, account.nickname, account.affiliation)
             has_changes = False
@@ -435,8 +434,12 @@ class Edit(utils.Handler):
                     changed_attributes_dict[name] = attribute
 
             if has_changes:
+                # Schedule a task to add a feed record.
+                # We can't really do this inside this transaction, since
+                # feed records are not part of the entity group.
+                # Transactional tasks is the closest we can get.
                 schedule_add_record(self.request, user,
-                    facility, changed_attributes_dict, observed)
+                    facility, changed_attributes_dict, utcnow)
                 db.put([report, facility, minimal_facility])
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,

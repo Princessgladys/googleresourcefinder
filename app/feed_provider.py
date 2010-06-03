@@ -17,7 +17,7 @@
 import logging
 import pickle
 from edxl_have import URI_PREFIXES, serialize
-from feeds.feedutils import handle_entry_get, handle_feed_get, handle_feed_post, notify_hub
+from feeds.feedutils import handle_entry_get, handle_feed_get, notify_hub
 from feeds.records import create_record
 from utils import ErrorMessage, Handler, run, taskqueue, _
 
@@ -34,7 +34,7 @@ def schedule_add_record(request, user, facility,
         get_feed_id(request, 'delta'),
         user.email(),
         '', # title
-        facility.key().id_or_name(), # subject_id
+        facility.key().name(), # subject_id
         observed_time,
         edxl_change)
 
@@ -61,7 +61,7 @@ class AddRecord(Handler):
         # todo: decide if idempotence here is required
         record = pickle.loads(self.request.body)
         record.put()
-        notify_hub(self.request.host_url + record.feed_id)
+        notify_hub(record.feed_id)
 
 
 if __name__ == '__main__':

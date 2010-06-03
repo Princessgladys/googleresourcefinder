@@ -18,16 +18,15 @@ import datetime
 import logging
 import time_formats
 import xmlutils
-import edxl_have
 
 ATOM_NS = 'http://www.w3.org/2005/Atom'
 STATUS_NS = 'http://schemas.google.com/2010/status'
 
-def __add_atom_prefix(uri_prefixes):
+def add_atom_prefix(uri_prefixes):
     """Adds an entry for the Atom namespace to a prefix dictionary."""
     return dict([(ATOM_NS, 'atom'), (STATUS_NS, 'status')], **uri_prefixes)
 
-def __create_entry(record):
+def create_entry(record):
     """Constructs an Element for an Atom entry for the given record."""
     atom_id = record.feed_id + '/' + str(record.key().id())
     return xmlutils.element('{%s}entry' % ATOM_NS,
@@ -41,34 +40,34 @@ def __create_entry(record):
         xmlutils.element('{%s}observed' % STATUS_NS,
             time_formats.to_rfc3339(record.observed)),
         xmlutils.element('{%s}report' % STATUS_NS,
-            {'type': '{%s}' % edxl_have.EDXL_HAVE_NS},
+            {'type': '%s' % record.type_name},
             xmlutils.parse(record.content))
     )
 
-def __create_feed(records, feed_id, hub=None):
+def create_feed(records, feed_id, hub=None):
     """Constructs an Element for an Atom feed containing the given records."""
     updated = None
     if records:
-      updated = records[0].arrived
+        updated = records[0].arrived
     else:
-      updated = datetime.datetime.utcnow()
+        updated = datetime.datetime.utcnow()
     elements = [
         xmlutils.element('{%s}title' % ATOM_NS, feed_id),
         xmlutils.element('{%s}id' % ATOM_NS, feed_id),
         xmlutils.element('{%s}updated' % ATOM_NS,
             time_formats.to_rfc3339(updated))
-        ]
+    ]
     if hub:
         elements.append(xmlutils.element('{%s}link' % ATOM_NS,
             {'rel': 'hub', 'href': hub}))
-    elements.extend(map(__create_entry, records))
+    elements.extend(map(create_entry, records))
     return xmlutils.element('{%s}feed' % ATOM_NS, elements)
 
 def write_entry(file, record, uri_prefixes={}):
     """Writes an Atom entry for the given record to the given file."""
-    xmlutils.write(file, create_entry(record), __add_atom_prefix(uri_prefixes))
+    xmlutils.write(file, create_entry(record), add_atom_prefix(uri_prefixes))
 
 def write_feed(file, records, feed_id, uri_prefixes={}, hub=None):
     """Writes an Atom feed containing the given records to the given file."""
-    feed = __create_feed(records, feed_id, hub)
-    xmlutils.write(file, feed, __add_atom_prefix(uri_prefixes))
+    feed = create_feed(records, feed_id, hub)
+    xmlutils.write(file, feed, add_atom_prefix(uri_prefixes))

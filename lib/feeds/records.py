@@ -32,7 +32,7 @@ class Record(db.Model):
 
 def create_record(feed_id, author_email, title, subject_id, observed, element):
     """Wraps XML Element in a record."""
-    record = Record(
+    return Record(
         feed_id=feed_id,
         type_name=element.tag,
         subject_id=subject_id,
@@ -40,7 +40,6 @@ def create_record(feed_id, author_email, title, subject_id, observed, element):
         author_email=author_email,
         observed=observed,
         content=xmlutils.serialize(element))
-    return record
 
 def put_record(feed_id, author_email, title, subject_id, observed, element):
     """Stores an XML Element as a record."""

@@ -79,11 +79,7 @@ class EditTest(SeleniumTestCase):
         # Check that feed is empty
         feed = self.s.go('http://localhost:8081/feeds/delta')
         assert feed.first('atom:feed')
-        try:
-          feed.first('atom:feed').first('atom:entry')
-          assert False
-        except scrape.ScrapeError:
-          pass
+        assert feed.first('atom:feed').all('atom:entry') == []
 
         # Go to the edit page
         self.login('/edit?facility_name=example.org/123')
@@ -182,7 +178,7 @@ class EditTest(SeleniumTestCase):
         text_fields['total_beds'] = '0'
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
-        # Check that feed is empty
+        # Check that feed is not empty now
         feed = self.s.go('http://localhost:8081/feeds/delta')
         assert feed.first('atom:feed')
         assert feed.first('atom:feed').first('atom:entry')
