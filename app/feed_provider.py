@@ -28,13 +28,14 @@ def get_feed_id(request, feed_name):
 
 def schedule_add_record(request, user, facility,
                         changed_attributes_dict, observed_time):
+    """Enqueue a task to create a record."""
     edxl_change = serialize(changed_attributes_dict)
     record = create_record(
         get_feed_id(request, 'delta'),
         user.email(),
         '', # title
         facility.key().id_or_name(), # subject_id
-        observed_time, 
+        observed_time,
         edxl_change)
 
     taskqueue.add(url='/tasks/add_feed_record',
@@ -57,7 +58,7 @@ class Entry(Handler):
 
 class AddRecord(Handler):
     def post(self):
-        # todo: idempotence
+        # todo: decide if idempotence here is required
         record = pickle.loads(self.request.body)
         record.put()
         notify_hub(self.request.host_url + record.feed_id)
