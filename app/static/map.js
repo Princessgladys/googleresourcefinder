@@ -1362,13 +1362,30 @@ function handle_default_location_error(){
   alert('Error');
 }
 
-function update_user_location(lat, lng, address) {
-  alert('Updated');
+function update_user_location(lat, lon, address) {
+  // Use AJAX to load the form in the InfoWindow, then reopen the
+  // InfoWindow so that it resizes correctly.
+  log('reqest action:', 'update_user_location');
+  show_loading(true);
+  
+  $j.ajax({
+    url: '/user_location',
+    type: 'POST',
+    data : {lat: lat,
+            lon: lon,
+            location_text: address,
+            token: $('user_location_token').value},
+    success: function(data) {
+        show_loading(false);
+    }
+  });
   return true;
 }
 
 function handle_default_location(second_try) {
   var user_entered_location = $('user_address').value;
+  update_user_location(0, 0, user_entered_location);
+  return;
   var lat;
   var lng;
   if (geocoder) {
@@ -1379,6 +1396,7 @@ function handle_default_location(second_try) {
         lng = results[0].geometry.location.lng();
         address = results[0].formatted_address;
         update_status = update_user_location(lat, lng, address);
+        
         if (update_status) {
           return;
         } else {
@@ -1386,7 +1404,7 @@ function handle_default_location(second_try) {
           return;
         }
       } else {
-        handle_default_location_error()
+        handle_default_location_error();
         return;
       }
     });

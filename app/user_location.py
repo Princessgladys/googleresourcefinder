@@ -20,7 +20,7 @@ import urlparse
 import utils
 import wsgiref
 from access import check_action_permitted
-from main import USE_WHITELISTS
+from main import USE_WHITELISTS, USER_LOCATION_XSRF_KEY_NAME, DAY_SECS
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
 from utils import db, get_message, html_escape, simplejson, to_unicode, users, _
@@ -28,8 +28,6 @@ from feeds.crypto import sign, verify
 
 # TODO(shakusa) Add per-attribute comment fields
 
-XSRF_KEY_NAME = 'resource-finder-user-location'
-DAY_SECS = 24 * 60 * 60
 
 def get_suggested_nickname(user):
     """Returns the suggested Account.nickname based on a user.nickname"""
@@ -48,16 +46,18 @@ def display_geopt(value):
      
 def parse_geopt(value):
     components = value.split(',')
-    lat = float(components[0])
-    lon = float(components[1])
+    try:
+        lat = float(components[0])
+        lon = float(components[1])
+    except ValueError:
+        return None
     return db.GeoPt(lat, lon)
-
 
 class UserLocation(utils.Handler):
     def get(self):
         self.require_logged_in_user()
 
-        token = sign(XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
+        token = sign(USER_LOCATION_XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
         fields = [{'name': 'location_text',
                        'type': 'text',
                        'input': 'location text',
@@ -79,8 +79,8 @@ class UserLocation(utils.Handler):
 
         if self.request.get('cancel'):
             raise Redirect('/')
-
-        if not verify(XSRF_KEY_NAME, self.user.user_id(),
+        
+        if not verify(USER_LOCATION_XSRF_KEY_NAME, self.user.user_id(),
             self.request.get('token')):
             raise ErrorMessage(403, 'Unable to submit data for %s'
                                % self.user.email())
@@ -108,15 +108,21 @@ class UserLocation(utils.Handler):
         location_text = self.request.get('location_text', None)
         if location_text:
             self.account.location_text = location_text
+        elif location_text == '':
+            # This was explicitly set to empty.
+            self.account.location_text = ''
         location = self.request.get('location', None)
         if location:
             self.account.location = parse_geopt(location)
+        elif location == '':
+            # This was explicitly set to empty.
+            self.account.location = None
         else:
             lat = self.request.get('lat', None)
             lon = self.request.get('lon', None)
             if lat and lon:
                 self.account.location = db.GeoPt(float(lat), float(lon))
-            
+        logging.error('HERE')
         self.account.put()
         self.redirect('/user_location')
        
