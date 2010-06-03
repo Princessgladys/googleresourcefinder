@@ -28,7 +28,7 @@ import config
 from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
-from feeds.crypto import get_key
+from feeds.crypto import get_secret
 from feeds.errors import ErrorMessage, Redirect
 import gzip
 from html import html_escape
@@ -144,7 +144,7 @@ class Handler(webapp.RequestHandler):
         self.params.languages = config.LANGUAGES
 
         # Google Analytics account id
-        self.params.analytics_id = get_key('analytics_id')
+        self.params.analytics_id = get_secret('analytics_id')
 
     def select_locale(self):
         """Detect and activate the appropriate locale.  The 'lang' query
