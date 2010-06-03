@@ -29,6 +29,8 @@ class Incoming(Handler):
 
         # TODO(guido): Check other hub parameters.
 
+        # Reference:
+        # pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html
         challenge = self.request.GET['hub.challenge']
         self.response.out.write(challenge)
 

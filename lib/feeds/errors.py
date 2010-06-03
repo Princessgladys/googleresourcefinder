@@ -19,7 +19,6 @@ import logging
 class ErrorMessage(Exception):
     """Raise this exception to show an error message to the user."""
     def __init__(self, status, message):
-        logging.warn('ErrorMessage(%r, %r)', status, message)  # DO NOT SUBMIT?
         self.status = status
         self.message = message
 
