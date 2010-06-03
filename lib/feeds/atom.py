@@ -18,12 +18,14 @@ import datetime
 import logging
 import time_formats
 import xmlutils
+import edxl_have
 
 ATOM_NS = 'http://www.w3.org/2005/Atom'
+STATUS_NS = 'http://schemas.google.com/2010/status'
 
 def add_atom_prefix(uri_prefixes):
     """Adds an entry for the Atom namespace to a prefix dictionary."""
-    return dict([(ATOM_NS, 'atom')], **uri_prefixes)
+    return dict([(ATOM_NS, 'atom'), (STATUS_NS, 'status')], **uri_prefixes)
 
 def create_entry(record):
     """Constructs an Element for an Atom entry for the given record."""
@@ -35,7 +37,12 @@ def create_entry(record):
         xmlutils.element('{%s}title' % ATOM_NS, record.title),
         xmlutils.element('{%s}updated' % ATOM_NS,
             time_formats.to_rfc3339(record.arrived)),
-        xmlutils.parse(record.content)
+        xmlutils.element('{%s}subject' % STATUS_NS, record.subject_id),
+        xmlutils.element('{%s}observed' % STATUS_NS,
+            time_formats.to_rfc3339(record.observed)),
+        xmlutils.element('{%s}report' % STATUS_NS,
+            {'type': '{%s}' % edxl_have.EDXL_HAVE_NS},
+            xmlutils.parse(record.content))
     )
 
 def __create_feed(records, feed_id, hub=None):

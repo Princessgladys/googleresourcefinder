@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import datetime
 import logging
 import model
@@ -20,14 +21,15 @@ import re
 import urlparse
 import utils
 import wsgiref
+
 from access import check_action_permitted
+from feed_provider import schedule_add_record
+from feeds.crypto import sign, verify
 from main import USE_WHITELISTS
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
-from utils import db, get_message, html_escape, simplejson, taskqueue, to_unicode, users, _
-from feeds.crypto import sign, verify
-import edxl_have
-from feeds import xmlutils, records
+from utils import db, get_message, html_escape, simplejson
+from utils import to_unicode, users, _
 
 # TODO(shakusa) Add per-attribute comment fields
 
@@ -432,22 +434,11 @@ class Edit(utils.Handler):
                     apply_change(facility, minimal_facility, report,
                                  facility_type, request, attribute,
                                  change_metadata)
-                    # TODO: geo properties
                     changed_attributes_dict[name] = attribute
 
             if has_changes:
-                edxl_change = edxl_have.serialize(changed_attributes_dict)
-                record = records.create_record(
-                    self.request.host_url + '/feeds/delta',
-                    user.email(),
-                    'some_title',
-                    'some_subject_id',
-                    observed,
-                    edxl_change)
-
-                taskqueue.add(url='/tasks/add_feed_record',
-                    payload=pickle.dumps(record),
-                    transactional=True)
+                schedule_add_record(self.request, user,
+                    facility, changed_attributes_dict, observed)
                 db.put([report, facility, minimal_facility])
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
