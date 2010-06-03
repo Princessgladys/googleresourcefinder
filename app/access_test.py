@@ -14,7 +14,7 @@
 
 """Tests for access.py."""
 
-from access import ROLES
+from access import ACTIONS
 from feeds.xmlutils import Struct
 
 import access
@@ -29,13 +29,13 @@ AUTH.user_id = 'test'
 AUTH.nickname = 'test'
 AUTH.affiliation = 'test'
 AUTH.token = 'test'
-AUTH.user_roles = ['user', 'editor']
-AUTH.requested_roles = ['supereditor']
+AUTH.actions = ['view', 'edit']
+AUTH.requested_actions = ['advanced_edit']
         
 class AccessTest(unittest.TestCase):
-    def test_check_user_role(self):
-        for role in ROLES:
-            if role in AUTH.user_roles:
-                assert access.check_user_role(AUTH, role) == True
+    def test_check_action_permitted(self):
+        for action in ACTIONS:
+            if action in AUTH.actions:
+                assert access.check_action_permitted(AUTH, action) == True
             else:
-                assert access.check_user_role(AUTH, role) == False
+                assert access.check_action_permitted(AUTH, action) == False
