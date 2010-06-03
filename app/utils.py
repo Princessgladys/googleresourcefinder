@@ -21,6 +21,7 @@ import google.appengine.ext.webapp.util
 
 import StringIO
 import access
+from cache import *
 from calendar import timegm
 import cgi
 import cgitb
@@ -80,8 +81,7 @@ def validate_float(text):
         return None
 
 def get_message(namespace, name):
-    message = model.Message.all().filter(
-        'namespace =', namespace).filter('name =', name).get()
+    message = MessageCache.get().get((namespace, name))
     django_locale = django.utils.translation.to_locale(
         django.utils.translation.get_language())
     return message and getattr(message, django_locale) or name

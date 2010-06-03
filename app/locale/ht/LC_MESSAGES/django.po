@@ -45,13 +45,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
 
 #. Error message for lacking edit permissions
-#: edit.py:421
+#: edit.py:420
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s pa gen pèmisyon edite %(a)s"
 
 #. Form option to indicate that a value is not specified
-#: edit.py:168 edit.py:194 edit.py:209
+#: edit.py:169 edit.py:210 edit.py:195
 msgid "(unspecified)"
 msgstr "(pa espesifye)"
 
@@ -233,7 +233,7 @@ msgid "District"
 msgstr "Distri"
 
 #. E-mail address
-#: ../tools/setup.py:119 edit.py:115
+#: ../tools/setup.py:119 edit.py:116
 msgid "E-mail"
 msgstr "Adrès elektronik"
 
@@ -373,12 +373,12 @@ msgid "Infectious disease"
 msgstr "Maladi enfektyez"
 
 #. Error message for invalid date entry
-#: edit.py:137
+#: edit.py:138
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Dat envalid : %(dat)r (bezwen ane-mwa-jou fòma)"
 
 #. Error message for request missing facility name.
-#: edit.py:324 bubble.py:146
+#: edit.py:325 bubble.py:147
 msgid "Invalid or missing facility name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -403,7 +403,7 @@ msgid "Last updated:"
 msgstr "Misajou"
 
 #. Label for text input
-#: edit.py:230
+#: edit.py:231
 msgid "Latitude"
 msgstr "Latitd"
 
@@ -443,7 +443,7 @@ msgid "Location:"
 msgstr "Kote"
 
 #. Label for text input
-#: edit.py:233
+#: edit.py:234
 msgid "Longitude"
 msgstr "Lonjitd"
 
@@ -478,7 +478,7 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: edit.py:111
+#: edit.py:112
 msgid "Name"
 msgstr "Non"
 
@@ -493,7 +493,7 @@ msgid "Neurosurgery"
 msgstr "Nerochiriji"
 
 #. Form option for a false Boolean value
-#: edit.py:172 bubble.py:47
+#: bubble.py:48 edit.py:173
 msgid "No"
 msgstr "Pa dakò"
 
@@ -579,7 +579,7 @@ msgid "Pediatrics"
 msgstr "Pedyatrik"
 
 #. telephone number
-#: edit.py:113 ../tools/setup.py:117
+#: edit.py:114 ../tools/setup.py:117
 msgid "Phone"
 msgstr "Telefòn"
 
@@ -788,7 +788,7 @@ msgid "X-ray"
 msgstr "Reyon X"
 
 #. Form option for a true Boolean value
-#: bubble.py:47 edit.py:170
+#: bubble.py:48 edit.py:171
 msgid "Yes"
 msgstr "Wi"
 

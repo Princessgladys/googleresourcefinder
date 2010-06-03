@@ -20,6 +20,7 @@ import urlparse
 import utils
 import wsgiref
 from access import check_action_permitted
+from cache import *
 from main import USE_WHITELISTS
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
@@ -322,10 +323,8 @@ class Edit(utils.Handler):
         if not self.facility:
             #i18n: Error message for request missing facility name.
             raise ErrorMessage(404, _('Invalid or missing facility name.'))
-        self.facility_type = model.FacilityType.get_by_key_name(
-            self.facility.type)
-        self.attributes = dict(
-            (a.key().name(), a) for a in model.Attribute.all())
+        self.facility_type = FacilityTypeCache.get()[self.facility.type]
+        self.attributes = AttributeCache.get()
 
     def get(self):
         self.init()
@@ -428,6 +427,7 @@ class Edit(utils.Handler):
                                  change_metadata)
             if has_changes:
                 db.put([report, facility, minimal_facility])
+                MinimalFacilityCache.flush()
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
                               self.attributes, self.request,
