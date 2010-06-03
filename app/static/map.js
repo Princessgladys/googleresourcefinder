@@ -156,6 +156,11 @@ var info = null;
 var markers = [];  // marker for each facility
 var marker_clusterer = null;  // clusters markers for efficient rendering
 var converted_markers_for_print = 0; // part of a hack for print support
+var geocoder;
+
+// ==== Google Maps Geocoding URL base
+
+var GEOCODING_BASE_URL = "http://maps.google.com/maps/api/geocode/json?";
 
 // ==== Debugging
 
@@ -1346,6 +1351,54 @@ function request_action_handler(request_url) {
     }
   });
   return false;
+}
+
+function initialize_geocoder() {
+  geocoder = new google.maps.Geocoder();
+  return;
+}
+
+function handle_default_location_error(){
+  alert('Error');
+}
+
+function update_user_location(lat, lng, address) {
+  alert('Updated');
+  return true;
+}
+
+function handle_default_location(second_try) {
+  var user_entered_location = $('user_address').value;
+  var lat;
+  var lng;
+  if (geocoder) {
+    geocoder.geocode( { 'address': user_entered_location},
+                      function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        lat = results[0].geometry.location.lat();
+        lng = results[0].geometry.location.lng();
+        address = results[0].formatted_address;
+        update_status = update_user_location(lat, lng, address);
+        if (update_status) {
+          return;
+        } else {
+          handle_default_location_error();
+          return;
+        }
+      } else {
+        handle_default_location_error()
+        return;
+      }
+    });
+  } else {
+    if (second_try) {
+      alert('Error');
+    } else {
+      initialize_geocoder();
+      handle_default_location(true);    
+    }
+  }
+  return;
 }
 
 log('map.js finished loading.');
