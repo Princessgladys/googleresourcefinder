@@ -189,6 +189,7 @@ def fetch(url, data='', agent=None, referrer=None, charset=None, verbose=0,
         headers = {'host': host, 'accept': '*/*'}
         if data:
             # When we're clearly submitting XML, say so.
+            # TODO: Allow passing in a headers dict as an argument.
             if data.startswith('<?xml'):
                 headers['content-type'] = 'text/xml'
             else:

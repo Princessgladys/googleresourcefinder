@@ -2,9 +2,8 @@
 
 import urllib
 
-from scrape_test_case import ScrapeTestCase
-
 from feeds import records
+from scrape_test_case import ScrapeTestCase
 
 # An actual POST request body from pubsubhubbub.
 DATA = """<?xml version="1.0" encoding="utf-8"?>
