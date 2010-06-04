@@ -12,18 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.appengine.api import memcache
 from google.appengine.api import users
+
 from model import *
+from simplejson import decoder
+
 import csv
 import datetime
 import logging
 import re
 import setup
+import urllib
 
 SHORELAND_URL = 'http://shoreland.com/'
 SHORELAND_EMAIL = 'admin@shoreland.com'
 SHORELAND_NICKNAME = 'Shoreland Contact Name'
 SHORELAND_AFFILIATION = 'Shoreland Inc.'
+
+US_HOSPITAL_URL = 'http://www.google.com/'
+US_HOSPITAL_EMAIL = 'us_hospital@resourcefinder.appspotmail.com'
+US_HOSPITAL_NICKNAME = 'US Hospital Contact Name'
+US_HOSPITAL_AFFILIATION = 'United States of America'
+
+json_decoder = decoder.JSONDecoder()
 
 def convert_paho_record(record):
     """Converts a dictionary of values from one row of a PAHO CSV file
@@ -85,7 +97,7 @@ def convert_paho_record(record):
     }
 
 def convert_shoreland_record(record):
-    """Converts a dictionary of values from one row of a Shoreland CSV file
+    """Converts a dictionary of values from one row of a US Hospital CSV file
     into a dictionary of ValueInfo objects for our datastore."""
     title = record['facility_name'].strip()
 
@@ -180,10 +192,154 @@ def convert_shoreland_record(record):
         'commune_code': ValueInfo(record['commune_code']),
         'sante_id': ValueInfo(record['sante_id'])
     }
+    
+def convert_us_hospital_record(record):
+    """Converts a dictionary of values from one row of a Shoreland CSV file
+    into a dictionary of ValueInfo objects for our datastore."""
+    title = record['Hospital Name'].strip()
+    key_name = 'paho.org/Provider_Number/' + record['Provider Number'].strip()
+    observed = None
+    
+    geocode_base_url = 'http://maps.google.com/maps/api/geocode/json?address='
+    address = re.sub('\s+', '+', record['Address'].strip())
+    db_form_address = re.sub('\s+', ' ', record['Address'].strip())
+    url = geocode_base_url + address + '&sensor=false'
+    
+    delay = memcache.get('delay')
+    num_sans_delay = memcache.get('num_sans_delay')
+    geocode_pending = True
+
+    while geocode_pending:
+        result = urllib.urlopen(url).read()
+        dict_result = json_decoder.decode(result)
+        if dict_result[u'status'] != 'OK':
+            if delay == 0:
+                delay = 1
+            else:
+                delay += delay
+            num_sans_delay = 0
+        else:
+            logging.info('here')
+            num_sans_delay += 1
+            geocode_pending = False
+        logging.info(dict_result[u'status'] + ' ' + record['Hospital Name'])
+
+    if num_sans_delay % 5 == 0 and delay > 0:
+        delay -= 1
+    memcache.set('delay', delay)
+    memcache.set('num_sans_delay', num_sans_delay)
+               
+    loc = dict_result[u'results'][0][u'geometry'][u'location']
+    latitude = loc[u'lat']
+    longitude = loc[u'lng']
+
+    return key_name, observed, {
+        'title': ValueInfo(title),
+        'Provider_Number': ValueInfo(record['Provider Number']),
+        'Hospital_Type': ValueInfo(record['Hospital Type']),
+        'Emergency_Services': ValueInfo(record['Emergency Services']),
+        'Contact_Name': ValueInfo(US_HOSPITAL_NICKNAME),
+        'Phone_Number': ValueInfo(record['Phone Number']),
+        'Email': ValueInfo(US_HOSPITAL_EMAIL),
+        'Address': ValueInfo(db_form_address),
+        'City': ValueInfo(record['City']),
+        'State': ValueInfo(record['State']),
+        'ZIP_Code': ValueInfo(record['ZIP Code']),
+        'location': ValueInfo(db.GeoPt(latitude, longitude)),
+        'Heart_Attack_30-Day_Mortality': ValueInfo(
+            record['Heart Attack 30-Day Mortality']),
+        'Heart_Failure_30-Day_Mortality': ValueInfo(
+            record['Heart Failure 30-Day Mortality']),
+        'Pneumonia_30-Day_Mortality': ValueInfo(
+            record['Pneumonia 30-Day Mortality']),
+        'Heart_Attack_30-Day_Readmission': ValueInfo(
+            record['Heart Attack 30-Day Readmission']),
+        'Heart_Failure_30-Day_Readmission': ValueInfo(
+            record['Heart Failure 30-Day Readmission']),
+        'Pneumonia_30-Day_Readmission': ValueInfo(
+            record['Pneumonia 30-Day Readmission']),
+        'Aspirin_on_Heart_Attack_Arrival': ValueInfo(
+            record['Aspirin on Heart Attack Arrival']),
+        'Aspirin_on_Heart_Attack_Discharge': ValueInfo(
+            record['Aspirin on Heart Attack Discharge']),
+        'ACE_or_ARB_for_Heart_Attack_and_LVSD': ValueInfo(
+            record['ACE or ARB for Heart Attack and LVSD']),
+        'Beta_Blocker_on_Heart_Attack_Discharge': ValueInfo(
+            record['Beta Blocker on Heart Attack Discharge']),
+        'Smoking_Cessation_Heart_Attack': ValueInfo(
+            record['Smoking Cessation Heart Attack']),
+        'Fibrinolytic_Within_30_Minutes_Heart_Attack_Arrival': ValueInfo(
+            record['Fibrinolytic Within 30 Minutes Heart Attack Arrival']),
+        'PCI_Within_90_Minutes_Heart_Attack_Arrival': ValueInfo(
+            record['PCI Within 90 Minutes Heart Attack Arrival']),
+        'LV_Systolic_Eval_for_Heart_Failure': ValueInfo(
+            record['LV Systolic Eval for Heart Failure']),
+        'ACE_or_ARB_for_Heart_Failure_and_LVSD': ValueInfo(
+            record['ACE or ARB for Heart Failure and LVSD']),
+        'Discharge_Instructions_Heart_Failure': ValueInfo(
+            record['Discharge Instructions Heart Failure']),
+        'Smoking_Cessation_Heart_Failure': ValueInfo(
+            record['Smoking Cessation Heart Failure']),
+        'Pneumococcal_Vaccine_for_Pneumonia': ValueInfo(
+            record['Pneumococcal Vaccine for Pneumonia']),
+        'Antibiotics_within_6_Hours_for_Pneumonia': ValueInfo(
+            record['Antibiotics within 6 Hours for Pneumonia']),
+        'Blood_Culture_Before_Antibiotics_for_Pneumonia': ValueInfo(
+            record['Blood Culture Before Antibiotics for Pneumonia']),
+        'Smoking_Cessation_Heart_Failure_2': ValueInfo(
+            record['Smoking Cessation Heart Failure 2']),
+        'Most_Appropriate_Antibiotic_for_Pneumonia': ValueInfo(
+            record['Most Appropriate Antibiotic for Pneumonia']),
+        'Flu_Vaccine_for_Pneumonia': ValueInfo(
+            record['Flu Vaccine for Pneumonia']),
+        'Antibiotics_Within_1_Hour_Before_Surgery': ValueInfo(
+            record['Antibiotics Within 1 Hour Before Surgery']),
+        'Antibiotics_Stopped_Within_24_hours_After_Surgery': ValueInfo(
+            record['Antibiotics Stopped Within 24 hours After Surgery']),
+        'Appropriate_Antibiotics_for_Surgery': ValueInfo(
+            record['Appropriate Antibiotics for Surgery']),
+        'Blood_Clot_Prevention_Within 24_hours_Before_or_After_Surgery':
+            ValueInfo(record[
+            'Blood Clot Prevention Within 24 hours Before or After Surgery']),
+        'Blood_Clot_Prevention_After_Certain_Surgeries': ValueInfo(
+            record['Blood Clot Prevention After Certain Surgeries']),
+        'Sugar_Control_after_Heart_Surgery': ValueInfo(
+            record['Sugar Control after Heart Surgery']),
+        'Safer_Hair_Removal_for_Surgery': ValueInfo(
+            record['Safer Hair Removal for Surgery']),
+        'Beta_Blockers_Maintained_for_Surgery': ValueInfo(
+            record['Beta Blockers Maintained for Surgery']),
+        'Pain_Relief_Children_Asthma_Admission': ValueInfo(
+            record['Pain Relief Children Asthma Admission']),
+        'Corticosteroid_Children_Asthma_Admission': ValueInfo(
+            record['Corticosteroid Children Asthma Admission']),
+        'Caregiver_Plan_Children_Asthma_Admission': ValueInfo(
+            record['Caregiver Plan Children Asthma Admission']),
+        'Nurses_"Always"_Communicated_Well': ValueInfo(
+            record['Nurses "Always" Communicated Well']),
+        'Doctors_"Always"_Communicated_Well': ValueInfo(
+            record['Doctors "Always" Communicated Well']),
+        'Patients_"Always"_Received_Help_When_Wanted': ValueInfo(
+            record['Patients "Always" Received Help When Wanted']),
+        'Pain_"Always"_Well_Controlled': ValueInfo(
+            record['Pain "Always" Well Controlled']),
+        'Medicines_"Always"_Explained_Before_Administered': ValueInfo(
+            record['Medicines "Always" Explained Before Administered']),
+        'Room_and_Bathroom_"Always"_Clean': ValueInfo(
+            record['Room and Bathroom "Always" Clean']),
+        'Room_"Always"_Quiet_at_Night': ValueInfo(
+            record['Room "Always" Quiet at Night']),
+        'Home_Recovery_Instructions_Given': ValueInfo(
+            record['Home Recovery Instructions Given']),
+        'Patient_Rating_of_9-10': ValueInfo(
+            record['Patient Rating of 9-10']),
+        'Patient_Recommended_Hospital': ValueInfo(
+            record['Patient Recommended Hospital'])
+    }
 
 def load_csv(
     filename, record_converter, source_url, default_observed,
-    author, author_nickname, author_affiliation, limit=None):
+    author, author_nickname, author_affiliation, facility_type_str, limit=None):
     """Loads a CSV file of records into the datastore.
 
     Args:
@@ -209,10 +365,14 @@ def load_csv(
     arrived = datetime.datetime.utcnow().replace(microsecond=0)
 
     # Store the raw file contents in a Dump.
-    Dump(source=source_url, data=open(filename, 'rb').read()).put()
+    # TODO(pfritzsche) upload files > 1mb
+    #Dump(source=source_url, data=open(filename, 'rb').read()).put()
 
-    facility_type = FacilityType.get_by_key_name('hospital')
+    facility_type = FacilityType.get_by_key_name(facility_type_str)
     count = 0
+    
+    memcache.set('delay', 0)
+    memcache.set('num_sans_delay', 0)
     for record in csv.DictReader(open(filename)):
         if limit and count >= limit:
             break
@@ -225,11 +385,12 @@ def load_csv(
             continue
         observed = observed or default_observed
 
-        facility = Facility(key_name=key_name, type='hospital', author=author)
+        facility = Facility(key_name=key_name, type=facility_type_str,
+                            author=author)
         facilities.append(facility)
         Facility.author.validate(author)
 
-        minimal_facility = MinimalFacility(facility, type='hospital')
+        minimal_facility = MinimalFacility(facility, type=facility_type_str)
         minimal_facilities.append(minimal_facility)
 
         # Create a report for this row. ValueInfos that have a different
@@ -311,7 +472,7 @@ def put_batches(entities):
     """Works around annoying limitations of App Engine's datastore."""
     count, total = 0, len(entities)
     while entities:
-        batch, entities = entities[:200], entities[200:]
+        batch, entities = entities[:50], entities[50:]
         db.put(batch)
         count += len(batch)
         logging.info('Stored %d of %d entities.' % (count, total))
@@ -334,10 +495,25 @@ def load_shoreland(filename, observed):
         observed = parse_datetime(observed)
     user = users.User(SHORELAND_EMAIL)
     load_csv(filename, convert_shoreland_record, SHORELAND_URL, observed, user,
-             SHORELAND_NICKNAME, SHORELAND_AFFILIATION)
+             SHORELAND_NICKNAME, SHORELAND_AFFILIATION, 'hospital')
 
 def wipe_and_load_shoreland(filename, observed):
     """Wipes the entire datastore and then loads a Shoreland CSV file."""
     open(filename)  # Ensure the file is readable before wiping the datastore.
     setup.wipe_datastore()
     load_shoreland(filename, observed)
+
+def load_us_hospital(filename, observed):
+    """Loads a US Hospital CSV file using defaults for the URL and author."""
+    setup.setup_new_datastore()
+    if isinstance(observed, basestring):
+        observed = parse_datetime(observed)
+    user = users.User(US_HOSPITAL_EMAIL)
+    load_csv(filename, convert_us_hospital_record, US_HOSPITAL_URL, observed,
+             user, US_HOSPITAL_NICKNAME, US_HOSPITAL_AFFILIATION, 'us_hospital')
+             
+def wipe_and_load_us_hospital(filename, observed):
+    """Wipes the entire datastore and then loads a US Hospital CSV file."""
+    open(filename)
+    setup.wipe_datastore()
+    load_us_hospital(filename, observed)
