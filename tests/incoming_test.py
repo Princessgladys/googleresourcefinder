@@ -137,14 +137,15 @@ class IncomingTest(ScrapeTestCase):
     def test_feed_update_notification(self):
         # Test POST request from the hub to announce feed update.
 
-        # Initially, there are no records.
-        assert records.Record.all().count() == 0
+        # Erase all records from the datastore.
+        for rec in records.Record.all():
+            rec.delete()
         
         doc = self.s.go(self.URL, data=DATA)
         assert self.s.status == 200
         assert doc.content == ''
 
-        # Now a Report record should have been written to the datastore.
+        # Now a Record should have been written to the datastore.
         assert records.Record.all().count() == 1
 
         record = records.Record.all().get()
