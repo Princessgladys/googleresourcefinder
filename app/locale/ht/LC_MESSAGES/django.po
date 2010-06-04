@@ -22,7 +22,7 @@ msgid "${DATE} at ${TIME}"
 msgstr "${DATE} a ${TIME}"
 
 #. Time format (example 14:32 UTC-4)
-#: static/locale.js:134
+#: static/locale.js:138
 #, sh-format
 msgid "${HOURS}:${MINUTES} ${ZONE}"
 msgstr "${HOURS}: ${MINUTES} ${ZONE}"
@@ -40,7 +40,7 @@ msgid "${MONTH} ${DAY}, ${YEAR}"
 msgstr "${MONTH} ${DAY}, ${YEAR}"
 
 #. Number of facilities within range of a location. (example: 5 Facilities within 10 miles)
-#: static/locale.js:84
+#: static/locale.js:88
 #, sh-format
 msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
@@ -117,7 +117,7 @@ msgid "Can pick up patients"
 msgstr "Ka al chache malad"
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:148
+#: templates/edit.html.py:158 templates/edit.html:149
 msgid "Cancel"
 msgstr "Anile"
 
@@ -263,13 +263,18 @@ msgstr "Erè"
 msgid "Error loading facility information."
 msgstr "Erè transpòte etablisman enfòmasyon."
 
+#. Error message for not saving facility information successfully
+#: static/locale.js:71
+msgid "Error saving facility information."
+msgstr ""
+
 #. Button to export data to comma-separated-values format.
-#: export.py:156 templates/map.html:192
+#: export.py:156 templates/map.html:193
 msgid "Export CSV"
 msgstr "Ekspote CSV"
 
 #. A place that provides a particular service
-#: templates/data.html:92 static/locale.js:88 templates/print_data.html:59
+#: templates/data.html:92 static/locale.js:92 templates/print_data.html:59
 msgid "Facility"
 msgstr "Etablisman"
 
@@ -304,7 +309,7 @@ msgid "Filters"
 msgstr "Filtè yo"
 
 #. Tooltip explaining how to enable print mode
-#: static/locale.js:117
+#: static/locale.js:121
 msgid "First select a hospital from the list on the left. Then Print will print a list of hospitals in order of distance from your selection."
 msgstr "Premyeman chwazi yon lopital ki nan bò goch la. Lè sa a enprimant la pral enprime yon lis lopital soti nan zòn ou ye a"
 
@@ -344,17 +349,17 @@ msgid "HealthC ID"
 msgstr "ID HealthC"
 
 #. Proper name of an ID for a healthcare facility, no translation necessary.
-#: templates/hospital_bubble.html:32 static/locale.js:98
+#: templates/hospital_bubble.html:32 static/locale.js:102
 msgid "HealthC ID:"
 msgstr "ID HealthC:"
 
 #. Link to go to a help page for the application
-#: templates/map.html:102
+#: templates/map.html:103
 msgid "Help"
 msgstr "Ed"
 
 #. Link to return to the main page of the application
-#: templates/map.html:91
+#: templates/map.html:92
 msgid "Home"
 msgstr "Paj akèy"
 
@@ -364,7 +369,7 @@ msgid "Hospital"
 msgstr "Lopital"
 
 #. Explains how to correct incorrect information that has been printed.
-#: templates/map.html:205
+#: templates/map.html:207
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr "Si yon enfòmasyon ta manke ou byen ta mal ekri, ale sou sit entènèt la"
 
@@ -384,7 +389,7 @@ msgid "Invalid or missing facility name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
 #. Abbreviated months of the year.
-#: static/locale.js:103
+#: static/locale.js:107
 msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
 msgstr "Janvye, Fevriye, Mas, Avril, Me, Jen, jiyè, Out, septanm, Oktòb, Novanm, Desanm"
 
@@ -394,7 +399,7 @@ msgid "Lab"
 msgstr "Laboratwa"
 
 #. Label for a language selector
-#: templates/map.html:77
+#: templates/map.html:78
 msgid "Language:"
 msgstr "Lang:"
 
@@ -429,7 +434,7 @@ msgid "Loader:"
 msgstr "Program pou telechaje"
 
 #. Indicator that the application is loading.
-#: templates/map.html:144
+#: static/locale.js:146 templates/map.html:145
 msgid "Loading..."
 msgstr "Transpòte..."
 
@@ -449,12 +454,12 @@ msgid "Longitude"
 msgstr "Lonjitd"
 
 #. Error message for invalid longitude.
-#: static/locale.js:75
+#: static/locale.js:79
 msgid "Longitude must be a number."
 msgstr "Lonjitd dwe yon nimewo"
 
 #. Error message for invalid longitude.
-#: static/locale.js:71
+#: static/locale.js:75
 msgid "Longitude must be between -180 and 180."
 msgstr "Lonjitd dwe ant -180 ak 180"
 
@@ -520,7 +525,7 @@ msgid "Obstetrics and gynecology"
 msgstr "Obstetrik ak jinekoloji"
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
-#: static/locale.js:108
+#: static/locale.js:112
 msgid "Open/Total Beds"
 msgstr "Kabann disponib/total"
 
@@ -560,7 +565,7 @@ msgid "PCode"
 msgstr "PCode"
 
 #. Proper name of an ID for a healthcare facility defined by the Pan-American Health Organization, no translation necessary.
-#: templates/hospital_bubble.html:37 static/locale.js:93
+#: static/locale.js:97 templates/hospital_bubble.html:37
 msgid "PCode:"
 msgstr "PCode:"
 
@@ -590,18 +595,18 @@ msgid "Postoperative care"
 msgstr "Swen aprè operasyon"
 
 #. Link to print the current view of the application
-#: templates/map.html:97
+#: templates/map.html:98
 msgid "Print"
 msgstr "Enprime"
 
 #. Tooltip explaining a 'Print' link
-#: static/locale.js:122
+#: static/locale.js:126
 #, sh-format
 msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Enprime yon list lopital nan lòd distans de ${FACILITY_NAME}"
 
 #. Link to privacy policy for the application
-#: templates/map.html:110
+#: templates/map.html:111
 msgid "Privacy"
 msgstr "Prive"
 
@@ -654,9 +659,14 @@ msgid "Resource Finder"
 msgstr "Chèche resous"
 
 #. Button text to save data
-#: templates/edit.html:144
+#: templates/edit.html:145 templates/edit.html.py:154
 msgid "Save"
 msgstr "Anrejistre"
+
+#. Message indicating saving hospital information
+#: static/locale.js:150
+msgid "Saving..."
+msgstr ""
 
 #. Label for a selector to export data to CSV
 #: export.py:145
@@ -664,12 +674,12 @@ msgid "Select facility type to export:"
 msgstr "Idantite kalite etablisman ekspòtasyon"
 
 #. work done by someone that benefits another
-#: ../tools/setup.py:113 static/locale.js:126
+#: static/locale.js:130 ../tools/setup.py:113
 msgid "Services"
 msgstr "Sèvis"
 
 #. Label for a control that filters a list of facilities
-#: static/locale.js:130
+#: static/locale.js:134
 msgid "Show:"
 msgstr "Ekspoze:"
 
@@ -709,7 +719,7 @@ msgid "Temporary mobile facility"
 msgstr "Mobil ki kapab deplase"
 
 #. Link to terms of service for the application
-#: templates/map.html:106
+#: templates/map.html:107
 msgid "Terms of Service"
 msgstr "Kondisyon yo pou itilizasyon"
 
@@ -724,7 +734,7 @@ msgid "Total beds"
 msgstr "Kantite kaban-n"
 
 #. Name of the application.
-#: templates/map.html:161
+#: templates/map.html:162
 msgid "Total facilities"
 msgstr "Kantite disponib"
 
@@ -754,12 +764,12 @@ msgid "Unreinforced masonry"
 msgstr "Pa ranfòse konkrè"
 
 #. Label indicating a record was updated
-#: static/locale.js:138
+#: static/locale.js:142
 msgid "Updated"
 msgstr "Remete an fonksyon"
 
 #. Error message for a value that is not a number
-#: static/locale.js:79
+#: static/locale.js:83
 msgid "Value must be a number."
 msgstr "Valè dwe yon nimewo"
 
@@ -769,7 +779,7 @@ msgid "Vascular surgery"
 msgstr "Chiriji vaskilè"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:197
+#: templates/map.html:198
 msgid "View Master List archive"
 msgstr "Ekspoze achiv nan lis mastè"
 
@@ -794,6 +804,11 @@ msgstr "Wi"
 msgid "You are already %(action)s"
 msgstr "Wol ou a bon a %(role)s"
 
+#. Message indicating hospital information has been saved
+#: static/locale.js:154
+msgid "Your edit has been saved"
+msgstr ""
+
 #. Requested permission action has already been granted
 #: request_access.py:54
 #, python-format
@@ -801,7 +816,7 @@ msgid "Your request for %(action)s is already registered"
 msgstr "Demand ou pou %(role)s la deja enrejistre"
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
-#: templates/map.html:171
+#: templates/map.html:172
 msgid "and with availability."
 msgstr "Avek anpil abilite"
 
@@ -821,12 +836,12 @@ msgid "capacity"
 msgstr "Kapasite"
 
 #. Header for the number of facilities less than 10 miles from a location.
-#: templates/map.html:166
+#: templates/map.html:167
 msgid "no more than 10 miles away"
 msgstr "Pa depase 10 mil"
 
 #. Very short abbreviation for a phone number, indended to disambiguate from a fax number.  (example: p 555-555-5555)
-#: static/locale.js:113
+#: static/locale.js:117
 #, sh-format
 msgid "p ${PHONE}"
 msgstr "t ${PHONE}"

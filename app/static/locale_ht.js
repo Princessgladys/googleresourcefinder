@@ -56,6 +56,9 @@ locale = function() {
   //i18n: Error message for not loading facility information successfully
   messages.ERROR_LOADING_FACILITY_INFORMATION = "Er\u00e8 transp\u00f2te etablisman enf\u00f2masyon.";
 
+  //i18n: Error message for not saving facility information successfully
+  messages.ERROR_SAVING_FACILITY_INFORMATION = "Error saving facility information.";
+
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_INVALID = "Lonjitd dwe ant -180 ak 180";
 
@@ -109,6 +112,15 @@ locale = function() {
 
   //i18n: Label indicating a record was updated
   messages.UPDATED = "Remete an fonksyon";
+
+  //i18n: Message indicating loading hospital information
+  messages.LOADING = "Transp\u00f2te...";
+
+  //i18n: Message indicating saving hospital information
+  messages.SAVING = "Saving...";
+
+  //i18n: Message indicating hospital information has been saved
+  messages.SAVED = "Your edit has been saved";
 
   function message_renderer(name) {
     return function (params) {
