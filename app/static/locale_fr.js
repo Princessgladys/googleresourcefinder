@@ -110,6 +110,15 @@ locale = function() {
   //i18n: Label indicating a record was updated
   messages.UPDATED = "Mise \u00e0 jour\u00a0:";
 
+  //i18n: Message indicating loading hospital information
+  messages.LOADING = "Chargement...";
+
+  //i18n: Message indicating saving hospital information
+  messages.SAVING = "Saving...";
+
+  //i18n: Message indicating hospital information has been saved
+  messages.SAVED = "Your edit has been saved";
+
   function message_renderer(name) {
     return function (params) {
       return render(messages[name], params);

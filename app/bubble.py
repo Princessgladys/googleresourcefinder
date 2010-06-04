@@ -149,7 +149,7 @@ class Bubble(Handler):
         value_info_extractor = VALUE_INFO_EXTRACTORS[facility.type]
         (special, general, details) = value_info_extractor.extract(
             facility, facility_type.attribute_names)
-        edit_link = '/edit?facility_name=%s' % self.params.facility_name
+        edit_link = '/edit?facility_name=%s&embed=yes' % self.params.facility_name
 
         self.render(value_info_extractor.template_name,
                     edit_link=edit_link,

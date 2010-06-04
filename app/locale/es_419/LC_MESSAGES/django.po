@@ -116,7 +116,7 @@ msgid "Can pick up patients"
 msgstr "Puedes buscar pacientes"
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:148
+#: templates/edit.html.py:158 templates/edit.html:149
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -263,7 +263,7 @@ msgid "Error loading facility information."
 msgstr "Error al cargar servicio de información."
 
 #. Button to export data to comma-separated-values format.
-#: export.py:156 templates/map.html:192
+#: export.py:156 templates/map.html:193
 msgid "Export CSV"
 msgstr "Exportar CSV"
 
@@ -348,12 +348,12 @@ msgid "HealthC ID:"
 msgstr "ID HealthC:"
 
 #. Link to go to a help page for the application
-#: templates/map.html:102
+#: templates/map.html:103
 msgid "Help"
 msgstr "Ayuda"
 
 #. Link to return to the main page of the application
-#: templates/map.html:91
+#: templates/map.html:92
 msgid "Home"
 msgstr "Página principal"
 
@@ -363,7 +363,7 @@ msgid "Hospital"
 msgstr "Hospital"
 
 #. Explains how to correct incorrect information that has been printed.
-#: templates/map.html:205
+#: templates/map.html:207
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr "Si la información es incorrecta o no está especificada, modificala en el sitio web:"
 
@@ -393,7 +393,7 @@ msgid "Lab"
 msgstr "Laboratorio"
 
 #. Label for a language selector
-#: templates/map.html:77
+#: templates/map.html:78
 msgid "Language:"
 msgstr "Idioma:"
 
@@ -428,7 +428,7 @@ msgid "Loader:"
 msgstr "Cargador:"
 
 #. Indicator that the application is loading.
-#: templates/map.html:144
+#: static/locale.js:142 templates/map.html:145
 msgid "Loading..."
 msgstr "Cargando..."
 
@@ -594,7 +594,7 @@ msgid "Postoperative care"
 msgstr "Cuidados posoperatorios"
 
 #. Link to print the current view of the application
-#: templates/map.html:97
+#: templates/map.html:98
 msgid "Print"
 msgstr "Imprimir"
 
@@ -605,7 +605,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Imprime una lista de hospitales por orden de distancia desde ${FACILITY_NAME}"
 
 #. Link to privacy policy for the application
-#: templates/map.html:110
+#: templates/map.html:111
 msgid "Privacy"
 msgstr "Privado"
 
@@ -658,9 +658,14 @@ msgid "Resource Finder"
 msgstr "Localizador de recursos"
 
 #. Button text to save data
-#: templates/edit.html:144
+#: templates/edit.html:145 templates/edit.html.py:154
 msgid "Save"
 msgstr "Guardar"
+
+#. Message indicating saving hospital information
+#: static/locale.js:146
+msgid "Saving..."
+msgstr ""
 
 #. Label for a selector to export data to CSV
 #: export.py:145
@@ -713,7 +718,7 @@ msgid "Temporary mobile facility"
 msgstr "Institución transitoria móvil"
 
 #. Link to terms of service for the application
-#: templates/map.html:106
+#: templates/map.html:107
 msgid "Terms of Service"
 msgstr "Condiciones del servicio"
 
@@ -728,7 +733,7 @@ msgid "Total beds"
 msgstr "Cantidad total de camas"
 
 #. Name of the application.
-#: templates/map.html:161
+#: templates/map.html:162
 msgid "Total facilities"
 msgstr "Cantidad total de instituciones"
 
@@ -773,7 +778,7 @@ msgid "Vascular surgery"
 msgstr "Cirugía vascular"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:197
+#: templates/map.html:198
 msgid "View Master List archive"
 msgstr "Ver archivo de la lista maestra"
 
@@ -798,6 +803,11 @@ msgstr "Sí"
 msgid "You are already %(action)s"
 msgstr "Ya eres %(role)s "
 
+#. Message indicating hospital information has been saved
+#: static/locale.js:150
+msgid "Your edit has been saved"
+msgstr ""
+
 #. Requested permission action has already been granted
 #: request_access.py:54
 #, python-format
@@ -805,7 +815,7 @@ msgid "Your request for %(action)s is already registered"
 msgstr "Tu solicitud de %(role)s ya se registró"
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
-#: templates/map.html:171
+#: templates/map.html:172
 msgid "and with availability."
 msgstr "y con disponibilidad."
 
@@ -825,7 +835,7 @@ msgid "capacity"
 msgstr "capacidad"
 
 #. Header for the number of facilities less than 10 miles from a location.
-#: templates/map.html:166
+#: templates/map.html:167
 msgid "no more than 10 miles away"
 msgstr "a no más de 10 millas"
 
