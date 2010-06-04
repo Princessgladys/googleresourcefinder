@@ -67,7 +67,7 @@ class BubbleTest(unittest.TestCase):
         assert bubble.format(None) == u'\u2013'.encode('utf-8')
         assert bubble.format('') == ''
         assert bubble.format(13) == 13
-        assert bubble.format(0) == u'\u2013'.encode('utf-8')
+        assert bubble.format(0) == 0
 
     def test_value_info_extractor(self):
         f = model.Facility(key_name='example.org/123', type='hospital')
