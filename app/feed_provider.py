@@ -14,13 +14,33 @@
 
 """Handler for feed retrieval requests."""
 
-from edxl_have import URI_PREFIXES
-from feeds.feedutils import handle_entry_get, handle_feed_get
-from utils import ErrorMessage, Handler, run, _
+import logging
+import pickle
+from edxl_have import URI_PREFIXES, serialize
+from feeds.feedutils import handle_entry_get, handle_feed_get, notify_hub
+from feeds.records import create_record
+from utils import ErrorMessage, Handler, run, taskqueue, _
 
 
 def get_feed_id(request, feed_name):
     return request.host_url + '/feeds/' + feed_name
+
+
+def schedule_add_record(request, user, facility,
+                        changed_attributes_dict, observed_time):
+    """Enqueue a task to create a record."""
+    edxl_change = serialize(changed_attributes_dict)
+    record = create_record(
+        get_feed_id(request, 'delta'),
+        user.email(),
+        '', # title
+        facility.key().name(), # subject_id
+        observed_time,
+        edxl_change)
+
+    taskqueue.add(url='/tasks/add_feed_record',
+        payload=pickle.dumps(record),
+        transactional=True)
 
 
 class Feed(Handler):
@@ -32,14 +52,20 @@ class Feed(Handler):
 class Entry(Handler):
     def get(self, feed_name, entry_id):
         feed_id = get_feed_id(self.request, feed_name)
-        try:
-            handle_entry_get(
-                self.request, self.response, feed_id, entry_id, URI_PREFIXES)
-        except EntryNotFoundError:
-            #i18n: Error message for missing entry
-            raise ErrorMessage(404, _('No such entry'))
+        handle_entry_get(
+            self.request, self.response, feed_id, entry_id, URI_PREFIXES)
+
+
+class AddRecord(Handler):
+    def post(self):
+        # todo: decide if idempotence here is required
+        record = pickle.loads(self.request.body)
+        record.put()
+        notify_hub(record.feed_id)
 
 
 if __name__ == '__main__':
     run([('/feeds/([^/]+)', Feed),
-         ('/feeds/([^/]+)/([^/]+)', Entry)], debug=True)
+         ('/feeds/([^/]+)/([^/]+)', Entry),
+         ('/tasks/add_feed_record', AddRecord),
+         ], debug=True)
