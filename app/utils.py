@@ -167,7 +167,8 @@ class Handler(webapp.RequestHandler):
             self.params.lang, self.params.lang)
         self.response.headers.add_header(
             'Set-Cookie', 'django_language=%s' % self.params.lang)
-        django.utils.translation.activate(self.params.lang.replace('-', '_'))
+        django.utils.translation.activate(django.utils.translation.to_locale(
+            self.params.lang))
         self.response.headers.add_header('Content-Language', self.params.lang)
 
     def handle_exception(self, exception, debug_mode):

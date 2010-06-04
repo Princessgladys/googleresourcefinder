@@ -253,8 +253,12 @@ class Alert(db.Model):
     facility_keys = db.StringListProperty(required=True) # key of facility
     last_sent = db.DateTimeProperty(required=True, auto_now_add=True)
     # time of previous update
-    frequencies = db.StringListProperty(required=True) # frequency at which
-                                                       # to send updates
+    frequencies = db.StringListProperty(required=True)
+    # frequency at which to send updates. options:
+    #   '1/min': send an alert whenever something changes
+    #   '1/day': send one alert e-mail per day
+    #   '1/week': send one alert e-mail per week
+    #   '1/month': send one alert e-mail per month
 
 def value_or_none(value):
     """Converts any false value other than 0 or 0.0 to None."""

@@ -17,6 +17,9 @@ version: 1
 runtime: python
 api_version: 1
 
+inbound_services:
+- mail
+
 handlers:
 - url: /static
   static_dir: static
@@ -88,6 +91,3 @@ handlers:
 - url: /send_mail_updates
   script: send_mail_updates.py
   login: admin
-
-inbound_services:
-- mail
