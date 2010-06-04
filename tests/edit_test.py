@@ -50,6 +50,10 @@ class EditTest(SeleniumTestCase):
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
         f.put()
+        self.mf = MinimalFacility(f, type='hospital')
+        self.mf.set_attribute('title', 'title_foo')
+        self.mf.set_attribute('location', db.GeoPt(51.5, 0))
+        self.mf.put()
         self.s = scrape.Session()
 
     def tearDown(self):
