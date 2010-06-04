@@ -1158,14 +1158,13 @@ function select_facility(facility_i, ignore_current) {
       // Sets up the tabs and should be called after the DOM is created.
       jQuery('#bubble-tabs').tabs();
 
-      // Title not actually editable - if this changes, uncomment the title lines
-      //var bubbleTitle = $('bubble-title').innerHTML;
-      var bubbleAvailability = $('bubble-availability').innerHTML;
-      var bubbleCapacity = $('bubble-capacity').innerHTML;
+      var bubbleAvailability = $('bubble-availability');
+      var bubbleCapacity = $('bubble-capacity');
 
-      //selected_facility.values[attributes_by_name.title] = bubbleTitle;
-      selected_facility.values[attributes_by_name.available_beds] = bubbleAvailability;
-      selected_facility.values[attributes_by_name.total_beds] = bubbleCapacity;
+      if (bubbleAvailability)
+	selected_facility.values[attributes_by_name.available_beds] = bubbleAvailability.innerHTML;
+      if (bubbleCapacity)
+	selected_facility.values[attributes_by_name.total_beds] = bubbleCapacity.innerHTML;
       update_facility_row(facility_i, false);
 
       show_loading(false);
@@ -1405,6 +1404,11 @@ function edit_save() {
       url: '/edit',
       type: 'POST',
       data: $j('#edit').serialize(),
+      error: function(request, textStatus, errorThrown){
+	log(textStatus + ', ' + errorThrown);
+	alert(locale.ERROR_SAVING_FACILITY_INFORMATION());
+	show_loading(false);
+      },
       success: function(data) {
 	$('data').style.display = '';
 	$('edit-data').style.display = 'none';

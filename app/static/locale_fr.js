@@ -56,6 +56,9 @@ locale = function() {
   //i18n: Error message for not loading facility information successfully
   messages.ERROR_LOADING_FACILITY_INFORMATION = "informations sur l'erreur installation de chargement";
 
+  //i18n: Error message for not saving facility information successfully
+  messages.ERROR_SAVING_FACILITY_INFORMATION = "Error saving facility information.";
+
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_INVALID = "Longitude doit \u00eatre comprise entre -180 et 180";
 

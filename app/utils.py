@@ -144,7 +144,7 @@ class Handler(webapp.RequestHandler):
         self.params.languages = config.LANGUAGES
 
         # Google Analytics account id
-        self.params.analytics_id = "oops" #get_key('analytics_id')
+        self.params.analytics_id = get_key('analytics_id')
 
     def select_locale(self):
         """Detect and activate the appropriate locale.  The 'lang' query
