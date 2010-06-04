@@ -5,6 +5,9 @@ to do it.  You'll be running your own pubsubhubbub instance locally,
 since pubsubhubbub needs to make web requests to your app (which is
 running on localhost:8080).
 
+For steps 1-3 see also:
+http://code.google.com/p/pubsubhubbub/wiki/DeveloperGettingStartedGuide
+
 1. Dowload the pubsubhubbub source code from:
    http://code.google.com/p/pubsubhubbub/source/checkout
 
