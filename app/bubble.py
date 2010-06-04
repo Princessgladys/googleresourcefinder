@@ -134,8 +134,25 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
             self, facility, filter(lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
                                    attribute_names))
 
+class USHospitalValueInfoExtractor(ValueInfoExtractor):
+    template_name = 'templates/us_hospital_bubble.html'
+    
+    def __init__(self):
+        ValueInfoExtractor.__init__(
+            self,
+            ['title', 'location', 'Emergency_Services', 'Hospital_Type',
+             'Provider_Number', 'Address'],
+            []
+        )
+        
+    def extract(self, facility, attribute_names):
+        return ValueInfoExtractor.extract(
+            self, facility, filter(lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
+                                   attribute_names))
+
 VALUE_INFO_EXTRACTORS = {
     'hospital': HospitalValueInfoExtractor(),
+    'us_hospital': USHospitalValueInfoExtractor()
 }
 
 class Bubble(Handler):
@@ -145,7 +162,6 @@ class Bubble(Handler):
             #i18n: Error message for request missing facility name.
             raise ErrorMessage(404, _('Invalid or missing facility name.'))
         facility_type = model.FacilityType.get_by_key_name(facility.type)
-
         value_info_extractor = VALUE_INFO_EXTRACTORS[facility.type]
         (special, general, details) = value_info_extractor.extract(
             facility, facility_type.attribute_names)

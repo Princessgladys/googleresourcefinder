@@ -84,7 +84,77 @@ def setup_facility_types():
                                  'contact_name', 'phone', 'address',
                                  'location'])
     db.put(hospital)
+    
+    attributes = [
+        attr('str', 'title', edit_action='advanced_edit'),
+        attr('str', 'Provider_Number', edit_action='advanced_edit'),
+        attr('str', 'Hospital_Type'),
+        attr('bool', 'Emergency_Services'),
+        attr('str', 'Contact_Name'),
+        attr('str', 'Phone_Number'),
+        attr('str', 'Email'),
+        attr('str', 'Address'),
+        attr('str', 'City'),
+        attr('str', 'State'),
+        attr('int', 'ZIP_Code'),
+        attr('geopt', 'location'),
+        attr('float', 'Heart_Attack_30-Day_Mortality'),
+        attr('float', 'Heart_Failure_30-Day_Mortality'),
+        attr('float', 'Pneumonia_30-Day_Mortality'),
+        attr('float', 'Heart_Attack_30-Day_Readmission'),
+        attr('float', 'Heart_Failure_30-Day_Readmission'),
+        attr('float', 'Pneumonia_30-Day_Readmission'),
+        attr('float', 'Aspirin_on_Heart_Attack_Arrival'),
+        attr('float', 'Aspirin_on_Heart Attack_Discharge'),
+        attr('float', 'ACE_or_ARB_for_Heart_Attack_and_LVSD'),
+        attr('float', 'Beta_Blocker_on_Heart_Attack_Discharge'),
+        attr('float', 'Smoking_Cessation_Heart_Attack'),
+        attr('float', 'Fibrinolytic_Within_30_Minutes_Heart_Attack_Arrival'),
+        attr('float', 'PCI_Within_90_Minutes_Heart_Attack_Arrival'),
+        attr('float', 'LV_Systolic_Eval_for_Heart_Failure'),
+        attr('float', 'ACE_or_ARB_for_Heart_Failure_and_LVSD'),
+        attr('float', 'Discharge_Instructions_Heart_Failure'),
+        attr('float', 'Smoking_Cessation_Heart_Failure'),
+        attr('float', 'Pneumococcal_Vaccine_for_Pneumonia'),
+        attr('float', 'Antibiotics_within_6_Hours_for_Pneumonia'),
+        attr('float', 'Blood_Culture_Before_Antibiotics_for_Pneumonia'),
+        # TODO(?) figure out why there are duplicate columns w/ different data
+        attr('float', 'Smoking_Cessation_Heart_Failure_2'),
+        attr('float', 'Most_Appropriate_Antibiotic_for_Pneumonia'),
+        attr('float', 'Flu_Vaccine_for_Pneumonia'),
+        attr('float', 'Antibiotics_Within_1_Hour_Before_Surgery'),
+        attr('float', 'Antibiotics_Stopped_Within_24_hours_After_Surgery'),
+        attr('float', 'Appropriate_Antibiotics_for_Surgery'),
+        attr('float',
+            'Blood_Clot_Prevention_Within_24_hours_Before_or_After_Surgery'),
+        attr('float', 'Blood_Clot_Prevention_After_Certain_Surgeries'),
+        attr('float', 'Sugar_Control_after_Heart_Surgery'),
+        attr('float', 'Safer_Hair_Removal_for_Surgery'),
+        attr('float', 'Beta_Blockers_Maintained_for_Surgery'),
+        attr('float', 'Pain_Relief_Children_Asthma_Admission'),
+        attr('float', 'Corticosteroid_Children_Asthma_Admission'),
+        attr('float', 'Caregiver_Plan_Children_Asthma_Admission'),
+        attr('float', 'Nurses_"Always"_Communicated_Well'),
+        attr('float', 'Doctors_"Always"_Communicated Well'),
+        attr('float', 'Patients_"Always"_Received Help When Wanted'),
+        attr('float', 'Pain_"Always"_Well_Controlled'),
+        attr('float', 'Medicines_"Always"_Explained Before Administered'),
+        attr('float', 'Room_and_Bathroom_"Always"_Clean'),
+        attr('float', 'Room_"Always"_Quiet_at_Night'),
+        attr('float', 'Home_Recovery_Instructions_Given'),
+        attr('float', 'Patient_Rating_of_9-10'),
+        attr('float', 'Patient_Recommended_Hospital')
+    ]
+    
+    db.put(attributes)
 
+    us_hospital = FacilityType(
+        key_name='us_hospital',
+        attribute_names=[a.key().name() for a in attributes],
+        minimal_attribute_names=['title', 'Provider_Number', 'Hospital_Type',
+                                 'Emergency_Services', 'Contact_Name',
+                                 'Phone_Number', 'Address', 'location'])
+    db.put(us_hospital)
 
 def setup_messages():
     """Sets up messages, pulling translations from the django .po files."""
