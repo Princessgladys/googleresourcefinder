@@ -19,12 +19,15 @@ import re
 import urlparse
 import utils
 import wsgiref
+
 from access import check_action_permitted
+from feed_provider import schedule_add_record
+from feeds.crypto import sign, verify
 from main import USE_WHITELISTS
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
-from utils import db, get_message, html_escape, simplejson, to_unicode, users, _
-from feeds.crypto import sign, verify
+from utils import db, get_message, html_escape, simplejson
+from utils import to_unicode, users, _
 
 # TODO(shakusa) Add per-attribute comment fields
 
@@ -407,6 +410,8 @@ class Edit(utils.Handler):
             change_metadata = ChangeMetadata(
                 utcnow, user, account.nickname, account.affiliation)
             has_changes = False
+            changed_attributes_dict = {}
+
             for name in facility_type.attribute_names:
                 attribute = attributes[name]
                 # To change an attribute, it has to have been marked editable
@@ -427,7 +432,15 @@ class Edit(utils.Handler):
                     apply_change(facility, minimal_facility, report,
                                  facility_type, request, attribute,
                                  change_metadata)
+                    changed_attributes_dict[name] = attribute
+
             if has_changes:
+                # Schedule a task to add a feed record.
+                # We can't really do this inside this transaction, since
+                # feed records are not part of the entity group.
+                # Transactional tasks is the closest we can get.
+                schedule_add_record(self.request, user,
+                    facility, changed_attributes_dict, utcnow)
                 db.put([report, facility, minimal_facility])
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
