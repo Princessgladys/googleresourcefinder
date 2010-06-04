@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cache
 import datetime
 import sets
 import sys
-from cache import *
 from feeds.geo import distance
 from utils import *
 from model import Attribute, Facility, FacilityType, Message, MinimalFacility
@@ -98,7 +98,7 @@ def clean_json(json):
 def render_json(center=None, radius=None):
     """Dump the data as a JSON string."""
 
-    facility_types = FacilityTypeCache.values()
+    facility_types = cache.FACILITY_TYPES.values()
 
     # Get the set of attributes to return
     attr_names = sets.Set()
@@ -107,8 +107,8 @@ def render_json(center=None, radius=None):
     attr_names = attr_names.difference(HIDDEN_ATTRIBUTE_NAMES)
 
     # Get the subset of attributes to render.
-    attributes = [a for a in AttributeCache.values()
-                  if a.key().name() in attr_names]
+    attributes = [cache.ATTRIBUTES[a] for a in cache.ATTRIBUTES
+                  if a in attr_names]
     attribute_jobjects, attribute_is = make_jobjects(
         attributes, attribute_transformer)
 
@@ -118,7 +118,8 @@ def render_json(center=None, radius=None):
 
     # Make JSON objects for the facilities
     facility_jobjects, facility_is = make_jobjects(
-        MinimalFacilityCache.values(),
+        sorted(cache.MINIMAL_FACILITIES.values(),
+               key=lambda f: f.get_value('title')),
         minimal_facility_transformer, attributes, facility_types,
         facility_type_is, center, radius)
     total_facility_count = len(facility_jobjects) - 1
@@ -132,7 +133,7 @@ def render_json(center=None, radius=None):
     django_locale = django.utils.translation.to_locale(
         django.utils.translation.get_language())
     message_jobjects = {}
-    for message in MessageCache.values():
+    for message in cache.MESSAGES.values():
         namespace = message_jobjects.setdefault(message.namespace, {})
         namespace[message.name] = getattr(message, django_locale)
 
