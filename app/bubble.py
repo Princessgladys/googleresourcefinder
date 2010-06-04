@@ -142,7 +142,7 @@ class USHospitalValueInfoExtractor(ValueInfoExtractor):
             self,
             ['title', 'location', 'Emergency_Services', 'Hospital_Type',
              'Provider_Number', 'Address'],
-            []
+            [] #TODO(pfritzsche) add localization
         )
         
     def extract(self, facility, attribute_names):
