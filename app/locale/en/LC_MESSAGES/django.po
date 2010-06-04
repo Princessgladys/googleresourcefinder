@@ -10,6 +10,7 @@ msgstr ""
 "PO-Revision-Date: 2010-05-27 00:08-0800\n"
 "Last-Translator: Ka-Ping Yee <kpy@google.com>\n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -45,13 +46,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Error message for lacking edit permissions
-#: edit.py:421
+#: edit.py:426
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr ""
 
 #. Form option to indicate that a value is not specified
-#: edit.py:168 edit.py:194 edit.py:209
+#: edit.py:212 edit.py:197 edit.py:171
 msgid "(unspecified)"
 msgstr ""
 
@@ -233,7 +234,7 @@ msgid "District"
 msgstr ""
 
 #. E-mail address
-#: ../tools/setup.py:119 edit.py:115
+#: edit.py:118 ../tools/setup.py:119
 msgid "E-mail"
 msgstr ""
 
@@ -373,12 +374,12 @@ msgid "Infectious disease"
 msgstr ""
 
 #. Error message for invalid date entry
-#: edit.py:137
+#: edit.py:140
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr ""
 
 #. Error message for request missing facility name.
-#: edit.py:324 bubble.py:146
+#: edit.py:327 bubble.py:146
 msgid "Invalid or missing facility name."
 msgstr ""
 
@@ -403,7 +404,7 @@ msgid "Last updated:"
 msgstr ""
 
 #. Label for text input
-#: edit.py:230
+#: edit.py:233
 msgid "Latitude"
 msgstr ""
 
@@ -443,7 +444,7 @@ msgid "Location:"
 msgstr ""
 
 #. Label for text input
-#: edit.py:233
+#: edit.py:236
 msgid "Longitude"
 msgstr ""
 
@@ -478,7 +479,7 @@ msgid "NGO"
 msgstr ""
 
 #. a person's name
-#: edit.py:111
+#: edit.py:114
 msgid "Name"
 msgstr ""
 
@@ -493,7 +494,7 @@ msgid "Neurosurgery"
 msgstr ""
 
 #. Form option for a false Boolean value
-#: edit.py:172 bubble.py:47
+#: edit.py:175 bubble.py:47
 msgid "No"
 msgstr ""
 
@@ -506,11 +507,6 @@ msgstr ""
 #: grant_access.py:74
 #, python-format
 msgid "No pending request for %(account_action)s by %(user)s"
-msgstr ""
-
-#. Error message for missing entry
-#: feed_provider.py:40
-msgid "No such entry"
 msgstr ""
 
 #. Facility operational status: cannot perform surgeries
@@ -579,7 +575,7 @@ msgid "Pediatrics"
 msgstr ""
 
 #. telephone number
-#: edit.py:113 ../tools/setup.py:117
+#: edit.py:116 ../tools/setup.py:117
 msgid "Phone"
 msgstr ""
 
@@ -625,7 +621,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:437
+#: edit.py:450
 msgid "Record updated."
 msgstr ""
 
@@ -738,7 +734,7 @@ msgid "URL:"
 msgstr ""
 
 #. Error message
-#: utils.py:111
+#: utils.py:112
 msgid "Unauthorized user."
 msgstr ""
 
@@ -788,7 +784,7 @@ msgid "X-ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: edit.py:170 bubble.py:47
+#: edit.py:173 bubble.py:47
 msgid "Yes"
 msgstr ""
 
