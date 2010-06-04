@@ -699,6 +699,14 @@ function update_facility_list() {
           var value = summary_columns[c].get_value(facility.values);
           cells.push($$('td', {'class': 'value column_' + c}, value));
         }
+        var a = $$('a', {}, 'S');
+        jQuery(a).click(function(e) {
+          e.stopPropagation();
+          jQuery.ajax({
+            url: '/subscribe?q=' + e.pageX
+          });
+        });
+        cells.push(a);
       } else {
         for (var c = 1; c < summary_columns.length; c++) {
           cells.push($$('td'));
@@ -1028,7 +1036,7 @@ function division_and_status_selector(division_i, status_i) {
 }
 
 function facility_selector(facility_i) {
-  return function () {
+  return function (e) {
     select_facility(facility_i);
   };
 }
