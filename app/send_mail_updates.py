@@ -35,6 +35,8 @@ from google.appengine.ext import webapp
 
 from utils import _
 
+import django.utils.translation
+
 import datetime
 import email
 import logging
@@ -86,13 +88,13 @@ def get_users_to_email():
     
     for alert in model.Alert.all(): # compile list of facility names per user
         for i in range(len(alert.facility_keys)):
-            fac = model.db.Model.get(facility_keys[i])
+            fac = model.db.Model.get(alert.facility_keys[i])
             freq = alert.frequencies[i]
             values = fetch_updates(alert, fac, freq)
             if values:
-                users[alert.user_email]['locale'] = alert.locale
                 if alert.user_email not in users:
                     users[alert.user_email] = {}
+                users[alert.user_email]['locale'] = alert.locale
                 users[alert.user_email][fac.key().name()] = values
 
     return users
@@ -111,7 +113,7 @@ def send_update(email, values):
             
         # TODO(pfritzsche): work with Jeromy to improve e-mail UI
         body += key.upper() + '\n'
-        for attr, value in facilities[key].iteritems():
+        for attr, value in values[key].iteritems():
             body += attr + ": " + str(value) + '\n'
         body += '\n'
         
@@ -119,7 +121,7 @@ def send_update(email, values):
     message.sender = 'updates@resource-finder.appspotmail.com'
     message.to = email
     # TODO(pfritzsche): make sure unicode chars render properly in the e-mail
-    message.subject = utils.to_unicode(_('Resource Finder Facility Updates'))
+    message.subject = utils.to_unicode(_('Resource Finder Facility Updatés'))
     message.body = body
 
     message.send()    
@@ -185,8 +187,8 @@ def send_speed_alert_email(time):
                   'shakusa@google.com',
                   'kpy@google.com']
     message.subject = '[ALERT] Resource Finder Cron Job is Running Slowly'
-    message.body = 'A recent e-mail subscription cron job ran with total ' +
-        'time: %s' % str(time)
+    message.body = ('A recent e-mail subscription cron job ran with total ' +
+        'time: %s' % str(time))
 
     message.send() 
 
