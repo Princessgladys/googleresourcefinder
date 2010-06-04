@@ -31,7 +31,7 @@ def format(value, localize=False):
             value = get_message('attribute_value', value)
     if isinstance(value, unicode):
         return value.encode('utf-8')
-    if isinstance(value, str):
+    if isinstance(value, str) and value != '':
         return value.replace('\n', ' ')
     if isinstance(value, list):
         return ', '.join(value).encode('utf-8')
@@ -45,7 +45,7 @@ def format(value, localize=False):
         return (latitude + ', ' + longitude).encode('utf-8')
     if isinstance (value, bool):
         return value and format(_('Yes')) or format(_('No'))
-    if value is not None or value == 0:
+    if value is not None and value != '' or value == 0:
         return value
     return u'\u2013'.encode('utf-8')
 
@@ -134,25 +134,8 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
             self, facility, filter(lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
                                    attribute_names))
 
-class USHospitalValueInfoExtractor(ValueInfoExtractor):
-    template_name = 'templates/us_hospital_bubble.html'
-    
-    def __init__(self):
-        ValueInfoExtractor.__init__(
-            self,
-            ['title', 'location', 'Emergency_Services', 'Hospital_Type',
-             'Provider_Number', 'Address'],
-            []
-        )
-        
-    def extract(self, facility, attribute_names):
-        return ValueInfoExtractor.extract(
-            self, facility, filter(lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
-                                   attribute_names))
-
 VALUE_INFO_EXTRACTORS = {
     'hospital': HospitalValueInfoExtractor(),
-    'us_hospital': USHospitalValueInfoExtractor()
 }
 
 class Bubble(Handler):
@@ -162,6 +145,7 @@ class Bubble(Handler):
             #i18n: Error message for request missing facility name.
             raise ErrorMessage(404, _('Invalid or missing facility name.'))
         facility_type = model.FacilityType.get_by_key_name(facility.type)
+
         value_info_extractor = VALUE_INFO_EXTRACTORS[facility.type]
         (special, general, details) = value_info_extractor.extract(
             facility, facility_type.attribute_names)
