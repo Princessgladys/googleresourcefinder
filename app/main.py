@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utils import Handler, Redirect, get_key, run, users, _
+from utils import Handler, Redirect, get_secret, run, users, _
 import access
 import cache
 import rendering
@@ -21,7 +21,7 @@ import rendering
 # configured to require login to view and 'editor' role to edit. Whitelists
 # are on by default. To allow anyone to view and logged-in users to edit, run
 # Secret(key_name='use_whitelists', value='FALSE').put() in a console
-USE_WHITELISTS = get_key('use_whitelists') != 'FALSE'
+USE_WHITELISTS = get_secret('use_whitelists') != 'FALSE'
 
 def get_export_link():
     """If only one facility type, return the direct download link,

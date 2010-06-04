@@ -45,13 +45,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
 
 #. Error message for lacking edit permissions
-#: edit.py:420
+#: edit.py:425
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s pa gen pèmisyon edite %(a)s"
 
 #. Form option to indicate that a value is not specified
-#: edit.py:169 edit.py:210 edit.py:195
+#: edit.py:198 edit.py:213 edit.py:172
 msgid "(unspecified)"
 msgstr "(pa espesifye)"
 
@@ -233,7 +233,7 @@ msgid "District"
 msgstr "Distri"
 
 #. E-mail address
-#: ../tools/setup.py:119 edit.py:116
+#: edit.py:119 ../tools/setup.py:119
 msgid "E-mail"
 msgstr "Adrès elektronik"
 
@@ -373,12 +373,12 @@ msgid "Infectious disease"
 msgstr "Maladi enfektyez"
 
 #. Error message for invalid date entry
-#: edit.py:138
+#: edit.py:141
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Dat envalid : %(dat)r (bezwen ane-mwa-jou fòma)"
 
 #. Error message for request missing facility name.
-#: edit.py:325 bubble.py:147
+#: bubble.py:147 edit.py:328
 msgid "Invalid or missing facility name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -403,7 +403,7 @@ msgid "Last updated:"
 msgstr "Misajou"
 
 #. Label for text input
-#: edit.py:231
+#: edit.py:234
 msgid "Latitude"
 msgstr "Latitd"
 
@@ -443,7 +443,7 @@ msgid "Location:"
 msgstr "Kote"
 
 #. Label for text input
-#: edit.py:234
+#: edit.py:237
 msgid "Longitude"
 msgstr "Lonjitd"
 
@@ -478,7 +478,7 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: edit.py:112
+#: edit.py:115
 msgid "Name"
 msgstr "Non"
 
@@ -493,7 +493,7 @@ msgid "Neurosurgery"
 msgstr "Nerochiriji"
 
 #. Form option for a false Boolean value
-#: bubble.py:48 edit.py:173
+#: edit.py:176 bubble.py:48
 msgid "No"
 msgstr "Pa dakò"
 
@@ -507,11 +507,6 @@ msgstr "Pa gen enfòmasyon ki koresponn"
 #, python-format
 msgid "No pending request for %(account_action)s by %(user)s"
 msgstr "Pa gen demand an atant pou %(authorization_role)s de %(user)s"
-
-#. Error message for missing entry
-#: feed_provider.py:40
-msgid "No such entry"
-msgstr "Pa gen oken antre"
 
 #. Facility operational status: cannot perform surgeries
 #: ../tools/setup.py:221
@@ -579,7 +574,7 @@ msgid "Pediatrics"
 msgstr "Pedyatrik"
 
 #. telephone number
-#: edit.py:114 ../tools/setup.py:117
+#: ../tools/setup.py:117 edit.py:117
 msgid "Phone"
 msgstr "Telefòn"
 
@@ -625,7 +620,7 @@ msgid "Reachable by road"
 msgstr "Aksesib pa wout"
 
 #. Record updated successfully.
-#: edit.py:437
+#: edit.py:450
 msgid "Record updated."
 msgstr "Done a jou"
 
@@ -738,7 +733,7 @@ msgid "URL:"
 msgstr "Sit entenet"
 
 #. Error message
-#: utils.py:111
+#: utils.py:112
 msgid "Unauthorized user."
 msgstr "San otorizasyon User"
 
@@ -788,7 +783,7 @@ msgid "X-ray"
 msgstr "Reyon X"
 
 #. Form option for a true Boolean value
-#: bubble.py:48 edit.py:171
+#: bubble.py:48 edit.py:174
 msgid "Yes"
 msgstr "Wi"
 

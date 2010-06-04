@@ -2,6 +2,7 @@ from google.appengine.api import users
 from model import *
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
+import scrape
 
 # "name" attributes of the checkboxes for available services in the edit form.
 SERVICES = [
@@ -53,6 +54,7 @@ class EditTest(SeleniumTestCase):
         mf.set_attribute('title', 'title_foo')
         mf.set_attribute('location', db.GeoPt(51.5, 0))
         mf.put()
+        self.s = scrape.Session()
 
     def tearDown(self):
         Facility.get_by_key_name('example.org/123').delete()
@@ -73,6 +75,12 @@ class EditTest(SeleniumTestCase):
     def test_edit_page(self):
         """Confirms that all the fields in the edit form save the entered
         values, and these values appear pre-filled when the form is loaded."""
+
+        # Check that feed is empty
+        feed = self.s.go('http://localhost:8081/feeds/delta')
+        assert feed.first('atom:feed')
+        assert feed.first('atom:feed').all('atom:entry') == []
+
         # Go to the edit page
         self.login('/edit?facility_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
@@ -169,6 +177,11 @@ class EditTest(SeleniumTestCase):
         text_fields['available_beds'] = '0'
         text_fields['total_beds'] = '0'
         self.verify_fields(text_fields, checkbox_fields, select_fields)
+
+        # Check that feed is not empty now
+        feed = self.s.go('http://localhost:8081/feeds/delta')
+        assert feed.first('atom:feed')
+        assert feed.first('atom:feed').first('atom:entry')
 
 
     def fill_fields(self, text_fields, checkbox_fields, select_fields):
