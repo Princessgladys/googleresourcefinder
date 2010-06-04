@@ -69,6 +69,8 @@ class BubbleTest(unittest.TestCase):
         assert bubble.format({'hey!' : 1}) == {'hey!' : 1}
         assert bubble.format(None) == u'\u2013'.encode('utf-8')
         assert bubble.format('') == u'\u2013'.encode('utf-8')
+        assert bubble.format([]) == u'\u2013'.encode('utf-8')
+        assert bubble.format({}) == u'\u2013'.encode('utf-8')
         assert bubble.format(13) == 13
         assert bubble.format(0) == 0
         assert bubble.format('fake_to_localize', True) == 'fake_localized'
