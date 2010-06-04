@@ -37,6 +37,9 @@ US_HOSPITAL_AFFILIATION = 'United States of America'
 
 json_decoder = decoder.JSONDecoder()
 
+delay = 0
+num_sans_delay = 0
+
 def convert_paho_record(record):
     """Converts a dictionary of values from one row of a PAHO CSV file
     into a dictionary of ValueInfo objects for our datastore."""
@@ -205,10 +208,7 @@ def convert_us_hospital_record(record):
     db_form_address = re.sub('\s+', ' ', record['Address'].strip())
     url = geocode_base_url + address + '&sensor=false'
     
-    delay = memcache.get('delay')
-    num_sans_delay = memcache.get('num_sans_delay')
     geocode_pending = True
-
     while geocode_pending:
         result = urllib.urlopen(url).read()
         dict_result = json_decoder.decode(result)
@@ -224,10 +224,9 @@ def convert_us_hospital_record(record):
             geocode_pending = False
         logging.info(dict_result[u'status'] + ' ' + record['Hospital Name'])
 
-    if num_sans_delay % 5 == 0 and delay > 0:
+    if num_sans_delay == 5 and delay > 0:
         delay -= 1
-    memcache.set('delay', delay)
-    memcache.set('num_sans_delay', num_sans_delay)
+        num_sans_delay = 0
                
     loc = dict_result[u'results'][0][u'geometry'][u'location']
     latitude = loc[u'lat']
@@ -370,9 +369,8 @@ def load_csv(
 
     facility_type = FacilityType.get_by_key_name(facility_type_str)
     count = 0
-    
-    memcache.set('delay', 0)
-    memcache.set('num_sans_delay', 0)
+    delay = 0
+    num_sans_delay = 0
     for record in csv.DictReader(open(filename)):
         if limit and count >= limit:
             break
