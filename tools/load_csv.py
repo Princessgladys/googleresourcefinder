@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.appengine.api import memcache
 from google.appengine.api import users
 
 from model import *
@@ -23,6 +22,7 @@ import datetime
 import logging
 import re
 import setup
+import time
 import urllib
 
 SHORELAND_URL = 'http://shoreland.com/'
@@ -197,6 +197,8 @@ def convert_shoreland_record(record):
     }
     
 def convert_us_hospital_record(record):
+    global num_sans_delay
+    global delay
     """Converts a dictionary of values from one row of a Shoreland CSV file
     into a dictionary of ValueInfo objects for our datastore."""
     title = record['Hospital Name'].strip()
@@ -219,10 +221,10 @@ def convert_us_hospital_record(record):
                 delay += delay
             num_sans_delay = 0
         else:
-            logging.info('here')
             num_sans_delay += 1
             geocode_pending = False
         logging.info(dict_result[u'status'] + ' ' + record['Hospital Name'])
+        time.sleep(delay)
 
     if num_sans_delay == 5 and delay > 0:
         delay -= 1

@@ -149,9 +149,8 @@ class IntAttributeType(AttributeType):
         return None
 
 class FloatAttributeType(IntAttributeType):
-#    def make_input(self, name, value, attribute):
-#        Attribute.make_input(self, name, '%g' % value, attribute)
-    input_size = 10
+    def make_input(self, name, value, attribute):
+        Attribute.make_input(self, name, '%g' % value, attribute)
 
     def to_stored_value(self, name, value, request, attribute):
         if value or value == 0:
