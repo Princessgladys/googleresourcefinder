@@ -596,8 +596,6 @@ def RunShellWithReturnCode(command, print_output=False,
     Tuple (output, return code)
   """
   logging.info("Running %s", command)
-  print ("Running %s"% command)
-  print env
   p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                        shell=use_shell, universal_newlines=universal_newlines,
                        env=env)
@@ -618,7 +616,6 @@ def RunShellWithReturnCode(command, print_output=False,
     print >>sys.stderr, errout
   p.stdout.close()
   p.stderr.close()
-  print 'code', p.returncode
   return output, p.returncode
 
 
