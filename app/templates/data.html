@@ -40,9 +40,9 @@
   <div id="default-location-message">
     {% if account.location_text %}
       {{ account.location_text }} <br />
-      <a href="#" id="location_link" onClick="render_location_form('Change default location')">Change default location</a>
+      <a href="#" id="location_link" onClick="render_location_form('{% trans 'Change default location' %}')">{% trans 'Change default location' %}</a>
       {% else %}
-      <a href="#" id="location_link" onClick="render_location_form('Set default location')">Set default location</a>
+      <a href="#" id="location_link" onClick="render_location_form('{% trans 'Set default location' %}')">{% trans 'Set default location' %}</a>
     {% endif %}
   </div>
   <div id="default-location-form" style="display:none">
