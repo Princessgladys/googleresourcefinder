@@ -110,6 +110,8 @@ class ValueInfoExtractor:
                 facility.get_observed(name))
             if name in special:
                 special[name] = value_info
+                if name == 'operational_status':
+                    general.append(value_info)
             else:
                 general.append(value_info)
             details.append(value_info)
@@ -122,7 +124,7 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
         ValueInfoExtractor.__init__(
             self,
             ['title', 'location', 'available_beds', 'total_beds',
-             'healthc_id', 'pcode', 'address', 'services'],
+             'healthc_id', 'pcode', 'address', 'services', 'operational_status'],
             # TODO(kpy): This list is redundant; see the comment above
             # in ValueInfoExtractor.
             ['services', 'organization_type', 'category', 'construction',
