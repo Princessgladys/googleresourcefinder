@@ -31,12 +31,13 @@ th { text-align: left; }
                 z-index: 1 }
 .header .title { position: absolute: left: 0px; top: 0px; padding: 4px;
                  font-size: 18px; color: #fff; background: #333; width: 392px;
-                 height: 30px; }
+                 height: 25px; }
 .loading { position: absolute; left:48%; top: 0px; padding: 3px; z-index: 5;
            background-color:#FFF1A8; font-size: 13px; font-weight: bold; }
 
 /* Data area */
 #data { position: absolute; left: 0px; width: 400px; top: 30px; bottom: 0; }
+#edit-data { position: absolute; left: 0px; width: 400px; top: 30px; bottom: 0; background: #fff; overflow-y: auto; }
 #data table { width: 100%; padding: 0; cursor: default; }
 th, td { padding: 2px 4px; }
 .section { margin-top: 10px; }

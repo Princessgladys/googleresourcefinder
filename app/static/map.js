@@ -1157,6 +1157,17 @@ function select_facility(facility_i, ignore_current) {
       info.open(map, markers[selected_facility_i]);
       // Sets up the tabs and should be called after the DOM is created.
       jQuery('#bubble-tabs').tabs();
+
+      // Title not actually editable - if this changes, uncomment the title lines
+      //var bubbleTitle = $('bubble-title').innerHTML;
+      var bubbleAvailability = $('bubble-availability').innerHTML;
+      var bubbleCapacity = $('bubble-capacity').innerHTML;
+
+      //selected_facility.values[attributes_by_name.title] = bubbleTitle;
+      selected_facility.values[attributes_by_name.available_beds] = bubbleAvailability;
+      selected_facility.values[attributes_by_name.total_beds] = bubbleCapacity;
+      update_facility_row(facility_i, false);
+
       show_loading(false);
     }
   });
@@ -1165,8 +1176,52 @@ function select_facility(facility_i, ignore_current) {
   enable_print_link();
 }
 
+var status_message = false;
+var status_temporary = false;
+var status_timeout;
+
+function update_status() {
+  var status = $('loading');
+
+  if (status_temporary) {
+    status.innerHTML = status_temporary;
+    status.style.display = '';
+  }
+  else if (status_message) {
+    status.innerHTML = status_message;
+    status.style.display = '';
+  }
+  else {
+    status.style.display = 'none';
+  }
+}
+
+function show_status(message) {
+  status_message = message;
+  update_status();
+}
+
+function clear_status() {
+  status_message = false;
+  update_status();
+}
+
 function show_loading(show) {
-  $('loading').style.display = show ? '' : 'none';
+  if (show)
+    show_status(locale.LOADING());
+  else
+    clear_status();
+}
+
+function show_temporary_status(message, duration) {
+  status_temporary = message;
+  update_status();
+
+  clearTimeout(status_timeout);
+  status_timeout = setTimeout(function () { 
+    status_temporary = false;
+    update_status();
+  }, duration);
 }
 
 // ==== Load data
@@ -1302,7 +1357,7 @@ function glow_next() {
   }
 }
 
-function update_facility_row(facility_i) {
+function update_facility_row(facility_i, noglow) {
   var row = $('facility-' + facility_i);
   var cell = row.firstChild;
   var facility = facilities[facility_i];
@@ -1312,7 +1367,8 @@ function update_facility_row(facility_i) {
     set_children(cell, value);
     cell.className = 'value column_' + c;
   }
-  glow(row);
+  if (noglow)
+    glow(row);
 }
 
 // ==== In-place editing
@@ -1323,14 +1379,47 @@ function edit_handler(edit_url) {
   log('Editing in place:', edit_url);
   $j.ajax({
     url: edit_url,
+    type: 'GET',
     success: function(data) {
-      info.close();
-      info.setContent('<div class="facility-info">' + data + '</div>');
-      info.open(map, markers[selected_facility_i]);
-      $j('#edit').ajaxForm({target: '#edit-status'});
+      var editData = $('edit-data');
+      editData.innerHTML = data;
+      editData.style.display = '';
+
+      var windowHeight = get_window_size()[1];
+      var editTop = get_element_top(editData);
+      editData.style.height = (windowHeight - editTop) + 'px';
+
+      $('data').style.display = 'none';
     }
   });
+
   return false;
+}
+
+function edit_save() {
+  if (validate(true)) {
+    log('Saving in place');
+
+    show_status(locale.SAVING());
+    $j.ajax({
+      url: '/edit',
+      type: 'POST',
+      data: $j('#edit').serialize(),
+      success: function(data) {
+	$('data').style.display = '';
+	$('edit-data').style.display = 'none';
+	select_facility(selected_facility_i, true);
+	show_temporary_status(locale.SAVED(), 5000);
+      }
+    });
+  }
+
+  return false;
+}
+
+function edit_cancel() {
+      $('data').style.display = '';
+      $('edit-data').style.display = 'none';
 }
 
 function request_action_handler(request_url) {
