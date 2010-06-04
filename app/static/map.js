@@ -1354,10 +1354,21 @@ function request_action_handler(request_url) {
   return false;
 }
 
+// === Set User's Default Location
 
-
-function handle_default_location_error(){
-  alert('Error');
+function render_default_location_text(msg, error){
+  message_location = $('default-location-message')
+  form_location = $('default-location-form')
+  if(error){
+    message_location.innerHTML = "<div class=\"errormsg\">" + msg + "</div>";
+    form_location.style.display = "inline";
+  } else {
+    message_location.innerHTML = msg + "<br />" +
+      "<a href=\"#\" id=\"location_link\" onClick=\"render_location_form('Change default location')\">Change default location</a>";
+    default_address = $('default_location_text')
+    default_address.value = msg;
+    form_location.style.display = "none";
+  }
 }
 
 function update_user_location(lat, lon, address) {
@@ -1372,14 +1383,34 @@ function update_user_location(lat, lon, address) {
     data : {lat: lat,
             lon: lon,
             location_text: address,
+            ajax: 'yes',
             token: $('user_location_token').value},
     success: function(data) {
         show_loading(false);
+        render_default_location_text(data, false);
     }
   });
   return true;
 }
 
+function cancel_location_update() {
+  location_text = $('default_location_text').value;
+  form_location = $('default-location-form');
+  message_location = $('default-location-message');
+  form_location.style.display = "none";
+  if (location_text.length > 1) {
+    message_location.innerHTML = location_text + "<br />" +
+                                 "<a href=\"#\" id=\"location_link\" " +
+                                 "onClick=\"render_location_form('Change default location')\">" + 
+                                 "Change default location</a>";    
+  } else {
+    message_location.innerHTML = "<a href=\"#\" id=\"location_link\" " +
+                                 "onClick=\"render_location_form('Set default location')\">" + 
+                                 "Set default location</a>";    
+    
+  }
+  
+}
 
 function handle_default_location() {
   var user_entered_location = $('user_address').value;
@@ -1396,16 +1427,16 @@ function handle_default_location() {
         if (update_status) {
           return;
         } else {
-          handle_default_location_error();
+          render_default_location_text("Unable to update location", true);
           return;
         }
       } else {
-        handle_default_location_error();
+        render_default_location_text("Can't find location", true);
         return;
       }
     });
   } else {
-      handle_default_location_error();
+      render_default_location_text("Can't connect to maps", true);
   }
   return;
 }
