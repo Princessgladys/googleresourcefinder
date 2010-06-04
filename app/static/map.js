@@ -698,6 +698,7 @@ function update_facility_list() {
         for (var c = 1; c < summary_columns.length; c++) {
           var value = summary_columns[c].get_value(facility.values);
           cells.push($$('td', {'class': 'value column_' + c}, value));
+          cells.push($$('td', {}, ' '));
         }
       } else {
         for (var c = 1; c < summary_columns.length; c++) {
