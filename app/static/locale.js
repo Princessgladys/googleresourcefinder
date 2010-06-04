@@ -67,6 +67,10 @@ locale = function() {
   messages.ERROR_LOADING_FACILITY_INFORMATION =
       'Error loading facility information.';
 
+  //i18n: Error message for not saving facility information successfully
+  messages.ERROR_SAVING_FACILITY_INFORMATION =
+      'Error saving facility information.';
+
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_INVALID =
       'Longitude must be between -180 and 180.';

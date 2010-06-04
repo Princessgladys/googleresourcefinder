@@ -31,7 +31,7 @@ th { text-align: left; }
                 z-index: 1 }
 .header .title { position: absolute: left: 0px; top: 0px; padding: 4px;
                  font-size: 18px; color: #fff; background: #333; width: 392px;
-                 height: 25px; }
+                 height: 30px; }
 .loading { position: absolute; left:48%; top: 0px; padding: 3px; z-index: 5;
            background-color:#FFF1A8; font-size: 13px; font-weight: bold; }
 
