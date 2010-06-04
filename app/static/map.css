@@ -105,3 +105,4 @@ td.facility-count.selected { color: #fff; }
 
 /*location error*/
 .errormsg { margin-left: 4px; color: #900 }
+.errorbox-bad { padding: 2px; border: 2px solid #900; }
