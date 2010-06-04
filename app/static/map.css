@@ -102,3 +102,6 @@ td.facility-count.selected { color: #fff; }
 .facility-info .attributes { margin: 1em 0; color: #666; }
 .facility-info .attribute .value { color: #000; }
 .facility-info .text { margin-left: 2em; }
+
+/*location error*/
+.errormsg { margin-left: 4px; color: #900 }

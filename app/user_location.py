@@ -124,7 +124,11 @@ class UserLocation(utils.Handler):
                 self.account.location = db.GeoPt(float(lat), float(lon))
         logging.error('HERE')
         self.account.put()
-        self.redirect('/user_location')
+        ajax = self.request.get('ajax')
+        if not ajax:
+          self.redirect('/user_location')
+        else:
+          self.response.out.write(location_text)
        
 if __name__ == '__main__':
     utils.run([('/user_location', UserLocation)], debug=True)

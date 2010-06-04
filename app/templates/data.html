@@ -48,7 +48,10 @@
   <div id="default-location-form" style="display:none">
     <form>
       <input type="text" name="user_address" id="user_address">
-	  <input id="user_location_token" type="hidden" name="user_location_token"
+      {% if account.location_text %}
+      <input type="hidden" name="default_location_text" id="default_location_text" value="{{ account.location_text }}">
+      {% endif %}
+	    <input id="user_location_token" type="hidden" name="user_location_token"
        value="{{user_location_token}}"/>
       {% comment %}
       #i18n: Button text to save data
@@ -57,7 +60,7 @@
       {% comment %}
       #i18n: Button text to cancel and return to the home page
       {% endcomment %}
-      <input type="button" name="cancel" id="cancel" value="{% trans 'Cancel' %}">
+      <input type="button" name="cancel" id="cancel" value="{% trans 'Cancel' %}" onClick="cancel_location_update()">
     </form>
   </div>
 </div>
