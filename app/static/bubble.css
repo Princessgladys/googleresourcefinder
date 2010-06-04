@@ -52,10 +52,6 @@
   text-align: center;
 }
 
-.bubble .capacity {
-  width: 100%;
-}
-
 .bubble .scorecard .no-information {
   font-style: italic;
   padding: 6px;
@@ -74,18 +70,6 @@
 .bubble .scorecard td.services {
   font-size: 16px;
   word-wrap: break-word;
-}
-
-.bubble .important_left {
-  font-size: 46px;
-  font-weight: bold;
-  margin-top: -5px;
-}
-
-.bubble .important_right {
-  font-size: 46px;
-  font-weight: normal;
-  margin-top: -5px;
 }
 
 .bubble #bubble-tabs {
@@ -152,5 +136,3 @@
 }
 
 /* Make bubble tab content align with rest of bubble. */
-
-
