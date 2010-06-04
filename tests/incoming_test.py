@@ -1,5 +1,77 @@
-"""Tests for app/feed_receiver.py."""
+"""Tests for app/feed_receiver.py.
 
+If you want to test with a real live pubsubhubbub instance, here's how
+to do it.  You'll be running your own pubsubhubbub instance locally,
+since pubsubhubbub needs to make web requests to your app (which is
+running on localhost:8080).
+
+1. Dowload the pubsubhubbub source code from:
+   http://code.google.com/p/pubsubhubbub/source/checkout
+
+2. Run the pubsubhubbub server code (in the hub subdirectory) using:
+   dev_appserver.py --port 8888 hub
+
+3. Check that it works by pointing your browser to:
+   http://localhost:8888
+   (Don't click on any links -- they don't work because they're https.)
+
+4. In another shell, run your resourcefinder instance in the usual way:
+   tools/gae run app
+
+5. Drop a copy of docs/sample_feed.xml into the app/static directory:
+   cp docs/sample_feed.xml app/static
+
+6. Check that this worked by pointing your browser to:
+   http://localhost:8080/static/sample_feed.xml
+
+7. Using your browser, send a subscription request to pubsubhubbub:
+
+   a. Point your browser to http://localhost:8888/subscribe
+
+   b. Fill out the top form as follows:
+
+      - Callback: http://localhost:8080/incoming/mytoken
+      - Topic: http://localhost:8080/static/sample_feed.xml
+      - Leave everything else default
+
+   c. Submit the form.
+
+   If successful, the form submission returns a 204 status which looks
+   like nothing happened in your browser.  In the resourcefinder logs
+   you should see two requests:
+
+   - "GET /static/sample_feed.xml HTTP/1.1" 200
+   - "GET /incoming/mytoken HTTP/1.1" 200
+
+8. Using your browser, send a publish request to pubsubhubbub:
+
+   a. Point your browser to http://localhost:8888/publish
+
+   b. Fill out the top form as follows:
+
+      - Topic: http://localhost:8080/static/sample_feed.xml
+
+   c. Submit the form.
+
+   Again, if successul, nothing appears to happen in the browser.  The
+   resourcefinder logs should show one request (and some other
+   messages):
+
+   - "POST /incoming/mytoken HTTP/1.1" 200
+
+   (The body of this POST request should be similar to DATA below,
+   except it contains two records.)
+
+9. Using your browser, verify that two records corresponding to the
+   contents of docs/sample_feed.xml have been added to the datastore:
+   http://localhost:8080/_ah/admin/datastore?kind=Record
+
+TODO: Once this part is implemented, verify that the corresponding
+Report, Facility and MinimalFacility records have been
+created/updated.
+"""
+
+import datetime
 import urllib
 
 from feeds import records
@@ -71,3 +143,13 @@ class IncomingTest(ScrapeTestCase):
 
         # Now a Report record should have been written to the datastore.
         assert records.Record.all().count() == 1
+
+        record = records.Record.all().get()
+        assert record.feed_id == 'http://example.com/feeds/delta'
+        assert (record.type_name ==
+                '{urn:oasis:names:tc:emergency:EDXL:HAVE:1.0}Hospital')
+        assert record.subject_id == 'paho.org/HealthC_ID/1115006'
+        assert record.title is None
+        assert record.author_email == 'foo@example.com'
+        assert record.observed == datetime.datetime(2010, 3, 12, 12, 12, 12)
+        # Not checking: arrived (dynamic), content (large)
