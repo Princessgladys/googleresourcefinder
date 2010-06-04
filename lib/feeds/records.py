@@ -27,16 +27,12 @@ class Record(db.Model):
     author_email = db.StringProperty(required=True)  # author identifier
     observed = db.DateTimeProperty(required=True)  # UTC timestamp
     arrived = db.DateTimeProperty(auto_now=True)  # UTC timestamp
-    content = db.TextProperty()  # serialized XML document 
+    content = db.TextProperty()  # serialized XML document
 
 
-def put_record(feed_id, author_email, title, subject_id, observed, element):
-    """Stores an XML Element as a record."""
-    try:
-        record_type = type_registry[element.tag]
-    except KeyError:
-        raise TypeError('unknown XML type %r' % element.tag)
-    record = Record(
+def create_record(feed_id, author_email, title, subject_id, observed, element):
+    """Wraps XML Element in a record."""
+    return Record(
         feed_id=feed_id,
         type_name=element.tag,
         subject_id=subject_id,
@@ -44,6 +40,11 @@ def put_record(feed_id, author_email, title, subject_id, observed, element):
         author_email=author_email,
         observed=observed,
         content=xmlutils.serialize(element))
+
+def put_record(feed_id, author_email, title, subject_id, observed, element):
+    """Stores an XML Element as a record."""
+    record = create_record(feed_id, author_email,
+        title, subject_id, observed, element)
     record.put()
     return record
 
@@ -62,3 +63,4 @@ def get_latest_arrived(feed_id, limit=None, arrived_after=None):
     if arrived_after:
         query = query.filter('arrived >', arrived_after)
     return query.fetch(min(limit or 100, 100))
+
