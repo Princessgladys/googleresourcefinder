@@ -82,7 +82,7 @@ def setup_facility_types():
         minimal_attribute_names=['title', 'pcode', 'healthc_id',
                                  'available_beds', 'total_beds', 'services',
                                  'contact_name', 'phone', 'address',
-                                 'location'])
+                                 'location', 'operational_status'])
     db.put(hospital)
 
 
