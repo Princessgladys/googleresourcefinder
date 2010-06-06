@@ -16,8 +16,8 @@
 
 from google.appengine.api import users
 
-from bubble import ValueInfoExtractor
-from utils import db
+from bubble import HospitalValueInfoExtractor, ValueInfoExtractor
+from utils import db, HIDDEN_ATTRIBUTE_NAMES
 
 import django.utils.translation
 
@@ -82,13 +82,14 @@ class BubbleTest(unittest.TestCase):
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
         f.set_attribute('attribute_value', 'fake_to_localize',
-                        datetime.datetime.now(), users.User('test@example.com'),
-                        'nickname_foo', 'afilliation_foo', 'comment_foo')
+                        datetime.datetime.now(),
+                        users.User('test@example.com'),
+                        'nickname_foo', 'affiliation_foo', 'comment_foo')
                     
         vai = ValueInfoExtractor(['title'], ['attribute_value'])
         (special, general, details) = vai.extract(f, ['title'])
         
-        assert special.get('title').raw == 'title_foo'
+        assert special['title'].raw == 'title_foo'
         assert general == []
         assert details[0].raw == 'title_foo'
         
@@ -97,3 +98,36 @@ class BubbleTest(unittest.TestCase):
         assert general[0].raw == 'fake_to_localize'
         assert general[0].value == 'fake_localized'
         assert general[0].label == 'foo'
+
+    def test_hospital_value_info_extractor(self):
+        f = model.Facility(key_name='example.org/123', type='hospital')
+        f.set_attribute('title', 'title_foo', datetime.datetime.now(),
+                        users.User('test@example.com'),
+                        'nickname_foo', 'affiliation_foo', 'title_comment_foo')
+        f.set_attribute(HIDDEN_ATTRIBUTE_NAMES[0], 'hidden_value_foo',
+                        datetime.datetime.now(),
+                        users.User('test@example.com'),
+                        'nickname_foo', 'affiliation_foo', 'comment_foo')
+        f.set_attribute('attribute_value', 'value_foo',
+                        datetime.datetime.now(),
+                        users.User('test@example.com'),
+                        'nickname_foo', 'affiliation_foo', 'comment_foo')
+
+        attrs = ['title', 'attribute_value', HIDDEN_ATTRIBUTE_NAMES[0]]
+        vai = HospitalValueInfoExtractor()
+        (special, general, details) = vai.extract(f, attrs)
+        
+        assert special['title'].raw == 'title_foo'
+        assert HIDDEN_ATTRIBUTE_NAMES[0] not in special
+        assert len(special) == len(vai.special_attribute_names)
+        for key in special:
+            assert key in vai.special_attribute_names
+        assert len(general) == 1
+        assert len(details) == 2
+        assert general[0].value != 'hidden_value_foo'
+        assert general[0].value == 'value_foo'
+        for detail in details:
+            assert detail.value == 'title_foo' or detail.value == 'value_foo'
+            assert detail.value != 'hidden_value_foo'
+
+        print 
