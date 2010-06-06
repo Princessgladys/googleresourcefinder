@@ -50,7 +50,7 @@ def check_request_etag(headers):
 
 def create_response_etag(latest):
     """Constructs the ETag response header for the given records."""
-    arrival_time = latest and latest[0].arrival_time or 0
+    arrival_time = latest and latest[0].arrived or 0
     timestamp = time_formats.to_rfc3339(arrival_time)
     return '"' + timestamp + '/' + sign('etag_key', timestamp) + '"'
 
@@ -62,12 +62,12 @@ def handle_feed_get(request, response, feed_id, uri_prefixes={}):
     response.headers['Content-Type'] = 'application/atom+xml'
     if latest:  # Deliver the new entries.
         response.headers['ETag'] = create_response_etag(latest)
-        atom.write_feed(response.out, latest, uri_prefixes, hub=HUB)
+        atom.write_feed(response.out, latest, feed_id, uri_prefixes, hub=HUB)
     elif etag:  # If-None-Match was specified, and there was nothing new.
         response.set_status(304)
         response.headers['ETag'] = '"' + etag + '"'
     else:  # There are no entries in this feed.
-        atom.write_feed(response.out, latest, uri_prefixes, hub=HUB)
+        atom.write_feed(response.out, latest, feed_id, uri_prefixes, hub=HUB)
 
 def handle_entry_get(request, response, feed_id, entry_id, uri_prefixes={}):
     """Handles a request for the Atom entry for an individual XML record."""
@@ -81,7 +81,7 @@ def handle_entry_get(request, response, feed_id, entry_id, uri_prefixes={}):
 
     response.headers['Content-Type'] = 'application/atom+xml'
     response.headers['Last-Modified'] = \
-        time_formats.to_rfc1123(record.arrival_time)
+        time_formats.to_rfc1123(record.arrived)
     atom.write_entry(response.out, record, uri_prefixes)
 
 def get_child(element, name, ns=None):
@@ -136,7 +136,3 @@ def handle_feed_post(request, response):
     notify_hub(feed_id.text)
     return posted_records
 
-
-if __name__ == '__main__':
-    run([(r'/feeds/([^/]+)', Feed),
-         (r'/feeds/([^/]+)/([^/]+)', Entry)])

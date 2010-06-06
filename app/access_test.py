@@ -16,26 +16,24 @@
 
 from access import ACTIONS
 from feeds.xmlutils import Struct
+from model import Account
 
 import access
 import datetime
 import unittest
         
-AUTH = Struct()
-AUTH.timestamp = datetime.datetime.now()
-AUTH.description = 'description'
-AUTH.email = 'test@example.com'
-AUTH.user_id = 'test'
-AUTH.nickname = 'test'
-AUTH.affiliation = 'test'
-AUTH.token = 'test'
-AUTH.actions = ['view', 'edit']
-AUTH.requested_actions = ['advanced_edit']
-        
 class AccessTest(unittest.TestCase):
-    def test_check_action_permitted(self):
+    def setUp(self):
+        self.auth = Account(timestamp=datetime.datetime.now(),
+                            description='description',
+                            email='test@example.com', user_id='test',
+                            nickname='test', affiliation='test', token='test',
+                            actions=[ACTIONS[0], ACTIONS[1]],
+                            requested_actions=[ACTIONS[2]])
+                       
+    def test_check_user_role(self):
         for action in ACTIONS:
-            if action in AUTH.actions:
-                assert access.check_action_permitted(AUTH, action) == True
+            if action in self.auth.actions:
+                assert access.check_action_permitted(self.auth, action) == True
             else:
-                assert access.check_action_permitted(AUTH, action) == False
+                assert access.check_action_permitted(self.auth, action) == False

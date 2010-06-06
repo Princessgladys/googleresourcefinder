@@ -16,29 +16,28 @@
 
 from feeds.xmlutils import Struct
 
+from cron import Job
+
 import cron
 import datetime
 import unittest
 
-JOB1 = Struct()
-JOB1.description = 'test'
-JOB1.url = 'http://www.google.com/'
-JOB1.payload = {}
-JOB1.method ='GET'
-JOB1.months = []
-JOB1.days_of_month = [datetime.datetime.now().day]
-JOB1.weekdays = []
-JOB1.hours_of_day = [datetime.datetime.now().hour]
-JOB1.minutes_of_hour = [datetime.datetime.now().minute]
-    
-JOB2 = Struct()
-JOB2.months = []
-JOB2.days_of_month = [datetime.datetime.now().day + 1]
-JOB2.isoweekday = []
-JOB2.hours_of_day = [datetime.datetime.now().hour + 1]
-JOB2.minutes_of_hour = [datetime.datetime.now().minute + 1]
-
 class CronTest(unittest.TestCase):
+    def setUp(self):
+        self.job1 = Job(description='test', url='http://www.google.com/',
+                        payload='', method='GET', months=[],
+                        days_of_month=[datetime.datetime.now().day],
+                        weekdays=[],
+                        hours_of_day=[datetime.datetime.now().hour],
+                        minutes_of_hour=[datetime.datetime.now().minute])
+
+        self.job2 = Job(description='test', url='http://www.google.com/',
+                        payload='', method='GET', months=[], 
+                        days_of_month=[datetime.datetime.now().day+1],
+                        weekdays=[],
+                        hours_of_day=[datetime.datetime.now().hour+1],
+                        minutes_of_hour=[datetime.datetime.now().minute+1])
+        
     def test_check_time(self):
-        assert cron.job_should_run(JOB1, datetime.datetime.now()) == True
-        assert cron.job_should_run(JOB2, datetime.datetime.now()) == False
+        assert cron.job_should_run(self.job1, datetime.datetime.now()) == True
+        assert cron.job_should_run(self.job2, datetime.datetime.now()) == False
