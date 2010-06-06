@@ -16,17 +16,18 @@
 
 import unittest
 import xmlutils
-
-TAG = 'testing'
-ATTRIBUTES_DICT = {'attr1':'hey', 'attr2':'you'}
-ATTRIBUTES_LIST = ['hi', 'you']
-E1 = xmlutils.element(TAG, ATTRIBUTES_DICT)
-E2 = xmlutils.element(TAG, ATTRIBUTES_LIST)
-E3 = xmlutils.element(TAG, [E1, E2])
         
 class XMLUtilsTest(unittest.TestCase):
+    def setUp(self):
+        self.tag = 'testing'
+        self.attributes_dict = {'attr1': 'hey', 'attr2': 'you'}
+        self.attributes_list = ['hi', 'you']
+        self.e1 = xmlutils.element(self.tag, self.attributes_dict)
+        self.e2 = xmlutils.element(self.tag, self.attributes_list)
+        self.e3 = xmlutils.element(self.tag, [self.e1, self.e2])
+        
     def test_element(self):
-        assert E1.items() == ATTRIBUTES_DICT.items()
-        assert E1.attrib == ATTRIBUTES_DICT
-        assert E2.text == ''.join(ATTRIBUTES_LIST)
-        assert E3.getchildren() == [E1, E2]
+        assert self.e1.items() == self.attributes_dict.items()
+        assert self.e1.attrib == self.attributes_dict
+        assert self.e2.text == ''.join(self.attributes_list)
+        assert self.e3.getchildren() == [self.e1, self.e2]

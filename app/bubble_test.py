@@ -32,16 +32,32 @@ SAN_FRANCISCO = {'lat': 40.7142, 'lon': -74.0064}
         
 def fake_get_message(ns, n):
     message = model.Message(namespace = ns, name = n)
-    message.en = 'foo'
+    if ns == 'attribute_value' and n == 'fake_to_localize':
+        message.en = 'fake_localized'
+    else:
+        message.en = 'foo'
     django_locale = 'en'
     
     return message and getattr(message, django_locale) or n
 
 class BubbleTest(unittest.TestCase):
+    def setUp(self):
+        self.real_auth_domain = os.environ.get('AUTH_DOMAIN')
+        os.environ['AUTH_DOMAIN'] = 'test'
+        self.real_get_message = bubble.get_message
+        bubble.get_message = fake_get_message   
+
+    def tearDown(self):
+        bubble.get_message = self.real_get_message
+        if self.real_auth_domain:
+            os.environ['AUTH_DOMAIN'] = self.val
+        else:
+            os.environ['AUTH_DOMAIN'] = ''
+
     def test_format(self):
         time = datetime.datetime(2010, 6, 2, 13, 21, 13, 97435)
         pt = utils.db.GeoPt(SAN_FRANCISCO['lat'], SAN_FRANCISCO['lon'])
-        assert bubble.format(u'123') == u'123'.encode('utf-8') == '123'
+        assert bubble.format(u'123\u26CC') == '123\xe2\x9b\x8c'
         assert bubble.format('12\n3') == bubble.format('12 3')
         assert bubble.format('123') == '123'
         assert bubble.format(['1', '2', '3']) == bubble.format('1, 2, 3') \
@@ -52,29 +68,32 @@ class BubbleTest(unittest.TestCase):
         assert bubble.format(False) == bubble.format(_('No')) == _('No')
         assert bubble.format({'hey!' : 1}) == {'hey!' : 1}
         assert bubble.format(None) == u'\u2013'.encode('utf-8')
-        assert bubble.format('') == ''
+        assert bubble.format('') == u'\u2013'.encode('utf-8')
+        assert bubble.format([]) == u'\u2013'.encode('utf-8')
+        assert bubble.format({}) == u'\u2013'.encode('utf-8')
         assert bubble.format(13) == 13
+        assert bubble.format(0) == 0
+        assert bubble.format('fake_to_localize', True) == 'fake_localized'
+        assert bubble.format(['fake_to_localize'], True == ['fake_localized'])
 
     def test_value_info_extractor(self):
-        val = os.environ.get('AUTH_DOMAIN')
-        os.environ['AUTH_DOMAIN'] = 'test'
-        real_get_message = bubble.get_message
-        bubble.get_message = fake_get_message
-    
         f = model.Facility(key_name='example.org/123', type='hospital')
         f.set_attribute('title', 'title_foo', datetime.datetime.now(),
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
+        f.set_attribute('attribute_value', 'fake_to_localize',
+                        datetime.datetime.now(), users.User('test@example.com'),
+                        'nickname_foo', 'afilliation_foo', 'comment_foo')
                     
-        vai = ValueInfoExtractor(['title'], ['title'])
+        vai = ValueInfoExtractor(['title'], ['attribute_value'])
         (special, general, details) = vai.extract(f, ['title'])
         
         assert special.get('title').raw == 'title_foo'
         assert general == []
         assert details[0].raw == 'title_foo'
-    
-        bubble.get_message = real_get_message
-        if val:
-            os.environ['AUTH_DOMAIN'] = val
-        else:
-            os.environ['AUTH_DOMAIN'] = ''
+        
+        (special, general, details) = vai.extract(f, ['attribute_value'])
+
+        assert general[0].raw == 'fake_to_localize'
+        assert general[0].value == 'fake_localized'
+        assert general[0].label == 'foo'
