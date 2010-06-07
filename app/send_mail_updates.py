@@ -88,7 +88,7 @@ def get_users_to_email():
     
     for alert in model.Alert.all(): # compile list of facility names per user
         for i in range(len(alert.facility_keys)):
-            fac = model.db.Model.get(alert.facility_keys[i])
+            fac = model.db.Model.get_by_key_name(alert.facility_keys[i])
             freq = alert.frequencies[i]
             values = fetch_updates(alert, fac, freq)
             if values:
