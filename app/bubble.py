@@ -31,9 +31,9 @@ def format(value, localize=False):
             value = get_message('attribute_value', value)
     if isinstance(value, unicode):
         return value.encode('utf-8')
-    if isinstance(value, str):
+    if isinstance(value, str) and value != '':
         return value.replace('\n', ' ')
-    if isinstance(value, list):
+    if isinstance(value, list) and value != []:
         return ', '.join(value).encode('utf-8')
     if isinstance(value, datetime.datetime):
         return to_local_isotime(value.replace(microsecond=0))
@@ -45,7 +45,7 @@ def format(value, localize=False):
         return (latitude + ', ' + longitude).encode('utf-8')
     if isinstance (value, bool):
         return value and format(_('Yes')) or format(_('No'))
-    if value is not None and value != 0:
+    if value or value == 0:
         return value
     return u'\u2013'.encode('utf-8')
 
