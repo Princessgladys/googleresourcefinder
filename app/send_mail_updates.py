@@ -85,17 +85,22 @@ def get_users_to_email():
         }
     """ 
     users = {}
-    
+    updated = False
     for alert in model.Alert.all(): # compile list of facility names per user
         for i in range(len(alert.facility_keys)):
-            fac = model.db.Model.get_by_key_name(alert.facility_keys[i])
+            fac = model.Facility.get_by_key_name(alert.facility_keys[i])
             freq = alert.frequencies[i]
             values = fetch_updates(alert, fac, freq)
             if values:
+                updated = True
                 if alert.user_email not in users:
                     users[alert.user_email] = {}
                 users[alert.user_email]['locale'] = alert.locale
-                users[alert.user_email][fac.key().name()] = values
+                users[alert.user_email][fac.get_value('title')] = values
+        if updated:
+            alert.last_sent = datetime.datetime.now()
+            db.put(alert)
+            updated = False
 
     return users
     
@@ -150,7 +155,6 @@ def fetch_updates(alert, facility, frequency):
         # if last update was before the user was last updated, move to next attr
         if last_facility_update < alert.last_sent:
             continue
-            
         # convert frequency to timedelta
         if frequency == '1/min':
             next_update_time = alert.last_sent
@@ -166,10 +170,6 @@ def fetch_updates(alert, facility, frequency):
         if (datetime.datetime.now() > next_update_time and
             last_facility_update > alert.last_sent):
             updated_attrs[attr] = value
-        
-    if updated_attrs:
-        alert.last_sent = datetime.datetime.now()
-        db.put(alert)
 
     return updated_attrs
     
