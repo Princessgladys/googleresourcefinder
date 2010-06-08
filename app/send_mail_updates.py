@@ -24,7 +24,7 @@ fetch_updates(email, facilities): gathers a list of updates for each user
 send_speed_alert_email(time): sends an alert to admins about file's time to run
 """
 
-__author__ = 'pfritzsche@google.com'
+__author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 
 from google.appengine.api import mail
 from google.appengine.api import memcache
@@ -129,7 +129,7 @@ def send_update(email, values):
     message.subject = utils.to_unicode(_('Resource Finder Facility Updatés'))
     message.body = body
 
-    message.send()    
+    message.send()
     
 def fetch_updates(alert, facility, frequency):
     """Finds updated attributes of the facility for a given alert.
