@@ -339,6 +339,7 @@ def setup_datastore():
     Report information will not be changed or deleted.)"""
     setup_facility_types()
     setup_messages()
+    memcache.flush_all()  # flush any cached messages
 
 def wipe_datastore(*kinds):
     """Deletes everything in the datastore except Accounts and Secrets.
