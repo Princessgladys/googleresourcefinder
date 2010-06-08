@@ -330,7 +330,7 @@ msgstr ""
 
 #. Service provided by a health facility (use Title Case). Meaning: surgical specialty that focuses on abdominal organs
 #: ../tools/setup.py:215
-msgid "General surgery"
+msgid "General Surgery"
 msgstr ""
 
 #. Proper name of an ID for a healthcare facility, no translation necessary.
