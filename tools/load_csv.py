@@ -359,7 +359,7 @@ def parse_datetime(timestamp):
 
 def load_shoreland(filename, observed):
     """Loads a Shoreland CSV file using defaults for the URL and author."""
-    setup.setup_new_datastore()
+    setup.setup_datastore()
     if isinstance(observed, basestring):
         observed = parse_datetime(observed)
     user = users.User(SHORELAND_EMAIL)
