@@ -222,23 +222,23 @@ def setup_messages():
         value_message('NEUROSURGERY', en='Neurosurgery'),
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: surgical specialty that focuses on arteries and veins
-        value_message('VASCULAR_SURGERY', en='Vascular surgery'),
+        value_message('VASCULAR_SURGERY', en='Vascular Surgery'),
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: deals with diagnosis and (non-surgical) treatment of
         #i18n: Meaning: diseases of the internal organs
-        value_message('INTERNAL_MEDICINE', en='Internal medicine'),
+        value_message('INTERNAL_MEDICINE', en='Internal Medicine'),
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: branch of medicine dealing with the heart
         value_message('CARDIOLOGY', en='Cardiology'),
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: specializing in treating communicable diseases
-        value_message('INFECTIOUS_DISEASE', en='Infectious disease'),
+        value_message('INFECTIOUS_DISEASE', en='Infectious Disease'),
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: branch of medicine dealing with infants and children
         value_message('PEDIATRICS', en='Pediatrics'),
         #i18n: Service provided by a health facility. 
         #i18n: care given after surgery until patient is discharged
-        value_message('POSTOPERATIVE_CARE', en='Postoperative care'),
+        value_message('POSTOPERATIVE_CARE', en='Postoperative Care'),
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: care given to improve and recover lost function after
         #i18n: an illness or injury that has caused functional limitations
@@ -246,23 +246,23 @@ def setup_messages():
         #i18n: Service provided by a health facility.
         #i18n: Meaning: Obstetrics deals with childbirth and care of the mother.
         #i18n: Meaning: Gynecology deals with diseases and hygiene of women
-        value_message('OBSTETRICS_GYNECOLOGY', en='Obstetrics and gynecology'),
+        value_message('OBSTETRICS_GYNECOLOGY', en='Obstetrics and Gynecology'),
         #i18n: Service provided by a health facility.
         #i18n: Meaning: Care for cognitive and emotional well-being.
-        value_message('MENTAL_HEALTH', en='Mental health'),
+        value_message('MENTAL_HEALTH', en='Mental Health'),
         #i18n: Service provided by a health facility.
         #i18n: Meaning: Artificial replacement for lost kidney function.
         value_message('DIALYSIS', en='Dialysis'),
         #i18n: Service provided by a health facility.
         value_message('LAB', en='Lab'),
         #i18n: Service provided by a health facility.
-        value_message('X_RAY', en='X-ray'),
+        value_message('X_RAY', en='X-Ray'),
         #i18n: Service provided by a health facility.
-        value_message('CT_SCAN', en='CT scan'),
+        value_message('CT_SCAN', en='CT Scan'),
         #i18n: Service provided by a health facility.
-        value_message('BLOOD_BANK', en='Blood bank'),
+        value_message('BLOOD_BANK', en='Blood Bank'),
         #i18n: Service provided by a health facility.
-        value_message('CORPSE_REMOVAL', en='Corpse removal'),
+        value_message('CORPSE_REMOVAL', en='Corpse Removal'),
     ]
 
     for locale in os.listdir(settings.LOCALE_PATHS[0]):
