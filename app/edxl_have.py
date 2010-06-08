@@ -112,10 +112,6 @@ def read(file):
     hospitals = xmlutils.read(file).findall('.//{%s}Hospital' % EDXL_HAVE_NS)
     return map(Hospital.from_element, hospitals)
 
-def serialize(hospitals):
-    """Serializes list of hospitals to EDXL-HAVE document."""
-    return HospitalStatus.to_element('HospitalStatus', hospitals)
-
 def write(file, hospitals):
     """Writes a list of hospital elements as an EDXL-HAVE document."""
     xmlutils.write(file, serialize(hospitals), URI_PREFIXES)
