@@ -438,6 +438,10 @@ function initialize_markers() {
   for (var f = 1; f < facilities.length; f++) {
     var facility = facilities[f];
     var location = facility.values[attributes_by_name.location];
+    if (!location) {
+      markers[f] = null;
+      continue;
+    }
     var title = facility.values[attributes_by_name.title];
     markers[f] = new google.maps.Marker({
       position: new google.maps.LatLng(location.lat, location.lon),
@@ -683,6 +687,12 @@ function update_facility_list() {
     var f = selected_division.facility_is[i];
     var facility = facilities[f];
     var facility_type = facility_types[facility.type];
+    if (!markers[f]) {
+      // TODO(kpy): For now, facilities without locations are hidden
+      // from the list.  Once we have a way to show the detail window for
+      // facilities without locations, we can include them in the list.
+      continue;
+    }
     if (selected_status_i === 0 ||
         facility_status_is[f] === selected_status_i) {
       var row = $$('tr', {
@@ -1150,30 +1160,32 @@ function select_facility(facility_i, ignore_current) {
     return;
   }
 
-  // Pop up the InfoWindow on the selected clinic.
+  // Pop up the InfoWindow on the selected clinic, if it has a location.
   info.close();
 
-  show_loading(true);
-  jQuery.ajax({
-    url: 'bubble?facility_name=' + selected_facility.name,
-    type: 'GET',
-    timeout: 10000,
-    error: function(request, textStatus, errorThrown){
-      log(textStatus + ', ' + errorThrown);
-      alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
-      show_loading(false);
-    },
-    success: function(result){
-      info.setContent(result);
-      info.open(map, markers[selected_facility_i]);
-      // Sets up the tabs and should be called after the DOM is created.
-      jQuery('#bubble-tabs').tabs();
-      show_loading(false);
-    }
-  });
+  if (markers[selected_facility_i]) {
+    show_loading(true);
+    jQuery.ajax({
+      url: 'bubble?facility_name=' + selected_facility.name,
+      type: 'GET',
+      timeout: 10000,
+      error: function(request, textStatus, errorThrown){
+        log(textStatus + ', ' + errorThrown);
+        alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
+        show_loading(false);
+      },
+      success: function(result){
+        info.setContent(result);
+        info.open(map, markers[selected_facility_i]);
+        // Sets up the tabs and should be called after the DOM is created.
+        jQuery('#bubble-tabs').tabs();
+        show_loading(false);
+      }
+    });
 
-  // Enable the Print link
-  enable_print_link();
+    // Enable the Print link (which requires a center location).
+    enable_print_link();
+  }
 }
 
 function show_loading(show) {

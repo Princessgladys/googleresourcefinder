@@ -438,8 +438,11 @@ class Edit(utils.Handler):
                 # We can't really do this inside this transaction, since
                 # feed records are not part of the entity group.
                 # Transactional tasks is the closest we can get.
-                schedule_add_record(self.request, user,
-                    facility, changed_attributes_dict, utcnow)
+                # TODO(kpy): This is disabled for now because it causes
+                # intermittent exceptions.  Re-enable it when we have it
+                # tested and working.
+                # schedule_add_record(self.request, user,
+                #     facility, changed_attributes_dict, utcnow)
                 db.put([report, facility, minimal_facility])
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
