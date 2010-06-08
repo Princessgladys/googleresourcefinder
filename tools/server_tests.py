@@ -20,6 +20,7 @@ which sets up the PYTHONPATH and other necessary environment variables."""
 
 import access
 import console
+import model
 import optparse
 import os
 import re
@@ -174,9 +175,9 @@ if __name__ == '__main__':
         console.connect(
             '%s:%d' % (options.address, options.port), None, 'test', 'test')
         setup.setup_datastore()
-        setup.add_account(email='test@example.com', description='Test',
-                          nickname='', affiliation='',
-                          actions=[':view', ':edit', 'grant'])
+
+        model.Account(email='test@example.com', description='Test',
+                      actions=[':view', ':edit', 'grant']).put()
 
         # Gather all the tests.
         loader = unittest.defaultTestLoader
