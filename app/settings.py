@@ -37,13 +37,23 @@ from utils import db, html_escape, users, _
 XSRF_KEY_NAME = 'resource-finder-settings'
 DAY_SECS = 24 * 60 * 60
 
-FREQUENCY_CHOICES = {
+FREQUENCY_UF_TO_PLAIN = {
     'Never Update': '',
     'Immediate Updates': '1/min',
     'Once per Day': '1/day',
     'Once per Week': '1/week',
     'Once per Month': '1/month'
 }
+
+
+FREQUENCY_PLAIN_TO_UF = {
+    '': 'Never Update',
+    '1/min': 'Immediate Updates',
+    '1/day': 'Once per Day',
+    '1/week': 'Once per Week',
+    '1/month': 'Once per Month'
+}
+
 
 def make_frequency_plain(frequency):
     """Returns datastore-friendly version of the plain text frequency updates.
@@ -57,37 +67,52 @@ def make_frequency_plain(frequency):
     Returns:
         A datastore-friendly frequency string.
     """
-    return FREQUENCY_CHOICES[frequency]
+    return FREQUENCY_UF_TO_PLAIN[frequency]
+    
+    
+def make_frequency_readable(frequency):
+    """Returns datastore-friendly version of the plain text frequency updates.
+    
+    The format this information is stored in the datastore is not user-
+    friendly. This is a convenience function to switch between them.
+    
+    Args:
+        frequency: a human readable frequency string
+    
+    Returns:
+        A datastore-friendly frequency string.
+    """
+    return FREQUENCY_PLAIN_TO_UF[frequency]
 
 
-def create_choice_input(facility, frequency):
+def create_choice_box(choices, preselect = '', name = '', extra_lines=0):
     """Creates HTML output for a particular facility's frequency.
     
     Creates a dropdown box with the options available in 'FREQUENCY_CHOICES'
     above, where the current frequency for the facility is pre-selected.
     
     Args:
-        facility: the current facility
-        frequency: the frequency of updates the user receives emails from for 
-            this particular facility
+        choices: the choices for the dropdown box
+        preselct: the choice to preselect, if any
+        name: the name for the select field, if any
+        extra_lines: number of lines after this box, if any
             
     Returns:
-        A string containing the necessary HTML output for a dropdown box where
-        the facility title is the name of the box and the frequency is the pre-
-        selected option in the dropdown.
+        A string containing the necessary HTML output for a dropdown box with
+        the appropriate box preselected for the user.
     """
-    output = ('<select name="%s [%s]">'
-        % (html_escape(facility.get_value('title')),
-           html_escape(facility.key().name())))
+    spacing = '<br />' * extra_lines
+    if name:
+        output = '<select name="%s">' % html_escape(name)
+    else:
+        output = '<select>'
     options = []
-    choices = [_('Never Update'), _('Immediate Updates'), _('Once per Day'),
-        _('Once per Week'), _('Once per Month')]
     for i in range(len(choices)):
-        if make_frequency_plain(choices[i]) == frequency:
+        if choices[i] == preselect:
             options.append('<option selected>%s</option>' % choices[i])
         else:
             options.append('<option>%s</option>' % choices[i])
-    return output + '%s</select>' % ''.join(options)
+    return output + '%s</select>%s' % (''.join(options), spacing)
 
 
 class Settings(utils.Handler):
@@ -118,7 +143,7 @@ class Settings(utils.Handler):
             for i in range(len(self.alert.facility_keys)):
                 #use tuples to maintain order
                 self.frequencies.append((self.alert.facility_keys[i],
-                    self.alert.frequencies[i]))
+                                         self.alert.frequencies[i]))
 
     def get(self):
         """Responds to HTTP GET requests to /settings.
@@ -128,14 +153,28 @@ class Settings(utils.Handler):
         
         self.init()
         fields = []
+        alert_ctrl_fields = []
+        
+        choices = [_('Never Update'), _('Immediate Updates'),
+                   _('Once per Day'), _('Once per Week'), _('Once per Month')]
+        plain_choices = [make_frequency_plain(choice) for choice in choices]
+        
+        fields.append({
+            'title': 'Default Frequency',
+            'input': create_choice_box(choices, 
+                make_frequency_readable(self.alert.default_frequency),
+                'df', 2)
+        })
         
         if self.alert:
             fac_keys, freqs = zip(*self.frequencies)
             for i in range(len(fac_keys)):
                 facility = model.Facility.get_by_key_name(fac_keys[i])
+                title = facility.get_value('title')
                 fields.append({
-                    'title': facility.get_value('title'),
-                    'input': create_choice_input(facility, freqs[i])
+                    'title': title,
+                    'input': create_choice_box(choices,
+                        make_frequency_readable(freqs[i]), title)
                 })
             
         token = sign(XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
@@ -172,26 +211,32 @@ class Settings(utils.Handler):
         facilities.sort()
                 
         for facility in facilities:
-            if facility not in ignore:
+            if facility == 'df':
+                default_frequency = make_frequency_plain(
+                    self.request.get('df'))
+            elif facility not in ignore:
                 new_frequencies.append(make_frequency_plain(
                     self.request.get(facility)))
 
-        def update(alert, frequencies):
+        def update(alert, frequencies, default_frequency):
             """Helper function; updates the facility alert frequencies."""
             
             if not frequencies:
                 return
-            
-            for i in range(len(alert.frequencies)):
+            logging.info(frequencies)
+            logging.info(alert.frequencies)
+            for i in range(len(frequencies) - 1, -1, -1):
                 if not frequencies[i]:
                     del alert.frequencies[i]
                     del alert.facility_keys[i]
                 else:
                     alert.frequencies[i] = frequencies[i]
+            alert.default_frequency = default_frequency
             
             db.put(alert)
 
-        db.run_in_transaction(update, self.alert, new_frequencies)
+        db.run_in_transaction(update, self.alert, new_frequencies,
+            default_frequency)
         
         if self.params.embed:
             #i18n: Record updated successfully.

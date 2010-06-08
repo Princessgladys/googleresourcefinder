@@ -259,6 +259,8 @@ class Alert(db.Model):
     #   '1/day': send one alert e-mail per day
     #   '1/week': send one alert e-mail per week
     #   '1/month': send one alert e-mail per month
+    default_frequency = db.StringProperty(default='1/min')
+    # frequency to be used by default
 
 def value_or_none(value):
     """Converts any false value other than 0 or 0.0 to None."""
