@@ -37,10 +37,11 @@ def setup_facility_types():
         attr('int', 'total_beds'),
         attr('multi', 'services',
              ['GENERAL_SURGERY', 'ORTHOPEDICS', 'NEUROSURGERY',
-              'VASCULAR_SURGERY', 'GENERAL_MEDICINE', 'CARDIOLOGY',
+              'VASCULAR_SURGERY', 'INTERNAL_MEDICINE', 'CARDIOLOGY',
               'INFECTIOUS_DISEASE', 'PEDIATRICS', 'POSTOPERATIVE_CARE',
-              'OBSTETRICS_GYNECOLOGY', 'DIALYSIS', 'LAB',
-              'X_RAY', 'CT_SCAN', 'BLOOD_BANK', 'CORPSE_REMOVAL']),
+              'REHABILITATION', 'OBSTETRICS_GYNECOLOGY', 'MENTAL_HEALTH',
+              'DIALYSIS', 'LAB', 'X_RAY', 'CT_SCAN', 'BLOOD_BANK',
+              'CORPSE_REMOVAL']),
         attr('str', 'contact_name'),
         attr('str', 'phone'),
         attr('str', 'email'),
@@ -52,11 +53,10 @@ def setup_facility_types():
         attr('str', 'accuracy'),
         attr('str', 'organization'),
         attr('choice', 'organization_type',
-             ['COM', 'MIL', 'MIX', 'NGO', 'PRI', 'PUB', 'UNI']),
+             ['PUBLIC', 'FOR_PROFIT', 'UNIVERSITY', 'COMMUNITY',
+              'NGO', 'FAITH_BASED', 'MILITARY', 'MIXED']),
         attr('choice', 'category',
-             ['C/S', 'C/S Temp', 'CAL', 'CSL', 'DISP', 'F Hospital',
-              'HOP', 'HOP Temp', 'HOP Spec', 'MOB', 'MOB Temp',
-              'Other', 'Unknown']),
+             ['HOSPITAL', 'CLINIC', 'MOBILE_CLINIC', 'DISPENSARY']),
         attr('choice', 'construction',
              ['REINFORCED_CONCRETE', 'UNREINFORCED_MASONRY', 'WOOD_FRAME',
               'ADOBE']),
@@ -64,7 +64,7 @@ def setup_facility_types():
         attr('choice', 'operational_status',
              ['OPERATIONAL', 'NO_SURGICAL_CAPACITY', 'FIELD_HOSPITAL',
               'FIELD_WITH_HOSPITAL', 'CLOSED_OR_CLOSING']),
-        attr('str', 'comments'),
+        attr('text', 'comments'),
         attr('bool', 'reachable_by_road'),
         attr('bool', 'can_pick_up_patients'),
         attr('str', 'region_id', edit_action='advanced_edit'),
@@ -152,53 +152,33 @@ def setup_messages():
         # organization_type
 
         #i18n: Type of organization: Local community organization
-        value_message('COM', en='Community'),
+        value_message('COMMUNITY', en='Community'),
+        #i18n: Type of organization: Faith-based organization
+        value_message('FAITH_BASED', en='Faith-based'),
+        #i18n: Type of organization: For-profit organization
+        value_message('FOR_PROFIT', en='For-profit'),
         #i18n: Type of organization: Organization associated with armed forces
-        value_message('MIL', en='Military'),
+        value_message('MILITARY', en='Military'),
         #i18n: Type of organization: Organization with mixed function
-        value_message('MIX', en='Mixed'),
+        value_message('MIXED', en='Mixed'),
         #i18n: Type of organization: Non-governmental organization
         value_message('NGO', en='NGO'),
-        #i18n: Type of organization: Private organization
-        value_message('PRI', en='Private'),
         #i18n: Type of organization: Public (government) organization
-        value_message('PUB', en='Public'),
+        value_message('PUBLIC', en='Public'),
         #i18n: Type of organization: Organization associated with a university
-        value_message('UNI', en='University'),
+        value_message('UNIVERSITY', en='University'),
 
         # category
 
-        #i18n: Category of facility: Health center
-        value_message('C/S', en='Health center'),
-        #i18n: Category of facility: health center that exists for a
-        #i18n: finite period of time.
-        value_message('C/S Temp', en='Temporary health center'),
-        #i18n: Category of facility: a health center with available beds,
-        #i18n: as a hospital has.
-        value_message('CAL', en='Health center with beds'),
-        #i18n: Category of facility: a health center without beds.
-        value_message('CSL', en='Health center without beds'),
-        #i18n: Category of facility: a dispensary where medicine and medical
+        #i18n: Category of facility: Clinic
+        value_message('CLINIC', en='Clinic'),
+        #i18n: Category of facility: A dispensary where medicine and medical
         #i18n: supplies are given out.
-        value_message('DISP', en='Dispensary'),
-        #i18n: Category of facility: A mobile self-sufficient health facility.
-        value_message('F Hospital', en='Field hospital'),
-        #i18n: Category of facility: Hospital
-        value_message('HOP', en='Hospital'),
-        #i18n: Category of facility: Hospital existing for a finite
-        #i18n: period of time.
-        value_message('HOP Temp', en='Temporary hospital'),
-        #i18n: Category of facility: A hospital with a particular specialty.
-        value_message('HOP Spec', en='Specialized hospital'),
-        #i18n: Category of facility: A moveable unit that provides a service.
-        value_message('MOB', en='Mobile facility',),
-        #i18n: Category of facility: A moveable unit that provides a particular
-        #i18n: service for a finite period of time.
-        value_message('MOB Temp', en='Temporary mobile facility'),
-        #i18n: Category of facility: Other.
-        value_message('Other', en='Other'),
-        #i18n: Category of facility: Unknown.
-        value_message('Unknown', en='Unknown'),
+        value_message('DISPENSARY', en='Dispensary'),
+        #i18n: Category of facility: Hospital.
+        value_message('HOSPITAL', en='Hospital'),
+        #i18n: Category of facility: A mobile clinic.
+        value_message('MOBILE_CLINIC', en='Mobile clinic',),
 
         # construction
 
@@ -246,7 +226,7 @@ def setup_messages():
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: deals with diagnosis and (non-surgical) treatment of
         #i18n: Meaning: diseases of the internal organs
-        value_message('GENERAL_MEDICINE', en='General medicine'),
+        value_message('INTERNAL_MEDICINE', en='Internal medicine'),
         #i18n: Service provided by a health facility. 
         #i18n: Meaning: branch of medicine dealing with the heart
         value_message('CARDIOLOGY', en='Cardiology'),
@@ -259,11 +239,19 @@ def setup_messages():
         #i18n: Service provided by a health facility. 
         #i18n: care given after surgery until patient is discharged
         value_message('POSTOPERATIVE_CARE', en='Postoperative care'),
-        #i18n: services provided by a health facility 
+        #i18n: Service provided by a health facility. 
+        #i18n: Meaning: care given to improve and recover lost function after
+        #i18n: an illness or injury that has caused functional limitations
+        value_message('REHABILITATION', en='Rehabilitation'),
+        #i18n: Service provided by a health facility.
         #i18n: Meaning: Obstetrics deals with childbirth and care of the mother.
         #i18n: Meaning: Gynecology deals with diseases and hygiene of women
         value_message('OBSTETRICS_GYNECOLOGY', en='Obstetrics and gynecology'),
         #i18n: Service provided by a health facility.
+        #i18n: Meaning: Care for cognitive and emotional well-being.
+        value_message('MENTAL_HEALTH', en='Mental health'),
+        #i18n: Service provided by a health facility.
+        #i18n: Meaning: Artificial replacement for lost kidney function.
         value_message('DIALYSIS', en='Dialysis'),
         #i18n: Service provided by a health facility.
         value_message('LAB', en='Lab'),
@@ -284,8 +272,8 @@ def setup_messages():
                 text = django.utils.translation.gettext_lazy(
                     message.en).decode('utf-8')
             except KeyError:
-                logging.warning('Translation for "%s" same as "en" for "%s"'
-                                % (locale, message.en))
+                logging.warning('en and %s messages are the same: %r' %
+                                (locale, message.en))
                 text = message.en
             setattr(message, locale, text)
 
@@ -326,8 +314,8 @@ def setup_js_messages():
                 trans = django.utils.translation.gettext_lazy(
                     current_msg).decode('utf-8')
                 if current_msg == trans:
-                    logging.warning('Translation for "%s "same as "en" for "%s"'
-                                    % (locale, current_msg))
+                    logging.warning('en and %s messages are the same: %r' %
+                                    (locale, current_msg))
                 line = re.sub(strcat_pattern, to_js_string(trans),
                               current_msg_line, count=1)
                 line = re.sub('\s*=\s*', ' = ', line, count=1)

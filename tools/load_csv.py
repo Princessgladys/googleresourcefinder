@@ -21,9 +21,38 @@ import re
 import setup
 
 SHORELAND_URL = 'http://shoreland.com/'
-SHORELAND_EMAIL = 'admin@shoreland.com'
-SHORELAND_NICKNAME = 'Shoreland Contact Name'
+SHORELAND_EMAIL = 'haitiaid@shoreland.com'
+SHORELAND_NICKNAME = 'Shoreland Editor'
 SHORELAND_AFFILIATION = 'Shoreland Inc.'
+
+
+def strip_or_none(value):
+    """Converts strings to their stripped values or None, while preserving
+    values of other types."""
+    if isinstance(value, db.Text):
+        # We have to preserve db.Text as db.Text, or the datastore might
+        # reject it.  (Strings longer than 500 characters are not storable.)
+        return db.Text(value.strip()) or None
+    if isinstance(value, basestring):
+        return value.strip() or None
+    return value
+
+
+class ValueInfo:
+    """Keeps track of an attribute value and metadata."""
+    def __init__(self, value, observed=None, source=None, comment=None):
+        self.value = strip_or_none(value)
+        self.observed = observed
+        self.comment = self.combine_comment(source, comment)
+
+    def combine_comment(self, source, comment):
+        source = strip_or_none(source)
+        comment = strip_or_none(comment)
+        if source is not None:
+            source = 'Source: %s' % source
+            comment = comment and '%s; %s' % (source, comment) or source
+        return comment
+
 
 def convert_paho_record(record):
     """Converts a dictionary of values from one row of a PAHO CSV file
@@ -37,7 +66,7 @@ def convert_paho_record(record):
             title, record.get('PCode'), record.get('HealthC_ID')))
         return None, None, None
 
-    key_name = 'paho.org/HealthC_ID/' + record['HealthC_ID']
+    key_name = 'paho.org/HealthC_ID/' + record['HealthC_ID'].strip()
     title = (record['Fac_NameFr'].strip() or record['NomInstitu'].strip())
     alt_title = (title == record['Fac_NameFr'].strip() and
                  record['NomInstitu'].strip() or '')
@@ -70,13 +99,14 @@ def convert_paho_record(record):
         'email': ValueInfo(record['email']),
         'organization_type': ValueInfo(record['Type']),
         'category': ValueInfo(record['Categorie']),
-        'damage': ValueInfo(record['Damage'], observed=record['DateDamage'],
+        'damage': ValueInfo(record['Damage'],
+                            observed=parse_paho_date(record['DateDamage']),
                             source=record['SourceDamage']),
         'operational_status': ValueInfo(
             record['OperationalStatus'],
-            observed=record['DateOperationalStatus'],
+            observed=parse_paho_date(record['DateOperationalStatus']),
             source=record['SourceOperationalStatus']),
-        'comments': ValueInfo(record['Comment']),
+        'comments': ValueInfo(db.Text(record['Comment'])),
         'region_id': ValueInfo(record['RegionId']),
         'district_id': ValueInfo(record['DistrictId']),
         'commune_id': ValueInfo(record['CommuneId']),
@@ -90,63 +120,89 @@ def convert_shoreland_record(record):
     title = record['facility_name'].strip()
 
     if not record.get('facility_healthc_id').strip():
-        # TODO(shakusa) Fix this. We should be importing all facilities.
+        # Every row in a Shoreland CSV file should have a non-blank healthc_id.
         logging.warn('Skipping %r (%s): Invalid HealthC_ID: "%s"' % (
             title, record.get('facility_pcode'),
             record.get('facility_healthc_id')))
         return None, None, None
 
-    key_name = 'paho.org/HealthC_ID/' + record['facility_healthc_id']
-    alt_title = record['alt_facility_name'].strip()
+    key_name = 'paho.org/HealthC_ID/' + record['facility_healthc_id'].strip()
     try:
         latitude = float(record['latitude'])
         longitude = float(record['longitude'])
+        location = db.GeoPt(latitude, longitude)
     except ValueError:
-        # TODO(shakusa) Fix this. We should be importing all facilities.
-        logging.warn('Skipping %r (%s): latitude=%r longitude=%r' % (
-            title, key_name, record.get('latitude'),
-            record.get('longitude')))
-        return None, None, None
+        logging.warn('No location for %r (%s): latitude=%r longitude=%r' % (
+            title, key_name, record.get('latitude'), record.get('longitude')))
+        location = None
     observed = None
     if record['entry_last_updated']:
         observed = parse_shoreland_datetime(record['entry_last_updated'])
 
-    # The CSV 'type' column corresponds to our 'category' attribute.
+    # The CSV 'type' column maps to our 'category' attribute.
     CATEGORY_MAP = {
         '': '',
-        'Hospital': 'HOP',
-        'Clinic': '???',  # TODO
-        'Dispensary': 'DISP'
-        # TODO(kpy): What happened to all the other values that were in v7?
+        'Clinic': 'CLINIC',
+        'Dispensary': 'DISPENSARY',
+        'Hospital': 'HOSPITAL',
+        'Mobile Clinic': 'MOBILE_CLINIC'
     }
 
-    # The CSV 'category' column corresponds to our 'organization_type' attribute.
+    # The CSV 'category' column maps to our 'organization_type' attribute.
     ORGANIZATION_TYPE_MAP = {
         '': '',
-        'Faith-Based Org': '???',  # TODO
-        'For Profit': 'PRI',
-        'Mixed': 'MIX',
+        'Community': 'COMMUNITY',
+        'Faith-Based Org': 'FAITH_BASED',
+        'For Profit': 'FOR_PROFIT',
+        'Military': 'MILITARY',
+        'Mixed': 'MIXED',
         'NGO': 'NGO',
-        'Public': 'PUB'
-        # TODO(kpy): What happened to all the other values that were in v7?
+        'Public': 'PUBLIC',
+        'University': 'UNIVERSITY'
     }
 
+    # The CSV 'operational_status' column has two possible values.
     OPERATIONAL_STATUS_MAP = {
         '': '',
         'Open': 'OPERATIONAL',
         'Closed or Closing': 'CLOSED_OR_CLOSING'
     }
 
+    # The CSV 'services' column contains space-separated abbreviations.
+    SERVICE_MAP = {
+        'GenSurg': 'GENERAL_SURGERY',
+        'Ortho': 'ORTHOPEDICS',
+        'Neuro': 'NEUROSURGERY',
+        'Vascular': 'VASCULAR_SURGERY',
+        'IntMed': 'INTERNAL_MEDICINE',
+        'Cardiology': 'CARDIOLOGY',
+        'ID': 'INFECTIOUS_DISEASE',
+        'Peds': 'PEDIATRICS',
+        'OB': 'OBSTETRICS_GYNECOLOGY',
+        'Dialysis': 'DIALYSIS',
+        'MentalHealth': 'MENTAL_HEALTH',
+        'Rehab': 'REHABILITATION'
+    }
+    service_list = []
+    for keyword in record.get('services', '').split():
+        service_list.append(SERVICE_MAP[keyword])
+    if record['services_last_updated']:
+        services = ValueInfo(service_list, parse_shoreland_datetime(
+            record['services_last_updated']))
+    else:
+        services = ValueInfo(service_list)
+
     return key_name, observed, {
         'title': ValueInfo(title),
-        'alt_title': ValueInfo(alt_title),
         'healthc_id': ValueInfo(record['facility_healthc_id']),
             # TODO(kpy) comment=record['AlternateHealthCIDDeleted']
         'pcode': ValueInfo(record['facility_pcode']),
-        'available_beds': ValueInfo(
-            record['available_beds'] and int(record['available_beds'])),
+        # Bill Lang recommends (2010-06-07) ignoring the available_beds column.
+        'available_beds': ValueInfo(None),
+        # NOTE(kpy): Intentionally treating total_beds=0 as "number unknown".
         'total_beds': ValueInfo(
-            record['total_beds'] and int(record['total_beds'])),
+            record['total_beds'] and int(record['total_beds']) or None,
+            None, strip_or_none(record['BED TRACKING COMMENTS'])),
         # Didn't bother to convert the 'services' field because it's empty
         # in the CSV from Shoreland.
         'contact_name': ValueInfo(record['contact_name']),
@@ -156,7 +212,7 @@ def convert_shoreland_record(record):
         'district': ValueInfo(record['district']),
         'commune': ValueInfo(record['commune']),
         'address': ValueInfo(record['address']),
-        'location': ValueInfo(db.GeoPt(latitude, longitude)),
+        'location': ValueInfo(location),
             # TODO(kpy) source=record['SourceHospitalCoordinates']
             # TODO(kpy) comment=record['AlternateCoordinates']
         'organization': ValueInfo(record['organization']),
@@ -167,17 +223,13 @@ def convert_shoreland_record(record):
         # Didn't bother to convert the 'construction' field because it's empty
         # in the CSV from Shoreland.
         'damage': ValueInfo(record['damage']),
-            # TODO(kpy) observed=record['DateDamage']
-            # TODO(kpy) source=record['SourceDamage']
         'operational_status':
             ValueInfo(OPERATIONAL_STATUS_MAP[record['operational_status']]),
-            # TODO(kpy) observed=record['DateOperationalStatus']
-            # TODO(kpy) source=record['SourceOperationalStatus']
-        'comments': ValueInfo(record['comments']),
+        'services': services,
+        'comments': ValueInfo(db.Text(record['comments'])),
         'region_id': ValueInfo(record['region_id']),
         'district_id': ValueInfo(record['district_id']),
         'commune_id': ValueInfo(record['commune_id']),
-        'commune_code': ValueInfo(record['commune_code']),
         'sante_id': ValueInfo(record['sante_id'])
     }
 
@@ -266,33 +318,11 @@ def load_csv(
 
     put_batches(facilities + minimal_facilities + reports)
 
-class ValueInfo:
-    """Keeps track of an attribute value and metadata."""
-    def __init__(self, value, observed=None, source=None, comment=None):
-        self.value = strip_or_none(value)
-        self.observed = parse_paho_date(strip_or_none(observed))
-        self.comment = self.combine_comment(source, comment)
-
-    def combine_comment(self, source, comment):
-        source = strip_or_none(source)
-        comment = strip_or_none(comment)
-        if source is not None:
-            source = 'Source: %s' % source
-            comment = comment and '%s; %s' % (source, comment) or source
-        return comment
-
-def strip_or_none(value):
-    """Converts strings to their stripped values or None, while preserving
-    values of other types."""
-    if isinstance(value, basestring):
-        return value.strip() or None
-    return value
-
 def parse_paho_date(date):
     """Parses a period-separated (month.day.year) date, passes through None.
     For example, May 19, 2010 would be represented as '05.19.2010'"""
     if date is not None:
-        (month, day, year) = date.split('.')
+        (month, day, year) = date.strip().split('.')
         date = datetime.datetime(int(year), int(month), int(day))
     return date
 
