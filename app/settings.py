@@ -12,43 +12,97 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
+"""Renders and populates a settings page for the logged in user.
+
+Accesses the Account and Alert data structures to retrieve any information
+pertaining to the logged in user that said user has control over changing.
+
+make_frequency_plain(frequency): returns a datastore friendly version of the
+    user friendly frequency text
+create_choice_input(facility, frequency): creates html output as a dropdown
+    box with the facilities frequency pre-selected
+Settings(utils.handler): renders the page; handles GET and POST requests
+"""
+
+__author__ = 'pfritzsche@google.com (Phil Fritzsche)'
+
 import logging
 import model
-import re
-import urlparse
 import utils
-import wsgiref
 
-from access import check_action_permitted
-from feed_provider import schedule_add_record
 from feeds.crypto import sign, verify
-from main import USE_WHITELISTS
-from rendering import clean_json, json_encode
-from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
-from utils import db, get_message, html_escape, simplejson
-from utils import to_unicode, users, _
+from utils import ErrorMessage, Redirect
+from utils import db, html_escape, users, _
 
 XSRF_KEY_NAME = 'resource-finder-settings'
 DAY_SECS = 24 * 60 * 60
 
-def create_input(facility, frequency):
-    output = '<select name="%s">' % html_escape(facility.get_value('title'))
+FREQUENCY_CHOICES = {
+    'Never Update': '',
+    'Immediate Updates': '1/min',
+    'Once per Day': '1/day',
+    'Once per Week': '1/week',
+    'Once per Month': '1/month'
+}
+
+def make_frequency_plain(frequency):
+    """Returns datastore-friendly version of the plain text frequency updates.
+    
+    The format this information is stored in the datastore is not user-
+    friendly. This is a convenience function to switch between them.
+    
+    Args:
+        frequency: a human readable frequency string
+    
+    Returns:
+        A datastore-friendly frequency string.
+    """
+    return FREQUENCY_CHOICES[frequency]
+
+
+def create_choice_input(facility, frequency):
+    """Creates HTML output for a particular facility's frequency.
+    
+    Creates a dropdown box with the options available in 'FREQUENCY_CHOICES'
+    above, where the current frequency for the facility is pre-selected.
+    
+    Args:
+        facility: the current facility
+        frequency: the frequency of updates the user receives emails from for 
+            this particular facility
+            
+    Returns:
+        A string containing the necessary HTML output for a dropdown box where
+        the facility title is the name of the box and the frequency is the pre-
+        selected option in the dropdown.
+    """
+    output = ('<select name="%s [%s]">'
+        % (html_escape(facility.get_value('title')),
+           html_escape(facility.key().name())))
     options = []
-    choices = [_('Immediate Updates'), _('Once per Day'), _('Once per Week'),
-        _('Once per Month')]
-    choices_plain = ['1/min', '1/day', '1/week', '1/month']
+    choices = [_('Never Update'), _('Immediate Updates'), _('Once per Day'),
+        _('Once per Week'), _('Once per Month')]
     for i in range(len(choices)):
-        if choices_plain[i] == frequency:
+        if make_frequency_plain(choices[i]) == frequency:
             options.append('<option selected>%s</option>' % choices[i])
         else:
             options.append('<option>%s</option>' % choices[i])
     return output + '%s</select>' % ''.join(options)
 
+
 class Settings(utils.Handler):
+    """Handler for calls to /settings. Creates / displays a user settings page.
+    
+    Attributes:
+        email: logged in user's email
+        account: current user's Account object from datastore [see model.py]
+        alert: current user's Alert object from datastore [see model.py]
+        frequencies: dictionary of frequencies for each facility the user is
+            subscribed to
+    """
+    
     def init(self):
-        """Checks for logged-in user and sets up the page, based on the user's
-        settings."""
+        """Checks for logged-in user and gathers necessary information."""
 
         self.require_logged_in_user()
         self.email = self.user.email()
@@ -66,6 +120,11 @@ class Settings(utils.Handler):
                     self.alert.frequencies[i]
 
     def get(self):
+        """Responds to HTTP GET requests to /settings.
+        
+        Will populate the screen with a list of the user's subscribed 
+        facilities and their respective selected frequencies."""
+        
         self.init()
         fields = []
         
@@ -74,7 +133,7 @@ class Settings(utils.Handler):
                 facility = model.Facility.get_by_key_name(facility_key)
                 fields.append({
                     'title': facility.get_value('title'),
-                    'input': create_input(facility,
+                    'input': create_choice_input(facility,
                                           self.frequencies[facility_key])
                 })
             
@@ -87,6 +146,12 @@ class Settings(utils.Handler):
                     instance=self.request.host.split('.')[0])
 
     def post(self):
+        """Responds to HTTP POST requests to /settings.
+        
+        If the user selected cancel, redirect to main RF page. If the user
+        selected save, it updates the datastore with the newly selected 
+        frequencies, as selected / changed by the user."""
+        
         self.init()
 
         if self.request.get('cancel'):
@@ -97,77 +162,31 @@ class Settings(utils.Handler):
             raise ErrorMessage(403, 'Unable to submit data for %s'
                                % self.user.email())
 
-        if not self.account.nickname:
-            nickname = self.request.get('account_nickname', None)
-            if not nickname:
-                logging.error("Missing editor nickname")
-                #i18n: Error message for request missing nickname
-                raise ErrorMessage(400, 'Missing editor nickname.')
-            self.account.nickname = nickname.strip()
+        logging.info("updating user subscriptions: %s" % self.user)
+        
+        new_frequencies = []
+        #TODO(pfritzsche): better way to pull out only facilities?
+        ignore = ['cc', 'facility_name', 'editable.', 'token', 'embed', 'save']
+        for arg in self.request.arguments():
+            if arg not in ignore:
+                new_frequencies.append(make_frequency_plain(
+                    self.request.get(arg)))
 
-            affiliation = self.request.get('account_affiliation', None)
-            if not affiliation:
-                logging.error("Missing editor affiliation")
-                #i18n: Error message for request missing affiliation
-                raise ErrorMessage(400, 'Missing editor affiliation.')
-            self.account.affiliation = affiliation.strip()
-            self.account.actions.append('edit')
-            self.account.put()
-            logging.info('Assigning nickname "%s" and affiliation "%s" to %s'
-                         % (nickname, affiliation, self.account.email))
+        def update(alert, frequencies):
+            if not frequencies:
+                return
+            
+            for i in range(len(alert.frequencies)):
+                if not frequencies[i]:
+                    del alert.frequencies[i]
+                    del alert.facility_keys[i]
+                else:
+                    alert.frequencies[i] = frequencies[i]
+            
+            db.put(alert)
 
-        logging.info("record by user: %s" % self.user)
-
-        def update(key, facility_type, attributes, request, user, account):
-            facility = db.get(key)
-            minimal_facility = model.MinimalFacility.all().ancestor(
-                facility).get()
-            utcnow = datetime.datetime.utcnow().replace(microsecond=0)
-            report = model.Report(
-                facility,
-                arrived=utcnow,
-                source=get_source_url(request),
-                author=user,
-                observed=utcnow)
-            change_metadata = ChangeMetadata(
-                utcnow, user, account.nickname, account.affiliation)
-            has_changes = False
-            changed_attributes_dict = {}
-
-            for name in facility_type.attribute_names:
-                attribute = attributes[name]
-                # To change an attribute, it has to have been marked editable
-                # at the time the page was rendered, the new value has to be
-                # different than the one in the facility at the time the page
-                # rendered, and the user has to have permission to edit it now.
-                if (is_editable(request, attribute) and
-                    has_changed(facility, request, attribute)):
-                    if not can_edit(account, attribute):
-                        raise ErrorMessage(
-                            403, _(
-                            #i18n: Error message for lacking edit permissions
-                            '%(user)s does not have permission to edit %(a)s')
-                            % {'user': user.email(),
-                               'a': get_message('attribute_name',
-                                                attribute.key().name())})
-                    has_changes = True
-                    apply_change(facility, minimal_facility, report,
-                                 facility_type, request, attribute,
-                                 change_metadata)
-                    changed_attributes_dict[name] = attribute
-
-            if has_changes:
-                # Schedule a task to add a feed record.
-                # We can't really do this inside this transaction, since
-                # feed records are not part of the entity group.
-                # Transactional tasks is the closest we can get.
-                schedule_add_record(self.request, user,
-                    facility, changed_attributes_dict, utcnow)
-                db.put([report, facility, minimal_facility])
-
-        db.run_in_transaction(update, self.facility.key(), self.facility_type,
-                              self.attributes, self.request,
-                              self.user, self.account)
+        db.run_in_transaction(update, self.alert, new_frequencies)
+        
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
