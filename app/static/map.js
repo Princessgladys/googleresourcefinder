@@ -700,10 +700,13 @@ function update_facility_list() {
           cells.push($$('td', {'class': 'value column_' + c}, value));
         }
         var a = $$('a', {}, 'S');
-        jQuery(a).click(function(e) {
-          e.stopPropagation();
-          jQuery.ajax({
-            url: '/subscribe?q=' + e.pageX
+        jQuery(a).bind('click', {key: facility.name, title: title},
+          function(e) {
+            e.stopPropagation();
+            jQuery.ajax({
+              type: 'POST',
+              data: { facility: e.data.key, title: e.data.title },
+              url: '/subscribe'
           });
         });
         cells.push(a);
