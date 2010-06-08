@@ -356,8 +356,9 @@ def reset_datastore():
     setup_new_datastore()
 
 def add_account(email='test@example.com', description='Test',
-                nickname='Test', affiliation='Test',
-                actions=[':view', ':edit']):
+                nickname=None, affiliation=None, actions=[':view', ':edit']):
     """Adds an Account entity to the datastore."""
+    nickname = nickname or email.split('@')[0]
+    affiliation = affiliation or email.split('@')[1]
     Account(email=email, description=description, nickname=nickname,
             affiliation=affiliation, actions=actions).put()
