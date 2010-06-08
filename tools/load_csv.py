@@ -195,14 +195,13 @@ def convert_shoreland_record(record):
     return key_name, observed, {
         'title': ValueInfo(title),
         'healthc_id': ValueInfo(record['facility_healthc_id']),
-            # TODO(kpy) comment=record['AlternateHealthCIDDeleted']
         'pcode': ValueInfo(record['facility_pcode']),
         # Bill Lang recommends (2010-06-07) ignoring the available_beds column.
         'available_beds': ValueInfo(None),
         # NOTE(kpy): Intentionally treating total_beds=0 as "number unknown".
         'total_beds': ValueInfo(
             record['total_beds'] and int(record['total_beds']) or None,
-            None, strip_or_none(record['BED TRACKING COMMENTS'])),
+            comment=record['BED TRACKING COMMENTS']),
         # Didn't bother to convert the 'services' field because it's empty
         # in the CSV from Shoreland.
         'contact_name': ValueInfo(record['contact_name']),
@@ -213,8 +212,6 @@ def convert_shoreland_record(record):
         'commune': ValueInfo(record['commune']),
         'address': ValueInfo(record['address']),
         'location': ValueInfo(location),
-            # TODO(kpy) source=record['SourceHospitalCoordinates']
-            # TODO(kpy) comment=record['AlternateCoordinates']
         'organization': ValueInfo(record['organization']),
         # The 'type' and 'category' columns are swapped.
         'organization_type':
