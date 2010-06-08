@@ -18,7 +18,7 @@ import datetime
 import logging
 import model
 from utils import db, get_message, run, to_local_isotime
-from utils import Handler, HIDDEN_ATTRIBUTE_NAMES
+from utils import ErrorMessage, Handler, HIDDEN_ATTRIBUTE_NAMES
 
 def format(value, localize=False):
     """Formats values in a way that is suitable to display in the bubble.

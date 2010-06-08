@@ -10,12 +10,14 @@ SERVICES = [
     'ORTHOPEDICS',
     'NEUROSURGERY',
     'VASCULAR_SURGERY',
-    'GENERAL_MEDICINE',
+    'INTERNAL_MEDICINE',
     'CARDIOLOGY',
     'INFECTIOUS_DISEASE',
     'PEDIATRICS',
     'POSTOPERATIVE_CARE',
+    'REHABILITATION',
     'OBSTETRICS_GYNECOLOGY',
+    'MENTAL_HEALTH',
     'DIALYSIS',
     'LAB',
     'X_RAY',
@@ -110,7 +112,7 @@ class EditTest(SeleniumTestCase):
         text_fields['location.lat'] = '18.537207 '
         text_fields['location.lon'] = '\t-72.349663'
         checkbox_fields = dict(('services.' + name, True) for name in SERVICES)
-        select_fields = {'organization_type': 'COM', 'category': 'C/S',
+        select_fields = {'organization_type': 'NGO', 'category': 'CLINIC',
                          'construction': 'ADOBE', 'reachable_by_road': 'TRUE',
                          'can_pick_up_patients': 'FALSE',
                          'operational_status': 'NO_SURGICAL_CAPACITY'}
@@ -178,10 +180,12 @@ class EditTest(SeleniumTestCase):
         text_fields['total_beds'] = '0'
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
+        # TODO(kpy): This feature is disabled until we can debug it.
+        # Re-enable this test when the delta feed is working properly.
         # Check that feed is not empty now
-        feed = self.s.go('http://localhost:8081/feeds/delta')
-        assert feed.first('atom:feed')
-        assert feed.first('atom:feed').first('atom:entry')
+        # feed = self.s.go('http://localhost:8081/feeds/delta')
+        # assert feed.first('atom:feed')
+        # assert feed.first('atom:feed').first('atom:entry')
 
 
     def fill_fields(self, text_fields, checkbox_fields, select_fields):
@@ -189,28 +193,22 @@ class EditTest(SeleniumTestCase):
         makes drop-down selections.  Each of the arguments should be a
         dictionary of field names to values."""
         for name, value in text_fields.items():
-            input_xpath = '//input[@name="%s"]' % name
-            self.type(input_xpath, value)
+            self.type('//*[@name=%r]' % name, value)
         for name, value in checkbox_fields.items():
-            checkbox_xpath = '//input[@name="%s"]' % name
-            (value and self.check or self.uncheck)(checkbox_xpath)
+            (value and self.check or self.uncheck)('//*[@name=%r]' % name)
         for name, value in select_fields.items():
-            select_xpath = '//select[@name="%s"]' % name
-            self.select(select_xpath, 'value=' + value)
+            self.select('//*[@name=%r]' % name, 'value=' + value)
 
     def verify_fields(self, text_fields, checkbox_fields, select_fields):
         """Checks the values of text fields, state of checkboxes, and
         selection state of options.  Each of the arguments should be a
         dictionary of field names to values."""
         for name, value in text_fields.items():
-            input_xpath = '//input[@name="%s"]' % name
-            self.assert_value(value, input_xpath)
+            self.assert_value(value, '//*[@name=%r]' % name)
         for name, value in checkbox_fields.items():
-            checkbox_xpath = '//input[@name="%s"]' % name
-            self.assertEquals(value, self.is_checked(checkbox_xpath))
+            assert value == self.is_checked('//*[@name=%r]' % name)
         for name, value in select_fields.items():
-            select_xpath = '//select[@name="%s"]' % name
-            self.assertEquals([value], self.get_selected_values(select_xpath))
+            assert [value] == self.get_selected_values('//*[@name=%r]' % name)
 
     def verify_errors(self, text_fields):
         """Checks that all the given text fields have visible error messages.
