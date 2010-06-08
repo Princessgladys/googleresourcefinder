@@ -173,7 +173,7 @@ if __name__ == '__main__':
         # Initialize the datastore.
         console.connect(
             '%s:%d' % (options.address, options.port), None, 'test', 'test')
-        setup.setup_new_datastore()
+        setup.setup_datastore()
         setup.add_account(email='test@example.com', description='Test',
                           nickname='', affiliation='',
                           actions=[':view', ':edit', 'grant'])

@@ -333,8 +333,10 @@ def to_js_string(string):
     """Escapes quotes and escapes unicode characters to \uXXXX notation"""
     return simplejson.dumps(string).replace("'", "\'")
 
-def setup_new_datastore():
-    """Sets up a new datastore with facility types and translations."""
+def setup_datastore():
+    """Sets up the facility types and translations in a datastore.  (Existing
+    the facility types and messages will be updated; existing Facility or
+    Report information will not be changed or deleted.)"""
     setup_facility_types()
     setup_messages()
 
@@ -353,7 +355,7 @@ def reset_datastore():
     """Wipes everything in the datastore except Accounts and Secrets,
     then sets up the datastore for new data."""
     wipe_datastore()
-    setup_new_datastore()
+    setup_datastore()
 
 def add_account(email='test@example.com', description='Test',
                 nickname=None, affiliation=None, actions=[':view', ':edit']):
