@@ -75,14 +75,26 @@ class Subscribe(Handler):
 
         def update(request, alert, frequencies):
             """Helper function; updates the facility alert list."""
-            
-            frequencies.append((request.get('title'),
-                                request.get('facility'),
-                                alert.default_frequency))
-            frequencies.sort()
-            new_titles, new_keys, new_frequencies = zip(*frequencies)
-            alert.facility_keys = list(new_keys)
-            alert.frequencies = list(new_frequencies)
+
+            titles, keys, freqs = zip(*frequencies)
+            if request.get('facility') in keys:
+                # remove facility from list
+                keys = list(keys)
+                freqs = list(freqs)
+                index = keys.index(request.get('facility'))
+                del keys[index]
+                del freqs[index]
+                alert.facility_keys = keys
+                alert.frequencies = freqs
+            else:
+                # add facility to list
+                frequencies.append((request.get('title'),
+                                    request.get('facility'),
+                                    alert.default_frequency))
+                frequencies.sort()
+                new_titles, new_keys, new_frequencies = zip(*frequencies)
+                alert.facility_keys = list(new_keys)
+                alert.frequencies = list(new_frequencies)
             
             db.put(alert)
 
