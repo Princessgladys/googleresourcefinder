@@ -222,6 +222,7 @@ class Account(db.Model):
                                 # Account entities corresponding to nonexistant
                                 # google accounts.
     actions = db.StringListProperty() # what the account is permitted to do
+    locale = db.StringProperty() # user locale
     requested_actions = db.StringListProperty()
 
 class Message(db.Expando):
@@ -232,7 +233,7 @@ class Message(db.Expando):
       'attribute_name',  # name is an Attribute's key_name
       'attribute_value', # name is a value name in a choice or multi attribute
       'facility_type' # name is a FacilityType's key name
-    ])    
+    ])
     name = db.StringProperty()
     # additional properties for each language (named by language code)
 
@@ -249,7 +250,6 @@ class Alert(db.Model):
     """A subscription by a user to receive notification when details for a
     facility change. Top-level entity, has no parent."""
     user_email = db.StringProperty(required=True) # user to alert
-    locale = db.StringProperty(required=True) # user locale
     facility_keys = db.StringListProperty(required=True) # key of facility
     last_sent = db.DateTimeProperty(required=True, auto_now_add=True)
     # time of previous update

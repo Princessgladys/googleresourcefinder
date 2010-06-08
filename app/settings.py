@@ -114,10 +114,11 @@ class Settings(utils.Handler):
         self.alert = db.GqlQuery('SELECT * FROM Alert WHERE user_email = :1',
                                  self.email).get()
         if self.alert:
-            self.frequencies = {}
+            self.frequencies = []
             for i in range(len(self.alert.facility_keys)):
-                self.frequencies[self.alert.facility_keys[i]] = \
-                    self.alert.frequencies[i]
+                #use tuples to maintain order
+                self.frequencies.append((self.alert.facility_keys[i],
+                    self.alert.frequencies[i]))
 
     def get(self):
         """Responds to HTTP GET requests to /settings.
@@ -129,12 +130,12 @@ class Settings(utils.Handler):
         fields = []
         
         if self.alert:
-            for facility_key in self.frequencies:
-                facility = model.Facility.get_by_key_name(facility_key)
+            fac_keys, freqs = zip(*self.frequencies)
+            for i in range(len(fac_keys)):
+                facility = model.Facility.get_by_key_name(fac_keys[i])
                 fields.append({
                     'title': facility.get_value('title'),
-                    'input': create_choice_input(facility,
-                                          self.frequencies[facility_key])
+                    'input': create_choice_input(facility, freqs[i])
                 })
             
         token = sign(XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
@@ -164,15 +165,20 @@ class Settings(utils.Handler):
 
         logging.info("updating user subscriptions: %s" % self.user)
         
-        new_frequencies = []
         #TODO(pfritzsche): better way to pull out only facilities?
         ignore = ['cc', 'facility_name', 'editable.', 'token', 'embed', 'save']
-        for arg in self.request.arguments():
-            if arg not in ignore:
+        new_frequencies = []
+        facilities = self.request.arguments()
+        facilities.sort()
+                
+        for facility in facilities:
+            if facility not in ignore:
                 new_frequencies.append(make_frequency_plain(
-                    self.request.get(arg)))
+                    self.request.get(facility)))
 
         def update(alert, frequencies):
+            """Helper function; updates the facility alert frequencies."""
+            
             if not frequencies:
                 return
             

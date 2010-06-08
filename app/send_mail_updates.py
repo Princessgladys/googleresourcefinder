@@ -88,6 +88,8 @@ def get_users_to_email():
     updated = False
     for alert in model.Alert.all(): # compile list of facility names per user
         for i in range(len(alert.facility_keys)):
+            account = db.GqlQuery('SELECT * FROM Account WHERE email = :1',
+                                  alert.user_email).get()
             fac = model.Facility.get_by_key_name(alert.facility_keys[i])
             freq = alert.frequencies[i]
             values = fetch_updates(alert, fac, freq)
@@ -95,7 +97,7 @@ def get_users_to_email():
                 updated = True
                 if alert.user_email not in users:
                     users[alert.user_email] = {}
-                users[alert.user_email]['locale'] = alert.locale
+                users[alert.user_email]['locale'] = account.locale
                 users[alert.user_email][fac.get_value('title')] = values
         if updated:
             alert.last_sent = datetime.datetime.now()
