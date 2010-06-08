@@ -212,7 +212,7 @@ def setup_messages():
 
         #i18n: Service provided by a health facility (use Title Case).
         #i18n: Meaning: surgical specialty that focuses on abdominal organs
-        value_message('GENERAL_SURGERY', en='General surgery'),
+        value_message('GENERAL_SURGERY', en='General Surgery'),
         #i18n: Service provided by a health facility (use Title Case).
         #i18n: Meaning: treats diseases and injury to bones, muscles, joints and
         #i18n: Meaning: tendons

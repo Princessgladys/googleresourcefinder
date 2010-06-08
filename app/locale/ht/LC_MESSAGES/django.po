@@ -330,8 +330,8 @@ msgstr "Enfòmasyon jeneral"
 
 #. Service provided by a health facility (use Title Case). Meaning: surgical specialty that focuses on abdominal organs
 #: ../tools/setup.py:215
-msgid "General surgery"
-msgstr "Chiriji jeneral"
+msgid "General Surgery"
+msgstr "Chiriji Jeneral"
 
 #. Proper name of an ID for a healthcare facility, no translation necessary.
 #: ../tools/setup.py:107

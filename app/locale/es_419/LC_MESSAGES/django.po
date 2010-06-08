@@ -99,7 +99,7 @@ msgstr "Camas libres/totales"
 #. Service provided by a health facility (use Title Case).
 #: ../tools/setup.py:263
 msgid "Blood Bank"
-msgstr "Banco de sangre"
+msgstr "Banco de Sangre"
 
 #. Save a copy of the data in CSV format
 #: export.py:140
@@ -109,7 +109,7 @@ msgstr "Exportar CSV"
 #. Service provided by a health facility (use Title Case).
 #: ../tools/setup.py:261
 msgid "CT Scan"
-msgstr "Tomografía computada"
+msgstr "Tomografía Computada"
 
 #. Whether or not a facility can send a vehicle to pick up patients
 #: ../tools/setup.py:150
@@ -184,7 +184,7 @@ msgstr "Nombre de contacto"
 #. Service provided by a health facility (use Title Case).
 #: ../tools/setup.py:265
 msgid "Corpse Removal"
-msgstr "Retiro de cadáver"
+msgstr "Retiro de Cadáver"
 
 #. Country code to load data for
 #: templates/load.html:34
@@ -330,8 +330,8 @@ msgstr "Información general"
 
 #. Service provided by a health facility (use Title Case). Meaning: surgical specialty that focuses on abdominal organs
 #: ../tools/setup.py:215
-msgid "General surgery"
-msgstr "Cirugía general"
+msgid "General Surgery"
+msgstr "Cirugía General"
 
 #. Proper name of an ID for a healthcare facility, no translation necessary.
 #: ../tools/setup.py:107
@@ -366,12 +366,12 @@ msgstr "Si la información es incorrecta o no está especificada, modificala en 
 #. Service provided by a health facility (use Title Case). Meaning: specializing in treating communicable diseases
 #: ../tools/setup.py:235
 msgid "Infectious Disease"
-msgstr "Enfermedades infecciosas"
+msgstr "Enfermedades Infecciosas"
 
 #. Service provided by a health facility (use Title Case). Meaning: deals with diagnosis and (non-surgical) treatment of Meaning: diseases of the internal organs
 #: ../tools/setup.py:229
 msgid "Internal Medicine"
-msgstr "Medicina interna"
+msgstr "Medicina Interna"
 
 #. Error message for invalid date entry
 #: edit.py:140
@@ -461,7 +461,7 @@ msgstr "La longitud debe estar entre -180 y 180"
 #. Service provided by a health facility (use Title Case). Meaning: Care for cognitive and emotional well-being.
 #: ../tools/setup.py:252
 msgid "Mental Health"
-msgstr "Salud mental"
+msgstr "Salud Mental"
 
 #. Type of organization: Organization associated with armed forces
 #: ../tools/setup.py:161
@@ -522,7 +522,7 @@ msgstr "No hay capacidad quirúrgica"
 #. Service provided by a health facility (use Title Case). Meaning: Obstetrics deals with childbirth and care of the mother. Meaning: Gynecology deals with diseases and hygiene of women
 #: ../tools/setup.py:249
 msgid "Obstetrics and Gynecology"
-msgstr "Obstetricia y ginecología"
+msgstr "Obstetricia y Ginecología"
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
 #: static/locale.js:108
@@ -587,7 +587,7 @@ msgstr "Llama para informarte acerca de la disponibilidad"
 #. Service provided by a health facility (use Title Case). care given after surgery until patient is discharged
 #: ../tools/setup.py:241
 msgid "Postoperative Care"
-msgstr "Cuidados posoperatorios"
+msgstr "Cuidados Posoperatorios"
 
 #. Link to print the current view of the application
 #: templates/map.html:97
@@ -741,7 +741,7 @@ msgstr "El valor debe ser un número"
 #. Service provided by a health facility (use Title Case). Meaning: surgical specialty that focuses on arteries and veins
 #: ../tools/setup.py:225
 msgid "Vascular Surgery"
-msgstr "Cirugía vascular"
+msgstr "Cirugía Vascular"
 
 #. Link to go to a page with past versions of the 'master' list
 #: templates/map.html:197
