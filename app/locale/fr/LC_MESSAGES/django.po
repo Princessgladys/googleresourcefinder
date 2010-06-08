@@ -96,20 +96,20 @@ msgstr "Lits disponibles"
 msgid "Beds open / total"
 msgstr "Lits libres/total"
 
-#. Service provided by a health facility.
+#. Service provided by a health facility (use Title Case).
 #: ../tools/setup.py:263
-msgid "Blood bank"
-msgstr "Banque de sang"
+msgid "Blood Bank"
+msgstr "Banque de Sang"
 
 #. Save a copy of the data in CSV format
 #: export.py:140
 msgid "CSV Export"
 msgstr "Exporter au format CSV"
 
-#. Service provided by a health facility.
+#. Service provided by a health facility (use Title Case).
 #: ../tools/setup.py:261
-msgid "CT scan"
-msgstr "Scanner"
+msgid "CT Scan"
+msgstr "CT Scan"
 
 #. Whether or not a facility can send a vehicle to pick up patients
 #: ../tools/setup.py:150
@@ -121,7 +121,7 @@ msgstr "Peut passer prendre les patients"
 msgid "Cancel"
 msgstr "Annuler"
 
-#. Service provided by a health facility.  Meaning: branch of medicine dealing with the heart
+#. Service provided by a health facility (use Title Case). Meaning: branch of medicine dealing with the heart
 #: ../tools/setup.py:232
 msgid "Cardiology"
 msgstr "Cardiologie"
@@ -181,10 +181,10 @@ msgstr "Construction"
 msgid "Contact name"
 msgstr "Nom de la personne à contacter"
 
-#. Service provided by a health facility.
+#. Service provided by a health facility (use Title Case).
 #: ../tools/setup.py:265
-msgid "Corpse removal"
-msgstr "Enlèvement des corps"
+msgid "Corpse Removal"
+msgstr "Enlèvement des Corps"
 
 #. Country code to load data for
 #: templates/load.html:34
@@ -206,7 +206,7 @@ msgstr "Date et heure"
 msgid "Department"
 msgstr "Département"
 
-#. Service provided by a health facility. Meaning: Artificial replacement for lost kidney function.
+#. Service provided by a health facility (use Title Case). Meaning: Artificial replacement for lost kidney function.
 #: ../tools/setup.py:255
 msgid "Dialysis"
 msgstr "Dialyse"
@@ -328,7 +328,7 @@ msgstr "À but lucratif"
 msgid "General Info"
 msgstr "Informations générales"
 
-#. Service provided by a health facility.  Meaning: surgical specialty that focuses on abdominal organs
+#. Service provided by a health facility (use Title Case). Meaning: surgical specialty that focuses on abdominal organs
 #: ../tools/setup.py:215
 msgid "General surgery"
 msgstr "Chirurgie générale"
@@ -363,15 +363,15 @@ msgstr "Hôpital"
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr "En cas d'informations incorrectes ou manquantes, veuillez apporter les modifications souhaitées sur le site Web :"
 
-#. Service provided by a health facility.  Meaning: specializing in treating communicable diseases
+#. Service provided by a health facility (use Title Case). Meaning: specializing in treating communicable diseases
 #: ../tools/setup.py:235
-msgid "Infectious disease"
-msgstr "Maladies infectieuses"
+msgid "Infectious Disease"
+msgstr "Maladies Infectieuses"
 
-#. Service provided by a health facility.  Meaning: deals with diagnosis and (non-surgical) treatment of Meaning: diseases of the internal organs
+#. Service provided by a health facility (use Title Case). Meaning: deals with diagnosis and (non-surgical) treatment of Meaning: diseases of the internal organs
 #: ../tools/setup.py:229
-msgid "Internal medicine"
-msgstr "Médecine interne"
+msgid "Internal Medicine"
+msgstr "Médecine Interne"
 
 #. Error message for invalid date entry
 #: edit.py:140
@@ -388,7 +388,7 @@ msgstr "Nom d'établissement incorrect ou manquant"
 msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
 msgstr "janv. févr. mars avr. mai juin juil. août sept. oct. nov. déc."
 
-#. Service provided by a health facility.
+#. Service provided by a health facility (use Title Case).
 #: ../tools/setup.py:257
 msgid "Lab"
 msgstr "Laboratoire"
@@ -458,10 +458,10 @@ msgstr "Longitude doit être un nombre"
 msgid "Longitude must be between -180 and 180."
 msgstr "Longitude doit être comprise entre -180 et 180"
 
-#. Service provided by a health facility. Meaning: Care for cognitive and emotional well-being.
+#. Service provided by a health facility (use Title Case). Meaning: Care for cognitive and emotional well-being.
 #: ../tools/setup.py:252
-msgid "Mental health"
-msgstr "Santé mentale"
+msgid "Mental Health"
+msgstr "Santé Mentale"
 
 #. Type of organization: Organization associated with armed forces
 #: ../tools/setup.py:161
@@ -493,7 +493,7 @@ msgstr "Nom"
 msgid "Name (required)"
 msgstr "Nom (obligatoire)"
 
-#. service provided by a health facility  Meaning: surgery that involves the nervous system
+#. service provided by a health facility (use Title Case). Meaning: surgery that involves the nervous system
 #: ../tools/setup.py:222
 msgid "Neurosurgery"
 msgstr "Neurochirurgie"
@@ -519,10 +519,10 @@ msgstr "Aucune demande en attente pour %(authorization_role)s  de %(user)s "
 msgid "No surgical capacity"
 msgstr "Aucune capacité chirurgicale"
 
-#. Service provided by a health facility. Meaning: Obstetrics deals with childbirth and care of the mother. Meaning: Gynecology deals with diseases and hygiene of women
+#. Service provided by a health facility (use Title Case). Meaning: Obstetrics deals with childbirth and care of the mother. Meaning: Gynecology deals with diseases and hygiene of women
 #: ../tools/setup.py:249
-msgid "Obstetrics and gynecology"
-msgstr "Obstétrique et gynécologie"
+msgid "Obstetrics and Gynecology"
+msgstr "Obstétrique et Gynécologie"
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
 #: static/locale.js:108
@@ -549,7 +549,7 @@ msgstr "Nom de l'organisation"
 msgid "Organization type"
 msgstr "Type d'organisation"
 
-#. Service provided by a health facility  Meaning: treats diseases and injury to bones, muscles, joints and Meaning: tendons
+#. Service provided by a health facility (use Title Case). Meaning: treats diseases and injury to bones, muscles, joints and Meaning: tendons
 #: ../tools/setup.py:219
 msgid "Orthopedics"
 msgstr "Orthopédie"
@@ -569,7 +569,7 @@ msgstr "PCode :"
 msgid "Payload:"
 msgstr "Données utiles :"
 
-#. Service provided by a health facility.  Meaning: branch of medicine dealing with infants and children
+#. Service provided by a health facility (use Title Case). Meaning: branch of medicine dealing with infants and children
 #: ../tools/setup.py:238
 msgid "Pediatrics"
 msgstr "Pédiatrie"
@@ -584,10 +584,10 @@ msgstr "Téléphone"
 msgid "Please call for availability information."
 msgstr "Merci d'appeler pour connaître les disponibilités."
 
-#. Service provided by a health facility.  care given after surgery until patient is discharged
+#. Service provided by a health facility (use Title Case). care given after surgery until patient is discharged
 #: ../tools/setup.py:241
-msgid "Postoperative care"
-msgstr "Soins postopératoires"
+msgid "Postoperative Care"
+msgstr "Soins Postopératoires"
 
 #. Link to print the current view of the application
 #: templates/map.html:97
@@ -620,7 +620,7 @@ msgstr "Accessible en voiture"
 msgid "Record updated."
 msgstr "Enregistrement mis à jour"
 
-#. Service provided by a health facility.  Meaning: care given to improve and recover lost function after an illness or injury that has caused functional limitations
+#. Service provided by a health facility (use Title Case). Meaning: care given to improve and recover lost function after an illness or injury that has caused functional limitations
 #: ../tools/setup.py:245
 msgid "Rehabilitation"
 msgstr "Réadaptation"
@@ -738,10 +738,10 @@ msgstr "Mise à jour :"
 msgid "Value must be a number."
 msgstr "La valeur doit être un nombre"
 
-#. Service provided by a health facility.  Meaning: surgical specialty that focuses on arteries and veins
+#. Service provided by a health facility (use Title Case). Meaning: surgical specialty that focuses on arteries and veins
 #: ../tools/setup.py:225
-msgid "Vascular surgery"
-msgstr "Chirurgie vasculaire"
+msgid "Vascular Surgery"
+msgstr "Chirurgie Vasculaire"
 
 #. Link to go to a page with past versions of the 'master' list
 #: templates/map.html:197
@@ -753,9 +753,9 @@ msgstr "Accéder aux archives (en anglais)"
 msgid "Wood frame"
 msgstr "Cadre en bois"
 
-#. Service provided by a health facility.
+#. Service provided by a health facility (use Title Case).
 #: ../tools/setup.py:259
-msgid "X-ray"
+msgid "X-Ray"
 msgstr "Radiographie"
 
 #. Form option for a true Boolean value
