@@ -30,8 +30,6 @@ from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
 from utils import db, get_message, html_escape, simplejson
 from utils import to_unicode, users, _
 
-# TODO(shakusa) Add per-attribute comment fields
-
 XSRF_KEY_NAME = 'resource-finder-edit'
 DAY_SECS = 24 * 60 * 60
 
@@ -233,6 +231,7 @@ class GeoPtAttributeType(AttributeType):
         #i18n: Label for text input
         return (to_unicode(_('Latitude')) + ' '
                 + self.text_input('%s.lat' % name, lat) +
+                '&nbsp;' +
                 #i18n: Label for text input
                 to_unicode(_('Longitude')) + ' '
                 + self.text_input('%s.lon' % name, lon))
@@ -289,6 +288,14 @@ def has_changed(facility, request, attribute):
     previous = request.get('editable.%s' % name, None)
     return previous != current
 
+def has_comment_changed(facility, request, attribute):
+    """Returns True if the request has a comment for the given attribute
+    and that comment has changed from the previous value in facility."""
+    name = attribute.key().name()
+    old_comment = facility.get_comment(name)
+    new_comment = request.get('%s__comment' % name)
+    return new_comment and (old_comment != new_comment)
+
 def is_editable(request, attribute):
     """Returns true if the special hidden 'editable.name' field is set in
     the request, indicating that the given field was editable by the user
@@ -338,13 +345,17 @@ class Edit(utils.Handler):
             if name in HIDDEN_ATTRIBUTE_NAMES:
                 continue
             attribute = self.attributes[name]
+            comment = self.facility.get_comment(attribute.key().name())
+            if not comment:
+                comment = ''
             if can_edit(self.account, attribute):
                 fields.append({
                     'name': name,
                     'title': get_message('attribute_name', name),
                     'type': attribute.type,
                     'input': make_input(self.facility, attribute),
-                    'json': render_attribute_as_json(self.facility, attribute)
+                    'json': render_attribute_as_json(self.facility, attribute),
+                    'comment': '',
                 })
             else:
                 readonly_fields.append({
@@ -416,8 +427,10 @@ class Edit(utils.Handler):
                 # at the time the page was rendered, the new value has to be
                 # different than the one in the facility at the time the page
                 # rendered, and the user has to have permission to edit it now.
+                value_changed = has_changed(facility, request, attribute)
+                comment_changed = has_comment_changed(facility, request, attribute)
                 if (is_editable(request, attribute) and
-                    has_changed(facility, request, attribute)):
+                    (value_changed or comment_changed)):
                     if not can_edit(account, attribute):
                         raise ErrorMessage(
                             403, _(
@@ -437,8 +450,11 @@ class Edit(utils.Handler):
                 # We can't really do this inside this transaction, since
                 # feed records are not part of the entity group.
                 # Transactional tasks is the closest we can get.
-                schedule_add_record(self.request, user,
-                    facility, changed_attributes_dict, utcnow)
+                # TODO(kpy): This is disabled for now because it causes
+                # intermittent exceptions.  Re-enable it when we have it
+                # tested and working.
+                # schedule_add_record(self.request, user,
+                #     facility, changed_attributes_dict, utcnow)
                 db.put([report, facility, minimal_facility])
                 cache.MINIMAL_FACILITIES.flush()
 
