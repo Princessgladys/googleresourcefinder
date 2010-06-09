@@ -14,15 +14,34 @@
 
 """Handler for feed posting requests."""
 
+import logging
+
 from edxl_have import Hospital
 from feeds.feedutils import handle_feed_post
 from model import Report
 from utils import Handler, run
-import feeds.edxl_have_record  # register the EDXL-HAVE record type
 
 
 class Incoming(Handler):
+
+    def get(self, token=None):
+        """Subscription verification from hub."""
+
+        # TODO(guido): Check other hub parameters.
+
+        # Reference:
+        # pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html
+        challenge = self.request.GET['hub.challenge']
+        self.response.out.write(challenge)
+
     def post(self, token):
+        """Feed update notification from hub."""
+
+        # TODO(kpy): Remove this when it's been fully tested.
+        logging.info("POST headers:\n%s", self.request.headers)
+        logging.info("POST body:\n%s", self.request.body)
+
+        # TODO(guido): Check hub signature.
 
         # TODO(shakusa) Implement an authorization token scheme
         # This involves changes to the data model so that we can store
