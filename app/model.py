@@ -250,10 +250,10 @@ class Alert(db.Model):
     """A subscription by a user to receive notification when details for a
     facility change. Top-level entity, has no parent."""
     user_email = db.StringProperty(required=True) # user to alert
-    facility_keys = db.StringListProperty(required=True) # key of facility
-    last_sent = db.DateTimeProperty(required=True, auto_now_add=True)
+    facility_keys = db.StringListProperty() # key of facility
+    last_sent = db.DateTimeProperty(auto_now_add=True)
     # time of previous update
-    frequencies = db.StringListProperty(required=True)
+    frequencies = db.StringListProperty()
     # frequency at which to send updates. options:
     #   '1/min': send an alert whenever something changes
     #   '1/day': send one alert e-mail per day

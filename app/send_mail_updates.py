@@ -128,7 +128,7 @@ def send_update(email, values):
     message.sender = 'updates@resource-finder.appspotmail.com'
     message.to = email
     # TODO(pfritzsche): make sure unicode chars render properly in the e-mail
-    message.subject = utils.to_unicode(_('Resource Finder Facility Updatés'))
+    message.subject = utils.to_unicode(_('Resource Finder Facility Updates'))
     message.body = body
 
     message.send()

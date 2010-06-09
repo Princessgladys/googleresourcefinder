@@ -18,7 +18,8 @@ import sys
 from google.appengine.api import memcache
 from feeds.geo import distance
 from utils import *
-from model import Attribute, Facility, FacilityType, Message, MinimalFacility
+from model import Alert, Attribute, Facility, FacilityType, Message
+from model import MinimalFacility
 
 def make_jobjects(entities, transformer, *args):
     """Run a sequence of entities through a transformer function that produces
@@ -50,7 +51,7 @@ def facility_type_transformer(index, facility_type, attribute_is):
                     facility_type.minimal_attribute_names)]}
 
 def minimal_facility_transformer(index, facility, attributes, facility_types,
-                                 facility_type_is, center, radius):
+                                 facility_type_is, center, radius, subscribed):
     """Construct the JSON object for a Facility."""
     # Gather all the attributes
     values = [None]
@@ -66,10 +67,12 @@ def minimal_facility_transformer(index, facility, attributes, facility_types,
             values.append(None)
 
     # Pack the results into an object suitable for JSON serialization.
+    subscribed = 'U' if facility.parent_key().name() in subscribed else 'S'
     facility_jobject = {
         'name': facility.parent_key().name(),
         'type': facility_type_is[facility.type],
-        'values' : values,
+        'values': values,
+        'subscribed': subscribed
     }
     if facility.has_value('location'):
         location = {
@@ -99,7 +102,8 @@ def render_json(center=None, radius=None):
     """Dump the data as a JSON string."""
 
     # TODO(shakusa) Use memcache more!
-
+    user_alert = Alert.all().filter('user_email =',
+                                    users.get_current_user().email()).get()
     facility_types = list(FacilityType.all())
 
     # Get the set of attributes to return
@@ -121,7 +125,7 @@ def render_json(center=None, radius=None):
     facility_jobjects, facility_is = make_jobjects(
         MinimalFacility.all().order(MinimalFacility.get_stored_name('title')),
         minimal_facility_transformer, attributes, facility_types,
-        facility_type_is, center, radius)
+        facility_type_is, center, radius, user_alert.facility_keys)
     total_facility_count = len(facility_jobjects) - 1
     logging.info("NUMBER OF FACILITIES %d" % total_facility_count)
 
