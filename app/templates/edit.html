@@ -132,6 +132,12 @@ tr.field.text { vertical-align: top; }
             <div id="{{field.name}}_errormsg" class="hidden"></div>
           </div>
         </td>
+        <td>            
+            <div id="{{field.name}}__comment" class="comment">
+                &nbsp;&nbsp;{% trans 'comment:' %}<input type="text" name="{{field.name}}__comment"
+                       value="{{field.comment|escape}}" class="comment">
+            </div>
+        </td>
       </tr>
     {% endfor %}
     <tr>

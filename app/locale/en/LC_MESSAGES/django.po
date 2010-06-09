@@ -46,13 +46,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Error message for lacking edit permissions
-#: edit.py:426
+#: edit.py:439
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr ""
 
 #. Form option to indicate that a value is not specified
-#: edit.py:212 edit.py:197 edit.py:171
+#: edit.py:169 edit.py:210 edit.py:195
 msgid "(unspecified)"
 msgstr ""
 
@@ -117,7 +117,7 @@ msgid "Can pick up patients"
 msgstr ""
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:148
+#: templates/edit.html:154
 msgid "Cancel"
 msgstr ""
 
@@ -239,7 +239,7 @@ msgid "District"
 msgstr ""
 
 #. E-mail address
-#: edit.py:118 ../tools/setup.py:119
+#: ../tools/setup.py:119 edit.py:116
 msgid "E-mail"
 msgstr ""
 
@@ -374,12 +374,12 @@ msgid "Internal Medicine"
 msgstr ""
 
 #. Error message for invalid date entry
-#: edit.py:140
+#: edit.py:138
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr ""
 
 #. Error message for request missing facility name.
-#: edit.py:327 bubble.py:146
+#: edit.py:334 bubble.py:146
 msgid "Invalid or missing facility name."
 msgstr ""
 
@@ -404,7 +404,7 @@ msgid "Last updated:"
 msgstr ""
 
 #. Label for text input
-#: edit.py:233
+#: edit.py:231
 msgid "Latitude"
 msgstr ""
 
@@ -444,7 +444,7 @@ msgid "Location:"
 msgstr ""
 
 #. Label for text input
-#: edit.py:236
+#: edit.py:235
 msgid "Longitude"
 msgstr ""
 
@@ -484,7 +484,7 @@ msgid "NGO"
 msgstr ""
 
 #. a person's name
-#: edit.py:114
+#: edit.py:112
 msgid "Name"
 msgstr ""
 
@@ -499,7 +499,7 @@ msgid "Neurosurgery"
 msgstr ""
 
 #. Form option for a false Boolean value
-#: bubble_test.py:68 edit.py:175 bubble.py:47
+#: bubble_test.py:68 edit.py:173 bubble.py:47
 msgid "No"
 msgstr ""
 
@@ -575,7 +575,7 @@ msgid "Pediatrics"
 msgstr ""
 
 #. telephone number
-#: edit.py:116 ../tools/setup.py:117
+#: edit.py:114 ../tools/setup.py:117
 msgid "Phone"
 msgstr ""
 
@@ -616,7 +616,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:453
+#: edit.py:466
 msgid "Record updated."
 msgstr ""
 
@@ -654,7 +654,7 @@ msgid "Resource Finder"
 msgstr ""
 
 #. Button text to save data
-#: templates/edit.html:144
+#: templates/edit.html:150
 msgid "Save"
 msgstr ""
 
@@ -759,7 +759,7 @@ msgid "X-Ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: bubble_test.py:67 bubble.py:47 edit.py:173
+#: bubble_test.py:67 bubble.py:47 edit.py:171
 msgid "Yes"
 msgstr ""
 
@@ -793,6 +793,11 @@ msgstr ""
 #. Heading for number of total beds at a hospital
 #: templates/hospital_bubble.html:53
 msgid "capacity"
+msgstr ""
+
+#. TODO: Add missing message description or meaning
+#: templates/edit.html:137
+msgid "comment:"
 msgstr ""
 
 #. Header for the number of facilities less than 10 miles from a location.
