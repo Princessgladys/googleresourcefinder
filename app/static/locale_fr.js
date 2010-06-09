@@ -24,7 +24,7 @@ locale = function() {
   //i18n: Label for every item in a list.
   messages.ALL = "Tous";
 
-  //i18n: Date at a give time (example: Jan 21, 2010 at 14:32 UTC-4)
+  //i18n: Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME = "${DATE} \u00e0 ${TIME}";
 
   //i18n: Local date format (example: Jan 21, 2010)
@@ -71,6 +71,14 @@ locale = function() {
 
   //i18n: A place that provides a particular service
   messages.FACILITY = "\u00c9tablissement";
+
+  //i18n: Proper name of an ID for a healthcare facility defined by the
+  //i18n: Pan-American Health Organization, no translation necessary.
+  messages.FACILITY_PCODE = "PCode\u00a0:";
+
+  //i18n: Proper name of an ID for a healthcare facility, no translation
+  //i18n: necessary.
+  messages.HEALTHC_ID = "ID HealthC\u00a0:";
 
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.

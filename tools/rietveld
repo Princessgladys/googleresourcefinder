@@ -31,7 +31,7 @@ function usage() {
 
 # Given a comma-separated list, append @$DOMAIN to any plain usernames.
 function get_email_addresses() {
-  echo ",$1," | sed -e 's/,,*/,,/g' -e 's/,\([a-z0-9_-]\+\),/,\1@'$DOMAIN',/g'
+  echo ",$1," | sed -E -e 's/,,*/,,/g' -e 's/,([a-z0-9_-]+),/,\1@'$DOMAIN',/g'
 }
 
 # Figure out where we are.
