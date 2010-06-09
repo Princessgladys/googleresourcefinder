@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Renders and populates a settings page for the logged in user.
+"""Acts on HTTP POST requests to /subscribe and adds subscriptions to a user's
+alert information in the datastore.
 
-Accesses the Account and Alert data structures to retrieve any information
-pertaining to the logged in user that said user has control over changing.
-
-Settings(utils.handler): renders the page; handles GET and POST requests
+Subscribe(utils.Handler): handles calls to /subscribe
 """
 
 __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
@@ -66,11 +64,12 @@ class Subscribe(Handler):
                                          self.alert.frequencies[i]))
 
     def get(self):
-        """Responds to HTTP GET requests to /subscribe."""
+        """Responds to HTTP GET requests to /subscribe; does nothing."""
         pass
 
     def post(self):
-        """Responds to HTTP POST requests to /subscribe."""
+        """Responds to HTTP POST requests to /subscribe by adding / subtracting
+        user subscriptions to / from the datastore, as necessary."""
         self.init()
 
         def update(request, alert, frequencies):
