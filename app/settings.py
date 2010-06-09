@@ -166,7 +166,7 @@ class Settings(utils.Handler):
                 'df', 2)
         })
         
-        if self.alert:
+        if self.alert.frequencies:
             fac_keys, freqs = zip(*self.frequencies)
             for i in range(len(fac_keys)):
                 facility = model.Facility.get_by_key_name(fac_keys[i])
