@@ -300,12 +300,12 @@ function maybe_selected(selected) {
   return selected ? ' selected' : '';
 }
 
-function make_icon(title, status, detail) {
+function make_icon(title, status, detail, opt_icon, opt_icon_size) {
   var text = detail ? title : '';
   var text_size = detail ? 10 : 0;
   var text_fill = STATUS_TEXT_COLORS[status];
-  var icon = 'greek_cross_4w10';
-  var icon_size = '12';
+  var icon = opt_icon || 'greek_cross_6w14';
+  var icon_size = opt_icon_size || '16';
   var icon_fill = STATUS_ICON_COLORS[status];
   var icon_outline = 'fff';
   var params = [
@@ -343,9 +343,9 @@ function initialize_map() {
   info = new google.maps.InfoWindow();
 
   var cluster_style = {
-    url: 'static/greek_cross36.png',
-    height: 36,
-    width: 36,
+    url: make_icon(null, 1, null, 'greek_cross_12w30', '32'),
+    height: 32,
+    width: 32,
     opt_textColor: '#fff',
     Z: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
   };
@@ -438,6 +438,10 @@ function initialize_markers() {
   for (var f = 1; f < facilities.length; f++) {
     var facility = facilities[f];
     var location = facility.values[attributes_by_name.location];
+    if (!location) {
+      markers[f] = null;
+      continue;
+    }
     var title = facility.values[attributes_by_name.title];
     markers[f] = new google.maps.Marker({
       position: new google.maps.LatLng(location.lat, location.lon),
@@ -683,6 +687,12 @@ function update_facility_list() {
     var f = selected_division.facility_is[i];
     var facility = facilities[f];
     var facility_type = facility_types[facility.type];
+    if (!markers[f]) {
+      // TODO(kpy): For now, facilities without locations are hidden
+      // from the list.  Once we have a way to show the detail window for
+      // facilities without locations, we can include them in the list.
+      continue;
+    }
     if (selected_status_i === 0 ||
         facility_status_is[f] === selected_status_i) {
       var row = $$('tr', {
@@ -734,6 +744,7 @@ function update_print_facility_list() {
       var address;
       var general_info;
       var healthc_id;
+      var pcode;
       if (facility) {
         var values = facility.values;
         total_beds = values[attributes_by_name.total_beds];
@@ -741,6 +752,7 @@ function update_print_facility_list() {
         address = values[attributes_by_name.address];
         general_info = values[attributes_by_name.contact_name];
         healthc_id = values[attributes_by_name.healthc_id];
+        pcode = values[attributes_by_name.pcode];
         var phone = values[attributes_by_name.phone];
         if (phone) {
           general_info = (general_info ? general_info + ' ' : '')
@@ -755,8 +767,9 @@ function update_print_facility_list() {
             KM: format_number(dist_meters * METERS_TO_KM, 2)});
       }
       var title = facility.values[attributes_by_name.title];
-      var facility_name = title + ' - ID:' + facility.name
-        + ' - HealthC ID: ' + render(healthc_id);
+      var facility_name = title + ' - '
+        + locale.HEALTHC_ID() + ' ' + render(healthc_id)
+        + ' - ' + locale.FACILITY_PCODE() + ' ' + render(pcode);
       cells.push($$('td', {'class': 'facility-beds-open'}, render(open_beds)));
       cells.push($$('td', {'class': 'facility-beds-total'},render(total_beds)));
       cells.push($$('td', {'class': 'facility-title'}, render(facility_name)));
@@ -1136,30 +1149,32 @@ function select_facility(facility_i, ignore_current) {
     return;
   }
 
-  // Pop up the InfoWindow on the selected clinic.
+  // Pop up the InfoWindow on the selected clinic, if it has a location.
   info.close();
 
-  show_loading(true);
-  jQuery.ajax({
-    url: 'bubble?facility_name=' + selected_facility.name,
-    type: 'GET',
-    timeout: 10000,
-    error: function(request, textStatus, errorThrown){
-      log(textStatus + ', ' + errorThrown);
-      alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
-      show_loading(false);
-    },
-    success: function(result){
-      info.setContent(result);
-      info.open(map, markers[selected_facility_i]);
-      // Sets up the tabs and should be called after the DOM is created.
-      jQuery('#bubble-tabs').tabs();
-      show_loading(false);
-    }
-  });
+  if (markers[selected_facility_i]) {
+    show_loading(true);
+    jQuery.ajax({
+      url: 'bubble?facility_name=' + selected_facility.name,
+      type: 'GET',
+      timeout: 10000,
+      error: function(request, textStatus, errorThrown){
+        log(textStatus + ', ' + errorThrown);
+        alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
+        show_loading(false);
+      },
+      success: function(result){
+        info.setContent(result);
+        info.open(map, markers[selected_facility_i]);
+        // Sets up the tabs and should be called after the DOM is created.
+        jQuery('#bubble-tabs').tabs();
+        show_loading(false);
+      }
+    });
 
-  // Enable the Print link
-  enable_print_link();
+    // Enable the Print link (which requires a center location).
+    enable_print_link();
+  }
 }
 
 function show_loading(show) {
@@ -1330,10 +1345,10 @@ function edit_handler(edit_url) {
   return false;
 }
 
-function request_role_handler(request_url) {
+function request_action_handler(request_url) {
   // Use AJAX to load the form in the InfoWindow, then reopen the
   // InfoWindow so that it resizes correctly.
-  log('reqest role:', request_url);
+  log('reqest action:', request_url);
   $j.ajax({
     url: request_url,
     type: 'POST',

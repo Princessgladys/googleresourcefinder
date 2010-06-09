@@ -51,13 +51,13 @@
    * makes an edit. If the fields are not present, returns true.
    */
   function validate_name_affil() {
-    var nickname = $('auth_nickname');
+    var nickname = $('account_nickname');
     if (!nickname) {
       return true;
     }
     var valid = validate_required_string(nickname);
     // careful to avoid short-circuiting here
-    return validate_required_string($('auth_affiliation')) && valid;
+    return validate_required_string($('account_affiliation')) && valid;
   }
 
   /**
