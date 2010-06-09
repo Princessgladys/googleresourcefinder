@@ -17,7 +17,7 @@ class Struct:
 # Configuration profiles for Selenium testing.
 CONFIGS = {
     'local': Struct(
-        base_url='http://localhost:8080',
+        base_url='http://localhost:8081',
         user_name='test@example.com',
         login_form='//form[@action="/_ah/login"]',
         login_email='//input[@id="email"]',
@@ -118,6 +118,8 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
 
     def wait_for_element(self, locator):
        """Waits until the given element is present."""
+       # For some reason, this wait doesn't always work unless we do it twice.
+       self.wait_until(self.is_element_present, locator)
        self.wait_until(self.is_element_present, locator)
 
     def assert_element(self, locator):
