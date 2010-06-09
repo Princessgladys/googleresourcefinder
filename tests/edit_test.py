@@ -109,8 +109,10 @@ class EditTest(SeleniumTestCase):
         text_fields['account_affiliation'] = 'Test'
         text_fields['available_beds'] = '   1'
         text_fields['total_beds'] = '2\t  '
+        text_fields['total_beds__comment'] = 'comment1'
         text_fields['location.lat'] = '18.537207 '
         text_fields['location.lon'] = '\t-72.349663'
+        text_fields['location__comment'] = 'comment2'
         checkbox_fields = dict(('services.' + name, True) for name in SERVICES)
         select_fields = {'organization_type': 'NGO', 'category': 'CLINIC',
                          'construction': 'ADOBE', 'reachable_by_road': 'TRUE',
@@ -136,10 +138,13 @@ class EditTest(SeleniumTestCase):
         del text_fields['account_affiliation']
 
         # Check that the new values were saved, and are pre-filled in the form
+        # except for comments which should remain empty.
         text_fields['available_beds'] = '1'  # whitespace should be gone
         text_fields['total_beds'] = '2'  # whitespace should be gone
         text_fields['location.lat'] = '18.537207'  # whitespace should be gone
         text_fields['location.lon'] = '-72.349663'  # whitespace should be gone
+        text_fields['total_beds__comment'] = ''
+        text_fields['location__comment'] = ''
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
         # Now empty everything
