@@ -457,6 +457,7 @@ class Edit(utils.Handler):
                 # schedule_add_record(self.request, user,
                 #     facility, changed_attributes_dict, utcnow)
                 db.put([report, facility, minimal_facility])
+                taskqueue.add(url='/send_mail_updates')
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
                               self.attributes, self.request,

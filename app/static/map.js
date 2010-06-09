@@ -677,14 +677,6 @@ function update_facility_legend() {
   set_children($('legend-tbody'), rows);
 }
 
-function swap_subscribe_item(e) {
-  if (e.srcElement.innerHTML == "S") {
-    e.srcElement.innerHTML = "U";
-  } else {
-    e.srcElement.innerHTML = "S";
-  }
-}
-
 // Repopulate the facility list based on the selected division and status.
 function update_facility_list() {
   if (!$('facility-tbody')) {
@@ -717,18 +709,6 @@ function update_facility_list() {
           var value = summary_columns[c].get_value(facility.values);
           cells.push($$('td', {'class': 'value column_' + c}, value));
         }
-        var a = $$('a', {}, facility.subscribed);
-        jQuery(a).bind('click', {key: facility.name, title: title},
-          function(e) {
-            e.stopPropagation();
-            jQuery.ajax({
-              type: 'POST',
-              data: { facility: e.data.key, title: e.data.title },
-              url: '/subscribe',
-              success: swap_subscribe_item(e)
-          });
-        });
-        cells.push(a);
       } else {
         for (var c = 1; c < summary_columns.length; c++) {
           cells.push($$('td'));
@@ -1058,7 +1038,7 @@ function division_and_status_selector(division_i, status_i) {
 }
 
 function facility_selector(facility_i) {
-  return function (e) {
+  return function () {
     select_facility(facility_i);
   };
 }
