@@ -40,6 +40,14 @@
     {% endcomment %}
     {% trans "Last updated:" %} {{last_updated|escape}}
   </h2>
+  {% ifequal special.operational_status.value 'Closed or closing' %}
+    <div style="color:#a00; font-size:14px;">
+      {% comment %}
+      TODO: Localize text
+      {% endcomment %}
+      <strong>Note:</strong> This facility has been marked closed.
+    </div>
+  {% endifequal %}
   <table class="scorecard" cellpadding="0" cellspacing="0">
     <tbody>
       <tr>
