@@ -18,33 +18,44 @@ import datetime
 import logging
 import model
 from utils import db, get_message, run, to_local_isotime
-from utils import Handler, HIDDEN_ATTRIBUTE_NAMES
+from utils import ErrorMessage, Handler, HIDDEN_ATTRIBUTE_NAMES
 
-def format(value):
-    """Formats values in a way that is suitable to display in the bubble."""
+def format(value, localize=False):
+    """Formats values in a way that is suitable to display in the bubble.
+    If 'localize' is true, the value is treated as a localizable message key or
+    list of message keys to be looked up in the 'attribute_value' namespace."""
+    if localize:
+        if isinstance(value, list):
+            value = [get_message('attribute_value', item) for item in value]
+        else:
+            value = get_message('attribute_value', value)
     if isinstance(value, unicode):
         return value.encode('utf-8')
-    if isinstance(value, str):
+    if isinstance(value, str) and value != '':
         return value.replace('\n', ' ')
-    if isinstance(value, list):
-        return ', '.join(get_message('attribute_value', v) for v in value)
+    if isinstance(value, list) and value != []:
+        return ', '.join(value).encode('utf-8')
     if isinstance(value, datetime.datetime):
         return to_local_isotime(value.replace(microsecond=0))
     if isinstance(value, db.GeoPt):
-        return '(%f, %f)' % (value.lat, value.lon);
+        latitude = u'%.4f\u00b0 %s' % (
+            abs(value.lat), value.lat >= 0 and 'N' or 'S')
+        longitude = u'%.4f\u00b0 %s' % (
+            abs(value.lon), value.lon >= 0 and 'E' or 'W')
+        return (latitude + ', ' + longitude).encode('utf-8')
     if isinstance (value, bool):
         return value and format(_('Yes')) or format(_('No'))
-    if value is not None and value != 0:
+    if value or value == 0:
         return value
     return u'\u2013'.encode('utf-8')
 
 class ValueInfo:
     """Simple struct used by the django template to extract values"""
-    def __init__(self, label, value, author=None, affiliation=None,
+    def __init__(self, name, value, localize, author=None, affiliation=None,
                  comment=None, date=None):
-        self.label = format(label)
+        self.label = get_message('attribute_name', name)
         self.raw = value
-        self.value = format(value)
+        self.value = format(value, localize)
         self.author = format(author)
         self.affiliation = format(affiliation)
         self.comment = format(comment)
@@ -52,13 +63,22 @@ class ValueInfo:
 
 class ValueInfoExtractor:
     """Base class to determine attributes to display in the bubble"""
-    def __init__(self, special_attribute_names):
+
+    # TODO(kpy): The localized_attribute_names could be determined by looking
+    # for attributes with type 'choice' or 'multi'.  Specifying them here is
+    # redundant but saves us having to load Attribute entities from the
+    # datastore.  If the cost of loading them turns out to be small, get rid
+    # of this redundancy.
+    def __init__(self, special_attribute_names, localized_attribute_names):
         """Initializes the ValueInfo Extractor.
 
         Args:
-          special_attribute_names: attribute names that are rendered
-          specially in the bubble, not in the general list of attributes"""
+          special_attribute_names: names of attributes that are rendered
+              specially in the bubble, not in the general list of attributes
+          localized_attribute_names: names of attributes whose values should
+              be localized (i.e. choice or multi attributes)"""
         self.special_attribute_names = special_attribute_names
+        self.localized_attribute_names = localized_attribute_names
 
     def extract(self, facility, attribute_names):
         """Extracts attributes from the given facility.
@@ -71,7 +91,7 @@ class ValueInfoExtractor:
           A 3-tuple of specially-handled ValueInfos, non-special ValueInfos,
           and ValueInfos to be displayed in change details"""
         special = dict(
-            (a, ValueInfo(get_message('attribute_name', a), None))
+            (a, ValueInfo(get_message('attribute_name', a), None, False))
             for a in self.special_attribute_names)
         general = []
         details = []
@@ -81,8 +101,9 @@ class ValueInfoExtractor:
             if not value:
                 continue
             value_info = ValueInfo(
-                get_message('attribute_name', name),
+                name,
                 value,
+                name in self.localized_attribute_names,
                 facility.get_author_nickname(name),
                 facility.get_author_affiliation(name),
                 facility.get_comment(name),
@@ -99,21 +120,19 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
 
     def __init__(self):
         ValueInfoExtractor.__init__(
-            self, ['title', 'location', 'available_beds', 'total_beds',
-                   'healthc_id', 'address', 'services'])
+            self,
+            ['title', 'location', 'available_beds', 'total_beds',
+             'healthc_id', 'pcode', 'address', 'services'],
+            # TODO(kpy): This list is redundant; see the comment above
+            # in ValueInfoExtractor.
+            ['services', 'organization_type', 'category', 'construction',
+             'operational_status']
+        )
 
     def extract(self, facility, attribute_names):
         return ValueInfoExtractor.extract(
             self, facility, filter(lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
                                    attribute_names))
-
-    def format_services(self, services):
-        if services == '&ndash;':
-            return services
-        service_titles = []
-        for name in services.split(', '):
-            service_titles.append(get_message('attribute_value', name))
-        return ', '.join(service_titles)
 
 VALUE_INFO_EXTRACTORS = {
     'hospital': HospitalValueInfoExtractor(),

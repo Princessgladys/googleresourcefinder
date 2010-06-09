@@ -19,14 +19,15 @@ import re
 import urlparse
 import utils
 import wsgiref
-from access import check_user_role
+
+from access import check_action_permitted
+from feed_provider import schedule_add_record
+from feeds.crypto import sign, verify
 from main import USE_WHITELISTS
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
-from utils import db, get_message, html_escape, simplejson, to_unicode, users, _
-from feeds.crypto import sign, verify
-
-# TODO(shakusa) Add per-attribute comment fields
+from utils import db, get_message, html_escape, simplejson
+from utils import to_unicode, users, _
 
 XSRF_KEY_NAME = 'resource-finder-edit'
 DAY_SECS = 24 * 60 * 60
@@ -115,7 +116,7 @@ class ContactAttributeType(AttributeType):
             _('E-mail'), self.text_input(name + '.email', contact_email),
         )
 
-    def to_stored_value(self, name, value, request, attribute):
+    def parse_input(self, report, name, value, request, attribute):
         contact = (request.get(name + '.name', '') + '|' +
                    request.get(name + '.phone', '') + '|' +
                    request.get(name + '.email', ''))
@@ -164,11 +165,11 @@ class BoolAttributeType(AttributeType):
         else:
             value = ''
         for choice, title in [
-            #i18n: Form option not specified
+            #i18n: Form option to indicate that a value is not specified
             ('', to_unicode(_('(unspecified)'))),
-            #i18n: Form option for agreement
+            #i18n: Form option for a true Boolean value
             ('TRUE', to_unicode(_('Yes'))),
-            #i18n: Form option for disagreement
+            #i18n: Form option for a false Boolean value
             ('FALSE', to_unicode(_('No')))]:
             selected = (value == choice) and 'selected' or ''
             options.append('<option value="%s" %s>%s</option>' %
@@ -190,7 +191,7 @@ class ChoiceAttributeType(AttributeType):
             value = ''
         for choice in [''] + attribute.values:
             message = get_message('attribute_value', choice)
-            #i18n: Form option not specified
+            #i18n: Form option to indicate that a value is not specified
             title = html_escape(message or to_unicode(_('(unspecified)')))
             selected = (value == choice) and 'selected' or ''
             options.append('<option value="%s" %s>%s</option>' %
@@ -205,7 +206,7 @@ class MultiAttributeType(AttributeType):
         checkboxes = []
         for choice in attribute.values:
             message = get_message('attribute_value', choice)
-            #i18n: Form option not specified
+            #i18n: Form option to indicate that a value is not specified
             title = html_escape(message or to_unicode(_('(unspecified)')))
             checked = (choice in value) and 'checked' or ''
             id = name + '.' + choice
@@ -229,6 +230,7 @@ class GeoPtAttributeType(AttributeType):
         #i18n: Label for text input
         return (to_unicode(_('Latitude')) + ' '
                 + self.text_input('%s.lat' % name, lat) +
+                '&nbsp;' +
                 #i18n: Label for text input
                 to_unicode(_('Longitude')) + ' '
                 + self.text_input('%s.lon' % name, lon))
@@ -285,19 +287,27 @@ def has_changed(facility, request, attribute):
     previous = request.get('editable.%s' % name, None)
     return previous != current
 
+def has_comment_changed(facility, request, attribute):
+    """Returns True if the request has a comment for the given attribute
+    and that comment has changed from the previous value in facility."""
+    name = attribute.key().name()
+    old_comment = facility.get_comment(name)
+    new_comment = request.get('%s__comment' % name)
+    return new_comment and (old_comment != new_comment)
+
 def is_editable(request, attribute):
     """Returns true if the special hidden 'editable.name' field is set in
     the request, indicating that the given field was editable by the user
     at the time the edit page was rendered."""
     return 'editable.%s' % attribute.key().name() in request.arguments()
 
-def can_edit(auth, attribute):
+def can_edit(account, attribute):
     """Returns True if the user can edit the given attribute."""
-    return not attribute.edit_role or check_user_role(
-        auth, attribute.edit_role)
+    return not attribute.edit_action or check_action_permitted(
+        account, attribute.edit_action)
 
 def get_suggested_nickname(user):
-    """Returns the suggested Authorization.nickname based on a user.nickname"""
+    """Returns the suggested Account.nickname based on a user.nickname"""
     return re.sub('@.*', '', user and user.nickname() or '')
 
 def get_source_url(request):
@@ -315,7 +325,7 @@ class Edit(utils.Handler):
         self.require_logged_in_user()
 
         if USE_WHITELISTS:
-            self.require_user_role('editor')
+            self.require_action_permitted('edit')
 
         self.facility = model.Facility.get_by_key_name(
             self.params.facility_name)
@@ -330,23 +340,23 @@ class Edit(utils.Handler):
     def get(self):
         self.init()
         fields = []
-        readonly_fields = [{
-            #i18n: Identifier for a facility
-            'title': to_unicode(_('Facility ID')),
-            'value': self.params.facility_name
-        }]
+        readonly_fields = []
 
         for name in self.facility_type.attribute_names:
             if name in HIDDEN_ATTRIBUTE_NAMES:
                 continue
             attribute = self.attributes[name]
-            if can_edit(self.auth, attribute):
+            comment = self.facility.get_comment(attribute.key().name())
+            if not comment:
+                comment = ''
+            if can_edit(self.account, attribute):
                 fields.append({
                     'name': name,
                     'title': get_message('attribute_name', name),
                     'type': attribute.type,
                     'input': make_input(self.facility, attribute),
-                    'json': render_attribute_as_json(self.facility, attribute)
+                    'json': render_attribute_as_json(self.facility, attribute),
+                    'comment': '',
                 })
             else:
                 readonly_fields.append({
@@ -358,7 +368,8 @@ class Edit(utils.Handler):
 
         self.render('templates/edit.html',
             token=token, facility_title=self.facility.get_value('title'),
-            fields=fields, readonly_fields=readonly_fields, auth=self.auth,
+            fields=fields, readonly_fields=readonly_fields,
+            account=self.account,
             suggested_nickname=get_suggested_nickname(self.user),
             params=self.params, logout_url=users.create_logout_url('/'),
             instance=self.request.host.split('.')[0])
@@ -374,28 +385,28 @@ class Edit(utils.Handler):
             raise ErrorMessage(403, 'Unable to submit data for %s'
                                % self.user.email())
 
-        if not self.auth.nickname:
-            nickname = self.request.get('auth_nickname', None)
+        if not self.account.nickname:
+            nickname = self.request.get('account_nickname', None)
             if not nickname:
                 logging.error("Missing editor nickname")
                 #i18n: Error message for request missing nickname
-                raise ErrorMessage(403, 'Missing editor nickname.')
-            self.auth.nickname = nickname.strip()
+                raise ErrorMessage(400, 'Missing editor nickname.')
+            self.account.nickname = nickname.strip()
 
-            affiliation = self.request.get('auth_affiliation', None)
+            affiliation = self.request.get('account_affiliation', None)
             if not affiliation:
                 logging.error("Missing editor affiliation")
                 #i18n: Error message for request missing affiliation
-                raise ErrorMessage(403, 'Missing editor affiliation.')
-            self.auth.affiliation = affiliation.strip()
-            self.auth.user_roles.append('editor')
-            self.auth.put()
+                raise ErrorMessage(400, 'Missing editor affiliation.')
+            self.account.affiliation = affiliation.strip()
+            self.account.actions.append('edit')
+            self.account.put()
             logging.info('Assigning nickname "%s" and affiliation "%s" to %s'
-                         % (nickname, affiliation, self.auth.email))
+                         % (nickname, affiliation, self.account.email))
 
         logging.info("record by user: %s" % self.user)
 
-        def update(key, facility_type, attributes, request, user, auth):
+        def update(key, facility_type, attributes, request, user, account):
             facility = db.get(key)
             minimal_facility = model.MinimalFacility.all().ancestor(
                 facility).get()
@@ -407,17 +418,21 @@ class Edit(utils.Handler):
                 author=user,
                 observed=utcnow)
             change_metadata = ChangeMetadata(
-                utcnow, user, auth.nickname, auth.affiliation)
+                utcnow, user, account.nickname, account.affiliation)
             has_changes = False
+            changed_attributes_dict = {}
+
             for name in facility_type.attribute_names:
                 attribute = attributes[name]
                 # To change an attribute, it has to have been marked editable
                 # at the time the page was rendered, the new value has to be
                 # different than the one in the facility at the time the page
                 # rendered, and the user has to have permission to edit it now.
+                value_changed = has_changed(facility, request, attribute)
+                comment_changed = has_comment_changed(facility, request, attribute)
                 if (is_editable(request, attribute) and
-                    has_changed(facility, request, attribute)):
-                    if not can_edit(auth, attribute):
+                    (value_changed or comment_changed)):
+                    if not can_edit(account, attribute):
                         raise ErrorMessage(
                             403, _(
                             #i18n: Error message for lacking edit permissions
@@ -429,12 +444,23 @@ class Edit(utils.Handler):
                     apply_change(facility, minimal_facility, report,
                                  facility_type, request, attribute,
                                  change_metadata)
+                    changed_attributes_dict[name] = attribute
+
             if has_changes:
+                # Schedule a task to add a feed record.
+                # We can't really do this inside this transaction, since
+                # feed records are not part of the entity group.
+                # Transactional tasks is the closest we can get.
+                # TODO(kpy): This is disabled for now because it causes
+                # intermittent exceptions.  Re-enable it when we have it
+                # tested and working.
+                # schedule_add_record(self.request, user,
+                #     facility, changed_attributes_dict, utcnow)
                 db.put([report, facility, minimal_facility])
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
                               self.attributes, self.request,
-                              self.user, self.auth)
+                              self.user, self.account)
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))

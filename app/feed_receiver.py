@@ -14,16 +14,11 @@
 
 """Handler for feed posting requests."""
 
-from edxl_have import Hospital, URI_PREFIXES
-from feeds import xmlutils
+from edxl_have import Hospital
 from feeds.feedutils import handle_feed_post
 from model import Report
-from utils import ErrorMessage, Handler, run, users
-import datetime
+from utils import Handler, run
 import feeds.edxl_have_record  # register the EDXL-HAVE record type
-
-def datetime_to_date(dt):
-    return datetime.date.fromordinal(dt.toordinal())
 
 
 class Incoming(Handler):
@@ -39,27 +34,11 @@ class Incoming(Handler):
 
         records = handle_feed_post(self.request, self.response)
 
-        from utils import get_latest_version
-
-        version = get_latest_version('ht')
         for record in records:
-            hospital = Hospital.from_element(xmlutils.parse(record.content))
-            last_report = Report.all().ancestor(version).filter(
-                'facility_name =', record.record_id).get()
-            report = Report(version,
-                            facility_name=record.record_id,
-                            user=users.get_current_user())
-            if last_report and hasattr(last_report, 'patient_capacity'):
-                report.patient_capacity = last_report.patient_capacity
-            if last_report and hasattr(last_report, 'patient_count'):
-                report.patient_count = last_report.patient_count
+            # TODO: Now parse these records and apply the edits to Report,
+            # Facility, and MinimalFacility.
+            pass
 
-            report.date = datetime_to_date(record.observation_time)
-            if 'patient_capacity' in hospital:
-                report.patient_capacity = hospital['patient_capacity']
-            if 'patient_count' in hospital:
-                report.patient_count = hospital['patient_count']
-            report.put()
 
 if __name__ == '__main__':
     run([('/incoming/([^/]+)', Incoming)], debug=True)
