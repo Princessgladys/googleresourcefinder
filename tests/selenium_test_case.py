@@ -16,7 +16,7 @@ class Struct:
 # Configuration profiles for Selenium testing.
 CONFIGS = {
     'local': Struct(
-        base_url='http://localhost:8081',
+        base_url='http://localhost:8080',
         user_name='test@example.com',
         login_form='//form[@action="/_ah/login"]',
         login_email='//input[@id="email"]',
