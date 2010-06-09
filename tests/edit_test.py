@@ -2,6 +2,7 @@ from google.appengine.api import users
 from model import *
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
+import time
 import scrape
 
 # "name" attributes of the checkboxes for available services in the edit form.
@@ -67,8 +68,6 @@ class EditTest(SeleniumTestCase):
         goes to the edit form."""
         self.login('/')
         self.click('id=facility-1')
-        # For some reason, this wait doesn't always work unless we do it twice.
-        self.wait_for_element('link=Edit this record')
         self.wait_for_element('link=Edit this record')
         self.click('link=Edit this record')
         self.wait_for_load()
