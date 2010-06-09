@@ -61,8 +61,8 @@ tr.field.text { vertical-align: top; }
   <input type="hidden" name="facility_name"
       value="{{params.facility_name|escape}}"/>
   <table>
-    {% if not auth.nickname %}
-      <tr class="auth">
+    {% if not account.nickname %}
+      <tr class="account">
         <td colspan="2" class="instructions">
           {% comment %}
           #i18n: Instructions to enter a person's name and organizational
@@ -79,10 +79,10 @@ tr.field.text { vertical-align: top; }
           {% trans "Name (required)" %}
         </td>
         <td class="input">
-          <div id="auth_nickname_errorbox" class="errorbox-good">
-            <input type="text" name="auth_nickname" id="auth_nickname" 
+          <div id="account_nickname_errorbox" class="errorbox-good">
+            <input type="text" name="account_nickname" id="account_nickname" 
                    value="{{suggested_nickname}}"/>
-            <div id="auth_nickname_errormsg" class="hidden"></div>
+            <div id="account_nickname_errormsg" class="hidden"></div>
           </div>
         </td>
       </tr>
@@ -95,10 +95,10 @@ tr.field.text { vertical-align: top; }
           {% trans "Affiliation (required)" %}
         </td>
         <td class="input">
-          <div id="auth_affiliation_errorbox" class="errorbox-good">
-            <input type="text" name="auth_affiliation" id="auth_affiliation"
+          <div id="account_affiliation_errorbox" class="errorbox-good">
+            <input type="text" name="account_affiliation" id="account_affiliation"
                    value=""/>
-            <div id="auth_affiliation_errormsg" class="hidden"></div>
+            <div id="account_affiliation_errormsg" class="hidden"></div>
           </div>
           <br/>
         </td>
@@ -131,6 +131,12 @@ tr.field.text { vertical-align: top; }
                    value="{{field.json|escape}}"/>
             <div id="{{field.name}}_errormsg" class="hidden"></div>
           </div>
+        </td>
+        <td>            
+            <div id="{{field.name}}__comment" class="comment">
+                &nbsp;&nbsp;{% trans 'comment:' %}<input type="text" name="{{field.name}}__comment"
+                       value="{{field.comment|escape}}" class="comment">
+            </div>
         </td>
       </tr>
     {% endfor %}

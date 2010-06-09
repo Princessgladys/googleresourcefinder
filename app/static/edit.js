@@ -51,13 +51,13 @@
    * makes an edit. If the fields are not present, returns true.
    */
   function validate_name_affil() {
-    var nickname = $('auth_nickname');
+    var nickname = $('account_nickname');
     if (!nickname) {
       return true;
     }
     var valid = validate_required_string(nickname);
     // careful to avoid short-circuiting here
-    return validate_required_string($('auth_affiliation')) && valid;
+    return validate_required_string($('account_affiliation')) && valid;
   }
 
   /**
@@ -166,6 +166,39 @@
 
     return jQuery.inArray(false, valid_arr) == -1;
   }
+  
+  function make_visible(id) {
+    $(id).style.visibility = "visible";
+  }
+  
+  function make_visible_closure(div) {
+    return function() {
+      make_visible(div.id);
+    }
+  }
+
+  /**
+   * Initializes comment visibility and installs onclick handlers to make
+   * comments visible if their values are updated.
+   */
+  function init_comment_visibility() {
+    var trs = document.getElementsByTagName('tr');
+    for (var i = 0; i < trs.length; i++) {
+      var tr = trs[i];
+      var classes = tr.className.split(' ');
+      if (classes.length > 1) {
+        var divs = tr.getElementsByTagName('div');
+        var attribute_name = "";
+        for (var div_index = 0; div_index < divs.length; div_index++) {
+          var div = divs[div_index];
+          if (div.className == "comment") {
+            tr.onclick = make_visible_closure(div);
+            div.style.visibility = "hidden";
+          }
+        }
+      }
+    }
+  }
 
   /**
    * Handler for a click of the save button.
@@ -188,6 +221,7 @@
     $('edit').onsubmit = validate;
     $('save').onclick = save;
     $('cancel').onclick = cancel;
+    init_comment_visibility();
   }
 
   init();

@@ -39,8 +39,8 @@ To do:
 """
 
 __author__ = 'Ka-Ping Yee <ping@zesty.ca>'
-__date__ = '$Date: 2008/07/06 11:13:19 $'.split()[1].replace('/', '-')
-__version__ = '$Revision: 1.43 $'
+__date__ = '$Date: 2010-05-26 18:39:37 $'.split()[1].replace('/', '-')
+__version__ = '$Revision: 1.49 $'
 
 from urlparse import urlsplit, urljoin
 from htmlentitydefs import name2codepoint
@@ -168,6 +168,7 @@ def fetch(url, data='', agent=None, referrer=None, charset=None, verbose=0,
     of RAW ensures that the content is left undecoded in an 8-bit string."""
     scheme, host, path, query, fragment = urlsplit(url)
     host = host.split('@')[-1]
+    path = path or '/'
 
     # Prepare the POST data.
     method = data and 'POST' or 'GET'
@@ -237,7 +238,7 @@ def fetch(url, data='', agent=None, referrer=None, charset=None, verbose=0,
                 charset = param.strip()[8:]
                 break
     if charset and charset is not RAW:
-        content = content.decode(charset, 'ignore')  # Lenient for now.
+        content = content.decode(charset, 'ignore')
 
     return url, status, message, headers, content
 
@@ -334,7 +335,7 @@ class Session:
             p[region['name']] = region.get('value', '')
         p.update(params)
         method = form['method'].lower() or 'get'
-        url = url or form['action']
+        url = url or form.get('action', self.url)
         if method == 'get':
             return self.go(url + '?' + urlencode(p), '', redirects)
         elif method == 'post':
@@ -665,7 +666,7 @@ class Region:
             params = {}
             for input in self.alltags('input'):
                 if 'name' in input and 'disabled' not in input:
-                    type = input['type'].lower()
+                    type = input.get('type', 'text').lower()
                     if type in ['text', 'password', 'hidden'] or (
                        type in ['checkbox', 'radio'] and 'checked' in input):
                         params[input['name']] = input.get('value', '')
@@ -718,6 +719,10 @@ class Region:
 
     def keys(self):
         return self.attrs.keys()
+
+    # All regions are true (i.e. truth means existence).
+    def __nonzero__(self):
+        return True
 
     # Report the length of the region.
     def __len__(self):

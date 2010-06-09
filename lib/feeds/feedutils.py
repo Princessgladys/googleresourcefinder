@@ -23,6 +23,7 @@ from errors import ErrorMessage
 from xmlutils import qualify, parse
 
 HUB = 'http://pubsubhubbub.appspot.com'
+STATUS_NS = 'http://schemas.google.com/2010/status'
 
 def notify_hub(feed_url):
     """Notifies a PubSubHubbub hub of new content."""
@@ -32,7 +33,7 @@ def notify_hub(feed_url):
     file.close()
 
 def check_request_etag(headers):
-    """Determines etag, limit, after_arrival_time based on request headers."""
+    """Determines etag, limit, arrived_after based on request headers."""
     # TODO: If records A and B are written to different data centers,
     # and clock skew causes B to be written with an arrival_time earlier
     # than A, after a subscriber has previously fetched the feed with A
@@ -49,24 +50,24 @@ def check_request_etag(headers):
 
 def create_response_etag(latest):
     """Constructs the ETag response header for the given records."""
-    arrival_time = latest and latest[0].arrival_time or 0
+    arrival_time = latest and latest[0].arrived or 0
     timestamp = time_formats.to_rfc3339(arrival_time)
     return '"' + timestamp + '/' + sign('etag_key', timestamp) + '"'
 
 def handle_feed_get(request, response, feed_id, uri_prefixes={}):
     """Handles a request for an Atom feed of XML records."""
-    etag, limit, after_arrival_time = check_request_etag(request.headers)
-    latest = records.get_latest_arrived(feed_id, limit, after_arrival_time)
+    etag, limit, arrived_after = check_request_etag(request.headers)
+    latest = records.get_latest_arrived(feed_id, limit, arrived_after)
 
     response.headers['Content-Type'] = 'application/atom+xml'
     if latest:  # Deliver the new entries.
         response.headers['ETag'] = create_response_etag(latest)
-        atom.write_feed(response.out, latest, uri_prefixes, hub=HUB)
+        atom.write_feed(response.out, latest, feed_id, uri_prefixes, hub=HUB)
     elif etag:  # If-None-Match was specified, and there was nothing new.
         response.set_status(304)
         response.headers['ETag'] = '"' + etag + '"'
     else:  # There are no entries in this feed.
-        atom.write_feed(response.out, latest, uri_prefixes, hub=HUB)
+        atom.write_feed(response.out, latest, feed_id, uri_prefixes, hub=HUB)
 
 def handle_entry_get(request, response, feed_id, entry_id, uri_prefixes={}):
     """Handles a request for the Atom entry for an individual XML record."""
@@ -80,15 +81,28 @@ def handle_entry_get(request, response, feed_id, entry_id, uri_prefixes={}):
 
     response.headers['Content-Type'] = 'application/atom+xml'
     response.headers['Last-Modified'] = \
-        time_formats.to_rfc1123(record.arrival_time)
+        time_formats.to_rfc1123(record.arrived)
     atom.write_entry(response.out, record, uri_prefixes)
 
-def get_child(element, name, error_message):
-    """Gets an Atom element, or raises an HTTP 400 error if not found."""
-    child = element.find(qualify(atom.ATOM_NS, name))
+def get_child(element, name, ns=None):
+    """Gets an element, or raises an HTTP 400 error if not found."""
+    if ns:
+        name = qualify(ns, name)
+    child = element.find(name)
+    # Elements without children are false, so we have to compare with None.
     if child is None:
-        raise ErrorMessage(400, error_message)
+        raise ErrorMessage(400, '%s contains no %s' % (element.tag, name))
     return child
+
+def get_optional_text(element, name, ns=None):
+    """Gets the text of a child element, or '' if the element is missing."""
+    if ns:
+        name = qualify(ns, name)
+    child = element.find(name)
+    # Elements without children are false, so we have to compare with None.
+    if child is None:
+        return ''
+    return child.text
 
 def handle_feed_post(request, response):
     """Handles a post of incoming entries from PubSubHubbub."""
@@ -99,25 +113,26 @@ def handle_feed_post(request, response):
         raise ErrorMessage(400, str(e))
     if feed.tag != qualify(atom.ATOM_NS, 'feed'):
         raise ErrorMessage(400, 'Incoming document is not an Atom feed')
-    feed_id = get_child(feed, 'id', 'feed has no id')
+    feed_id = get_child(feed, 'id', atom.ATOM_NS)
     for entry in feed.findall(qualify(atom.ATOM_NS, 'entry')):
-        entry_id = get_child(entry, 'id', 'entry has no id')
-        author = get_child(entry, 'author', 'entry %r has no author' % entry_id)
-        email = get_child(author, 'email', 'entry %r has no email' % entry_id)
-        for child in entry.getchildren():
-            if not child.tag.startswith('{%s}' % atom.ATOM_NS):
-                try:
-                    posted_records.append(
-                        records.put_record(feed_id.text, email.text, child))
-                except TypeError, e:
-                    raise ErrorMessage(400, str(e))
-                break
-        else:
-            raise ErrorMessage(400, 'entry %r contains no XML document')
+        # Get the Atom metadata.
+        entry_id = get_child(entry, 'id', atom.ATOM_NS)
+        author = get_child(entry, 'author', atom.ATOM_NS)
+        email = get_child(author, 'email', atom.ATOM_NS)
+        title = get_optional_text(entry, 'title', atom.ATOM_NS)
+
+        # Get the status report metadata (subject ID and observed time).
+        subject = get_child(entry, 'subject', STATUS_NS)
+        observed = time_formats.from_rfc3339(
+            get_child(entry, 'observed', STATUS_NS).text)
+
+        # Get the content of the status report.
+        report = get_child(entry, 'report', STATUS_NS)
+        content = get_child(report, report.attrib.get('type'))
+
+        # Store the record.
+        posted_records.append(records.put_record(
+            feed_id.text, email.text, title, subject.text, observed, content))
     notify_hub(feed_id.text)
     return posted_records
 
-
-if __name__ == '__main__':
-    run([(r'/feeds/([^/]+)', Feed),
-         (r'/feeds/([^/]+)/([^/]+)', Entry)])

@@ -20,6 +20,7 @@ which sets up the PYTHONPATH and other necessary environment variables."""
 
 import access
 import console
+import model
 import optparse
 import os
 import re
@@ -33,14 +34,12 @@ import time
 import traceback
 import unittest
 
-APP_ID = 'resource-finder'
-
 
 class ProcessRunner(threading.Thread):
     """A thread that starts a subprocess, collects its output, and stops it."""
 
     READY_RE = re.compile('')  # this output means the process is ready
-    OMIT_RE = re.compile('a^')  # omit these lines from the displayed output
+    OMIT_RE = re.compile('INFO ')  # omit these lines from the displayed output
     ERROR_RE = re.compile('ERROR|CRITICAL')  # this output indicates failure
 
     def __init__(self, name, args):
@@ -117,7 +116,7 @@ class ProcessRunner(threading.Thread):
 class AppServerRunner(ProcessRunner):
     """Manages a dev_appserver subprocess."""
 
-    READY_RE = re.compile('Running application ' + APP_ID)
+    READY_RE = re.compile('Running application ' + console.get_app_id())
 
     def __init__(self, port):
         self.datastore_path = '/tmp/dev_appserver.datastore.%d' % os.getpid()
@@ -173,18 +172,18 @@ if __name__ == '__main__':
             runner.wait_until_ready()
 
         # Initialize the datastore.
-        console.init(
-            APP_ID, '%s:%d' % (options.address, options.port), 'test', 'test')
-        setup.setup_new_datastore()
-        access.Authorization(
-            email='test@example.com', description='Test',
-            user_roles=[':user', ':editor', ':superuser']).put()
+        console.connect(
+            '%s:%d' % (options.address, options.port), None, 'test', 'test')
+        setup.setup_datastore()
+
+        model.Account(email='test@example.com', description='Test',
+                      actions=[':view', ':edit', 'grant']).put()
 
         # Gather all the tests.
         loader = unittest.defaultTestLoader
         suites = []
         for filename in os.listdir(os.environ['TESTS_DIR']):
-            if filename.startswith('test_') and filename.endswith('.py'):
+            if filename.endswith('_test.py'):
                 module = filename[:-3]
                 suites.append(loader.loadTestsFromName(module))
 

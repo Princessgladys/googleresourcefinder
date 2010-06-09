@@ -27,44 +27,24 @@ class Record(db.Model):
     author_email = db.StringProperty(required=True)  # author identifier
     observed = db.DateTimeProperty(required=True)  # UTC timestamp
     arrived = db.DateTimeProperty(auto_now=True)  # UTC timestamp
-    content = db.TextProperty()  # serialized XML document 
+    content = db.TextProperty()  # serialized XML document
 
 
-class RecordType:
-    def get_subject_id(self, element):
-        """Extracts the subject_id string from an XML document."""
-        raise NotImplementedError
-
-    def get_observed(self, element):
-        """Extracts the observed time from an XML document."""
-        raise NotImplementedError
-
-    def get_title(self, element):
-        """Gets or fashions an Atom entry title for an XML document."""
-        return ''
-
-
-# A map of XML type strings to RecordType objects.
-type_registry = {}
-
-def register_type(type_name, record_type):
-    """Adds a RecordType instance to the XML type registry."""
-    type_registry[type_name] = record_type
-
-def put_record(feed_id, author_email, element):
-    """Stores an XML Element as a record."""
-    try:
-        record_type = type_registry[element.tag]
-    except KeyError:
-        raise TypeError('unknown XML type %r' % element.tag)
-    record = Record(
+def create_record(feed_id, author_email, title, subject_id, observed, element):
+    """Wraps XML Element in a record."""
+    return Record(
         feed_id=feed_id,
         type_name=element.tag,
-        subject_id=record_type.get_subject_id(element),
-        title=record_type.get_title(element),
+        subject_id=subject_id,
+        title=title,
         author_email=author_email,
-        observed=record_type.get_observed(element),
+        observed=observed,
         content=xmlutils.serialize(element))
+
+def put_record(feed_id, author_email, title, subject_id, observed, element):
+    """Stores an XML Element as a record."""
+    record = create_record(feed_id, author_email,
+        title, subject_id, observed, element)
     record.put()
     return record
 
@@ -83,3 +63,4 @@ def get_latest_arrived(feed_id, limit=None, arrived_after=None):
     if arrived_after:
         query = query.filter('arrived >', arrived_after)
     return query.fetch(min(limit or 100, 100))
+
