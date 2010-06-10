@@ -1,5 +1,5 @@
 from google.appengine.api import users
-from model import *
+from model import Facility, MinimalFacility
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import scrape
@@ -56,10 +56,12 @@ class EditTest(SeleniumTestCase):
         mf.set_attribute('title', 'title_foo')
         mf.set_attribute('location', db.GeoPt(51.5, 0))
         mf.put()
-        self.s = scrape.Session()
 
     def tearDown(self):
-        Facility.get_by_key_name('example.org/123').delete()
+        f = Facility.get_by_key_name('example.org/123')
+        mf = MinimalFacility.all().ancestor(f).get()
+        mf.delete()
+        f.delete()
         SeleniumTestCase.tearDown(self)
 
     def test_edit_link(self):
