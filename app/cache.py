@@ -15,6 +15,7 @@
 from google.appengine.api import memcache
 import logging
 import model
+import sets
 import time
 import UserDict
 
@@ -24,18 +25,26 @@ and in-memory caches."""
 class JsonCache:
     """Memcache layer for JSON rendered by rendering.py. Offers significant
     startup performance increase."""
-    def set(self, json):
-        """Sets the value in this cache"""
-        if not memcache.add(self.__class__.__name__, json):
-            logging.error('Memcache set of %s failed' % self.__class__.__name__)
+    def __init__(self):
+        self.locales = sets.Set()
 
-    def get(self):
+    def _key(self, locale):
+        return '%s_%s' % (self.__class__.__name__, locale)
+
+    def set(self, locale, json):
+        """Sets the value in this cache"""
+        if memcache.add(self._key(locale), json):
+            self.locales.add(locale)
+        else:
+            logging.error('Memcache set of %s failed' % self._key(locale))
+
+    def get(self, locale):
         """Gets the value in this cache"""
-        return memcache.get(self.__class__.__name__)
+        return memcache.get(self._key(locale))
 
     def flush(self):
         """Flushes the value in this cache."""
-        memcache.delete(self.__class__.__name__)
+        memcache.delete_multi([self._key(locale) for locale in self.locales])
 
 class Cache(UserDict.DictMixin):
     """A cache that looks first in memory, then at memcache, then finally
@@ -63,6 +72,7 @@ class Cache(UserDict.DictMixin):
         if now - self.last_refresh > self.ttl:
             self.entities = memcache.get(self.__class__.__name__)
             if self.entities is None:
+                self.json_cache.flush()
                 self.entities = self.fetch_entities()
                 # TODO(shakusa) memcache has a 1MB limit for values. If any
                 # cache gets larger, we need to revisit this.

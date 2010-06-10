@@ -19,6 +19,6 @@ def webapp_add_wsgi_middleware(app):
     # To turn on AppStats recording, uncomment these 2 lines
     # There is a performance overhead for doing this, which is why it is off
     # by default
-    #from google.appengine.ext.appstats import recording
-    #app = recording.appstats_wsgi_middleware(app)
+    from google.appengine.ext.appstats import recording
+    app = recording.appstats_wsgi_middleware(app)
     return app

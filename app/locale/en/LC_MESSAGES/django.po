@@ -122,7 +122,7 @@ msgid "Can pick up patients"
 msgstr ""
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:154
+#: templates/edit.html:158
 msgid "Cancel"
 msgstr ""
 
@@ -159,6 +159,11 @@ msgstr ""
 #. Facility operational status: closed or in the process of closing
 #: ../tools/setup.py:209
 msgid "Closed or closing"
+msgstr ""
+
+#. Label for a text field to enter a comment about a change.
+#: templates/edit.html:140
+msgid "Comment:"
 msgstr ""
 
 #. remarks
@@ -659,7 +664,7 @@ msgid "Resource Finder"
 msgstr ""
 
 #. Button text to save data
-#: templates/edit.html:150
+#: templates/edit.html:154
 msgid "Save"
 msgstr ""
 
@@ -798,11 +803,6 @@ msgstr ""
 #. Heading for number of total beds at a hospital
 #: templates/hospital_bubble.html:61
 msgid "capacity"
-msgstr ""
-
-#. TODO: Add missing message description or meaning
-#: templates/edit.html:137
-msgid "comment:"
 msgstr ""
 
 #. Header for the number of facilities less than 10 miles from a location.
