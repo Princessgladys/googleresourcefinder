@@ -27,27 +27,36 @@ SERVICES = ['All',
 class MainTestCase(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
-        f = Facility(key_name='example.org/123', type='hospital')
-        f.set_attribute('title1', 'title_foo1', datetime.datetime.now(),
+        f = Facility(key_name='example.org/1000', type='hospital')
+        f.set_attribute('title', 'title_foo1', datetime.datetime.now(),
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
         f.set_attribute('location', db.GeoPt(51.5, 0), datetime.datetime.now(),
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
         f.put()
-        f = Facility(key_name='example.org/234', type='hospital')
-        f.set_attribute('title2', 'title_foo2', datetime.datetime.now(),
+        mf = MinimalFacility(f, type='hospital')
+        mf.set_attribute('title', 'title_foo1')
+        mf.set_attribute('location', db.GeoPt(51.5, 0))
+        mf.put()
+
+        f = Facility(key_name='example.org/1001', type='hospital')
+        f.set_attribute('title', 'title_foo2', datetime.datetime.now(),
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
         f.set_attribute('location', db.GeoPt(50.5, 1), datetime.datetime.now(),
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
         f.put()
+        mf = MinimalFacility(f, type='hospital')
+        mf.set_attribute('title', 'title_foo2')
+        mf.set_attribute('location', db.GeoPt(51.5, 1))
+        mf.put()
         self.s = scrape.Session()
 
     def tearDown(self):
-        Facility.get_by_key_name('example.org/123').delete()
-        Facility.get_by_key_name('example.org/234').delete()
+        Facility.get_by_key_name('example.org/1000').delete()
+        Facility.get_by_key_name('example.org/1001').delete()
 
         SeleniumTestCase.tearDown(self)
 
