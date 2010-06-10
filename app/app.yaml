@@ -72,9 +72,6 @@ handlers:
 - url: /bubble
   script: bubble.py
 
-- url: /settings
-  script: settings.py
-
 - url: /terms
   script: terms.py
 

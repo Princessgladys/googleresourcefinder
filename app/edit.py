@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from google.appengine.api.labs import taskqueue
+from google.appengine.api.labs.taskqueue import Task
 
 import datetime
 import logging
@@ -459,7 +460,13 @@ class Edit(utils.Handler):
                 # schedule_add_record(self.request, user,
                 #     facility, changed_attributes_dict, utcnow)
                 db.put([report, facility, minimal_facility])
-                taskqueue.add(url='/send_mail_updates')
+                
+                # On edit, create a task to e-mail users who have subscribed
+                # to that facility.
+                attrs = changed_attributes_dict.copy()
+                attrs['facility_name'] = facility.key().name()
+                taskqueue.add(url='/send_mail_updates', method='POST',
+                              params=attrs, transactional=True)
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
                               self.attributes, self.request,
