@@ -2,7 +2,6 @@ from google.appengine.api import users
 from model import db, Facility, MinimalFacility
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
-import scrape
 
 # services listed in the drop down box on top of the list
 SERVICES = ['All',
@@ -71,28 +70,28 @@ class MainTestCase(SeleniumTestCase):
         self.login('/')
  
         # Check list column names        
-        self.failUnless(self.is_text_present("Facility"))
-        self.failUnless(self.is_text_present("Services"))
-        self.failUnless(self.is_text_present("Total Beds"))
+        assert self.is_text_present('Facility')
+        assert self.is_text_present('Services')
+        assert self.is_text_present('Total Beds')
 
         # Check that all services are listed in the drop down
         for service in SERVICES:
-            self.assert_element("//select[option='" + service + "']" )
+            self.assert_element('//select[option=%r]' % service)
 
         # Make sure facilities are visible    
-        self.failUnless(self.is_visible("//tr[@id='facility-1']"))
-        self.failUnless(self.is_visible("//tr[@id='facility-2']"))
+        assert self.is_visible('//tr[@id="facility-1"]')
+        assert self.is_visible('//tr[@id="facility-2"]')
 
         # Check map is present with zoom elements
-        self.failUnless(self.is_element_present('map'), 'map is not present')
-        self.failUnless(self.is_element_present("//div[@title='Zoom in']"))
-        self.failUnless(self.is_element_present("//div[@title='Zoom out']"))
+        self.assert_element('map')
+        self.assert_element('//div[@title="Zoom in"]')
+        self.assert_element('//div[@title="Zoom out"]')
  
         # Click on facility name and make sure it results in a bubble 
         # with correct name
-        facility_xpath = "//tr[@id='facility-1']"
-        facility_name = self.get_text(facility_xpath + '/td')
+        facility_xpath = '//tr[@id="facility-1"]'
+        facility_title = self.get_text(facility_xpath + '/td')
         bubble_xpath = "//div[@class='bubble']/span/span[@class='title']"
         self.click(facility_xpath)
         self.wait_for_element(bubble_xpath)
-        self.assert_text(facility_name, bubble_xpath)
+        self.assert_text(facility_title, bubble_xpath)
