@@ -55,12 +55,12 @@ class Subscribe(Handler):
                                  self.email).get()
         if self.alert:
             self.frequencies = []
-            for i in range(len(self.alert.facility_keys)):
+            for i in range(len(self.alert.facility_names)):
                 #TODO(pfritzsche): better way to get titles?
-                f = model.Facility.get_by_key_name(self.alert.facility_keys[i])
+                f = model.Facility.get_by_key_name(self.alert.facility_names[i])
                 #use tuples to maintain order
                 self.frequencies.append((f.get_value('title'),
-                                         self.alert.facility_keys[i],
+                                         self.alert.facility_names[i],
                                          self.alert.frequencies[i]))
 
     def get(self):
@@ -85,7 +85,7 @@ class Subscribe(Handler):
                     index = keys.index(request.get('facility'))
                     del keys[index]
                     del freqs[index]
-                    alert.facility_keys = keys
+                    alert.facility_names = keys
                     alert.frequencies = freqs
             else:
                 # add facility to list
@@ -94,7 +94,7 @@ class Subscribe(Handler):
                                     alert.default_frequency))
                 frequencies.sort()
                 new_titles, new_keys, new_frequencies = zip(*frequencies)
-                alert.facility_keys = list(new_keys)
+                alert.facility_names = list(new_keys)
                 alert.frequencies = list(new_frequencies)
             
             db.put(alert)

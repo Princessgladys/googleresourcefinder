@@ -250,16 +250,17 @@ class Alert(db.Model):
     """A subscription by a user to receive notification when details for a
     facility change. Top-level entity, has no parent."""
     user_email = db.StringProperty(required=True) # user to alert
-    facility_keys = db.StringListProperty() # key of facility
+    facility_names = db.StringListProperty() # key_name of facility
     last_sent = db.DateTimeProperty(auto_now_add=True)
     # time of previous update
     frequencies = db.StringListProperty()
     # frequency at which to send updates. options:
-    #   '1/min': send an alert whenever something changes
+    #   'immediate': send an alert whenever something changes
     #   '1/day': send one alert e-mail per day
     #   '1/week': send one alert e-mail per week
     #   '1/month': send one alert e-mail per month
-    default_frequency = db.StringProperty(default='1/min')
+    #   'default': use the default setting, per default_frequency
+    default_frequency = db.StringProperty(default='immediate')
     # frequency to be used by default
 
 def value_or_none(value):
