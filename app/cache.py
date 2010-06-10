@@ -16,35 +16,46 @@ from google.appengine.api import memcache
 import logging
 import model
 import time
+import UserDict
 
 """Caching layer for Resource Finder, taking advantage of both memcache
 and in-memory caches."""
 
-class Cache:
+class JsonCache:
+    """Memcache layer for JSON rendered by rendering.py. Offers significant
+    startup performance increase."""
+    def set(self, json):
+        """Sets the value in this cache"""
+        if not memcache.add(self.__class__.__name__, json):
+            logging.error('Memcache set of %s failed' % self.__class__.__name__)
+
+    def get(self):
+        """Gets the value in this cache"""
+        return memcache.get(self.__class__.__name__)
+
+    def flush(self):
+        """Flushes the value in this cache."""
+        memcache.delete(self.__class__.__name__)
+
+class Cache(UserDict.DictMixin):
     """A cache that looks first in memory, then at memcache, then finally
     loads data from the datastore. The in-memory cache lives for ttl seconds,
     then is refreshed from memcache. The cache exposes a dictionary
     interface."""
-    def __init__(self, ttl=30):
-        self.entities = {}
+    def __init__(self, json_cache, ttl=30):
+        assert ttl > 0
+        self.entities = None
         self.last_refresh = 0
+        self.json_cache = json_cache
         self.ttl = ttl
 
     def __getitem__(self, key):
         self.load()
         return self.entities[key]
 
-    def __iter__(self):
+    def keys(self):
         self.load()
-        return iter(self.entities)
-
-    def get(self, key, default=None):
-        self.load()
-        return self.entities.get(key, default)
-
-    def values(self):
-        self.load()
-        return list(self.entities[key] for key in iter(self.entities))
+        return self.entities.keys()
 
     def load(self):
         """Load entities into memory, if necessary."""
@@ -56,7 +67,8 @@ class Cache:
                 # TODO(shakusa) memcache has a 1MB limit for values. If any
                 # cache gets larger, we need to revisit this.
                 if not memcache.add(self.__class__.__name__, self.entities):
-                    logging.error('Memcache set of %s failed' % key)
+                    logging.error('Memcache set of %s failed'
+                                  % self.__class__.__name__)
             self.last_refresh = now
 
     def fetch_entities(self):
@@ -68,18 +80,20 @@ class Cache:
         all entities."""
         entities = []
         batch = query.fetch(batch_size)
-        offset = 0
+        cursor = query.cursor()
         while batch:
-            entities = entities + batch
+            entities += batch
             if len(batch) < batch_size:
                 break
-            offset = offset + len(batch)
-            batch =query.fetch(batch_size, offset=offset)
+            batch = query.with_cursor(cursor).fetch(batch_size)
+            cursor = query.cursor()
         return entities
 
     def flush(self, flush_memcache=True):
+        """Flushes the in-memory cache and optionally memcache"""
         if flush_memcache:
             memcache.delete(self.__class__.__name__)
+            self.json_cache.flush()
         self.entities = None
         self.last_refresh = 0
 
@@ -103,7 +117,8 @@ class MinimalFacilityCache(Cache):
         entities = self._query_in_batches(model.MinimalFacility.all())
         return dict((e.parent_key(), e) for e in entities)
 
-ATTRIBUTES = AttributeCache()
-FACILITY_TYPES = FacilityTypeCache()
-MESSAGES = MessageCache()
-MINIMAL_FACILITIES = MinimalFacilityCache()
+JSON_CACHE = JsonCache()
+ATTRIBUTES = AttributeCache(JSON_CACHE)
+FACILITY_TYPES = FacilityTypeCache(JSON_CACHE)
+MESSAGES = MessageCache(JSON_CACHE)
+MINIMAL_FACILITIES = MinimalFacilityCache(JSON_CACHE)
