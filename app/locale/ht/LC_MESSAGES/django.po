@@ -56,13 +56,18 @@ msgstr "%(user)s pa gen pèmisyon edite %(a)s"
 msgid "(unspecified)"
 msgstr "(pa espesifye)"
 
+#. Note that a facility has been marked closed.
+#: templates/hospital_bubble.html:48
+msgid "<strong>Note:</strong> This facility has been marked closed."
+msgstr "<strong>Remak:</strong> etablisman sa a te make fèmen."
+
 #. Accuracy of latitude, longitude coordinates
 #: ../tools/setup.py:131
 msgid "Accuracy"
 msgstr "Presizyon"
 
 #. Header for a street address
-#: templates/hospital_bubble.html:112 templates/print_data.html:68 ../tools/setup.py:127
+#: templates/print_data.html:68 ../tools/setup.py:127 templates/hospital_bubble.html:120
 msgid "Address"
 msgstr "Adrès"
 
@@ -132,17 +137,17 @@ msgid "Category"
 msgstr "Kategori"
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:140
+#: templates/hospital_bubble.html:148
 msgid "Change"
 msgstr "Chanje"
 
 #. Header for the history of changes in data for a facility
-#: templates/hospital_bubble.html:102
+#: templates/hospital_bubble.html:110
 msgid "Change details"
 msgstr "Chanje done"
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:148
+#: templates/hospital_bubble.html:156
 msgid "Change note"
 msgstr "Chanje"
 
@@ -197,7 +202,7 @@ msgid "Damage"
 msgstr "Domaj"
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:152
+#: templates/hospital_bubble.html:160
 msgid "Date and time"
 msgstr "Jou  ak  lè"
 
@@ -254,7 +259,7 @@ msgid "Edit this record"
 msgstr "modifye enregistreman sa"
 
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:144
+#: templates/hospital_bubble.html:152
 msgid "Edited by"
 msgstr "Moun ki reekri a"
 
@@ -279,7 +284,7 @@ msgid "Facility"
 msgstr "Etablisman"
 
 #. Header for details about a facility
-#: templates/hospital_bubble.html:97
+#: templates/hospital_bubble.html:105
 msgid "Facility details"
 msgstr "Enfòmasyon sou etablisman "
 
@@ -379,7 +384,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Dat envalid : %(dat)r (bezwen ane-mwa-jou fòma)"
 
 #. Error message for request missing facility name.
-#: edit.py:335 bubble.py:147
+#: edit.py:335 bubble.py:156
 msgid "Invalid or missing facility name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -439,7 +444,7 @@ msgid "Location"
 msgstr "Kote"
 
 #. Geographic coordinates of a location on earth.
-#: templates/hospital_bubble.html:121
+#: templates/hospital_bubble.html:129
 msgid "Location:"
 msgstr "Kote"
 
@@ -504,7 +509,7 @@ msgid "No"
 msgstr "Pa dakò"
 
 #. Indicates there is no availability information for this  hospital.
-#: templates/hospital_bubble.html:81
+#: templates/hospital_bubble.html:89
 msgid "No availability information"
 msgstr "Pa gen enfòmasyon ki koresponn"
 
@@ -580,7 +585,7 @@ msgid "Phone"
 msgstr "Telefòn"
 
 #. Indicates a user should call for availability of beds and services at a hospital.
-#: templates/hospital_bubble.html:75
+#: templates/hospital_bubble.html:83
 msgid "Please call for availability information."
 msgstr "Tanpri rele pou enfomasyon disponib"
 
@@ -786,12 +791,12 @@ msgid "anonymous"
 msgstr "anonim"
 
 #. Heading for number of available beds at a hospital
-#: templates/hospital_bubble.html:49
+#: templates/hospital_bubble.html:57
 msgid "availability"
 msgstr "Disponibilite"
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:53
+#: templates/hospital_bubble.html:61
 msgid "capacity"
 msgstr "Kapasite"
 
@@ -812,7 +817,7 @@ msgid "p ${PHONE}"
 msgstr "t ${PHONE}"
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:58
+#: templates/hospital_bubble.html:66
 msgid "services"
 msgstr "sèvis"
 

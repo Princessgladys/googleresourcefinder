@@ -300,13 +300,14 @@ function maybe_selected(selected) {
   return selected ? ' selected' : '';
 }
 
-function make_icon(title, status, detail, opt_icon, opt_icon_size) {
+function make_icon(title, status, detail, opt_icon, opt_icon_size,
+    opt_icon_fill) {
   var text = detail ? title : '';
   var text_size = detail ? 10 : 0;
   var text_fill = STATUS_TEXT_COLORS[status];
   var icon = opt_icon || 'greek_cross_6w14';
   var icon_size = opt_icon_size || '16';
-  var icon_fill = STATUS_ICON_COLORS[status];
+  var icon_fill = opt_icon_fill || STATUS_ICON_COLORS[status];
   var icon_outline = 'fff';
   var params = [
       text, text_size, text_fill,
@@ -639,6 +640,9 @@ function update_facility_icons() {
       var s = facility_status_is[f];
       var title = facility.values[attributes_by_name.title];
       var icon_url = make_icon(title, s, detail);
+      if (is_facility_closed(facility)) {
+        icon_url = make_icon(title, s, detail, null, null, 'a00');
+      }
       facility.visible = false;
       if (s == STATUS_GOOD) {
         markers[f].setIcon(icon_url);
@@ -695,9 +699,11 @@ function update_facility_list() {
     }
     if (selected_status_i === 0 ||
         facility_status_is[f] === selected_status_i) {
+      var disabledClass = is_facility_closed(facility) ? ' disabled' : '';
       var row = $$('tr', {
         id: 'facility-' + f,
-        'class': 'facility' + maybe_selected(f === selected_facility_i),
+        'class': 'facility' + disabledClass
+            + maybe_selected(f === selected_facility_i),
         onclick: facility_selector(f),
         onmouseover: hover_activator('facility-' + f),
         onmouseout: hover_deactivator('facility-' + f)
@@ -1359,5 +1365,18 @@ function request_action_handler(request_url) {
   });
   return false;
 }
+
+// Returns true IFF the operational status of the facility is set to
+// CLOSED_OR_CLOSING
+function is_facility_closed(facility) {
+  if (facility) {
+    var op_status = facility.values[attributes_by_name.operational_status];
+    if (op_status == 'CLOSED_OR_CLOSING') {
+      return true;
+    }
+  }
+
+  return false;
+};
 
 log('map.js finished loading.');

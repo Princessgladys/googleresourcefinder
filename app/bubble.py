@@ -98,23 +98,27 @@ class ValueInfoExtractor:
         details = []
 
         for name in attribute_names:
-            value = facility.get_value(name)
-            if not value:
+            value_info = self.get_value_info(facility, name)
+            if not value_info:
                 continue
-            value_info = ValueInfo(
-                name,
-                value,
-                name in self.localized_attribute_names,
-                facility.get_author_nickname(name),
-                facility.get_author_affiliation(name),
-                facility.get_comment(name),
-                facility.get_observed(name))
             if name in special:
                 special[name] = value_info
             else:
                 general.append(value_info)
             details.append(value_info)
         return (special, general, details)
+
+    def get_value_info(self, facility, attribute_name):
+        value = facility.get_value(attribute_name)
+        if value:
+            return ValueInfo(
+                attribute_name,
+                value,
+                attribute_name in self.localized_attribute_names,
+                facility.get_author_nickname(attribute_name),
+                facility.get_author_affiliation(attribute_name),
+                facility.get_comment(attribute_name),
+                facility.get_observed(attribute_name))
 
 class HospitalValueInfoExtractor(ValueInfoExtractor):
     template_name = 'templates/hospital_bubble.html'
@@ -123,7 +127,7 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
         ValueInfoExtractor.__init__(
             self,
             ['title', 'location', 'available_beds', 'total_beds',
-             'healthc_id', 'pcode', 'address', 'services'],
+             'healthc_id', 'pcode', 'address', 'services', 'operational_status'],
             # TODO(kpy): This list is redundant; see the comment above
             # in ValueInfoExtractor.
             ['services', 'organization_type', 'category', 'construction',
@@ -131,9 +135,14 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
         )
 
     def extract(self, facility, attribute_names):
-        return ValueInfoExtractor.extract(
+        (special, general, details) = ValueInfoExtractor.extract(
             self, facility, filter(lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
                                    attribute_names))
+        value_info = ValueInfoExtractor.get_value_info(self, facility,
+            'operational_status')
+        if value_info:
+            general.append(value_info)
+        return (special, general, details)
 
 VALUE_INFO_EXTRACTORS = {
     'hospital': HospitalValueInfoExtractor(),
