@@ -83,7 +83,8 @@ class MainTestCase(SeleniumTestCase):
         self.failUnless(self.is_element_present("//div[@title='Zoom in']"))
         self.failUnless(self.is_element_present("//div[@title='Zoom out']"))
  
-        # Click on facility name and make sure it results in a bubble with correct name
+        # Click on facility name and make sure it results in a bubble 
+        # with correct name
         facility_xpath = "//tr[@id='facility-1']"
         facility_name = self.get_text(facility_xpath + '/td')
         bubble_xpath = "//div[@class='bubble']/span/span[@class='title']"
