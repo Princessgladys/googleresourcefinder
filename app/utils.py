@@ -23,6 +23,7 @@ import google.appengine.ext.webapp.util
 
 import StringIO
 import access
+import cache
 from calendar import timegm
 import cgi
 import cgitb
@@ -82,8 +83,7 @@ def validate_float(text):
         return None
 
 def get_message(namespace, name):
-    message = model.Message.all().filter(
-        'namespace =', namespace).filter('name =', name).get()
+    message = cache.MESSAGES.get((namespace, name))
     django_locale = django.utils.translation.to_locale(
         django.utils.translation.get_language())
     return message and getattr(message, django_locale) or name
@@ -126,6 +126,9 @@ class Handler(webapp.RequestHandler):
 
     def initialize(self, request, response):
         webapp.RequestHandler.initialize(self, request, response)
+        # To be safe, we purge the in-memory portion of MinimalFacilityCache
+        # before each request to be sure we don't see stale data.
+        cache.MINIMAL_FACILITIES.flush(flush_memcache=False)
         self.user = users.get_current_user()
         self.account = access.check_and_log(request, self.user)
         for name in request.headers.keys():

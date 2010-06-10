@@ -699,17 +699,17 @@ function update_facility_list() {
     }
     if (selected_status_i === 0 ||
         facility_status_is[f] === selected_status_i) {
+      var disabledClass = is_facility_closed(facility) ? ' disabled' : '';
       var row = $$('tr', {
         id: 'facility-' + f,
-        'class': 'facility' + maybe_selected(f === selected_facility_i),
+        'class': 'facility' + disabledClass
+            + maybe_selected(f === selected_facility_i),
         onclick: facility_selector(f),
         onmouseover: hover_activator('facility-' + f),
         onmouseout: hover_deactivator('facility-' + f)
       });
-      var cells = []
       var title = facility.values[attributes_by_name.title];
-      var disabledClass = is_facility_closed(facility) ? ' disabled' : '';
-      cells = [$$('td', {'class': 'facility-title' + disabledClass}, title)];
+      var cells = [$$('td', {'class': 'facility-title'}, title)];
       if (facility) {
         for (var c = 1; c < summary_columns.length; c++) {
           var value = summary_columns[c].get_value(facility.values);

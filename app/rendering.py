@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cache
 import datetime
+import django.utils.translation
+import logging
+import re
 import sets
 import sys
-from google.appengine.api import memcache
 from feeds.geo import distance
-from utils import *
 from model import Attribute, Facility, FacilityType, Message, MinimalFacility
+from utils import HIDDEN_ATTRIBUTE_NAMES, db, Date, simplejson
 
 def make_jobjects(entities, transformer, *args):
     """Run a sequence of entities through a transformer function that produces
@@ -89,7 +92,7 @@ def json_encode(object):
     if isinstance(object, Date) or isinstance(object, datetime.datetime):
         return to_local_isotime(object)
     if isinstance(object, db.GeoPt):
-        return {'lat': object.lat, 'lon': object.lon}
+        return {'lat': '%.6f' % object.lat, 'lon': '%.6f' % object.lon}
     raise TypeError(repr(object) + ' is not JSON serializable')
 
 def clean_json(json):
@@ -98,9 +101,11 @@ def clean_json(json):
 def render_json(center=None, radius=None):
     """Dump the data as a JSON string."""
 
-    # TODO(shakusa) Use memcache more!
+    json = cache.JSON_CACHE.get()
+    if json is not None and radius is None:
+        return json
 
-    facility_types = list(FacilityType.all())
+    facility_types = cache.FACILITY_TYPES.values()
 
     # Get the set of attributes to return
     attr_names = sets.Set()
@@ -109,7 +114,7 @@ def render_json(center=None, radius=None):
     attr_names = attr_names.difference(HIDDEN_ATTRIBUTE_NAMES)
 
     # Get the subset of attributes to render.
-    attributes = [a for a in Attribute.all() if a.key().name() in attr_names]
+    attributes = [cache.ATTRIBUTES[a] for a in attr_names]
     attribute_jobjects, attribute_is = make_jobjects(
         attributes, attribute_transformer)
 
@@ -118,8 +123,10 @@ def render_json(center=None, radius=None):
         facility_types, facility_type_transformer, attribute_is)
 
     # Make JSON objects for the facilities
+    mfs = cache.MINIMAL_FACILITIES.values()
     facility_jobjects, facility_is = make_jobjects(
-        MinimalFacility.all().order(MinimalFacility.get_stored_name('title')),
+        sorted(cache.MINIMAL_FACILITIES.values(),
+               key=lambda f: f.get_value('title')),
         minimal_facility_transformer, attributes, facility_types,
         facility_type_is, center, radius)
     total_facility_count = len(facility_jobjects) - 1
@@ -132,16 +139,12 @@ def render_json(center=None, radius=None):
     # Get all the messages for the current language.
     django_locale = django.utils.translation.to_locale(
         django.utils.translation.get_language())
-    def load_messages(django_locale):
-        message_jobjects = {}
-        for message in Message.all():
-            namespace = message_jobjects.setdefault(message.namespace, {})
-            namespace[message.name] = getattr(message, django_locale)
-        return message_jobjects
-    message_jobjects = check_cache(
-        'messages_%s' % django_locale, load_messages, django_locale)
+    message_jobjects = {}
+    for message in cache.MESSAGES.values():
+        namespace = message_jobjects.setdefault(message.namespace, {})
+        namespace[message.name] = getattr(message, django_locale)
 
-    return clean_json(simplejson.dumps({
+    json = clean_json(simplejson.dumps({
         'total_facility_count': total_facility_count,
         'attributes': attribute_jobjects,
         'facility_types': facility_type_jobjects,
@@ -149,11 +152,5 @@ def render_json(center=None, radius=None):
         'messages': message_jobjects
     # set indent=2 to pretty-print; it blows up download size, so defaults off
     }, indent=None, default=json_encode))
-
-def check_cache(key, miss_function, *args):
-    ret = memcache.get(key)
-    if not ret:
-        ret = miss_function(*args)
-        if not memcache.add(key, ret):
-            logging.error('Memcache set of %s failed' % key)
-    return ret
+    cache.JSON_CACHE.set(json)
+    return json
