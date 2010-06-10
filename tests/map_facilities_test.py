@@ -2,7 +2,6 @@ from google.appengine.api import users
 from model import *
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
-import time
 import scrape
 
 # services listed in the drop down box on top of the list
