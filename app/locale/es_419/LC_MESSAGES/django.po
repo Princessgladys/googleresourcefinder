@@ -62,7 +62,7 @@ msgid "Accuracy"
 msgstr "Precisión"
 
 #. street address
-#: templates/hospital_bubble.html:112 templates/print_data.html:68 ../tools/setup.py:127
+#: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
 msgid "Address"
 msgstr "Dirección"
 
@@ -132,17 +132,17 @@ msgid "Category"
 msgstr "Categoría"
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:140
+#: templates/hospital_bubble.html:148
 msgid "Change"
 msgstr "Cambio"
 
 #. Header for the history of changes in data for a facility
-#: templates/hospital_bubble.html:102
+#: templates/hospital_bubble.html:110
 msgid "Change details"
 msgstr "Detalles de cambios"
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:148
+#: templates/hospital_bubble.html:156
 msgid "Change note"
 msgstr "Nota"
 
@@ -197,7 +197,7 @@ msgid "Damage"
 msgstr "Daño"
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:152
+#: templates/hospital_bubble.html:160
 msgid "Date and time"
 msgstr "Fecha y hora"
 
@@ -254,7 +254,7 @@ msgid "Edit this record"
 msgstr "Modifica este registro"
 
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:144
+#: templates/hospital_bubble.html:152
 msgid "Edited by"
 msgstr "Modificado por"
 
@@ -279,7 +279,7 @@ msgid "Facility"
 msgstr "Institución"
 
 #. Header for details about a facility
-#: templates/hospital_bubble.html:97
+#: templates/hospital_bubble.html:105
 msgid "Facility details"
 msgstr "Detalles de la institución"
 
@@ -379,7 +379,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Fecha no válida: %(date)r (requiere un formato de DD-MM-AAAA)"
 
 #. Error message for request missing facility name.
-#: edit.py:334 bubble.py:146
+#: edit.py:334 bubble.py:155
 msgid "Invalid or missing facility name."
 msgstr "Nombre de la institución no válido o no especificado"
 
@@ -439,7 +439,7 @@ msgid "Location"
 msgstr "Ubicación"
 
 #. Geographic coordinates of a location on earth.
-#: templates/hospital_bubble.html:121
+#: templates/hospital_bubble.html:129
 msgid "Location:"
 msgstr "Ubicación"
 
@@ -504,7 +504,7 @@ msgid "No"
 msgstr "No"
 
 #. Indicates there is no availability information for this  hospital.
-#: templates/hospital_bubble.html:81
+#: templates/hospital_bubble.html:89
 msgid "No availability information"
 msgstr "No hay información de disponibilidad"
 
@@ -580,7 +580,7 @@ msgid "Phone"
 msgstr "Teléfono"
 
 #. Indicates a user should call for availability of beds and services at a hospital.
-#: templates/hospital_bubble.html:75
+#: templates/hospital_bubble.html:83
 msgid "Please call for availability information."
 msgstr "Llama para informarte acerca de la disponibilidad"
 
@@ -786,12 +786,12 @@ msgid "anonymous"
 msgstr "anónimo"
 
 #. Heading for number of available beds at a hospital
-#: templates/hospital_bubble.html:49
+#: templates/hospital_bubble.html:57
 msgid "availability"
 msgstr "disponibilidad"
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:53
+#: templates/hospital_bubble.html:61
 msgid "capacity"
 msgstr "capacidad"
 
@@ -812,7 +812,7 @@ msgid "p ${PHONE}"
 msgstr "p ${PHONE}"
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:58
+#: templates/hospital_bubble.html:66
 msgid "services"
 msgstr "servicios"
 
