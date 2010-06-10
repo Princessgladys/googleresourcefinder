@@ -1,5 +1,5 @@
 from google.appengine.api import users
-from model import *
+from model import Facility, MinimalFacility
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import scrape
@@ -54,8 +54,15 @@ class MainTestCase(SeleniumTestCase):
         self.s = scrape.Session()
 
     def tearDown(self):
-        Facility.get_by_key_name('example.org/1000').delete()
-        Facility.get_by_key_name('example.org/1001').delete()
+        f = Facility.get_by_key_name('example.org/1000')
+        mf = MinimalFacility.all().ancestor(f).get()
+        mf.delete()
+        f.delete()
+        
+        f = Facility.get_by_key_name('example.org/1001')
+        mf = MinimalFacility.all().ancestor(f).get()
+        mf.delete()
+        f.delete()
 
         SeleniumTestCase.tearDown(self)
 
