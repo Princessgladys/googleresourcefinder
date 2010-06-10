@@ -100,8 +100,10 @@ def clean_json(json):
 
 def render_json(center=None, radius=None):
     """Dump the data as a JSON string."""
+    django_locale = django.utils.translation.to_locale(
+        django.utils.translation.get_language())
 
-    json = cache.JSON_CACHE.get()
+    json = cache.JSON_CACHE.get(django_locale)
     if json is not None and radius is None:
         return json
 
@@ -137,8 +139,6 @@ def render_json(center=None, radius=None):
         facility_jobjects.sort(key=lambda f: f and f.get('distance_meters'))
 
     # Get all the messages for the current language.
-    django_locale = django.utils.translation.to_locale(
-        django.utils.translation.get_language())
     message_jobjects = {}
     for message in cache.MESSAGES.values():
         namespace = message_jobjects.setdefault(message.namespace, {})
@@ -152,5 +152,5 @@ def render_json(center=None, radius=None):
         'messages': message_jobjects
     # set indent=2 to pretty-print; it blows up download size, so defaults off
     }, indent=None, default=json_encode))
-    cache.JSON_CACHE.set(json)
+    cache.JSON_CACHE.set(django_locale, json)
     return json

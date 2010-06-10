@@ -192,8 +192,13 @@
         for (var div_index = 0; div_index < divs.length; div_index++) {
           var div = divs[div_index];
           if (div.className == "comment") {
-            tr.onclick = make_visible_closure(div);
             div.style.visibility = "hidden";
+            var closure = make_visible_closure(div);
+            var inputs = tr.getElementsByTagName('input');
+            for (var inp_index = 0; inp_index < inputs.length; inp_index++) {
+              var input = inputs[inp_index];
+              input.onfocus = closure;
+            }
           }
         }
       }

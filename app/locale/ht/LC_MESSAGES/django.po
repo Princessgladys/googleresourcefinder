@@ -122,7 +122,7 @@ msgid "Can pick up patients"
 msgstr "Ka al chache malad"
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:154
+#: templates/edit.html:158
 msgid "Cancel"
 msgstr "Anile"
 
@@ -160,6 +160,11 @@ msgstr "Klinik"
 #: ../tools/setup.py:209
 msgid "Closed or closing"
 msgstr "Fèmen oswa pwal fèmen vit"
+
+#. Label for a text field to enter a comment about a change.
+#: templates/edit.html:140
+msgid "Comment:"
+msgstr "Kòmantè:"
 
 #. remarks
 #: ../tools/setup.py:145
@@ -659,7 +664,7 @@ msgid "Resource Finder"
 msgstr "Chèche resous"
 
 #. Button text to save data
-#: templates/edit.html:150
+#: templates/edit.html:154
 msgid "Save"
 msgstr "Anrejistre"
 
@@ -799,11 +804,6 @@ msgstr "Disponibilite"
 #: templates/hospital_bubble.html:61
 msgid "capacity"
 msgstr "Kapasite"
-
-#. TODO: Add missing message description or meaning
-#: templates/edit.html:137
-msgid "comment:"
-msgstr "Kòmantè"
 
 #. Header for the number of facilities less than 10 miles from a location.
 #: templates/map.html:166
