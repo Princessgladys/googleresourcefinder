@@ -2,7 +2,6 @@ from google.appengine.api import users
 from model import *
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
-import time
 import scrape
 
 # "name" attributes of the checkboxes for available services in the edit form.
