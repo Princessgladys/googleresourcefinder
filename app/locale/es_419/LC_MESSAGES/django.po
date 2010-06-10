@@ -46,7 +46,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Instituciones dentro de${RADIUS_MILES} millas"
 
 #. Error message for lacking edit permissions
-#: edit.py:438
+#: edit.py:437
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s no tiene permiso para editar %(a)s"
@@ -616,7 +616,7 @@ msgid "Reachable by road"
 msgstr "Acceso a través de carretera"
 
 #. Record updated successfully.
-#: edit.py:466
+#: edit.py:464
 msgid "Record updated."
 msgstr "Registro actualizado."
 
@@ -674,12 +674,12 @@ msgid "Show:"
 msgstr "Mostrar:"
 
 #. Link to sign into the app
-#: main.py:58
+#: main.py:55
 msgid "Sign in"
 msgstr "Acceder"
 
 #. Link to sign out of the app
-#: main.py:56
+#: main.py:53
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
@@ -781,7 +781,7 @@ msgid "and with availability."
 msgstr "y con disponibilidad."
 
 #. a user with no identity
-#: main.py:52
+#: main.py:49
 msgid "anonymous"
 msgstr "anónimo"
 
