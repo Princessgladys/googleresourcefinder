@@ -46,7 +46,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
 
 #. Error message for lacking edit permissions
-#: edit.py:438
+#: edit.py:437
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s pa gen pèmisyon edite %(a)s"
@@ -616,7 +616,7 @@ msgid "Reachable by road"
 msgstr "Aksesib pa wout"
 
 #. Record updated successfully.
-#: edit.py:466
+#: edit.py:464
 msgid "Record updated."
 msgstr "Done a jou"
 
@@ -674,12 +674,12 @@ msgid "Show:"
 msgstr "Ekspoze:"
 
 #. Link to sign into the app
-#: main.py:58
+#: main.py:55
 msgid "Sign in"
 msgstr "Mete Anprent"
 
 #. Link to sign out of the app
-#: main.py:56
+#: main.py:53
 msgid "Sign out"
 msgstr "Sòti"
 
@@ -781,7 +781,7 @@ msgid "and with availability."
 msgstr "Avek anpil abilite"
 
 #. a user with no identity
-#: main.py:52
+#: main.py:49
 msgid "anonymous"
 msgstr "anonim"
 
