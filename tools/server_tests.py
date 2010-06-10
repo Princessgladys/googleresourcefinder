@@ -183,7 +183,7 @@ def main():
         loader = unittest.defaultTestLoader
         suites = []
         for filename in os.listdir(os.environ['TESTS_DIR']):
-            if filename.endswith('edit_test.py'):
+            if filename.endswith('_test.py'):
                 module = filename[:-3]
                 if args:
                     for pattern in args:
