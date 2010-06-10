@@ -27,14 +27,11 @@ def get_export_link():
     """If only one facility type, return the direct download link,
     otherwise return a link to the download page"""
     link = '/export'
-    facility_type = None
-    for ftype in cache.FACILITY_TYPES:
-        if facility_type is not None:
-            # We have more than one facility type, just redirect to the /export
-            # page
-            return link
-        facility_type = ftype
-    return link + '?facility_type=%s' % facility_type
+    if len(cache.FACILITY_TYPES) > 1:
+        # The /export page can handle rendering multiple facility types
+        return link
+    # Shortcut to bypass /export when we have only one facility type
+    return link + '?facility_type=%s' % cache.FACILITY_TYPES.keys()[0]
 
 class Main(Handler):
 
