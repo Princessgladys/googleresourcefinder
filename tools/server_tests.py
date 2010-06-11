@@ -146,7 +146,7 @@ class SeleniumRunner(ProcessRunner):
             self, 'selenium', ['java', '-jar', os.environ['SELENIUM_JAR']])
 
 
-if __name__ == '__main__':
+def main():
     parser = optparse.OptionParser()
     parser.add_option('-a', '--address', help='appserver hostname')
     parser.add_option('-p', '--port', type='int', help='appserver port number')
@@ -179,13 +179,19 @@ if __name__ == '__main__':
         model.Account(email='test@example.com', description='Test',
                       actions=[':view', ':edit', 'grant']).put()
 
-        # Gather all the tests.
+        # Gather the selected tests, or all the tests if none were specified.
         loader = unittest.defaultTestLoader
         suites = []
         for filename in os.listdir(os.environ['TESTS_DIR']):
             if filename.endswith('_test.py'):
                 module = filename[:-3]
-                suites.append(loader.loadTestsFromName(module))
+                if args:
+                    for pattern in args:
+                        if re.match(pattern, filename):
+                            suites.append(loader.loadTestsFromName(module))
+                            break
+                else:        
+                    suites.append(loader.loadTestsFromName(module))
 
         # Run the tests.
         print
@@ -199,3 +205,7 @@ if __name__ == '__main__':
         # Clean up all the subprocesses, no matter what happened.
         for runner in runners:
             runner.stop()
+
+
+if __name__ == '__main__':
+    main()
