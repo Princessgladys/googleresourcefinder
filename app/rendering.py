@@ -23,14 +23,27 @@ from feeds.geo import distance
 from model import Attribute, Facility, FacilityType, Message, MinimalFacility
 from utils import HIDDEN_ATTRIBUTE_NAMES, db, Date, simplejson
 
-def make_jobjects(entities, transformer, *args):
+def get_all_results(query_or_list):
+    """Gets all the results of a query as efficiently as possible.  If the
+    query's results were previously obtained, they are reused."""
+    if isinstance(query_or_list, list):
+        return query_or_list  # it's a list of entities
+    query = query_or_list  # it's a query
+    if not hasattr(query, 'results'):
+        # Calling fetch() is faster than iterating one by one.  'limit' can
+        # be arbitrarily large, but 'offset' cannot exceed 1000 -- so we
+        # only get one attempt.  We assume less than a million results.
+        query.results = query.fetch(1000000)
+    return query.results
+
+def make_jobjects(query_or_list, transformer, *args):
     """Run a sequence of entities through a transformer function that produces
     objects suitable for serialization to JSON, returning a list of objects
     and a dictionary that maps each entity's key_name to its index in the list.
     Item 0 of the list is always None."""
     jobjects = [None]
     indexes = {}
-    for entity in entities:
+    for entity in get_all_results(query_or_list):
         index = len(jobjects)
         jobject = transformer(index, entity, *args)
         if jobject is not None:

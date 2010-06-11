@@ -65,8 +65,8 @@ msgstr "<strong>Note:</strong> Cet établissement a été marquée fermée."
 msgid "Accuracy"
 msgstr "Précision"
 
-#. Header for a street address
-#: templates/print_data.html:68 ../tools/setup.py:127 templates/hospital_bubble.html:120
+#. street address
+#: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
 msgid "Address"
 msgstr "Adresse"
 
@@ -106,7 +106,7 @@ msgid "Blood Bank"
 msgstr "Banque de sang"
 
 #. Save a copy of the data in CSV format
-#: export.py:140
+#: export.py:130
 msgid "CSV Export"
 msgstr "Exporter au format CSV"
 
@@ -278,7 +278,7 @@ msgid "Error loading facility information."
 msgstr "informations sur l'erreur installation de chargement"
 
 #. Button to export data to comma-separated-values format.
-#: export.py:156 templates/map.html:192
+#: export.py:146 templates/map.html:192
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
@@ -668,7 +668,7 @@ msgid "Save"
 msgstr "Enregistrer"
 
 #. Label for a selector to export data to CSV
-#: export.py:145
+#: export.py:135
 msgid "Select facility type to export:"
 msgstr "Sélectionnez le type d'établissement à l'exportation :"
 
