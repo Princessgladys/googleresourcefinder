@@ -66,8 +66,8 @@ msgstr "<strong>Remak:</strong> etablisman sa a te make fèmen."
 msgid "Accuracy"
 msgstr "Presizyon"
 
-#. Header for a street address
-#: templates/print_data.html:68 ../tools/setup.py:127 templates/hospital_bubble.html:120
+#. street address
+#: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
 msgid "Address"
 msgstr "Adrès"
 
@@ -107,7 +107,7 @@ msgid "Blood Bank"
 msgstr "Bank san"
 
 #. Save a copy of the data in CSV format
-#: export.py:140
+#: export.py:130
 msgid "CSV Export"
 msgstr "Ekspote CSV"
 
@@ -279,7 +279,7 @@ msgid "Error loading facility information."
 msgstr "Erè transpòte etablisman enfòmasyon."
 
 #. Button to export data to comma-separated-values format.
-#: export.py:156 templates/map.html:192
+#: export.py:146 templates/map.html:192
 msgid "Export CSV"
 msgstr "Ekspote CSV"
 
@@ -669,7 +669,7 @@ msgid "Save"
 msgstr "Anrejistre"
 
 #. Label for a selector to export data to CSV
-#: export.py:145
+#: export.py:135
 msgid "Select facility type to export:"
 msgstr "Idantite kalite etablisman ekspòtasyon"
 
