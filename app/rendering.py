@@ -82,7 +82,8 @@ def minimal_facility_transformer(index, facility, attributes, facility_types,
         if center:
             facility_jobject['distance_meters'] = distance(location, center)
 
-    if facility_jobject.get('distance_meters') > radius > 0:
+    dist = facility_jobject.get('distance_meters')
+    if center and (not dist or dist > radius > 0):
         return None
 
     return facility_jobject
@@ -104,7 +105,7 @@ def render_json(center=None, radius=None):
         django.utils.translation.get_language())
 
     json = cache.JSON.get(django_locale)
-    if json is not None and radius is None:
+    if json and not center:
         return json
 
     facility_types = cache.FACILITY_TYPES.values()
@@ -152,5 +153,6 @@ def render_json(center=None, radius=None):
         'messages': message_jobjects
     # set indent=2 to pretty-print; it blows up download size, so defaults off
     }, indent=None, default=json_encode))
-    cache.JSON.set(django_locale, json)
+    if not center:
+        cache.JSON.set(django_locale, json)
     return json
