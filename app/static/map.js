@@ -516,7 +516,10 @@ function initialize_filters() {
     id: 'specialty-selector',
     name: 'specialty',
     onchange: function() {
-      select_filter.apply(null, $('specialty-selector').value.split(' '));
+      var value = $('specialty-selector').value.split(' ');
+      _gaq.push(['_trackEvent', 'facility_list', 'filter', 'services',
+                 value[1]]);
+      select_filter.apply(null, value);
     }
   });
   var options = [];
@@ -1160,8 +1163,10 @@ function select_facility(facility_i, ignore_current) {
 
   if (markers[selected_facility_i]) {
     show_loading(true);
+    var url = 'bubble?facility_name=' + selected_facility.name;
+    _gaq.push(['_trackEvent', 'bubble', 'open', selected_facility.name]);
     jQuery.ajax({
-      url: 'bubble?facility_name=' + selected_facility.name,
+      url: url,
       type: 'GET',
       timeout: 10000,
       error: function(request, textStatus, errorThrown){
@@ -1173,7 +1178,12 @@ function select_facility(facility_i, ignore_current) {
         info.setContent(result);
         info.open(map, markers[selected_facility_i]);
         // Sets up the tabs and should be called after the DOM is created.
-        jQuery('#bubble-tabs').tabs();
+        jQuery('#bubble-tabs').tabs({
+          select: function(event, ui) {
+            _gaq.push(['_trackEvent', 'bubble', 'click ' + ui.tab.innerText,
+              selected_facility.name]);
+          }
+        });
         show_loading(false);
       }
     });
