@@ -64,9 +64,9 @@
   <script type="text/javascript">
     var print = {% if params.print %} true {% else %} false {% endif %};
   </script>
+{% include "analytics.html" %}
 </head>
 <body>
-{% include "analytics.html" %}
 <!-- Main document -->
 <div id="viewport"></div>
 <div class="header">
@@ -189,12 +189,12 @@
     {% comment %}
     #i18n: Button to export data to comma-separated-values format.
     {% endcomment %}
-    <a href="{{export_link}}">{% trans "Export CSV" %}</a> <span class="sep">|</span>
+    <a href="{{export_link}}" onclick="_gaq.push(['_trackEvent', 'export', 'csv']);">{% trans "Export CSV" %}</a> <span class="sep">|</span>
 
     {% comment %}
     #i18n: Link to go to a page with past versions of the 'master' list
     {% endcomment %}
-    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">{% trans "View Master List archive" %}</a>
+    <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files" onclick="_gaq.push(['_trackEvent', 'masterlist', 'view']);">{% trans "View Master List archive" %}</a>
   </div>
 </div>
 {% if params.print %}
