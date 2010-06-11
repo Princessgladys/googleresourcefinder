@@ -39,9 +39,9 @@ COLUMNS_BY_FACILITY_TYPE = {
         ('commune', lambda f: f.get_value('commune')),
         ('address', lambda f: f.get_value('address')),
         ('latitude', lambda f: (f.get_value('location') and
-                                f.get_value('location').lat)),
+                                f.get_value('location')).lat),
         ('longitude', lambda f: (f.get_value('location') and
-                                 f.get_value('location').lon)),
+                                 f.get_value('location')).lon),
         ('organization', lambda f: f.get_value('organization')),
         ('organization_type', lambda f: f.get_value('organization_type')),
         ('category', lambda f: f.get_value('category')),
