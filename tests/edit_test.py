@@ -76,7 +76,9 @@ class EditTest(SeleniumTestCase):
 
     def test_edit_page(self):
         """Confirms that all the fields in the edit form save the entered
-        values, and these values appear pre-filled when the form is loaded."""
+        values, and these values appear pre-filled when the form is loaded.
+        Also checks to make sure the comment fields are properly registering
+        in the bubble."""
 
         # Check that feed is empty
         feed = self.s.go('http://localhost:8081/feeds/delta')
