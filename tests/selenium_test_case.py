@@ -100,6 +100,7 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         return False
 
     # ---------------------------------------- datastore convenience methods
+
     def put_facility(self, key_name, type='hospital', observed=None,
                      email='test@example.com', nickname='nickname_foo',
                      affiliation='affiliation_foo', comment='comment_foo',
