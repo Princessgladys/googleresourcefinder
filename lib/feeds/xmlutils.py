@@ -72,9 +72,13 @@ def parse(string):
     """Parses XML from a string."""
     return ElementTree.fromstring(string)
 
-def serialize(root):
+def serialize(root, uri_prefixes={}, pretty_print=True):
     """Serializes XML to a string."""
-    return ElementTree.tostring(root)
+    root_copy = copy.deepcopy(root)
+    set_prefixes(root_copy, uri_prefixes)
+    if pretty_print:
+        indent(root_copy)
+    return ElementTree.tostring(root_copy)
 
 def read(file):
     """Reads an XML tree from a file."""

@@ -1,7 +1,8 @@
 from google.appengine.api import users
-from model import *
+from model import db, Facility, MinimalFacility
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
+import scrape
 
 # "name" attributes of the checkboxes for available services in the edit form.
 SERVICES = [
@@ -9,12 +10,14 @@ SERVICES = [
     'ORTHOPEDICS',
     'NEUROSURGERY',
     'VASCULAR_SURGERY',
-    'GENERAL_MEDICINE',
+    'INTERNAL_MEDICINE',
     'CARDIOLOGY',
     'INFECTIOUS_DISEASE',
     'PEDIATRICS',
     'POSTOPERATIVE_CARE',
+    'REHABILITATION',
     'OBSTETRICS_GYNECOLOGY',
+    'MENTAL_HEALTH',
     'DIALYSIS',
     'LAB',
     'X_RAY',
@@ -53,9 +56,13 @@ class EditTest(SeleniumTestCase):
         mf.set_attribute('title', 'title_foo')
         mf.set_attribute('location', db.GeoPt(51.5, 0))
         mf.put()
-
+        self.s = scrape.Session()
+    
     def tearDown(self):
-        Facility.get_by_key_name('example.org/123').delete()
+        f = Facility.get_by_key_name('example.org/123')
+        mf = MinimalFacility.all().ancestor(f).get()
+        mf.delete()
+        f.delete()
         SeleniumTestCase.tearDown(self)
 
     def test_edit_link(self):
@@ -63,8 +70,6 @@ class EditTest(SeleniumTestCase):
         goes to the edit form."""
         self.login('/')
         self.click('id=facility-1')
-        # For some reason, this wait doesn't always work unless we do it twice.
-        self.wait_for_element('link=Edit this record')
         self.wait_for_element('link=Edit this record')
         self.click('link=Edit this record')
         self.wait_for_load()
@@ -73,6 +78,12 @@ class EditTest(SeleniumTestCase):
     def test_edit_page(self):
         """Confirms that all the fields in the edit form save the entered
         values, and these values appear pre-filled when the form is loaded."""
+
+        # Check that feed is empty
+        feed = self.s.go('http://localhost:8081/feeds/delta')
+        assert feed.first('atom:feed')
+        assert feed.first('atom:feed').all('atom:entry') == []
+
         # Go to the edit page
         self.login('/edit?facility_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
@@ -99,10 +110,12 @@ class EditTest(SeleniumTestCase):
         text_fields['account_affiliation'] = 'Test'
         text_fields['available_beds'] = '   1'
         text_fields['total_beds'] = '2\t  '
+        text_fields['total_beds__comment'] = 'comment1'
         text_fields['location.lat'] = '18.537207 '
         text_fields['location.lon'] = '\t-72.349663'
+        text_fields['location__comment'] = 'comment2'
         checkbox_fields = dict(('services.' + name, True) for name in SERVICES)
-        select_fields = {'organization_type': 'COM', 'category': 'C/S',
+        select_fields = {'organization_type': 'NGO', 'category': 'CLINIC',
                          'construction': 'ADOBE', 'reachable_by_road': 'TRUE',
                          'can_pick_up_patients': 'FALSE',
                          'operational_status': 'NO_SURGICAL_CAPACITY'}
@@ -126,10 +139,13 @@ class EditTest(SeleniumTestCase):
         del text_fields['account_affiliation']
 
         # Check that the new values were saved, and are pre-filled in the form
+        # except for comments which should remain empty.
         text_fields['available_beds'] = '1'  # whitespace should be gone
         text_fields['total_beds'] = '2'  # whitespace should be gone
         text_fields['location.lat'] = '18.537207'  # whitespace should be gone
         text_fields['location.lon'] = '-72.349663'  # whitespace should be gone
+        text_fields['total_beds__comment'] = ''
+        text_fields['location__comment'] = ''
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
         # Now empty everything
@@ -170,34 +186,35 @@ class EditTest(SeleniumTestCase):
         text_fields['total_beds'] = '0'
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
+        # TODO(kpy): This feature is disabled until we can debug it.
+        # Re-enable this test when the delta feed is working properly.
+        # Check that feed is not empty now
+        # feed = self.s.go('http://localhost:8081/feeds/delta')
+        # assert feed.first('atom:feed')
+        # assert feed.first('atom:feed').first('atom:entry')
+
 
     def fill_fields(self, text_fields, checkbox_fields, select_fields):
         """Fills in text fields, selects or deselects checkboxes, and
         makes drop-down selections.  Each of the arguments should be a
         dictionary of field names to values."""
         for name, value in text_fields.items():
-            input_xpath = '//input[@name="%s"]' % name
-            self.type(input_xpath, value)
+            self.type('//*[@name=%r]' % name, value)
         for name, value in checkbox_fields.items():
-            checkbox_xpath = '//input[@name="%s"]' % name
-            (value and self.check or self.uncheck)(checkbox_xpath)
+            (value and self.check or self.uncheck)('//*[@name=%r]' % name)
         for name, value in select_fields.items():
-            select_xpath = '//select[@name="%s"]' % name
-            self.select(select_xpath, 'value=' + value)
+            self.select('//*[@name=%r]' % name, 'value=' + value)
 
     def verify_fields(self, text_fields, checkbox_fields, select_fields):
         """Checks the values of text fields, state of checkboxes, and
         selection state of options.  Each of the arguments should be a
         dictionary of field names to values."""
         for name, value in text_fields.items():
-            input_xpath = '//input[@name="%s"]' % name
-            self.assert_value(value, input_xpath)
+            self.assert_value(value, '//*[@name=%r]' % name)
         for name, value in checkbox_fields.items():
-            checkbox_xpath = '//input[@name="%s"]' % name
-            self.assertEquals(value, self.is_checked(checkbox_xpath))
+            assert value == self.is_checked('//*[@name=%r]' % name)
         for name, value in select_fields.items():
-            select_xpath = '//select[@name="%s"]' % name
-            self.assertEquals([value], self.get_selected_values(select_xpath))
+            assert [value] == self.get_selected_values('//*[@name=%r]' % name)
 
     def verify_errors(self, text_fields):
         """Checks that all the given text fields have visible error messages.

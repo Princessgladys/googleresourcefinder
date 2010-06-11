@@ -166,6 +166,39 @@
 
     return jQuery.inArray(false, valid_arr) == -1;
   }
+  
+  function make_visible(id) {
+    $(id).style.visibility = "visible";
+  }
+  
+  function make_visible_closure(div) {
+    return function() {
+      make_visible(div.id);
+    }
+  }
+
+  /**
+   * Initializes comment visibility and installs onclick handlers to make
+   * comments visible if their values are updated.
+   */
+  function init_comment_visibility() {
+    var trs = document.getElementsByTagName('tr');
+    for (var i = 0; i < trs.length; i++) {
+      var tr = trs[i];
+      var classes = tr.className.split(' ');
+      if (classes.length > 1) {
+        var divs = tr.getElementsByTagName('div');
+        var attribute_name = "";
+        for (var div_index = 0; div_index < divs.length; div_index++) {
+          var div = divs[div_index];
+          if (div.className == "comment") {
+            tr.onclick = make_visible_closure(div);
+            div.style.visibility = "hidden";
+          }
+        }
+      }
+    }
+  }
 
   /**
    * Handler for a click of the save button.
@@ -188,6 +221,7 @@
     $('edit').onsubmit = validate;
     $('save').onclick = save;
     $('cancel').onclick = cancel;
+    init_comment_visibility();
   }
 
   init();

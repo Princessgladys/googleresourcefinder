@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.appengine.api import memcache
 from google.appengine.api import urlfetch
 from google.appengine.api import users
+from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 import google.appengine.ext.webapp.template
@@ -28,7 +30,7 @@ import config
 from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
-from feeds.crypto import get_key
+from feeds.crypto import get_secret
 from feeds.errors import ErrorMessage, Redirect
 import gzip
 from html import html_escape
@@ -144,7 +146,7 @@ class Handler(webapp.RequestHandler):
         self.params.languages = config.LANGUAGES
 
         # Google Analytics account id
-        self.params.analytics_id = get_key('analytics_id')
+        self.params.analytics_id = get_secret('analytics_id')
 
     def select_locale(self):
         """Detect and activate the appropriate locale.  The 'lang' query

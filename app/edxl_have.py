@@ -114,5 +114,4 @@ def read(file):
 
 def write(file, hospitals):
     """Writes a list of hospital elements as an EDXL-HAVE document."""
-    root = HospitalStatus.to_element('HospitalStatus', hospitals)
-    xmlutils.write(file, root, URI_PREFIXES)
+    xmlutils.write(file, serialize(hospitals), URI_PREFIXES)
