@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.appengine.api import memcache
+import config
+import django.utils.translation
 import logging
 import model
-import sets
 import time
 import UserDict
+
+from google.appengine.api import memcache
 
 """Caching layer for Resource Finder, taking advantage of both memcache
 and in-memory caches."""
@@ -25,27 +27,24 @@ and in-memory caches."""
 class JsonCache:
     """Memcache layer for JSON rendered by rendering.py. Offers significant
     startup performance increase."""
-    def __init__(self):
-        self.locales = sets.Set()
-
     def _key(self, locale):
         return '%s_%s' % (self.__class__.__name__, locale)
 
     def set(self, locale, json):
-        """Sets the value in this cache"""
-        if memcache.add(self._key(locale), json):
-            self.locales.add(locale)
-        else:
+        """Sets the value in this cache for the given locale"""
+        if not memcache.set(self._key(locale), json):
             logging.error('Memcache set of %s failed' % self._key(locale))
 
     def get(self, locale):
-        """Gets the value in this cache"""
+        """Gets the value in this cache for the given locale"""
         return memcache.get(self._key(locale))
 
     def flush(self):
-        """Flushes the value in this cache."""
+        """Flushes the values in this cache for all locales."""
         logging.debug('Flushing %s' % self.__class__.__name__)
-        memcache.delete_multi([self._key(locale) for locale in self.locales])
+        memcache.delete_multi(
+            list(self._key(django.utils.translation.to_locale(lang[0]))
+                 for lang in config.LANGUAGES))
 
 class Cache(UserDict.DictMixin):
     """A cache that looks first in memory, then at memcache, then finally
@@ -59,6 +58,9 @@ class Cache(UserDict.DictMixin):
         self.json_cache = json_cache
         self.ttl = ttl
 
+    def _key(self):
+        return self.__class__.__name__
+
     def __getitem__(self, key):
         self.load()
         return self.entities[key]
@@ -71,17 +73,16 @@ class Cache(UserDict.DictMixin):
         """Load entities into memory, if necessary."""
         now = time.time()
         if now - self.last_refresh > self.ttl:
-            logging.debug('In-memory cache miss %s' % self.__class__.__name__)
-            self.entities = memcache.get(self.__class__.__name__)
+            logging.debug('In-memory cache miss %s' % self._key())
+            self.entities = memcache.get(self._key())
             if self.entities is None:
-                logging.debug('Memcache miss %s' % self.__class__.__name__)
+                logging.debug('Memcache miss %s' % self._key())
                 self.json_cache.flush()
                 self.entities = self.fetch_entities()
                 # TODO(shakusa) memcache has a 1MB limit for values. If any
                 # cache gets larger, we need to revisit this.
-                if not memcache.add(self.__class__.__name__, self.entities):
-                    logging.error('Memcache set of %s failed'
-                                  % self.__class__.__name__)
+                if not memcache.set(self._key(), self.entities):
+                    logging.error('Memcache set of %s failed' % self._key())
             self.last_refresh = now
 
     def fetch_entities(self):
@@ -105,9 +106,9 @@ class Cache(UserDict.DictMixin):
     def flush(self, flush_memcache=True):
         """Flushes the in-memory cache and optionally memcache"""
         logging.debug('Flushing %s (flush_memcache=%s)'
-                     % (self.__class__.__name__, flush_memcache))
+                      % (self._key(), flush_memcache))
         if flush_memcache:
-            memcache.delete(self.__class__.__name__)
+            memcache.delete(self._key())
             self.json_cache.flush()
         self.entities = None
         self.last_refresh = 0
