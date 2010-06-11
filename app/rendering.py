@@ -79,8 +79,7 @@ def minimal_facility_transformer(index, facility, attributes, facility_types,
         if center:
             facility_jobject['distance_meters'] = distance(location, center)
 
-    dist = facility_jobject.get('distance_meters')
-    if center and (not dist or dist > radius > 0):
+    if facility_jobject.get('distance_meters') > radius > 0:
         return None
 
     return facility_jobject
