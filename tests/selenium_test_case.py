@@ -118,6 +118,8 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
 
     def wait_for_element(self, locator):
        """Waits until the given element is present."""
+       # For some reason, this wait doesn't always work unless we do it twice.
+       self.wait_until(self.is_element_present, locator)
        self.wait_until(self.is_element_present, locator)
 
     def assert_element(self, locator):
