@@ -106,7 +106,7 @@ msgid "Blood Bank"
 msgstr "Banque de sang"
 
 #. Save a copy of the data in CSV format
-#: export.py:130
+#: export.py:127
 msgid "CSV Export"
 msgstr "Exporter au format CSV"
 
@@ -278,7 +278,7 @@ msgid "Error loading facility information."
 msgstr "informations sur l'erreur installation de chargement"
 
 #. Button to export data to comma-separated-values format.
-#: export.py:146 templates/map.html:192
+#: export.py:143 templates/map.html:192
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
@@ -668,7 +668,7 @@ msgid "Save"
 msgstr "Enregistrer"
 
 #. Label for a selector to export data to CSV
-#: export.py:135
+#: export.py:132
 msgid "Select facility type to export:"
 msgstr "Sélectionnez le type d'établissement à l'exportation :"
 
@@ -723,7 +723,7 @@ msgid "URL:"
 msgstr "URL :"
 
 #. Error message
-#: utils.py:113
+#: utils.py:123
 msgid "Unauthorized user."
 msgstr "utilisateur non autorisé"
 

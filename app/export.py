@@ -68,11 +68,8 @@ def write_csv(out, facility_type):
        in CSV format, with a row for each facility"""
     writer = csv.writer(out)
 
-    # Get the facilities, assuming less than a million of them.
-    # (The 'limit' argument is allowed to be arbitrarily large now.)
-    facilities = Facility.all().fetch(1000000)
- 
-    columns= COLUMNS_BY_FACILITY_TYPE[facility_type.key().name()]
+    facilities = fetch_all(Facility.all())
+    columns = COLUMNS_BY_FACILITY_TYPE[facility_type.key().name()]
     if columns:
         row = list(column[0] for column in columns)
     else:
