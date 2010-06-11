@@ -456,6 +456,7 @@ class Edit(utils.Handler):
                 #     facility, changed_attributes_dict, utcnow)
                 db.put([report, facility, minimal_facility])
                 cache.MINIMAL_FACILITIES.flush()
+                cache.JSON.flush()
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
                               self.request, self.user, self.account)
