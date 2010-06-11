@@ -44,6 +44,7 @@ class JsonCache:
 
     def flush(self):
         """Flushes the value in this cache."""
+        logging.debug('Flushing %s' % self.__class__.__name__)
         memcache.delete_multi([self._key(locale) for locale in self.locales])
 
 class Cache(UserDict.DictMixin):
@@ -70,8 +71,10 @@ class Cache(UserDict.DictMixin):
         """Load entities into memory, if necessary."""
         now = time.time()
         if now - self.last_refresh > self.ttl:
+            logging.debug('In-memory cache miss %s' % self.__class__.__name__)
             self.entities = memcache.get(self.__class__.__name__)
             if self.entities is None:
+                logging.debug('Memcache miss %s' % self.__class__.__name__)
                 self.json_cache.flush()
                 self.entities = self.fetch_entities()
                 # TODO(shakusa) memcache has a 1MB limit for values. If any
@@ -101,6 +104,8 @@ class Cache(UserDict.DictMixin):
 
     def flush(self, flush_memcache=True):
         """Flushes the in-memory cache and optionally memcache"""
+        logging.debug('Flushing %s (flush_memcache=%s)'
+                     % (self.__class__.__name__, flush_memcache))
         if flush_memcache:
             memcache.delete(self.__class__.__name__)
             self.json_cache.flush()
@@ -127,8 +132,15 @@ class MinimalFacilityCache(Cache):
         entities = self._query_in_batches(model.MinimalFacility.all())
         return dict((e.parent_key(), e) for e in entities)
 
-JSON_CACHE = JsonCache()
-ATTRIBUTES = AttributeCache(JSON_CACHE)
-FACILITY_TYPES = FacilityTypeCache(JSON_CACHE)
-MESSAGES = MessageCache(JSON_CACHE)
-MINIMAL_FACILITIES = MinimalFacilityCache(JSON_CACHE)
+JSON = JsonCache()
+ATTRIBUTES = AttributeCache(JSON)
+FACILITY_TYPES = FacilityTypeCache(JSON)
+MESSAGES = MessageCache(JSON)
+MINIMAL_FACILITIES = MinimalFacilityCache(JSON)
+
+CACHES = [JSON, ATTRIBUTES, FACILITY_TYPES, MESSAGES, MINIMAL_FACILITIES]
+
+def flush_all():
+    """Flush all caches"""
+    for cache in CACHES:
+        cache.flush()
