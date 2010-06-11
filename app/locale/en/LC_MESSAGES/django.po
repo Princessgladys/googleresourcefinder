@@ -46,21 +46,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Error message for lacking edit permissions
-<<<<<<< local
-#: edit.py:426
-=======
-#: edit.py:434
->>>>>>> other
+#: edit.py:439
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr ""
 
 #. Form option to indicate that a value is not specified
-<<<<<<< local
-#: edit.py:212 edit.py:197 edit.py:171
-=======
-#: edit.py:192 edit.py:207 edit.py:166
->>>>>>> other
+#: edit.py:169 edit.py:210 edit.py:195
 msgid "(unspecified)"
 msgstr ""
 
@@ -70,7 +62,7 @@ msgid "Accuracy"
 msgstr ""
 
 #. street address
-#: templates/hospital_bubble.html:112 templates/print_data.html:68 ../tools/setup.py:127
+#: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
 msgid "Address"
 msgstr ""
 
@@ -140,17 +132,17 @@ msgid "Category"
 msgstr ""
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:140
+#: templates/hospital_bubble.html:148
 msgid "Change"
 msgstr ""
 
 #. Header for the history of changes in data for a facility
-#: templates/hospital_bubble.html:102
+#: templates/hospital_bubble.html:110
 msgid "Change details"
 msgstr ""
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:148
+#: templates/hospital_bubble.html:156
 msgid "Change note"
 msgstr ""
 
@@ -205,7 +197,7 @@ msgid "Damage"
 msgstr ""
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:152
+#: templates/hospital_bubble.html:160
 msgid "Date and time"
 msgstr ""
 
@@ -247,11 +239,7 @@ msgid "District"
 msgstr ""
 
 #. E-mail address
-<<<<<<< local
-#: edit.py:118 ../tools/setup.py:119
-=======
-#: ../tools/setup.py:119 edit.py:113
->>>>>>> other
+#: ../tools/setup.py:119 edit.py:116
 msgid "E-mail"
 msgstr ""
 
@@ -266,7 +254,7 @@ msgid "Edit this record"
 msgstr ""
 
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:144
+#: templates/hospital_bubble.html:152
 msgid "Edited by"
 msgstr ""
 
@@ -291,7 +279,7 @@ msgid "Facility"
 msgstr ""
 
 #. Header for details about a facility
-#: templates/hospital_bubble.html:97
+#: templates/hospital_bubble.html:105
 msgid "Facility details"
 msgstr ""
 
@@ -386,20 +374,12 @@ msgid "Internal Medicine"
 msgstr ""
 
 #. Error message for invalid date entry
-<<<<<<< local
-#: edit.py:140
-=======
-#: edit.py:135
->>>>>>> other
+#: edit.py:138
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr ""
 
 #. Error message for request missing facility name.
-<<<<<<< local
-#: edit.py:327 bubble.py:146
-=======
-#: bubble.py:146 edit.py:331
->>>>>>> other
+#: edit.py:334 bubble.py:155
 msgid "Invalid or missing facility name."
 msgstr ""
 
@@ -424,11 +404,7 @@ msgid "Last updated:"
 msgstr ""
 
 #. Label for text input
-<<<<<<< local
-#: edit.py:233
-=======
-#: edit.py:228
->>>>>>> other
+#: edit.py:231
 msgid "Latitude"
 msgstr ""
 
@@ -463,16 +439,12 @@ msgid "Location"
 msgstr ""
 
 #. Geographic coordinates of a location on earth.
-#: templates/hospital_bubble.html:121
+#: templates/hospital_bubble.html:129
 msgid "Location:"
 msgstr ""
 
 #. Label for text input
-<<<<<<< local
-#: edit.py:236
-=======
-#: edit.py:232
->>>>>>> other
+#: edit.py:235
 msgid "Longitude"
 msgstr ""
 
@@ -512,11 +484,7 @@ msgid "NGO"
 msgstr ""
 
 #. a person's name
-<<<<<<< local
-#: edit.py:114
-=======
-#: edit.py:109
->>>>>>> other
+#: edit.py:112
 msgid "Name"
 msgstr ""
 
@@ -531,16 +499,12 @@ msgid "Neurosurgery"
 msgstr ""
 
 #. Form option for a false Boolean value
-<<<<<<< local
-#: bubble_test.py:68 edit.py:175 bubble.py:47
-=======
-#: edit.py:170 bubble.py:47
->>>>>>> other
+#: bubble_test.py:68 edit.py:173 bubble.py:47
 msgid "No"
 msgstr ""
 
 #. Indicates there is no availability information for this  hospital.
-#: templates/hospital_bubble.html:81
+#: templates/hospital_bubble.html:89
 msgid "No availability information"
 msgstr ""
 
@@ -611,16 +575,12 @@ msgid "Pediatrics"
 msgstr ""
 
 #. telephone number
-<<<<<<< local
-#: edit.py:116 ../tools/setup.py:117
-=======
-#: edit.py:111 ../tools/setup.py:117
->>>>>>> other
+#: edit.py:114 ../tools/setup.py:117
 msgid "Phone"
 msgstr ""
 
 #. Indicates a user should call for availability of beds and services at a hospital.
-#: templates/hospital_bubble.html:75
+#: templates/hospital_bubble.html:83
 msgid "Please call for availability information."
 msgstr ""
 
@@ -656,11 +616,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-<<<<<<< local
-#: edit.py:453
-=======
-#: edit.py:450
->>>>>>> other
+#: edit.py:466
 msgid "Record updated."
 msgstr ""
 
@@ -803,11 +759,7 @@ msgid "X-Ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-<<<<<<< local
-#: bubble_test.py:67 bubble.py:47 edit.py:173
-=======
-#: edit.py:168 bubble.py:47
->>>>>>> other
+#: bubble_test.py:67 bubble.py:47 edit.py:171
 msgid "Yes"
 msgstr ""
 
@@ -834,12 +786,12 @@ msgid "anonymous"
 msgstr ""
 
 #. Heading for number of available beds at a hospital
-#: templates/hospital_bubble.html:49
+#: templates/hospital_bubble.html:57
 msgid "availability"
 msgstr ""
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:53
+#: templates/hospital_bubble.html:61
 msgid "capacity"
 msgstr ""
 
@@ -860,7 +812,7 @@ msgid "p ${PHONE}"
 msgstr ""
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:58
+#: templates/hospital_bubble.html:66
 msgid "services"
 msgstr ""
 

@@ -1,5 +1,5 @@
 from google.appengine.api import users
-from model import *
+from model import db, Facility, MinimalFacility
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import scrape
@@ -57,9 +57,12 @@ class EditTest(SeleniumTestCase):
         mf.set_attribute('location', db.GeoPt(51.5, 0))
         mf.put()
         self.s = scrape.Session()
-
+    
     def tearDown(self):
-        Facility.get_by_key_name('example.org/123').delete()
+        f = Facility.get_by_key_name('example.org/123')
+        mf = MinimalFacility.all().ancestor(f).get()
+        mf.delete()
+        f.delete()
         SeleniumTestCase.tearDown(self)
 
     def test_edit_link(self):
@@ -67,8 +70,6 @@ class EditTest(SeleniumTestCase):
         goes to the edit form."""
         self.login('/')
         self.click('id=facility-1')
-        # For some reason, this wait doesn't always work unless we do it twice.
-        self.wait_for_element('link=Edit this record')
         self.wait_for_element('link=Edit this record')
         self.click('link=Edit this record')
         self.wait_for_load()
