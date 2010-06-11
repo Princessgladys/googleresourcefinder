@@ -29,8 +29,8 @@ from feeds.crypto import sign, verify
 from main import USE_WHITELISTS
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
-from utils import db, get_message, html_escape, simplejson, to_unicode, users, _
-from feeds.crypto import sign, verify
+from utils import db, get_message, html_escape, simplejson
+from utils import to_unicode, users, _
 
 XSRF_KEY_NAME = 'resource-finder-edit'
 DAY_SECS = 24 * 60 * 60

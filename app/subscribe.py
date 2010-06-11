@@ -46,8 +46,6 @@ class Subscribe(Handler):
 
         self.require_logged_in_user()
         self.email = self.user.email()
-        self.account = db.GqlQuery('SELECT * FROM Account WHERE email = :1',
-                                   self.email).get()
         if not self.account:
             #i18n: Error message for request missing facility name.
             raise ErrorMessage(404, _('Invalid or missing account e-mail.'))
@@ -56,10 +54,7 @@ class Subscribe(Handler):
         if self.alert:
             self.frequencies = []
             for i in range(len(self.alert.facility_names)):
-                #TODO(pfritzsche): better way to get titles?
-                f = model.Facility.get_by_key_name(self.alert.facility_names[i])
-                #use tuples to maintain order
-                self.frequencies.append((f.get_value('title'),
+                self.frequencies.append((self.params.facility_title,
                                          self.alert.facility_names[i],
                                          self.alert.frequencies[i]))
 
@@ -72,22 +67,12 @@ class Subscribe(Handler):
         user subscriptions to / from the datastore, as necessary."""
         self.init()
 
-        def update(request, alert, frequencies):
+        def update(request, alert, frequencies, action):
             """Helper function; updates the facility alert list."""
 
             if frequencies:
                 titles, keys, freqs = zip(*frequencies)
-            
-            if frequencies and request.get('facility') in keys:
-                    # remove facility from list
-                    keys = list(keys)
-                    freqs = list(freqs)
-                    index = keys.index(request.get('facility'))
-                    del keys[index]
-                    del freqs[index]
-                    alert.facility_names = keys
-                    alert.frequencies = freqs
-            else:
+            if action == 'subscribe' and self.params.facility_name not in keys:
                 # add facility to list
                 frequencies.append((request.get('title'),
                                     request.get('facility'),
@@ -96,11 +81,20 @@ class Subscribe(Handler):
                 new_titles, new_keys, new_frequencies = zip(*frequencies)
                 alert.facility_names = list(new_keys)
                 alert.frequencies = list(new_frequencies)
+            elif action == 'unsubscribe' and self.params.facility_name in keys:
+                # remove facility from list
+                keys = list(keys)
+                freqs = list(freqs)
+                index = keys.index(request.get('facility'))
+                del keys[index]
+                del freqs[index]
+                alert.facility_names = keys
+                alert.frequencies = freqs
             
             db.put(alert)
 
         db.run_in_transaction(update, self.request, self.alert,
-            self.frequencies)
+            self.frequencies, self.request.get('action'))
 
 if __name__ == '__main__':
     run([('/subscribe', Subscribe)], debug=True)
