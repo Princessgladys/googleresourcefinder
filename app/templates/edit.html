@@ -41,9 +41,9 @@ tr.field.text { vertical-align: top; }
 .dash { border-top: 3px dotted #000; margin: 12px; }
 </style>
 {% if not params.embed %}
+{% include "analytics.html" %}
 </head>
 <body>
-{% include "analytics.html" %}
 {% endif %}
 {% comment %}
 # NB: This probably should use blocktrans and include facility_name as a param
