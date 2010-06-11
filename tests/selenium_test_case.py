@@ -1,3 +1,5 @@
+from google.appengine.api import memcache
+
 import os
 import re
 import selenium
@@ -80,8 +82,9 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         self.start()
 
     def tearDown(self):
+        memcache.flush_all()
         self.stop()
-    
+
     def login(self, path):
         """Navigates to the given path, logging in if necessary, and waits for
         the page to load.  Use this method to load the first page in a test.

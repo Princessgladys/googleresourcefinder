@@ -103,7 +103,7 @@ def render_json(center=None, radius=None):
     django_locale = django.utils.translation.to_locale(
         django.utils.translation.get_language())
 
-    json = cache.JSON_CACHE.get(django_locale)
+    json = cache.JSON.get(django_locale)
     if json is not None and radius is None:
         return json
 
@@ -152,5 +152,5 @@ def render_json(center=None, radius=None):
         'messages': message_jobjects
     # set indent=2 to pretty-print; it blows up download size, so defaults off
     }, indent=None, default=json_encode))
-    cache.JSON_CACHE.set(django_locale, json)
+    cache.JSON.set(django_locale, json)
     return json
