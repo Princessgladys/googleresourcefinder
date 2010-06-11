@@ -66,7 +66,7 @@
         <th class="services">{% trans "services" %}</th>
       </tr>
       <tr>
-        {% if special.total_beds.raw %}
+        {% if special.total_beds.raw or special.available_beds.raw %}
           <td class="availability">
             <div class="number">{{special.available_beds.value|escape}}</div>
           </td>
