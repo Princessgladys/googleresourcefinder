@@ -250,7 +250,7 @@ class Alert(db.Model):
     """A subscription by a user to receive notification when details for a
     facility change. Top-level entity, has no parent."""
     user_email = db.StringProperty(required=True) # user to alert
-    facility_names = db.StringListProperty() # key_name of facility
+    facility_names = db.StringListProperty() # key_names of facilities
     last_sent = db.DateTimeProperty(auto_now_add=True)
     # time of previous update
     frequencies = db.StringListProperty()

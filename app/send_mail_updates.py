@@ -18,6 +18,8 @@ Accesses the Account data structure to retrieve facility updates for each user,
 then sends out information to each user per their subscription settings.
 
 get_frequency(alert, facility): returns frequency for a particular facility
+is_time_to_send(alert, frequency): returns if enough time has passed to require
+    an update for a particular facility
 MailUpdateSystem(utils.Handler): handler class to send e-mail updates
 """
 
@@ -50,14 +52,18 @@ FREQUENCY_CONVERSTION = {
     '1/month': datetime.timedelta(30)
 }
 
+
 def get_frequency(alert, facility):
     """Given an alert and a facility, returns the frequency of subscription
     for that alert and facility."""
     for i in range(len(alert.frequencies)):
         if alert.facility_names[i] == facility:
             return alert.frequencies[i]
-            
+
+
 def is_time_to_send(alert, frequency):
+    """Given an alert and a facility, determines if it is time to send an
+    e-mail to the user about that particular facility. Returns True/False."""
     delta = datetime.datetime.now() - alert.last_sent
     
     if frequency == 'default':
@@ -66,6 +72,7 @@ def is_time_to_send(alert, frequency):
         f_delta = FREQUENCY_CONVERSTION[frequency]
         
     return f_delta < delta
+
 
 class MailUpdateSystem(utils.Handler):
     """Handler class; on POST request, sends out e-mail updates to users
@@ -125,32 +132,38 @@ class MailUpdateSystem(utils.Handler):
         if self.facility_name:
             # performed when a facility is updated; sends emails to all users
             # subscribed to that facility
-            self.send_immediate_updates()
+            num_alerts = self.send_immediate_updates()
         else:
             # performed during daily email subscription routine; sends emails
             # to all users subscribed to any facility, if there are any new
             # updates and their frequency requires an update
-            self.send_non_immediate_updates()
+            num_alerts = self.send_non_immediate_updates()
             
         time_delta = datetime.datetime.now().minute - self.time_start.minute
         if (abs(time_delta) >= ADMIN_TIMEOUT_ALERT_TIME and
             memcache.get('last_alert_email_sent') is None):
-            send_admin_timeout_email(time_delta)
+            send_admin_timeout_email(time_delta, num_alerts)
             memcache.set('last_alert_email_sent', 'sent', time=DAYS_SECS)
-            
+
     def send_immediate_updates(self):
         """Gathers a list of immediate update subscribers for the given
-        facility and sends updates to them."""
+        facility and sends updates to them.
+        
+        Returns the number of alerts processed."""
+        num_alerts = 0
         alerts = model.Alert.all().filter(
             'facility_names =', self.facility_name)
         if not alerts:
             return
         for alert in alerts:
             if get_frequency(alert, self.facility_name) == 'immediate':
+                num_alerts += 1
                 account = db.GqlQuery('SELECT * FROM Account WHERE email = :1',
                                       alert.user_email).get()
                 locale = account.locale
                 self.send_immediate_email(alert.user_email, locale)
+        
+        return num_alerts
             
     def send_immediate_email(self, email, locale):
         """Sends an update to a specific user for one facility. """
@@ -179,12 +192,15 @@ class MailUpdateSystem(utils.Handler):
         two minutes, e-mail the administrators of the code to let them know the cron
         job may need more time than anticipated.
         """
-        users = self.get_users_to_email()
+        users, alerts = self.get_users_to_email()
         if not users:
             return
         
         for email, values in users.iteritems():
             self.send_list_updates(email, values)
+            
+        db.put(alerts)
+        return len(alerts)
 
     def get_users_to_email(self):
         """Gathers a list of users and their locales.
@@ -204,7 +220,11 @@ class MailUpdateSystem(utils.Handler):
                 'locale' : 'en',
                 'facility_zoo' : {'attr1' : 'new_value', 'attr2' : 'new_value'} },
             }
+            
+            Also returns a list of changed alerts, for updating into the
+            datastore at a later point.
         """ 
+        alerts = []
         users = {}
         updated = False
         for alert in model.Alert.all(): # compile list of facilities per user
@@ -216,8 +236,14 @@ class MailUpdateSystem(utils.Handler):
                     continue
                 fac = model.Facility.get_by_key_name(alert.facility_names[i])
                 freq = alert.frequencies[i]
+                if freq == 'default':
+                    freq = alert.default_frequency
                 values = self.fetch_updates(alert, fac, freq)
+                logging.info(fac)
+                logging.info(fac.get_value('title'))
+                logging.info(alert.facility_names[i])
                 if values:
+                    values['title'] = fac.get_value('title')
                     updated = True
                     if alert.user_email not in users:
                         users[alert.user_email] = {}
@@ -225,10 +251,10 @@ class MailUpdateSystem(utils.Handler):
                     users[alert.user_email][fac.key().name()] = values
             if updated:
                 alert.last_sent = datetime.datetime.now()
-                db.put(alert)
+                alerts.append(alert)
                 updated = False
 
-        return users
+        return users, alerts
         
     def send_list_updates(self, email, values):
         """Sends an update to a specific user. """
@@ -237,14 +263,15 @@ class MailUpdateSystem(utils.Handler):
         # running in a separate thread, disconnected from any user interaction.
         django.utils.translation.activate(values['locale'])
         
-        body = ''
         for key in values.keys():
             if key == 'locale':
                 continue
-                
+
+            body = values[key]['title'].upper() + '\n'
             # TODO(pfritzsche): work with Jeromy to improve e-mail UI
-            body += key.upper() + '\n'
             for attr, value in values[key].iteritems():
+                if attr == 'title':
+                    continue
                 body += attr + ": " + str(value) + '\n'
             body += '\n'
             
@@ -299,7 +326,7 @@ class MailUpdateSystem(utils.Handler):
 
         return updated_attrs
         
-    def send_admin_timeout_email(self, time):
+    def send_admin_timeout_email(self, time, num_alerts):
         """Sends an alert to admins about file's time to run.
         
         If the file is taking too long to run, alerts the admins.
@@ -312,9 +339,10 @@ class MailUpdateSystem(utils.Handler):
         message.to = 'resourcefinder-alerts@google.com'
         message.subject = '[ALERT] Resource Finder Cron Job is Running Slowly'
         message.body = ('A recent e-mail subscription cron job ran with ' +
-            'total time: %s' % str(time))
+            'total time: %s. During this time, %d alerts were sent.'
+            % (str(time), num_alerts))
 
-        message.send() 
+        message.send()
 
 if __name__ == '__main__':
     utils.run([('/send_mail_updates', MailUpdateSystem)], debug=True)
