@@ -26,6 +26,7 @@ from google.appengine.api import memcache
 """Caching layer for Resource Finder, taking advantage of both memcache
 and in-memory caches."""
 
+
 class JsonCache:
     """Memcache layer for JSON rendered by rendering.py. Offers significant
     startup performance increase."""
@@ -47,6 +48,7 @@ class JsonCache:
         memcache.delete_multi(
             list(self._memcache_key(django.utils.translation.to_locale(lang[0]))
                  for lang in config.LANGUAGES))
+
 
 class Cache(UserDict.DictMixin):
     """A cache that looks first in memory, then at memcache, then finally
@@ -86,20 +88,6 @@ class Cache(UserDict.DictMixin):
         """Fetch entities on a cache miss."""
         raise NotImplementedError()
 
-    def _query_in_batches(self, query, batch_size=1000):
-        """Helper to run the query in batches of size batch_size and return
-        all entities."""
-        entities = []
-        batch = query.fetch(batch_size)
-        cursor = query.cursor()
-        while batch:
-            entities += batch
-            if len(batch) < batch_size:
-                break
-            batch = query.with_cursor(cursor).fetch(batch_size)
-            cursor = query.cursor()
-        return entities
-
     def flush(self, flush_memcache=True):
         """Flushes the in-memory cache and optionally memcache"""
         if flush_memcache:
@@ -107,25 +95,30 @@ class Cache(UserDict.DictMixin):
         self.entities = None
         self.last_refresh = 0
 
+
 class AttributeCache(Cache):
     def fetch_entities(self):
-        entities = self._query_in_batches(model.Attribute.all())
+        entities = utils.fetch_all(model.Attribute.all())
         return dict((e.key().name(), e) for e in entities)
+
 
 class FacilityTypeCache(Cache):
     def fetch_entities(self):
-        entities = self._query_in_batches(model.FacilityType.all())
+        entities = utils.fetch_all(model.FacilityType.all())
         return dict((e.key().name(), e) for e in entities)
+
 
 class MessageCache(Cache):
     def fetch_entities(self):
-        entities = self._query_in_batches(model.Message.all())
+        entities = utils.fetch_all(model.Message.all())
         return dict(((e.namespace, e.name), e) for e in entities)
+
 
 class MinimalFacilityCache(Cache):
     def fetch_entities(self):
-        entities = self._query_in_batches(model.MinimalFacility.all())
+        entities = utils.fetch_all(model.MinimalFacility.all())
         return dict((e.parent_key(), e) for e in entities)
+
 
 JSON = JsonCache()
 ATTRIBUTES = AttributeCache()
