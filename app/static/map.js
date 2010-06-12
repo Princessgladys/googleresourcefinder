@@ -517,8 +517,9 @@ function initialize_filters() {
     name: 'specialty',
     onchange: function() {
       var value = $('specialty-selector').value.split(' ');
-      _gaq.push(['_trackEvent', 'facility_list', 'filter', 'services',
-                 value[1]]);
+      var trackedValue = value[1] ? value[1] : 'ANY';
+      _gaq.push(['_trackEvent', 'facility_list', 'filter',
+                 'Services contains ' + trackedValue]);
       select_filter.apply(null, value);
     }
   });
