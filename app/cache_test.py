@@ -96,8 +96,3 @@ class CacheTest(MediumTestCase):
         cache.MESSAGES.flush(flush_memcache=False)
         assert memcache.get(cache.MESSAGES.memcache_key) != None
         assert cache.MESSAGES.entities == None
-
-    def test_query_in_batches(self):
-      """Confirms that querying for entities in batches works correctly."""
-      entries = cache.MESSAGES._query_in_batches(Message.all(), 1)
-      assert len(entries) == 10
