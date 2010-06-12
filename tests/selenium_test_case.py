@@ -1,5 +1,6 @@
-from google.appengine.api import memcache
-
+from google.appengine.api import memcache, users
+from model import Facility, MinimalFacility, db
+import datetime
 import os
 import re
 import selenium
@@ -98,6 +99,35 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
             self.wait_for_load()
             return True
         return False
+
+    # ---------------------------------------- datastore convenience methods
+
+    def put_facility(self, key_name, type='hospital', observed=None,
+                     email='test@example.com', nickname='nickname_foo',
+                     affiliation='affiliation_foo', comment='comment_foo',
+                     **attribute_values):
+        """Stores a Facility and its corresponding MinimalFacility."""
+        facility = Facility(key_name=key_name, type=type)
+        if observed is None:
+            observed = datetime.datetime.now()
+        user = users.User(email)
+        for key, value in attribute_values.items():
+            facility.set_attribute(
+                key, value, observed, user, nickname, affiliation, comment)
+        facility.put()
+        minimal = MinimalFacility(facility, type=type)
+        for key, value in attribute_values.items():
+            minimal.set_attribute(key, value)
+        minimal.put()
+
+    def delete_facility(self, key_name):
+        """Deletes a Facility and all its child entities from the datastore."""
+        facility = Facility.get_by_key_name(key_name)
+        children = db.Query(keys_only=True).ancestor(facility).fetch(200)
+        while children:
+            db.delete(children)
+            children = db.Query(keys_only=True).ancestor(facility).fetch(200)
+        db.delete(facility)
 
     # ----------------------------------------- Selenium convenience methods
 
