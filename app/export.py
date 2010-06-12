@@ -60,17 +60,6 @@ COLUMNS_BY_FACILITY_TYPE = {
     ],
 }
 
-def get_all(query_maker, batch_size=500):
-    results = []
-    query = query_maker().order('__key__')
-    batch = query.fetch(batch_size)
-    while batch:
-        results += batch
-        query = query_maker().order('__key__').filter(
-            '__key__ >', batch[-1].key())
-        batch = query.fetch(batch_size)
-    return results
-
 def short_date(date):
     return '%s %d' % (calendar.month_abbr[date.month], date.day)
 
@@ -79,10 +68,8 @@ def write_csv(out, facility_type):
        in CSV format, with a row for each facility"""
     writer = csv.writer(out)
 
-    # Get the facilities.
-    facilities = get_all(lambda: Facility.all())
- 
-    columns= COLUMNS_BY_FACILITY_TYPE[facility_type.key().name()]
+    facilities = fetch_all(Facility.all())
+    columns = COLUMNS_BY_FACILITY_TYPE[facility_type.key().name()]
     if columns:
         row = list(column[0] for column in columns)
     else:

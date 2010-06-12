@@ -67,6 +67,16 @@ from django.utils.translation import gettext_lazy as _
 HIDDEN_ATTRIBUTE_NAMES = ['accuracy', 'region_id', 'district_id', 'commune_id',
                           'commune_code', 'sante_id']
 
+def fetch_all(query):
+    """Gets all the results of a query as efficiently as possible.  If the
+    query's results were previously obtained, they are reused."""
+    if not hasattr(query, 'results'):
+        # Calling fetch() is faster than iterating one by one.  'limit' can
+        # be arbitrarily large, but 'offset' cannot exceed 1000 -- so we
+        # only get one attempt.  We assume less than a million results.
+        query.results = query.fetch(1000000)
+    return query.results
+
 def strip(text):
     return text.strip()
 
