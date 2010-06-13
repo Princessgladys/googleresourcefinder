@@ -56,6 +56,9 @@ locale = function() {
   //i18n: Error message for not loading facility information successfully
   messages.ERROR_LOADING_FACILITY_INFORMATION = "Error al cargar servicio de informaci\u00f3n.";
 
+  //i18n: Error message for not saving facility information successfully
+  messages.ERROR_SAVING_FACILITY_INFORMATION = "Error saving facility information.";
+
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_INVALID = "La longitud debe estar entre -180 y 180";
 
@@ -109,6 +112,15 @@ locale = function() {
 
   //i18n: Label indicating a record was updated
   messages.UPDATED = "Actualizado";
+
+  //i18n: Message indicating loading hospital information
+  messages.LOADING = "Cargando...";
+
+  //i18n: Message indicating saving hospital information
+  messages.SAVING = "Saving...";
+
+  //i18n: Message indicating hospital information has been saved
+  messages.SAVED = "Your edit has been saved";
 
   function message_renderer(name) {
     return function (params) {

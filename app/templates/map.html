@@ -61,6 +61,7 @@
     <script type="text/javascript" src="static/locale_{{params.lang}}.js"></script>
   {% endifequal %}
   <script type="text/javascript" src="static/map.js"></script>
+  <script type="text/javascript" src="static/edit.js"></script>
   <script type="text/javascript">
     var print = {% if params.print %} true {% else %} false {% endif %};
   </script>
@@ -197,6 +198,7 @@
     <a href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files">{% trans "View Master List archive" %}</a>
   </div>
 </div>
+<div id="edit-data"></div>
 {% if params.print %}
   <div id="update-instructions">
     {% comment %}
@@ -208,6 +210,7 @@
 {% endif %}
 
 <script>
+  $('edit-data').style.display = 'none';
   jQuery(document).ready(function() {
     load_data({{data}});
   });
