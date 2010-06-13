@@ -559,8 +559,8 @@ msgstr ""
 msgid "Organization type"
 msgstr ""
 
-#. Service provided by a health facility (use Title Case). Meaning: treats diseases and injury to bones, muscles, joints and Meaning: tendons
-#: ../tools/setup.py:219
+#. Service provided by a health facility  Meaning: treats diseases and injury to bones, muscles, joints and Meaning: tendons
+#: ../tools/setup.py:239
 msgid "Orthopedics"
 msgstr ""
 
@@ -679,7 +679,7 @@ msgid "Services"
 msgstr ""
 
 #. Label for a control that filters a list of facilities
-#: static/locale.js:130
+#: static/locale.js:134
 msgid "Show:"
 msgstr ""
 
@@ -696,6 +696,21 @@ msgstr ""
 #. Header for a list of provisions
 #: templates/data.html:27
 msgid "Supplies"
+msgstr ""
+
+#. Category of facility: health center that exists for a finite period of time.
+#: ../tools/setup.py:175
+msgid "Temporary health center"
+msgstr ""
+
+#. Category of facility: Hospital existing for a finite period of time.
+#: ../tools/setup.py:190
+msgid "Temporary hospital"
+msgstr ""
+
+#. Category of facility: A moveable unit that provides a particular service for a finite period of time.
+#: ../tools/setup.py:197
+msgid "Temporary mobile facility"
 msgstr ""
 
 #. Link to terms of service for the application
@@ -777,6 +792,11 @@ msgstr ""
 #: request_access.py:50
 #, python-format
 msgid "You are already %(action)s"
+msgstr ""
+
+#. Message indicating hospital information has been saved
+#: static/locale.js:154
+msgid "Your edit has been saved"
 msgstr ""
 
 #. Requested permission action has already been granted

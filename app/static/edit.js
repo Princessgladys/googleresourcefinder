@@ -18,7 +18,6 @@
  * @fileoverview Functions for the edit page
  */
 
-(function() {
   var button_click = '';
 
   /**
@@ -47,17 +46,27 @@
   }
 
   /**
-   * Validates the name and affiliation fields, present the first time a user
-   * makes an edit. If the fields are not present, returns true.
+   * Validates the name field, present the first time a user
+   * makes an edit. If the field is not present, returns true.
    */
-  function validate_name_affil() {
+  function validate_name() {
     var nickname = $('account_nickname');
     if (!nickname) {
       return true;
     }
-    var valid = validate_required_string(nickname);
-    // careful to avoid short-circuiting here
-    return validate_required_string($('account_affiliation')) && valid;
+    return validate_required_string(nickname);
+  }
+
+  /**
+   * Validates the affiliation field, present the first time a user
+   * makes an edit. If the field is not present, returns true.
+   */
+  function validate_affil() {
+    var affiliation = $('account_affiliation');
+    if (!affiliation) {
+      return true;
+    }
+    return validate_required_string(affiliation);
   }
 
   /**
@@ -144,12 +153,21 @@
    * @return {boolean} - true if the "save" button was not pressed or all 
    * inputs are valid, otherwise false
    */
-  function validate() {
-    if (button_click !== 'save') {
+  function validate(embed) {
+    if (!embed && button_click !== 'save') {
       return true;
     }
 
-    var valid_arr = [validate_name_affil()];
+    var failed = false;
+
+    function confirm(valid, element) {
+      if (!valid)
+	if (!failed)
+	  failed = element;
+    }
+
+    confirm(validate_name(), $('account_nickname'));
+    confirm(validate_affil(), $('account_affiliation'));
 
     var trs = document.getElementsByTagName('tr');
     for (var i = 0; i < trs.length; i++) {
@@ -157,14 +175,17 @@
       var classes = tr.className.split(' ');
       if (jQuery.inArray('int', classes) != -1
           || jQuery.inArray('float', classes) != -1) {
-        valid_arr.push(validate_number(tr.getElementsByTagName('input')[0]));
+
+        var input = tr.getElementsByTagName('input')[0];
+        confirm(validate_number(input), input);
       } else if (jQuery.inArray('geopt', classes) != -1) {
         var inputs = tr.getElementsByTagName('input');
-        valid_arr.push(validate_geopt([inputs[0], inputs[1]]));
+        confirm(validate_geopt([inputs[0], inputs[1]]), inputs[0]);
       }
     }      
-
-    return jQuery.inArray(false, valid_arr) == -1;
+    if (failed)
+      failed.focus();
+    return !failed;
   }
   
   function make_visible(id) {
@@ -223,11 +244,8 @@
    * Initializes event handlers for the page.
    */
   function init() {
-    $('edit').onsubmit = validate;
+    $('edit').onsubmit = function() validate(false);
     $('save').onclick = save;
     $('cancel').onclick = cancel;
     init_comment_visibility();
   }
-
-  init();
-})();

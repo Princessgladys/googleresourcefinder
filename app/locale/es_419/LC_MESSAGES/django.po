@@ -734,7 +734,7 @@ msgid "University"
 msgstr "Universidad"
 
 #. Type of facility construction: walls constructed of clay brick or concrete block
-#: ../tools/setup.py:190
+#: ../tools/setup.py:210
 msgid "Unreinforced masonry"
 msgstr "Mampostería no reforzada"
 
@@ -744,7 +744,7 @@ msgid "Updated"
 msgstr "Actualizado"
 
 #. Error message for a value that is not a number
-#: static/locale.js:79
+#: static/locale.js:83
 msgid "Value must be a number."
 msgstr "El valor debe ser un número"
 
@@ -817,7 +817,7 @@ msgid "p ${PHONE}"
 msgstr "p ${PHONE}"
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:66
+#: templates/hospital_bubble.html:58
 msgid "services"
 msgstr "servicios"
 

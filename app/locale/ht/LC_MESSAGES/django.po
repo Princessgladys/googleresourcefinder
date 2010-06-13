@@ -56,11 +56,6 @@ msgstr "%(user)s pa gen pèmisyon edite %(a)s"
 msgid "(unspecified)"
 msgstr "(pa espesifye)"
 
-#. Note that a facility has been marked closed.
-#: templates/hospital_bubble.html:48
-msgid "<strong>Note:</strong> This facility has been marked closed."
-msgstr "<strong>Remak:</strong> etablisman sa a te make fèmen."
-
 #. Accuracy of latitude, longitude coordinates
 #: ../tools/setup.py:131
 msgid "Accuracy"
@@ -72,7 +67,7 @@ msgid "Address"
 msgstr "Adrès"
 
 #. Type of facility construction: sun-dried clay bricks
-#: ../tools/setup.py:194
+#: ../tools/setup.py:214
 msgid "Adobe"
 msgstr "Adobe"
 
@@ -107,7 +102,7 @@ msgid "Blood Bank"
 msgstr "Bank san"
 
 #. Save a copy of the data in CSV format
-#: export.py:127
+#: export.py:140
 msgid "CSV Export"
 msgstr "Ekspote CSV"
 
@@ -354,7 +349,7 @@ msgid "HealthC ID:"
 msgstr "ID HealthC:"
 
 #. Link to go to a help page for the application
-#: templates/map.html:102
+#: templates/map.html:103
 msgid "Help"
 msgstr "Ed"
 
@@ -363,8 +358,8 @@ msgstr "Ed"
 msgid "Home"
 msgstr "Paj akèy"
 
-#. Category of facility: Hospital.
-#: ../tools/setup.py:179
+#. Category of facility: Hospital
+#: ../tools/setup.py:187
 msgid "Hospital"
 msgstr "Lopital"
 
@@ -384,7 +379,7 @@ msgid "Internal Medicine"
 msgstr "Medsin Entèn"
 
 #. Error message for invalid date entry
-#: edit.py:139
+#: edit.py:140
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Dat envalid : %(dat)r (bezwen ane-mwa-jou fòma)"
 
@@ -459,7 +454,7 @@ msgid "Longitude"
 msgstr "Lonjitd"
 
 #. Error message for invalid longitude.
-#: static/locale.js:75
+#: static/locale.js:79
 msgid "Longitude must be a number."
 msgstr "Lonjitd dwe yon nimewo"
 
@@ -698,6 +693,21 @@ msgstr "Sòti"
 msgid "Supplies"
 msgstr "Prodwi"
 
+#. Category of facility: health center that exists for a finite period of time.
+#: ../tools/setup.py:175
+msgid "Temporary health center"
+msgstr "Sant sante mobil"
+
+#. Category of facility: Hospital existing for a finite period of time.
+#: ../tools/setup.py:190
+msgid "Temporary hospital"
+msgstr "Lopital mobil"
+
+#. Category of facility: A moveable unit that provides a particular service for a finite period of time.
+#: ../tools/setup.py:197
+msgid "Temporary mobile facility"
+msgstr "Mobil ki kapab deplase"
+
 #. Link to terms of service for the application
 #: templates/map.html:106
 msgid "Terms of Service"
@@ -724,7 +734,7 @@ msgid "URL:"
 msgstr "Sit entenet"
 
 #. Error message
-#: utils.py:123
+#: utils.py:112
 msgid "Unauthorized user."
 msgstr "San otorizasyon User"
 
@@ -732,6 +742,11 @@ msgstr "San otorizasyon User"
 #: ../tools/setup.py:169
 msgid "University"
 msgstr "Inivesite"
+
+#. Category of facility: Unknown.
+#: ../tools/setup.py:201
+msgid "Unknown"
+msgstr "Pa konnen"
 
 #. Type of facility construction: walls constructed of clay brick or concrete block
 #: ../tools/setup.py:190
@@ -779,6 +794,11 @@ msgstr "Wi"
 msgid "You are already %(action)s"
 msgstr "Wol ou a bon a %(role)s"
 
+#. Message indicating hospital information has been saved
+#: static/locale.js:154
+msgid "Your edit has been saved"
+msgstr ""
+
 #. Requested permission action has already been granted
 #: request_access.py:54
 #, python-format
@@ -801,7 +821,7 @@ msgid "availability"
 msgstr "Disponibilite"
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:61
+#: templates/hospital_bubble.html:53
 msgid "capacity"
 msgstr "Kapasite"
 
