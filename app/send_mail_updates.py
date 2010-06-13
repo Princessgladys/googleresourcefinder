@@ -41,6 +41,7 @@ from google.appengine.ext import webapp
 
 import django.utils.translation
 
+import cache
 import model
 import utils
 
@@ -173,7 +174,7 @@ class MailUpdateSystem(utils.Handler):
             if arg == 'facility_name':
                 continue
             updated_vals[arg] = facility.get_value(arg)
-                
+            
         body = form_body({self.facility_name: { 
             facility.get_value('title') : updated_vals}})
         
@@ -238,7 +239,8 @@ class MailUpdateSystem(utils.Handler):
             { 'attr1' : 'new_value', 'attr2' : 'new_value' , ... }
         """ 
         updated_attrs = {}
-        facility_type = model.FacilityType.get_by_key_name(facility.type)
+        #facility_type = model.FacilityType.get_by_key_name(facility.type)
+        facility_type = cache.FACILITY_TYPES[facility.type]
         
         for attr in facility_type.attribute_names:
             value = facility.get_value(attr)
