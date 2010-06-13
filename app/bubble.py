@@ -14,6 +14,7 @@
 
 """Handler for dynamically loading a bubble with attributes from a facility."""
 
+import cache
 import datetime
 import logging
 import model
@@ -153,7 +154,7 @@ class Bubble(Handler):
         if not facility:
             #i18n: Error message for request missing facility name.
             raise ErrorMessage(404, _('Invalid or missing facility name.'))
-        facility_type = model.FacilityType.get_by_key_name(facility.type)
+        facility_type = cache.FACILITY_TYPES[facility.type]
 
         value_info_extractor = VALUE_INFO_EXTRACTORS[facility.type]
         (special, general, details) = value_info_extractor.extract(

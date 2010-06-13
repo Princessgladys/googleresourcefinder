@@ -23,6 +23,7 @@ import google.appengine.ext.webapp.util
 
 import StringIO
 import access
+import cache
 from calendar import timegm
 import cgi
 import cgitb
@@ -66,6 +67,16 @@ from django.utils.translation import gettext_lazy as _
 HIDDEN_ATTRIBUTE_NAMES = ['accuracy', 'region_id', 'district_id', 'commune_id',
                           'commune_code', 'sante_id']
 
+def fetch_all(query):
+    """Gets all the results of a query as efficiently as possible.  If the
+    query's results were previously obtained, they are reused."""
+    if not hasattr(query, 'results'):
+        # Calling fetch() is faster than iterating one by one.  'limit' can
+        # be arbitrarily large, but 'offset' cannot exceed 1000 -- so we
+        # only get one attempt.  We assume less than a million results.
+        query.results = query.fetch(1000000)
+    return query.results
+
 def strip(text):
     return text.strip()
 
@@ -82,8 +93,7 @@ def validate_float(text):
         return None
 
 def get_message(namespace, name):
-    message = model.Message.all().filter(
-        'namespace =', namespace).filter('name =', name).get()
+    message = cache.MESSAGES.get((namespace, name))
     django_locale = django.utils.translation.to_locale(
         django.utils.translation.get_language())
     return message and getattr(message, django_locale) or name
@@ -126,6 +136,9 @@ class Handler(webapp.RequestHandler):
 
     def initialize(self, request, response):
         webapp.RequestHandler.initialize(self, request, response)
+        # To be safe, we purge the in-memory portion of MinimalFacilityCache
+        # before each request to be sure we don't see stale data.
+        cache.MINIMAL_FACILITIES.flush(flush_memcache=False)
         self.user = users.get_current_user()
         self.account = access.check_and_log(request, self.user)
         for name in request.headers.keys():

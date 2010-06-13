@@ -103,4 +103,4 @@ td.facility-count.selected { color: #fff; }
 .facility-info .attribute .value { color: #000; }
 .facility-info .text { margin-left: 2em; }
 
-.disabled { color: #666; }
+tr.disabled td { color: #aaa; }
