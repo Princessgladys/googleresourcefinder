@@ -83,9 +83,11 @@ class Subscribe(Handler):
                 alert.frequencies = list(new_frequencies)
             elif action == 'unsubscribe' and self.params.facility_name in keys:
                 # remove facility from list
+                if not frequencies:
+                    return
                 keys = list(keys)
                 freqs = list(freqs)
-                index = keys.index(request.get('facility'))
+                index = keys.index(request.get('facility_name'))
                 del keys[index]
                 del freqs[index]
                 alert.facility_names = keys

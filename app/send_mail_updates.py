@@ -17,13 +17,20 @@
 Accesses the Account data structure to retrieve facility updates for each user,
 then sends out information to each user per their subscription settings.
 
-get_frequency(alert, facility): returns frequency for a particular facility
+get_frequency(alert, facility): returns a text frequency as a timedelta
 is_time_to_send(alert, frequency): returns if enough time has passed to require
     an update for a particular facility
+form_body(values): forms the e-mail body for an update e-mail
+EmailData: used as a structure to store useful information for an update
 MailUpdateSystem(utils.Handler): handler class to send e-mail updates
 """
 
 __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
+
+import datetime
+import email
+import logging
+import time
 
 from google.appengine.api import mail
 from google.appengine.api import memcache
@@ -32,20 +39,18 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 
-from utils import _
-
 import django.utils.translation
 
-import datetime
-import email
-import logging
 import model
 import utils
 
-DAYS_SECS = 60 * 60 * 24
-ADMIN_TIMEOUT_ALERT_TIME = 2
+from utils import _
 
-FREQUENCY_CONVERSTION = {
+DAYS_SECS = 60 * 60 * 24
+ADMIN_TIMEOUT_ALERT_TIME_SECS = 60
+
+
+FREQUENCY_TO_DATETIME = {
     'immediate': datetime.timedelta(0),
     '1/day': datetime.timedelta(1),
     '1/week': datetime.timedelta(7),
@@ -53,25 +58,47 @@ FREQUENCY_CONVERSTION = {
 }
 
 
-def get_frequency(alert, facility):
-    """Given an alert and a facility, returns the frequency of subscription
-    for that alert and facility."""
-    for i in range(len(alert.frequencies)):
-        if alert.facility_names[i] == facility:
-            return alert.frequencies[i]
+def get_frequency_as_time_delta(alert, frequency):
+    """Given a text frequency, converts it to a timedelta."""
+    if frequency == 'default':
+        return FREQUENCY_TO_DATETIME[alert.default_frequency]
+    return FREQUENCY_TO_DATETIME[frequency]
 
 
 def is_time_to_send(alert, frequency):
     """Given an alert and a facility, determines if it is time to send an
     e-mail to the user about that particular facility. Returns True/False."""
     delta = datetime.datetime.now() - alert.last_sent
+    return frequency <= delta
+
+
+def form_body(values):
+    """Forms the body text for an e-mail. """
+    body = ''
+    for facility_name in values.keys():
+        facility_title = values[facility_name].keys()[0]
+        updates = values[facility_name][facility_title]
+        body += facility_title.upper() + '\n'
+        for attr, update in updates.iteritems():
+            body += attr + ": " + str(update) + '\n'
+        body += '\n'
+    return body
+
+
+class EmailData():
+    """Helper class; used as a structure to store useful information for an
+    e-mail update.
     
-    if frequency == 'default':
-        f_delta = FREQUENCY_CONVERSTION[alert.default_frequency]
-    else:
-        f_delta = FREQUENCY_CONVERSTION[frequency]
-        
-    return f_delta < delta
+    Attributes:
+        locale: the locale to send this e-mail in
+        to: the user to send the e-mail to
+        updated_params: the updated facilities and attributes to be used for
+            the update e-mail
+    """
+    def __init__(self, locale, to, updated_params):
+        self.locale = locale
+        self.to = to
+        self.updated_params = updated_params
 
 
 class MailUpdateSystem(utils.Handler):
@@ -83,36 +110,20 @@ class MailUpdateSystem(utils.Handler):
     Functions:
         init(): initializes necessary variables
         get(): responds to HTTP GET requests; does nothing
-        post(): responds to HTTP POST requests; determines how to respond
-            properly
-        send_immediate_updates(): gathers a list of immediate update
-            subscribers for the given facility and sends updates
-        send_immediate_email(email, locale, value): sends e-mail for one
-            facility; assumes it is an immediate update
-        send_non_immediate_updates(): gathers a list of all users and sends out
-            e-mails accordingly, pending user subscription frequency
-        get_users_to_email(): gathers a list of users and their locales
-        send_list_updates(email, locale, facilities): sends a specific e-mail
-            to a user, for all subscribed facilities as necessary
-        fetch_updates(email, facilities): gathers a list of updates for each
-            user
+        post(): responds to HTTP POST requests; responds to the HTTP request
+        send_immediate_updates(): sends an e-mail to all users subscribed to a
+            particular facility status == 'immediate'
+        send_email_to_all_users(): gathers a list of users and their locales
+            and sends them an e-mail as appropriate
+        fetch_updates(alert, facility, facilities): gathers a list of updates 
+            for the given facility and the given alert
         send_admin_timeout_email(time): sends an alert to admins about the
             length of time this script to run
     """
     def init(self):
         """Initializes appropriate variables for later use."""
-        self.ignore_args = ['facility_name']
-        self.time_start = datetime.datetime.now()
-        self.facility_name = self.request.get('facility_name') or ''
-        if self.facility_name:
-            self.facility = model.Facility.get_by_key_name(self.facility_name)
-            self.facility_title = self.facility.get_value('title')
-            
-            self.updated_vals = []
-            for arg in self.request.arguments():
-                if arg == 'facility_name':
-                    continue
-                self.updated_vals.append((arg, self.facility.get_value(arg)))
+        self.time_start = time.time()
+        self.facility_name = self.params.facility_name or ''
     
     def get(self):
         """Default method; do nothing."""
@@ -137,10 +148,10 @@ class MailUpdateSystem(utils.Handler):
             # performed during daily email subscription routine; sends emails
             # to all users subscribed to any facility, if there are any new
             # updates and their frequency requires an update
-            num_alerts = self.send_non_immediate_updates()
+            num_alerts = self.send_email_to_all_users()
             
-        time_delta = datetime.datetime.now().minute - self.time_start.minute
-        if (abs(time_delta) >= ADMIN_TIMEOUT_ALERT_TIME and
+        time_delta = time.time() - self.time_start
+        if (time_delta >= ADMIN_TIMEOUT_ALERT_TIME_SECS and
             memcache.get('last_alert_email_sent') is None):
             send_admin_timeout_email(time_delta, num_alerts)
             memcache.set('last_alert_email_sent', 'sent', time=DAYS_SECS)
@@ -154,136 +165,66 @@ class MailUpdateSystem(utils.Handler):
         alerts = model.Alert.all().filter(
             'facility_names =', self.facility_name)
         if not alerts:
-            return
+            return 0
+        
+        facility = model.Facility.get_by_key_name(self.facility_name)
+        updated_vals = {}
+        for arg in self.request.arguments():
+            if arg == 'facility_name':
+                continue
+            updated_vals[arg] = facility.get_value(arg)
+                
+        body = form_body({self.facility_name: { 
+            facility.get_value('title') : updated_vals}})
+        
         for alert in alerts:
-            if get_frequency(alert, self.facility_name) == 'immediate':
+            freqs = dict(zip(alert.facility_names, alert.frequencies))
+            if freqs[self.facility_name] == 'immediate':
                 num_alerts += 1
                 account = db.GqlQuery('SELECT * FROM Account WHERE email = :1',
                                       alert.user_email).get()
-                locale = account.locale
-                self.send_immediate_email(alert.user_email, locale)
+                self.send_email(account.locale, alert.user_email, body)
         
         return num_alerts
-            
-    def send_immediate_email(self, email, locale):
-        """Sends an update to a specific user for one facility. """
-        
-        # Will not alter the active locale for the website, given that it is
-        # running in a separate thread, disconnected from any user interaction.
-        django.utils.translation.activate(locale)
-        
-        body = self.facility.get_value('title').upper() + '\n' # facility_name
-        # TODO(pfritzsche): work with Jeromy to improve e-mail UI
-        for attr, value in self.updated_vals:
-            body += attr + ": " + str(value) + '\n'
 
-        message = mail.EmailMessage()
-        message.sender = 'updates@resource-finder.appspotmail.com'
-        message.to = email
-        # TODO(pfritzsche): make sure unicode chars render properly in the e-mail
-        message.subject = utils.to_unicode(_('Resource Finder Facility Updates'))
-        message.body = body
-
-        message.send()
-        
-    def send_non_immediate_updates(self):
-        """Gathers a list of all users, then iterates through each user to send them
-        an e-mail with the appropriate information. If this process takes more than
-        two minutes, e-mail the administrators of the code to let them know the cron
-        job may need more time than anticipated.
-        """
-        users, alerts = self.get_users_to_email()
-        if not users:
-            return
-        
-        for email, values in users.iteritems():
-            self.send_list_updates(email, values)
-            
-        db.put(alerts)
-        return len(alerts)
-
-    def get_users_to_email(self):
-        """Gathers a list of users and their locales.
+    def send_email_to_all_users(self):
+        """Gathers a list of users and their locales and sends them updates.
         
         Accesses the database to create a dictionary of all users, the
-        facilities they are subscribed to, and the users' locales.
+        facilities they are subscribed to, and the users' locales. It then
+        renders the body of an update e-mail and sends it to each user.
         
         Returns:
-            A dictionary mapping the users e-mails to the facilities they are
-            subscribed to as well as the locales of each user. Example:
-            
-            {'pfritzsche@google.com' : {
-                'locale' : 'en',
-                'facility_foo' : {'attr1' : 'new_value'},
-                'facility_bar' : {'attr2' : 'new_value'} },
-             'shakusa@google.com' : {
-                'locale' : 'en',
-                'facility_zoo' : {'attr1' : 'new_value', 'attr2' : 'new_value'} },
-            }
-            
-            Also returns a list of changed alerts, for updating into the
-            datastore at a later point.
-        """ 
-        alerts = []
-        users = {}
-        updated = False
+            The number of alerts processed.
+        """
+        num_alerts = 0
         for alert in model.Alert.all(): # compile list of facilities per user
-            account = db.GqlQuery('SELECT * FROM Account WHERE email = :1',
-                                  alert.user_email).get()
+            freqs = dict(zip(alert.facility_names, alert.frequencies))
+            updated = False
+            facilities = {}
             for i in range(len(alert.facility_names)):
-                if not is_time_to_send(alert,
-                    get_frequency(alert, alert.facility_names[i])):
+                freq = get_frequency_as_time_delta(alert,
+                                                   alert.frequencies[i])
+                if not is_time_to_send(alert, freq):
                     continue
                 fac = model.Facility.get_by_key_name(alert.facility_names[i])
-                freq = alert.frequencies[i]
-                if freq == 'default':
-                    freq = alert.default_frequency
                 values = self.fetch_updates(alert, fac, freq)
-                logging.info(fac)
-                logging.info(fac.get_value('title'))
-                logging.info(alert.facility_names[i])
                 if values:
-                    values['title'] = fac.get_value('title')
                     updated = True
-                    if alert.user_email not in users:
-                        users[alert.user_email] = {}
-                    users[alert.user_email]['locale'] = account.locale
-                    users[alert.user_email][fac.key().name()] = values
-            if updated:
-                alert.last_sent = datetime.datetime.now()
-                alerts.append(alert)
-                updated = False
-
-        return users, alerts
-        
-    def send_list_updates(self, email, values):
-        """Sends an update to a specific user. """
-        
-        # Will not alter the active locale for the website, given that it is
-        # running in a separate thread, disconnected from any user interaction.
-        django.utils.translation.activate(values['locale'])
-        
-        for key in values.keys():
-            if key == 'locale':
-                continue
-
-            body = values[key]['title'].upper() + '\n'
-            # TODO(pfritzsche): work with Jeromy to improve e-mail UI
-            for attr, value in values[key].iteritems():
-                if attr == 'title':
-                    continue
-                body += attr + ": " + str(value) + '\n'
-            body += '\n'
+                    facilities[fac.key().name()] = {fac.get_value('title'):
+                        values}
             
-        message = mail.EmailMessage()
-        message.sender = 'updates@resource-finder.appspotmail.com'
-        message.to = email
-        # TODO(pfritzsche): make sure unicode chars render properly in the e-mail
-        message.subject = utils.to_unicode(_('Resource Finder Facility Updates'))
-        message.body = body
+            if updated:
+                account = db.GqlQuery('SELECT * FROM Account WHERE email = :1',
+                      alert.user_email).get()
+                self.send_email(account.locale, alert.user_email,
+                    form_body(facilities))
+                alert.last_sent = datetime.datetime.now()
+                db.put(alert)
+                num_alerts += 1
 
-        message.send()
-        
+        return num_alerts
+    
     def fetch_updates(self, alert, facility, frequency):
         """Finds updated attributes of the facility for a given alert.
         
@@ -301,38 +242,47 @@ class MailUpdateSystem(utils.Handler):
         
         for attr in facility_type.attribute_names:
             value = facility.get_value(attr)
-            if not value and value != 0: continue
-            
+            if not value and value != 0:
+                continue
             last_facility_update = facility.get_observed(attr)
-            
-            # if last update was before the user was last updated, move to next attr
             if last_facility_update < alert.last_sent:
                 continue
-            # convert frequency to timedelta
-            if frequency == 'immediate':
-                next_update_time = alert.last_sent
-            elif frequency == '1/day':
-                next_update_time = alert.last_sent + datetime.timedelta(1)
-            elif frequency == '1/week':
-                next_update_time = alert.last_sent + datetime.timedelta(7)
-            else:
-                next_update_time = alert.last_sent + datetime.timedelta(30)
-            
-            # check and see if frequency period is up    
-            # if so, add value to list of values to send
+            next_update_time = alert.last_sent + frequency
             if (datetime.datetime.now() > next_update_time and
                 last_facility_update > alert.last_sent):
                 updated_attrs[attr] = value
-
+        
         return updated_attrs
-        
-    def send_admin_timeout_email(self, time, num_alerts):
-        """Sends an alert to admins about file's time to run.
-        
-        If the file is taking too long to run, alerts the admins.
+    
+    def send_email(self, locale, to, body):
+        """Sends a single e-mail update.
         
         Args:
-            time: amount of time taken to run the script.
+            locale: the locale whose language to use for the email
+            to: the user to send the update to
+            body: the text to use as the body of the e-mail
+        """
+        
+        # Will not alter the active locale for the website, given that it is
+        # running in a separate thread, disconnected from any user interaction.
+        django.utils.translation.activate(locale)
+        
+        message = mail.EmailMessage()
+        message.sender = 'updates@resource-finder.appspotmail.com'
+        message.to = to
+        message.subject = utils.to_unicode(
+            _('Resource Finder Facility Updates'))
+        message.body = body
+        
+        message.send()
+    
+    def send_admin_timeout_email(self, time, num_alerts):
+        """Sends an alert to admins about this file's time to run, if it has
+        taken too long.
+        
+        Args:
+            time: amount of time taken to run the script
+            num_alerts: the number of alerts processed during this time
         """
         message = mail.EmailMessage()
         message.sender = 'alerts@resource-finder.appspotmail.com'
