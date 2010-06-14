@@ -1,4 +1,4 @@
-from model import db
+from model import Account, db
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import scrape
@@ -49,6 +49,11 @@ class EditTest(SeleniumTestCase):
     
     def tearDown(self):
         self.delete_facility('example.org/123')
+        # Reset account to initial (no nickname, affiliation) state
+        a = Account.all().fetch(1)[0]
+        a.nickname = ''
+        a.affiliation = ''
+        a.put()
         SeleniumTestCase.tearDown(self)
 
     def test_edit_link(self):
@@ -180,64 +185,69 @@ class EditTest(SeleniumTestCase):
         # assert feed.first('atom:feed').first('atom:entry')
 
     def test_comments(self):
-        # Fill in the form. Change available beds and comment.
-        text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
+        text_fields = {}
+        
+        # Fill comment, but not available beds field ----------------------- #
+        
+        # Go to the edit page
+        self.login('/edit?facility_name=example.org/123')
+        self.assert_text(Regex('Edit.*'), '//h1')
+        
+        # Fill in the form. Change available beds comment.
         text_fields['account_nickname'] = 'Test'
         text_fields['account_affiliation'] = 'Test'
-        text_fields['available_beds'] = '1'
-        text_fields['available_beds__comment'] == 'comment_foo'
-        checkbox_fields = dict(('services.' + name, True) for name in SERVICES)
-        select_fields = {'organization_type': 'NGO', 'category': 'CLINIC',
-                         'construction': 'ADOBE', 'reachable_by_road': 'TRUE',
-                         'can_pick_up_patients': 'FALSE',
-                         'operational_status': 'NO_SURGICAL_CAPACITY'}
+        text_fields['total_beds'] = ''
+        text_fields['total_beds__comment'] = 'comment_foo!'
+        text_fields['location.lat'] = '18.537207 '
+        text_fields['location.lon'] = '-72.349663'
+        checkbox_fields = {}
+        select_fields = {}
         self.fill_fields(text_fields, checkbox_fields, select_fields)
         
         # Reload bubble, go to change details page, and confirm changes
         self.save_and_load_bubble()
         self.click('link=Change details')
-        self.failUnless(self.is_text_present('Available beds: 1'))
-        self.failUnless(self.is_text_present('comment_foo'))
+        self.failUnless(self.is_text_present(u'Total beds: \u2013'))
+        self.failUnless(self.is_text_present('comment_foo!'))
         
-        # Delete comment, but not available beds field --------------------- #
-        
-        # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
-        
-        # Change beds but not comment
-        text_fields['available_beds'] = '37'
-        text_fields['available_beds__comment'] = ''
-        self.fill_fields(text_fields, checkbox_fields, select_fields)
-        
-        # Reload bubble, go to change details page, and confirm changes
-        self.save_and_load_bubble()
-        self.click('link=Change details')
-        self.failUnless(self.is_text_present('Available beds: 37'))
-        self.failUnless(not self.is_text_present('comment_bar'))
-        
-        # Delete available beds field, but include comment ----------------- #
-        
-        # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
+        # Fill available beds, but not comment field ----------------------- #
         
         # Nickname and affiliation fields should not be shown this time
-        self.assert_no_element('//input[@name="account_nickname"]')
-        self.assert_no_element('//input[@name="account_affiliation"]')
         del text_fields['account_nickname']
         del text_fields['account_affiliation']
         
-        # Delete available_beds field, but not the comment field.
-        text_fields['available_beds'] = ''
-        text_fields['available_beds__comment'] = 'comment_bar'
+        # Return to the edit page
+        self.open_path('/edit?facility_name=example.org/123')
+        self.assert_text(Regex('Edit.*'), '//h1')
+        
+        # Change beds but without comment
+        text_fields['total_beds'] = '37'
+        text_fields['total_beds__comment'] = ''
         self.fill_fields(text_fields, checkbox_fields, select_fields)
         
         # Reload bubble, go to change details page, and confirm changes
         self.save_and_load_bubble()
         self.click('link=Change details')
-        self.failUnless(self.is_text_present(u'Available beds: \u2013'))
-        self.failUnless(self.is_text_present('comment_bar'))
+        self.failUnless(self.is_text_present('Total beds: 37'))
+        self.failUnless(not self.is_text_present('comment_foo!'))
+        
+        # Fill available beds and comment fields --------------------------- #
+        
+        # Return to the edit page
+        self.open_path('/edit?facility_name=example.org/123')
+        self.assert_text(Regex('Edit.*'), '//h1')
+        
+        # Change total beds and comment fields.
+        text_fields['total_beds'] = '99'
+        text_fields['total_beds__comment'] = 'comment_bar!'
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+        
+        # Reload bubble, go to change details page, and confirm changes
+        self.save_and_load_bubble()
+        self.click('link=Change details')
+        self.failUnless(self.is_text_present('Total beds: 99'))
+        self.failUnless(self.is_text_present('comment_bar!'))
+        
         # Delete both available beds and comment fields -------------------- #
         
         # Return to the edit page
@@ -245,15 +255,15 @@ class EditTest(SeleniumTestCase):
         self.assert_text(Regex('Edit.*'), '//h1')
 
         # Fill fields
-        text_fields['available_beds'] = ''
-        text_fields['available_beds__comment'] = ''
+        text_fields['total_beds'] = ''
+        text_fields['total_beds__comment'] = ''
         self.fill_fields(text_fields, checkbox_fields, select_fields)
         
         # Reload bubble and go to change details page
         self.save_and_load_bubble()
         self.click('link=Change details')
-        self.failUnless(self.is_text_present(u'Available beds: \u2013'))
-        self.failUnless(not self.is_text_present('comment_bar'))
+        self.failUnless(self.is_text_present(u'Total beds: \u2013'))
+        self.failUnless(not self.is_text_present('comment_bar!'))
         
     def save_and_load_bubble(self):
         # Submit the form

@@ -404,7 +404,7 @@ class Edit(utils.Handler):
 
         logging.info("record by user: %s" % self.user)
 
-        def update(key, facility_type, request, user, account):
+        def update(key, facility_type, request, user, account, attributes):
             facility = db.get(key)
             minimal_facility = model.MinimalFacility.all().ancestor(
                 facility).get()
@@ -421,7 +421,7 @@ class Edit(utils.Handler):
             changed_attributes_dict = {}
 
             for name in facility_type.attribute_names:
-                attribute = cache.ATTRIBUTES[name]
+                attribute = attributes[name]
                 # To change an attribute, it has to have been marked editable
                 # at the time the page was rendered, the new value has to be
                 # different than the one in the facility at the time the page
@@ -459,7 +459,8 @@ class Edit(utils.Handler):
                 cache.JSON.flush()
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
-                              self.request, self.user, self.account)
+                              self.request, self.user, self.account,
+                              cache.ATTRIBUTES)
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
