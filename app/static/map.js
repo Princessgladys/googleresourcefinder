@@ -1181,8 +1181,8 @@ function select_facility(facility_i, ignore_current) {
         // Sets up the tabs and should be called after the DOM is created.
         jQuery('#bubble-tabs').tabs({
           select: function(event, ui) {
-            _gaq.push(['_trackEvent', 'bubble', 'click ' + ui.tab.innerText,
-              selected_facility.name]);
+            _gaq.push(['_trackEvent', 'bubble', 'click ' + ui.panel.id,
+                       selected_facility.name]);
           }
         });
         show_loading(false);
