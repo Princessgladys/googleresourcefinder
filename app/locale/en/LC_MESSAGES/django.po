@@ -46,14 +46,19 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Error message for lacking edit permissions
-#: edit.py:439
+#: edit.py:437
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr ""
 
 #. Form option to indicate that a value is not specified
-#: edit.py:169 edit.py:210 edit.py:195
+#: edit.py:211 edit.py:196 edit.py:170
 msgid "(unspecified)"
+msgstr ""
+
+#. Note that a facility has been marked closed.
+#: templates/hospital_bubble.html:48
+msgid "<strong>Note:</strong> This facility has been marked closed."
 msgstr ""
 
 #. Accuracy of latitude, longitude coordinates
@@ -102,7 +107,7 @@ msgid "Blood Bank"
 msgstr ""
 
 #. Save a copy of the data in CSV format
-#: export.py:140
+#: export.py:127
 msgid "CSV Export"
 msgstr ""
 
@@ -117,7 +122,7 @@ msgid "Can pick up patients"
 msgstr ""
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:154
+#: templates/edit.html:158
 msgid "Cancel"
 msgstr ""
 
@@ -154,6 +159,11 @@ msgstr ""
 #. Facility operational status: closed or in the process of closing
 #: ../tools/setup.py:209
 msgid "Closed or closing"
+msgstr ""
+
+#. Label for a text field to enter a comment about a change.
+#: templates/edit.html:140
+msgid "Comment:"
 msgstr ""
 
 #. remarks
@@ -239,7 +249,7 @@ msgid "District"
 msgstr ""
 
 #. E-mail address
-#: ../tools/setup.py:119 edit.py:116
+#: ../tools/setup.py:119 edit.py:117
 msgid "E-mail"
 msgstr ""
 
@@ -269,7 +279,7 @@ msgid "Error loading facility information."
 msgstr ""
 
 #. Button to export data to comma-separated-values format.
-#: export.py:156 templates/map.html:192
+#: export.py:143 templates/map.html:192
 msgid "Export CSV"
 msgstr ""
 
@@ -374,12 +384,12 @@ msgid "Internal Medicine"
 msgstr ""
 
 #. Error message for invalid date entry
-#: edit.py:138
+#: edit.py:139
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr ""
 
 #. Error message for request missing facility name.
-#: edit.py:334 bubble.py:155
+#: edit.py:335 bubble.py:156
 msgid "Invalid or missing facility name."
 msgstr ""
 
@@ -404,7 +414,7 @@ msgid "Last updated:"
 msgstr ""
 
 #. Label for text input
-#: edit.py:231
+#: edit.py:232
 msgid "Latitude"
 msgstr ""
 
@@ -444,7 +454,7 @@ msgid "Location:"
 msgstr ""
 
 #. Label for text input
-#: edit.py:235
+#: edit.py:236
 msgid "Longitude"
 msgstr ""
 
@@ -484,7 +494,7 @@ msgid "NGO"
 msgstr ""
 
 #. a person's name
-#: edit.py:112
+#: edit.py:113
 msgid "Name"
 msgstr ""
 
@@ -499,7 +509,7 @@ msgid "Neurosurgery"
 msgstr ""
 
 #. Form option for a false Boolean value
-#: bubble_test.py:68 edit.py:173 bubble.py:47
+#: bubble.py:48 edit.py:174 bubble_test.py:68
 msgid "No"
 msgstr ""
 
@@ -575,7 +585,7 @@ msgid "Pediatrics"
 msgstr ""
 
 #. telephone number
-#: edit.py:114 ../tools/setup.py:117
+#: edit.py:115 ../tools/setup.py:117
 msgid "Phone"
 msgstr ""
 
@@ -616,7 +626,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:466
+#: edit.py:465
 msgid "Record updated."
 msgstr ""
 
@@ -654,12 +664,12 @@ msgid "Resource Finder"
 msgstr ""
 
 #. Button text to save data
-#: templates/edit.html:150
+#: templates/edit.html:154
 msgid "Save"
 msgstr ""
 
 #. Label for a selector to export data to CSV
-#: export.py:145
+#: export.py:132
 msgid "Select facility type to export:"
 msgstr ""
 
@@ -674,12 +684,12 @@ msgid "Show:"
 msgstr ""
 
 #. Link to sign into the app
-#: main.py:58
+#: main.py:55
 msgid "Sign in"
 msgstr ""
 
 #. Link to sign out of the app
-#: main.py:56
+#: main.py:53
 msgid "Sign out"
 msgstr ""
 
@@ -714,7 +724,7 @@ msgid "URL:"
 msgstr ""
 
 #. Error message
-#: utils.py:113
+#: utils.py:123
 msgid "Unauthorized user."
 msgstr ""
 
@@ -759,7 +769,7 @@ msgid "X-Ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: bubble_test.py:67 bubble.py:47 edit.py:171
+#: bubble.py:48 edit.py:172 bubble_test.py:67
 msgid "Yes"
 msgstr ""
 
@@ -781,7 +791,7 @@ msgid "and with availability."
 msgstr ""
 
 #. a user with no identity
-#: main.py:52
+#: main.py:49
 msgid "anonymous"
 msgstr ""
 
@@ -793,11 +803,6 @@ msgstr ""
 #. Heading for number of total beds at a hospital
 #: templates/hospital_bubble.html:61
 msgid "capacity"
-msgstr ""
-
-#. TODO: Add missing message description or meaning
-#: templates/edit.html:137
-msgid "comment:"
 msgstr ""
 
 #. Header for the number of facilities less than 10 miles from a location.

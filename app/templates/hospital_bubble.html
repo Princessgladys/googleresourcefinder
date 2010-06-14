@@ -43,9 +43,9 @@
   {% ifequal special.operational_status.value 'Closed or closing' %}
     <div style="color:#a00; font-size:14px;">
       {% comment %}
-      TODO: Localize text
+      #i18n: Note that a facility has been marked closed.
       {% endcomment %}
-      <strong>Note:</strong> This facility has been marked closed.
+      {% blocktrans %}<strong>Note:</strong> This facility has been marked closed.{% endblocktrans %}
     </div>
   {% endifequal %}
   <table class="scorecard" cellpadding="0" cellspacing="0">
@@ -66,7 +66,7 @@
         <th class="services">{% trans "services" %}</th>
       </tr>
       <tr>
-        {% if special.total_beds.raw %}
+        {% if special.total_beds.raw or special.available_beds.raw %}
           <td class="availability">
             <div class="number">{{special.available_beds.value|escape}}</div>
           </td>

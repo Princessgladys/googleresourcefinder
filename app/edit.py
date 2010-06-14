@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cache
 import datetime
 import logging
 import model
@@ -319,8 +320,8 @@ def get_source_url(request):
 
 class Edit(utils.Handler):
     def init(self):
-        """Checks for logged-in user and sets up self.facility,
-        self.facility_type, and self.attributes based on the query params."""
+        """Checks for logged-in user and sets up self.facility
+        and self.facility_type based on the query params."""
 
         self.require_logged_in_user()
 
@@ -332,10 +333,7 @@ class Edit(utils.Handler):
         if not self.facility:
             #i18n: Error message for request missing facility name.
             raise ErrorMessage(404, _('Invalid or missing facility name.'))
-        self.facility_type = model.FacilityType.get_by_key_name(
-            self.facility.type)
-        self.attributes = dict(
-            (a.key().name(), a) for a in model.Attribute.all())
+        self.facility_type = cache.FACILITY_TYPES[self.facility.type]
 
     def get(self):
         self.init()
@@ -345,7 +343,7 @@ class Edit(utils.Handler):
         for name in self.facility_type.attribute_names:
             if name in HIDDEN_ATTRIBUTE_NAMES:
                 continue
-            attribute = self.attributes[name]
+            attribute = cache.ATTRIBUTES[name]
             comment = self.facility.get_comment(attribute.key().name())
             if not comment:
                 comment = ''
@@ -406,7 +404,7 @@ class Edit(utils.Handler):
 
         logging.info("record by user: %s" % self.user)
 
-        def update(key, facility_type, attributes, request, user, account):
+        def update(key, facility_type, request, user, account):
             facility = db.get(key)
             minimal_facility = model.MinimalFacility.all().ancestor(
                 facility).get()
@@ -423,7 +421,7 @@ class Edit(utils.Handler):
             changed_attributes_dict = {}
 
             for name in facility_type.attribute_names:
-                attribute = attributes[name]
+                attribute = cache.ATTRIBUTES[name]
                 # To change an attribute, it has to have been marked editable
                 # at the time the page was rendered, the new value has to be
                 # different than the one in the facility at the time the page
@@ -457,10 +455,11 @@ class Edit(utils.Handler):
                 # schedule_add_record(self.request, user,
                 #     facility, changed_attributes_dict, utcnow)
                 db.put([report, facility, minimal_facility])
+                cache.MINIMAL_FACILITIES.flush()
+                cache.JSON.flush()
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
-                              self.attributes, self.request,
-                              self.user, self.account)
+                              self.request, self.user, self.account)
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
