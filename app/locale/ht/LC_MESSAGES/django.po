@@ -46,15 +46,20 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
 
 #. Error message for lacking edit permissions
-#: edit.py:439
+#: edit.py:437
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s pa gen pèmisyon edite %(a)s"
 
 #. Form option to indicate that a value is not specified
-#: edit.py:169 edit.py:210 edit.py:195
+#: edit.py:211 edit.py:196 edit.py:170
 msgid "(unspecified)"
 msgstr "(pa espesifye)"
+
+#. Note that a facility has been marked closed.
+#: templates/hospital_bubble.html:48
+msgid "<strong>Note:</strong> This facility has been marked closed."
+msgstr "<strong>Remak:</strong> etablisman sa a te make fèmen."
 
 #. Accuracy of latitude, longitude coordinates
 #: ../tools/setup.py:131
@@ -102,7 +107,7 @@ msgid "Blood Bank"
 msgstr "Bank san"
 
 #. Save a copy of the data in CSV format
-#: export.py:140
+#: export.py:127
 msgid "CSV Export"
 msgstr "Ekspote CSV"
 
@@ -117,7 +122,7 @@ msgid "Can pick up patients"
 msgstr "Ka al chache malad"
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:154
+#: templates/edit.html:158
 msgid "Cancel"
 msgstr "Anile"
 
@@ -155,6 +160,11 @@ msgstr "Klinik"
 #: ../tools/setup.py:209
 msgid "Closed or closing"
 msgstr "Fèmen oswa pwal fèmen vit"
+
+#. Label for a text field to enter a comment about a change.
+#: templates/edit.html:140
+msgid "Comment:"
+msgstr "Kòmantè:"
 
 #. remarks
 #: ../tools/setup.py:145
@@ -239,7 +249,7 @@ msgid "District"
 msgstr "Distri"
 
 #. E-mail address
-#: ../tools/setup.py:119 edit.py:116
+#: ../tools/setup.py:119 edit.py:117
 msgid "E-mail"
 msgstr "Adrès elektronik"
 
@@ -269,7 +279,7 @@ msgid "Error loading facility information."
 msgstr "Erè transpòte etablisman enfòmasyon."
 
 #. Button to export data to comma-separated-values format.
-#: export.py:156 templates/map.html:192
+#: export.py:143 templates/map.html:192
 msgid "Export CSV"
 msgstr "Ekspote CSV"
 
@@ -374,12 +384,12 @@ msgid "Internal Medicine"
 msgstr "Medsin Entèn"
 
 #. Error message for invalid date entry
-#: edit.py:138
+#: edit.py:139
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Dat envalid : %(dat)r (bezwen ane-mwa-jou fòma)"
 
 #. Error message for request missing facility name.
-#: edit.py:334 bubble.py:155
+#: edit.py:335 bubble.py:156
 msgid "Invalid or missing facility name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -404,7 +414,7 @@ msgid "Last updated:"
 msgstr "Misajou"
 
 #. Label for text input
-#: edit.py:231
+#: edit.py:232
 msgid "Latitude"
 msgstr "Latitd"
 
@@ -444,7 +454,7 @@ msgid "Location:"
 msgstr "Kote"
 
 #. Label for text input
-#: edit.py:235
+#: edit.py:236
 msgid "Longitude"
 msgstr "Lonjitd"
 
@@ -484,7 +494,7 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: edit.py:112
+#: edit.py:113
 msgid "Name"
 msgstr "Non"
 
@@ -499,7 +509,7 @@ msgid "Neurosurgery"
 msgstr "Nerochiriji"
 
 #. Form option for a false Boolean value
-#: bubble_test.py:68 edit.py:173 bubble.py:47
+#: bubble.py:48 edit.py:174 bubble_test.py:68
 msgid "No"
 msgstr "Pa dakò"
 
@@ -575,7 +585,7 @@ msgid "Pediatrics"
 msgstr "Pedyatrik"
 
 #. telephone number
-#: edit.py:114 ../tools/setup.py:117
+#: edit.py:115 ../tools/setup.py:117
 msgid "Phone"
 msgstr "Telefòn"
 
@@ -616,7 +626,7 @@ msgid "Reachable by road"
 msgstr "Aksesib pa wout"
 
 #. Record updated successfully.
-#: edit.py:466
+#: edit.py:465
 msgid "Record updated."
 msgstr "Done a jou"
 
@@ -654,12 +664,12 @@ msgid "Resource Finder"
 msgstr "Chèche resous"
 
 #. Button text to save data
-#: templates/edit.html:150
+#: templates/edit.html:154
 msgid "Save"
 msgstr "Anrejistre"
 
 #. Label for a selector to export data to CSV
-#: export.py:145
+#: export.py:132
 msgid "Select facility type to export:"
 msgstr "Idantite kalite etablisman ekspòtasyon"
 
@@ -674,12 +684,12 @@ msgid "Show:"
 msgstr "Ekspoze:"
 
 #. Link to sign into the app
-#: main.py:58
+#: main.py:55
 msgid "Sign in"
 msgstr "Mete Anprent"
 
 #. Link to sign out of the app
-#: main.py:56
+#: main.py:53
 msgid "Sign out"
 msgstr "Sòti"
 
@@ -714,7 +724,7 @@ msgid "URL:"
 msgstr "Sit entenet"
 
 #. Error message
-#: utils.py:113
+#: utils.py:123
 msgid "Unauthorized user."
 msgstr "San otorizasyon User"
 
@@ -759,7 +769,7 @@ msgid "X-Ray"
 msgstr "Reyon X"
 
 #. Form option for a true Boolean value
-#: bubble_test.py:67 bubble.py:47 edit.py:171
+#: bubble.py:48 edit.py:172 bubble_test.py:67
 msgid "Yes"
 msgstr "Wi"
 
@@ -781,7 +791,7 @@ msgid "and with availability."
 msgstr "Avek anpil abilite"
 
 #. a user with no identity
-#: main.py:52
+#: main.py:49
 msgid "anonymous"
 msgstr "anonim"
 
@@ -794,11 +804,6 @@ msgstr "Disponibilite"
 #: templates/hospital_bubble.html:61
 msgid "capacity"
 msgstr "Kapasite"
-
-#. TODO: Add missing message description or meaning
-#: templates/edit.html:137
-msgid "comment:"
-msgstr "Kòmantè"
 
 #. Header for the number of facilities less than 10 miles from a location.
 #: templates/map.html:166
