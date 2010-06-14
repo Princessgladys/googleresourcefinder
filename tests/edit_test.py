@@ -1,5 +1,4 @@
-from google.appengine.api import users
-from model import db, Facility, MinimalFacility
+from model import db
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import scrape
@@ -44,25 +43,12 @@ STR_FIELDS = [
 class EditTest(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
-        f = Facility(key_name='example.org/123', type='hospital')
-        f.set_attribute('title', 'title_foo', datetime.datetime.now(),
-                        users.User('test@example.com'),
-                        'nickname_foo', 'affiliation_foo', 'comment_foo')
-        f.set_attribute('location', db.GeoPt(51.5, 0), datetime.datetime.now(),
-                        users.User('test@example.com'),
-                        'nickname_foo', 'affiliation_foo', 'comment_foo')
-        f.put()
-        mf = MinimalFacility(f, type='hospital')
-        mf.set_attribute('title', 'title_foo')
-        mf.set_attribute('location', db.GeoPt(51.5, 0))
-        mf.put()
+        self.put_facility(
+            'example.org/123', title='title_foo', location=db.GeoPt(51.5, 0))
         self.s = scrape.Session()
     
     def tearDown(self):
-        f = Facility.get_by_key_name('example.org/123')
-        mf = MinimalFacility.all().ancestor(f).get()
-        mf.delete()
-        f.delete()
+        self.delete_facility('example.org/123')
         SeleniumTestCase.tearDown(self)
 
     def test_edit_link(self):
@@ -77,9 +63,7 @@ class EditTest(SeleniumTestCase):
 
     def test_edit_page(self):
         """Confirms that all the fields in the edit form save the entered
-        values, and these values appear pre-filled when the form is loaded.
-        Also checks to make sure the comment fields are properly registering
-        in the bubble."""
+        values, and these values appear pre-filled when the form is loaded."""
 
         # Check that feed is empty
         feed = self.s.go('http://localhost:8081/feeds/delta')
@@ -126,18 +110,10 @@ class EditTest(SeleniumTestCase):
         # Submit the form
         self.click('//input[@name="save"]')
         self.wait_for_load()
-        
+
         # Check that we got back to the main map
         self.assertEquals(self.config.base_url + '/', self.get_location())
-        
-        # Test bubble change history comments
-        self.click('id=facility-1')
-        self.wait_for_element('link=Change details')
-        self.wait_for_element('link=Change details')
-        self.click('link=Change details')
-        self.failUnless(self.is_text_present('comment1'))
-        self.failUnless(self.is_text_present('comment2'))
-        
+
         # Return to the edit page
         self.open_path('/edit?facility_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
@@ -147,105 +123,7 @@ class EditTest(SeleniumTestCase):
         self.assert_no_element('//input[@name="account_affiliation"]')
         del text_fields['account_nickname']
         del text_fields['account_affiliation']
-        
-        # Change total beds comment field, but not the total beds field.
-        text_fields['total_beds__comment'] = '!_!'
-        self.fill_fields(text_fields, checkbox_fields, select_fields)
-        
-        # Submit the form
-        self.click('//input[@name="save"]')
-        self.wait_for_load()
-        
-        # Check that we got back to the main map
-        self.assertEquals(self.config.base_url + '/', self.get_location())
-        
-        # Test bubble change history comments
-        self.click('id=facility-1')
-        self.wait_for_element('link=Change details')
-        self.wait_for_element('link=Change details')
-        self.click('link=Change details')
-        self.failUnless(self.is_text_present('!_!'))
-        self.failUnless(not self.is_text_present('comment1'))
-        self.failUnless(self.is_text_present('comment2'))
-        
-        # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
-        
-        # Change total beds comment field, but not the total beds field.
-        text_fields['total_beds'] = '3867'
-        text_fields['total_beds__comment'] = ''
-        self.fill_fields(text_fields, checkbox_fields, select_fields)
-        
-        # Submit the form
-        self.click('//input[@name="save"]')
-        self.wait_for_load()
-        
-        # Check that we got back to the main map
-        self.assertEquals(self.config.base_url + '/', self.get_location())
-        
-        # Test bubble change history comments
-        self.click('id=facility-1')
-        self.wait_for_element('link=Change details')
-        self.wait_for_element('link=Change details')
-        self.click('link=Change details')
-        self.failUnless(self.is_text_present('Total beds: 3867'))
-        self.failUnless(not self.is_text_present('!_!'))
-        
-        # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
-        
-        # Change total beds comment field, but not the total beds field.
-        text_fields['total_beds'] = ''
-        text_fields['total_beds__comment'] = ''
-        self.fill_fields(text_fields, checkbox_fields, select_fields)
-        
-        # Submit the form
-        self.click('//input[@name="save"]')
-        self.wait_for_load()
-        
-        # Check that we got back to the main map
-        self.assertEquals(self.config.base_url + '/', self.get_location())
-        
-        # Test bubble change history comments
-        self.click('id=facility-1')
-        self.wait_for_element('link=Change details')
-        self.wait_for_element('link=Change details')
-        self.click('link=Change details')
-        self.failUnless(not self.is_text_present('Total beds'))
-        self.failUnless(not self.is_text_present('!'))
 
-        # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
-        
-        # Fill in the form
-        text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
-        text_fields['available_beds'] = '   1'
-        text_fields['total_beds'] = '2\t  '
-        text_fields['total_beds__comment'] = 'comment1'
-        text_fields['location.lat'] = '18.537207 '
-        text_fields['location.lon'] = '\t-72.349663'
-        text_fields['location__comment'] = 'comment2'
-        checkbox_fields = dict(('services.' + name, True) for name in SERVICES)
-        select_fields = {'organization_type': 'NGO', 'category': 'CLINIC',
-                         'construction': 'ADOBE', 'reachable_by_road': 'TRUE',
-                         'can_pick_up_patients': 'FALSE',
-                         'operational_status': 'NO_SURGICAL_CAPACITY'}
-        self.fill_fields(text_fields, checkbox_fields, select_fields)
-
-        # Submit the form
-        self.click('//input[@name="save"]')
-        self.wait_for_load()
-        
-        # Check that we got back to the main map
-        self.assertEquals(self.config.base_url + '/', self.get_location())
-        
-        # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
-        
         # Check that the new values were saved, and are pre-filled in the form
         # except for comments which should remain empty.
         text_fields['available_beds'] = '1'  # whitespace should be gone
@@ -301,7 +179,94 @@ class EditTest(SeleniumTestCase):
         # assert feed.first('atom:feed')
         # assert feed.first('atom:feed').first('atom:entry')
 
+    def test_comments(self):
+        # Fill in the form. Change available beds and comment.
+        text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
+        text_fields['account_nickname'] = 'Test'
+        text_fields['account_affiliation'] = 'Test'
+        text_fields['available_beds'] = '1'
+        text_fields['available_beds__comment'] == 'comment_foo'
+        checkbox_fields = dict(('services.' + name, True) for name in SERVICES)
+        select_fields = {'organization_type': 'NGO', 'category': 'CLINIC',
+                         'construction': 'ADOBE', 'reachable_by_road': 'TRUE',
+                         'can_pick_up_patients': 'FALSE',
+                         'operational_status': 'NO_SURGICAL_CAPACITY'}
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+        
+        # Reload bubble, go to change details page, and confirm changes
+        self.save_and_load_bubble()
+        self.click('link=Change details')
+        self.failUnless(self.is_text_present('Available beds: 1'))
+        self.failUnless(self.is_text_present('comment_foo'))
+        
+        # Delete comment, but not available beds field --------------------- #
+        
+        # Return to the edit page
+        self.open_path('/edit?facility_name=example.org/123')
+        self.assert_text(Regex('Edit.*'), '//h1')
+        
+        # Change beds but not comment
+        text_fields['available_beds'] = '37'
+        text_fields['available_beds__comment'] = ''
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+        
+        # Reload bubble, go to change details page, and confirm changes
+        self.save_and_load_bubble()
+        self.click('link=Change details')
+        self.failUnless(self.is_text_present('Available beds: 37'))
+        self.failUnless(not self.is_text_present('comment_bar'))
+        
+        # Delete available beds field, but include comment ----------------- #
+        
+        # Return to the edit page
+        self.open_path('/edit?facility_name=example.org/123')
+        self.assert_text(Regex('Edit.*'), '//h1')
+        
+        # Nickname and affiliation fields should not be shown this time
+        self.assert_no_element('//input[@name="account_nickname"]')
+        self.assert_no_element('//input[@name="account_affiliation"]')
+        del text_fields['account_nickname']
+        del text_fields['account_affiliation']
+        
+        # Delete available_beds field, but not the comment field.
+        text_fields['available_beds'] = ''
+        text_fields['available_beds__comment'] = 'comment_bar'
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+        
+        # Reload bubble, go to change details page, and confirm changes
+        self.save_and_load_bubble()
+        self.click('link=Change details')
+        self.failUnless(self.is_text_present(u'Available beds: \u2013'))
+        self.failUnless(self.is_text_present('comment_bar'))
+        # Delete both available beds and comment fields -------------------- #
+        
+        # Return to the edit page
+        self.open_path('/edit?facility_name=example.org/123')
+        self.assert_text(Regex('Edit.*'), '//h1')
 
+        # Fill fields
+        text_fields['available_beds'] = ''
+        text_fields['available_beds__comment'] = ''
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+        
+        # Reload bubble and go to change details page
+        self.save_and_load_bubble()
+        self.click('link=Change details')
+        self.failUnless(self.is_text_present(u'Available beds: \u2013'))
+        self.failUnless(not self.is_text_present('comment_bar'))
+        
+    def save_and_load_bubble(self):
+        # Submit the form
+        self.click('//input[@name="save"]')
+        self.wait_for_load()
+        
+        # Check that we got back to the main map
+        self.assertEquals(self.config.base_url + '/', self.get_location())
+        
+        # Test bubble change history comments
+        self.click('id=facility-1')
+        self.wait_for_element('link=Change details')
+        
     def fill_fields(self, text_fields, checkbox_fields, select_fields):
         """Fills in text fields, selects or deselects checkboxes, and
         makes drop-down selections.  Each of the arguments should be a
