@@ -66,7 +66,7 @@ msgstr "<strong>Remak:</strong> etablisman sa a te make fèmen."
 msgid "Accuracy"
 msgstr "Presizyon"
 
-#. street address
+#. Header for a street address
 #: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
 msgid "Address"
 msgstr "Adrès"

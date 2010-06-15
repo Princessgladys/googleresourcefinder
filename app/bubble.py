@@ -109,16 +109,16 @@ class ValueInfoExtractor:
         return (special, general, details)
 
     def get_value_info(self, facility, attribute_name):
-        value = facility.get_value(attribute_name)
-        if value:
+        observed = facility.get_observed(attribute_name)
+        if observed:
             return ValueInfo(
                 attribute_name,
-                value,
+                facility.get_value(attribute_name),
                 attribute_name in self.localized_attribute_names,
                 facility.get_author_nickname(attribute_name),
                 facility.get_author_affiliation(attribute_name),
                 facility.get_comment(attribute_name),
-                facility.get_observed(attribute_name))
+                observed)
 
 class HospitalValueInfoExtractor(ValueInfoExtractor):
     template_name = 'templates/hospital_bubble.html'

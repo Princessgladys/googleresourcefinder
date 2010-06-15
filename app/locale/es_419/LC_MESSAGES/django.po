@@ -66,7 +66,7 @@ msgstr "Nota: Esta institución se ha caracterizado cerrado."
 msgid "Accuracy"
 msgstr "Precisión"
 
-#. street address
+#. Header for a street address
 #: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
 msgid "Address"
 msgstr "Dirección"
