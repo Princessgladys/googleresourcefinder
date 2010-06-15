@@ -126,10 +126,13 @@ def render_json(center=None, radius=None):
         facility_types, facility_type_transformer, attribute_is)
 
     # Make JSON objects for the facilities
-    mfs = cache.MINIMAL_FACILITIES.values()
+    # Because storing the MinimalFacility entities into memcache is fairly
+    # slow (~3s for 1000 entities) and the JSON cache already provides almost
+    # all the benefit, we fetch the MinimalFacility entities directly from the
+    # datastore every time instead of letting the cache cache them.
+    mfs = cache.MINIMAL_FACILITIES.fetch_entities().values()
     facility_jobjects, facility_is = make_jobjects(
-        sorted(cache.MINIMAL_FACILITIES.values(),
-               key=lambda f: f.get_value('title')),
+        sorted(mfs, key=lambda f: f.get_value('title')),
         minimal_facility_transformer, attributes, facility_types,
         facility_type_is, center, radius)
     total_facility_count = len(facility_jobjects) - 1
