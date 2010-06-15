@@ -297,4 +297,4 @@ class MailUpdateSystem(utils.Handler):
         message.send()
 
 if __name__ == '__main__':
-    utils.run([('/send_mail_updates', MailUpdateSystem)], debug=True)
+    utils.run([('/subscription_handler', SubscriptionHandler)], debug=True)

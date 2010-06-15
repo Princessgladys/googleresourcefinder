@@ -465,7 +465,7 @@ class Edit(utils.Handler):
                 # to that facility.
                 attrs = changed_attributes_dict.copy()
                 attrs['facility_name'] = facility.key().name()
-                taskqueue.add(url='/send_mail_updates', method='POST',
+                taskqueue.add(url='/subscription_handler', method='POST',
                               params=attrs, transactional=True)
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,

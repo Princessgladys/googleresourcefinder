@@ -88,8 +88,8 @@ handlers:
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin
 
-- url: /send_mail_updates
-  script: send_mail_updates.py
+- url: /subscription_handler
+  script: subscription_handler.py
   login: admin
 
 - url: /subscribe
