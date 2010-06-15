@@ -116,7 +116,7 @@ class EditTest(SeleniumTestCase):
         self.wait_for_load()
 
         # Check that we got back to the main map
-        self.assertEquals(self.config.base_url + '/', self.get_location())
+        assert self.config.base_url + '/' == self.get_location()
 
         # Return to the edit page
         self.open_path('/edit?facility_name=example.org/123')
