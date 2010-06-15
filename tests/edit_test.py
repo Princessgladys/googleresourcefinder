@@ -50,7 +50,7 @@ class EditTest(SeleniumTestCase):
     def tearDown(self):
         self.delete_facility('example.org/123')
         # Reset account to initial (no nickname, affiliation) state
-        a = Account.all().fetch(1)[0]
+        a = Account.all().get()
         a.nickname = ''
         a.affiliation = ''
         a.put()
@@ -266,7 +266,7 @@ class EditTest(SeleniumTestCase):
         self.wait_for_load()
         
         # Check that we got back to the main map
-        self.assertEquals(self.config.base_url + '/', self.get_location())
+        assert self.config.base_url + '/' == self.get_location()
         
         # Test bubble change history comments
         self.click('id=facility-1')

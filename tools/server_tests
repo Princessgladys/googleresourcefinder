@@ -6,7 +6,7 @@ update_hgignore
 
 echo
 echo "--- Updating translations"
-$TOOLS_DIR/update_messages
+#$TOOLS_DIR/update_messages
 
 echo
 echo "--- Running Selenium tests"
