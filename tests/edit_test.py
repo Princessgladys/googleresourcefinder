@@ -188,7 +188,8 @@ class EditTest(SeleniumTestCase):
         text_fields = {}
         
         # Fill comment, but not available beds field ----------------------- #
-        
+        import code
+        code.interact('anything', None, locals())
         # Go to the edit page
         self.login('/edit?facility_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
@@ -207,8 +208,8 @@ class EditTest(SeleniumTestCase):
         # Reload bubble, go to change details page, and confirm changes
         self.save_and_load_bubble()
         self.click('link=Change details')
-        self.failUnless(self.is_text_present(u'Total beds: \u2013'))
-        self.failUnless(self.is_text_present('comment_foo!'))
+        assert self.is_text_present(u'Total beds: \u2013')
+        assert self.is_text_present('comment_foo!')
         
         # Fill available beds, but not comment field ----------------------- #
         
@@ -217,8 +218,7 @@ class EditTest(SeleniumTestCase):
         del text_fields['account_affiliation']
         
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
+        self.open_edit_page()
         
         # Change beds but without comment
         text_fields['total_beds'] = '37'
@@ -228,14 +228,13 @@ class EditTest(SeleniumTestCase):
         # Reload bubble, go to change details page, and confirm changes
         self.save_and_load_bubble()
         self.click('link=Change details')
-        self.failUnless(self.is_text_present('Total beds: 37'))
-        self.failUnless(not self.is_text_present('comment_foo!'))
+        assert self.is_text_present('Total beds: 37')
+        assert not self.is_text_present('comment_foo!')
         
         # Fill available beds and comment fields --------------------------- #
         
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
+        self.open_edit_page()
         
         # Change total beds and comment fields.
         text_fields['total_beds'] = '99'
@@ -245,15 +244,14 @@ class EditTest(SeleniumTestCase):
         # Reload bubble, go to change details page, and confirm changes
         self.save_and_load_bubble()
         self.click('link=Change details')
-        self.failUnless(self.is_text_present('Total beds: 99'))
-        self.failUnless(self.is_text_present('comment_bar!'))
+        assert self.is_text_present('Total beds: 99')
+        assert self.is_text_present('comment_bar!')
         
         # Delete both available beds and comment fields -------------------- #
         
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
-
+        self.open_edit_page()
+        
         # Fill fields
         text_fields['total_beds'] = ''
         text_fields['total_beds__comment'] = ''
@@ -262,8 +260,8 @@ class EditTest(SeleniumTestCase):
         # Reload bubble and go to change details page
         self.save_and_load_bubble()
         self.click('link=Change details')
-        self.failUnless(self.is_text_present(u'Total beds: \u2013'))
-        self.failUnless(not self.is_text_present('comment_bar!'))
+        assert self.is_text_present(u'Total beds: \u2013')
+        assert not self.is_text_present('comment_bar!')
         
     def save_and_load_bubble(self):
         # Submit the form
@@ -276,6 +274,10 @@ class EditTest(SeleniumTestCase):
         # Test bubble change history comments
         self.click('id=facility-1')
         self.wait_for_element('link=Change details')
+        
+    def open_edit_page(self):
+        self.open_path('/edit?facility_name=example.org/123')
+        self.assert_text(Regex('Edit.*'), '//h1')
         
     def fill_fields(self, text_fields, checkbox_fields, select_fields):
         """Fills in text fields, selects or deselects checkboxes, and

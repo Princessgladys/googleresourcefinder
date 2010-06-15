@@ -458,9 +458,11 @@ class Edit(utils.Handler):
                 cache.MINIMAL_FACILITIES.flush()
                 cache.JSON.flush()
 
+        # Cannot run datastore queries in a transaction outside the entity group
+        # being modified, so fetch the attributes here just in case
+        attributes = cache.ATTRIBUTES.load()
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
-                              self.request, self.user, self.account,
-                              cache.ATTRIBUTES)
+                              self.request, self.user, self.account, attributes)
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
