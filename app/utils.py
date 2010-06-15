@@ -302,10 +302,5 @@ def to_unicode(value):
     else:
         return u''
 
-def plural(n, singular='', plural='s'):
-    if not isinstance(n, (int, float)):
-        n = len(n)
-    return [plural, singular][n == 1]
-
 def run(*args, **kwargs):
     webapp.util.run_wsgi_app(webapp.WSGIApplication(*args, **kwargs))

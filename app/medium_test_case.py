@@ -15,6 +15,7 @@
 """Tests for cache.py."""
 
 import os
+import sets
 import unittest
 
 from google.appengine.api import apiproxy_stub_map
@@ -42,3 +43,19 @@ class MediumTestCase(unittest.TestCase):
 
         apiproxy_stub_map.apiproxy.RegisterStub(
             'user', user_service_stub.UserServiceStub())
+
+    def assert_same_elements(self, expected_coll, actual_coll):
+        """Assert that two collections hav the same elements (in any order)"""
+        expected = sets.Set(expected_coll)
+        actual = sets.Set(actual_coll)
+        missing = [elem for elem in expected if elem not in actual]
+        unexpected = [elem for elem in actual if elem not in expected]
+        errors = []
+        if missing:
+            missing.sort()
+            errors.append('Expected, but missing: %r\n' % missing)
+        if unexpected:
+            unexpected.sort()
+            errors.append('Unexpected, but present: %r' % unexpected)
+        if errors:
+            self.fail(''.join(errors))
