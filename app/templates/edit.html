@@ -41,9 +41,9 @@ tr.field.text { vertical-align: top; }
 .dash { border-top: 3px dotted #000; margin: 12px; }
 </style>
 {% if not params.embed %}
+{% include "analytics.html" %}
 </head>
 <body>
-{% include "analytics.html" %}
 {% endif %}
 {% comment %}
 # NB: This probably should use blocktrans and include facility_name as a param
@@ -133,9 +133,13 @@ tr.field.text { vertical-align: top; }
           </div>
         </td>
         <td>            
-            <div id="{{field.name}}__comment" class="comment">
-                &nbsp;&nbsp;{% trans 'comment:' %}<input type="text" name="{{field.name}}__comment"
-                       value="{{field.comment|escape}}" class="comment">
+            <div id="{{field.name}}__comment" class="comment" style="visibility:hidden">
+              {% comment %}
+              #i18n: Label for a text field to enter a comment about a change.
+              {% endcomment %}
+              &nbsp;&nbsp;{% trans 'Comment:' %} <input type="text"
+                name="{{field.name}}__comment" value="{{field.comment|escape}}"
+                class="comment">
             </div>
         </td>
       </tr>

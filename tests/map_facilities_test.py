@@ -1,5 +1,4 @@
-from google.appengine.api import users
-from model import db, Facility, MinimalFacility
+from model import db
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 
@@ -25,43 +24,14 @@ SERVICES = ['All',
 class MainTestCase(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
-        f = Facility(key_name='example.org/1000', type='hospital')
-        f.set_attribute('title', 'title_foo1', datetime.datetime.now(),
-                        users.User('test@example.com'),
-                        'nickname_foo', 'affiliation_foo', 'comment_foo')
-        f.set_attribute('location', db.GeoPt(51.5, 0), datetime.datetime.now(),
-                        users.User('test@example.com'),
-                        'nickname_foo', 'affiliation_foo', 'comment_foo')
-        f.put()
-        mf = MinimalFacility(f, type='hospital')
-        mf.set_attribute('title', 'title_foo1')
-        mf.set_attribute('location', db.GeoPt(51.5, 0))
-        mf.put()
-
-        f = Facility(key_name='example.org/1001', type='hospital')
-        f.set_attribute('title', 'title_foo2', datetime.datetime.now(),
-                        users.User('test@example.com'),
-                        'nickname_foo', 'affiliation_foo', 'comment_foo')
-        f.set_attribute('location', db.GeoPt(50.5, 1), datetime.datetime.now(),
-                        users.User('test@example.com'),
-                        'nickname_foo', 'affiliation_foo', 'comment_foo')
-        f.put()
-        mf = MinimalFacility(f, type='hospital')
-        mf.set_attribute('title', 'title_foo2')
-        mf.set_attribute('location', db.GeoPt(51.5, 1))
-        mf.put()
+        self.put_facility(
+            'example.org/1000', title='title_foo1', location=db.GeoPt(51.5, 0))
+        self.put_facility(
+            'example.org/1001', title='title_foo2', location=db.GeoPt(50.5, 1))
 
     def tearDown(self):
-        f = Facility.get_by_key_name('example.org/1000')
-        mf = MinimalFacility.all().ancestor(f).get()
-        mf.delete()
-        f.delete()
-        
-        f = Facility.get_by_key_name('example.org/1001')
-        mf = MinimalFacility.all().ancestor(f).get()
-        mf.delete()
-        f.delete()
-
+        self.delete_facility('example.org/1000')
+        self.delete_facility('example.org/1001')
         SeleniumTestCase.tearDown(self)
 
     def test_elements_present(self):

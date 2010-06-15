@@ -28,7 +28,7 @@ th { text-align: left; }
 .header .user { position: absolute; right: 0px; top: 0px; padding: 4px 8px; 
                 z-index: 1 }
 .header .lang { position: absolute; left: 400px; top: 0px; padding: 2px 8px;
-                z-index: 1 }
+                z-index: 2 }
 .header .title { position: absolute: left: 0px; top: 0px; padding: 4px;
                  font-size: 18px; color: #fff; background: #333; width: 392px;
                  height: 30px; }
@@ -103,4 +103,4 @@ td.facility-count.selected { color: #fff; }
 .facility-info .attribute .value { color: #000; }
 .facility-info .text { margin-left: 2em; }
 
-.disabled { color: #666; }
+tr.disabled td { color: #aaa; }

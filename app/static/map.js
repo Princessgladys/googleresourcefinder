@@ -516,7 +516,11 @@ function initialize_filters() {
     id: 'specialty-selector',
     name: 'specialty',
     onchange: function() {
-      select_filter.apply(null, $('specialty-selector').value.split(' '));
+      var value = $('specialty-selector').value.split(' ');
+      var trackedValue = value[1] ? value[1] : 'ANY';
+      _gaq.push(['_trackEvent', 'facility_list', 'filter',
+                 'Services contains ' + trackedValue]);
+      select_filter.apply(null, value);
     }
   });
   var options = [];
@@ -699,17 +703,17 @@ function update_facility_list() {
     }
     if (selected_status_i === 0 ||
         facility_status_is[f] === selected_status_i) {
+      var disabledClass = is_facility_closed(facility) ? ' disabled' : '';
       var row = $$('tr', {
         id: 'facility-' + f,
-        'class': 'facility' + maybe_selected(f === selected_facility_i),
+        'class': 'facility' + disabledClass
+            + maybe_selected(f === selected_facility_i),
         onclick: facility_selector(f),
         onmouseover: hover_activator('facility-' + f),
         onmouseout: hover_deactivator('facility-' + f)
       });
-      var cells = []
       var title = facility.values[attributes_by_name.title];
-      var disabledClass = is_facility_closed(facility) ? ' disabled' : '';
-      cells = [$$('td', {'class': 'facility-title' + disabledClass}, title)];
+      var cells = [$$('td', {'class': 'facility-title'}, title)];
       if (facility) {
         for (var c = 1; c < summary_columns.length; c++) {
           var value = summary_columns[c].get_value(facility.values);
@@ -1160,8 +1164,10 @@ function select_facility(facility_i, ignore_current) {
 
   if (markers[selected_facility_i]) {
     show_loading(true);
+    var url = 'bubble?facility_name=' + selected_facility.name;
+    _gaq.push(['_trackEvent', 'bubble', 'open', selected_facility.name]);
     jQuery.ajax({
-      url: 'bubble?facility_name=' + selected_facility.name,
+      url: url,
       type: 'GET',
       timeout: 10000,
       error: function(request, textStatus, errorThrown){
@@ -1173,7 +1179,12 @@ function select_facility(facility_i, ignore_current) {
         info.setContent(result);
         info.open(map, markers[selected_facility_i]);
         // Sets up the tabs and should be called after the DOM is created.
-        jQuery('#bubble-tabs').tabs();
+        jQuery('#bubble-tabs').tabs({
+          select: function(event, ui) {
+            _gaq.push(['_trackEvent', 'bubble', 'click ' + ui.panel.id,
+                       selected_facility.name]);
+          }
+        });
         show_loading(false);
       }
     });
