@@ -76,8 +76,7 @@ class EditTest(SeleniumTestCase):
         assert feed.first('atom:feed').all('atom:entry') == []
 
         # Go to the edit page
-        self.login('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
+        self.login_to_edit_page()
 
         # First-time edit should show nickname and affiliation fields
         self.assert_element('//input[@name="account_nickname"]')
@@ -188,11 +187,9 @@ class EditTest(SeleniumTestCase):
         text_fields = {}
         
         # Fill comment, but not available beds field ----------------------- #
-        import code
-        code.interact('anything', None, locals())
+
         # Go to the edit page
-        self.login('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
+        self.login_to_edit_page()
         
         # Fill in the form. Change available beds comment.
         text_fields['account_nickname'] = 'Test'
@@ -277,6 +274,10 @@ class EditTest(SeleniumTestCase):
         
     def open_edit_page(self):
         self.open_path('/edit?facility_name=example.org/123')
+        self.assert_text(Regex('Edit.*'), '//h1')
+        
+    def login_to_edit_page(self):
+        self.login('/edit?facility_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
         
     def fill_fields(self, text_fields, checkbox_fields, select_fields):
