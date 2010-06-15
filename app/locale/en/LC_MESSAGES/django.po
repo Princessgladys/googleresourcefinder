@@ -66,8 +66,8 @@ msgstr ""
 msgid "Accuracy"
 msgstr ""
 
-#. street address
-#: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
+#. Header for a street address
+#: templates/print_data.html:68 ../tools/setup.py:127 templates/hospital_bubble.html:120
 msgid "Address"
 msgstr ""
 
