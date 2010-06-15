@@ -24,6 +24,8 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 
+from nose.tools import assert_raises
+
 import access
 import cache
 import config
@@ -52,33 +54,20 @@ class HandlerTest(MediumTestCase):
 
     def test_require_action_permitted(self):
         """Confirms require_action_permitted is working correctly"""
-        try:
-            self.handler.require_action_permitted('grant')
-            assert False # Should have failed
-        except utils.Redirect, r:
-            # expected
-            pass
+        assert_raises(utils.Redirect,
+                      self.handler.require_action_permitted, 'grant')
 
         self.handler.account = Account(email='foo@example.com',
                                        description='Test',
-                                       actions = ['view', 'edit'])
-        try:
-            self.handler.require_action_permitted('grant')
-            assert False # Should have failed
-        except utils.ErrorMessage, e:
-            # expected
-            pass
+                                       actions=['view', 'edit'])
 
+        assert_raises(utils.ErrorMessage,
+                      self.handler.require_action_permitted, 'grant')
         self.handler.require_action_permitted('view')
 
     def test_require_logged_in_user(self):
         """Confirms require_logged_in_user is working correctly"""
-        try:
-            self.handler.require_logged_in_user()
-            assert False # Should have failed
-        except utils.Redirect, r:
-            # expected
-            pass
+        assert_raises(utils.Redirect, self.handler.require_logged_in_user)
 
         self.handler.user = users.User(email='foo@example.com')
         self.handler.require_logged_in_user()
@@ -144,7 +133,8 @@ class UtilsTest(MediumTestCase):
         query = Message.all()
         results = utils.fetch_all(query)
         assert len(results) == 10
-        self.assert_same_elements(self.messages, [r.key() for r in results])
+        self.assert_contents_any_order(
+            self.messages, [r.key() for r in results])
 
         # Make sure it works twice in a row
         results = utils.fetch_all(query)
@@ -154,14 +144,17 @@ class UtilsTest(MediumTestCase):
         """Confirm validate_yes works as expected"""
         assert utils.validate_yes('yes') == 'yes'
         assert utils.validate_yes('YeS') == 'yes'
+        assert utils.validate_yes('y') == 'yes'
+        assert utils.validate_yes('Y') == 'yes'
         assert utils.validate_yes('no') == ''
+        assert utils.validate_yes('NO') == ''
         assert utils.validate_yes('foo') == ''
         assert utils.validate_yes('') == ''
 
     def test_validate_action(self):
         """Confirm validate_action works as expected"""
         for action in access.ACTIONS:
-          assert utils.validate_action(action)
+            assert utils.validate_action(action)
         assert not utils.validate_action('FOO')
 
     def test_validate_float(self):
