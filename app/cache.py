@@ -83,6 +83,7 @@ class Cache(UserDict.DictMixin):
                     logging.error('Memcache set of %s failed'
                                   % self.memcache_key)
             self.last_refresh = now
+        return self.entities
 
     def fetch_entities(self):
         """Fetch entities on a cache miss."""
