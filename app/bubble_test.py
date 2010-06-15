@@ -51,7 +51,7 @@ class BubbleTest(unittest.TestCase):
     def tearDown(self):
         bubble.get_message = self.real_get_message
         if self.real_auth_domain:
-            os.environ['AUTH_DOMAIN'] = self.val
+            os.environ['AUTH_DOMAIN'] = self.real_auth_domain
         else:
             os.environ['AUTH_DOMAIN'] = ''
 

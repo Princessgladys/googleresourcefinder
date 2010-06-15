@@ -16,7 +16,7 @@
 
 from feeds.xmlutils import Struct
 
-from cron import Job
+from cron import Job, Timestamp
 
 import cron
 import datetime
@@ -37,6 +37,16 @@ class CronTest(unittest.TestCase):
                         weekdays=[],
                         hours_of_day=[datetime.datetime.now().hour+1],
                         minutes_of_hour=[datetime.datetime.now().minute+1])
+        
+        self.now = datetime.datetime.utcnow()
+        Timestamp(key_name='cron',
+                  timestamp=self.now-datetime.timedelta(0, 0, 0, 0, 3)).put()
+        
+    def test_get_datetimes(self):
+        times = cron.get_datetimes()
+        assert len(times) == 3
+        for i in range(len(times)):
+            assert times[i].minute == self.now.minute-len(times)+i+1
         
     def test_check_time(self):
         assert cron.job_should_run(self.job1, datetime.datetime.now()) == True
