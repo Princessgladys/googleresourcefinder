@@ -112,22 +112,19 @@ class BubbleTest(unittest.TestCase):
                         comment)
         f.set_attribute(HIDDEN_ATTRIBUTE_NAMES[0], 'hidden_value_foo', now,
                         user, nickname, affiliation, comment)
-        f.set_attribute('attribute_value', 'value_foo', now, user, nickname,
+        f.set_attribute('organization_name', 'value_foo', now, user, nickname,
                         affiliation, comment)
 
-        attrs = ['title', 'attribute_value', HIDDEN_ATTRIBUTE_NAMES[0]]
+        attrs = ['title', 'organization_name', HIDDEN_ATTRIBUTE_NAMES[0]]
         vai = HospitalValueInfoExtractor()
         (special, general, details) = vai.extract(f, attrs)
         
         assert special['title'].date == '2010-06-11 09:26:52 -05:00'
         assert special['title'].raw == 'title_foo'
         assert HIDDEN_ATTRIBUTE_NAMES[0] not in special
-        assert len(special) == len(vai.special_attribute_names)
-        for key in special:
-            assert key in vai.special_attribute_names
+        assert sorted(special) == sorted(vai.special_attribute_names)
         assert len(general) == 1
         assert len(details) == 2
-        assert general[0].value != 'hidden_value_foo'
         assert general[0].value == 'value_foo'
         for detail in details:
             assert detail.value == 'title_foo' or detail.value == 'value_foo'
