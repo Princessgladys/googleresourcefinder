@@ -119,8 +119,7 @@ class EditTest(SeleniumTestCase):
         assert self.config.base_url + '/' == self.get_location()
 
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
+        self.open_edit_page()
 
         # Nickname and affiliation fields should not be shown this time
         self.assert_no_element('//input[@name="account_nickname"]')
