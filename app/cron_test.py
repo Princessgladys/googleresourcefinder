@@ -41,13 +41,17 @@ class CronTest(unittest.TestCase):
         self.now = datetime.datetime.utcnow()
         Timestamp(key_name='cron',
                   timestamp=self.now-datetime.timedelta(0, 0, 0, 0, 3)).put()
-        
+    
     def test_get_datetimes(self):
         times = cron.get_datetimes()
         assert len(times) == 3
         for i in range(len(times)):
             assert times[i].minute == self.now.minute-len(times)+i+1
-        
-    def test_check_time(self):
+    
+    def test_job_should_run(self):
         assert cron.job_should_run(self.job1, datetime.datetime.now()) == True
         assert cron.job_should_run(self.job2, datetime.datetime.now()) == False
+    
+    def test_make_task_name(self):
+        assert cron.make_task_name('foo') == 'foo'
+        assert cron.make_task_name('foo! \t\n!BAR37') == 'foo---BAR37'
