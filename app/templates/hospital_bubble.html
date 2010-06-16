@@ -1,0 +1,176 @@
+{% comment %}
+# Copyright 2010 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+{% load i18n %}
+
+<div class="bubble">
+  <span class="title-row">
+    <span class="title">{{special.title.value|escape}}</span>
+    {% comment %}
+    #i18n: Link to edit the data for a facility record.
+    {% endcomment %}
+    <a href='{{edit_link|escape}}'>{% trans "Edit this record" %}</a>
+  </span>
+  <h2>
+    {% comment %}
+    #i18n: Proper name of an ID for a healthcare facility, no translation
+    #i18n: necessary.
+    {% endcomment %}
+    {% trans "HealthC ID:" %} {{special.healthc_id.value|escape}} &#xb7;
+    {% comment %}
+    #i18n: Proper name of an ID for a healthcare facility defined by the
+    #i18n: Pan-American Health Organization, no translation necessary.
+    {% endcomment %}
+    {% trans "PCode:" %} {{special.pcode.value|escape}}<br>
+    {% comment %}
+    #i18n: Label for a date-time when the data was last updated
+    {% endcomment %}
+    {% trans "Last updated:" %} {{last_updated|escape}}
+  </h2>
+  {% ifequal special.operational_status.value 'Closed or closing' %}
+    <div style="color:#a00; font-size:14px;">
+      {% comment %}
+      #i18n: Note that a facility has been marked closed.
+      {% endcomment %}
+      {% blocktrans %}<strong>Note:</strong> This facility has been marked closed.{% endblocktrans %}
+    </div>
+  {% endifequal %}
+  <table class="scorecard" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        {% comment %}
+        #i18n: Heading for number of available beds at a hospital
+        {% endcomment %}
+        <th class="availability" width="1%">{% trans "availability" %}</th>
+        {% comment %}
+        #i18n: Heading for number of total beds at a hospital
+        {% endcomment %}
+        <th class="capacity" width="1%">{% trans "capacity" %}</th>
+        {% comment %}
+        #i18n: Heading for servies available at a hospital
+        #i18n: (eg, orthopedics, cardiology)
+        {% endcomment %}
+        <th class="services">{% trans "services" %}</th>
+      </tr>
+      <tr>
+        {% if special.total_beds.raw or special.available_beds.raw %}
+          <td class="availability">
+            <div class="number">{{special.available_beds.value|escape}}</div>
+          </td>
+          <td class="capacity">
+            <div class="number">{{special.total_beds.value|escape}}</div>
+          </td>
+        {% else %}
+        <td class="no-information" colspan="2">
+          {% if general.phone and general.phone.raw %}
+          {% comment %}
+          #i18n: Indicates a user should call for availability of beds and
+          #i18n: services at a hospital.
+          {% endcomment %}
+          {% trans "Please call for availability information." %}
+          {% else %}
+          {% comment %}
+          #i18n: Indicates there is no availability information for this 
+          #i18n: hospital.
+          {% endcomment %}
+          {% trans "No availability information" %}
+          {% endif %}
+        </td>
+        {% endif %}
+        <td class="services">
+          {{special.services.value|escape}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div id="bubble-tabs">
+    <ul>
+      <li><a href="#bubble-tab-details">
+          {% comment %}
+          #i18n: Header for details about a facility
+          {% endcomment %}
+          {% trans "Facility details" %}</a></li> 
+      <li><a href="#bubble-tab-history">
+          {% comment %}
+          #i18n: Header for the history of changes in data for a facility
+          {% endcomment %}
+          {% trans "Change details" %}</a></li>
+    </ul>
+    <div id="bubble-tab-details">
+      <table class="details" cellpadding="0" cellspacing="0">
+        <tbody>
+          <tr class="item">
+            <td class="label" width="20%">
+              {% comment %}
+              #i18n: Header for a street address
+              {% endcomment %}
+              {% trans "Address" %}
+            </td>
+            <td class="value">
+              {{special.address.value|escape}}
+            </td>
+            <td class="value">
+              {% comment %}
+              #i18n: Geographic coordinates of a location on earth.
+              {% endcomment %}
+              {% trans "Location:" %} {{special.location.value|escape}}
+            </td>
+          </tr>
+          {% for attribute in general %}
+          <tr class="item">
+            <td class="label">{{attribute.label|escape}}</td>
+            <td class="value" colspan="2">{{attribute.value|escape}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div id="bubble-tab-history">
+      <table class="details" cellpadding="0" cellspacing="0">
+        <thead>
+          <tr>
+            {% comment %}
+            #i18n: Header for a record of a change to a facility detail
+            {% endcomment %}
+            <th>{% trans "Change" %}</th>
+            {% comment %}
+            #i18n: Header a column of user who made the edits
+            {% endcomment %}
+            <th>{% trans "Edited by" %}</th>
+            {% comment %}
+            #i18n: Header a column of comment about why a change was made
+            {% endcomment %}
+            <th>{% trans "Change note" %}</th>
+            {% comment %}
+            #i18n: Header for date and time of a change record
+            {% endcomment %}
+            <th>{% trans "Date and time" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for attribute in details %}
+          <tr>
+            <td>{{attribute.label|escape}}: {{attribute.value|escape}}</td>
+            <td>{{attribute.author|escape}}, {{attribute.affiliation|escape}}</td>
+            <td>{{attribute.comment|escape}}</td>
+            <td>{{attribute.date|escape}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

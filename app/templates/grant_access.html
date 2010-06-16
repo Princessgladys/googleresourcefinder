@@ -62,7 +62,7 @@ input, select, textarea, option {
       <thead>
         <tr>
           <th scope="col">Google Account</th>
-          <th scope="col">Requested Role</th>
+          <th scope="col">Requested Actions</th>
           <th scope="col">Grant Access</th>
           <th scope="col">Delete Request</th>
         </tr>
@@ -78,12 +78,12 @@ input, select, textarea, option {
             {{req.email|escape}}
           </td>
           <td>
-            {{req.requested_role|escape}}
+            {{req.requested_action|escape}}
           </td>
           <td>
             <form method="post" action="/grant_access">
               <input type="hidden" value="{{ req.key }}" name="key">
-              <input type="hidden" value="{{ req.requested_role }}" name="ccrole">
+              <input type="hidden" value="{{ req.requested_action }}" name="action">
               <input type="hidden" value="approve" name="action">
               <input type="submit" value="Approve">
             </form>
@@ -91,7 +91,7 @@ input, select, textarea, option {
           <td>
             <form method="post" action="/grant_access">
               <input type="hidden" value="{{ req.key }}" name="key">
-              <input type="hidden" value="{{ req.requested_role }}" name="ccrole">
+              <input type="hidden" value="{{ req.requested_action }}" name="action">
               <input type="hidden" value="deny" name="action">
               <input type="submit" value="Delete">
             </form>
