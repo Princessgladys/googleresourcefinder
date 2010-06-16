@@ -65,8 +65,6 @@ class EditTest(SeleniumTestCase):
         self.click('link=Edit this record')
         self.wait_for_load()
         self.assertTrue('/edit?' in self.get_location())
-        import code
-        code.interact('anything', None, locals())
 
     def test_edit_page(self):
         """Confirms that all the fields in the edit form save the entered
