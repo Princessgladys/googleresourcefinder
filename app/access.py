@@ -13,18 +13,7 @@
 # limitations under the License.
 
 """
-NOTE: THIS MODULE IS CURRENTLY UNUSED.
-
-The current permissions scheme for resource finder is:
-- Anyone (logged-in and non-logged-in users) can view and print
-- Any logged-in user can edit data
-
-THE CODE BELOW IS UNNECESSARY WITH THIS PERMISSION SCHEME
-
-Manages per-user permissions.  Three types of access are defined
-- user = User can view the app
-- editor = User can make changes
-- superuser = User can grant access to other users
+Manages per-user permissions.
 
 There is also a token system for allowing access to anonymous users by passing
 them a url.
@@ -32,30 +21,26 @@ them a url.
 
 from google.appengine.ext import db
 import logging
+from model import Account
 
-ROLES = ['user', 'editor', 'superuser']
-
-class Authorization(db.Model):
-    timestamp = db.DateTimeProperty(auto_now_add=True)
-    description = db.StringProperty(required=True)
-    email = db.StringProperty()
-    user_id = db.StringProperty()
-    token = db.StringProperty()
-    # user roles are in the format: country_code:role
-    # where role is one of ROLES
-    # an empty country_code means the user has the role for
-    # all countries
-    user_roles = db.StringListProperty()
-    requested_roles = db.StringListProperty()
+# Actions explained:
+# 'view' user can view the UI (unnecessary if default is 'anyone can view')
+# 'edit' user can edit basic fields of facilities (unnecessary if default is
+#          'any signed in user can make edits')
+# 'advanced_edit' user can edit all fields of facilities
+# 'add' user can add new facilities
+# 'remove' user can remove facilities from the UI (not delete them entirely)
+# 'grant' user can grant access to other users
+ACTIONS = ['view', 'add', 'remove', 'edit', 'advanced_edit', 'grant']
 
 def check_token(token):
-    return Authorization.all().filter('token =', token).get()
+    return Account.all().filter('token =', token).get()
 
 def check_email(email):
-    return Authorization.all().filter('email =', email).get()
+    return Account.all().filter('email =', email).get()
 
 def check_user_id(user_id):
-    return Authorization.all().filter('user_id =', user_id).get()
+    return Account.all().filter('user_id =', user_id).get()
 
 def check_request(request, user):
     if request.get('access_token'):
@@ -63,20 +48,20 @@ def check_request(request, user):
     if user:
         return check_email(user.email()) or check_user_id(user.user_id())
 
-def check_user_role(auth, role, cc):
-    """Return True if the auth user has the given role for the given country"""
-    return auth and ("%s:%s" % (cc or '',role) in auth.user_roles or
-                     ":%s" % role in auth.user_roles)
+def check_action_permitted(account, action):
+    """Return True if the account is allowed to perform the given action"""
+    return account and (action in account.actions
+                        or ":%s" % action in account.actions)
 
 def check_and_log(request, user):
-    auth = check_request(request, user)
+    account = check_request(request, user)
     logging.info(
-        'access.py: ' +
-        (auth and 'authorized %s' % auth.description or 'not authorized') +
+        'access.py: ' + (account and 'authorized %s' % account.description
+                         or 'not authorized') +
         ' (access_token=%r, user=%r)'
         % (request.get('access_token'), user and user.email()))
-    if not auth and user:
-        # we create an auth for a login user with no roles and don't save it
-        auth = Authorization(description=user.nickname(),
-                             email=user.email())
-    return auth
+    if not account and user:
+        # we create an account for a logged-in user with no actions
+        # but don't save it
+        account = Account(description=user.nickname(), email=user.email())
+    return account

@@ -21,8 +21,8 @@ The current permissions scheme for resource finder is:
 
 THE CODE BELOW IS UNNECESSARY WITH THIS PERMISSION SCHEME
 
-Handler for allowing a superuser to grant access using the permission scheme
-provided in access.py
+Handler for allowing an Account with 'grant' permission to grant access using
+the permission scheme provided in access.py
 """
 
 import logging
@@ -30,26 +30,24 @@ import model
 import utils
 from utils import DateTime, ErrorMessage, Redirect
 from utils import db, html_escape, users, _
-from access import check_user_role
-from access import Authorization
+from access import check_action_permitted
 
 
 class GrantAccess(utils.Handler):
     def get(self):
         """ Shows all requests for waiting for approval"""
 
-        self.require_user_role('superuser', self.params.cc)
+        self.require_action_permitted('grant')
 
-        q = Authorization.all().filter('requested_roles !=', None)
+        q = model.Account.all().filter('requested_actions !=', None)
 
         requests = []
-        for auth in q.fetch(100):
-          for ccrole in auth.requested_roles:
-            cc, role = ccrole.split(':')
-            if check_user_role(self.auth, 'superuser', cc):
-              requests.append({'email': auth.email,
-                               'requested_role': ccrole,
-                               'key': auth.key()})
+        for account in q.fetch(100):
+          for action in account.requested_actions:
+              if check_action_permitted(self.account, 'grant'):
+                  requests.append({'email': account.email,
+                                   'requested_action': action,
+                                   'key': account.key()})
 
         self.render('templates/grant_access.html',
                     requests=requests,
@@ -57,44 +55,43 @@ class GrantAccess(utils.Handler):
                     logout_url=users.create_logout_url('/'))
 
     def post(self):
-        """ Shows all requests for waiting fro approval"""
+        """ Shows all requests for waiting for approval"""
 
-        ccrole = self.request.get('ccrole')
-        if not ccrole:
-            raise ErrorMessage(404, 'missing ccrole (requested_role) params')
-        cc, role = ccrole.split(':')
+        action = self.request.get('action')
+        if not action:
+            raise ErrorMessage(404, 'missing action (requested_action) params')
 
-        self.require_user_role('superuser', cc)
+        self.require_action_permitted('grant')
 
-        auth = Authorization.get(self.request.get('key'))
-        if not auth:
+        account = model.Account.get(self.request.get('key'))
+        if not account:
             raise ErrorMessage(404, 'bad key given')
 
-        #TODO(eyalf): define auth.display_name() or something
-        name = auth.email
-        if not ccrole in auth.requested_roles:
+        #TODO(eyalf): define account.display_name() or something
+        name = account.email
+        if not action in account.requested_actions:
             #i18n: Error message
             raise ErrorMessage(404, _('No pending request for '
-                                      '%(authorization_role)s by %(user)s')
-                               % (ccrole, name))
-        auth.requested_roles.remove(ccrole)
-        action = self.request.get('action', 'deny')
-        if action == 'approve':
-            auth.user_roles.append(ccrole)
-        auth.put()
-        logging.info('%s request for %s was %s' % (auth.email,
-                                                   ccrole,
-                                                   action))
+                                      '%(account_action)s by %(user)s')
+                               % (action, name))
+        account.requested_actions.remove(action)
+        grant = self.request.get('grant', 'deny')
+        if grant == 'approve':
+            account.actions.append(action)
+        account.put()
+        logging.info('%s request for %s was %s' % (account.email,
+                                                   action,
+                                                   grant))
 
         if self.params.embed:
-            if action == 'approve':
+            if grant == 'approve':
                 self.write(
-                    #i18n: Application for the given permission role approved
-                    _('Request for becoming %(role)s was approved.') % role)
+                    #i18n: Application for the given permission action approved
+                    _('Request for becoming %(action)s was approved.') % action)
             else:
                 self.write(
-                    #i18n: Application for the given permission role denied
-                    _('Request for becoming %(role)s was denied.') % role)
+                    #i18n: Application for the given permission action denied
+                    _('Request for becoming %(action)s was denied.') % action)
         else:
             raise Redirect('/grant_access')
 

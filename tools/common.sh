@@ -7,6 +7,7 @@ export TOOLS_DIR=$(pwd)
 export PROJECT_DIR=$(dirname $TOOLS_DIR)
 export APP_DIR=$PROJECT_DIR/app
 export LIB_DIR=$PROJECT_DIR/lib
+export TESTS_DIR=$PROJECT_DIR/tests
 
 for dir in \
     "$APPENGINE_DIR" \
@@ -22,6 +23,41 @@ done
 if [ -z "$APPENGINE_DIR" ]; then
     echo "Could not find google_appengine directory.  Set APPENGINE_DIR."
     exit 1
+fi
+
+for dir in \
+    "$SELENIUM_DIR" \
+    /usr/lib/selenium \
+    /usr/local/lib/selenium \
+    /usr/local/selenium \
+    $HOME/selenium; do
+    if [ -d "$dir" ]; then
+        export SELENIUM_DIR="$dir"
+    fi
+done
+
+if [ -z "$APPENGINE_DIR" ]; then
+    echo "Could not find selenium directory.  Set APPENGINE_DIR."
+    exit 1
+fi
+
+export SELENIUM_JAR=$(find $SELENIUM_DIR -name selenium-server.jar)
+
+if [ -z "$SELENIUM_JAR" ]; then
+    echo "Could not find selenium-server.jar in $SELENIUM_DIR."
+    exit 1
+fi
+
+export SELENIUM_PYTHON_DIR=$(dirname $(find $SELENIUM_DIR -name selenium.py))
+
+if [ -z "$SELENIUM_PYTHON_DIR" ]; then
+    #if [ $(python -m selenium) ]; then
+    if python -m selenium; then
+        export SELENIUM_PYTHON_DIR=""
+    else
+        echo "Could not find selenium.py in $SELENIUM_DIR nor egg in site-packages."
+        exit 1
+    fi
 fi
 
 for python in \
@@ -49,7 +85,9 @@ fi
 export PYTHONPATH=\
 "$APP_DIR":\
 "$LIB_DIR":\
+"$TESTS_DIR":\
 "$TOOLS_DIR":\
+"$SELENIUM_PYTHON_DIR":\
 "$APPENGINE_DIR":\
 "$APPENGINE_DIR/lib/django":\
 "$APPENGINE_DIR/lib/webob":\

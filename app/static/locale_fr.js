@@ -24,11 +24,7 @@ locale = function() {
   //i18n: Label for every item in a list.
   messages.ALL = "Tous";
 
-  //i18n: Indicates a user should call for availability of beds
-  //i18n: and services at a hospital.
-  messages.CALL_FOR_AVAILABILITY = "Merci d'appeler pour conna\u00eetre les disponibilit\u00e9s.";
-
-  //i18n: Date at a give time (example: Jan 21, 2010 at 14:32 UTC-4)
+  //i18n: Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME = "${DATE} \u00e0 ${TIME}";
 
   //i18n: Local date format (example: Jan 21, 2010)
@@ -48,8 +44,26 @@ locale = function() {
   //i18n: Meaning: administrative division
   messages.DISTRICT = "District";
 
-  //i18n: Link to edit the data for a facility record.
-  messages.EDIT_LINK_HTML = HTML("${LINK_START}Modifier cet enregistrement${LINK_END}");
+  //i18n: Error message for required field.
+  messages.ERROR_FIELD_IS_REQUIRED = "Ce champ est obligatoire.";
+
+  //i18n: Error message for invalid latitude.
+  messages.ERROR_LATITUDE_INVALID = "Latitude doit \u00eatre comprise entre -90 et 90";
+
+  //i18n: Error message for invalid latitude.
+  messages.ERROR_LATITUDE_MUST_BE_NUMBER = "Latitude doit \u00eatre un nombre";
+
+  //i18n: Error message for not loading facility information successfully
+  messages.ERROR_LOADING_FACILITY_INFORMATION = "informations sur l'erreur installation de chargement";
+
+  //i18n: Error message for invalid longitude.
+  messages.ERROR_LONGITUDE_INVALID = "Longitude doit \u00eatre comprise entre -180 et 180";
+
+  //i18n: Error message for invalid longitude.
+  messages.ERROR_LONGITUDE_MUST_BE_NUMBER = "Longitude doit \u00eatre un nombre";
+
+  //i18n: Error message for a value that is not a number
+  messages.ERROR_VALUE_MUST_BE_NUMBER = "La valeur doit \u00eatre un nombre";
 
   //i18n: Number of facilities within range of a location.
   //i18n: (example: 5 Facilities within 10 miles)
@@ -58,22 +72,21 @@ locale = function() {
   //i18n: A place that provides a particular service
   messages.FACILITY = "\u00c9tablissement";
 
-  //i18n: Latitude and longitude location on earth.
-  messages.GEOLOCATION_HTML = HTML("Latitude\u00a0: ${LATITUDE}<br>Longitude\u00a0: ${LONGITUDE}");
+  //i18n: Proper name of an ID for a healthcare facility defined by the
+  //i18n: Pan-American Health Organization, no translation necessary.
+  messages.FACILITY_PCODE = "PCode\u00a0:";
+
+  //i18n: Proper name of an ID for a healthcare facility, no translation
+  //i18n: necessary.
+  messages.HEALTHC_ID = "ID HealthC\u00a0:";
 
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "janv. f\u00e9vr. mars avr. mai juin juil. ao\u00fbt sept. oct. nov. d\u00e9c.".split(' ');
 
-  //i18n: Form option for disagreement.
-  messages.NO = "Non";
-
-  //i18n: Indicates there is no availability information for this hospital.
-  messages.NO_AVAILABILITY = "Aucune information concernant les disponibilit\u00e9s";
-
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
-  messages.OPEN_TOTAL_BEDS = "Lits libres/au total";
+  messages.OPEN_TOTAL_BEDS = "Lits libres/total";
 
   //i18n: Very short abbreviation for a phone number, indended to disambiguate
   //i18n: from a fax number.  (example: p 555-555-5555)
@@ -85,26 +98,17 @@ locale = function() {
   //i18n: Tooltip explaining a 'Print' link
   messages.PRINT_ENABLED_TOOLTIP = "Imprimer une liste d'h\u00f4pitaux tri\u00e9s selon la distance qui les s\u00e9pare de ${FACILITY_NAME}";
 
-  //i18n: Link to request access for editing a facility record.
-  messages.REQUEST_EDIT_ACCESS_HTML = HTML("${LINK_START}Demander l'acc\u00e8s pour modification${LINK_END}");
-
   //i18n: work done by someone that benefits another
   messages.SERVICES = "Services";
 
   //i18n: Label for a control that filters a list of facilities
   messages.SHOW = "Afficher\u00a0:";
 
-  //i18n: Indicates a user needs to sign in to edit data on a facility.
-  messages.SIGN_IN_TO_EDIT = "Connectez-vous pour apporter des modifications.";
-
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}:${MINUTES} ${ZONE}";
 
   //i18n: Label indicating a record was updated
   messages.UPDATED = "Mise \u00e0 jour\u00a0:";
-
-  //i18n: Form option for agreement.
-  messages.YES = "Oui";
 
   function message_renderer(name) {
     return function (params) {

@@ -12,14 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.appengine.api import memcache
 from google.appengine.api import urlfetch
 from google.appengine.api import users
+from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 import google.appengine.ext.webapp.template
 import google.appengine.ext.webapp.util
 
 import StringIO
+import access
+import cache
 from calendar import timegm
 import cgi
 import cgitb
@@ -27,6 +31,7 @@ import config
 from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
+from feeds.crypto import get_secret
 from feeds.errors import ErrorMessage, Redirect
 import gzip
 from html import html_escape
@@ -59,8 +64,18 @@ from django.utils.translation import gettext_lazy as _
 # Attributes exported to CSV that should currently remain hidden from the
 # info window bubble and edit view.
 # TODO(shakusa) Un-hide these post-v1 when view/edit support is better
-HIDDEN_ATTRIBUTE_NAMES = ['region_id', 'district_id', 'commune_id',
+HIDDEN_ATTRIBUTE_NAMES = ['accuracy', 'region_id', 'district_id', 'commune_id',
                           'commune_code', 'sante_id']
+
+def fetch_all(query):
+    """Gets all the results of a query as efficiently as possible.  If the
+    query's results were previously obtained, they are reused."""
+    if not hasattr(query, 'results'):
+        # Calling fetch() is faster than iterating one by one.  'limit' can
+        # be arbitrarily large, but 'offset' cannot exceed 1000 -- so we
+        # only get one attempt.  We assume less than a million results.
+        query.results = query.fetch(1000000)
+    return query.results
 
 def strip(text):
     return text.strip()
@@ -68,15 +83,17 @@ def strip(text):
 def validate_yes(text):
     return (text.lower() == 'yes') and 'yes' or ''
 
+def validate_action(text):
+    return text in access.ACTIONS and text
+
 def validate_float(text):
     try:
         return float(text)
     except ValueError:
         return None
 
-def get_message(version, namespace, name):
-    message = model.Message.all().ancestor(version).filter(
-        'namespace =', namespace).filter('name =', name).get()
+def get_message(namespace, name):
+    message = cache.MESSAGES.get((namespace, name))
     django_locale = django.utils.translation.to_locale(
         django.utils.translation.get_language())
     return message and getattr(message, django_locale) or name
@@ -86,15 +103,24 @@ class Struct:
 
 class Handler(webapp.RequestHandler):
     auto_params = {
-        'cc': strip,
-        'facility_name': strip,
-        'print': validate_yes,
         'embed': validate_yes,
+        'facility_name': strip,
+        'lang': strip,
         'lat': validate_float,
         'lon': validate_float,
+        'print': validate_yes,
         'rad': validate_float,
-        'lang': strip,
+        'action': validate_action,
     }
+
+    def require_action_permitted(self, action):
+        """Raise and exception in case the user don't have the given action.
+           Redirect to login in case there is no user"""
+        if not self.account:
+            raise Redirect(users.create_login_url(self.request.uri))
+        if not access.check_action_permitted(self.account, action):
+            #i18n: Error message
+            raise ErrorMessage(403, _('Unauthorized user.'))
 
     def require_logged_in_user(self):
         """Redirect to login in case there is no user"""
@@ -110,9 +136,11 @@ class Handler(webapp.RequestHandler):
 
     def initialize(self, request, response):
         webapp.RequestHandler.initialize(self, request, response)
+        # To be safe, we purge the in-memory portion of MinimalFacilityCache
+        # before each request to be sure we don't see stale data.
+        cache.MINIMAL_FACILITIES.flush(flush_memcache=False)
         self.user = users.get_current_user()
-        logging.info('user: %s' % (self.user and
-                                   self.user.email() or 'anonymous'))
+        self.account = access.check_and_log(request, self.user)
         for name in request.headers.keys():
             if name.lower().startswith('x-appengine'):
                 logging.debug('%s: %s' % (name, request.headers[name]))
@@ -130,6 +158,9 @@ class Handler(webapp.RequestHandler):
 
         self.params.languages = config.LANGUAGES
 
+        # Google Analytics account id
+        self.params.analytics_id = get_secret('analytics_id')
+
     def select_locale(self):
         """Detect and activate the appropriate locale.  The 'lang' query
            parameter has priority, then the rflang cookie, then the
@@ -142,6 +173,11 @@ class Handler(webapp.RequestHandler):
             settings.LANGUAGE_CODE)
         # Check for and potentially convert an alternate language code
         self.params.lang = config.ALTERNATE_LANG_CODES.get(
+            self.params.lang, self.params.lang)
+        if self.params.lang not in list(lang[0] for lang in config.LANGUAGES):
+          self.params.lang = settings.LANGUAGE_CODE
+
+        self.params.maps_lang = config.GOOGLE_MAPS_ALTERNATE_LANG_CODES.get(
             self.params.lang, self.params.lang)
         self.response.headers.add_header(
             'Set-Cookie', 'django_language=%s' % self.params.lang)
@@ -180,32 +216,16 @@ def get_base(entity):
         entity = entity.base
     return entity
 
-def get_latest_version(cc):
-    country = get(None, model.Country, cc)
-    versions = model.Version.all().ancestor(country).order('-timestamp')
-    if versions.count():
-        return versions[0]
-
-def fetch(cc, url, payload=None, previous_data=None):
-    country = get(None, model.Country, cc)
+def fetch(url, payload=None, previous_data=None):
     method = (payload is None) and urlfetch.GET or urlfetch.POST
     response = urlfetch.fetch(url, payload, method, deadline=10)
     data = response.content
     logging.info('utils.py: received %d bytes of data' % len(data))
     if data == previous_data:
         return None
-    dump = model.Dump(country, source=url, data=data)
+    dump = model.Dump(source=url, data=data)
     dump.put()
     return dump
-
-def load(loader, dump):
-    logging.info('load started')
-    version = model.Version(dump.parent(), dump=dump)
-    version.put()
-    logging.info('new version: %r' % version)
-    loader.put_dump(version, decompress(dump.data))
-    logging.info('load finished: %r' % version)
-    return version
 
 def decompress(data):
     file = gzip.GzipFile(fileobj=StringIO.StringIO(data))
@@ -264,6 +284,11 @@ def to_isotime(datetime):
     if isinstance(datetime, (int, float)):
         datetime = to_datetime(datetime)
     return datetime.isoformat() + 'Z'
+
+def to_local_isotime(utc_datetime):
+  # TODO(shakusa) Use local timezone instead of hard-coding Haitian time
+  utc_datetime = utc_datetime - TimeDelta(hours=5)
+  return utc_datetime.isoformat(' ') + ' -05:00'
 
 def to_unicode(value):
     """Converts the given value to unicode. Django does not do this
