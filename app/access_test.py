@@ -14,66 +14,93 @@
 
 """Tests for access.py."""
 
+import datetime
+import unittest
+
 from google.appengine.api import users
+
+import access
 
 from access import ACTIONS
 from feeds.xmlutils import Struct
 from medium_test_case import MediumTestCase
 from model import Account
 from utils import db
-
-import access
-import datetime
-import unittest
         
 class AccessTest(MediumTestCase):
     def setUp(self):
         MediumTestCase.setUp(self)
         self.user = users.User(email='test@example.com')
-        self.request = Struct(access_token='')
-        self.request2 = Struct(access_token='token_foo')
-        self.request3 = Struct(access_token='token_bar')
+        self.user2 = users.User(email='test@example.com')
+        self.no_token_req = Struct(access_token='')
+        self.foo_token_req = Struct(access_token='token_foo')
+        self.bar_token_req = Struct(access_token='token_bar')
         self.account = Account(timestamp=datetime.datetime.now(),
                                description='description',
-                               email='test@example.com', user_id='id_foo',
+                               email=self.user.email(), user_id='id_foo',
                                nickname='test', affiliation='test',
                                token='token_foo',
                                actions=[ACTIONS[0], ACTIONS[1]],
-                               requested_actions=[ACTIONS[2]])
+                               no_token_reqed_actions=[ACTIONS[2]])
+        self.no_email_account = Account(timestamp=datetime.datetime.now(),
+                                        description='description',
+                                        email='', user_id='', token='',
+                                        nickname='test', affiliation='test',
+                                        actions=[ACTIONS[0], ACTIONS[1]],
+                                        requested_actions=[ACTIONS[2]])
 
-        db.put(self.account)
-        
+        db.put([self.account, self.no_email_account])
+    
     def tearDown(self):
         for account in Account.all():
             db.delete(account)
     
     def test_check_request(self):
-        assert (access.check_request(self.request2, self.user).email ==
-            self.account.email)
-        assert (access.check_request(self.request, self.user).email ==
-            self.account.email)
-        assert (access.check_request(self.request2, '').email ==
-            self.account.email)
-        assert access.check_request(self.request, '') == None
-        assert access.check_request(self.request3, '') == None
-                       
+        self.run_check_request_asserts(access.check_request)
+        
+        # if an incorrect token is supplied, should return as None even if
+        # there is a user also supplied
+        assert access.check_request(self.bar_token_req, self.user) == None
+    
     def test_action_permitted(self):
         for action in ACTIONS:
             if action in self.account.actions:
-                assert access.check_action_permitted(self.account, action) == True
+                assert (access.check_action_permitted(self.account, action) ==
+                    True)
             else:
                 assert (access.check_action_permitted(self.account, action) ==
                     False)
-
+    
     def test_check_and_log(self):
-        assert (access.check_and_log(self.request2, self.user).email ==
-            self.account.email)
-        assert (access.check_and_log(self.request, self.user).email ==
-            self.account.email)
-        assert (access.check_and_log(self.request2, '').email ==
-            self.account.email)
-        assert access.check_and_log(self.request, '') == None
-        assert (access.check_and_log(self.request, self.user).email ==
+        # should produce same results as access.check_request() in 
+        # most situations
+        self.run_check_request_asserts(access.check_and_log)
+        
+        # if there is an invalid token requested, but still a user, it should
+        # create a new account and return that instead
+        assert (access.check_and_log(self.no_token_req, self.user).email ==
             self.user.email())
-        assert (access.check_and_log(self.request3, self.user).email ==
+        assert (access.check_and_log(self.bar_token_req, self.user).email ==
             self.user.email())
+    
+    def run_check_request_asserts(self, test_request_function):
+        # with or without a token on the request, it should return the account
+        # with the same e-mail as the user
+        assert (test_request_function(self.foo_token_req, self.user).email ==
+            self.account.email)
+        assert (test_request_function(self.no_token_req, self.user).email ==
+            self.account.email)
+        
+        # should return appropriate account given a token, but no user
+        assert (test_request_function(self.foo_token_req, '').email ==
+            self.account.email)
+            
+        # if no token is supplied, or an incorrect token is supplied,
+        # without a correct user, this should return None
+        assert test_request_function(self.no_token_req, '') == None
+        assert test_request_function(self.bar_token_req, '') == None
+
+        # if a token is supplied that differs from the given user, it should
+        # still return the account that matches the token
+        assert (test_request_function(self.foo_token_req, self.user2).email ==
+            self.account.email)
