@@ -67,7 +67,7 @@ msgid "Accuracy"
 msgstr "Presizyon"
 
 #. Header for a street address
-#: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
+#: templates/print_data.html:68 ../tools/setup.py:127 templates/hospital_bubble.html:120
 msgid "Address"
 msgstr "Adrès"
 
@@ -190,11 +190,6 @@ msgstr "Konstriksyon"
 #: ../tools/setup.py:115
 msgid "Contact name"
 msgstr "Non pou kontak"
-
-#. Service provided by a health facility (use Title Case).
-#: ../tools/setup.py:265
-msgid "Corpse Removal"
-msgstr "Retire Kadav"
 
 #. Country code to load data for
 #: templates/load.html:34
@@ -488,6 +483,11 @@ msgstr "Etabisman Miks"
 msgid "Mobile clinic"
 msgstr "Klinik mobil"
 
+#. Service provided by a health facility (use Title Case). Meaning: Corpse removal
+#: ../tools/setup.py:266
+msgid "Mortuary Services"
+msgstr "Pomp Funèb"
+
 #. Type of organization: Non-governmental organization
 #: ../tools/setup.py:165
 msgid "NGO"
@@ -509,7 +509,7 @@ msgid "Neurosurgery"
 msgstr "Nerochiriji"
 
 #. Form option for a false Boolean value
-#: bubble.py:48 edit.py:174 bubble_test.py:68
+#: bubble_test.py:69 bubble.py:48 edit.py:174
 msgid "No"
 msgstr "Pa dakò"
 
@@ -769,7 +769,7 @@ msgid "X-Ray"
 msgstr "Reyon X"
 
 #. Form option for a true Boolean value
-#: bubble.py:48 edit.py:172 bubble_test.py:67
+#: bubble.py:48 edit.py:172 bubble_test.py:68
 msgid "Yes"
 msgstr "Wi"
 

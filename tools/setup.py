@@ -41,7 +41,7 @@ def setup_facility_types():
               'INFECTIOUS_DISEASE', 'PEDIATRICS', 'POSTOPERATIVE_CARE',
               'REHABILITATION', 'OBSTETRICS_GYNECOLOGY', 'MENTAL_HEALTH',
               'DIALYSIS', 'LAB', 'X_RAY', 'CT_SCAN', 'BLOOD_BANK',
-              'CORPSE_REMOVAL']),
+              'MORTUARY_SERVICES']),
         attr('str', 'contact_name'),
         attr('str', 'phone'),
         attr('str', 'email'),
@@ -262,7 +262,8 @@ def setup_messages():
         #i18n: Service provided by a health facility (use Title Case).
         value_message('BLOOD_BANK', en='Blood Bank'),
         #i18n: Service provided by a health facility (use Title Case).
-        value_message('CORPSE_REMOVAL', en='Corpse Removal'),
+        #i18n: Meaning: Corpse removal
+        value_message('MORTUARY_SERVICES', en='Mortuary Services'),
     ]
 
     for locale in os.listdir(settings.LOCALE_PATHS[0]):
