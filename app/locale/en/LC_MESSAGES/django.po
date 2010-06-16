@@ -191,11 +191,6 @@ msgstr ""
 msgid "Contact name"
 msgstr ""
 
-#. Service provided by a health facility (use Title Case).
-#: ../tools/setup.py:265
-msgid "Corpse Removal"
-msgstr ""
-
 #. Country code to load data for
 #: templates/load.html:34
 msgid "Country:"
@@ -486,6 +481,11 @@ msgstr ""
 #. Category of facility: A mobile clinic.
 #: ../tools/setup.py:181
 msgid "Mobile clinic"
+msgstr ""
+
+#. Service provided by a health facility (use Title Case). Meaning: Corpse removal
+#: ../tools/setup.py:266
+msgid "Mortuary Services"
 msgstr ""
 
 #. Type of organization: Non-governmental organization
