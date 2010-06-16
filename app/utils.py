@@ -81,8 +81,7 @@ def strip(text):
     return text.strip()
 
 def validate_yes(text):
-    text = text.lower()
-    return (text == 'y' or text == 'yes') and 'yes' or ''
+    return (text.lower() in ['y', 'yes']) and 'yes' or ''
 
 def validate_action(text):
     return text in access.ACTIONS and text
