@@ -129,20 +129,3 @@ class BubbleTest(unittest.TestCase):
         for detail in details:
             assert detail.value == 'title_foo' or detail.value == 'value_foo'
             assert detail.value != 'hidden_value_foo'
-
-'''    def test_vai_get_value_info(self):
-        f = model.Facility(key_name='example.org/123', type='hospital')
-        f.set_attribute('title', 'title_foo', datetime.datetime(2010, 06, 01),
-                        users.User('test@example.com'),
-                        'nickname_foo', 'affiliation_foo\n', 'comment_\nfoo')
-        vai = ValueInfoExtractor(['title'], [])
-        vi = vai.get_value_info(f, 'title')
-        
-        assert vi.label == 'title'
-        assert vi.raw == 'title_foo'
-        assert vi.localize == u'\u2013'
-        assert vi.author == 'test@example.com'
-        assert vi.affiliation == 'affiliation_foo '
-        assert vi.comment == 'comment_ foo'
-        assert vi.date == '2010-05-31 19:00:00 -05:00'
-'''
