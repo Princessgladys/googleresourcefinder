@@ -486,7 +486,7 @@ msgstr "Clínica móvil"
 #. Service provided by a health facility (use Title Case). Meaning: Corpse removal
 #: ../tools/setup.py:266
 msgid "Mortuary Services"
-msgstr "Servicios Mortuorios"
+msgstr "Servicio de Pompas Fúnebres"
 
 #. Type of organization: Non-governmental organization
 #: ../tools/setup.py:165
