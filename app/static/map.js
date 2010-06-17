@@ -522,7 +522,11 @@ function initialize_filters() {
     id: 'specialty-selector',
     name: 'specialty',
     onchange: function() {
-      select_filter.apply(null, $('specialty-selector').value.split(' '));
+      var value = $('specialty-selector').value.split(' ');
+      var trackedValue = value[1] ? value[1] : 'ANY';
+      _gaq.push(['_trackEvent', 'facility_list', 'filter',
+                 'Services contains ' + trackedValue]);
+      select_filter.apply(null, value);
     }
   });
   var options = [];
@@ -1166,8 +1170,10 @@ function select_facility(facility_i, ignore_current) {
 
   if (markers[selected_facility_i]) {
     show_loading(true);
+    var url = 'bubble?facility_name=' + selected_facility.name;
+    _gaq.push(['_trackEvent', 'bubble', 'open', selected_facility.name]);
     $j.ajax({
-      url: 'bubble?facility_name=' + selected_facility.name,
+      url: url,
       type: 'GET',
       timeout: 10000,
       error: function(request, textStatus, errorThrown){
@@ -1179,7 +1185,12 @@ function select_facility(facility_i, ignore_current) {
         info.setContent(result);
         info.open(map, markers[selected_facility_i]);
         // Sets up the tabs and should be called after the DOM is created.
-        $j('#bubble-tabs').tabs();
+       $j('#bubble-tabs').tabs({
+          select: function(event, ui) {
+            _gaq.push(['_trackEvent', 'bubble', 'click ' + ui.panel.id,
+                       selected_facility.name]);
+          }
+        });
 
         var bubbleAvailability = $('bubble-availability');
         var bubbleCapacity = $('bubble-capacity');
@@ -1351,6 +1362,34 @@ function set_facility_attribute(facility_name, attribute_name, value) {
   update_facility_row(facility_i);
 }
 
+var GLOW_COLORS = ['#ff4', '#ff4', '#ff5', '#ff6', '#ff8', '#ffa',
+                   '#ffb', '#ffc', '#ffd', '#ffe', '#fffff8'];
+var glow_element = null;
+var glow_step = -1;
+
+function glow(element) {
+  if (glow_element) {
+    glow_element.style.backgroundColor = '';
+  }
+  glow_element = element;
+  glow_step = 0;
+  glow_next();
+}
+
+function glow_next() {
+  if (glow_element && glow_step < GLOW_COLORS.length) {
+    glow_element.style.backgroundColor = GLOW_COLORS[glow_step];
+    glow_step++;
+    window.setTimeout(glow_next, 200);
+  } else {
+    if (glow_element) {
+      glow_element.style.backgroundColor = '';
+    }
+    glow_element = null;
+    glow_step = -1;
+  }
+}
+
 function update_facility_row(facility_i) {
   var row = $('facility-' + facility_i);
   var cell = row.firstChild;
@@ -1361,6 +1400,7 @@ function update_facility_row(facility_i) {
     set_children(cell, value);
     cell.className = 'value column_' + c;
   }
+  glow(row);
 }
 
 // ==== In-place editing

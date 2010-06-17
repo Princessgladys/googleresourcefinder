@@ -81,7 +81,7 @@ def strip(text):
     return text.strip()
 
 def validate_yes(text):
-    return (text.lower() == 'yes') and 'yes' or ''
+    return (text.lower() in ['y', 'yes']) and 'yes' or ''
 
 def validate_action(text):
     return text in access.ACTIONS and text
@@ -301,11 +301,6 @@ def to_unicode(value):
         return str(value).decode('utf-8')
     else:
         return u''
-
-def plural(n, singular='', plural='s'):
-    if not isinstance(n, (int, float)):
-        n = len(n)
-    return [plural, singular][n == 1]
 
 def run(*args, **kwargs):
     webapp.util.run_wsgi_app(webapp.WSGIApplication(*args, **kwargs))
