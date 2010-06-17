@@ -102,10 +102,10 @@ locale = function() {
   messages.PRINT_ENABLED_TOOLTIP = "Enprime yon list lopital nan l\u00f2d distans de ${FACILITY_NAME}";
 
   //i18n: Message indicating hospital information has been saved
-  messages.SAVED = "Your edit has been saved";
+  messages.SAVED = "Nou anrejistre chanjman ou";
 
   //i18n: Message indicating saving hospital information
-  messages.SAVING = "Saving...";
+  messages.SAVING = "Anrejistre...";
 
   //i18n: work done by someone that benefits another
   messages.SERVICES = "S\u00e8vis";

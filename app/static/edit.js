@@ -214,8 +214,7 @@
         for (var div_index = 0; div_index < divs.length; div_index++) {
           var div = divs[div_index];
           if (div.className == "comment") {
-            div.style.visibility = "hidden";
-            var closure = make_visible_closure(div);
+            var closure = make_unhidden_closure(div);
             var elements = get_edit_elements(tr);
             for (var el_index = 0; el_index < elements.length; el_index++) {
               var element = elements[el_index];
