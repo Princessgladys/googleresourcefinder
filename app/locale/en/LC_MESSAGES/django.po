@@ -46,13 +46,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Error message for lacking edit permissions
-#: edit.py:438
+#: edit.py:439
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr ""
 
 #. Form option to indicate that a value is not specified
-#: edit.py:211 edit.py:196 edit.py:170
+#: edit.py:212 edit.py:197 edit.py:171
 msgid "(unspecified)"
 msgstr ""
 
@@ -66,7 +66,7 @@ msgstr ""
 msgid "Accuracy"
 msgstr ""
 
-#. street address
+#. Header for a street address
 #: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
 msgid "Address"
 msgstr ""
@@ -249,7 +249,7 @@ msgid "District"
 msgstr ""
 
 #. E-mail address
-#: ../tools/setup.py:119 edit.py:117
+#: edit.py:118 ../tools/setup.py:119
 msgid "E-mail"
 msgstr ""
 
@@ -384,12 +384,12 @@ msgid "Internal Medicine"
 msgstr ""
 
 #. Error message for invalid date entry
-#: edit.py:139
+#: edit.py:140
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr ""
 
 #. Error message for request missing facility name.
-#: bubble.py:156 edit.py:336
+#: bubble.py:156 edit.py:337
 msgid "Invalid or missing facility name."
 msgstr ""
 
@@ -414,7 +414,7 @@ msgid "Last updated:"
 msgstr ""
 
 #. Label for text input
-#: edit.py:232
+#: edit.py:233
 msgid "Latitude"
 msgstr ""
 
@@ -454,7 +454,7 @@ msgid "Location:"
 msgstr ""
 
 #. Label for text input
-#: edit.py:236
+#: edit.py:237
 msgid "Longitude"
 msgstr ""
 
@@ -494,7 +494,7 @@ msgid "NGO"
 msgstr ""
 
 #. a person's name
-#: edit.py:113
+#: edit.py:114
 msgid "Name"
 msgstr ""
 
@@ -509,7 +509,7 @@ msgid "Neurosurgery"
 msgstr ""
 
 #. Form option for a false Boolean value
-#: bubble.py:48 edit.py:174 bubble_test.py:68
+#: bubble_test.py:69 bubble.py:48 edit.py:175
 msgid "No"
 msgstr ""
 
@@ -585,7 +585,7 @@ msgid "Pediatrics"
 msgstr ""
 
 #. telephone number
-#: edit.py:115 ../tools/setup.py:117
+#: edit.py:116 ../tools/setup.py:117
 msgid "Phone"
 msgstr ""
 
@@ -626,7 +626,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:467
+#: edit.py:470
 msgid "Record updated."
 msgstr ""
 
@@ -774,7 +774,7 @@ msgid "X-Ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: bubble.py:48 edit.py:172 bubble_test.py:67
+#: bubble.py:48 edit.py:173 bubble_test.py:68
 msgid "Yes"
 msgstr ""
 

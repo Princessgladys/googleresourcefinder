@@ -45,13 +45,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} établissements dans un rayon de ${RADIUS_MILES} miles"
 
 #. Error message for lacking edit permissions
-#: edit.py:438
+#: edit.py:439
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s n'a pas l'autorisation de modifier %(a)s"
 
 #. Form option to indicate that a value is not specified
-#: edit.py:211 edit.py:196 edit.py:170
+#: edit.py:212 edit.py:197 edit.py:171
 msgid "(unspecified)"
 msgstr "(non spécifié)"
 
@@ -65,7 +65,7 @@ msgstr "<strong>Note:</strong> Cet établissement a été marquée fermée."
 msgid "Accuracy"
 msgstr "Précision"
 
-#. street address
+#. Header for a street address
 #: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
 msgid "Address"
 msgstr "Adresse"
@@ -163,7 +163,7 @@ msgstr "Fermé ou fermer bientôt"
 #. Label for a text field to enter a comment about a change.
 #: templates/edit.html:142
 msgid "Comment:"
-msgstr "Commentaires"
+msgstr "Commentaires :"
 
 #. remarks
 #: ../tools/setup.py:145
@@ -248,7 +248,7 @@ msgid "District"
 msgstr "District"
 
 #. E-mail address
-#: ../tools/setup.py:119 edit.py:117
+#: edit.py:118 ../tools/setup.py:119
 msgid "E-mail"
 msgstr "E-mail"
 
@@ -383,12 +383,12 @@ msgid "Internal Medicine"
 msgstr "Médecine Interne"
 
 #. Error message for invalid date entry
-#: edit.py:139
+#: edit.py:140
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Date incorrecte : %(date)r  (format AAAA-MM-JJ requis)"
 
 #. Error message for request missing facility name.
-#: bubble.py:156 edit.py:336
+#: bubble.py:156 edit.py:337
 msgid "Invalid or missing facility name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -413,7 +413,7 @@ msgid "Last updated:"
 msgstr "Mise à jour :"
 
 #. Label for text input
-#: edit.py:232
+#: edit.py:233
 msgid "Latitude"
 msgstr "Latitude"
 
@@ -453,7 +453,7 @@ msgid "Location:"
 msgstr "Emplacement"
 
 #. Label for text input
-#: edit.py:236
+#: edit.py:237
 msgid "Longitude"
 msgstr "Longitude"
 
@@ -493,7 +493,7 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: edit.py:113
+#: edit.py:114
 msgid "Name"
 msgstr "Nom"
 
@@ -508,7 +508,7 @@ msgid "Neurosurgery"
 msgstr "Neurochirurgie"
 
 #. Form option for a false Boolean value
-#: bubble.py:48 edit.py:174 bubble_test.py:68
+#: bubble_test.py:69 bubble.py:48 edit.py:175
 msgid "No"
 msgstr "Non"
 
@@ -584,7 +584,7 @@ msgid "Pediatrics"
 msgstr "Pédiatrie"
 
 #. telephone number
-#: edit.py:115 ../tools/setup.py:117
+#: edit.py:116 ../tools/setup.py:117
 msgid "Phone"
 msgstr "Téléphone"
 
@@ -625,7 +625,7 @@ msgid "Reachable by road"
 msgstr "Accessible en voiture"
 
 #. Record updated successfully.
-#: edit.py:467
+#: edit.py:470
 msgid "Record updated."
 msgstr "Enregistrement mis à jour"
 
@@ -773,7 +773,7 @@ msgid "X-Ray"
 msgstr "Radiographie"
 
 #. Form option for a true Boolean value
-#: bubble.py:48 edit.py:172 bubble_test.py:67
+#: bubble.py:48 edit.py:173 bubble_test.py:68
 msgid "Yes"
 msgstr "Oui"
 

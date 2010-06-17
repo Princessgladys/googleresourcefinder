@@ -31,7 +31,7 @@ class AccessTest(unittest.TestCase):
                             actions=[ACTIONS[0], ACTIONS[1]],
                             requested_actions=[ACTIONS[2]])
                        
-    def test_check_user_role(self):
+    def test_action_permitted(self):
         for action in ACTIONS:
             if action in self.auth.actions:
                 assert access.check_action_permitted(self.auth, action) == True

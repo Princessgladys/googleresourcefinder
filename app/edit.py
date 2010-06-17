@@ -26,6 +26,7 @@ from access import check_action_permitted
 from feed_provider import schedule_add_record
 from feeds.crypto import sign, verify
 from main import USE_WHITELISTS
+from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
 from utils import db, get_message, html_escape, simplejson
 from utils import to_unicode, users, _
@@ -459,9 +460,11 @@ class Edit(utils.Handler):
                 cache.MINIMAL_FACILITIES.flush()
                 cache.JSON.flush()
 
+        # Cannot run datastore queries in a transaction outside the entity group
+        # being modified, so fetch the attributes here just in case
+        attributes = cache.ATTRIBUTES.load()
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
-                              self.request, self.user, self.account,
-                              cache.ATTRIBUTES)
+                              self.request, self.user, self.account, attributes)
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
