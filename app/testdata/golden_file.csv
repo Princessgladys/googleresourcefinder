@@ -1,2 +1,2 @@
 facility_name,alt_facility_name,facility_healthc_id,facility_pcode,available_beds,total_beds,services,contact_name,contact_phone,contact_email,department,district,commune,address,latitude,longitude,organization,organization_type,category,construction,damage,operational_status,comments,reachable_by_road,can_pick_up_patients,region_id,district_id,commune_id,commune_code,sante_id,entry_last_updated
-title_foo,,,pcode_foo,,,,,,,,,,,,,,,,,,,,,,,,,,,
+title_foo,alt_title_foo,5555555,55555,10,25,"GENERAL_SURGERY, ORTHOPEDICS, INFECTIOUS_DISEASE, LAB, CORPSE_REMOVAL",John Smith,,,Ouest,Port-Au-Prince,Delmas,Address,40.7142,-74.0064,Google,MIL,DISP,WOOD_FRAME,Minimal,OPERATIONAL,comment_foo,True,False,1,1,12,,154,

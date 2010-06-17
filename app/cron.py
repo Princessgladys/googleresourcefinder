@@ -38,8 +38,9 @@ def get_datetimes(now=None):
     """Get a list of DateTime objects for each minute since the last run.
     The presence of a Timestamp with key name 'cron' and timestamp t means
     that cron.py has been run for every minute up to and including t."""
-    if not now:
-        now = truncate_to_minute(DateTime.utcnow())
+    if now is None:
+        now = DateTime.utcnow()
+    now = truncate_to_minute(now)
     last_run = Timestamp.get_by_key_name('cron')
     if last_run is None:
         logging.debug('cron.py: initializing timestamp to %s' % to_isotime(now))

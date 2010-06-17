@@ -24,7 +24,7 @@ import unittest
 
 class CronTest(unittest.TestCase):
     def setUp(self):
-        self.time = datetime.datetime(2010, 06, 16, 12, 30)
+        self.time = datetime.datetime(2010, 06, 16, 12, 30, 37)
         self.job1 = Job(description='test', url='http://www.google.com/',
                         payload='', method='GET', months=[],
                         days_of_month=[self.time.day],
