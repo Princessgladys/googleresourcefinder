@@ -509,7 +509,7 @@ msgid "Neurosurgery"
 msgstr "Nerochiriji"
 
 #. Form option for a false Boolean value
-#: bubble.py:48 edit.py:174 bubble_test.py:68
+#: bubble_test.py:69 bubble.py:48 edit.py:174
 msgid "No"
 msgstr "Pa dakò"
 
@@ -769,7 +769,7 @@ msgid "X-Ray"
 msgstr "Reyon X"
 
 #. Form option for a true Boolean value
-#: bubble.py:48 edit.py:172 bubble_test.py:67
+#: bubble.py:48 edit.py:172 bubble_test.py:68
 msgid "Yes"
 msgstr "Wi"
 
