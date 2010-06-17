@@ -65,7 +65,7 @@ msgstr "<strong>Note:</strong> Cet établissement a été marquée fermée."
 msgid "Accuracy"
 msgstr "Précision"
 
-#. street address
+#. Header for a street address
 #: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
 msgid "Address"
 msgstr "Adresse"
@@ -508,7 +508,7 @@ msgid "Neurosurgery"
 msgstr "Neurochirurgie"
 
 #. Form option for a false Boolean value
-#: bubble.py:48 edit.py:174 bubble_test.py:68
+#: bubble_test.py:69 bubble.py:48 edit.py:174
 msgid "No"
 msgstr "Non"
 
@@ -625,7 +625,7 @@ msgid "Reachable by road"
 msgstr "Accessible en voiture"
 
 #. Record updated successfully.
-#: edit.py:465
+#: edit.py:468
 msgid "Record updated."
 msgstr "Enregistrement mis à jour"
 
@@ -768,7 +768,7 @@ msgid "X-Ray"
 msgstr "Radiographie"
 
 #. Form option for a true Boolean value
-#: bubble.py:48 edit.py:172 bubble_test.py:67
+#: bubble.py:48 edit.py:172 bubble_test.py:68
 msgid "Yes"
 msgstr "Oui"
 
