@@ -18,11 +18,11 @@
 
 <div class="bubble">
   <span class="title-row">
-    <span class="title">{{special.title.value|escape}}</span>
+    <span id="bubble-title" class="title">{{special.title.value|escape}}</span>
     {% comment %}
     #i18n: Link to edit the data for a facility record.
     {% endcomment %}
-    <a href='{{edit_link|escape}}'>{% trans "Edit this record" %}</a>
+    <a href='#' onclick='inplace_edit_handler("{{edit_link|escape}}"); return false'>{% trans "Edit this record" %}</a>
   </span>
   <h2>
     {% comment %}
@@ -68,10 +68,10 @@
       <tr>
         {% if special.total_beds.raw or special.available_beds.raw %}
           <td class="availability">
-            <div class="number">{{special.available_beds.value|escape}}</div>
+            <div id="bubble-availability" class="number">{{special.available_beds.value|escape}}</div>
           </td>
           <td class="capacity">
-            <div class="number">{{special.total_beds.value|escape}}</div>
+            <div id="bubble-capacity" class="number">{{special.total_beds.value|escape}}</div>
           </td>
         {% else %}
         <td class="no-information" colspan="2">

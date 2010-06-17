@@ -17,6 +17,7 @@ import datetime
 import logging
 import model
 import re
+import rendering
 import urlparse
 import utils
 import wsgiref
@@ -25,7 +26,6 @@ from access import check_action_permitted
 from feed_provider import schedule_add_record
 from feeds.crypto import sign, verify
 from main import USE_WHITELISTS
-from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
 from utils import db, get_message, html_escape, simplejson
 from utils import to_unicode, users, _
@@ -90,7 +90,7 @@ class StrAttributeType(AttributeType):
 
 class TextAttributeType(AttributeType):
     def make_input(self, name, value, attribute):
-        return '<textarea name="%s" rows=5 cols=40>%s</textarea>' % (
+        return '<textarea name="%s" rows=5 cols=34>%s</textarea>' % (
             html_escape(name), html_escape(value or ''))
 
     def to_stored_value(self, name, value, request, attribute):
@@ -262,7 +262,8 @@ def make_input(facility, attribute):
 
 def render_json(value):
     """Renders the given value as json"""
-    return clean_json(simplejson.dumps(value, indent=None, default=json_encode))
+    return rendering.clean_json(
+        simplejson.dumps(value, indent=None, default=rendering.json_encode))
 
 def render_attribute_as_json(facility, attribute):
     """Returns the value of this attribute as a JSON string"""
@@ -404,7 +405,7 @@ class Edit(utils.Handler):
 
         logging.info("record by user: %s" % self.user)
 
-        def update(key, facility_type, request, user, account):
+        def update(key, facility_type, request, user, account, attributes):
             facility = db.get(key)
             minimal_facility = model.MinimalFacility.all().ancestor(
                 facility).get()
@@ -421,7 +422,7 @@ class Edit(utils.Handler):
             changed_attributes_dict = {}
 
             for name in facility_type.attribute_names:
-                attribute = cache.ATTRIBUTES[name]
+                attribute = attributes[name]
                 # To change an attribute, it has to have been marked editable
                 # at the time the page was rendered, the new value has to be
                 # different than the one in the facility at the time the page
@@ -459,10 +460,13 @@ class Edit(utils.Handler):
                 cache.JSON.flush()
 
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
-                              self.request, self.user, self.account)
+                              self.request, self.user, self.account,
+                              cache.ATTRIBUTES)
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
+            # Refresh the cache
+            #rendering.render_json()
         else:
             raise Redirect('/')
 

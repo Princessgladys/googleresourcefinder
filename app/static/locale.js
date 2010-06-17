@@ -98,6 +98,10 @@ locale = function() {
   messages.HEALTHC_ID =
       'HealthC ID:';
 
+  //i18n: Message indicating loading hospital information
+  messages.LOADING =
+    'Loading...';
+
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS =
@@ -121,6 +125,14 @@ locale = function() {
   //i18n: Tooltip explaining a 'Print' link
   messages.PRINT_ENABLED_TOOLTIP =
       'Print a list of hospitals in order of distance from ${FACILITY_NAME}';
+
+  //i18n: Message indicating hospital information has been saved
+  messages.SAVED =
+    'Your edit has been saved';
+
+  //i18n: Message indicating saving hospital information
+  messages.SAVING =
+    'Saving...';
 
   //i18n: work done by someone that benefits another
   messages.SERVICES =

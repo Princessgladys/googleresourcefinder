@@ -18,7 +18,6 @@
  * @fileoverview Functions for the edit page
  */
 
-(function() {
   var button_click = '';
 
   /**
@@ -47,17 +46,27 @@
   }
 
   /**
-   * Validates the name and affiliation fields, present the first time a user
-   * makes an edit. If the fields are not present, returns true.
+   * Validates the name field, present the first time a user
+   * makes an edit. If the field is not present, returns true.
    */
-  function validate_name_affil() {
+  function validate_name() {
     var nickname = $('account_nickname');
     if (!nickname) {
       return true;
     }
-    var valid = validate_required_string(nickname);
-    // careful to avoid short-circuiting here
-    return validate_required_string($('account_affiliation')) && valid;
+    return validate_required_string(nickname);
+  }
+
+  /**
+   * Validates the affiliation field, present the first time a user
+   * makes an edit. If the field is not present, returns true.
+   */
+  function validate_affil() {
+    var affiliation = $('account_affiliation');
+    if (!affiliation) {
+      return true;
+    }
+    return validate_required_string(affiliation);
   }
 
   /**
@@ -144,12 +153,20 @@
    * @return {boolean} - true if the "save" button was not pressed or all 
    * inputs are valid, otherwise false
    */
-  function validate() {
-    if (button_click !== 'save') {
+  function validate(embed) {
+    if (!embed && button_click !== 'save') {
       return true;
     }
 
-    var valid_arr = [validate_name_affil()];
+    var failed = false;
+    function confirm(valid, element) {
+      if (!valid && !failed) {
+        failed = element; 
+      }
+    }
+
+    confirm(validate_name(), $('account_nickname'));
+    confirm(validate_affil(), $('account_affiliation'));
 
     var trs = document.getElementsByTagName('tr');
     for (var i = 0; i < trs.length; i++) {
@@ -157,32 +174,37 @@
       var classes = tr.className.split(' ');
       if (jQuery.inArray('int', classes) != -1
           || jQuery.inArray('float', classes) != -1) {
-        valid_arr.push(validate_number(tr.getElementsByTagName('input')[0]));
+
+        var input = tr.getElementsByTagName('input')[0];
+        confirm(validate_number(input), input);
       } else if (jQuery.inArray('geopt', classes) != -1) {
         var inputs = tr.getElementsByTagName('input');
-        valid_arr.push(validate_geopt([inputs[0], inputs[1]]));
+        confirm(validate_geopt([inputs[0], inputs[1]]), inputs[0]);
       }
     }      
-
-    return jQuery.inArray(false, valid_arr) == -1;
-  }
-  
-  function make_visible(id) {
-    $(id).style.visibility = "visible";
-  }
-  
-  function make_visible_closure(div) {
-    return function() {
-      make_visible(div.id);
+    if (failed) {
+      failed.focus();
     }
+    return !failed;
+  }
+  
+  function make_unhidden(id) {
+    $(id).style.display = "";
+  }
+  
+  function make_unhidden_closure(div) {
+    return function() {
+      make_unhidden(div.id);
+    };
   }
 
   /**
-   * Initializes comment visibility and installs onclick handlers to make
+   * Initializes comments as hidden and installs onclick handlers to make
    * comments visible if their values are updated.
    */
-  function init_comment_visibility() {
-    var trs = document.getElementsByTagName('tr');
+  function init_edit_comments(opt_parent) {
+    var parent = opt_parent || document;
+    var trs = parent.getElementsByTagName('tr');
     for (var i = 0; i < trs.length; i++) {
       var tr = trs[i];
       var classes = tr.className.split(' ');
@@ -192,17 +214,36 @@
         for (var div_index = 0; div_index < divs.length; div_index++) {
           var div = divs[div_index];
           if (div.className == "comment") {
-            div.style.visibility = "hidden";
-            var closure = make_visible_closure(div);
-            var inputs = tr.getElementsByTagName('input');
-            for (var inp_index = 0; inp_index < inputs.length; inp_index++) {
-              var input = inputs[inp_index];
-              input.onfocus = closure;
+            div.style.display = "none";
+            var closure = make_unhidden_closure(div);
+            var elements = get_edit_elements(tr);
+            for (var el_index = 0; el_index < elements.length; el_index++) {
+              var element = elements[el_index];
+              element.onfocus = closure;
+              element.onclick = closure;
             }
           }
         }
       }
     }
+  }
+
+  function get_edit_elements(parent) {
+    var elements = [];
+    var element_index = 0;
+    var inputs = parent.getElementsByTagName('input');
+    for (var i = 0; i < inputs.length; i++) {
+      elements[element_index++] = inputs[i];
+    }
+    var selects = parent.getElementsByTagName('select');
+    for (var j = 0; j < selects.length; j++) {
+      elements[element_index++] = selects[j];
+    }
+    var textareas = parent.getElementsByTagName('textarea');
+    for (var k = 0; k < textareas.length; k++) {
+      elements[element_index++] = textareas[k];
+    }
+    return elements;
   }
 
   /**
@@ -220,14 +261,22 @@
   }
 
   /**
-   * Initializes event handlers for the page.
+   * Initializes event handlers for the page when not embedded on the main page.
    */
-  function init() {
-    $('edit').onsubmit = validate;
-    $('save').onclick = save;
-    $('cancel').onclick = cancel;
-    init_comment_visibility();
+  function init_edit(embed, opt_parent) {
+    if (embed) {
+      $('save').onclick = inplace_edit_save;
+      $('cancel').onclick = inplace_edit_cancel;
+      $('edit').onsubmit = function() {
+        $('save').onclick();
+        return false;
+      };
+    } else {
+      $('save').onclick = save;
+      $('cancel').onclick = cancel;
+      $('edit').onsubmit = function() {
+        return validate(false);
+      };
+    }
+    init_edit_comments(opt_parent);
   }
-
-  init();
-})();
