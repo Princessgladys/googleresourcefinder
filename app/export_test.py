@@ -47,10 +47,10 @@ class ExportTest(MediumTestCase):
         min_attrs = [u'title', u'pcode', u'healthc_id', u'available_beds',
             u'total_beds', u'services', u'contact_name', u'phone', u'address',
             u'location']
-        ft = model.FacilityType(key_name='hospital',
-                                timestamp=datetime.datetime(2010, 06, 01),
-                                attribute_names=['title', 'pcode'],
-                                minimal_attribute_names=min_attrs)
+        self.ft = model.FacilityType(key_name='hospital',
+                                     timestamp=datetime.datetime(2010, 06, 01),
+                                     attribute_names=['title', 'pcode'],
+                                     minimal_attribute_names=min_attrs)
         fin = open('app/testdata/golden_file.csv', 'r')
         self.time = datetime.datetime(2010, 06, 01, 12, 30, 50)
         self.user = users.User('test@example.com')
@@ -58,28 +58,33 @@ class ExportTest(MediumTestCase):
         self.affiliation = 'affiliation_foo'
         self.comment = 'comment_foo'
         for record in csv.DictReader(fin):
-            f = model.Facility(key_name='example.org/123', type='hospital')
-            set_attr(f, 'location', db.GeoPt(record['latitude'],
+            self.f = model.Facility(key_name='example.org/123',
+                                    type='hospital')
+            set_attr(self.f, 'location', db.GeoPt(record['latitude'],
                           record['longitude']))
             for key in record:
                 if key == 'services':
-                    set_attr(f, key, record[key].split(', '))
+                    set_attr(self.f, key, record[key].split(', '))
                 elif key in ['available_beds' or 'total_beds' or 
                     'facility_healthc_id' or 'facility_pcode' or'region_id' or
                     'commune_id' or 'sante_id' or 'district_id' or
                     'commune_code']:
-                    set_attr(f, key, int(record[key]))
+                    set_attr(self.f, key, int(record[key]))
                 elif record[key] == 'True':
-                    set_attr(f, key, True)
+                    set_attr(self.f, key, True)
                 elif record[key] == 'False':
-                    set_attr(f, key, False)
+                    set_attr(self.f, key, False)
                 elif key in KEY_MAP:
-                    set_attr(f, KEY_MAP[key], record[key])
+                    set_attr(self.f, KEY_MAP[key], record[key])
                 else:
-                    set_attr(f, key, record[key])
+                    set_attr(self.f, key, record[key])
         
-        db.put(f)
-        db.put(ft)
+        db.put(self.f)
+        db.put(self.ft)
+        
+    def tearDown(self):
+        db.delete(self.f)
+        db.delete(self.ft)
     
     def test_format(self):
         time = datetime.datetime(2010, 6, 6, 15, 17, 3, 52581)
