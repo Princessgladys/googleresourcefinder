@@ -22,7 +22,7 @@ SERVICES = [
     'X_RAY',
     'CT_SCAN',
     'BLOOD_BANK',
-    'CORPSE_REMOVAL',
+    'MORTUARY_SERVICES',
 ]
 
 # "name" attributes of the string input fields in the edit form.
