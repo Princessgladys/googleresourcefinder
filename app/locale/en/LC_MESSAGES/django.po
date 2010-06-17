@@ -66,7 +66,7 @@ msgstr ""
 msgid "Accuracy"
 msgstr ""
 
-#. street address
+#. Header for a street address
 #: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
 msgid "Address"
 msgstr ""
@@ -509,7 +509,7 @@ msgid "Neurosurgery"
 msgstr ""
 
 #. Form option for a false Boolean value
-#: bubble.py:48 edit.py:174 bubble_test.py:68
+#: bubble_test.py:69 bubble.py:48 edit.py:174
 msgid "No"
 msgstr ""
 
@@ -626,7 +626,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:465
+#: edit.py:468
 msgid "Record updated."
 msgstr ""
 
@@ -769,7 +769,7 @@ msgid "X-Ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: bubble.py:48 edit.py:172 bubble_test.py:67
+#: bubble.py:48 edit.py:172 bubble_test.py:68
 msgid "Yes"
 msgstr ""
 

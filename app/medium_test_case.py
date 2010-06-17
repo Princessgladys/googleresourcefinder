@@ -42,3 +42,42 @@ class MediumTestCase(unittest.TestCase):
 
         apiproxy_stub_map.apiproxy.RegisterStub(
             'user', user_service_stub.UserServiceStub())
+
+    def assert_contents_in_order(self, expected, actual):
+        """"""
+        if expected == actual:
+            return
+        len1 = len(expected)
+        len2 = len(actual)
+        for i in xrange(min(len1, len2)):
+            if expected[i] != actual[i]:
+                self.fail('First differing element %d:\n%s\n%s'
+                          % (i, expected[i], actual[i]))
+        if len1 < len2:
+            self.fail('Actual contains %d extra elements' % (len2 - len1))
+        elif len1 > len2:
+            self.fail('Expected contains %d extra elements' % (len1 - len2))
+
+    def assert_contents_any_order(self, expected, actual):
+        """Assert that two collections have the same elements (in any order).
+        If there are duplicates, they must be present the same number of
+        times."""
+        if expected == actual:
+            return
+        missing = list(expected)
+        unexpected = list(actual)
+        # Remove expected elements from the unexpected list
+        for element in expected:
+            if element in unexpected:
+                unexpected.remove(element)
+        # Remove actual elements from the missing list
+        for element in actual:
+            if element in missing:
+                missing.remove(element)
+        errors = []
+        if missing:
+            errors.append('Expected, but missing: %r\n' % sorted(missing))
+        if unexpected:
+            errors.append('Unexpected, but present: %r' % sorted(unexpected))
+        if errors:
+            self.fail(''.join(errors))
