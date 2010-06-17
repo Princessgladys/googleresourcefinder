@@ -1,4 +1,4 @@
-from model import db
+from model import db, Account
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import scrape
@@ -46,24 +46,132 @@ class EditTest(SeleniumTestCase):
         self.put_facility(
             'example.org/123', title='title_foo', location=db.GeoPt(51.5, 0))
         self.s = scrape.Session()
-    
+
     def tearDown(self):
         self.delete_facility('example.org/123')
+        # Reset account to initial (no nickname, affiliation) state
+        a = Account.all().fetch(1)[0]
+        a.nickname = ''
+        a.affiliation = ''
+        a.put()
         SeleniumTestCase.tearDown(self)
 
-    def test_edit_link(self):
-        """Confirms that the "Edit this record" link in the detail bubble
-        goes to the edit form."""
+    def edit(self):
+        """Goes to edit form for facility 1"""
         self.login('/')
         self.click('id=facility-1')
         self.wait_for_element('link=Edit this record')
         self.click('link=Edit this record')
-        self.wait_for_load()
-        self.assertTrue('/edit?' in self.get_location())
+        self.wait_until(self.is_visible, 'edit-data')
+
+    def test_edit_link(self):
+        """Confirms that the "Edit this record" link in the detail bubble
+        goes to the edit form."""
+        self.edit()
+
+    def test_inplace_edit(self):
+        """In-place edit: Confirms that all the fields in the in-place edit
+        form save the entered values, and these values appear pre-filled when
+        the form is loaded."""
+        self.edit()
+
+        # First-time edit should show nickname and affiliation fields
+        self.assert_element('//input[@name="account_nickname"]')
+        self.assert_element('//input[@name="account_affiliation"]')
+
+        # Test javascript error checking
+        text_fields = {}
+        text_fields['account_nickname'] = '   '
+        text_fields['account_affiliation'] = '\t'
+        text_fields['available_beds'] = 'available'
+        text_fields['total_beds'] = 'total'
+        text_fields['location.lat'] = '91'
+        text_fields['location.lon'] = '-181'
+        self.fill_fields(text_fields, {}, {})
+        self.click('//input[@name="save"]')
+        self.verify_errors(text_fields)
+
+        # Fill in the form
+        text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
+        text_fields['account_nickname'] = 'Test'
+        text_fields['account_affiliation'] = 'Test'
+        text_fields['available_beds'] = '   1'
+        text_fields['total_beds'] = '2\t  '
+        text_fields['total_beds__comment'] = 'comment1'
+        text_fields['location.lat'] = '18.537207 '
+        text_fields['location.lon'] = '\t-72.349663'
+        text_fields['location__comment'] = 'comment2'
+        checkbox_fields = dict(('services.' + name, True) for name in SERVICES)
+        select_fields = {'organization_type': 'NGO', 'category': 'CLINIC',
+                         'construction': 'ADOBE', 'reachable_by_road': 'TRUE',
+                         'can_pick_up_patients': 'FALSE',
+                         'operational_status': 'NO_SURGICAL_CAPACITY'}
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+
+        # Submit the form
+        self.click('//input[@name="save"]')
+        self.wait_until(self.is_visible, 'data')
+
+        # Return to the edit page
+        self.edit()
+
+        # Nickname and affiliation fields should not be shown this time
+        self.assert_no_element('//input[@name="account_nickname"]')
+        self.assert_no_element('//input[@name="account_affiliation"]')
+        del text_fields['account_nickname']
+        del text_fields['account_affiliation']
+
+        # Check that the new values were saved, and are pre-filled in the form
+        text_fields['available_beds'] = '1'  # whitespace should be gone
+        text_fields['total_beds'] = '2'  # whitespace should be gone
+        text_fields['location.lat'] = '18.537207'  # whitespace should be gone
+        text_fields['location.lon'] = '-72.349663'  # whitespace should be gone
+        self.verify_fields(text_fields, checkbox_fields, select_fields)
+
+        # Now empty everything
+        text_fields = dict((name, '') for name in STR_FIELDS)
+        text_fields['available_beds'] = ''
+        text_fields['total_beds'] = ''
+        checkbox_fields = dict(('services.' + name, False) for name in SERVICES)
+        select_fields = {'organization_type': '', 'category': '',
+                         'construction': '', 'reachable_by_road': '',
+                         'can_pick_up_patients': '', 'operational_status': ''}
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+
+        # Submit the form
+        import code
+        code.interact('anything', None, locals())
+        self.click('//input[@name="save"]')
+        code.interact('anything', None, locals())
+        self.wait_until(self.is_visible, 'data')
+        code.interact('anything', None, locals())
+
+        # Return to the edit page
+        self.edit()
+
+        # Check that everything is now empty or deselected
+        self.verify_fields(text_fields, checkbox_fields, select_fields)
+
+        # Set the integer fields to zero
+        self.type('//input[@name="available_beds"]', '  0')
+        self.type('//input[@name="total_beds"]', '0  ')
+
+        # Submit the form
+        self.click('//input[@name="save"]')
+        self.wait_until(self.is_visible, 'data')
+
+        # Return to the edit page
+        self.edit()
+
+        # Check that the integer fields are actually zero, not empty
+        text_fields['available_beds'] = '0'
+        text_fields['total_beds'] = '0'
+        self.verify_fields(text_fields, checkbox_fields, select_fields)
 
     def test_edit_page(self):
-        """Confirms that all the fields in the edit form save the entered
-        values, and these values appear pre-filled when the form is loaded."""
+        """Separate-page edit: Confirms that all the fields in the edit form
+        save the entered values, and these values appear pre-filled when the
+        form is loaded."""
 
         # Check that feed is empty
         feed = self.s.go('http://localhost:8081/feeds/delta')

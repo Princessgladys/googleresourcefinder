@@ -80,6 +80,9 @@ locale = function() {
   //i18n: necessary.
   messages.HEALTHC_ID = "ID HealthC\u00a0:";
 
+  //i18n: Message indicating loading hospital information
+  messages.LOADING = "Chargement...";
+
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "janv. f\u00e9vr. mars avr. mai juin juil. ao\u00fbt sept. oct. nov. d\u00e9c.".split(' ');
@@ -97,6 +100,12 @@ locale = function() {
 
   //i18n: Tooltip explaining a 'Print' link
   messages.PRINT_ENABLED_TOOLTIP = "Imprimer une liste d'h\u00f4pitaux tri\u00e9s selon la distance qui les s\u00e9pare de ${FACILITY_NAME}";
+
+  //i18n: Message indicating hospital information has been saved
+  messages.SAVED = "Your edit has been saved";
+
+  //i18n: Message indicating saving hospital information
+  messages.SAVING = "Saving...";
 
   //i18n: work done by someone that benefits another
   messages.SERVICES = "Services";
