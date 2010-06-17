@@ -61,6 +61,7 @@
     <script type="text/javascript" src="static/locale_{{params.lang}}.js"></script>
   {% endifequal %}
   <script type="text/javascript" src="static/map.js"></script>
+  <script type="text/javascript" src="static/edit.js"></script>
   <script type="text/javascript">
     var print = {% if params.print %} true {% else %} false {% endif %};
   </script>
@@ -197,6 +198,7 @@
     <a target="_blank" href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files" onclick="_gaq.push(['_trackEvent', 'outbound', 'masterlist', this.href])">{% trans "View Master List archive" %}</a>
   </div>
 </div>
+<div id="edit-data" style="display:none"></div>
 {% if params.print %}
   <div id="update-instructions">
     {% comment %}

@@ -65,6 +65,9 @@ tr.field.text { vertical-align: top; }
       <tr class="account">
         <td colspan="2" class="instructions">
           {% comment %}
+          #TODO(shakusa) Make instructions fit in same-page-edit without horizontal scrolling.
+          {% endcomment %}
+          {% comment %}
           #i18n: Instructions to enter a person's name and organizational
           #i18n: affiliation.
           {% endcomment %}
@@ -150,26 +153,15 @@ tr.field.text { vertical-align: top; }
       <td>
       </td>
       <td class="field">
-	{% if params.embed %}
-	  {% comment %}
-	  #i18n: Button text to save data
-	  {% endcomment %}
-	  <input type="button" name="save" id="save" value="{% trans 'Save' %}">
-	  {% comment %}
-	  #i18n: Button text to cancel and return to the home page
-	  {% endcomment %}
-	  <input type="button" name="cancel" id="cancel" value="{% trans 'Cancel' %}">
-	{% else %}
-	  {% comment %}
-	  #i18n: Button text to save data
-	  {% endcomment %}
-	  <input type="submit" name="save" id="save" value="{% trans 'Save' %}">
-	  {% comment %}
-	  #i18n: Button text to cancel and return to the home page
-	  {% endcomment %}
-	   <input type="submit" name="cancel" id="cancel" value="{% trans 'Cancel' %}">
-	{% endif %}
-       <span id="edit-status"></span>
+	{% comment %}
+	#i18n: Button text to save data
+	{% endcomment %}
+	<input type="submit" name="save" id="save" value="{% trans 'Save' %}">
+	{% comment %}
+	#i18n: Button text to cancel and return to the home page
+	{% endcomment %}
+	<input type="submit" name="cancel" id="cancel" value="{% trans 'Cancel' %}">
+        <span id="edit-status"></span>
       </td>
     </tr>
   </table>

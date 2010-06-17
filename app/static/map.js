@@ -1203,7 +1203,7 @@ function select_facility(facility_i, ignore_current) {
           selected_facility.values[attributes_by_name.total_beds] =
               bubbleCapacity.innerHTML; 
         }
-        update_facility_row(facility_i, false);
+        update_facility_row(facility_i);
 
         show_loading(false);
       }
@@ -1390,7 +1390,7 @@ function glow_next() {
   }
 }
 
-function update_facility_row(facility_i) {
+function update_facility_row(facility_i, opt_glow) {
   var row = $('facility-' + facility_i);
   var cell = row.firstChild;
   var facility = facilities[facility_i];
@@ -1400,7 +1400,9 @@ function update_facility_row(facility_i) {
     set_children(cell, value);
     cell.className = 'value column_' + c;
   }
-  glow(row);
+  if (opt_glow) {
+    glow(row);
+  }
 }
 
 // ==== In-place editing

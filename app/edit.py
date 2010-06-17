@@ -17,7 +17,6 @@ import datetime
 import logging
 import model
 import re
-import rendering
 import urlparse
 import utils
 import wsgiref
@@ -263,8 +262,7 @@ def make_input(facility, attribute):
 
 def render_json(value):
     """Renders the given value as json"""
-    return rendering.clean_json(
-        simplejson.dumps(value, indent=None, default=rendering.json_encode))
+    return clean_json(simplejson.dumps(value, indent=None, default=json_encode))
 
 def render_attribute_as_json(facility, attribute):
     """Returns the value of this attribute as a JSON string"""
@@ -468,8 +466,7 @@ class Edit(utils.Handler):
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
-            # Refresh the cache
-            #rendering.render_json()
+            # TODO(shakusa) Create a task to refresh the cache
         else:
             raise Redirect('/')
 

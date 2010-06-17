@@ -56,19 +56,12 @@ class EditTest(SeleniumTestCase):
         a.put()
         SeleniumTestCase.tearDown(self)
 
-    def edit(self):
-        """Goes to edit form for facility 1"""
-        self.login('/')
-        self.click('id=facility-1')
-        self.wait_for_element('link=Edit this record')
-        self.click('link=Edit this record')
-        self.wait_until(self.is_visible, 'edit-data')
-
     def test_edit_link(self):
         """Confirms that the "Edit this record" link in the detail bubble
         goes to the edit form."""
         self.edit()
 
+    # TODO(shakusa) This could probably use some more cleanup
     def test_inplace_edit(self):
         """In-place edit: Confirms that all the fields in the in-place edit
         form save the entered values, and these values appear pre-filled when
@@ -142,12 +135,8 @@ class EditTest(SeleniumTestCase):
         self.fill_fields(text_fields, checkbox_fields, select_fields)
 
         # Submit the form
-        import code
-        code.interact('anything', None, locals())
         self.click('//input[@name="save"]')
-        code.interact('anything', None, locals())
         self.wait_until(self.is_visible, 'data')
-        code.interact('anything', None, locals())
 
         # Return to the edit page
         self.edit()
@@ -182,8 +171,7 @@ class EditTest(SeleniumTestCase):
         assert feed.first('atom:feed').all('atom:entry') == []
 
         # Go to the edit page
-        self.login('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
+        self.login_to_edit_page()
 
         # First-time edit should show nickname and affiliation fields
         self.assert_element('//input[@name="account_nickname"]')
@@ -223,11 +211,10 @@ class EditTest(SeleniumTestCase):
         self.wait_for_load()
 
         # Check that we got back to the main map
-        self.assertEquals(self.config.base_url + '/', self.get_location())
+        assert self.config.base_url + '/' == self.get_location()
 
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
+        self.open_edit_page()
 
         # Nickname and affiliation fields should not be shown this time
         self.assert_no_element('//input[@name="account_nickname"]')
@@ -292,12 +279,12 @@ class EditTest(SeleniumTestCase):
 
     def test_comments(self):
         text_fields = {}
-        
+
         # Fill comment, but not available beds field ----------------------- #
 
         # Go to the edit page
         self.login_to_edit_page()
-        
+
         # Fill in the form. Change available beds comment.
         text_fields['account_nickname'] = 'Test'
         text_fields['account_affiliation'] = 'Test'
@@ -308,85 +295,93 @@ class EditTest(SeleniumTestCase):
         checkbox_fields = {}
         select_fields = {}
         self.fill_fields(text_fields, checkbox_fields, select_fields)
-        
+
         # Reload bubble, go to change details page, and confirm changes
         self.save_and_load_bubble()
         self.click('link=Change details')
         assert self.is_text_present(u'Total beds: \u2013')
         assert self.is_text_present('comment_foo!')
-        
+
         # Fill available beds, but not comment field ----------------------- #
-        
+
         # Nickname and affiliation fields should not be shown this time
         del text_fields['account_nickname']
         del text_fields['account_affiliation']
-        
+
         # Return to the edit page
         self.open_edit_page()
-        
+
         # Change beds but without comment
         text_fields['total_beds'] = '37'
         text_fields['total_beds__comment'] = ''
         self.fill_fields(text_fields, checkbox_fields, select_fields)
-        
+
         # Reload bubble, go to change details page, and confirm changes
         self.save_and_load_bubble()
         self.click('link=Change details')
         assert self.is_text_present('Total beds: 37')
         assert not self.is_text_present('comment_foo!')
-        
+
         # Fill available beds and comment fields --------------------------- #
-        
+
         # Return to the edit page
         self.open_edit_page()
-        
+
         # Change total beds and comment fields.
         text_fields['total_beds'] = '99'
         text_fields['total_beds__comment'] = 'comment_bar!'
         self.fill_fields(text_fields, checkbox_fields, select_fields)
-        
+
         # Reload bubble, go to change details page, and confirm changes
         self.save_and_load_bubble()
         self.click('link=Change details')
         assert self.is_text_present('Total beds: 99')
         assert self.is_text_present('comment_bar!')
-        
+
         # Delete both available beds and comment fields -------------------- #
-        
+
         # Return to the edit page
         self.open_edit_page()
-        
+
         # Fill fields
         text_fields['total_beds'] = ''
         text_fields['total_beds__comment'] = ''
         self.fill_fields(text_fields, checkbox_fields, select_fields)
-        
+
         # Reload bubble and go to change details page
         self.save_and_load_bubble()
         self.click('link=Change details')
         assert self.is_text_present(u'Total beds: \u2013')
         assert not self.is_text_present('comment_bar!')
-        
+
+    def edit(self):
+        """Goes to edit form for facility 1"""
+        self.login('/')
+        self.click('id=facility-1')
+        self.wait_for_element('link=Edit this record')
+        self.click('link=Edit this record')
+        self.wait_until(self.is_visible, 'edit-data')
+
     def save_and_load_bubble(self):
         # Submit the form
         self.click('//input[@name="save"]')
         self.wait_for_load()
-        
+
         # Check that we got back to the main map
         assert self.config.base_url + '/' == self.get_location()
-        
+
         # Test bubble change history comments
         self.click('id=facility-1')
         self.wait_for_element('link=Change details')
-        
+
     def open_edit_page(self):
         self.open_path('/edit?facility_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
-        
+
     def login_to_edit_page(self):
         self.login('/edit?facility_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
-        
+
     def fill_fields(self, text_fields, checkbox_fields, select_fields):
         """Fills in text fields, selects or deselects checkboxes, and
         makes drop-down selections.  Each of the arguments should be a

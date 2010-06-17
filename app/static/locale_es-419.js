@@ -102,10 +102,10 @@ locale = function() {
   messages.PRINT_ENABLED_TOOLTIP = "Imprime una lista de hospitales por orden de distancia desde ${FACILITY_NAME}";
 
   //i18n: Message indicating hospital information has been saved
-  messages.SAVED = "Your edit has been saved";
+  messages.SAVED = "Sus cambios se han guardado";
 
   //i18n: Message indicating saving hospital information
-  messages.SAVING = "Saving...";
+  messages.SAVING = "Guardando...";
 
   //i18n: work done by someone that benefits another
   messages.SERVICES = "Servicios";

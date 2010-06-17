@@ -45,13 +45,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} établissements dans un rayon de ${RADIUS_MILES} miles"
 
 #. Error message for lacking edit permissions
-#: edit.py:439
+#: edit.py:437
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s n'a pas l'autorisation de modifier %(a)s"
 
 #. Form option to indicate that a value is not specified
-#: edit.py:212 edit.py:197 edit.py:171
+#: edit.py:211 edit.py:196 edit.py:170
 msgid "(unspecified)"
 msgstr "(non spécifié)"
 
@@ -76,7 +76,7 @@ msgid "Adobe"
 msgstr "Adobe"
 
 #. Label for a required text box to enter organizational affiliation.
-#: templates/edit.html:95
+#: templates/edit.html:98
 msgid "Affiliation (required)"
 msgstr "Affiliation (obligatoire)"
 
@@ -121,7 +121,7 @@ msgid "Can pick up patients"
 msgstr "Peut passer prendre les patients"
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:161 templates/edit.html.py:170
+#: templates/edit.html:163
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -161,7 +161,7 @@ msgid "Closed or closing"
 msgstr "Fermé ou fermer bientôt"
 
 #. Label for a text field to enter a comment about a change.
-#: templates/edit.html:142
+#: templates/edit.html:145
 msgid "Comment:"
 msgstr "Commentaires :"
 
@@ -248,7 +248,7 @@ msgid "District"
 msgstr "District"
 
 #. E-mail address
-#: edit.py:118 ../tools/setup.py:119
+#: ../tools/setup.py:119 edit.py:117
 msgid "E-mail"
 msgstr "E-mail"
 
@@ -278,7 +278,7 @@ msgid "Error loading facility information."
 msgstr "informations sur l'erreur installation de chargement"
 
 #. Button to export data to comma-separated-values format.
-#: export.py:143 templates/map.html:192
+#: export.py:143 templates/map.html:193
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
@@ -353,12 +353,12 @@ msgid "HealthC ID:"
 msgstr "ID HealthC :"
 
 #. Link to go to a help page for the application
-#: templates/map.html:102
+#: templates/map.html:103
 msgid "Help"
 msgstr "Aide"
 
 #. Link to return to the main page of the application
-#: templates/map.html:91
+#: templates/map.html:92
 msgid "Home"
 msgstr "Accueil"
 
@@ -368,7 +368,7 @@ msgid "Hospital"
 msgstr "Hôpital"
 
 #. Explains how to correct incorrect information that has been printed.
-#: templates/map.html:205
+#: templates/map.html:207
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr "En cas d'informations incorrectes ou manquantes, veuillez apporter les modifications souhaitées sur le site Web :"
 
@@ -383,12 +383,12 @@ msgid "Internal Medicine"
 msgstr "Médecine Interne"
 
 #. Error message for invalid date entry
-#: edit.py:140
+#: edit.py:139
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Date incorrecte : %(date)r  (format AAAA-MM-JJ requis)"
 
 #. Error message for request missing facility name.
-#: bubble.py:156 edit.py:337
+#: edit.py:335 bubble.py:156
 msgid "Invalid or missing facility name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -403,7 +403,7 @@ msgid "Lab"
 msgstr "Laboratoire"
 
 #. Label for a language selector
-#: templates/map.html:77
+#: templates/map.html:78
 msgid "Language:"
 msgstr "Langue :"
 
@@ -413,7 +413,7 @@ msgid "Last updated:"
 msgstr "Mise à jour :"
 
 #. Label for text input
-#: edit.py:233
+#: edit.py:232
 msgid "Latitude"
 msgstr "Latitude"
 
@@ -438,7 +438,7 @@ msgid "Loader:"
 msgstr "Outil de chargement :"
 
 #. Indicator that the application is loading.
-#: static/locale.js:102 templates/map.html:144
+#: static/locale.js:102 templates/map.html:145
 msgid "Loading..."
 msgstr "Chargement..."
 
@@ -453,7 +453,7 @@ msgid "Location:"
 msgstr "Emplacement"
 
 #. Label for text input
-#: edit.py:237
+#: edit.py:236
 msgid "Longitude"
 msgstr "Longitude"
 
@@ -493,12 +493,12 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: edit.py:114
+#: edit.py:113
 msgid "Name"
 msgstr "Nom"
 
 #. Label for a required text box to enter a person's name
-#: templates/edit.html:79
+#: templates/edit.html:82
 msgid "Name (required)"
 msgstr "Nom (obligatoire)"
 
@@ -508,7 +508,7 @@ msgid "Neurosurgery"
 msgstr "Neurochirurgie"
 
 #. Form option for a false Boolean value
-#: bubble_test.py:69 bubble.py:48 edit.py:175
+#: bubble_test.py:69 bubble.py:48 edit.py:174
 msgid "No"
 msgstr "Non"
 
@@ -584,7 +584,7 @@ msgid "Pediatrics"
 msgstr "Pédiatrie"
 
 #. telephone number
-#: edit.py:116 ../tools/setup.py:117
+#: edit.py:115 ../tools/setup.py:117
 msgid "Phone"
 msgstr "Téléphone"
 
@@ -599,7 +599,7 @@ msgid "Postoperative Care"
 msgstr "Soins Postopératoires"
 
 #. Link to print the current view of the application
-#: templates/map.html:97
+#: templates/map.html:98
 msgid "Print"
 msgstr "Imprimer"
 
@@ -610,7 +610,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Imprimer une liste d'hôpitaux triés selon la distance qui les sépare de ${FACILITY_NAME}"
 
 #. Link to privacy policy for the application
-#: templates/map.html:110
+#: templates/map.html:111
 msgid "Privacy"
 msgstr "Privé"
 
@@ -625,7 +625,7 @@ msgid "Reachable by road"
 msgstr "Accessible en voiture"
 
 #. Record updated successfully.
-#: edit.py:470
+#: edit.py:468
 msgid "Record updated."
 msgstr "Enregistrement mis à jour"
 
@@ -663,14 +663,14 @@ msgid "Resource Finder"
 msgstr "Localisation de ressources"
 
 #. Button text to save data
-#: templates/edit.html:157 templates/edit.html.py:166
+#: templates/edit.html:159
 msgid "Save"
 msgstr "Enregistrer"
 
 #. Message indicating saving hospital information
 #: static/locale.js:134
 msgid "Saving..."
-msgstr ""
+msgstr "Enregistrement..."
 
 #. Label for a selector to export data to CSV
 #: export.py:132
@@ -703,12 +703,12 @@ msgid "Supplies"
 msgstr "Matériel"
 
 #. Link to terms of service for the application
-#: templates/map.html:106
+#: templates/map.html:107
 msgid "Terms of Service"
 msgstr "Conditions d'utilisation"
 
 #. Instructions to enter a person's name and organizational affiliation.
-#: templates/edit.html:71
+#: templates/edit.html:74
 msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/terms\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
 msgstr "Merci pour l'ajout de contenu à l'application \"Localisation de ressources\". Pour commencer, merci de créer un nom d'utilisateur et nous indiquer votre affiliation. Cette information sera affichée à côté de l'information que vous avez ajoutée ou modifiée. Voir aussi les <a target=\"_blank\" href=\"/TOS\">Conditions d'utilisation</a> and <a target=\"_blank\" href=\"/privacy\">Règles de confidentialité</a> (en anglais)."
 
@@ -718,7 +718,7 @@ msgid "Total beds"
 msgstr "Lits au total"
 
 #. Name of the application.
-#: templates/map.html:161
+#: templates/map.html:162
 msgid "Total facilities"
 msgstr "Nombre d'établissements au total"
 
@@ -758,7 +758,7 @@ msgid "Vascular Surgery"
 msgstr "Chirurgie Vasculaire"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:197
+#: templates/map.html:198
 msgid "View Master List archive"
 msgstr "Accéder aux archives (en anglais)"
 
@@ -773,7 +773,7 @@ msgid "X-Ray"
 msgstr "Radiographie"
 
 #. Form option for a true Boolean value
-#: bubble.py:48 edit.py:173 bubble_test.py:68
+#: bubble.py:48 edit.py:172 bubble_test.py:68
 msgid "Yes"
 msgstr "Oui"
 
@@ -786,7 +786,7 @@ msgstr "Vous êtes déjà %(role)s ."
 #. Message indicating hospital information has been saved
 #: static/locale.js:130
 msgid "Your edit has been saved"
-msgstr ""
+msgstr "Vos modifications ont été enregistrées"
 
 #. Requested permission action has already been granted
 #: request_access.py:54
@@ -795,7 +795,7 @@ msgid "Your request for %(action)s is already registered"
 msgstr "Votre demande pour devenir %(role)s  est déjà enregistrée."
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
-#: templates/map.html:171
+#: templates/map.html:172
 msgid "and with availability."
 msgstr "avec disponibilités"
 
@@ -815,7 +815,7 @@ msgid "capacity"
 msgstr "capacité"
 
 #. Header for the number of facilities less than 10 miles from a location.
-#: templates/map.html:166
+#: templates/map.html:167
 msgid "no more than 10 miles away"
 msgstr "à moins de 10 miles"
 
