@@ -14,6 +14,7 @@
 
 """Tests for export.py."""
 
+import bubble
 import csv
 import datetime
 import StringIO
@@ -25,9 +26,23 @@ import export
 import model
 from medium_test_case import MediumTestCase
 from utils import db
-        
+
+
+KEY_MAP = {
+    'facility_name': 'title',
+    'alt_facility_name': 'alt_title',
+    'facility_healthc_id': 'healthc_id',
+    'facility_pcode': 'pcode',
+    'contact_phone': 'phone',
+    'contact_email': 'email'
+}
+
 class ExportTest(MediumTestCase):
     def setUp(self):
+        def set_attr(facility, key, value):
+            facility.set_attribute(key, value, self.time, self.user,
+                                   self.nickname, self.affiliation,
+                                   self.comment)
         MediumTestCase.setUp(self)
         min_attrs = [u'title', u'pcode', u'healthc_id', u'available_beds',
             u'total_beds', u'services', u'contact_name', u'phone', u'address',
@@ -44,34 +59,24 @@ class ExportTest(MediumTestCase):
         self.comment = 'comment_foo'
         for record in csv.DictReader(fin):
             f = model.Facility(key_name='example.org/123', type='hospital')
-            f.set_attribute('title', record['facility_name'], self.time,
-                            self.user, self.nickname, self.affiliation,
-                            self.comment)
-            f.set_attribute('alt_title', record['alt_facility_name'],
-                            self.time, self.user, self.nickname,
-                            self.affiliation, self.comment)
-            f.set_attribute('healthc_id', record['facility_healthc_id'],
-                            self.time, self.user, self.nickname,
-                            self.affiliation, self.comment)
-            f.set_attribute('pcode', record['facility_pcode'],
-                            self.time, self.user, self.nickname,
-                            self.affiliation, self.comment)
-            f.set_attribute('location', db.GeoPt(record['latitude'],
-                            record['longitude']), self.time, self.user,
-                            self.nickname, self.affiliation, self.comment)
+            set_attr(f, 'location', db.GeoPt(record['latitude'],
+                          record['longitude']))
             for key in record:
                 if key == 'services':
-                    record[key] = record[key].split(', ')
-                if key == ('available_beds' or 'total_beds' or
+                    set_attr(f, key, record[key].split(', '))
+                elif key in ['available_beds' or 'total_beds' or 
                     'facility_healthc_id' or 'facility_pcode' or'region_id' or
-                    'commune_id' or 'sante_id' or 'district_id'):
-                    record[key] = int(record[key])
-                if record[key] == 'True':
-                    record[key] = True
+                    'commune_id' or 'sante_id' or 'district_id' or
+                    'commune_code']:
+                    set_attr(f, key, int(record[key]))
+                elif record[key] == 'True':
+                    set_attr(f, key, True)
                 elif record[key] == 'False':
-                    record[key] = False
-                f.set_attribute(key, record[key], self.time, self.user,
-                                self.nickname, self.affiliation, self.comment)
+                    set_attr(f, key, False)
+                elif key in KEY_MAP:
+                    set_attr(f, KEY_MAP[key], record[key])
+                else:
+                    set_attr(f, key, record[key])
         
         db.put(f)
         db.put(ft)
@@ -96,3 +101,4 @@ class ExportTest(MediumTestCase):
         sout = StringIO.StringIO()
         export.write_csv(sout, facility_type)
         assert sout.getvalue().strip() == fin.read().strip()
+    

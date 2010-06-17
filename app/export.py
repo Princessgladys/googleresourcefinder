@@ -15,6 +15,7 @@
 from model import *
 from utils import *
 import access
+import bubble
 import calendar
 import csv
 import datetime
@@ -56,9 +57,16 @@ COLUMNS_BY_FACILITY_TYPE = {
         ('commune_id', lambda f: f.get_value('commune_id')),
         ('commune_code', lambda f: f.get_value('commune_code')),
         ('sante_id', lambda f: f.get_value('sante_id')),
-        ('entry_last_updated', lambda f: f.get_value('timestamp'))
+        ('entry_last_updated', lambda f: get_last_updated_time(f))
     ],
 }
+
+def get_last_updated_time(f):
+    f_type = FacilityType.get_by_key_name(f.type)
+    value_info_extractor = bubble.VALUE_INFO_EXTRACTORS[f.type]
+    (special, general, details) = value_info_extractor.extract(
+        f, f_type.attribute_names)
+    return max(detail.date for detail in details)
 
 def short_date(date):
     return '%s %d' % (calendar.month_abbr[date.month], date.day)
