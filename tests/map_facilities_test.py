@@ -19,7 +19,7 @@ SERVICES = ['All',
             'X-Ray',
             'CT Scan',
             'Blood Bank',
-            'Corpse Removal']
+            'Mortuary Services']
 
 class MainTestCase(SeleniumTestCase):
     def setUp(self):
