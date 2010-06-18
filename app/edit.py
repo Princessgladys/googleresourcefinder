@@ -94,7 +94,7 @@ class TextAttributeType(AttributeType):
             html_escape(name), html_escape(value or ''))
 
     def to_stored_value(self, name, value, request, attribute):
-        if value or value == 0:
+        if value:
             return db.Text(value)
         return None
 
@@ -149,7 +149,7 @@ class IntAttributeType(AttributeType):
 
 class FloatAttributeType(IntAttributeType):
     def make_input(self, name, value, attribute):
-        Attribute.make_input(self, name, '%g' % value, attribute)
+        return AttributeType.make_input(self, name, '%g' % value, attribute)
 
     def to_stored_value(self, name, value, request, attribute):
         if value or value == 0:
@@ -215,7 +215,7 @@ class MultiAttributeType(AttributeType):
                 ('<input type=checkbox name="%s" id="%s" %s>' +
                  '<label for="%s">%s</label>') % (id, id, checked, id, title))
         return '<br>\n'.join(checkboxes)
-
+    
     def to_stored_value(self, name, value, request, attribute):
         value = []
         for choice in attribute.values:
@@ -237,9 +237,11 @@ class GeoPtAttributeType(AttributeType):
                 + self.text_input('%s.lon' % name, lon))
 
     def to_stored_value(self, name, value, request, attribute):
-        lat = float(request.get('%s.lat' % name, None))
-        lon = float(request.get('%s.lon' % name, None))
-        return db.GeoPt(lat, lon)
+        lat = request.get('%s.lat' % name, None)
+        lon = request.get('%s.lon' % name, None)
+        if lat and long:
+            return db.GeoPt(float(lat), float(lon))
+        return None
 
 ATTRIBUTE_TYPES = {
     'str': StrAttributeType(),
