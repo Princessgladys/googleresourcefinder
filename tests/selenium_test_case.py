@@ -150,35 +150,58 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
             time.sleep(0.2)
 
     def wait_for_element(self, locator):
-       """Waits until the given element is present."""
-       # For some reason, this wait doesn't always work unless we do it twice.
-       self.wait_until(self.is_element_present, locator)
-       self.wait_until(self.is_element_present, locator)
+        """Waits until the given element is present."""
+        # For some reason, this wait doesn't always work unless we do it twice.
+        self.wait_until(self.is_element_present, locator)
+        self.wait_until(self.is_element_present, locator)
+
+    def click_and_wait_for_new_window(self, link_locator):
+        """Clicks a link that is supposed to open a new window, waits for the
+        new window to load, and switches to the new window for subsequent
+        Selenium commands."""
+        # Selenium can't detect new windows opened via target="_blank".  Our
+        # workaround for testing is to open a window before clicking the link
+        # and change the link to target our prepared window.
+        self.window_count = getattr(self, 'window_count', 0) + 1
+        window_id = 'popup%d' % self.window_count  # a new unique window ID
+        self.open_window('about:blank', window_id)
+
+        # Open the link in the new window.
+        self.run_script(
+            'this.page().findElement(%r).target=%r' % (link_locator, window_id))
+        self.click(link_locator)
+
+        # Wait for the new window to finish loading.
+        self.select_window(window_id)
+        print window_id
+        print 'location', self.get_location()
+        assert self.get_location() != 'about:blank'
+        self.wait_for_load()
 
     def assert_element(self, locator):
-       """Asserts that the given element is present."""
-       self.assertTrue(self.is_element_present(locator),
-           'Element %s is unexpectedly missing' % locator)
+        """Asserts that the given element is present."""
+        self.assertTrue(self.is_element_present(locator),
+            'Element %s is unexpectedly missing' % locator)
 
     def assert_no_element(self, locator):
-       """Asserts that the given element is not present."""
-       self.assertFalse(self.is_element_present(locator),
-           'Element %s is unexpectedly present' % locator)
+        """Asserts that the given element is not present."""
+        self.assertFalse(self.is_element_present(locator),
+            'Element %s is unexpectedly present' % locator)
 
     def assert_text(self, string_or_regex, locator):
-       """Asserts that the text of the given element entirely matches the
-       given string or regular expression."""
-       text = self.get_text(locator)
-       self.assertTrue(
-           match(string_or_regex, text),
-           'Element %s: actual text %r does not match %r' %
-           (locator, text, string_or_regex))
+        """Asserts that the text of the given element entirely matches the
+        given string or regular expression."""
+        text = self.get_text(locator)
+        self.assertTrue(
+            match(string_or_regex, text),
+            'Element %s: actual text %r does not match %r' %
+            (locator, text, string_or_regex))
 
     def assert_value(self, string_or_regex, locator):
-       """Asserts that the entire value of the given element exactly matches
-       the given string, or matches the given regular expression."""
-       value = self.get_value(locator)
-       self.assertTrue(
-           match(string_or_regex, value),
-           'Element %s: actual value %r does not match %r' %
-           (locator, value, string_or_regex))
+        """Asserts that the entire value of the given element exactly matches
+        the given string, or matches the given regular expression."""
+        value = self.get_value(locator)
+        self.assertTrue(
+            match(string_or_regex, value),
+            'Element %s: actual value %r does not match %r' %
+            (locator, value, string_or_regex))
