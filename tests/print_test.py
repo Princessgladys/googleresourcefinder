@@ -37,7 +37,21 @@ class PrintTest(SeleniumTestCase):
 
     def test_print_page(self):
         """Confirms that the print page renders correctly."""
-        self.login('/?print=yes&lat=51.5&lon=0.01&rad=16093')
+        # Print link should be initially disabled
+        self.login('/')
+        self.click('link=Print')
+        assert self.get_alert().startswith('First select a hospital')
+
+        # After a facility is selected, the Print link should work
+        self.click('id=facility-1')
+        self.wait_for_element('//div[@class="bubble"]//span')
+
+        # Click the link and switch to the new window
+        self.click_and_wait_for_new_window('print-link')
+
+        # Verify that this looks like a print window
+        assert ('/?print=yes&lat=51.500000&lon=0.010000&rad=16093.'
+                in self.get_location())
         self.assert_text(
             Regex('Displaying facilities within.*'),
             '//span[@id="header-print-subtitle" and @class="print-subtitle"]')
