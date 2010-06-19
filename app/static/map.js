@@ -936,6 +936,7 @@ function disable_print_link() {
   }
   print_link.href = 'javascript:void(0)';
   print_link.title = locale.PRINT_DISABLED_TOOLTIP();
+  print_link.target = '';  // prevent Selenium from opening a window in testing
   print_link.onclick = function() {
     // TODO: Use a nice model dialog instead of alert
     alert(locale.PRINT_DISABLED_TOOLTIP());
@@ -957,6 +958,7 @@ function enable_print_link() {
   print_link.href = render(PRINT_URL, {LAT: location.lat, LON: location.lon,
        RAD: PRINT_RADIUS_MILES / METERS_TO_MILES});
   print_link.title = locale.PRINT_ENABLED_TOOLTIP({FACILITY_NAME: title});
+  print_link.target = '_blank';
   print_link.onclick = null;
 }
 
