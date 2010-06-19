@@ -42,21 +42,14 @@ class PrintTest(SeleniumTestCase):
         self.click('link=Print')
         assert self.get_alert().startswith('First select a hospital')
 
-        existing_windows = self.get_all_window_names()
-        print 'names', self.get_all_window_names()
-        print 'IDs', self.get_all_window_ids()
-        print 'titles', self.get_all_window_titles()
-
         # After a facility is selected, the Print link should work
         self.click('id=facility-1')
         self.wait_for_element('//div[@class="bubble"]//span')
 
         # Click the link and switch to the new window
-        self.click_and_wait_for_new_window('link=Print')
+        self.click_and_wait_for_new_window('print-link')
 
         # Verify that this looks like a print window
-        print self.get_all_window_names()
-        print self.get_location()
         assert ('/?print=yes&lat=51.500000&lon=0.010000&rad=16093.'
                 in self.get_location())
         self.assert_text(

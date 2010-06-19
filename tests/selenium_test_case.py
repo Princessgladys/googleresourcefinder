@@ -155,7 +155,7 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         self.wait_until(self.is_element_present, locator)
         self.wait_until(self.is_element_present, locator)
 
-    def click_and_wait_for_new_window(self, link_locator):
+    def click_and_wait_for_new_window(self, link_id):
         """Clicks a link that is supposed to open a new window, waits for the
         new window to load, and switches to the new window for subsequent
         Selenium commands."""
@@ -163,19 +163,16 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         # workaround for testing is to open a window before clicking the link
         # and change the link to target our prepared window.
         self.window_count = getattr(self, 'window_count', 0) + 1
-        window_id = 'popup%d' % self.window_count  # a new unique window ID
+        window_id = 'window_%d' % self.window_count  # a new unique window ID
         self.open_window('about:blank', window_id)
 
         # Open the link in the new window.
         self.run_script(
-            'this.page().findElement(%r).target=%r' % (link_locator, window_id))
-        self.click(link_locator)
+            'document.getElementById(%r).target=%r' % (link_id, window_id))
+        self.click('id=' + link_id)
 
         # Wait for the new window to finish loading.
         self.select_window(window_id)
-        print window_id
-        print 'location', self.get_location()
-        assert self.get_location() != 'about:blank'
         self.wait_for_load()
 
     def assert_element(self, locator):
