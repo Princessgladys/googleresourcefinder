@@ -104,6 +104,7 @@ class Struct:
 class Handler(webapp.RequestHandler):
     auto_params = {
         'embed': validate_yes,
+        'flush': validate_yes,
         'facility_name': strip,
         'lang': strip,
         'lat': validate_float,
@@ -148,6 +149,12 @@ class Handler(webapp.RequestHandler):
         for param in self.auto_params:
             validator = self.auto_params[param]
             setattr(self.params, param, validator(request.get(param, '')))
+
+        # Flush all caches if "flush=yes" was set.
+        if self.params.flush:
+            cache.flush_all()
+            memcache.flush_all()
+
         # Activate localization.
         self.select_locale()
 
