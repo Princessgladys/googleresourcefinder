@@ -300,6 +300,10 @@ function maybe_selected(selected) {
   return selected ? ' selected' : '';
 }
 
+function maybe_disabled(disabled) {
+  return disabled ? ' disabled' : '';
+}
+
 function make_icon(title, status, detail, opt_icon, opt_icon_size,
     opt_icon_fill) {
   var text = detail ? title : '';
@@ -703,11 +707,11 @@ function update_facility_list() {
     }
     if (selected_status_i === 0 ||
         facility_status_is[f] === selected_status_i) {
-      var disabledClass = is_facility_closed(facility) ? ' disabled' : '';
       var row = $$('tr', {
         id: 'facility-' + f,
-        'class': 'facility' + disabledClass
-            + maybe_selected(f === selected_facility_i),
+        'class': 'facility' +
+            maybe_disabled(is_facility_closed(facility)) +
+            maybe_selected(f === selected_facility_i),
         onclick: facility_selector(f),
         onmouseover: hover_activator('facility-' + f),
         onmouseout: hover_deactivator('facility-' + f)
@@ -1151,7 +1155,9 @@ function select_facility(facility_i, ignore_current) {
   for (var f = 1; f < facilities.length; f++) {
     var item = $('facility-' + f);
     if (item) {
-      item.className = 'facility' + maybe_selected(f === facility_i);
+      item.className = 'facility' +
+          maybe_disabled(is_facility_closed(facilities[f])) +
+          maybe_selected(f === selected_facility_i);
     }
   }
 
