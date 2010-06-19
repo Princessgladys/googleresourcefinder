@@ -74,17 +74,21 @@ class MainTestCase(SeleniumTestCase):
         self.wait_for_element('facility-2')
 
         # Facility 1000 is open
-        assert 'disabled' not in self.get_attribute('//tr[@id="facility-1"]/@class')
+        assert 'disabled' not in self.get_attribute(
+            '//tr[@id="facility-1"]/@class')
         self.click('id=facility-1')
         bubble_xpath = "//div[@class='bubble']/span/span[@class='title']"
         self.wait_for_element(bubble_xpath)
-        assert not self.is_text_present('Note: This facility has been marked closed')
+        assert not self.is_text_present(
+            'Note: This facility has been marked closed')
 
         # Facility 1001 is closed
-        assert 'disabled' in self.get_attribute('//tr[@id="facility-2"]/@class')
+        assert 'disabled' in self.get_attribute(
+            '//tr[@id="facility-2"]/@class')
         self.click('id=facility-2')
         self.wait_for_element(bubble_xpath)
-        assert self.is_text_present('Note: This facility has been marked closed')
+        assert self.is_text_present(
+            'Note: This facility has been marked closed')
 
         # Change facility 1000 to closed
         self.put_facility(
