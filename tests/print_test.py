@@ -16,24 +16,24 @@ import datetime
 
 from google.appengine.api import users
 
-from model import db, Facility, MinimalFacility
+from model import db, Subject, MinimalSubject
 from selenium_test_case import Regex, SeleniumTestCase
 
 class PrintTest(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
-        self.put_facility('example.org/10', title='title_within_10_miles',
+        self.put_subject('example.org/10', title='title_within_10_miles',
                           location=db.GeoPt(51.5, 0))
-        self.put_facility('example.org/11', title='title_center',
+        self.put_subject('example.org/11', title='title_center',
                           location=db.GeoPt(51.5, 0.01))
-        self.put_facility('example.org/12', title='title_outside_10_miles',
+        self.put_subject('example.org/12', title='title_outside_10_miles',
                           location=db.GeoPt(51.6, 0.2))
 
     def tearDown(self):
         SeleniumTestCase.tearDown(self)
-        self.delete_facility('example.org/10')
-        self.delete_facility('example.org/11')
-        self.delete_facility('example.org/12')
+        self.delete_subject('example.org/10')
+        self.delete_subject('example.org/11')
+        self.delete_subject('example.org/12')
 
     def test_print_page(self):
         """Confirms that the print page renders correctly."""
@@ -42,8 +42,8 @@ class PrintTest(SeleniumTestCase):
         self.click('link=Print')
         assert self.get_alert().startswith('First select a hospital')
 
-        # After a facility is selected, the Print link should work
-        self.click('id=facility-1')
+        # After a subject is selected, the Print link should work
+        self.click('id=subject-1')
         self.wait_for_element('//div[@class="bubble"]//span')
 
         # Click the link and switch to the new window
@@ -62,10 +62,10 @@ class PrintTest(SeleniumTestCase):
         self.assert_element('//div[@title="Zoom in"]')
         self.assert_element('//div[@title="Zoom out"]')
 
-        # Assert two facilities are present
+        # Confirm that exactly two subjects are present in the list.
         self.assert_text(Regex('title_center.*'),
-                         "//tr[@id='facility-1']/*[@class='facility-title']")
+                         "//tr[@id='subject-1']/*[@class='subject-title']")
         self.assert_text(Regex('title_within_10_miles.*'),
-                         "//tr[@id='facility-2']/*[@class='facility-title']")
+                         "//tr[@id='subject-2']/*[@class='subject-title']")
         self.assert_no_element(
-                         "//tr[@id='facility-3']/*[@class='facility-title']")
+                         "//tr[@id='subject-3']/*[@class='subject-title']")

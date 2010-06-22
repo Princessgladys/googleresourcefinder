@@ -105,7 +105,7 @@ class Handler(webapp.RequestHandler):
     auto_params = {
         'embed': validate_yes,
         'flush': validate_yes,
-        'facility_name': strip,
+        'subject_name': strip,
         'lang': strip,
         'lat': validate_float,
         'lon': validate_float,
@@ -137,9 +137,9 @@ class Handler(webapp.RequestHandler):
 
     def initialize(self, request, response):
         webapp.RequestHandler.initialize(self, request, response)
-        # To be safe, we purge the in-memory portion of MinimalFacilityCache
+        # To be safe, we purge the in-memory portion of MinimalSubjectCache
         # before each request to be sure we don't see stale data.
-        cache.MINIMAL_FACILITIES.flush(flush_memcache=False)
+        cache.MINIMAL_SUBJECTS.flush(flush_memcache=False)
         self.user = users.get_current_user()
         self.account = access.check_and_log(request, self.user)
         for name in request.headers.keys():

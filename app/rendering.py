@@ -15,12 +15,11 @@
 import cache
 import datetime
 import django.utils.translation
-import logging
 import re
 import sets
 import sys
 from feeds.geo import distance
-from model import Attribute, Facility, FacilityType, Message, MinimalFacility
+from model import Attribute, Subject, SubjectType, Message, MinimalSubject
 from utils import HIDDEN_ATTRIBUTE_NAMES, db, Date, simplejson
 
 def make_jobjects(entities, transformer, *args):
@@ -44,49 +43,53 @@ def attribute_transformer(index, attribute):
             'type': attribute.type,
             'values': attribute.values}
 
-def facility_type_transformer(index, facility_type, attribute_is):
-    """Construct the JSON object for a FacilityType."""
-    return {'name': facility_type.key().name(),
+def subject_type_transformer(index, subject_type, attribute_is):
+    """Construct the JSON object for a SubjectType."""
+    return {'name': subject_type.key().name(),
             'attribute_is':
                 [attribute_is[p] for p in filter(
                     lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
-                    facility_type.minimal_attribute_names)]}
+                    subject_type.minimal_attribute_names)]}
 
-def minimal_facility_transformer(index, facility, attributes, facility_types,
-                                 facility_type_is, center, radius):
-    """Construct the JSON object for a Facility."""
+def get_subject_type(subject_types, subject):
+    """In a list of SubjectType entities, finds the one for a given Subject."""
+    for subject_type in subject_types:
+        if subject_type.key().name() == subject.type:
+            return subject_type
+
+def minimal_subject_transformer(index, subject, attributes, subject_types,
+                                subject_type_is, center, radius):
+    """Construct the JSON object for a Subject."""
     # Gather all the attributes
     values = [None]
 
-    facility_type = filter(lambda f: f.key().name() == facility.type,
-                           facility_types)[0]
-
+    subject_type = get_subject_type(subject_types, subject)
     for attribute in attributes:
         name = attribute.key().name()
-        if name in facility_type.minimal_attribute_names:
-            values.append(facility.get_value(name))
+        if name in subject_type.minimal_attribute_names:
+            values.append(subject.get_value(name))
         else:
             values.append(None)
 
     # Pack the results into an object suitable for JSON serialization.
-    facility_jobject = {
-        'name': facility.parent_key().name(),
-        'type': facility_type_is[facility.type],
+    subject_jobject = {
+        'name': subject.parent_key().name(),
+        'type': subject_type_is[subject.type],
         'values' : values,
     }
-    if facility.has_value('location'):
+    if subject.has_value('location'):
         location = {
-            'lat': facility.get_value('location').lat,
-            'lon': facility.get_value('location').lon
+            'lat': subject.get_value('location').lat,
+            'lon': subject.get_value('location').lon
         }
         if center:
-            facility_jobject['distance_meters'] = distance(location, center)
+            subject_jobject['distance_meters'] = distance(location, center)
 
-    dist = facility_jobject.get('distance_meters')
+    dist = subject_jobject.get('distance_meters')
     if center and (dist is None or dist > radius > 0):
         return None
 
-    return facility_jobject
+    return subject_jobject
 
 def json_encode(object):
     """Handle JSON encoding for non-primitive objects."""
@@ -108,12 +111,12 @@ def render_json(center=None, radius=None):
     if json and not center:
         return json
 
-    facility_types = cache.FACILITY_TYPES.values()
+    subject_types = cache.SUBJECT_TYPES.values()
 
     # Get the set of attributes to return
     attr_names = sets.Set()
-    for facility_type in facility_types:
-        attr_names = attr_names.union(facility_type.minimal_attribute_names)
+    for subject_type in subject_types:
+        attr_names = attr_names.union(subject_type.minimal_attribute_names)
     attr_names = attr_names.difference(HIDDEN_ATTRIBUTE_NAMES)
 
     # Get the subset of attributes to render.
@@ -121,23 +124,22 @@ def render_json(center=None, radius=None):
     attribute_jobjects, attribute_is = make_jobjects(
         attributes, attribute_transformer)
 
-    # Make JSON objects for the facility types.
-    facility_type_jobjects, facility_type_is = make_jobjects(
-        facility_types, facility_type_transformer, attribute_is)
+    # Make JSON objects for the subject types.
+    subject_type_jobjects, subject_type_is = make_jobjects(
+        subject_types, subject_type_transformer, attribute_is)
 
-    # Make JSON objects for the facilities
-    mfs = cache.MINIMAL_FACILITIES.values()
-    facility_jobjects, facility_is = make_jobjects(
-        sorted(cache.MINIMAL_FACILITIES.values(),
-               key=lambda f: f.get_value('title')),
-        minimal_facility_transformer, attributes, facility_types,
-        facility_type_is, center, radius)
-    total_facility_count = len(facility_jobjects) - 1
-    logging.info("NUMBER OF FACILITIES %d" % total_facility_count)
+    # Make JSON objects for the subjects.
+    mfs = cache.MINIMAL_SUBJECTS.values()
+    subject_jobjects, subject_is = make_jobjects(
+        sorted(cache.MINIMAL_SUBJECTS.values(),
+               key=lambda s: s.get_value('title')),
+        minimal_subject_transformer, attributes, subject_types,
+        subject_type_is, center, radius)
+    total_subject_count = len(subject_jobjects) - 1
 
     # Sort by distance, if necessary.
     if center:
-        facility_jobjects.sort(key=lambda f: f and f.get('distance_meters'))
+        subject_jobjects.sort(key=lambda s: s and s.get('distance_meters'))
 
     # Get all the messages for the current language.
     message_jobjects = {}
@@ -146,10 +148,10 @@ def render_json(center=None, radius=None):
         namespace[message.name] = getattr(message, django_locale)
 
     json = clean_json(simplejson.dumps({
-        'total_facility_count': total_facility_count,
+        'total_subject_count': total_subject_count,
         'attributes': attribute_jobjects,
-        'facility_types': facility_type_jobjects,
-        'facilities': facility_jobjects,
+        'subject_types': subject_type_jobjects,
+        'subjects': subject_jobjects,
         'messages': message_jobjects
     # set indent=2 to pretty-print; it blows up download size, so defaults off
     }, indent=None, default=json_encode))

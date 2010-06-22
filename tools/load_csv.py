@@ -119,14 +119,16 @@ def convert_shoreland_record(record):
     into a dictionary of ValueInfo objects for our datastore."""
     title = record['facility_name'].strip()
 
-    if not record.get('facility_healthc_id').strip():
+    healthc_id = record.get(
+        'healthc_id', record.get('facility_healthc_id', '')).strip()
+    pcode = record.get('pcode', record.get('facility_pcode', '')).strip()
+
+    if not healthc_id:
         # Every row in a Shoreland CSV file should have a non-blank healthc_id.
-        logging.warn('Skipping %r (%s): Invalid HealthC_ID: "%s"' % (
-            title, record.get('facility_pcode'),
-            record.get('facility_healthc_id')))
+        logging.warn('Skipping %r (pcode %s): no HealthC_ID' % (title, pcode))
         return None, None, None
 
-    key_name = 'paho.org/HealthC_ID/' + record['facility_healthc_id'].strip()
+    key_name = 'paho.org/HealthC_ID/' + healthc_id
     try:
         latitude = float(record['latitude'])
         longitude = float(record['longitude'])
@@ -194,8 +196,8 @@ def convert_shoreland_record(record):
 
     return key_name, observed, {
         'title': ValueInfo(title),
-        'healthc_id': ValueInfo(record['facility_healthc_id']),
-        'pcode': ValueInfo(record['facility_pcode']),
+        'healthc_id': ValueInfo(healthc_id),
+        'pcode': ValueInfo(pcode),
         # Bill Lang recommends (2010-06-07) ignoring the available_beds column.
         'available_beds': ValueInfo(None),
         # NOTE(kpy): Intentionally treating total_beds=0 as "number unknown".
@@ -252,15 +254,15 @@ def load_csv(
         not author_nickname or not author_affiliation):
         raise Exception('All arguments must be non-empty.')
 
-    facilities = []
-    minimal_facilities = []
+    subjects = []
+    minimal_subjects = []
     reports = []
     arrived = datetime.datetime.utcnow().replace(microsecond=0)
 
     # Store the raw file contents in a Dump.
     Dump(source=source_url, data=open(filename, 'rb').read()).put()
 
-    facility_type = FacilityType.get_by_key_name('hospital')
+    subject_type = SubjectType.get_by_key_name('hospital')
     count = 0
     for record in csv.DictReader(open(filename)):
         if limit and count >= limit:
@@ -274,17 +276,17 @@ def load_csv(
             continue
         observed = observed or default_observed
 
-        facility = Facility(key_name=key_name, type='hospital', author=author)
-        facilities.append(facility)
-        Facility.author.validate(author)
+        subject = Subject(key_name=key_name, type='hospital', author=author)
+        subjects.append(subject)
+        Subject.author.validate(author)
 
-        minimal_facility = MinimalFacility(facility, type='hospital')
-        minimal_facilities.append(minimal_facility)
+        minimal_subject = MinimalSubject(subject, type='hospital')
+        minimal_subjects.append(minimal_subject)
 
         # Create a report for this row. ValueInfos that have a different
         # observed date than 'observed' will be reported in a separate report
         report = Report(
-            facility,
+            subject,
             arrived=arrived,
             source=source_url,
             author=author,
@@ -299,21 +301,21 @@ def load_csv(
             if info.observed and observed != info.observed:
                 # Separate out this change into a new report
                 current_report = Report(
-                    facility,
+                    subject,
                     arrived=arrived,
                     source=source_url,
                     author=author,
                     observed=info.observed)
                 reports.append(current_report)
 
-            facility.set_attribute(name, info.value, observed, author,
+            subject.set_attribute(name, info.value, observed, author,
                                    author_nickname, author_affiliation,
                                    info.comment)
             current_report.set_attribute(name, info.value, info.comment)
-            if name in facility_type.minimal_attribute_names:
-                minimal_facility.set_attribute(name, info.value)
+            if name in subject_type.minimal_attribute_names:
+                minimal_subject.set_attribute(name, info.value)
 
-    put_batches(facilities + minimal_facilities + reports)
+    put_batches(subjects + minimal_subjects + reports)
 
 def parse_paho_date(date):
     """Parses a period-separated (month.day.year) date, passes through None.
