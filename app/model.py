@@ -15,7 +15,7 @@
 """The Resource Mapper data model.  All entities and fields are add-only and
 are never deleted or overwritten.  To represent modifications to a country's
 data, create a new Version under the appropriate Country.  To represent
-modifications to a facility's attributes, add a new Report for that Facility.
+modifications to a subject's attributes, add a new Report for that Subject.
 
 This project uses the following naming conventions in variables and properties:
 
@@ -37,12 +37,14 @@ This project uses the following naming conventions in variables and properties:
 
 from google.appengine.ext import db
 
-class Facility(db.Expando):
-    """A Facility whose attributes are tracked. Top-level entity, has no parent.
-    Key name: government or internationally established facility ID."""
+class Subject(db.Expando):
+    """A thing whose attributes are tracked by this application.  Top-level
+    entity, has no parent.  Key name: globally unique ID.  For the Haiti
+    instance, these are health facilities with a government or internationally
+    established health facility ID."""
     timestamp = db.DateTimeProperty(auto_now_add=True) # creation time
-    type = db.StringProperty(required=True)  # key_name of a FacilityType
-    author = db.UserProperty() # who created this facility
+    type = db.StringProperty(required=True)  # key_name of a SubjectType
+    author = db.UserProperty() # who created this subject
     # additional properties for the current value of each attribute
     # (named by Attribute's key_name).  This denormalization is for read speed.
     # Consider an attribute named 'foo'. We will store 6 values here:
@@ -54,9 +56,9 @@ class Facility(db.Expando):
     # foo__author_affiliation db.StringProperty, affiliation of the source
     # foo__comment            db.StringProperty, a comment about the change
     # These properties will exist with the following invariants:
-    # 1. If facility.foo__ is not present, that means attribute "foo" has never
-    # existed on this facility at any point in the past.
-    # 2. If facility.foo__ is None, that means some user actually set the
+    # 1. If subject.foo__ is not present, that means attribute "foo" has never
+    # existed on this subject at any point in the past.
+    # 2. If subject.foo__ is None, that means some user actually set the
     # attribute to "(unspecified)".
     # 3. All six fields are always written together at the same time, and
     # are never removed.  (Hence either all are present or none are present.)
@@ -112,14 +114,15 @@ class Facility(db.Expando):
                 value_or_none(author_affiliation))
         setattr(self, '%s__comment' % name, value_or_none(comment))
 
-class MinimalFacility(db.Expando):
-    """Minimal version of Facility that loads fast from the datastore.
-    Parent: Facility. Wouldn't be necessary if we could select columns
+class MinimalSubject(db.Expando):
+    """Minimal version of Subject that loads fast from the datastore and
+    contains just the information needed to populate the initial list and map.
+    Parent: Subject. Wouldn't be necessary if we could select columns
     from the datastore."""
-    type = db.StringProperty(required=True)  # key_name of a FacilityType
-    # properties for the current value of ONLY the most critically important
-    # attributes of Facility (named by Attribute's key_name).
-    # An attribute named foo will be stored as 'foo__' to match Facility.
+    type = db.StringProperty(required=True)  # key_name of a SubjectType
+    # More properties for the current values of ONLY the most critically
+    # important attributes of Subject (named by Attribute's key_name).
+    # An attribute named foo will be stored as 'foo__' to match Subject.
 
     @staticmethod
     def get_stored_name(attribute_name):
@@ -139,20 +142,19 @@ class MinimalFacility(db.Expando):
         """Sets the value for the Attribute with the given key_name."""
         setattr(self, '%s__' % name, value_or_none(value))
 
-class FacilityType(db.Model):
-    """A type of Facility, e.g. hospital, warehouse, charity, camp.
+class SubjectType(db.Model):
+    """A type of Subject, e.g. hospital, warehouse, charity, camp.
     Top-level entity, has no parent.
-    Key name: an identifier used as the value of Facility.type."""
+    Key name: an identifier used as the value of Subject.type."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
     attribute_names = db.StringListProperty()  # key_names of Attribute entities
-    minimal_attribute_names = db.StringListProperty() # key_names of Attribute
-                                                      # entities for
-                                                      # MinimalFacility
+    minimal_attribute_names = db.StringListProperty()  # key_names of
+        # Attribute entities for MinimalSubject
 
 class Attribute(db.Model):
-    """An attribute of a facility, e.g. services available, # of
+    """An attribute of a subject, e.g. services available, # of
     patients. Top-level entity, has no parent.  Key name: name of a property
-    in a Report,and also the name of the Message providing the
+    in a Report, and also the name of the Message providing the
     UI-displayable attribute name."""
     timestamp = db.DateTimeProperty(auto_now_add=True)
     type = db.StringProperty(required=True, choices=[
@@ -171,9 +173,9 @@ class Attribute(db.Model):
     values = db.StringListProperty()  # allowed value names for choice or multi
 
 class Report(db.Expando):
-    """A report on the attributes and resources of a Facility.
-    Parent: Facility. A Report may represent a partial update of the
-    attributes of the facility."""
+    """A report on the attributes and resources of a Subject.
+    Parent: Subject. A Report may represent a partial update of the
+    attributes of the subject."""
     arrived = db.DateTimeProperty(auto_now_add=True) # date we received report
     source = db.StringProperty() # a URL, the source of the report
     author = db.UserProperty() # author of the report
@@ -238,7 +240,7 @@ class Message(db.Expando):
       'english',  # name is an English string
       'attribute_name',  # name is an Attribute's key_name
       'attribute_value', # name is a value name in a choice or multi attribute
-      'facility_type' # name is a FacilityType's key name
+      'subject_type' # name is a SubjectType's key name
     ])
     name = db.StringProperty()
     # additional properties for each language (named by language code)

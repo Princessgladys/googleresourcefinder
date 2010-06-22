@@ -68,9 +68,9 @@ class AttributeType:
             return value
         return None
 
-    def apply_change(self, facility, minimal_facility, report, facility_type,
+    def apply_change(self, subject, minimal_subject, report, subject_type,
                      request, attribute, change_metadata):
-        """Adds an attribute to the given Facility, MinimalFacility, and
+        """Adds an attribute to the given Subject, MinimalSubject, and
         Report based on a query parameter. Also adds the required change
         history fields according to the invariants in model.py."""
         name = attribute.key().name()
@@ -79,14 +79,14 @@ class AttributeType:
         comment = request.get('%s__comment' % name, None)
 
         report.set_attribute(name, value, comment)
-        facility.set_attribute(name, value,
+        subject.set_attribute(name, value,
                                change_metadata.observed,
                                change_metadata.author,
                                change_metadata.author_nickname,
                                change_metadata.author_affiliation,
                                comment)
-        if name in facility_type.minimal_attribute_names:
-            minimal_facility.set_attribute(name, value)
+        if name in subject_type.minimal_attribute_names:
+            minimal_subject.set_attribute(name, value)
 
 class StrAttributeType(AttributeType):
     input_size = 40
@@ -257,33 +257,33 @@ ATTRIBUTE_TYPES = {
     'geopt': GeoPtAttributeType(),
 }
 
-def make_input(facility, attribute):
+def make_input(subject, attribute):
     """Generates the HTML for an input field for the given attribute."""
     name = attribute.key().name()
     return ATTRIBUTE_TYPES[attribute.type].make_input(
-        name, facility.get_value(name), attribute)
+        name, subject.get_value(name), attribute)
 
 def render_json(value):
     """Renders the given value as json"""
     return clean_json(simplejson.dumps(value, indent=None, default=json_encode))
 
-def render_attribute_as_json(facility, attribute):
+def render_attribute_as_json(subject, attribute):
     """Returns the value of this attribute as a JSON string"""
     name = attribute.key().name()
-    return render_json(facility.get_value(name))
+    return render_json(subject.get_value(name))
 
-def apply_change(facility, minimal_facility, report, facility_type,
+def apply_change(subject, minimal_subject, report, subject_type,
                  request, attribute, change_metadata):
-    """Adds an attribute to the given Facility, MinimalFacility and Report
+    """Adds an attribute to the given Subject, MinimalSubject and Report
     based on a query parameter."""
     attribute_type = ATTRIBUTE_TYPES[attribute.type]
-    attribute_type.apply_change(facility, minimal_facility, report,
-                                facility_type, request, attribute,
+    attribute_type.apply_change(subject, minimal_subject, report,
+                                subject_type, request, attribute,
                                 change_metadata)
 
-def has_changed(facility, request, attribute):
+def has_changed(subject, request, attribute):
     """Returns True if the request has an input for the given attribute
-    and that attribute has changed from the previous value in facility."""
+    and that attribute has changed from the previous value in subject."""
     name = attribute.key().name()
     value = ATTRIBUTE_TYPES[attribute.type].to_stored_value(
         name, request.get(name, None), request, attribute)
@@ -291,11 +291,11 @@ def has_changed(facility, request, attribute):
     previous = request.get('editable.%s' % name, None)
     return previous != current and previous
 
-def has_comment_changed(facility, request, attribute):
+def has_comment_changed(subject, request, attribute):
     """Returns True if the request has a comment for the given attribute
-    and that comment has changed from the previous value in facility."""
+    and that comment has changed from the previous value in subject."""
     name = attribute.key().name()
-    old_comment = facility.get_comment(name)
+    old_comment = subject.get_comment(name)
     new_comment = request.get('%s__comment' % name)
     return new_comment and (old_comment != new_comment)
 
@@ -323,31 +323,31 @@ def get_source_url(request):
 
 class Edit(utils.Handler):
     def init(self):
-        """Checks for logged-in user and sets up self.facility
-        and self.facility_type based on the query params."""
+        """Checks for logged-in user and sets up self.subject
+        and self.subject_type based on the query params."""
 
         self.require_logged_in_user()
 
         if USE_WHITELISTS:
             self.require_action_permitted('edit')
 
-        self.facility = model.Facility.get_by_key_name(
-            self.params.facility_name)
-        if not self.facility:
-            #i18n: Error message for request missing facility name.
-            raise ErrorMessage(404, _('Invalid or missing facility name.'))
-        self.facility_type = cache.FACILITY_TYPES[self.facility.type]
+        self.subject = model.Subject.get_by_key_name(
+            self.params.subject_name)
+        if not self.subject:
+            #i18n: Error message for request missing subject name.
+            raise ErrorMessage(404, _('Invalid or missing subject name.'))
+        self.subject_type = cache.SUBJECT_TYPES[self.subject.type]
 
     def get(self):
         self.init()
         fields = []
         readonly_fields = []
 
-        for name in self.facility_type.attribute_names:
+        for name in self.subject_type.attribute_names:
             if name in HIDDEN_ATTRIBUTE_NAMES:
                 continue
             attribute = cache.ATTRIBUTES[name]
-            comment = self.facility.get_comment(attribute.key().name())
+            comment = self.subject.get_comment(attribute.key().name())
             if not comment:
                 comment = ''
             if can_edit(self.account, attribute):
@@ -355,20 +355,20 @@ class Edit(utils.Handler):
                     'name': name,
                     'title': get_message('attribute_name', name),
                     'type': attribute.type,
-                    'input': make_input(self.facility, attribute),
-                    'json': render_attribute_as_json(self.facility, attribute),
+                    'input': make_input(self.subject, attribute),
+                    'json': render_attribute_as_json(self.subject, attribute),
                     'comment': '',
                 })
             else:
                 readonly_fields.append({
                     'title': get_message('attribute_name', name),
-                    'value': self.facility.get_value(name)
+                    'value': self.subject.get_value(name)
                 })
 
         token = sign(XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
 
         self.render('templates/edit.html',
-            token=token, facility_title=self.facility.get_value('title'),
+            token=token, subject_title=self.subject.get_value('title'),
             fields=fields, readonly_fields=readonly_fields,
             account=self.account,
             suggested_nickname=get_suggested_nickname(self.user),
@@ -385,7 +385,7 @@ class Edit(utils.Handler):
             self.request.get('token')):
             raise ErrorMessage(403, 'Unable to submit data for %s'
                                % self.user.email())
-        
+
         if not self.account.nickname:
             nickname = self.request.get('account_nickname', None)
             if not nickname:
@@ -407,13 +407,13 @@ class Edit(utils.Handler):
 
         logging.info("record by user: %s" % self.user)
 
-        def update(key, facility_type, request, user, account, attributes):
-            facility = db.get(key)
-            minimal_facility = model.MinimalFacility.all().ancestor(
-                facility).get()
+        def update(key, subject_type, request, user, account, attributes):
+            subject = db.get(key)
+            minimal_subject = model.MinimalSubject.all().ancestor(
+                subject).get()
             utcnow = datetime.datetime.utcnow().replace(microsecond=0)
             report = model.Report(
-                facility,
+                subject,
                 arrived=utcnow,
                 source=get_source_url(request),
                 author=user,
@@ -424,15 +424,15 @@ class Edit(utils.Handler):
             changed_attributes_dict = {}
             changed_attribute_values = {}
 
-            for name in facility_type.attribute_names:
+            for name in subject_type.attribute_names:
                 attribute = attributes[name]
                 # To change an attribute, it has to have been marked editable
                 # at the time the page was rendered, the new value has to be
-                # different than the one in the facility at the time the page
+                # different than the one in the subject at the time the page
                 # rendered, and the user has to have permission to edit it now.
-                value_changed = has_changed(facility, request, attribute)
-                comment_changed = has_comment_changed(facility, request,
-                    attribute)
+                value_changed = has_changed(subject, request, attribute)
+                comment_changed = has_comment_changed(
+                    subject, request, attribute)
                 if (is_editable(request, attribute) and
                     (value_changed or comment_changed)):
                     if not can_edit(account, attribute):
@@ -444,8 +444,8 @@ class Edit(utils.Handler):
                                'a': get_message('attribute_name',
                                                 attribute.key().name())})
                     has_changes = True
-                    apply_change(facility, minimal_facility, report,
-                                 facility_type, request, attribute,
+                    apply_change(subject, minimal_subject, report,
+                                 subject_type, request, attribute,
                                  change_metadata)
                     changed_attributes_dict[name] = attribute
                     changed_attribute_values[name] = value_changed
@@ -459,9 +459,9 @@ class Edit(utils.Handler):
                 # intermittent exceptions.  Re-enable it when we have it
                 # tested and working.
                 # schedule_add_record(self.request, user,
-                #     facility, changed_attributes_dict, utcnow)
-                db.put([report, facility, minimal_facility])
-                cache.MINIMAL_FACILITIES.flush()
+                #     subject, changed_attributes_dict, utcnow)
+                db.put([report, subject, minimal_subject])
+                cache.MINIMAL_SUBJECTS.flush()
                 cache.JSON.flush()
                 
                 # On edit, create a task to e-mail users who have subscribed
@@ -471,9 +471,11 @@ class Edit(utils.Handler):
                 attrs['action'] = 'facility_changed'
                 taskqueue.add(url='/mail_update_system', method='POST',
                               params=attrs, transactional=True)
-        
+
+        # Cannot run datastore queries in a transaction outside the entity group
+        # being modified, so fetch the attributes here just in case
         attributes = cache.ATTRIBUTES.load()
-        db.run_in_transaction(update, self.facility.key(), self.facility_type,
+        db.run_in_transaction(update, self.subject.key(), self.subject_type,
                               self.request, self.user, self.account, attributes)
         if self.params.embed:
             #i18n: Record updated successfully.

@@ -23,14 +23,14 @@ from google.appengine.ext import db
 import logging
 from model import Account
 
-# Actions explained:
-# 'view' user can view the UI (unnecessary if default is 'anyone can view')
-# 'edit' user can edit basic fields of facilities (unnecessary if default is
-#          'any signed in user can make edits')
-# 'advanced_edit' user can edit all fields of facilities
-# 'add' user can add new facilities
-# 'remove' user can remove facilities from the UI (not delete them entirely)
-# 'grant' user can grant access to other users
+# Actions that are permitted/forbidden according to the 'actions' property:
+#     'view': view the UI (unnecessary if default is 'anyone can view')
+#     'edit': edit basic fields (unnecessary if default is
+#         'any signed in user can make edits')
+#     'advanced_edit': edit all fields
+#     'add': add new subjects
+#     'remove': remove subjects from the UI (not delete them entirely)
+#     'grant': grant access to other users
 ACTIONS = ['view', 'add', 'remove', 'edit', 'advanced_edit', 'grant']
 
 def check_token(token):

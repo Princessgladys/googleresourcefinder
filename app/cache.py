@@ -103,9 +103,9 @@ class AttributeCache(Cache):
         return dict((e.key().name(), e) for e in entities)
 
 
-class FacilityTypeCache(Cache):
+class SubjectTypeCache(Cache):
     def fetch_entities(self):
-        entities = utils.fetch_all(model.FacilityType.all())
+        entities = utils.fetch_all(model.SubjectType.all())
         return dict((e.key().name(), e) for e in entities)
 
 
@@ -115,19 +115,19 @@ class MessageCache(Cache):
         return dict(((e.namespace, e.name), e) for e in entities)
 
 
-class MinimalFacilityCache(Cache):
+class MinimalSubjectCache(Cache):
     def fetch_entities(self):
-        entities = utils.fetch_all(model.MinimalFacility.all())
+        entities = utils.fetch_all(model.MinimalSubject.all())
         return dict((e.parent_key(), e) for e in entities)
 
 
 JSON = JsonCache()
 ATTRIBUTES = AttributeCache()
-FACILITY_TYPES = FacilityTypeCache()
+SUBJECT_TYPES = SubjectTypeCache()
 MESSAGES = MessageCache()
-MINIMAL_FACILITIES = MinimalFacilityCache()
+MINIMAL_SUBJECTS = MinimalSubjectCache()
 
-CACHES = [JSON, ATTRIBUTES, FACILITY_TYPES, MESSAGES, MINIMAL_FACILITIES]
+CACHES = [JSON, ATTRIBUTES, SUBJECT_TYPES, MESSAGES, MINIMAL_SUBJECTS]
 
 def flush_all():
     """Flush all caches"""

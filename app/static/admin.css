@@ -20,7 +20,7 @@ td { padding: 1px 2px; }
 .kind { color: #c44; }
 .id { color: #808; }
 .name { color: #080; }
-th.facility-count img, th.legend-icon img { margin-bottom: -1px; }
+th.subject-count img, th.legend-icon img { margin-bottom: -1px; }
 table.entity, table.list { margin-bottom: 2px; font-size: 11px; }
 table.entity { border: 1px solid #edd; }
 table.entity td[colspan="2"] { background: #fee; }

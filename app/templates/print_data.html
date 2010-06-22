@@ -16,8 +16,7 @@
 
 {% load i18n %}
 
-<div id="facility-section" class="section">
-
+<div id="subject-section" class="section">
   {% comment %}
   # Use nested tables here so that we can have two different thead sections
   # that show up on every new page when printed (on modern browsers)
@@ -41,41 +40,39 @@
     <tbody>
       <tr>
         <td colspan=2>
-          <div class="facility-background">
-            <table id="facility-list" width="100%"
-                   cellspacing=0 cellpadding=0 border=0>
-              <thead id="facility-print-thead">
-                <tr>
-                  <th colspan=2 align=center>
-                    {% comment %}
-                    #i18n: Heading for number of available beds and number
-                    #i18n: of total beds in a hospital.
-                    {% endcomment %}
-                    {% trans "Beds open / total" %}
-                  </th>
+          <table id="subject-list" width="100%"
+                 cellspacing=0 cellpadding=0 border=0>
+            <thead id="subject-print-thead">
+              <tr>
+                <th colspan=2 align=center>
                   {% comment %}
-                  #i18n: Header for a place that provides a particular service
+                  #i18n: Heading for number of available beds and number
+                  #i18n: of total beds in a hospital.
                   {% endcomment %}
-                  <th>{% trans "Facility" %}</th>
-                  {% comment %}
-                  #i18n: Header for a distance from the current facility to
-                  #i18n: another location
-                  {% endcomment %}
-                  <th>{% trans "Distance" %}</th>
-                  {% comment %}
-                  #i18n: Header for a street address
-                  {% endcomment %}
-                  <th>{% trans "Address" %}</th>
-                  {% comment %}
-                  #i18n: Header for general information about a facility
-                  {% endcomment %}
-                  <th>{% trans "General Info" %}</th>
-                </tr>
-              </thead>
-              <tbody id="facility-print-tbody">
-              </tbody>
-            </table>
-          </div>
+                  {% trans "Beds open / total" %}
+                </th>
+                {% comment %}
+                #i18n: Header for a place that provides a particular service
+                {% endcomment %}
+                <th>{% trans "Facility" %}</th>
+                {% comment %}
+                #i18n: Header for a distance from the current subject to
+                #i18n: another location
+                {% endcomment %}
+                <th>{% trans "Distance" %}</th>
+                {% comment %}
+                #i18n: Header for a street address
+                {% endcomment %}
+                <th>{% trans "Address" %}</th>
+                {% comment %}
+                #i18n: Header for general information about a subject
+                {% endcomment %}
+                <th>{% trans "General Info" %}</th>
+              </tr>
+            </thead>
+            <tbody id="subject-print-tbody">
+            </tbody>
+          </table>
         </td>
       </tr>
     </tbody>
