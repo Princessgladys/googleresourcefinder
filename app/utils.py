@@ -81,7 +81,7 @@ def strip(text):
     return text.strip()
 
 def validate_yes(text):
-    return (text.lower() == 'yes') and 'yes' or ''
+    return (text.lower() in ['y', 'yes']) and 'yes' or ''
 
 def validate_action(text):
     return text in access.ACTIONS and text
@@ -104,6 +104,7 @@ class Struct:
 class Handler(webapp.RequestHandler):
     auto_params = {
         'embed': validate_yes,
+        'flush': validate_yes,
         'facility_name': strip,
         'lang': strip,
         'lat': validate_float,
@@ -148,6 +149,12 @@ class Handler(webapp.RequestHandler):
         for param in self.auto_params:
             validator = self.auto_params[param]
             setattr(self.params, param, validator(request.get(param, '')))
+
+        # Flush all caches if "flush=yes" was set.
+        if self.params.flush:
+            cache.flush_all()
+            memcache.flush_all()
+
         # Activate localization.
         self.select_locale()
 
@@ -302,11 +309,6 @@ def to_unicode(value):
         return str(value).decode('utf-8')
     else:
         return u''
-
-def plural(n, singular='', plural='s'):
-    if not isinstance(n, (int, float)):
-        n = len(n)
-    return [plural, singular][n == 1]
 
 def run(*args, **kwargs):
     webapp.util.run_wsgi_app(webapp.WSGIApplication(*args, **kwargs))

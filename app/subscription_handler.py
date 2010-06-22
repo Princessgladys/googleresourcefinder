@@ -40,6 +40,7 @@ class SubscriptionHandler(Handler):
     
     def init(self):
         """Checks for logged-in user and gathers necessary information."""
+        self.action = self.request.get('action')
         self.require_logged_in_user()
         self.email = self.user.email()
         if not self.account:
@@ -105,8 +106,8 @@ class SubscriptionHandler(Handler):
                      facility_name=self.params.facility_name,
                      frequency=frequency).put()
         
-        old_pending_key_name = '%s:%s:%s' %
-            (old_frequency, email, self.params.facility_name)
+        old_pending_key_name = ('%s:%s:%s' %
+            (old_frequency, email, self.params.facility_name))
         old_alert = PendingAlert.get_by_key_name(old_pending_key_name)
         if old_alert:
             new_key_name = '%s:%s:%s' % (frequency, email,

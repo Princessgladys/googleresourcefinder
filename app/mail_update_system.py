@@ -27,13 +27,27 @@ __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 
 import datetime
 import logging
+import os
 
 from google.appengine.api import mail
 from google.appengine.ext import db
 
+import cache
 import utils
-from model import PendingAlert, Subscription
+from model import Account, Facility, PendingAlert, Subscription
 from utils import _, Handler
+
+# Set up localization.
+ROOT = os.path.dirname(__file__)
+from django.conf import settings
+try:
+    settings.configure()
+except:
+    pass
+settings.LANGUAGE_CODE = 'en'
+settings.USE_I18N = True
+settings.LOCALE_PATHS = (os.path.join(ROOT, 'locale'),)
+import django.utils.translation
 
 FREQUENCY_TO_DATETIME = {
     'daily': datetime.timedelta(1),
@@ -51,12 +65,12 @@ def get_timedelta(account, frequency):
 def form_body(values):
     """Forms the body text for an e-mail. """
     body = ''
-    for facility_name in values.keys():
+    for facility_name in values:
         facility_title = values[facility_name].keys()[0]
         updates = values[facility_name][facility_title]
         body += facility_title.upper() + '\n'
         for update in updates:
-            body += update[0] + ": " + str(update[1]) + '\n'
+            body += str(update[0]) + ": " + str(update[1]) + '\n'
         body += '\n'
     return body
 
@@ -70,21 +84,20 @@ class MailUpdateSystem(Handler):
         
         if self.action == 'facility_changed':
             self.update_and_add_pending_subs()
-        elif self.action == 'daily_digest':
-            self.send_digests('daily')
-        elif self.action == 'weekly_digest':
-            self.send_digests('weekly')
-        elif self.action == 'monthly_digest':
-            self.send_digests('monthly')
+        else:
+            for freq in ['daily', 'weekly', 'monthly']:
+                self.send_digests('daily')
+                self.send_digests('weekly')
+                self.send_digests('monthly')
     
     def update_and_add_pending_subs(self):
         facility = Facility.get_by_key_name(self.params.facility_name)
         old_values = []
         for arg in self.request.arguments():
-            if key not in ['action', 'facility_name']:
+            if arg not in ['action', 'facility_name']:
                 old_values.append((arg, self.request.get(arg)))
             
-        subscriptions = Subscription.all().filter('facility_name =',
+        subscriptions = Subscription.all().filter       ('facility_name =',
             self.params.facility_name)
         body = form_body({self.params.facility_name: {
             facility.get_value('title'): old_values}})
@@ -94,16 +107,23 @@ class MailUpdateSystem(Handler):
                 key_name = '%s:%s:%s' % (subscription.frequency,
                                          subscription.user_email,
                                          subscription.facility_name)
-                PendingAlert.get_or_insert(key_name,
+                old_values_str=['%s:%s' % (x[0], x[1]) for x in old_values]
+                pa = PendingAlert.get_or_insert(key_name,
                     user_email=subscription.user_email,
                     facility_name=subscription.facility_name,
                     frequency=subscription.frequency,
-                    old_values=old_values)
+                    old_values=old_values_str)
+                if pa and len(old_values) != len(pa.old_values):
+                    for i in range(len(old_values)):
+                        if old_values[i] not in pa.old_values[i]:
+                            pa.old_values.append('%s:%s' %
+                                (old_values[i][0], old_values[i][1]))
+                    db.put(pa)
             else:
                 # send out alerts for those with immediate update subscriptions
-                account = Account.filter('email =', subscription.user_email
-                    ).get()
-                self.send_update_email(account.email, account.locale, body)
+                account = Account.all().filter('email =',
+                    subscription.user_email).get()
+                self.send_email(account.locale, account.email, body)
     
     def send_digests(self, frequency):
         now = datetime.datetime.now()
@@ -111,25 +131,48 @@ class MailUpdateSystem(Handler):
         for account in accounts:
             min_key = db.Key.from_path('PendingAlert', '%s:%s:' %
                 (frequency, account.email))
-            max_key = db.Key.from_path('PendingAlert', '%s:%s:\xff' %
+            max_key = db.Key.from_path('PendingAlert', u'%s:%s:\xff' %
                 (frequency, account.email))
-            pending_alerts = PendingAlert.all().filter('__key__ >' min_key
+            pending_alerts = PendingAlert.all().filter('__key__ >', min_key
                 ).filter('__key__ <', max_key)
             
+            alerts_to_delete = []
             facilities = {}
             for alert in pending_alerts:
                 fac = Facility.get_by_key_name(alert.facility_name)
                 values = self.fetch_updates(alert, fac)
-                if values:
-                    facilities[fac.key().name()] = {fac.get_value('title'):
-                        values}
-                    alerts_to_delete.append(alert)
+                facilities[fac.key().name()] = {fac.get_value('title'):
+                    values}
+                logging.info(facilities)
+                alerts_to_delete.append(alert)
+            
+            if not facilities:
+                continue
             
             body = form_body(facilities)
-            self.send_update_email(account.email, account.locale, body)
+            self.send_email(account.locale, account.email, body)
+            account.next_daily_alert = (datetime.datetime.now() + 
+                get_timedelta(account, frequency))
             db.delete(alerts_to_delete)
-            account.next_daily_alert += get_timedelta(frequency)
             db.put(account)
+            
+    def fetch_updates(self, alert, facility):
+        updated_attrs = []
+        facility_type = cache.FACILITY_TYPES[facility.type]
+        
+        old_values = {}
+        for value in alert.old_values:
+            update = value.split(':')
+            old_values[update[0]] = update[1]
+            
+        for attr in facility_type.attribute_names:
+            value = facility.get_value(attr)
+            if not value and value != 0:
+                continue
+            if attr in old_values and value != old_values[attr]:
+                updated_attrs.append((attr, value))
+        
+        return updated_attrs
     
     def send_email(self, locale, to, body):
         """Sends a single e-mail update.
@@ -142,7 +185,7 @@ class MailUpdateSystem(Handler):
         django.utils.translation.activate(locale)
         
         message = mail.EmailMessage()
-        message.sender = 'updates@resource-finder@appspotmail.com'
+        message.sender = 'updates@resource-finder.appspotmail.com'
         message.to = to
         message.subject = utils.to_unicode(
             _('Resource Finder Facility Updates'))

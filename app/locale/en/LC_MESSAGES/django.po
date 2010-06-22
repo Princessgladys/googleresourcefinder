@@ -66,7 +66,7 @@ msgstr ""
 msgid "Accuracy"
 msgstr ""
 
-#. street address
+#. Header for a street address
 #: templates/hospital_bubble.html:120 ../tools/setup.py:127 templates/print_data.html:68
 msgid "Address"
 msgstr ""
@@ -189,11 +189,6 @@ msgstr ""
 #. Name of a person to contact for more information.
 #: ../tools/setup.py:115
 msgid "Contact name"
-msgstr ""
-
-#. Service provided by a health facility (use Title Case).
-#: ../tools/setup.py:265
-msgid "Corpse Removal"
 msgstr ""
 
 #. Country code to load data for
@@ -488,6 +483,11 @@ msgstr ""
 msgid "Mobile clinic"
 msgstr ""
 
+#. Service provided by a health facility (use Title Case). Meaning: Corpse removal
+#: ../tools/setup.py:266
+msgid "Mortuary Services"
+msgstr ""
+
 #. Type of organization: Non-governmental organization
 #: ../tools/setup.py:165
 msgid "NGO"
@@ -509,7 +509,7 @@ msgid "Neurosurgery"
 msgstr ""
 
 #. Form option for a false Boolean value
-#: bubble.py:48 edit.py:174 bubble_test.py:68
+#: bubble_test.py:69 bubble.py:48 edit.py:174
 msgid "No"
 msgstr ""
 
@@ -626,7 +626,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:465
+#: edit.py:468
 msgid "Record updated."
 msgstr ""
 
@@ -724,7 +724,7 @@ msgid "URL:"
 msgstr ""
 
 #. Error message
-#: utils.py:123
+#: utils.py:124
 msgid "Unauthorized user."
 msgstr ""
 
@@ -769,7 +769,7 @@ msgid "X-Ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: bubble.py:48 edit.py:172 bubble_test.py:67
+#: bubble.py:48 edit.py:172 bubble_test.py:68
 msgid "Yes"
 msgstr ""
 

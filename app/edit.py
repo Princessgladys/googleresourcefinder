@@ -289,7 +289,7 @@ def has_changed(facility, request, attribute):
         name, request.get(name, None), request, attribute)
     current = render_json(value)
     previous = request.get('editable.%s' % name, None)
-    return previous != current
+    return previous != current and previous
 
 def has_comment_changed(facility, request, attribute):
     """Returns True if the request has a comment for the given attribute
@@ -407,7 +407,7 @@ class Edit(utils.Handler):
 
         logging.info("record by user: %s" % self.user)
 
-        def update(key, facility_type, request, user, account):
+        def update(key, facility_type, request, user, account, attributes):
             facility = db.get(key)
             minimal_facility = model.MinimalFacility.all().ancestor(
                 facility).get()
@@ -422,15 +422,17 @@ class Edit(utils.Handler):
                 utcnow, user, account.nickname, account.affiliation)
             has_changes = False
             changed_attributes_dict = {}
+            changed_attribute_values = {}
 
             for name in facility_type.attribute_names:
-                attribute = cache.ATTRIBUTES[name]
+                attribute = attributes[name]
                 # To change an attribute, it has to have been marked editable
                 # at the time the page was rendered, the new value has to be
                 # different than the one in the facility at the time the page
                 # rendered, and the user has to have permission to edit it now.
                 value_changed = has_changed(facility, request, attribute)
-                comment_changed = has_comment_changed(facility, request, attribute)
+                comment_changed = has_comment_changed(facility, request,
+                    attribute)
                 if (is_editable(request, attribute) and
                     (value_changed or comment_changed)):
                     if not can_edit(account, attribute):
@@ -446,7 +448,8 @@ class Edit(utils.Handler):
                                  facility_type, request, attribute,
                                  change_metadata)
                     changed_attributes_dict[name] = attribute
-
+                    changed_attribute_values[name] = value_changed
+            
             if has_changes:
                 # Schedule a task to add a feed record.
                 # We can't really do this inside this transaction, since
@@ -463,13 +466,15 @@ class Edit(utils.Handler):
 
                 # On edit, create a task to e-mail users who have subscribed
                 # to that facility.
-                attrs = changed_attributes_dict.copy()
+                attrs = changed_attribute_values.copy()
                 attrs['facility_name'] = facility.key().name()
-                taskqueue.add(url='/subscription_handler', method='POST',
+                attrs['action'] = 'facility_changed'
+                taskqueue.add(url='/mail_update_system', method='POST',
                               params=attrs, transactional=True)
-
+        
+        attributes = cache.ATTRIBUTES.load()
         db.run_in_transaction(update, self.facility.key(), self.facility_type,
-                              self.request, self.user, self.account)
+                              self.request, self.user, self.account, attributes)
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))

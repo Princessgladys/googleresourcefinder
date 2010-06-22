@@ -19,7 +19,7 @@ SERVICES = ['All',
             'X-Ray',
             'CT Scan',
             'Blood Bank',
-            'Corpse Removal']
+            'Mortuary Services']
 
 class MainTestCase(SeleniumTestCase):
     def setUp(self):
@@ -27,7 +27,8 @@ class MainTestCase(SeleniumTestCase):
         self.put_facility(
             'example.org/1000', title='title_foo1', location=db.GeoPt(51.5, 0))
         self.put_facility(
-            'example.org/1001', title='title_foo2', location=db.GeoPt(50.5, 1))
+            'example.org/1001', title='title_foo2', location=db.GeoPt(50.5, 1),
+            operational_status='CLOSED_OR_CLOSING')
 
     def tearDown(self):
         self.delete_facility('example.org/1000')
@@ -65,3 +66,40 @@ class MainTestCase(SeleniumTestCase):
         self.click(facility_xpath)
         self.wait_for_element(bubble_xpath)
         self.assert_text(facility_title, bubble_xpath)
+
+    def test_closed_facilities(self):
+        self.login('/')
+
+        # Wait for list to populate
+        self.wait_for_element('facility-2')
+
+        # Facility 1000 is open
+        assert 'disabled' not in self.get_attribute(
+            '//tr[@id="facility-1"]/@class')
+        self.click('id=facility-1')
+        bubble_xpath = "//div[@class='bubble']/span/span[@class='title']"
+        self.wait_for_element(bubble_xpath)
+        assert not self.is_text_present(
+            'Note: This facility has been marked closed')
+
+        # Facility 1001 is closed
+        assert 'disabled' in self.get_attribute(
+            '//tr[@id="facility-2"]/@class')
+        self.click('id=facility-2')
+        self.wait_for_element(bubble_xpath)
+        assert self.is_text_present(
+            'Note: This facility has been marked closed')
+
+        # Change facility 1000 to closed
+        self.put_facility(
+            'example.org/1000', title='title_foo1', location=db.GeoPt(51.5, 0),
+            operational_status='CLOSED_OR_CLOSING')
+        self.open_path('/?flush=yes')
+        assert 'disabled' in self.get_attribute('//tr[@id="facility-1"]/@class')
+
+        # TODO(kpy): The just-closed facility should have a new message in its
+        # bubble; however the bubble survives in the browser cache.  This is a
+        # real bug that needs to be fixed.
+        # self.click('id=facility-1')
+        # self.wait_for_element(bubble_xpath)
+        # assert self.is_text_present('Note: This facility has been marked closed')
