@@ -13,10 +13,12 @@
 # limitations under the License.
 
 import utils
+import django.utils.translation  # must be imported after utils
 
 class TermsOfService(utils.Handler):
     def get(self):
-        self.render('locale/en/terms.html', params=self.params)
+        lang = django.utils.translation.get_language()
+        self.render('locale/%s/terms.html' % lang, params=self.params)
 
 if __name__ == '__main__':
     utils.run([('/terms', TermsOfService)], debug=True)
