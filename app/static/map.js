@@ -300,6 +300,10 @@ function maybe_selected(selected) {
   return selected ? ' selected' : '';
 }
 
+function maybe_disabled(disabled) {
+  return disabled ? ' disabled' : '';
+}
+
 function make_icon(title, status, detail, opt_icon, opt_icon_size,
     opt_icon_fill) {
   var text = detail ? title : '';
@@ -516,7 +520,11 @@ function initialize_filters() {
     id: 'specialty-selector',
     name: 'specialty',
     onchange: function() {
-      select_filter.apply(null, $('specialty-selector').value.split(' '));
+      var value = $('specialty-selector').value.split(' ');
+      var trackedValue = value[1] ? value[1] : 'ANY';
+      _gaq.push(['_trackEvent', 'facility_list', 'filter',
+                 'Services contains ' + trackedValue]);
+      select_filter.apply(null, value);
     }
   });
   var options = [];
@@ -699,11 +707,11 @@ function update_facility_list() {
     }
     if (selected_status_i === 0 ||
         facility_status_is[f] === selected_status_i) {
-      var disabledClass = is_facility_closed(facility) ? ' disabled' : '';
       var row = $$('tr', {
         id: 'facility-' + f,
-        'class': 'facility' + disabledClass
-            + maybe_selected(f === selected_facility_i),
+        'class': 'facility' +
+            maybe_disabled(is_facility_closed(facility)) +
+            maybe_selected(f === selected_facility_i),
         onclick: facility_selector(f),
         onmouseover: hover_activator('facility-' + f),
         onmouseout: hover_deactivator('facility-' + f)
@@ -932,6 +940,7 @@ function disable_print_link() {
   }
   print_link.href = 'javascript:void(0)';
   print_link.title = locale.PRINT_DISABLED_TOOLTIP();
+  print_link.target = '';  // prevent Selenium from opening a window in testing
   print_link.onclick = function() {
     // TODO: Use a nice model dialog instead of alert
     alert(locale.PRINT_DISABLED_TOOLTIP());
@@ -953,6 +962,7 @@ function enable_print_link() {
   print_link.href = render(PRINT_URL, {LAT: location.lat, LON: location.lon,
        RAD: PRINT_RADIUS_MILES / METERS_TO_MILES});
   print_link.title = locale.PRINT_ENABLED_TOOLTIP({FACILITY_NAME: title});
+  print_link.target = '_blank';
   print_link.onclick = null;
 }
 
@@ -1145,7 +1155,9 @@ function select_facility(facility_i, ignore_current) {
   for (var f = 1; f < facilities.length; f++) {
     var item = $('facility-' + f);
     if (item) {
-      item.className = 'facility' + maybe_selected(f === facility_i);
+      item.className = 'facility' +
+          maybe_disabled(is_facility_closed(facilities[f])) +
+          maybe_selected(f === selected_facility_i);
     }
   }
 
@@ -1160,8 +1172,10 @@ function select_facility(facility_i, ignore_current) {
 
   if (markers[selected_facility_i]) {
     show_loading(true);
+    var url = 'bubble?facility_name=' + selected_facility.name;
+    _gaq.push(['_trackEvent', 'bubble', 'open', selected_facility.name]);
     jQuery.ajax({
-      url: 'bubble?facility_name=' + selected_facility.name,
+      url: url,
       type: 'GET',
       timeout: 10000,
       error: function(request, textStatus, errorThrown){
@@ -1173,7 +1187,12 @@ function select_facility(facility_i, ignore_current) {
         info.setContent(result);
         info.open(map, markers[selected_facility_i]);
         // Sets up the tabs and should be called after the DOM is created.
-        jQuery('#bubble-tabs').tabs();
+        jQuery('#bubble-tabs').tabs({
+          select: function(event, ui) {
+            _gaq.push(['_trackEvent', 'bubble', 'click ' + ui.panel.id,
+                       selected_facility.name]);
+          }
+        });
         show_loading(false);
       }
     });
