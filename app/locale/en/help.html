@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -11,9 +11,10 @@
   li { margin:0 0 .5em }
   .footer { margin:3em 0 0; text-align:center; color: #666; }
   .q { font-weight: bold }
+  .maincontent { width:760px; margin: 15px; }
 </style>
 </head>
-<body>
+<body class="maincontent">
 <h1>Frequently Asked Questions</h1>
 
 <ol>
@@ -48,7 +49,7 @@
 <p>Google does not review or verify the accuracy of this data.  Anyone can edit information in Resource Finder.
 
 <a name="new"/>
-<p class="q">4. Can I add a facility to Resource Finder that is not listed? 
+<p class="q">4. Can I add a facility to Resource Finder that is not listed?
 
 <p>Only administrators can add a facility, delete a facility, or change the name of a facility.  If you wish to add, delete, or change the name of a facility, please email <a href="mailto:haitiaid@shoreland.com">haitiaid@shoreland.com</a>.
 
@@ -80,7 +81,7 @@
 <a name="mobile"/>
 <p class="q">10. Does Resource Finder work on mobile phones?
 
-<p>The Resource Finder web site may work on smartphones, but it is not yet designed to work well on mobile phones.    
+<p>The Resource Finder web site may work on smartphones, but it is not yet designed to work well on mobile phones.
 
 <a name="own"/>
 <p class="q">11. Who owns the data in Resource Finder?
@@ -97,7 +98,7 @@
 
 <p>Thank you in advance for providing any feedback you have <a href="http://www.google.org/support/bin/request.py?contact_type=do_resource">here</a>.
 
-<p class="footer">&copy;2010 Google - <a href="/privacy">Google Resource Finder Privacy Policy</a> - <a href="/terms">Terms of Service</a> - <a href="http://www.google.com/about.html">About Google</a>
-{% include "../../templates/analytics.html" %}  
+{% include "footer.html" %}
+{% include "../../templates/analytics.html" %}
 </body>
 </html>
