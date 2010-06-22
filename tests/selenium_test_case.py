@@ -1,5 +1,5 @@
 from google.appengine.api import memcache, users
-from model import Facility, MinimalFacility, db
+from model import Subject, MinimalSubject, db
 import datetime
 import os
 import re
@@ -102,32 +102,32 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
 
     # ---------------------------------------- datastore convenience methods
 
-    def put_facility(self, key_name, type='hospital', observed=None,
-                     email='test@example.com', nickname='nickname_foo',
-                     affiliation='affiliation_foo', comment='comment_foo',
-                     **attribute_values):
-        """Stores a Facility and its corresponding MinimalFacility."""
-        facility = Facility(key_name=key_name, type=type)
+    def put_subject(self, key_name, type='hospital', observed=None,
+                    email='test@example.com', nickname='nickname_foo',
+                    affiliation='affiliation_foo', comment='comment_foo',
+                    **attribute_values):
+        """Stores a Subject and its corresponding MinimalSubject."""
+        subject = Subject(key_name=key_name, type=type)
         if observed is None:
             observed = datetime.datetime.now()
         user = users.User(email)
         for key, value in attribute_values.items():
-            facility.set_attribute(
+            subject.set_attribute(
                 key, value, observed, user, nickname, affiliation, comment)
-        facility.put()
-        minimal = MinimalFacility(facility, type=type)
+        subject.put()
+        minimal = MinimalSubject(subject, type=type)
         for key, value in attribute_values.items():
             minimal.set_attribute(key, value)
         minimal.put()
 
-    def delete_facility(self, key_name):
-        """Deletes a Facility and all its child entities from the datastore."""
-        facility = Facility.get_by_key_name(key_name)
-        children = db.Query(keys_only=True).ancestor(facility).fetch(200)
+    def delete_subject(self, key_name):
+        """Deletes a Subject and all its child entities from the datastore."""
+        subject = Subject.get_by_key_name(key_name)
+        children = db.Query(keys_only=True).ancestor(subject).fetch(200)
         while children:
             db.delete(children)
-            children = db.Query(keys_only=True).ancestor(facility).fetch(200)
-        db.delete(facility)
+            children = db.Query(keys_only=True).ancestor(subject).fetch(200)
+        db.delete(subject)
 
     # ----------------------------------------- Selenium convenience methods
 

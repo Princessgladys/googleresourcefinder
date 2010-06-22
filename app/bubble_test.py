@@ -78,23 +78,23 @@ class BubbleTest(unittest.TestCase):
         assert bubble.format(['fake_to_localize'], True == ['fake_localized'])
 
     def test_value_info_extractor(self):
-        f = model.Facility(key_name='example.org/123', type='hospital')
-        f.set_attribute('title', 'title_foo', datetime.datetime.now(),
+        s = model.Subject(key_name='example.org/123', type='hospital')
+        s.set_attribute('title', 'title_foo', datetime.datetime.now(),
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
-        f.set_attribute('attribute_value', 'fake_to_localize',
+        s.set_attribute('attribute_value', 'fake_to_localize',
                         datetime.datetime.now(),
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
                     
         vai = ValueInfoExtractor(['title'], ['attribute_value'])
-        (special, general, details) = vai.extract(f, ['title'])
+        (special, general, details) = vai.extract(s, ['title'])
         
         assert special['title'].raw == 'title_foo'
         assert general == []
         assert details[0].raw == 'title_foo'
         
-        (special, general, details) = vai.extract(f, ['attribute_value'])
+        (special, general, details) = vai.extract(s, ['attribute_value'])
 
         assert general[0].raw == 'fake_to_localize'
         assert general[0].value == 'fake_localized'
@@ -107,17 +107,17 @@ class BubbleTest(unittest.TestCase):
         affiliation = 'affiliation_foo'
         comment = 'comment_foo'
         
-        f = model.Facility(key_name='example.org/123', type='hospital')
-        f.set_attribute('title', 'title_foo', now, user, nickname, affiliation,
+        s = model.Subject(key_name='example.org/123', type='hospital')
+        s.set_attribute('title', 'title_foo', now, user, nickname, affiliation,
                         comment)
-        f.set_attribute(HIDDEN_ATTRIBUTE_NAMES[0], 'hidden_value_foo', now,
+        s.set_attribute(HIDDEN_ATTRIBUTE_NAMES[0], 'hidden_value_foo', now,
                         user, nickname, affiliation, comment)
-        f.set_attribute('organization_name', 'value_foo', now, user, nickname,
+        s.set_attribute('organization_name', 'value_foo', now, user, nickname,
                         affiliation, comment)
 
         attrs = ['title', 'organization_name', HIDDEN_ATTRIBUTE_NAMES[0]]
         vai = HospitalValueInfoExtractor()
-        (special, general, details) = vai.extract(f, attrs)
+        (special, general, details) = vai.extract(s, attrs)
         
         assert special['title'].date == '2010-06-11 09:26:52 -05:00'
         assert special['title'].raw == 'title_foo'

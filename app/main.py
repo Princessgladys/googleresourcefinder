@@ -24,14 +24,14 @@ import rendering
 USE_WHITELISTS = get_secret('use_whitelists') != 'FALSE'
 
 def get_export_link():
-    """If only one facility type, return the direct download link,
+    """If only one subject type, return the direct download link,
     otherwise return a link to the download page"""
     link = '/export'
-    if len(cache.FACILITY_TYPES) > 1:
-        # The /export page can handle rendering multiple facility types
+    if len(cache.SUBJECT_TYPES) > 1:
+        # The /export page can handle rendering multiple subject types
         return link
-    # Shortcut to bypass /export when we have only one facility type
-    return link + '?facility_type=%s' % cache.FACILITY_TYPES.keys()[0]
+    # Shortcut to bypass /export when we have only one subject type
+    return link + '?subject_type=%s' % cache.SUBJECT_TYPES.keys()[0]
 
 class Main(Handler):
 
