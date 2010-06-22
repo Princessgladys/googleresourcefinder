@@ -17,6 +17,9 @@ version: 1
 runtime: python
 api_version: 1
 
+inbound_services:
+- mail
+
 handlers:
 - url: /static
   static_dir: static
@@ -85,6 +88,10 @@ handlers:
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin
 
-- url: /stats.*
-  script: $PYTHON_LIB/google/appengine/ext/appstats/ui.py
+- url: /mail_update_system
+  script: mail_update_system.py
+  login: admin
+
+- url: /subscription_handler
+  script: subscription_handler.py
   login: admin

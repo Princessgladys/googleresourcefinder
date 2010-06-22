@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.appengine.api.labs import taskqueue
+from google.appengine.api.labs.taskqueue import Task
+
 import cache
 import datetime
 import logging
@@ -286,7 +289,7 @@ def has_changed(subject, request, attribute):
         name, request.get(name, None), request, attribute)
     current = render_json(value)
     previous = request.get('editable.%s' % name, None)
-    return previous != current
+    return previous != current and previous
 
 def has_comment_changed(subject, request, attribute):
     """Returns True if the request has a comment for the given attribute
@@ -419,6 +422,7 @@ class Edit(utils.Handler):
                 utcnow, user, account.nickname, account.affiliation)
             has_changes = False
             changed_attributes_dict = {}
+            changed_attribute_values = {}
 
             for name in subject_type.attribute_names:
                 attribute = attributes[name]
@@ -444,7 +448,8 @@ class Edit(utils.Handler):
                                  subject_type, request, attribute,
                                  change_metadata)
                     changed_attributes_dict[name] = attribute
-
+                    changed_attribute_values[name] = value_changed
+            
             if has_changes:
                 # Schedule a task to add a feed record.
                 # We can't really do this inside this transaction, since
@@ -458,6 +463,14 @@ class Edit(utils.Handler):
                 db.put([report, subject, minimal_subject])
                 cache.MINIMAL_SUBJECTS.flush()
                 cache.JSON.flush()
+                
+                # On edit, create a task to e-mail users who have subscribed
+                # to that facility.
+                attrs = changed_attribute_values.copy()
+                attrs['facility_name'] = facility.key().name()
+                attrs['action'] = 'facility_changed'
+                taskqueue.add(url='/mail_update_system', method='POST',
+                              params=attrs, transactional=True)
 
         # Cannot run datastore queries in a transaction outside the entity group
         # being modified, so fetch the attributes here just in case
