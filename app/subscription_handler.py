@@ -27,15 +27,15 @@ class SubscriptionHandler(Handler):
     """Handler for /subscription_handler. Used to handle subscription changes.
     
     Attributes:
+        action: the desired action for this instance of the handler
         email: logged in user's email
-        account: current user's Account object from datastore [see model.py]
-        alert: current user's Alert object from datastore [see model.py]
-        frequencies: dictionary of frequencies for each facility the user is
-            subscribed to
-            
+    
     Functions:
-        get(): responds to HTTP GET requests; do nothing
-        post(): responds to HTTP POST requests; add facility to subscription
+        init(): handles initialization tasks for the class
+        post(): responds to POST requests; create/remove/edit subscriptions
+        subscribe(): subscribes the current user to a particular subject
+        unsubscribe(): desubscribes the current user from a particular subject
+        change_sub_frequency(): changes a praticular subscription's frequency
     """
     
     def init(self):
@@ -44,7 +44,7 @@ class SubscriptionHandler(Handler):
         self.require_logged_in_user()
         self.email = self.user.email()
         if not self.account:
-            #i18n: Error message for request missing facility name.
+            #i18n: Error message for request missing subject name.
             raise ErrorMessage(404, _('Invalid or missing account e-mail.'))
     
     def post(self):
@@ -60,13 +60,14 @@ class SubscriptionHandler(Handler):
             self.change_sub_frequency()
     
     def subscribe(self):
+        """Subscribes the current user to a particular subject."""
         self.require_user()
         email = self.user.email()
-        key_name = '%s:%s' % (email, self.params.facility_name)
+        key_name = '%s:%s' % (email, self.params.subject_name)
         frequency = (self.request.get('frequency') or
                      self.account.default_frequency)
         Subscription(key_name=key_name, frequency=frequency,
-                     facility_name=facility_name, user_email=email).put()
+                     subject_name=subject_name, user_email=email).put()
         
         # update account to include next send time
         account = Account.all().filter('email =', email)
@@ -82,39 +83,41 @@ class SubscriptionHandler(Handler):
         db.put(account)
     
     def unsubscribe(self):
+        """Desubscribes the current user from a particular subject."""
         self.require_user()
         email = self.user.email()
-        key_name = '%s:%s' % (email, self.params.facility_name)
+        key_name = '%s:%s' % (email, self.params.subject_name)
         subcription = Subscription.get_by_key_name(key_name)
         if subscription:
             db.delete(subscription)
         
         for freq in ['daily', 'weekly', 'monthly']:
             alert = PendingAlert.get_by_key_name('%s:%s:%s' %
-                (freq, email, self.params.facility_name))
+                (freq, email, self.params.subject_name))
             if alert:
                 db.delete(alert)
     
     def change_sub_frequency(self):
+        """Change's the current user's subscription to a particular subject."""
         self.require_user()
         email = self.user.email()
-        key_name = '%s:%s' % (email, self.params.facility_name)
+        key_name = '%s:%s' % (email, self.params.subject_name)
         old_frequency = self.request.get('old_frequency')
         frequency = (self.request.get('frequency') or
                      self.account.default_frequency)
         Subscription(key_name=key_name, user_email=email,
-                     facility_name=self.params.facility_name,
+                     subject_name=self.params.subject_name,
                      frequency=frequency).put()
         
         old_pending_key_name = ('%s:%s:%s' %
-            (old_frequency, email, self.params.facility_name))
+            (old_frequency, email, self.params.subject_name))
         old_alert = PendingAlert.get_by_key_name(old_pending_key_name)
         if old_alert:
             new_key_name = '%s:%s:%s' % (frequency, email,
-                                         self.params.facility_name)
+                                         self.params.subject_name)
             PendingAlert(key_name=new_key_name,
                          user_email=old_alert.user_email,
-                         facility_name=old_alert.facility_name,
+                         subject_name=old_alert.subject_name,
                          old_values=old_alert.old_values,
                          frequency=frequency).put()
             db.delete(old_alert)

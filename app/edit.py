@@ -385,7 +385,7 @@ class Edit(utils.Handler):
             self.request.get('token')):
             raise ErrorMessage(403, 'Unable to submit data for %s'
                                % self.user.email())
-
+        
         if not self.account.nickname:
             nickname = self.request.get('account_nickname', None)
             if not nickname:
@@ -463,7 +463,7 @@ class Edit(utils.Handler):
                 db.put([report, facility, minimal_facility])
                 cache.MINIMAL_FACILITIES.flush()
                 cache.JSON.flush()
-
+                
                 # On edit, create a task to e-mail users who have subscribed
                 # to that facility.
                 attrs = changed_attribute_values.copy()
