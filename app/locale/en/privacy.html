@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -6,10 +6,11 @@
 <style>
   body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
   h1 { font-size: 16px }
-  .footer {margin:3em 0 0; text-align:center; color: #666; }
+  .footer { margin: 3em 0 0; text-align: center; color: #666; }
+  .maincontent { width: 760px; margin: 15px; }
 </style>
 </head>
-<body>
+<body class="maincontent">
 <h1>Google Resource Finder Privacy Policy</h1>
 <p>The <a href="http://www.google.com/privacy.html">Google Privacy Policy</a> describes how we treat personal information when you use Google's products and services, including Google Resource Finder. In addition, the following describes our privacy practices that are specific to certain features of Google Resource Finder (referred to below as “the Service”).
 
@@ -23,7 +24,7 @@
 <h3>Communication with users:</h3>
 <p>The Google Resource Finder team may communicate with you at the email ID voluntarily given by you. In addition, you may also opt to receive notifications from the Google Resource Finder team on the email ID given by you. You consent to receiving such email communications from the Google Resource Finder team or moderators and agree that such email communication does not constitute spam or unsolicited email communications (or terms of equivalent import as may be used in your jurisdiction).
 
-<p class="footer">&copy;2010 Google - <a href="/terms">Google Resource Finder Terms of Service</a> - <a href="http://www.google.com/about.html">About Google</a>
+{% include "footer.html" %}
 {% include "../../templates/analytics.html" %}
 </body>
 </html>

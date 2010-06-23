@@ -274,7 +274,7 @@ msgid "Error loading facility information."
 msgstr ""
 
 #. Button to export data to comma-separated-values format.
-#: export.py:142 templates/map.html:192
+#: templates/map.html:195 export.py:142
 msgid "Export CSV"
 msgstr ""
 
@@ -354,7 +354,7 @@ msgid "Hospital"
 msgstr ""
 
 #. Explains how to correct incorrect information that has been printed.
-#: templates/map.html:205
+#: templates/map.html:208
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr ""
 
@@ -424,7 +424,7 @@ msgid "Loader:"
 msgstr ""
 
 #. Indicator that the application is loading.
-#: templates/map.html:144
+#: templates/map.html:147
 msgid "Loading..."
 msgstr ""
 
@@ -596,7 +596,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr ""
 
 #. Link to privacy policy for the application
-#: templates/map.html:110
+#: templates/map.html:112
 msgid "Privacy"
 msgstr ""
 
@@ -684,7 +684,7 @@ msgid "Supplies"
 msgstr ""
 
 #. Link to terms of service for the application
-#: templates/map.html:106
+#: templates/map.html:107
 msgid "Terms of Service"
 msgstr ""
 
@@ -699,7 +699,7 @@ msgid "Total beds"
 msgstr ""
 
 #. Total number of facilities shown on the map.
-#: templates/map.html:161
+#: templates/map.html:164
 msgid "Total facilities"
 msgstr ""
 
@@ -709,7 +709,7 @@ msgid "URL:"
 msgstr ""
 
 #. Error message
-#: utils.py:124
+#: utils.py:134
 msgid "Unauthorized user."
 msgstr ""
 
@@ -739,7 +739,7 @@ msgid "Vascular Surgery"
 msgstr ""
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:197
+#: templates/map.html:200
 msgid "View Master List archive"
 msgstr ""
 
@@ -771,7 +771,7 @@ msgid "Your request for %(action)s is already registered"
 msgstr ""
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
-#: templates/map.html:171
+#: templates/map.html:174
 msgid "and with availability."
 msgstr ""
 
@@ -791,7 +791,7 @@ msgid "capacity"
 msgstr ""
 
 #. Header for the number of facilities less than 10 miles from a location.
-#: templates/map.html:166
+#: templates/map.html:169
 msgid "no more than 10 miles away"
 msgstr ""
 
