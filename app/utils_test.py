@@ -80,6 +80,9 @@ class HandlerTest(MediumTestCase):
         assert self.handler.params.lang == 'en'
         assert self.handler.params.maps_lang == 'en'
         assert self.response.headers['Content-Language'] == 'en'
+        assert django.utils.translation.get_language() == 'en'
+        assert utils.get_lang() == 'en'
+        assert utils.get_locale() == 'en'
 
         # test cookie
         self.handler.params.lang = ''
@@ -87,24 +90,36 @@ class HandlerTest(MediumTestCase):
         self.handler.select_locale()
         assert self.handler.params.lang == 'fr'
         assert self.handler.params.maps_lang == 'fr'
+        assert django.utils.translation.get_language() == 'fr'
+        assert utils.get_lang() == 'fr'
+        assert utils.get_locale() == 'fr'
 
         # if self.params.lang is already set, don't change it.
         self.handler.params.lang = 'ht'
         self.handler.select_locale()
         assert self.handler.params.lang == 'ht'
-        assert self.handler.params.maps_lang == 'fr'
+        assert self.handler.params.maps_lang == 'fr'  # fallback
+        assert django.utils.translation.get_language() == 'ht'
+        assert utils.get_lang() == 'ht'
+        assert utils.get_locale() == 'ht'
 
         # test alternate language code
-        alt_lang = config.ALTERNATE_LANG_CODES.keys()[0]
-        self.handler.params.lang = alt_lang
+        self.handler.params.lang = 'es'
         self.handler.select_locale()
-        assert self.handler.params.lang == config.ALTERNATE_LANG_CODES[alt_lang]
+        assert self.handler.params.lang == 'es-419'
+        assert self.handler.params.maps_lang == 'es-419'
+        assert django.utils.translation.get_language() == 'es-419'
+        assert utils.get_lang() == 'es-419'
+        assert utils.get_locale() == 'es_419'
 
-        # test maps_lang and django language select
+        # test a language with a subcode
         self.handler.params.lang = 'es-419'
         self.handler.select_locale()
         assert self.handler.params.lang == 'es-419'
+        assert self.handler.params.maps_lang == 'es-419'
         assert django.utils.translation.get_language() == 'es-419'
+        assert utils.get_lang() == 'es-419'
+        assert utils.get_locale() == 'es_419'
 
 
 class UtilsTest(MediumTestCase):
