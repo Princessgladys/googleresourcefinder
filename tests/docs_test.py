@@ -16,6 +16,19 @@ class DocsTest(SeleniumTestCase):
         self.assert_text_present('Frequently Asked Questions')
 
     def test_languages(self):
+        # English (en)
+        self.open_path('/help?lang=en')
+        self.assert_text_present('Frequently Asked Questions')
+
+        self.click_and_wait('link=Terms of Service')
+        self.assert_text_present('Terms of Service for Google Resource Finder')
+
+        self.click_and_wait('link=Privacy')
+        self.assert_text_present('Google Resource Finder Privacy Policy')
+
+        self.click_and_wait('link=Help')
+        self.assert_text_present('Frequently Asked Questions')
+
         # Spanish (es-419)
         self.open_path('/help?lang=es')
         self.assert_text_present('Preguntas frecuentes')
@@ -55,8 +68,8 @@ class DocsTest(SeleniumTestCase):
             u'Kondisyon S\u00e8vis pou Resource Finder Google')
 
         self.click_and_wait(u'link=Vi prive')
-        self.assert_text_present(
-            u'Politik Resp\u00e8 Pou Moun ak \u201cResource Finder\u201d nan Google')
+        self.assert_text_present(u'Politik Resp\u00e8 Pou Moun ak ' +
+                                 u'\u201cResource Finder\u201d nan Google')
 
         self.click_and_wait(u'link=Ed')
         self.assert_text_present(u'Kesyon Div\u00e8s Moun Poze Tout Tan')
