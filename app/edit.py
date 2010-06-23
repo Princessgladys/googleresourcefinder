@@ -289,7 +289,7 @@ def has_changed(subject, request, attribute):
         name, request.get(name, None), request, attribute)
     current = render_json(value)
     previous = request.get('editable.%s' % name, None)
-    return previous != current and previous
+    return previous != current and current
 
 def has_comment_changed(subject, request, attribute):
     """Returns True if the request has a comment for the given attribute
@@ -467,8 +467,9 @@ class Edit(utils.Handler):
                 # On edit, create a task to e-mail users who have subscribed
                 # to that facility.
                 attrs = changed_attribute_values.copy()
-                attrs['facility_name'] = facility.key().name()
-                attrs['action'] = 'facility_changed'
+                attrs['subject_name'] = subject.key().name()
+                attrs['action'] = 'subject_changed'
+                logging.info(attrs)
                 taskqueue.add(url='/mail_update_system', method='POST',
                               params=attrs, transactional=True)
 

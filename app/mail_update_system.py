@@ -33,7 +33,7 @@ from google.appengine.ext import db
 
 import cache
 import utils
-from model import Account, subject, PendingAlert, Subscription
+from model import Account, Subject, PendingAlert, Subscription
 from utils import _, Handler
 
 # Set up localization.
@@ -116,7 +116,7 @@ class MailUpdateSystem(Handler):
         users who were subscribed to immediate updates for this particular
         subject.
         """
-        subject = subject.get_by_key_name(self.params.subject_name)
+        subject = Subject.get_by_key_name(self.params.subject_name)
         old_values = []
         for arg in self.request.arguments():
             if arg not in ['action', 'subject_name']:
@@ -169,7 +169,7 @@ class MailUpdateSystem(Handler):
             alerts_to_delete = []
             subjects = {}
             for alert in pending_alerts:
-                subj = subject.get_by_key_name(alert.subject_name)
+                subj = Subject.get_by_key_name(alert.subject_name)
                 values = self.fetch_updates(alert, subj)
                 subjects[subj.key().name()] = {subj.get_value('title'):
                     values}
@@ -195,7 +195,7 @@ class MailUpdateSystem(Handler):
                   ... }
         """
         updated_attrs = []
-        subject_type = cache.subject_TYPES[subject.type]
+        subject_type = cache.SUBJECT_TYPES[subject.type]
         
         old_values = {}
         for value in alert.old_values:
