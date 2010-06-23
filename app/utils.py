@@ -183,10 +183,12 @@ class Handler(webapp.RequestHandler):
            parameter has priority, then the 'django_language' cookie, then the
            default setting."""
         # lang will be a Django language code: all lowercase, with a dash
-        # between the language and optional region (e.g. 'en', 'de-at', 'fr-ca').
-        lang = (self.params.lang or
+        # between the language and optional region (e.g. 'en', 'fr-ca').
+        lang = (
+            self.params.lang or
             self.request.cookies.get('django_language', None) or
-            settings.LANGUAGE_CODE).replace('_', '-')
+            settings.LANGUAGE_CODE
+        ).replace('_', '-')
 
         # Check for and potentially convert an alternate language code.
         if lang not in dict(config.LANGUAGES):
