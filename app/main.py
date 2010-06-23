@@ -29,7 +29,7 @@ def get_export_link():
     link = '/export'
     if len(cache.SUBJECT_TYPES) == 1:
         # Shortcut to bypass /export when we have only one subject type
-        return link + '?subject_type=%s' % cache.FACILITY_TYPES.keys()[0]
+        return link + '?subject_type=%s' % cache.SUBJECT_TYPES.keys()[0]
     # The /export page can handle rendering multiple subject types
     return link
 

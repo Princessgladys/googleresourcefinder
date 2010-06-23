@@ -19,8 +19,6 @@ import time
 import utils
 import UserDict
 
-import django.utils.translation
-
 from google.appengine.api import memcache
 
 """Caching layer for Resource Finder, taking advantage of both memcache
@@ -30,24 +28,23 @@ and in-memory caches."""
 class JsonCache:
     """Memcache layer for JSON rendered by rendering.py. Offers significant
     startup performance increase."""
-    def _memcache_key(self, locale):
+    def get_memcache_key(self, locale):
         return '%s_%s' % (self.__class__.__name__, locale)
 
     def set(self, locale, json):
         """Sets the value in this cache for the given locale"""
-        if not memcache.set(self._memcache_key(locale), json):
-            logging.error('Memcache set of %s failed'
-                          % self._memcache_key(locale))
+        key = self.get_memcache_key(locale)
+        if not memcache.set(key, json):
+            logging.error('Memcache set of %s failed' % key)
 
     def get(self, locale):
         """Gets the value in this cache for the given locale"""
-        return memcache.get(self._memcache_key(locale))
+        return memcache.get(self.get_memcache_key(locale))
 
     def flush(self):
         """Flushes the values in this cache for all locales."""
-        memcache.delete_multi(
-            list(self._memcache_key(django.utils.translation.to_locale(lang[0]))
-                 for lang in config.LANGUAGES))
+        locales = map(utils.get_locale, dict(config.LANGUAGES).keys())
+        memcache.delete_multi(map(self.get_memcache_key, locales))
 
 
 class Cache(UserDict.DictMixin):

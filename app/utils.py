@@ -50,9 +50,9 @@ ROOT = os.path.dirname(__file__)
 # Set up localization.
 from django.conf import settings
 try:
-  settings.configure()
+    settings.configure()
 except:
-  pass
+    pass
 settings.LANGUAGE_CODE = 'en'
 settings.USE_I18N = True
 settings.LOCALE_PATHS = (os.path.join(ROOT, 'locale'),)
@@ -92,11 +92,21 @@ def validate_float(text):
     except ValueError:
         return None
 
+def get_lang():
+    """Gets the current Django language code (a lowercase language code
+    followed by an optional hyphen and lowercase subcode)."""
+    return django.utils.translation.get_language()
+
+def get_locale(lang=None):
+    """Gets the current Django locale code (a lowercase two-letter language
+    code followed by an optional underscore and uppercase country code),
+    or converts the specified Django language code to a locale code."""
+    return django.utils.translation.to_locale(lang or get_lang())
+
 def get_message(namespace, name):
+    """Gets a translated message (in the current language)."""
     message = cache.MESSAGES.get((namespace, name))
-    django_locale = django.utils.translation.to_locale(
-        django.utils.translation.get_language())
-    return message and getattr(message, django_locale) or name
+    return message and getattr(message, get_locale()) or name
 
 class Struct:
     pass
@@ -170,26 +180,26 @@ class Handler(webapp.RequestHandler):
 
     def select_locale(self):
         """Detect and activate the appropriate locale.  The 'lang' query
-           parameter has priority, then the rflang cookie, then the
+           parameter has priority, then the 'django_language' cookie, then the
            default setting."""
-        # self.param.lang will use dashes (fr-CA), which is more common
-        # externally, but django wants underscores (fr_CA). If you need
-        # that version, use django.utils.translation.get_language()
-        self.params.lang = (self.params.lang or
+        # lang will be a Django language code: all lowercase, with a dash
+        # between the language and optional region (e.g. 'en', 'de-at', 'fr-ca').
+        lang = (self.params.lang or
             self.request.cookies.get('django_language', None) or
-            settings.LANGUAGE_CODE)
-        # Check for and potentially convert an alternate language code
-        self.params.lang = config.ALTERNATE_LANG_CODES.get(
-            self.params.lang, self.params.lang)
-        if self.params.lang not in list(lang[0] for lang in config.LANGUAGES):
-          self.params.lang = settings.LANGUAGE_CODE
+            settings.LANGUAGE_CODE).replace('_', '-')
 
-        self.params.maps_lang = config.GOOGLE_MAPS_ALTERNATE_LANG_CODES.get(
-            self.params.lang, self.params.lang)
-        self.response.headers.add_header(
-            'Set-Cookie', 'django_language=%s' % self.params.lang)
-        django.utils.translation.activate(self.params.lang.replace('-', '_'))
-        self.response.headers.add_header('Content-Language', self.params.lang)
+        # Check for and potentially convert an alternate language code.
+        if lang not in dict(config.LANGUAGES):
+            lang = config.LANG_FALLBACKS.get(lang, settings.LANGUAGE_CODE)
+
+        # Store the language settings in params.lang and params.maps_lang.
+        self.params.lang = lang
+        self.params.maps_lang = config.MAPS_LANG_FALLBACKS.get(lang, lang)
+
+        # Activate the selected language.
+        django.utils.translation.activate(lang)
+        self.response.headers.add_header('Set-Cookie', 'lang=%s' % lang)
+        self.response.headers.add_header('Content-Language', lang)
 
     def handle_exception(self, exception, debug_mode):
         if isinstance(exception, Redirect):
