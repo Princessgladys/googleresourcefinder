@@ -62,7 +62,16 @@ def get_timedelta(account, frequency):
 
 
 def form_body(values):
-    """Forms the body text for an e-mail."""
+    """Forms the body text for an e-mail. Expects the data to be input in the
+    following format:
+    
+        { subject_key { subject_title [
+            (attribute, value),
+            (attribute, value) ] },
+          subject_key { subject_title [
+            (attribute, value),
+            (attribute, value) ] } }
+    """
     body = ''
     for subject_name in values:
         subject_title = values[subject_name].keys()[0]
@@ -106,9 +115,7 @@ class MailUpdateSystem(Handler):
             self.update_and_add_pending_subs()
         else:
             for freq in ['daily', 'weekly', 'monthly']:
-                self.send_digests('daily')
-                self.send_digests('weekly')
-                self.send_digests('monthly')
+                self.send_digests(freq)
     
     def update_and_add_pending_subs(self):
         """Called when a subject is changed. It creates PendingAlerts for
@@ -117,33 +124,43 @@ class MailUpdateSystem(Handler):
         subject.
         """
         subject = Subject.get_by_key_name(self.params.subject_name)
-        old_values = []
+        old_values = {}
+        new_values = []
         for arg in self.request.arguments():
             if arg not in ['action', 'subject_name']:
-                old_values.append((arg, self.request.get(arg)))
-            
+                if arg == '%s__old' % arg[:-5]:
+                    old_values[arg[:-5]] = self.request.get(arg)
+                elif arg == '%s__new' % arg[:-5]:
+                    new_values.append((arg[:-5], self.request.get(arg)))
+        
         subscriptions = Subscription.all().filter('subject_name =',
             self.params.subject_name)
         body = form_body({self.params.subject_name: {
-            subject.get_value('title'): old_values}})
+            subject.get_value('title'): new_values}})
         for subscription in subscriptions:
             if subscription.frequency != 'immediate':
                 # queue pending alerts for non-immediate update subscriptions
                 key_name = '%s:%s:%s' % (subscription.frequency,
                                          subscription.user_email,
                                          subscription.subject_name)
-                old_values_str=['%s:%s' % (x[0], x[1]) for x in old_values]
+                old_values_str=['%s:%s' % (x, old_values[x])
+                                for x in old_values]
                 pa = PendingAlert.get_or_insert(key_name,
                     user_email=subscription.user_email,
                     subject_name=subscription.subject_name,
                     frequency=subscription.frequency,
                     old_values=old_values_str)
-                if pa and len(old_values) != len(pa.old_values):
-                    for i in range(len(old_values)):
-                        if old_values[i] not in pa.old_values[i]:
-                            pa.old_values.append('%s:%s' %
-                                (old_values[i][0], old_values[i][1]))
-                    db.put(pa)
+                
+                # if new values have been changed after the pending alert was
+                # originally created, store their original values as well
+                pa_old_value_keys = []
+                for value in pa.old_values:
+                    pa_old_value_keys.append(value[:value.find(':')])
+                    
+                for key in old_values:
+                    if key not in pa_old_value_keys:
+                        pa.old_values.append('%s:%s' % (key, old_values[key]))
+                db.put(pa)
             else:
                 # send out alerts for those with immediate update subscriptions
                 account = Account.all().filter('email =',
@@ -156,8 +173,8 @@ class MailUpdateSystem(Handler):
         'monthly']. Also removes pending alerts once an e-mail has been sent
         and updates the account's next alert times.
         """
-        now = datetime.datetime.now()
-        accounts = Account.all().filter('next_%s_alert <' % frequency, now)
+        accounts = Account.all().filter('next_%s_alert <' % frequency,
+            datetime.datetime.now())
         for account in accounts:
             min_key = db.Key.from_path('PendingAlert', '%s:%s:' %
                 (frequency, account.email))

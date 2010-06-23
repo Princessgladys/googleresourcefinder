@@ -289,7 +289,7 @@ def has_changed(subject, request, attribute):
         name, request.get(name, None), request, attribute)
     current = render_json(value)
     previous = request.get('editable.%s' % name, None)
-    return previous != current and current
+    return previous != current and (previous, current)
 
 def has_comment_changed(subject, request, attribute):
     """Returns True if the request has a comment for the given attribute
@@ -448,7 +448,10 @@ class Edit(utils.Handler):
                                  subject_type, request, attribute,
                                  change_metadata)
                     changed_attributes_dict[name] = attribute
-                    changed_attribute_values[name] = value_changed
+                    changed_attribute_values['%s__old' % name] = \
+                        value_changed
+                    changed_attribute_values['%s__new' % name] = \
+                        value_changed
             
             if has_changes:
                 # Schedule a task to add a feed record.
@@ -469,7 +472,6 @@ class Edit(utils.Handler):
                 attrs = changed_attribute_values.copy()
                 attrs['subject_name'] = subject.key().name()
                 attrs['action'] = 'subject_changed'
-                logging.info(attrs)
                 taskqueue.add(url='/mail_update_system', method='POST',
                               params=attrs, transactional=True)
 
