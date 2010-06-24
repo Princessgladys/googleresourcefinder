@@ -27,6 +27,7 @@ __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 import datetime
 import logging
 import os
+import pickle
 
 from google.appengine.api import mail
 from google.appengine.ext import db
@@ -34,7 +35,7 @@ from google.appengine.ext import db
 import cache
 import utils
 from model import Account, Subject, PendingAlert, Subscription
-from utils import _, Handler
+from utils import _, Handler, simplejson
 
 # Set up localization.
 ROOT = os.path.dirname(__file__)
@@ -48,17 +49,15 @@ settings.USE_I18N = True
 settings.LOCALE_PATHS = (os.path.join(ROOT, 'locale'),)
 import django.utils.translation
 
-FREQUENCY_TO_DATETIME = {
+FREQUENCY_TO_TIMEDELTA = {
     'daily': datetime.timedelta(1),
     'weekly': datetime.timedelta(7),
     'monthly': datetime.timedelta(30)
 }
 
-def get_timedelta(account, frequency):
+def get_timedelta(frequency):
     """Given a text frequency, converts it to a timedelta."""
-    if frequency == 'default':
-        return FREQUENCY_TO_DATETIME[account.default_frequency]
-    return FREQUENCY_TO_DATETIME[frequency]
+    return FREQUENCY_TO_TIMEDELTA[frequency]
 
 
 def form_body(values):
@@ -89,7 +88,7 @@ class MailUpdateSystem(Handler):
     Attributes:
         action: the specific action to be taken by the class
             
-    Functions:
+    Methods:
         init(): handles initialization tasks for the class
         post(): responds to HTTP POST requests
         update_and_add_pending_subs(): queues up future digest alerts and sends
@@ -112,6 +111,8 @@ class MailUpdateSystem(Handler):
         self.init()
         
         if self.action == 'subject_changed':
+            self.request_data = pickle.loads(str(simplejson.loads(
+                self.request.get('data'))))
             self.update_and_add_pending_subs()
         else:
             for freq in ['daily', 'weekly', 'monthly']:
@@ -126,15 +127,18 @@ class MailUpdateSystem(Handler):
         subject = Subject.get_by_key_name(self.params.subject_name)
         old_values = {}
         new_values = []
-        for arg in self.request.arguments():
-            if arg not in ['action', 'subject_name']:
-                if arg == '%s__old' % arg[:-5]:
-                    old_values[arg[:-5]] = self.request.get(arg)
-                elif arg == '%s__new' % arg[:-5]:
-                    new_values.append((arg[:-5], self.request.get(arg)))
+        for arg in self.request_data:
+            if arg == '%s__old' % arg[:-5]:
+                old_values[arg[:-5]] = self.request_data[arg]
+            elif arg == '%s__new' % arg[:-5]:
+                new_values.append((arg[:-5], self.request_data[arg]))
         
-        subscriptions = Subscription.all().filter('subject_name =',
+        min_key = db.Key.from_path('Subscription', '%s:' %
             self.params.subject_name)
+        max_key = db.Key.from_path('Subscription', u'%s:\xff' %
+            self.params.subject_name)
+        subscriptions = Subscription.all().filter('__key__ >', min_key
+            ).filter('__key__ <', max_key)
         body = form_body({self.params.subject_name: {
             subject.get_value('title'): new_values}})
         for subscription in subscriptions:
@@ -231,15 +235,13 @@ class MailUpdateSystem(Handler):
     def update_account_alert_time(self, account, frequency):
         """Updates a particular account to send an alert at the appropriate
         later date, depending on the given frequency."""
+        new_time = datetime.datetime.now() + get_timedelta(frequency)
         if frequency == 'daily':
-            account.next_daily_alert = (datetime.datetime.now() + 
-                get_timedelta(account, frequency))
+            account.next_daily_alert = new_time
         elif frequency == 'weekly':
-            account.next_weekly_alert = (datetime.datetime.now() + 
-                get_timedelta(account, frequency))
+            account.next_weekly_alert = new_time
         elif frequency == 'monthly':
-            account.next_monthly_alert = (datetime.datetime.now() + 
-                get_timedelta(account, frequency))
+            account.next_monthly_alert = new_time
     
     def send_email(self, locale, to, body):
         """Sends a single e-mail update.

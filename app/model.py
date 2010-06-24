@@ -257,20 +257,20 @@ class Dump(db.Model):
 class Subscription(db.Model):
     """A subscription by a user to receive notification when details for a
     facility change. Top-level entity, has no parent.
-    Key name: follows the format user_email:subject_name"""
+    Key name: follows the format subject_name:user_email"""
     user_email = db.StringProperty(required=True) # user to alert
     subject_name = db.StringProperty(required=True) # key_name of subject
     frequency = db.StringProperty(required=True, choices=[
         'immediate', # send an alert whenever the facility is updated
         'daily', # send during a daily digest e-mail
         'weekly', # send during a weekly digest e-mail
-        'monthly', # send during a monthly digest e-mail
-        'default' # look to the account default frequency
+        'monthly' # send during a monthly digest e-mail
     ]) # frequency of updates for this subject
 
 class PendingAlert(db.Model):
-    """A pending subscription by a user; used to 'queue' up subscriptions as
-    necessary. Top-level entity, has no parent.
+    """A pending notification for a user; waiting to be sent on a daily/weekly/
+    monthly basis, pending the frequency of the particular alrt. Top-level
+    entity, has no parent.
     Key name: follows the format frequency:user_email:subject_name"""
     user_email = db.StringProperty(required=True) # user to alert
     subject_name = db.StringProperty(required=True) # key_name of subject
@@ -279,8 +279,7 @@ class PendingAlert(db.Model):
         'immediate', # send an alert whenever the subject is updated
         'daily', # send during a daily digest e-mail
         'weekly', # send during a weekly digest e-mail
-        'monthly', # send during a monthly digest e-mail
-        'default' # look to the account default frequency
+        'monthly' # send during a monthly digest e-mail
     ]) # frequency of updates for this subject
 
 def value_or_none(value):

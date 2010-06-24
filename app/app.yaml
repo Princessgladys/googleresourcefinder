@@ -92,6 +92,6 @@ handlers:
   script: mail_update_system.py
   login: admin
 
-- url: /subscription_handler
-  script: subscription_handler.py
+- url: /subscribe
+  script: subscribe.py
   login: admin
