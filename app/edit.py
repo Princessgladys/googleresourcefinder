@@ -19,7 +19,9 @@ import cache
 import datetime
 import logging
 import model
+import pickle
 import re
+import StringIO
 import urlparse
 import utils
 import wsgiref
@@ -282,8 +284,9 @@ def apply_change(subject, minimal_subject, report, subject_type,
                                 change_metadata)
 
 def has_changed(subject, request, attribute):
-    """Returns True if the request has an input for the given attribute
-    and that attribute has changed from the previous value in subject."""
+    """Returns a tuple containing the previous and current values if the
+    request has an input for the given attribute and that attribute has changed
+    from the previous value in subject."""
     name = attribute.key().name()
     value = ATTRIBUTE_TYPES[attribute.type].to_stored_value(
         name, request.get(name, None), request, attribute)
@@ -449,9 +452,9 @@ class Edit(utils.Handler):
                                  change_metadata)
                     changed_attributes_dict[name] = attribute
                     changed_attribute_values['%s__old' % name] = \
-                        value_changed
+                        value_changed[0]
                     changed_attribute_values['%s__new' % name] = \
-                        value_changed
+                        value_changed[1]
             
             if has_changes:
                 # Schedule a task to add a feed record.
@@ -468,12 +471,17 @@ class Edit(utils.Handler):
                 cache.JSON.flush()
                 
                 # On edit, create a task to e-mail users who have subscribed
-                # to that facility.
+                # to that subject.
                 attrs = changed_attribute_values.copy()
-                attrs['subject_name'] = subject.key().name()
-                attrs['action'] = 'subject_changed'
+                json_pickle_attrs = simplejson.dumps(pickle.dumps(attrs))
+                
+                params = {}
+                params['subject_name'] = subject.key().name()
+                params['action'] = 'subject_changed'
+                params['data'] = json_pickle_attrs
+                
                 taskqueue.add(url='/mail_update_system', method='POST',
-                              params=attrs, transactional=True)
+                              params=params, transactional=True)
 
         # Cannot run datastore queries in a transaction outside the entity group
         # being modified, so fetch the attributes here just in case

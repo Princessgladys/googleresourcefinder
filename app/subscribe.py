@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Acts on HTTP POST requests to /subscription_handler and adds subscriptions to a user's
+"""Acts on HTTP POST requests to /subscribe and adds subscriptions to a user's
 alert information in the datastore.
 
-SubscriptionHandler(utils.Handler): handles calls to /subscription_handler
+Subscribe(utils.Handler): handles calls to /subscribe
 """
 
 __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
@@ -23,14 +23,14 @@ __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 from model import PendingAlert, Subscription
 from utils import db, Handler, run
 
-class SubscriptionHandler(Handler):
-    """Handler for /subscription_handler. Used to handle subscription changes.
+class Subscribe(Handler):
+    """Handler for /subscribe. Used to handle subscription changes.
     
     Attributes:
         action: the desired action for this instance of the handler
         email: logged in user's email
     
-    Functions:
+    Methods:
         init(): handles initialization tasks for the class
         post(): responds to POST requests; create/remove/edit subscriptions
         subscribe(): subscribes the current user to a particular subject
@@ -48,7 +48,7 @@ class SubscriptionHandler(Handler):
             raise ErrorMessage(404, _('Invalid or missing account e-mail.'))
     
     def post(self):
-        """Responds to HTTP POST requests to /subscription_handler by adding / subtracting
+        """Responds to HTTP POST requests to /subscribe by adding / subtracting
         user subscriptions to / from the datastore, as necessary."""
         self.init()
         
@@ -63,7 +63,7 @@ class SubscriptionHandler(Handler):
         """Subscribes the current user to a particular subject."""
         self.require_user()
         email = self.user.email()
-        key_name = '%s:%s' % (email, self.params.subject_name)
+        key_name = '%s:%s' % (self.params.subject_name, email)
         frequency = (self.request.get('frequency') or
                      self.account.default_frequency)
         Subscription(key_name=key_name, frequency=frequency,
@@ -86,7 +86,7 @@ class SubscriptionHandler(Handler):
         """Desubscribes the current user from a particular subject."""
         self.require_user()
         email = self.user.email()
-        key_name = '%s:%s' % (email, self.params.subject_name)
+        key_name = '%s:%s' % (self.params.subject_name, email)
         subcription = Subscription.get_by_key_name(key_name)
         if subscription:
             db.delete(subscription)
@@ -101,7 +101,7 @@ class SubscriptionHandler(Handler):
         """Change's the current user's subscription to a particular subject."""
         self.require_user()
         email = self.user.email()
-        key_name = '%s:%s' % (email, self.params.subject_name)
+        key_name = '%s:%s' % (self.params.subject_name, email)
         old_frequency = self.request.get('old_frequency')
         frequency = (self.request.get('frequency') or
                      self.account.default_frequency)
@@ -123,4 +123,4 @@ class SubscriptionHandler(Handler):
             db.delete(old_alert)
 
 if __name__ == '__main__':
-    run([('/subscription_handler', SubscriptionHandler)], debug=True)
+    run([('/subscribe', Subscribe)], debug=True)
