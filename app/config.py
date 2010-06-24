@@ -22,9 +22,9 @@ LANGUAGES = [('en', 'English'),
              ('es-419', u'Espa\u00F1ol'), # Spanish (Latin American)
              ]
 
-# Mapping of alternate language code to internal representation
-ALTERNATE_LANG_CODES = { 'es': 'es-419', }
+# A map from unavailable languages to the best available fallback languages.
+LANG_FALLBACKS = {'es': 'es-419'}
 
-# Google maps is not available in all languages. This maps from unavailable
+# Google Maps is not available in all languages.  This maps from unavailable
 # languages to the best available fallback language.
-GOOGLE_MAPS_ALTERNATE_LANG_CODES = { 'ht' : 'fr', }
+MAPS_LANG_FALLBACKS = {'ht': 'fr'}

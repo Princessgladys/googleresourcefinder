@@ -155,6 +155,12 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         self.wait_until(self.is_element_present, locator)
         self.wait_until(self.is_element_present, locator)
 
+    def click_and_wait(self, locator):
+        """Clicks a link that is supposed to load a page, then waits for the
+        page to finish loading."""
+        self.click(locator)
+        self.wait_for_load()
+
     def click_and_wait_for_new_window(self, link_id):
         """Clicks a link that is supposed to open a new window, waits for the
         new window to load, and switches to the new window for subsequent
@@ -202,3 +208,11 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
             match(string_or_regex, value),
             'Element %s: actual value %r does not match %r' %
             (locator, value, string_or_regex))
+
+    def assert_text_present(self, string):
+        """Asserts that the given text is present somewhere on the page."""
+        self.assertTrue(
+            self.is_text_present(string),
+            'Expected text %r is not present on page %s' %
+            (string, self.get_location())
+        )
