@@ -14,13 +14,12 @@
 
 import cache
 import datetime
-import django.utils.translation
 import re
 import sets
 import sys
 from feeds.geo import distance
 from model import Attribute, Subject, SubjectType, Message, MinimalSubject
-from utils import HIDDEN_ATTRIBUTE_NAMES, db, Date, simplejson
+from utils import Date, HIDDEN_ATTRIBUTE_NAMES, db, get_locale, simplejson
 
 def make_jobjects(entities, transformer, *args):
     """Run a sequence of entities through a transformer function that produces
@@ -104,10 +103,8 @@ def clean_json(json):
 
 def render_json(center=None, radius=None):
     """Dump the data as a JSON string."""
-    django_locale = django.utils.translation.to_locale(
-        django.utils.translation.get_language())
-
-    json = cache.JSON.get(django_locale)
+    locale = get_locale()
+    json = cache.JSON.get(locale)
     if json and not center:
         return json
 
@@ -145,7 +142,7 @@ def render_json(center=None, radius=None):
     message_jobjects = {}
     for message in cache.MESSAGES.values():
         namespace = message_jobjects.setdefault(message.namespace, {})
-        namespace[message.name] = getattr(message, django_locale)
+        namespace[message.name] = getattr(message, locale)
 
     json = clean_json(simplejson.dumps({
         'total_subject_count': total_subject_count,
@@ -156,5 +153,5 @@ def render_json(center=None, radius=None):
     # set indent=2 to pretty-print; it blows up download size, so defaults off
     }, indent=None, default=json_encode))
     if not center:
-        cache.JSON.set(django_locale, json)
+        cache.JSON.set(locale, json)
     return json
