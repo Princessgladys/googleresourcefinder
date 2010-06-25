@@ -18,7 +18,10 @@ Accesses the Account data structure to retrieve subject updates for each user,
 then sends out information to each user per their subscription settings.
 
 get_timedelta(account, subject): returns a text frequency as a timedelta
+fetch_updates(): returns a dictionary of updated values for the given subject
 form_body(values): forms the e-mail body for an update e-mail
+send_email(): sends an e-mail with the supplied information
+update_account_alert_time(): updates an account's next_%freq%_alert time
 MailUpdateSystem(utils.Handler): handler class to send e-mail updates
 """
 
@@ -60,6 +63,34 @@ def get_timedelta(frequency):
     return FREQUENCY_TO_TIMEDELTA[frequency]
 
 
+def fetch_updates(alert, subject):
+    """For a given alert and subject, finds any updated values.
+    
+    Returns:
+        A dictionary mapping attributes to updated values. Example:
+        
+            { attr1: new_value1,
+              attr2: new_value2,
+              ... }
+    """
+    updated_attrs = []
+    subject_type = cache.SUBJECT_TYPES[subject.type]
+    
+    old_values = {}
+    for value in alert.old_values:
+        update = value.split(':')
+        old_values[update[0]] = update[1]
+        
+    for attr in subject_type.attribute_names:
+        value = subject.get_value(attr)
+        if not value and value != 0:
+            continue
+        if attr in old_values and value != old_values[attr]:
+            updated_attrs.append((attr, value))
+    
+    return updated_attrs
+    
+
 def form_body(values):
     """Forms the body text for an e-mail. Expects the data to be input in the
     following format:
@@ -82,6 +113,50 @@ def form_body(values):
     return body
 
 
+def send_email(locale, sender, to, subject, body):
+    """Sends a single e-mail update.
+    
+    Args:
+        locale: the locale whose language to use for the email
+        to: the user to send the update to
+        body: the text to use as the body of the e-mail
+    """
+    django.utils.translation.activate(locale)
+    
+    message = mail.EmailMessage()
+    message.sender = sender
+    message.to = to
+    message.subject = subject
+    message.body = body
+    
+    message.send()
+
+
+def update_account_alert_time(account, frequency, initial=False):
+    """Updates a particular account to send an alert at the appropriate
+    later date, depending on the given frequency.
+    
+    Args:
+        account: the account whose time is to be updated
+        frequency: used to determine how much to update by
+        initial: (optional) tells the function to check if this is the first
+            time setting the account's update times"""
+    new_time = datetime.datetime.now() + get_timedelta(frequency)
+    if initial:
+        if frequency == 'daily' and not account.next_daily_alert:
+            account.next_daily_alert = new_time
+        elif frequency == 'weekly' and not account.next_weekly_alert:
+            account.next_weekly_alert = new_time
+        elif frequency == 'monthly' and not account.next_monthly_alert:
+            account.next_monthly_alert = new_time
+    else:
+        if frequency == 'daily':
+            account.next_daily_alert = new_time
+        elif frequency == 'weekly':
+            account.next_weekly_alert = new_time
+        elif frequency == 'monthly':
+            account.next_monthly_alert = new_time
+
 class MailUpdateSystem(Handler):
     """Handler for /mail_update_system. Used to handle e-mail update sending.
     
@@ -94,9 +169,6 @@ class MailUpdateSystem(Handler):
         update_and_add_pending_subs(): queues up future digest alerts and sends
             out immediate updates; called when a subject is changed
         send_digests(): sends out a digest update for the specified frequency
-        fetch_updates(): returns a dictionary of updated values for the given
-            subject
-        send_email(): sends an e-mail with the supplied information
     """
     
     def init(self):
@@ -169,7 +241,10 @@ class MailUpdateSystem(Handler):
                 # send out alerts for those with immediate update subscriptions
                 account = Account.all().filter('email =',
                     subscription.user_email).get()
-                self.send_email(account.locale, account.email, body)
+                send_email(account.locale,
+                           'updates@resource-finder.appspotmail.com',
+                           account.email, utils.to_unicode(
+                           _('Resource Finder subject Updates')), body)
     
     def send_digests(self, frequency):
         """Sends out a digest update for the specified frequency. Currently
@@ -191,7 +266,7 @@ class MailUpdateSystem(Handler):
             subjects = {}
             for alert in pending_alerts:
                 subj = Subject.get_by_key_name(alert.subject_name)
-                values = self.fetch_updates(alert, subj)
+                values = fetch_updates(alert, subj)
                 subjects[subj.key().name()] = {subj.get_value('title'):
                     values}
                 alerts_to_delete.append(alert)
@@ -200,67 +275,13 @@ class MailUpdateSystem(Handler):
                 continue
             
             body = form_body(subjects)
-            self.send_email(account.locale, account.email, body)
-            self.update_account_alert_time(account, frequency)
+            send_email(account.locale,
+                       'updates@resource-finder.appspotmail.com',
+                       account.email, utils.to_unicode(
+                       _('Resource Finder subject Updates')), body)
+            update_account_alert_time(account, frequency)
             db.delete(alerts_to_delete)
             db.put(account)
-            
-    def fetch_updates(self, alert, subject):
-        """For a given alert and subject, finds any updated values.
-        
-        Returns:
-            A dictionary mapping attributes to updated values. Example:
-            
-                { attr1: new_value1,
-                  attr2: new_value2,
-                  ... }
-        """
-        updated_attrs = []
-        subject_type = cache.SUBJECT_TYPES[subject.type]
-        
-        old_values = {}
-        for value in alert.old_values:
-            update = value.split(':')
-            old_values[update[0]] = update[1]
-            
-        for attr in subject_type.attribute_names:
-            value = subject.get_value(attr)
-            if not value and value != 0:
-                continue
-            if attr in old_values and value != old_values[attr]:
-                updated_attrs.append((attr, value))
-        
-        return updated_attrs
-    
-    def update_account_alert_time(self, account, frequency):
-        """Updates a particular account to send an alert at the appropriate
-        later date, depending on the given frequency."""
-        new_time = datetime.datetime.now() + get_timedelta(frequency)
-        if frequency == 'daily':
-            account.next_daily_alert = new_time
-        elif frequency == 'weekly':
-            account.next_weekly_alert = new_time
-        elif frequency == 'monthly':
-            account.next_monthly_alert = new_time
-    
-    def send_email(self, locale, to, body):
-        """Sends a single e-mail update.
-        
-        Args:
-            locale: the locale whose language to use for the email
-            to: the user to send the update to
-            body: the text to use as the body of the e-mail
-        """
-        django.utils.translation.activate(locale)
-        
-        message = mail.EmailMessage()
-        message.sender = 'updates@resource-finder.appspotmail.com'
-        message.to = to
-        message.subject = utils.to_unicode(
-            _('Resource Finder subject Updates'))
-        message.body = body
-        
-        message.send()
 
 
 if __name__ == '__main__':

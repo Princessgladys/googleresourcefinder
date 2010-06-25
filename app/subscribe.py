@@ -20,8 +20,10 @@ Subscribe(utils.Handler): handles calls to /subscribe
 
 __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 
+import utils
+from mail_update_system import fetch_updates, form_body, send_email
 from model import PendingAlert, Subscription
-from utils import db, Handler, run
+from utils import _, db, Handler, run
 
 class Subscribe(Handler):
     """Handler for /subscribe. Used to handle subscription changes.
@@ -62,25 +64,13 @@ class Subscribe(Handler):
     def subscribe(self):
         """Subscribes the current user to a particular subject."""
         self.require_user()
-        email = self.user.email()
-        key_name = '%s:%s' % (self.params.subject_name, email)
+        key_name = '%s:%s' % (self.params.subject_name, self.email)
         frequency = (self.request.get('frequency') or
                      self.account.default_frequency)
         Subscription(key_name=key_name, frequency=frequency,
-                     subject_name=subject_name, user_email=email).put()
-        
-        # update account to include next send time
-        account = Account.all().filter('email =', email)
-        if frequency == 'daily' and not account.next_daily_alert:
-            account.next_daily_alert = (datetime.datetime.now +
-                get_timedelta(frequency))
-        elif frequency == 'weekly' and not account.next_weekly_alert:
-            account.next_weekly_alert = (datetime.datetime.now +
-                get_timedelta(frequency))
-        elif frequency == 'monthly' and not account.next_monthly_alert:
-            account.next_monthly_alert = (datetime.datetime.now +
-                get_timedelta(frequency))
-        db.put(account)
+                     subject_name=subject_name, user_email=self.email).put()
+        update_account_alert_time(self.account, frequency, initial=True)
+        db.put(self.account)
     
     def unsubscribe(self):
         """Desubscribes the current user from a particular subject."""
@@ -90,7 +80,6 @@ class Subscribe(Handler):
         subcription = Subscription.get_by_key_name(key_name)
         if subscription:
             db.delete(subscription)
-        
         for freq in ['daily', 'weekly', 'monthly']:
             alert = PendingAlert.get_by_key_name('%s:%s:%s' %
                 (freq, email, self.params.subject_name))
@@ -113,13 +102,23 @@ class Subscribe(Handler):
             (old_frequency, email, self.params.subject_name))
         old_alert = PendingAlert.get_by_key_name(old_pending_key_name)
         if old_alert:
-            new_key_name = '%s:%s:%s' % (frequency, email,
-                                         self.params.subject_name)
-            PendingAlert(key_name=new_key_name,
-                         user_email=old_alert.user_email,
-                         subject_name=old_alert.subject_name,
-                         old_values=old_alert.old_values,
-                         frequency=frequency).put()
+            if frequency = 'immediate':
+                subj = Subject.get_by_key_name(old_alert.subject_name)
+                values = fetch_updates(old_alert, subj)
+                body = form_body({old_alert.subject_name:
+                    {subj.get_value('title'): values}})
+                send_email(self.account.locale,
+                           'updates@resource-finder.appspotmail.com',
+                           self.account.email, utils.to_unicode(
+                           _('Resource Finder subject Updates')), body)
+            else:
+                new_key_name = '%s:%s:%s' % (frequency, email,
+                                             self.params.subject_name)
+                PendingAlert(key_name=new_key_name,
+                             user_email=old_alert.user_email,
+                             subject_name=old_alert.subject_name,
+                             old_values=old_alert.old_values,
+                             frequency=frequency).put()
             db.delete(old_alert)
 
 if __name__ == '__main__':
