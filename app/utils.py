@@ -223,7 +223,8 @@ class Handler(webapp.RequestHandler):
 
         # Activate the selected language.
         django.utils.translation.activate(lang)
-        self.response.headers.add_header('Set-Cookie', 'lang=%s' % lang)
+        self.response.headers.add_header(
+            'Set-Cookie', 'django_language=%s' % lang)
         self.response.headers.add_header('Content-Language', lang)
 
     def get_subdomain_root(self, subdomain):
