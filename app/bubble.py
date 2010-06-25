@@ -126,8 +126,8 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
     def __init__(self):
         ValueInfoExtractor.__init__(
             self,
-            ['title', 'location', 'available_beds', 'total_beds',
-             'healthc_id', 'pcode', 'address', 'services', 'operational_status'],
+            ['title', 'location', 'available_beds', 'total_beds', 'healthc_id',
+             'pcode', 'address', 'services', 'operational_status'],
             # TODO(kpy): This list is redundant; see the comment above
             # in ValueInfoExtractor.
             ['services', 'organization_type', 'category', 'construction',
@@ -145,24 +145,27 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
         return (special, general, details)
 
 VALUE_INFO_EXTRACTORS = {
-    'hospital': HospitalValueInfoExtractor(),
+    'haiti': {
+        'hospital': HospitalValueInfoExtractor(),
+    }
 }
 
 class Bubble(Handler):
     def get(self):
-        subject = model.Subject.get_by_key_name(self.params.subject_name)
+        subject = model.Subject.get(self.subdomain, self.params.subject_name)
         if not subject:
             #i18n: Error message for request missing subject name.
             raise ErrorMessage(404, _('Invalid or missing subject name.'))
-        subject_type = cache.SUBJECT_TYPES[subject.type]
+        subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
 
-        value_info_extractor = VALUE_INFO_EXTRACTORS[subject.type]
+        value_info_extractor = VALUE_INFO_EXTRACTORS[
+            self.subdomain][subject.type]
         (special, general, details) = value_info_extractor.extract(
             subject, subject_type.attribute_names)
-        edit_link = '/edit?subject_name=%s' % self.params.subject_name
+        edit_url = self.get_url('/edit', subject_name=self.params.subject_name)
 
         self.render(value_info_extractor.template_name,
-                    edit_link=edit_link,
+                    edit_url=edit_url,
                     subject_name=self.params.subject_name,
                     last_updated=max(detail.date for detail in details),
                     special=special,

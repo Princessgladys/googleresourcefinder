@@ -24,16 +24,28 @@ import unittest
         
 class AccessTest(unittest.TestCase):
     def setUp(self):
-        self.auth = Account(timestamp=datetime.datetime.now(),
-                            description='description',
-                            email='test@example.com', user_id='test',
-                            nickname='test', affiliation='test', token='test',
-                            actions=[ACTIONS[0], ACTIONS[1]],
-                            requested_actions=[ACTIONS[2]])
+        self.account = Account(timestamp=datetime.datetime.now(),
+                               description='description',
+                               email='test@example.com', user_id='test',
+                               nickname='test', affiliation='test',
+                               actions=['*:view', 'foo:add', 'bar:*'],
+                               requested_actions=['xyz:remove'])
                        
     def test_action_permitted(self):
-        for action in ACTIONS:
-            if action in self.auth.actions:
-                assert access.check_action_permitted(self.auth, action) == True
-            else:
-                assert access.check_action_permitted(self.auth, action) == False
+        # 'foo:add' should apply only to subdomain 'foo' and verb 'add'
+        assert access.check_action_permitted(self.account, 'foo', 'add')
+        assert not access.check_action_permitted(self.account, 'foo', 'edit')
+        assert not access.check_action_permitted(self.account, 'foo', 'remove')
+        assert not access.check_action_permitted(self.account, 'xyz', 'add')
+
+        # 'bar:*' should work for any verb
+        assert access.check_action_permitted(self.account, 'bar', 'add')
+        assert access.check_action_permitted(self.account, 'bar', 'edit')
+        assert access.check_action_permitted(self.account, 'bar', 'remove')
+        assert not access.check_action_permitted(self.account, 'xyz', 'remove')
+
+        # '*:view' should work for any subdomain
+        assert access.check_action_permitted(self.account, 'foo', 'view')
+        assert access.check_action_permitted(self.account, 'bar', 'view')
+        assert access.check_action_permitted(self.account, 'xyz', 'view')
+        assert not access.check_action_permitted(self.account, 'xyz', 'grant')

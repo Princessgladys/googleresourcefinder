@@ -25,20 +25,22 @@ class MainTestCase(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
         self.put_subject(
-            'example.org/1000', title='title_foo1', location=db.GeoPt(51.5, 0))
+            'haiti', 'example.org/1000',
+            title='title_foo1', location=db.GeoPt(51.5, 0))
         self.put_subject(
-            'example.org/1001', title='title_foo2', location=db.GeoPt(50.5, 1),
+            'haiti', 'example.org/1001',
+            title='title_foo2', location=db.GeoPt(50.5, 1),
             operational_status='CLOSED_OR_CLOSING')
 
     def tearDown(self):
-        self.delete_subject('example.org/1000')
-        self.delete_subject('example.org/1001')
+        self.delete_subject('haiti', 'example.org/1000')
+        self.delete_subject('haiti', 'example.org/1001')
         SeleniumTestCase.tearDown(self)
 
     def test_elements_present(self):
         """Confirms that listbox and maps with elements are present and
         interaction between a list and a map works."""    
-        self.login('/')
+        self.login('/?subdomain=haiti')
  
         # Check list column names        
         assert self.is_text_present('Facility')
@@ -70,7 +72,7 @@ class MainTestCase(SeleniumTestCase):
     def test_closed_facilities(self):
         """Confirms that closed facilities appear grey in the facility list
         and have a warning message in their info bubble."""
-        self.login('/')
+        self.login('/?subdomain=haiti')
 
         # Wait for list to populate
         self.wait_for_element('subject-2')
@@ -94,9 +96,10 @@ class MainTestCase(SeleniumTestCase):
 
         # Change facility 1000 to closed
         self.put_subject(
-            'example.org/1000', title='title_foo1', location=db.GeoPt(51.5, 0),
+            'haiti', 'example.org/1000',
+            title='title_foo1', location=db.GeoPt(51.5, 0),
             operational_status='CLOSED_OR_CLOSING')
-        self.open_path('/?flush=yes')
+        self.open_path('/?subdomain=haiti&flush=yes')
         assert 'disabled' in self.get_attribute('//tr[@id="subject-1"]/@class')
 
         # TODO(kpy): The just-closed facility should have a new message in its

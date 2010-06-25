@@ -177,7 +177,7 @@ def main():
         setup.setup_datastore()
 
         model.Account(email='test@example.com', description='Test',
-                      actions=[':view', ':edit', 'grant']).put()
+                      actions=['*:view', '*:edit', '*:grant']).put()
 
         # Gather the selected tests, or all the tests if none were specified.
         loader = unittest.defaultTestLoader

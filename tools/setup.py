@@ -17,6 +17,7 @@ from extract_messages import parse_message, PATTERNS
 from feeds import crypto
 from model import *
 from utils import *
+import cache
 
 def setup_subject_types():
     """Sets up the attributes and subject types."""
@@ -77,7 +78,7 @@ def setup_subject_types():
     db.put(attributes)
 
     hospital = SubjectType(
-        key_name='hospital',
+        key_name='haiti:hospital',
         attribute_names=[a.key().name() for a in attributes],
         minimal_attribute_names=['title', 'pcode', 'healthc_id',
                                  'available_beds', 'total_beds', 'services',
@@ -339,7 +340,7 @@ def setup_datastore():
     information will not be changed or deleted.)"""
     setup_subject_types()
     setup_messages()
-    memcache.flush_all()  # flush any cached entities
+    cache.flush_all()  # flush any cached entities
 
 def wipe_datastore(*kinds):
     """Deletes everything in the datastore except Accounts and Secrets.
@@ -359,7 +360,7 @@ def reset_datastore():
     setup_datastore()
 
 def add_account(email='test@example.com', description=None,
-                nickname=None, affiliation=None, actions=[':view', ':edit']):
+                nickname=None, affiliation=None, actions=['*:*']):
     """Adds an Account entity to the datastore."""
     Account(email=email, description=description or email,
             nickname=nickname or email.split('@')[0],

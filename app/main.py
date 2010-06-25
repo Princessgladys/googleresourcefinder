@@ -23,18 +23,7 @@ import rendering
 # Secret(key_name='use_whitelists', value='FALSE').put() in a console
 USE_WHITELISTS = get_secret('use_whitelists') != 'FALSE'
 
-def get_export_link():
-    """If only one subject type, return the direct download link,
-    otherwise return a link to the download page"""
-    link = '/export'
-    if len(cache.SUBJECT_TYPES) == 1:
-        # Shortcut to bypass /export when we have only one subject type
-        return link + '?subject_type=%s' % cache.SUBJECT_TYPES.keys()[0]
-    # The /export page can handle rendering multiple subject types
-    return link
-
 class Main(Handler):
-
     def get(self):
         if USE_WHITELISTS:
             self.require_logged_in_user()
@@ -43,19 +32,37 @@ class Main(Handler):
         center = None
         if self.params.lat is not None and self.params.lon is not None:
             center = {'lat': self.params.lat, 'lon': self.params.lon}
+        home_url = self.get_url('/')
+        login_url = users.create_login_url(home_url)
+        logout_url = users.create_logout_url(home_url)
         self.render('templates/map.html',
                     params=self.params,
                     #i18n: a user with no identity
                     authorization=user and user.email() or _('anonymous'),
-                    loginout_url=(user and users.create_logout_url('/') or
-                                  users.create_login_url('/')),
+                    loginout_url=user and logout_url or login_url,
                     #i18n: Link to sign out of the app
                     loginout_text=(user and _('Sign out')
                                    #i18n: Link to sign into the app
                                    or _('Sign in')),
-                    data=rendering.render_json(center, self.params.rad),
-                    export_link=get_export_link(),
-                    instance=self.request.host.split('.')[0])
+                    data=rendering.render_json(
+                        self.subdomain, center, self.params.rad),
+                    home_url=home_url,
+                    export_url=self.get_export_url(),
+                    print_url=self.get_url('/?print=yes'),
+                    bubble_url=self.get_url('/bubble'),
+                    subdomain=self.subdomain)
+
+    def get_export_url(self):
+        """If only one subject type, return the direct download link URL,
+        otherwise return a link to the download page"""
+        types = cache.SUBJECT_TYPES[self.subdomain].values()
+        if len(types) == 1:
+            # Shortcut to bypass /export when we have only one subject type
+            return self.get_url('/export', subject_type=types[0])
+        else:
+            # The /export page can handle rendering multiple subject types
+            return self.get_url('/export')
+
 
 if __name__ == '__main__':
     run([('/', Main)], debug=True)
