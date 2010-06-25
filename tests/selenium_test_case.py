@@ -124,7 +124,10 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
     def delete_subject(self, subdomain, subject_name):
         """Deletes a Subject and all its child entities from the datastore."""
         subject = Subject.get(subdomain, subject_name)
-        db.delete(db.Query(keys_only=True).ancestor(subject).fetch(1000))
+        children = db.Query(keys_only=True).ancestor(subject).fetch(200)
+        while children:
+            db.delete(children)
+            children = db.Query(keys_only=True).ancestor(subject).fetch(200)
         db.delete(subject)
 
     # ----------------------------------------- Selenium convenience methods

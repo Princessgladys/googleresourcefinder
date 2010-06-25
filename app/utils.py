@@ -315,13 +315,13 @@ def to_utf8(string):
     return string
 
 def urlencode(params):
-  """Apply UTF-8 encoding to any Unicode strings in the parameter dict.
-  Leave 8-bit strings alone.  (urllib.urlencode doesn't support Unicode.)"""
-  keys = params.keys()
-  keys.sort()  # Sort the keys to get canonical ordering
-  return urllib.urlencode([
-      (to_utf8(key), to_utf8(params[key]))
-      for key in keys if isinstance(params[key], basestring)])
+    """Apply UTF-8 encoding to any Unicode strings in the parameter dict.
+    Leave 8-bit strings alone.  (urllib.urlencode doesn't support Unicode.)"""
+    keys = params.keys()
+    keys.sort()  # Sort the keys to get canonical ordering
+    return urllib.urlencode([
+        (to_utf8(key), to_utf8(params[key]))
+        for key in keys if isinstance(params[key], basestring)])
 
 def set_url_param(url, param, value):
     """Modifies a URL, setting the given param to the specified value.  This

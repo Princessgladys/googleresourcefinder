@@ -44,7 +44,7 @@ class Subdomain(db.Model):
     permitted actions of Accounts and key_names of Subjects and SubjectTypes
     are namespaced by prefixing them with the subdomain name and a colon.  All
     other entities are shared across all subdomains."""
-    # No properties for now; only the key_name is significant.
+    pass  # No properties for now; only the key_name is significant.
 
 
 def filter_by_prefix(query, key_name_prefix, root_kind=None):
