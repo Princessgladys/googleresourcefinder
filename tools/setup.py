@@ -19,6 +19,11 @@ from model import *
 from utils import *
 import cache
 
+def setup_subdomains():
+    """Sets up the subdomain record."""
+    Subdomain(key_name='haiti').put()
+
+
 def setup_subject_types():
     """Sets up the attributes and subject types."""
     def attr(type, name, values=[], edit_action=None):
@@ -338,6 +343,7 @@ def setup_datastore():
     """Sets up the subject types and translations in a datastore.  (Existing
     subject types and messages will be updated; existing Subject or Report
     information will not be changed or deleted.)"""
+    setup_subdomains()
     setup_subject_types()
     setup_messages()
     cache.flush_all()  # flush any cached entities
@@ -345,7 +351,7 @@ def setup_datastore():
 def wipe_datastore(*kinds):
     """Deletes everything in the datastore except Accounts and Secrets.
     If 'kinds' is given, deletes only those kinds of entities."""
-    for kind in kinds or [Attribute, SubjectType, Message, Dump,
+    for kind in kinds or [Subdomain, Attribute, SubjectType, Message, Dump,
                           MinimalSubject, Subject, Report]:
         keys = kind.all(keys_only=True).fetch(200)
         while keys:

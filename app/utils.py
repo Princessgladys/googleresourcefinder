@@ -226,6 +226,17 @@ class Handler(webapp.RequestHandler):
         self.response.headers.add_header('Set-Cookie', 'lang=%s' % lang)
         self.response.headers.add_header('Content-Language', lang)
 
+    def get_subdomain_root(self, subdomain):
+        """Gets the URL to the main page for a subdomain."""
+        host = self.request.headers['Host']
+        levels = host.split('.')
+        if levels[-2:] == ['appspot', 'com']:
+            if len(levels) >= 5:  # kpy.latest.resource-finder.appspot.com
+                return 'http://%s.%s/' % (subdomain, '.'.join(levels[-5:]))
+            elif len(levels) >= 3:  # resource-finder.appspot.com
+                return 'http://%s.%s/' % (subdomain, '.'.join(levels[-3:]))
+        return 'http://%s/?subdomain=%s' % (host, subdomain)
+
     def get_url(self, path, **params):
         """Constructs a relative URL for a given path and query parameters,
         preserving the current 'subdomain' parameter if there is one."""

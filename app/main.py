@@ -16,6 +16,7 @@ from google.appengine.api import users
 from utils import _
 import access
 import cache
+import model
 import rendering
 import utils
 
@@ -27,6 +28,20 @@ USE_WHITELISTS = utils.get_secret('use_whitelists') != 'FALSE'
 
 class Main(utils.Handler):
     def get(self):
+        if not self.subdomain:
+            # Get the list of available subdomains.
+            names = [s.key().name() for s in model.Subdomain.all()]
+
+            # If there's only one subdomain, go straight there.
+            if len(names) == 1:
+                raise utils.Redirect(self.get_subdomain_root(names[0]))
+
+            # Show the menu of available subdomains.
+            self.render('templates/subdomain_menu.html', subdomains=[
+                utils.Struct(name=name, url=self.get_subdomain_root(name))
+                for name in names])
+            return
+
         if USE_WHITELISTS:
             self.require_logged_in_user()
 
