@@ -35,7 +35,7 @@ from access import check_action_permitted
 
 class GrantAccess(utils.Handler):
     def get(self):
-        """ Shows all requests for waiting for approval"""
+        """Shows all access requests that are waiting for approval."""
 
         self.require_action_permitted('grant')
 
@@ -52,10 +52,12 @@ class GrantAccess(utils.Handler):
         self.render('templates/grant_access.html',
                     requests=requests,
                     params=self.params,
-                    logout_url=users.create_logout_url('/'))
+                    grant_url=self.get_url('/grant_access'),
+                    logout_url=users.create_logout_url('/'),
+                    subdomain=self.subdomain)
 
     def post(self):
-        """ Shows all requests for waiting for approval"""
+        """Grants or denies a single request."""
 
         action = self.request.get('action')
         if not action:
@@ -93,7 +95,7 @@ class GrantAccess(utils.Handler):
                     #i18n: Application for the given permission action denied
                     _('Request for becoming %(action)s was denied.') % action)
         else:
-            raise Redirect('/grant_access')
+            raise Redirect(self.get_url('/grant_access'))
 
 if __name__ == '__main__':
     utils.run([('/grant_access', GrantAccess)], debug=True)

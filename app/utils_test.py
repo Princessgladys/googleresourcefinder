@@ -54,15 +54,18 @@ class HandlerTest(MediumTestCase):
 
     def test_require_action_permitted(self):
         """Confirms require_action_permitted is working correctly"""
+        # 'grant' is not allowed
         assert_raises(utils.Redirect,
                       self.handler.require_action_permitted, 'grant')
 
         self.handler.account = Account(email='foo@example.com',
                                        description='Test',
-                                       actions=['view', 'edit'])
+                                       actions=['*:view', '*:edit'])
 
+        # 'grant' is still not allowed
         assert_raises(utils.ErrorMessage,
                       self.handler.require_action_permitted, 'grant')
+        # 'view' should be allowed
         self.handler.require_action_permitted('view')
 
     def test_require_logged_in_user(self):
@@ -72,11 +75,11 @@ class HandlerTest(MediumTestCase):
         self.handler.user = users.User(email='foo@example.com')
         self.handler.require_logged_in_user()
 
-    def test_select_locale(self):
-        """Confirm select_locale works as expected"""
+    def test_select_lang(self):
+        """Confirm select_lang works as expected"""
         # English by default
         self.handler.params.lang = ''
-        self.handler.select_locale()
+        self.handler.select_lang()
         assert self.handler.params.lang == 'en'
         assert self.handler.params.maps_lang == 'en'
         assert self.response.headers['Content-Language'] == 'en'
@@ -87,7 +90,7 @@ class HandlerTest(MediumTestCase):
         # test cookie
         self.handler.params.lang = ''
         self.handler.request.cookies['django_language'] = 'fr'
-        self.handler.select_locale()
+        self.handler.select_lang()
         assert self.handler.params.lang == 'fr'
         assert self.handler.params.maps_lang == 'fr'
         assert django.utils.translation.get_language() == 'fr'
@@ -96,7 +99,7 @@ class HandlerTest(MediumTestCase):
 
         # if self.params.lang is already set, don't change it.
         self.handler.params.lang = 'ht'
-        self.handler.select_locale()
+        self.handler.select_lang()
         assert self.handler.params.lang == 'ht'
         assert self.handler.params.maps_lang == 'fr'  # fallback
         assert django.utils.translation.get_language() == 'ht'
@@ -105,7 +108,7 @@ class HandlerTest(MediumTestCase):
 
         # test alternate language code
         self.handler.params.lang = 'es'
-        self.handler.select_locale()
+        self.handler.select_lang()
         assert self.handler.params.lang == 'es-419'
         assert self.handler.params.maps_lang == 'es-419'
         assert django.utils.translation.get_language() == 'es-419'
@@ -114,7 +117,7 @@ class HandlerTest(MediumTestCase):
 
         # test a language with a subcode
         self.handler.params.lang = 'es-419'
-        self.handler.select_locale()
+        self.handler.select_lang()
         assert self.handler.params.lang == 'es-419'
         assert self.handler.params.maps_lang == 'es-419'
         assert django.utils.translation.get_language() == 'es-419'

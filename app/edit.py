@@ -302,10 +302,10 @@ def is_editable(request, attribute):
     at the time the edit page was rendered."""
     return 'editable.%s' % attribute.key().name() in request.arguments()
 
-def can_edit(account, attribute):
+def can_edit(account, subdomain, attribute):
     """Returns True if the user can edit the given attribute."""
     return not attribute.edit_action or check_action_permitted(
-        account, attribute.edit_action)
+        account, subdomain, attribute.edit_action)
 
 def get_suggested_nickname(user):
     """Returns the suggested Account.nickname based on a user.nickname"""
@@ -322,18 +322,18 @@ class Edit(utils.Handler):
     def init(self):
         """Checks for logged-in user and sets up self.subject
         and self.subject_type based on the query params."""
-
         self.require_logged_in_user()
 
         if USE_WHITELISTS:
             self.require_action_permitted('edit')
 
-        self.subject = model.Subject.get_by_key_name(
-            self.params.subject_name)
+        self.subject = model.Subject.get(
+            self.subdomain, self.params.subject_name)
         if not self.subject:
             #i18n: Error message for request missing subject name.
             raise ErrorMessage(404, _('Invalid or missing subject name.'))
-        self.subject_type = cache.SUBJECT_TYPES[self.subject.type]
+        self.subject_type = \
+            cache.SUBJECT_TYPES[self.subdomain][self.subject.type]
 
     def get(self):
         self.init()
@@ -347,7 +347,7 @@ class Edit(utils.Handler):
             comment = self.subject.get_comment(attribute.key().name())
             if not comment:
                 comment = ''
-            if can_edit(self.account, attribute):
+            if can_edit(self.account, self.subdomain, attribute):
                 fields.append({
                     'name': name,
                     'title': get_message('attribute_name', name),
@@ -369,14 +369,15 @@ class Edit(utils.Handler):
             fields=fields, readonly_fields=readonly_fields,
             account=self.account,
             suggested_nickname=get_suggested_nickname(self.user),
-            params=self.params, logout_url=users.create_logout_url('/'),
-            instance=self.request.host.split('.')[0])
+            params=self.params, edit_url=self.get_url('/edit'),
+            logout_url=users.create_logout_url('/'),
+            subdomain=self.subdomain)
 
     def post(self):
         self.init()
 
         if self.request.get('cancel'):
-            raise Redirect('/')
+            raise Redirect(self.get_url('/'))
 
         if not verify(XSRF_KEY_NAME, self.user.user_id(),
             self.request.get('token')):
@@ -406,8 +407,7 @@ class Edit(utils.Handler):
 
         def update(key, subject_type, request, user, account, attributes):
             subject = db.get(key)
-            minimal_subject = model.MinimalSubject.all().ancestor(
-                subject).get()
+            minimal_subject = model.MinimalSubject.get_by_subject(subject)
             utcnow = datetime.datetime.utcnow().replace(microsecond=0)
             report = model.Report(
                 subject,
@@ -431,7 +431,7 @@ class Edit(utils.Handler):
                     subject, request, attribute)
                 if (is_editable(request, attribute) and
                     (value_changed or comment_changed)):
-                    if not can_edit(account, attribute):
+                    if not can_edit(account, self.subdomain, attribute):
                         raise ErrorMessage(
                             403, _(
                             #i18n: Error message for lacking edit permissions
@@ -456,8 +456,8 @@ class Edit(utils.Handler):
                 # schedule_add_record(self.request, user,
                 #     subject, changed_attributes_dict, utcnow)
                 db.put([report, subject, minimal_subject])
-                cache.MINIMAL_SUBJECTS.flush()
-                cache.JSON.flush()
+                cache.MINIMAL_SUBJECTS[self.subdomain].flush()
+                cache.JSON[self.subdomain].flush()
 
         # Cannot run datastore queries in a transaction outside the entity group
         # being modified, so fetch the attributes here just in case
@@ -468,7 +468,7 @@ class Edit(utils.Handler):
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
         else:
-            raise Redirect('/')
+            raise Redirect(self.get_url('/'))
 
 if __name__ == '__main__':
     utils.run([('/edit', Edit)], debug=True)
