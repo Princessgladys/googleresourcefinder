@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cache
 from access import *
 from extract_messages import parse_message, PATTERNS
 from feeds import crypto
 from model import *
 from utils import *
-import cache
 
 def setup_subdomains():
     """Sets up the subdomain record."""
