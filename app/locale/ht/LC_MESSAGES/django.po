@@ -107,7 +107,7 @@ msgid "Blood Bank"
 msgstr "Bank san"
 
 #. Save a copy of the data in CSV format
-#: export.py:126
+#: export.py:128
 msgid "CSV Export"
 msgstr "Ekspote CSV"
 
@@ -274,7 +274,7 @@ msgid "Error loading facility information."
 msgstr "Erè transpòte etablisman enfòmasyon."
 
 #. Button to export data to comma-separated-value format.
-#: templates/map.html:197 export.py:140
+#: export.py:141 templates/map.html:197
 msgid "Export CSV"
 msgstr "Ekspote CSV"
 
@@ -648,7 +648,7 @@ msgid "Save"
 msgstr "Anrejistre"
 
 #. Label for a selector to export data to CSV
-#: export.py:130
+#: export.py:132
 msgid "Select subject type to export:"
 msgstr "Idantite kalite etablisman ekspòtasyon"
 
@@ -663,12 +663,12 @@ msgid "Show"
 msgstr "Ekspoze"
 
 #. Link to sign into the app
-#: main.py:46
+#: main.py:48
 msgid "Sign in"
 msgstr "Mete Anprent"
 
 #. Link to sign out of the app
-#: main.py:44
+#: main.py:46
 msgid "Sign out"
 msgstr "Sòti"
 
@@ -770,7 +770,7 @@ msgid "and with availability."
 msgstr "Avek anpil abilite"
 
 #. a user with no identity
-#: main.py:41
+#: main.py:43
 msgid "anonymous"
 msgstr "anonim"
 

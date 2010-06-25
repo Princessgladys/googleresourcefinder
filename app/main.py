@@ -12,18 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utils import Handler, Redirect, get_secret, run, users, _
+from google.appengine.api import users
+from utils import _
 import access
 import cache
 import rendering
+import utils
 
 # We use a Secret in the db to determine whether or not the app should be
 # configured to require login to view and 'editor' role to edit. Whitelists
 # are on by default. To allow anyone to view and logged-in users to edit, run
 # Secret(key_name='use_whitelists', value='FALSE').put() in a console
-USE_WHITELISTS = get_secret('use_whitelists') != 'FALSE'
+USE_WHITELISTS = utils.get_secret('use_whitelists') != 'FALSE'
 
-class Main(Handler):
+class Main(utils.Handler):
     def get(self):
         if USE_WHITELISTS:
             self.require_logged_in_user()
@@ -58,11 +60,12 @@ class Main(Handler):
         types = cache.SUBJECT_TYPES[self.subdomain].values()
         if len(types) == 1:
             # Shortcut to bypass /export when we have only one subject type
-            return self.get_url('/export', subject_type=types[0])
+            subdomain, type_name = utils.split_key_name(types[0])
+            return self.get_url('/export', subject_type=type_name)
         else:
             # The /export page can handle rendering multiple subject types
             return self.get_url('/export')
 
 
 if __name__ == '__main__':
-    run([('/', Main)], debug=True)
+    utils.run([('/', Main)], debug=True)

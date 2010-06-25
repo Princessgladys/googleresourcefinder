@@ -23,7 +23,7 @@ import datetime
 # Each tuple has the column header and a lambda function that takes a
 # subject and a report and returns the column value
 COLUMNS_BY_SUBJECT_TYPE = {
-    'haiti:hospital': [
+    ('haiti', 'hospital'): [
         ('name', lambda f: f.get_value('title')),
         ('alt_name', lambda f: f.get_value('alt_title')),
         ('healthc_id', lambda f: f.get_value('healthc_id')),
@@ -68,12 +68,13 @@ def write_csv(out, subject_type):
        in CSV format, with a row for each subject"""
     writer = csv.writer(out)
 
-    subjects = fetch_all(Subject.all().filter('type =', subject_type))
-    columns = COLUMNS_BY_SUBJECT_TYPE[subject_type.key().name()]
+    subdomain, type_name = split_key_name(subject_type)
+    subjects = fetch_all(Subject.all().filter('type =', type_name))
+    columns = COLUMNS_BY_SUBJECT_TYPE[(subdomain, type_name)]
     if columns:
         row = list(column[0] for column in columns)
     else:
-        row = [subject_type] + subject_type.attribute_names
+        row = [type_name] + subject_type.attribute_names
     writer.writerow(row)
 
     # Write a row for each subject.
@@ -83,7 +84,8 @@ def write_csv(out, subject_type):
             for column in columns:
                 row.append(format(column[1](subject)))
         else:
-            row = [subject.key().name()]
+            subdomain, subject_name = split_key_name(subject)
+            row = [subject_name]
             for name in subject_type.attribute_names:
                 value = get_value(subject, name)
                 row.append(format(value))
@@ -133,8 +135,7 @@ class Export(Handler):
                 # TODO(shakusa) SubjectType should have translated messages
                 subdomain, type_name = split_key_name(subject_type)
                 self.write('<option value="%s">%s</option>' % (
-                    type_name,
-                    get_message('subject_type', subject_type.key().name())))
+                    type_name, type_name))
             self.write('<p><input type=submit value="%s">' %
                 #i18n: Button to export data to comma-separated-value format.
                 to_unicode(_('Export CSV')))
