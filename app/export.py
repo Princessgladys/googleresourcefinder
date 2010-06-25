@@ -69,7 +69,8 @@ def write_csv(out, subject_type):
     writer = csv.writer(out)
 
     subdomain, type_name = split_key_name(subject_type)
-    subjects = fetch_all(Subject.all().filter('type =', type_name))
+    subjects = fetch_all(
+        Subject.all_in_subdomain(subdomain).filter('type =', type_name))
     columns = COLUMNS_BY_SUBJECT_TYPE[(subdomain, type_name)]
     if columns:
         row = list(column[0] for column in columns)
