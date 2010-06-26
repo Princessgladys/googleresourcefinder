@@ -379,7 +379,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Fecha no válida: %(date)r (requiere un formato de DD-MM-AAAA)"
 
 #. Error message for request missing subject name.
-#: edit.py:335 bubble.py:158
+#: edit.py:335 bubble.py:161
 msgid "Invalid or missing subject name."
 msgstr "Nombre de la institución no válido o no especificado"
 

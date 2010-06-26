@@ -35,14 +35,36 @@ class MainTestCase(SeleniumTestCase):
 
     def tearDown(self):
         self.delete_account()
+        self.delete_default_account()
         self.delete_subject('haiti', 'example.org/1000')
         self.delete_subject('haiti', 'example.org/1001')
         SeleniumTestCase.tearDown(self)
 
+    def test_default_permissions(self):
+        """Confirms that when the default account has 'view' permission,
+        login is not required."""
+        # No default permission; should redirect to login page.
+        self.open_path('/')
+        self.wait_for_element(self.config.login_form)
+
+        # 'view' permission provided by default; should go straight to map.
+        self.set_default_permissions(['*:view'])
+        self.open_path('/')
+        self.wait_for_element('map')
+
+        # Even with 'edit' granted by default, editing should still need login.
+        self.set_default_permissions(['*:view', '*:edit'])
+        self.open_path('/edit?subdomain=haiti&subject_name=example.org/1000')
+        self.wait_for_element(self.config.login_form)
+
+        # After login, editing should be allowed.
+        self.login('/edit?subdomain=haiti&subject_name=example.org/1000')
+        self.assert_text(Regex('Edit.*'), '//h1')
+
     def test_elements_present(self):
         """Confirms that listbox and maps with elements are present and
         interaction between a list and a map works."""    
-        self.login('/?subdomain=haiti')
+        self.login('/')  # should automatically redirect to subdomain 'haiti'
  
         # Check list column names        
         assert self.is_text_present('Facility')
