@@ -43,17 +43,14 @@ def fake_get_message(ns, n):
 
 class BubbleTest(unittest.TestCase):
     def setUp(self):
-        self.real_auth_domain = os.environ.get('AUTH_DOMAIN')
+        self.real_auth_domain = os.environ.get('AUTH_DOMAIN', '')
         os.environ['AUTH_DOMAIN'] = 'test'
         self.real_get_message = bubble.get_message
         bubble.get_message = fake_get_message   
 
     def tearDown(self):
         bubble.get_message = self.real_get_message
-        if self.real_auth_domain:
-            os.environ['AUTH_DOMAIN'] = self.val
-        else:
-            os.environ['AUTH_DOMAIN'] = ''
+        os.environ['AUTH_DOMAIN'] = self.real_auth_domain
 
     def test_format(self):
         time = datetime.datetime(2010, 6, 2, 13, 21, 13, 97435)

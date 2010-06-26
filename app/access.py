@@ -46,17 +46,27 @@ def check_request(request, user):
     if request.get('access_token'):
         return check_token(request.get('access_token'))
     if user:
-        return check_email(user.email()) or check_user_id(user.user_id())
+        if user.email():
+            return check_email(user.email())
+        if user.user_id():
+            return check_user_id(user.user_id())
+
+def get_default_permissions():
+    """Returns the list of default permissions granted to all users,
+    which resides in the special Account with key_name='default'."""
+    account = Account.get_by_key_name('default')
+    return account and account.actions or []
 
 def check_action_permitted(account, subdomain, action):
     """Returns True if the account is allowed to perform the given action
     in the given subdomain."""
     # Items in the Account.actions list have the form subdomain + ':' + verb,
     # where '*' can be used a wildcard for the subdomain or the verb.
-    return account and ('%s:%s' % (subdomain, action) in account.actions
-                        or '%s:*' % subdomain in account.actions
-                        or '*:%s' % action in account.actions
-                        or '*:*' in account.actions)
+    actions = get_default_permissions() + (account and account.actions or [])
+    return ('%s:%s' % (subdomain, action) in actions or
+            '%s:*' % subdomain in actions or
+            '*:%s' % action in actions or
+            '*:*' in actions)
 
 def check_and_log(request, user):
     account = check_request(request, user)
