@@ -108,6 +108,16 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
 
     # ---------------------------------------- datastore convenience methods
 
+    def set_default_permissions(self, actions):
+        """Sets the permissions for the special 'default' account."""
+        Account(key_name='default', actions=actions).put()
+
+    def delete_default_account(self):
+        """Deletes the special 'default' account."""
+        account = Account.get_by_key_name('default')
+        if account:
+            account.delete()
+
     def put_account(self, **properties):
         """Stores a test Account with the specified properties.  (By default,
         the e-mail address is determined by the test configuration.)"""
