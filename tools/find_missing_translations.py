@@ -122,13 +122,15 @@ def find_missing_translations(locale_dir, template, fuzzy_ok, excluded_files):
   """Output to stdout the message id's that are missing translations."""
   for lang, po_file in get_translation_files(locale_dir):
     if lang != 'en':
-      print "LANGUAGE = %s" % lang
+      print '%s:' % lang,
       num_missing = 0
       for msg_id, comment in get_untranslated_msg_ids_from_file(po_file,
                                                                 fuzzy_ok):
         filename_match = _FILENAME_FROM_COMMENT.match(comment)
         if filename_match and (lang, filename_match.group(1)) in excluded_files:
           continue
+        if num_missing == 0:
+          print
         num_missing += 1
         quoted_msg = msg_id.replace('"', '\"')
         if template:
@@ -137,7 +139,7 @@ def find_missing_translations(locale_dir, template, fuzzy_ok, excluded_files):
         else:
           print '  missing: "%s"' % quoted_msg
       if not num_missing:
-        print "  ok"
+        print 'ok'
 
 def main():
   options, args = OptParseDefinitions()
