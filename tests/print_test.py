@@ -22,6 +22,7 @@ from selenium_test_case import Regex, SeleniumTestCase
 class PrintTest(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
+        self.put_account(actions=['*:view'])
         self.put_subject(
             'haiti', 'example.org/10',
             title='title_within_10_miles', location=db.GeoPt(51.5, 0))
@@ -34,6 +35,7 @@ class PrintTest(SeleniumTestCase):
 
     def tearDown(self):
         SeleniumTestCase.tearDown(self)
+        self.delete_account()
         self.delete_subject('haiti', 'example.org/10')
         self.delete_subject('haiti', 'example.org/11')
         self.delete_subject('haiti', 'example.org/12')

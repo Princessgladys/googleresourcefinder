@@ -24,6 +24,7 @@ SERVICES = ['All',
 class MainTestCase(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
+        self.put_account(actions=['*:view'])
         self.put_subject(
             'haiti', 'example.org/1000',
             title='title_foo1', location=db.GeoPt(51.5, 0))
@@ -33,6 +34,7 @@ class MainTestCase(SeleniumTestCase):
             operational_status='CLOSED_OR_CLOSING')
 
     def tearDown(self):
+        self.delete_account()
         self.delete_subject('haiti', 'example.org/1000')
         self.delete_subject('haiti', 'example.org/1001')
         SeleniumTestCase.tearDown(self)
