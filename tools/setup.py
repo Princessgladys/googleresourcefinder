@@ -12,11 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cache
 from access import *
 from extract_messages import parse_message, PATTERNS
 from feeds import crypto
 from model import *
 from utils import *
+
+def setup_subdomains():
+    """Sets up the subdomain record."""
+    Subdomain(key_name='haiti').put()
+
 
 def setup_subject_types():
     """Sets up the attributes and subject types."""
@@ -77,7 +83,7 @@ def setup_subject_types():
     db.put(attributes)
 
     hospital = SubjectType(
-        key_name='hospital',
+        key_name='haiti:hospital',
         attribute_names=[a.key().name() for a in attributes],
         minimal_attribute_names=['title', 'pcode', 'healthc_id',
                                  'available_beds', 'total_beds', 'services',
@@ -337,14 +343,15 @@ def setup_datastore():
     """Sets up the subject types and translations in a datastore.  (Existing
     subject types and messages will be updated; existing Subject or Report
     information will not be changed or deleted.)"""
+    setup_subdomains()
     setup_subject_types()
     setup_messages()
-    memcache.flush_all()  # flush any cached entities
+    cache.flush_all()  # flush any cached entities
 
 def wipe_datastore(*kinds):
     """Deletes everything in the datastore except Accounts and Secrets.
     If 'kinds' is given, deletes only those kinds of entities."""
-    for kind in kinds or [Attribute, SubjectType, Message, Dump,
+    for kind in kinds or [Subdomain, Attribute, SubjectType, Message, Dump,
                           MinimalSubject, Subject, Report]:
         keys = kind.all(keys_only=True).fetch(200)
         while keys:
@@ -359,9 +366,14 @@ def reset_datastore():
     setup_datastore()
 
 def add_account(email='test@example.com', description=None,
-                nickname=None, affiliation=None, actions=[':view', ':edit']):
+                nickname=None, affiliation=None,
+                actions=['*:view', '*:edit']):
     """Adds an Account entity to the datastore."""
     Account(email=email, description=description or email,
             nickname=nickname or email.split('@')[0],
             affiliation=affiliation or email.split('@')[1],
             actions=actions).put()
+
+def set_default_permissions(actions):
+    """Sets the list of default permissions, granted to all users."""
+    Account(key_name='default', actions=actions).put()
