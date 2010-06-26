@@ -78,7 +78,7 @@ class BubbleTest(unittest.TestCase):
         assert bubble.format(['fake_to_localize'], True == ['fake_localized'])
 
     def test_value_info_extractor(self):
-        s = model.Subject(key_name='example.org/123', type='hospital')
+        s = model.Subject(key_name='haiti:example.org/123', type='hospital')
         s.set_attribute('title', 'title_foo', datetime.datetime.now(),
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
@@ -107,7 +107,7 @@ class BubbleTest(unittest.TestCase):
         affiliation = 'affiliation_foo'
         comment = 'comment_foo'
         
-        s = model.Subject(key_name='example.org/123', type='hospital')
+        s = model.Subject(key_name='haiti:example.org/123', type='hospital')
         s.set_attribute('title', 'title_foo', now, user, nickname, affiliation,
                         comment)
         s.set_attribute(HIDDEN_ATTRIBUTE_NAMES[0], 'hidden_value_foo', now,

@@ -22,7 +22,7 @@
   {% comment %}
   #i18n: Name of the application.
   {% endcomment %}
-  <title>{% trans "Resource Finder" %} ({{instance}})</title>
+  <title>{% trans "Resource Finder" %} ({{subdomain}})</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <!-- Stylesheets -->
   <link rel="stylesheet" href="static/map.css">
@@ -63,6 +63,8 @@
   <script type="text/javascript" src="static/map.js"></script>
   <script type="text/javascript">
     var print = {% if params.print %} true {% else %} false {% endif %};
+    var print_url = '{{print_url}}';
+    var bubble_url = '{{bubble_url}}';
   </script>
 {% include "analytics.html" %}
 </head>
@@ -88,7 +90,7 @@
       {% comment %}
       #i18n: Link to return to the main page of the application
       {% endcomment %}
-      <a href="/">{% trans "Home" %}</a> <span class="sep">|</span>
+      <a href="{{home_url}}">{% trans "Home" %}</a> <span class="sep">|</span>
     {% else %}
       <a id="print-link" href="#"
          {% comment %}
@@ -192,7 +194,7 @@
     {% comment %}
     #i18n: Button to export data to comma-separated-values format.
     {% endcomment %}
-    <a target="_blank" href="{{export_link}}" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export CSV" %}</a> <span class="sep">|</span>
+    <a target="_blank" href="{{export_url}}" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export CSV" %}</a> <span class="sep">|</span>
 
     {% comment %}
     #i18n: Link to go to a page with past versions of the 'master' list

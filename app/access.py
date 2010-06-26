@@ -48,10 +48,15 @@ def check_request(request, user):
     if user:
         return check_email(user.email()) or check_user_id(user.user_id())
 
-def check_action_permitted(account, action):
-    """Return True if the account is allowed to perform the given action"""
-    return account and (action in account.actions
-                        or ":%s" % action in account.actions)
+def check_action_permitted(account, subdomain, action):
+    """Returns True if the account is allowed to perform the given action
+    in the given subdomain."""
+    # Items in the Account.actions list have the form subdomain + ':' + verb,
+    # where '*' can be used a wildcard for the subdomain or the verb.
+    return account and ('%s:%s' % (subdomain, action) in account.actions
+                        or '%s:*' % subdomain in account.actions
+                        or '*:%s' % action in account.actions
+                        or '*:*' in account.actions)
 
 def check_and_log(request, user):
     account = check_request(request, user)
@@ -61,7 +66,6 @@ def check_and_log(request, user):
         ' (access_token=%r, user=%r)'
         % (request.get('access_token'), user and user.email()))
     if not account and user:
-        # we create an account for a logged-in user with no actions
-        # but don't save it
+        # Create an account for this user with no actions, but don't save it.
         account = Account(description=user.nickname(), email=user.email())
     return account

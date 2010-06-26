@@ -15,15 +15,33 @@
 {% endcomment %}
 
 {% load i18n %}
+
+<html>
+<head>
 {% comment %}
 #i18n: Name of the application.
 {% endcomment %}
-<title>{% trans "Resource Finder" %} ({{subdomain}})</title>
+<title>{% trans "Resource Finder" %}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <style>
-body, h1, p { font-family: helvetica, arial; font-size: 13px; }
+  body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
+  h1 { font-size: 24px }
 </style>
+</head>
+<body>
 {% comment %}
-#i18n: Header for an error message.
+#i18n: Name of the application.
 {% endcomment %}
-<h1>{% trans "Error" %}</h1>
-<p>{{message|escape}}
+<h1>{% trans "Resource Finder" %}</h1>
+
+{% comment %}
+#i18n: Instructions for a menu of deployed instances of the application
+{% endcomment %}
+{% trans "Choose a site:" %}
+<ul>
+  {% for subdomain in subdomains %}
+    <li><a href="{{subdomain.url}}">{{subdomain.name}}</a>
+  {% endfor %}
+</ul>
+</body>
+</html>
