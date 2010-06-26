@@ -1,0 +1,140 @@
+/*
+# Copyright 2009-2010 by Ka-Ping Yee
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+*/
+
+.bubble .title-row {
+  margin: 0 4px 0 0;
+}
+
+.bubble .title {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0 4px 0 0;
+}
+
+.bubble h2 {
+  font-size: 11px;
+  font-weight: normal;
+  color: #aaa;
+  margin: 0 0 1em 0;
+}
+
+.bubble .scorecard {
+  margin: 8px 0;
+  width: 100%;
+  background: #eee;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+.bubble .scorecard tr {
+  vertical-align: top;
+}
+
+.bubble .scorecard th, .bubble .scorecard td {
+  font-weight: normal;
+  padding: 4px 16px 0;
+}
+
+.bubble .scorecard .availability, .bubble .scorecard .capacity {
+  text-align: center;
+}
+
+.bubble .scorecard .no-information {
+  font-style: italic;
+  padding: 6px;
+  text-align: center;
+}
+
+.bubble .scorecard .availability {
+  color: #090;
+}
+
+.bubble .scorecard .number {
+  font-size: 46px;
+  margin-top: -5px; /* bring the numbers closer to the headings */
+}
+
+.bubble .scorecard td.services {
+  font-size: 16px;
+  word-wrap: break-word;
+}
+
+.bubble #bubble-tabs {
+  padding-top: 4px;
+}
+
+.bubble .details {
+  width: 100%;
+}
+
+.bubble .label {
+  padding: 0 8px 8px 0;
+  text-align: left;
+  font-weight: bold;
+}
+
+.bubble .value {
+  padding: 0 0 8px 0;
+  text-align: left;
+  word-wrap: break-word;
+}
+
+.new_window {
+  width: 10px;
+  height: 10px;
+  border-width: 0px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Override JQuery tab styles. */
+
+.ui-widget-content {
+  border: none; /* border around entire tab section including content */
+}
+
+.ui-widget-header {
+  border-top: none; /* border around header containing all tab handles */
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #aaa;
+  -webkit-border-bottom-left-radius: 0;
+  -webkit-border-bottom-right-radius: 0;
+}
+
+.ui-tabs {
+  padding: 0; /* padding around entire tab section including content */
+}
+
+.ui-tabs .ui-tabs-nav {
+  padding-left: 8px; /* horizontal space before all tab handles */
+}
+
+.ui-tabs .ui-tabs-nav li {
+  margin: 0 8px 0 0; /* horizontal space between tab handles */
+  font-family: arial;
+  font-size: 11px;
+}
+
+.ui-tabs .ui-tabs-nav li a {
+  padding: 2px 8px; /* tab handle label padding */
+}
+
+/* Make bubble tab content align with rest of bubble. */
+
+
