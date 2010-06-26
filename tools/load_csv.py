@@ -128,14 +128,14 @@ def convert_shoreland_record(record):
         logging.warn('Skipping %r (pcode %s): no HealthC_ID' % (title, pcode))
         return None, None, None
 
-    key_name = 'paho.org/HealthC_ID/' + healthc_id
+    subject_name = 'paho.org/HealthC_ID/' + healthc_id
     try:
         latitude = float(record['latitude'])
         longitude = float(record['longitude'])
         location = db.GeoPt(latitude, longitude)
     except ValueError:
         logging.warn('No location for %r (%s): latitude=%r longitude=%r' % (
-            title, key_name, record.get('latitude'), record.get('longitude')))
+            title, healthc_id, record.get('latitude'), record.get('longitude')))
         location = None
     observed = None
     if record['entry_last_updated']:
@@ -194,7 +194,7 @@ def convert_shoreland_record(record):
     else:
         services = ValueInfo(service_list)
 
-    return key_name, observed, {
+    return subject_name, observed, {
         'title': ValueInfo(title),
         'healthc_id': ValueInfo(healthc_id),
         'pcode': ValueInfo(pcode),
@@ -233,14 +233,16 @@ def convert_shoreland_record(record):
     }
 
 def load_csv(
-    filename, record_converter, source_url, default_observed,
-    author, author_nickname, author_affiliation, limit=None):
+    filename, record_converter, subdomain, subject_type_name, source_url,
+    default_observed, author, author_nickname, author_affiliation, limit=None):
     """Loads a CSV file of records into the datastore.
 
     Args:
       filename: name of the csv file to load
+      subdomain: name of the subdomain to load subjects into
+      subject_type_name: name of the subject type for these subjects
       record_converter: function that takes a CSV row and returns a
-          (key_name, observed, values) triple, where observed is a datetime
+          (subject_name, observed, values) triple, where observed is a datetime
           and values is a dictionary of attribute names to ValueInfo objects
       source_url: where filename was downloaded, stored in Report.source
       default_observed: datetime.datetime when data was observed to be valid,
@@ -262,7 +264,7 @@ def load_csv(
     # Store the raw file contents in a Dump.
     Dump(source=source_url, data=open(filename, 'rb').read()).put()
 
-    subject_type = SubjectType.get_by_key_name('hospital')
+    subject_type = SubjectType.get(subdomain, subject_type_name)
     count = 0
     for record in csv.DictReader(open(filename)):
         if limit and count >= limit:
@@ -271,16 +273,18 @@ def load_csv(
 
         for key in record:
             record[key] = (record[key] or '').decode('utf-8')
-        key_name, observed, value_infos = record_converter(record)
-        if not key_name:  # if key_name is None, skip this record
+        subject_name, observed, value_infos = record_converter(record)
+        if not subject_name:  # if converter returned None, skip this record
             continue
         observed = observed or default_observed
 
-        subject = Subject(key_name=key_name, type='hospital', author=author)
+        subject = Subject(key_name='%s:%s' % (subdomain, subject_name),
+                          type=subject_type_name, author=author)
         subjects.append(subject)
         Subject.author.validate(author)
 
-        minimal_subject = MinimalSubject(subject, type='hospital')
+        minimal_subject = MinimalSubject(
+            subject, key_name=subject.key().name(), type=subject_type_name)
         minimal_subjects.append(minimal_subject)
 
         # Create a report for this row. ValueInfos that have a different
@@ -362,7 +366,8 @@ def load_shoreland(filename, observed):
     if isinstance(observed, basestring):
         observed = parse_datetime(observed)
     user = users.User(SHORELAND_EMAIL)
-    load_csv(filename, convert_shoreland_record, SHORELAND_URL, observed, user,
+    load_csv(filename, convert_shoreland_record, 'haiti', 'hospital',
+             SHORELAND_URL, observed, user,
              SHORELAND_NICKNAME, SHORELAND_AFFILIATION)
 
 def wipe_and_load_shoreland(filename, observed):

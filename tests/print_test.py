@@ -22,23 +22,26 @@ from selenium_test_case import Regex, SeleniumTestCase
 class PrintTest(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
-        self.put_subject('example.org/10', title='title_within_10_miles',
-                          location=db.GeoPt(51.5, 0))
-        self.put_subject('example.org/11', title='title_center',
-                          location=db.GeoPt(51.5, 0.01))
-        self.put_subject('example.org/12', title='title_outside_10_miles',
-                          location=db.GeoPt(51.6, 0.2))
+        self.put_subject(
+            'haiti', 'example.org/10',
+            title='title_within_10_miles', location=db.GeoPt(51.5, 0))
+        self.put_subject(
+            'haiti', 'example.org/11',
+            title='title_center', location=db.GeoPt(51.5, 0.01))
+        self.put_subject(
+            'haiti', 'example.org/12',
+            title='title_outside_10_miles', location=db.GeoPt(51.6, 0.2))
 
     def tearDown(self):
         SeleniumTestCase.tearDown(self)
-        self.delete_subject('example.org/10')
-        self.delete_subject('example.org/11')
-        self.delete_subject('example.org/12')
+        self.delete_subject('haiti', 'example.org/10')
+        self.delete_subject('haiti', 'example.org/11')
+        self.delete_subject('haiti', 'example.org/12')
 
     def test_print_page(self):
         """Confirms that the print page renders correctly."""
         # Print link should be initially disabled
-        self.login('/')
+        self.login('/?subdomain=haiti')
         self.click('link=Print')
         assert self.get_alert().startswith('First select a hospital')
 
@@ -50,8 +53,13 @@ class PrintTest(SeleniumTestCase):
         self.click_and_wait_for_new_window('print-link')
 
         # Verify that this looks like a print window
-        assert ('/?print=yes&lat=51.500000&lon=0.010000&rad=16093.'
-                in self.get_location())
+        params = self.get_location().split('?', 1)[1]
+        pairs = set(params.split('&'))
+        assert 'subdomain=haiti' in pairs
+        assert 'print=yes' in pairs
+        assert 'lat=51.500000' in pairs
+        assert 'lon=0.010000' in pairs
+        assert any(pair.startswith('rad=16093.') for pair in pairs)
         self.assert_text(
             Regex('Displaying facilities within.*'),
             '//span[@id="header-print-subtitle" and @class="print-subtitle"]')

@@ -13,13 +13,13 @@
 # limitations under the License.
 
 import cache
-import datetime
 import re
 import sets
 import sys
 from feeds.geo import distance
 from model import Attribute, Subject, SubjectType, Message, MinimalSubject
-from utils import Date, HIDDEN_ATTRIBUTE_NAMES, db, get_locale, simplejson
+from utils import Date, DateTime, HIDDEN_ATTRIBUTE_NAMES
+from utils import db, get_locale, simplejson, split_key_name
 
 def make_jobjects(entities, transformer, *args):
     """Run a sequence of entities through a transformer function that produces
@@ -44,42 +44,37 @@ def attribute_transformer(index, attribute):
 
 def subject_type_transformer(index, subject_type, attribute_is):
     """Construct the JSON object for a SubjectType."""
-    return {'name': subject_type.key().name(),
-            'attribute_is':
-                [attribute_is[p] for p in filter(
-                    lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
-                    subject_type.minimal_attribute_names)]}
+    subdomain, type_name = split_key_name(subject_type)
+    return {'name': type_name,
+            'attribute_is': [attribute_is[name]
+                             for name in subject_type.minimal_attribute_names
+                             if name not in HIDDEN_ATTRIBUTE_NAMES]}
 
-def get_subject_type(subject_types, subject):
-    """In a list of SubjectType entities, finds the one for a given Subject."""
-    for subject_type in subject_types:
-        if subject_type.key().name() == subject.type:
-            return subject_type
-
-def minimal_subject_transformer(index, subject, attributes, subject_types,
-                                subject_type_is, center, radius):
-    """Construct the JSON object for a Subject."""
+def minimal_subject_transformer(index, minimal_subject, attributes,
+                                subject_types, subject_type_is, center, radius):
+    """Construct the JSON object for a MinimalSubject."""
     # Gather all the attributes
     values = [None]
 
-    subject_type = get_subject_type(subject_types, subject)
+    subject_type = subject_types[minimal_subject.type]
     for attribute in attributes:
         name = attribute.key().name()
         if name in subject_type.minimal_attribute_names:
-            values.append(subject.get_value(name))
+            values.append(minimal_subject.get_value(name))
         else:
             values.append(None)
 
     # Pack the results into an object suitable for JSON serialization.
+    subdomain, subject_name = split_key_name(minimal_subject)
     subject_jobject = {
-        'name': subject.parent_key().name(),
-        'type': subject_type_is[subject.type],
-        'values' : values,
+        'name': subject_name,
+        'type': subject_type_is[subdomain + ':' + minimal_subject.type],
+        'values': values,
     }
-    if subject.has_value('location'):
+    if minimal_subject.has_value('location'):
         location = {
-            'lat': subject.get_value('location').lat,
-            'lon': subject.get_value('location').lon
+            'lat': minimal_subject.get_value('location').lat,
+            'lon': minimal_subject.get_value('location').lon
         }
         if center:
             subject_jobject['distance_meters'] = distance(location, center)
@@ -92,7 +87,7 @@ def minimal_subject_transformer(index, subject, attributes, subject_types,
 
 def json_encode(object):
     """Handle JSON encoding for non-primitive objects."""
-    if isinstance(object, Date) or isinstance(object, datetime.datetime):
+    if isinstance(object, Date) or isinstance(object, DateTime):
         return to_local_isotime(object)
     if isinstance(object, db.GeoPt):
         return {'lat': '%.6f' % object.lat, 'lon': '%.6f' % object.lon}
@@ -101,18 +96,18 @@ def json_encode(object):
 def clean_json(json):
     return re.sub(r'"(\w+)":', r'\1:', json)
 
-def render_json(center=None, radius=None):
-    """Dump the data as a JSON string."""
+def render_json(subdomain, center=None, radius=None):
+    """Dump the data for a subdomain as a JSON string."""
     locale = get_locale()
-    json = cache.JSON.get(locale)
+    json = cache.JSON[subdomain].get(locale)
     if json and not center:
         return json
 
-    subject_types = cache.SUBJECT_TYPES.values()
+    subject_types = cache.SUBJECT_TYPES[subdomain]
 
     # Get the set of attributes to return
     attr_names = sets.Set()
-    for subject_type in subject_types:
+    for subject_type in subject_types.values():
         attr_names = attr_names.union(subject_type.minimal_attribute_names)
     attr_names = attr_names.difference(HIDDEN_ATTRIBUTE_NAMES)
 
@@ -123,13 +118,17 @@ def render_json(center=None, radius=None):
 
     # Make JSON objects for the subject types.
     subject_type_jobjects, subject_type_is = make_jobjects(
-        subject_types, subject_type_transformer, attribute_is)
+        subject_types.values(), subject_type_transformer, attribute_is)
 
     # Make JSON objects for the subjects.
-    mfs = cache.MINIMAL_SUBJECTS.values()
+    # Because storing the MinimalSubject entities into memcache is fairly
+    # slow (~3s for 1000 entities) and the JSON cache already provides almost
+    # all the benefit, we fetch the MinimalSubject entities directly from the
+    # datastore every time instead of letting the cache cache them.
+    minimal_subjects = \
+        cache.MINIMAL_SUBJECTS[subdomain].fetch_entities().values()
     subject_jobjects, subject_is = make_jobjects(
-        sorted(cache.MINIMAL_SUBJECTS.values(),
-               key=lambda s: s.get_value('title')),
+        sorted(minimal_subjects, key=lambda s: s.get_value('title')),
         minimal_subject_transformer, attributes, subject_types,
         subject_type_is, center, radius)
     total_subject_count = len(subject_jobjects) - 1
@@ -153,5 +152,5 @@ def render_json(center=None, radius=None):
     # set indent=2 to pretty-print; it blows up download size, so defaults off
     }, indent=None, default=json_encode))
     if not center:
-        cache.JSON.set(locale, json)
+        cache.JSON[subdomain].set(locale, json)
     return json
