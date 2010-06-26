@@ -46,15 +46,12 @@ class EditTest(SeleniumTestCase):
         self.put_subject(
             'haiti', 'example.org/123',
             title='title_foo', location=db.GeoPt(51.5, 0))
+        self.put_account(actions=['*:view', '*:edit'])  # allow edits
         self.s = scrape.Session()
     
     def tearDown(self):
         self.delete_subject('haiti', 'example.org/123')
-        # Reset account to initial (no nickname, affiliation) state
-        a = Account.all().get()
-        a.nickname = ''
-        a.affiliation = ''
-        a.put()
+        self.delete_account()
         SeleniumTestCase.tearDown(self)
 
     def test_edit_link(self):

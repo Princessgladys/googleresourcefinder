@@ -1,9 +1,10 @@
 from google.appengine.api import memcache, users
-from model import Subject, MinimalSubject, db
+from model import Account, MinimalSubject, Subject, db
 import datetime
 import os
 import re
 import selenium
+import scrape
 import time
 import unittest
 
@@ -78,12 +79,17 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
             raise Exception('TEST_CONFIG must be one of: %r' % CONFIGS.keys())
         self.config = CONFIGS[config_name]
 
+        # Start up Selenium.
         selenium.selenium.__init__(
             self, 'localhost', 4444, '*chrome', 'https://www.google.com/')
         self.start()
 
     def tearDown(self):
-        memcache.flush_all()
+        # Hitting any page with flush=yes will flush the appserver's caches.
+        s = scrape.Session()
+        s.go(self.config.base_url + '/help?flush=yes')
+
+        # Shut down Selenium.
         self.stop()
 
     def login(self, path):
@@ -101,6 +107,20 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         return False
 
     # ---------------------------------------- datastore convenience methods
+
+    def put_account(self, **properties):
+        """Stores a test Account with the specified properties.  (By default,
+        the e-mail address is determined by the test configuration.)"""
+        account = Account(email=self.config.user_name)
+        for key, value in properties.items():
+            setattr(account, key, value)
+        account.put()
+
+    def delete_account(self):
+        """Deletes the test Account."""
+        account = Account.all().filter('email =', self.config.user_name).get()
+        if account:
+            account.delete()
 
     def put_subject(self, subdomain, subject_name, type='hospital',
                     observed=None, email='test@example.com',
