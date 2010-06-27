@@ -16,14 +16,16 @@
 
 from access import ACTIONS
 from feeds.xmlutils import Struct
+from medium_test_case import MediumTestCase
 from model import Account
 
 import access
 import datetime
 import unittest
         
-class AccessTest(unittest.TestCase):
+class AccessTest(MediumTestCase):
     def setUp(self):
+        MediumTestCase.setUp(self)
         self.account = Account(timestamp=datetime.datetime.now(),
                                description='description',
                                email='test@example.com', user_id='test',
