@@ -24,7 +24,6 @@ import wsgiref
 from access import check_action_permitted
 from feed_provider import schedule_add_record
 from feeds.crypto import sign, verify
-from main import USE_WHITELISTS
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
 from utils import db, get_message, html_escape, simplejson
@@ -322,10 +321,12 @@ class Edit(utils.Handler):
     def init(self):
         """Checks for logged-in user and sets up self.subject
         and self.subject_type based on the query params."""
-        self.require_logged_in_user()
+        # Gotta have 'edit' permission to see or submit the edit form.
+        self.require_action_permitted('edit')
 
-        if USE_WHITELISTS:
-            self.require_action_permitted('edit')
+        # Regardless of permissions, the user has to be logged in so we
+        # can record the author information with the edit.
+        self.require_logged_in_user()
 
         self.subject = model.Subject.get(
             self.subdomain, self.params.subject_name)

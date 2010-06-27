@@ -46,13 +46,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
 
 #. Error message for lacking edit permissions
-#: edit.py:438
+#: edit.py:439
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s pa gen pèmisyon edite %(a)s"
 
 #. Form option to indicate that a value is not specified
-#: edit.py:211 edit.py:196 edit.py:170
+#: edit.py:169 edit.py:210 edit.py:195
 msgid "(unspecified)"
 msgstr "(pa espesifye)"
 
@@ -107,7 +107,7 @@ msgid "Blood Bank"
 msgstr "Bank san"
 
 #. Save a copy of the data in CSV format
-#: export.py:128
+#: export.py:129
 msgid "CSV Export"
 msgstr "Ekspote CSV"
 
@@ -249,7 +249,7 @@ msgid "District"
 msgstr "Distri"
 
 #. E-mail address
-#: ../tools/setup.py:124 edit.py:117
+#: ../tools/setup.py:124 edit.py:116
 msgid "E-mail"
 msgstr "Adrès elektronik"
 
@@ -279,7 +279,7 @@ msgid "Error loading facility information."
 msgstr "Erè transpòte etablisman enfòmasyon."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:141 templates/map.html:197
+#: export.py:142 templates/map.html:197
 msgid "Export CSV"
 msgstr "Ekspote CSV"
 
@@ -374,12 +374,12 @@ msgid "Internal Medicine"
 msgstr "Medsin Entèn"
 
 #. Error message for invalid date entry
-#: edit.py:139
+#: edit.py:138
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Dat envalid : %(dat)r (bezwen ane-mwa-jou fòma)"
 
 #. Error message for request missing subject name.
-#: edit.py:334 bubble.py:158
+#: edit.py:335 bubble.py:161
 msgid "Invalid or missing subject name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -404,7 +404,7 @@ msgid "Last updated"
 msgstr "Misajou"
 
 #. Label for text input
-#: edit.py:232
+#: edit.py:231
 msgid "Latitude"
 msgstr "Latitd"
 
@@ -444,7 +444,7 @@ msgid "Location:"
 msgstr "Kote"
 
 #. Label for text input
-#: edit.py:236
+#: edit.py:235
 msgid "Longitude"
 msgstr "Lonjitd"
 
@@ -489,7 +489,7 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: ../tools/setup.py:104 edit.py:113
+#: edit.py:112 ../tools/setup.py:104
 msgid "Name"
 msgstr "Non"
 
@@ -504,7 +504,7 @@ msgid "Neurosurgery"
 msgstr "Nerochiriji"
 
 #. Form option for a false Boolean value
-#: bubble_test.py:69 bubble.py:48 edit.py:174
+#: bubble.py:48 edit.py:173 bubble_test.py:66
 msgid "No"
 msgstr "Pa dakò"
 
@@ -575,7 +575,7 @@ msgid "Pediatrics"
 msgstr "Pedyatrik"
 
 #. telephone number
-#: ../tools/setup.py:122 edit.py:115
+#: ../tools/setup.py:122 edit.py:114
 msgid "Phone"
 msgstr "Telefòn"
 
@@ -616,7 +616,7 @@ msgid "Reachable by road"
 msgstr "Aksesib pa wout"
 
 #. Record updated successfully.
-#: edit.py:469
+#: edit.py:470
 msgid "Record updated."
 msgstr "Done a jou"
 
@@ -653,7 +653,7 @@ msgid "Save"
 msgstr "Anrejistre"
 
 #. Label for a selector to export data to CSV
-#: export.py:132
+#: export.py:133
 msgid "Select subject type to export:"
 msgstr "Idantite kalite etablisman ekspòtasyon"
 
@@ -668,12 +668,12 @@ msgid "Show"
 msgstr "Ekspoze"
 
 #. Link to sign into the app
-#: main.py:63
+#: main.py:58
 msgid "Sign in"
 msgstr "Mete Anprent"
 
 #. Link to sign out of the app
-#: main.py:61
+#: main.py:56
 msgid "Sign out"
 msgstr "Sòti"
 
@@ -708,7 +708,7 @@ msgid "URL:"
 msgstr "Sit entenet"
 
 #. Error message
-#: utils.py:142
+#: utils.py:141
 msgid "Unauthorized user."
 msgstr "San otorizasyon User"
 
@@ -753,7 +753,7 @@ msgid "X-Ray"
 msgstr "Reyon X"
 
 #. Form option for a true Boolean value
-#: bubble.py:48 edit.py:172 bubble_test.py:68
+#: bubble.py:48 bubble_test.py:65 edit.py:171
 msgid "Yes"
 msgstr "Wi"
 
@@ -775,7 +775,7 @@ msgid "and with availability."
 msgstr "Avek anpil abilite"
 
 #. a user with no identity
-#: main.py:58
+#: main.py:53
 msgid "anonymous"
 msgstr "anonim"
 
