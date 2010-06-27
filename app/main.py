@@ -37,7 +37,7 @@ class Main(utils.Handler):
                 for name in names])
             return
 
-        # Ya gotta have 'view' permission to see the main page.
+        # Need 'view' permission to see the main page.
         self.require_action_permitted('view')
 
         user = self.user

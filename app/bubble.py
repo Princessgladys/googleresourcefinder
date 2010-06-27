@@ -152,7 +152,7 @@ VALUE_INFO_EXTRACTORS = {
 
 class Bubble(Handler):
     def get(self):
-        # Ya gotta have 'view' permission to see a bubble.
+        # Need 'view' permission to see a bubble.
         self.require_action_permitted('view')
 
         subject = model.Subject.get(self.subdomain, self.params.subject_name)
