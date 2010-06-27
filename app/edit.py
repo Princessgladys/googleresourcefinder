@@ -321,7 +321,7 @@ class Edit(utils.Handler):
     def init(self):
         """Checks for logged-in user and sets up self.subject
         and self.subject_type based on the query params."""
-        # Gotta have 'edit' permission to see or submit the edit form.
+        # Need 'edit' permission to see or submit the edit form.
         self.require_action_permitted('edit')
 
         # Regardless of permissions, the user has to be logged in so we
