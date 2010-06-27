@@ -64,7 +64,10 @@ class MainTestCase(SeleniumTestCase):
     def test_elements_present(self):
         """Confirms that listbox and maps with elements are present and
         interaction between a list and a map works."""    
-        self.login('/')  # should automatically redirect to subdomain 'haiti'
+        self.login('/')
+        
+        # Should have automatically redirected to subdomain 'haiti'.
+        assert 'subdomain=haiti' in self.get_location()
  
         # Check list column names        
         assert self.is_text_present('Facility')
