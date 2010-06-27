@@ -20,11 +20,6 @@ import model
 import rendering
 import utils
 
-# We use a Secret in the db to determine whether or not the app should be
-# configured to require login to view and 'editor' role to edit. Whitelists
-# are on by default. To allow anyone to view and logged-in users to edit, run
-# Secret(key_name='use_whitelists', value='FALSE').put() in a console
-USE_WHITELISTS = utils.get_secret('use_whitelists') != 'FALSE'
 
 class Main(utils.Handler):
     def get(self):
@@ -42,8 +37,8 @@ class Main(utils.Handler):
                 for name in names])
             return
 
-        if USE_WHITELISTS:
-            self.require_logged_in_user()
+        # Need 'view' permission to see the main page.
+        self.require_action_permitted('view')
 
         user = self.user
         center = None
