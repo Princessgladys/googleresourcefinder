@@ -94,6 +94,14 @@ class MainTestCase(SeleniumTestCase):
         assert self.is_text_present(
             'Note: This facility has been marked closed')
 
+        # Make sure the message appears in other languages, too.
+        self.open_path('/?subdomain=haiti&lang=fr')
+        self.wait_for_element('subject-2')
+        self.click('id=subject-2')
+        self.wait_for_element(bubble_xpath)
+        assert self.is_text_present(
+            u'Note: Cet \xe9tablissement a \xe9t\xe9 marqu\xe9e ferm\xe9e.')
+
         # Change facility 1000 to closed.
         self.put_subject(
             'haiti', 'example.org/1000',
@@ -109,12 +117,3 @@ class MainTestCase(SeleniumTestCase):
         self.wait_for_element(bubble_xpath)
         assert self.is_text_present(
             'Note: This facility has been marked closed')
-
-        # Make sure the message appears in other languages, too.
-        self.open_path('/?subdomain=haiti&lang=fr')
-        self.wait_for_element('subject-2')
-        self.click('id=subject-2')
-        self.wait_for_element(bubble_xpath)
-        assert self.is_text_present(
-            u'Note: Cet \xe9tablissement a \xe9t\xe9 marqu\xe9e ferm\xe9e.')
-
