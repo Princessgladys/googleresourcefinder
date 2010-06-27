@@ -24,6 +24,7 @@ SERVICES = ['All',
 class MainTestCase(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
+        self.put_account(actions=['*:view'])
         self.put_subject(
             'haiti', 'example.org/1000',
             title='title_foo1', location=db.GeoPt(51.5, 0))
@@ -33,14 +34,40 @@ class MainTestCase(SeleniumTestCase):
             operational_status='CLOSED_OR_CLOSING')
 
     def tearDown(self):
+        self.delete_account()
+        self.delete_default_account()
         self.delete_subject('haiti', 'example.org/1000')
         self.delete_subject('haiti', 'example.org/1001')
         SeleniumTestCase.tearDown(self)
 
+    def test_default_permissions(self):
+        """Confirms that when the default account has 'view' permission,
+        login is not required."""
+        # No default permission; should redirect to login page.
+        self.open_path('/')
+        self.wait_for_element(self.config.login_form)
+
+        # 'view' permission provided by default; should go straight to map.
+        self.set_default_permissions(['*:view'])
+        self.open_path('/')
+        self.wait_for_element('map')
+
+        # Even with 'edit' granted by default, editing should still need login.
+        self.set_default_permissions(['*:view', '*:edit'])
+        self.open_path('/edit?subdomain=haiti&subject_name=example.org/1000')
+        self.wait_for_element(self.config.login_form)
+
+        # After login, editing should be allowed.
+        self.login('/edit?subdomain=haiti&subject_name=example.org/1000')
+        self.assert_text(Regex('Edit.*'), '//h1')
+
     def test_elements_present(self):
         """Confirms that listbox and maps with elements are present and
         interaction between a list and a map works."""    
-        self.login('/?subdomain=haiti')
+        self.login('/')
+        
+        # Should have automatically redirected to subdomain 'haiti'.
+        assert 'subdomain=haiti' in self.get_location()
  
         # Check list column names        
         assert self.is_text_present('Facility')
@@ -109,7 +136,8 @@ class MainTestCase(SeleniumTestCase):
             operational_status='CLOSED_OR_CLOSING')
 
         # Reload and flush the cache so we see the changes.
-        self.open_path('/?subdomain=haiti&flush=yes')
+        # Also switch back from French to English.
+        self.open_path('/?subdomain=haiti&flush=yes&lang=en')
 
         # Facility 1000 should now be grey and have a 'closed' message.
         assert 'disabled' in self.get_attribute('//tr[@id="subject-1"]/@class')

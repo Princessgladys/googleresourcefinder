@@ -268,11 +268,13 @@ class Report(db.Expando):
         setattr(self, '%s__comment' % name, value_or_none(comment))
 
 class Account(db.Model):
-    """User account. Top-level entity, has no parent.
-    A user only obtains an Account record when they modify the application
-    in some way, either by editing data or subscribing to alerts."""
+    """User account. Top-level entity, has no parent.  Users without Account
+    entities can use the application; for such users, their permissions are
+    determined by the special Account object with key_name='default'.  Users
+    get their own Account entities when editing a Subject, requesting
+    permissions, being granted permissions, or subscribing to alerts."""
     timestamp = db.DateTimeProperty(auto_now_add=True)  # creation time
-    description = db.StringProperty(required=True)
+    description = db.StringProperty()  # full name or description
     email = db.StringProperty()  # e-mail address of the account
     user_id = db.StringProperty()  # users.User.id() of the account
     nickname = db.StringProperty()  # nickname for display in the UI; may

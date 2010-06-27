@@ -373,3 +373,7 @@ def add_account(email='test@example.com', description=None,
             nickname=nickname or email.split('@')[0],
             affiliation=affiliation or email.split('@')[1],
             actions=actions).put()
+
+def set_default_permissions(actions):
+    """Sets the list of default permissions, granted to all users."""
+    Account(key_name='default', actions=actions).put()
