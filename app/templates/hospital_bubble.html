@@ -40,7 +40,7 @@
     {% endcomment %}
     {% trans "Last updated" %}: {{last_updated|escape}}
   </h2>
-  {% ifequal special.operational_status.value 'Closed or closing' %}
+  {% ifequal special.operational_status.raw 'CLOSED_OR_CLOSING' %}
     <div style="color:#a00; font-size:14px;">
       {% comment %}
       #i18n: Note that a health facility has been marked closed.

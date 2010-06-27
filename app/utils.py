@@ -132,14 +132,13 @@ class Handler(webapp.RequestHandler):
     }
 
     def require_action_permitted(self, action):
-        """Raises an exception if the given action is not allowed, or redirect
-           to the login page if there is no logged-in user."""
-        if not self.account:
-            raise Redirect(users.create_login_url(self.request.uri))
-        if not access.check_action_permitted(
-            self.account, self.subdomain, action):
-            #i18n: Error message
-            raise ErrorMessage(403, _('Unauthorized user.'))
+        """Returns if and only if the given action is allowed.  Otherwise,
+        aborts with an error message or redirection to the login page."""
+        if access.check_action_permitted(self.account, self.subdomain, action):
+            return
+        self.require_logged_in_user()  # if not logged in, offer login page
+        #i18n: Error message
+        raise ErrorMessage(403, _('Unauthorized user.'))
 
     def require_logged_in_user(self):
         """Redirect to login in case there is no user"""
@@ -153,10 +152,12 @@ class Handler(webapp.RequestHandler):
     def write(self, text):
         self.response.out.write(text)
 
-    def initialize(self, request, response):
+    def initialize(self, request, response, user_for_test=None):
+        """Performs common initialization steps for all requests (subdomain
+        selection, language selection, query parameter validation)."""
         webapp.RequestHandler.initialize(self, request, response)
 
-        self.user = users.get_current_user()
+        self.user = user_for_test or users.get_current_user()
         self.account = access.check_and_log(request, self.user)
         for name in request.headers.keys():
             if name.lower().startswith('x-appengine'):
