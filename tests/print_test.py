@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
-import time
-
 from google.appengine.api import users
 
 from model import db, Subject, MinimalSubject
@@ -103,9 +100,13 @@ class PrintTest(SeleniumTestCase):
                          "//tr[@id='subject-2']/*" +
                          "[@class='subject-general-info']")
 
-        # Test to make sure the proper number of facilities are rendering.
-        # Digit #1 [3] is the number of total facilities, digit #2 [2] is the
-        # number of facilities within 10 miles, and digit #3 [1] is the number
-        # with availability
-        self.assert_text(Regex('321'), 
-                         '//tbody[@id="print-summary-tbody"]')
+        # Test to make sure the proper number of subjects are rendering.
+        # td[1] is the number of total subjects
+        # td[2] is the number of subjects less than 10 miles away
+        # td[3] is the number of subjects with availability
+        self.assert_text(Regex('3'), 
+                         '//tbody[@id="print-summary-tbody"]//tr//td[1]')
+        self.assert_text(Regex('2'), 
+                         '//tbody[@id="print-summary-tbody"]//tr//td[2]')
+        self.assert_text(Regex('1'), 
+                         '//tbody[@id="print-summary-tbody"]//tr//td[3]')
