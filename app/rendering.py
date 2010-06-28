@@ -131,7 +131,7 @@ def render_json(subdomain, center=None, radius=None):
         sorted(minimal_subjects, key=lambda s: s.get_value('title')),
         minimal_subject_transformer, attributes, subject_types,
         subject_type_is, center, radius)
-    total_subject_count = len(subject_jobjects) - 1
+    total_subject_count = len(minimal_subjects)
 
     # Sort by distance, if necessary.
     if center:
