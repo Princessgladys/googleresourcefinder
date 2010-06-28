@@ -29,7 +29,7 @@ os.environ['SERVER_NAME'] = 'localhost'
 os.environ['SERVER_PORT'] = '80'
 
 class MediumTestCase(unittest.TestCase):
-    """Sets up stubs to be able to tset against the datastore and various other
+    """Sets up stubs to be able to test against the datastore and various other
     appengine services."""
     def setUp(self):
         apiproxy_stub_map.apiproxy = apiproxy_stub_map.APIProxyStubMap()

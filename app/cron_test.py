@@ -16,7 +16,7 @@
 
 from feeds.xmlutils import Struct
 
-from cron import Job
+from cron import Job, Timestamp
 
 import cron
 import datetime
@@ -24,20 +24,34 @@ import unittest
 
 class CronTest(unittest.TestCase):
     def setUp(self):
+        self.time = datetime.datetime(2010, 06, 16, 12, 30, 37)
         self.job1 = Job(description='test', url='http://www.google.com/',
                         payload='', method='GET', months=[],
-                        days_of_month=[datetime.datetime.now().day],
+                        days_of_month=[self.time.day],
                         weekdays=[],
-                        hours_of_day=[datetime.datetime.now().hour],
-                        minutes_of_hour=[datetime.datetime.now().minute])
+                        hours_of_day=[self.time.hour],
+                        minutes_of_hour=[self.time.minute])
 
         self.job2 = Job(description='test', url='http://www.google.com/',
                         payload='', method='GET', months=[], 
-                        days_of_month=[datetime.datetime.now().day+1],
+                        days_of_month=[self.time.day + 1],
                         weekdays=[],
-                        hours_of_day=[datetime.datetime.now().hour+1],
-                        minutes_of_hour=[datetime.datetime.now().minute+1])
+                        hours_of_day=[self.time.hour + 1],
+                        minutes_of_hour=[self.time.minute + 1])
         
-    def test_check_time(self):
-        assert cron.job_should_run(self.job1, datetime.datetime.now()) == True
-        assert cron.job_should_run(self.job2, datetime.datetime.now()) == False
+        Timestamp(key_name='cron',
+                  timestamp=self.time - datetime.timedelta(minutes=3)).put()
+        
+    def test_get_datetimes(self):
+        times = cron.get_datetimes(self.time)
+        assert len(times) == 3
+        for i in range(len(times)):
+            assert times[i].minute == self.time.minute - 2 + i
+        
+    def test_job_should_run(self):
+        assert cron.job_should_run(self.job1, self.time) == True
+        assert cron.job_should_run(self.job2, self.time) == False
+
+    def test_make_task_name(self):
+        assert cron.make_task_name('foo') == 'foo'
+        assert cron.make_task_name('foo! \t\n!BAR37') == 'foo---BAR37'
