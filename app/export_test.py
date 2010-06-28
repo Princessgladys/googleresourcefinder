@@ -14,22 +14,96 @@
 
 """Tests for export.py."""
 
-from export import format
-
+import bubble
+import csv
 import datetime
+import StringIO
 import unittest
+
+from google.appengine.api import users
+
+import export
+import model
+from medium_test_case import MediumTestCase
+from utils import db
+
+
+KEY_MAP = {
+    'facility_name': 'title',
+    'alt_facility_name': 'alt_title',
+    'facility_healthc_id': 'healthc_id',
+    'facility_pcode': 'pcode',
+    'contact_phone': 'phone',
+    'contact_email': 'email'
+}
+
+class ExportTest(MediumTestCase):
+    def setUp(self):
+        def set_attr(facility, key, value):
+            facility.set_attribute(key, value, self.time, self.user,
+                                   self.nickname, self.affiliation,
+                                   self.comment)
+        MediumTestCase.setUp(self)
+        min_attrs = [u'title', u'pcode', u'healthc_id', u'available_beds',
+            u'total_beds', u'services', u'contact_name', u'phone', u'address',
+            u'location']
+        self.ft = model.FacilityType(key_name='hospital',
+                                     timestamp=datetime.datetime(2010, 06, 01),
+                                     attribute_names=['title', 'pcode'],
+                                     minimal_attribute_names=min_attrs)
+        fin = open('app/testdata/golden_file.csv', 'r')
+        self.time = datetime.datetime(2010, 06, 01, 12, 30, 50)
+        self.user = users.User('test@example.com')
+        self.nickname = 'nickname_foo'
+        self.affiliation = 'affiliation_foo'
+        self.comment = 'comment_foo'
+        for record in csv.DictReader(fin):
+            self.f = model.Facility(key_name='example.org/123',
+                                    type='hospital')
+            set_attr(self.f, 'location', db.GeoPt(record['latitude'],
+                          record['longitude']))
+            for key in record:
+                if key == 'services':
+                    set_attr(self.f, key, record[key].split(', '))
+                elif key in ['available_beds' or 'total_beds' or 
+                    'facility_healthc_id' or 'facility_pcode' or'region_id' or
+                    'commune_id' or 'sante_id' or 'district_id' or
+                    'commune_code']:
+                    set_attr(self.f, key, int(record[key]))
+                elif record[key] == 'True':
+                    set_attr(self.f, key, True)
+                elif record[key] == 'False':
+                    set_attr(self.f, key, False)
+                elif key in KEY_MAP:
+                    set_attr(self.f, KEY_MAP[key], record[key])
+                else:
+                    set_attr(self.f, key, record[key])
         
-class ExportTest(unittest.TestCase):                       
+        db.put(self.f)
+        db.put(self.ft)
+        
+    def tearDown(self):
+        db.delete(self.f)
+        db.delete(self.ft)
+    
     def test_format(self):
         time = datetime.datetime(2010, 6, 6, 15, 17, 3, 52581)
         
-        assert format(u'inf\xf6r') == 'inf\xc3\xb6r'
-        assert format('foo\n!') == 'foo !'
-        assert format(['foo_', '1']) == 'foo_, 1'
-        assert format(['foo_', '']) == 'foo_, '
-        assert format(time) == '2010-06-06 10:17:03 -05:00'
-        assert format(u'') == ''
-        assert format('') == ''
-        assert format([]) == ''
-        assert format({}) == {}
-        assert format(0) == 0
+        assert export.format(u'inf\xf6r') == 'inf\xc3\xb6r'
+        assert export.format('foo\n!') == 'foo !'
+        assert export.format(['foo_', '1']) == 'foo_, 1'
+        assert export.format(['foo_', '']) == 'foo_, '
+        assert export.format(time) == '2010-06-06 10:17:03 -05:00'
+        assert export.format(u'') == ''
+        assert export.format('') == ''
+        assert export.format([]) == ''
+        assert export.format({}) == {}
+        assert export.format(0) == 0
+
+    def test_write_csv(self):
+        facility_type = model.FacilityType.get_by_key_name('hospital')
+        fin = open('app/testdata/golden_file.csv', 'r')
+        sout = StringIO.StringIO()
+        export.write_csv(sout, facility_type)
+        assert sout.getvalue().strip() == fin.read().strip()
+    
