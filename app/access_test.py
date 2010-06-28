@@ -41,7 +41,7 @@ class AccessTest(MediumTestCase):
                                nickname='test', affiliation='test',
                                token='token_foo',
                                actions=[ACTIONS[0], ACTIONS[1]],
-                               no_token_reqed_actions=[ACTIONS[2]])
+                               no_token_requested_actions=[ACTIONS[2]])
         self.no_email_account = Account(timestamp=datetime.datetime.now(),
                                         description='description',
                                         email='', user_id='', token='',
@@ -83,24 +83,24 @@ class AccessTest(MediumTestCase):
         assert (access.check_and_log(self.bar_token_req, self.user).email ==
             self.user.email())
     
-    def run_check_request_asserts(self, test_request_function):
+    def run_check_request_asserts(self, check_request_function):
         # with or without a token on the request, it should return the account
         # with the same e-mail as the user
-        assert (test_request_function(self.foo_token_req, self.user).email ==
+        assert (check_request_function(self.foo_token_req, self.user).email ==
             self.account.email)
-        assert (test_request_function(self.no_token_req, self.user).email ==
+        assert (check_request_function(self.no_token_req, self.user).email ==
             self.account.email)
         
         # should return appropriate account given a token, but no user
-        assert (test_request_function(self.foo_token_req, '').email ==
+        assert (check_request_function(self.foo_token_req, '').email ==
             self.account.email)
             
         # if no token is supplied, or an incorrect token is supplied,
         # without a correct user, this should return None
-        assert test_request_function(self.no_token_req, '') == None
-        assert test_request_function(self.bar_token_req, '') == None
+        assert check_request_function(self.no_token_req, '') == None
+        assert check_request_function(self.bar_token_req, '') == None
 
         # if a token is supplied that differs from the given user, it should
         # still return the account that matches the token
-        assert (test_request_function(self.foo_token_req, self.user2).email ==
+        assert (check_request_function(self.foo_token_req, self.user2).email ==
             self.account.email)
