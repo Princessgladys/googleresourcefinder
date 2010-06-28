@@ -27,64 +27,95 @@ import model
 from medium_test_case import MediumTestCase
 from utils import db
 
+INT_FIELDS = [
+    'available_beds',
+    'total_beds',
+    'healthc_id',
+    'pcode',
+    'region_id',
+    'commune_id',
+    'sante_id',
+    'district_id',
+    'commune_code'
+]
 
-KEY_MAP = {
-    'facility_name': 'title',
-    'alt_facility_name': 'alt_title',
-    'facility_healthc_id': 'healthc_id',
-    'facility_pcode': 'pcode',
-    'contact_phone': 'phone',
-    'contact_email': 'email'
+SERVICES = [
+    'GENERAL_SURGERY',
+    'LAB',
+    'X_RAY',
+    'CT_SCAN',
+    'BLOOD_BANK',
+    'MORTUARY_SERVICES'
+]
+
+STR_FIELDS = [
+    'title',
+    'alt_title',
+    'contact_name',
+    'phone',
+    'email',
+    'department',
+    'district',
+    'commune',
+    'address',
+    'organization',
+    'damage',
+    'comments'
+]
+
+BOOL_FIELDS = {
+    'reachable_by_road': True,
+    'can_pick_up_patients': False
 }
+
+SELECT_FIELDS = {
+    'organization_type': 'MIL',
+    'category': 'DISP',
+    'construction': 'WOOD_FRAME',
+    'operational_status': 'OPERATIONAL'
+}
+
 
 class ExportTest(MediumTestCase):
     def setUp(self):
-        def set_attr(facility, key, value):
-            facility.set_attribute(key, value, self.time, self.user,
+        def set_attr(subject, key, value):
+            subject.set_attribute(key, value, self.time, self.user,
                                    self.nickname, self.affiliation,
                                    self.comment)
         MediumTestCase.setUp(self)
         min_attrs = [u'title', u'pcode', u'healthc_id', u'available_beds',
             u'total_beds', u'services', u'contact_name', u'phone', u'address',
             u'location']
-        self.ft = model.FacilityType(key_name='hospital',
-                                     timestamp=datetime.datetime(2010, 06, 01),
-                                     attribute_names=['title', 'pcode'],
-                                     minimal_attribute_names=min_attrs)
-        fin = open('app/testdata/golden_file.csv', 'r')
         self.time = datetime.datetime(2010, 06, 01, 12, 30, 50)
         self.user = users.User('test@example.com')
         self.nickname = 'nickname_foo'
         self.affiliation = 'affiliation_foo'
         self.comment = 'comment_foo'
-        for record in csv.DictReader(fin):
-            self.f = model.Facility(key_name='example.org/123',
-                                    type='hospital')
-            set_attr(self.f, 'location', db.GeoPt(record['latitude'],
-                          record['longitude']))
-            for key in record:
-                if key == 'services':
-                    set_attr(self.f, key, record[key].split(', '))
-                elif key in ['available_beds' or 'total_beds' or 
-                    'facility_healthc_id' or 'facility_pcode' or'region_id' or
-                    'commune_id' or 'sante_id' or 'district_id' or
-                    'commune_code']:
-                    set_attr(self.f, key, int(record[key]))
-                elif record[key] == 'True':
-                    set_attr(self.f, key, True)
-                elif record[key] == 'False':
-                    set_attr(self.f, key, False)
-                elif key in KEY_MAP:
-                    set_attr(self.f, KEY_MAP[key], record[key])
-                else:
-                    set_attr(self.f, key, record[key])
+        self.st = model.SubjectType(key_name='haiti:hospital',
+                                    timestamp=datetime.datetime(2010, 06, 01),
+                                    attribute_names=['title', 'pcode'],
+                                    minimal_attribute_names=min_attrs)
+        self.s = model.Subject(key_name='haiti:example.org/123',
+                               type='hospital')
+        text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
+        services_str = ','.join(SERVICES)
+        set_attr(self.s, 'location', db.GeoPt(50.0, 0.1))
+        set_attr(self.s, 'services', services_str)
+        for field in text_fields:
+            set_attr(self.s, field, text_fields[field])
+        for i in range(len(INT_FIELDS)):
+            set_attr(self.s, INT_FIELDS[i], i)
+        for key in BOOL_FIELDS:
+            set_attr(self.s, key, BOOL_FIELDS[key])
+        for key in SELECT_FIELDS:
+            set_attr(self.s, key, SELECT_FIELDS[key])
         
-        db.put(self.f)
-        db.put(self.ft)
+        db.put(self.s)
+        db.put(self.st)
         
     def tearDown(self):
-        db.delete(self.f)
-        db.delete(self.ft)
+        db.delete(self.s)
+        db.delete(self.st)
     
     def test_format(self):
         time = datetime.datetime(2010, 6, 6, 15, 17, 3, 52581)
@@ -99,11 +130,10 @@ class ExportTest(MediumTestCase):
         assert export.format([]) == ''
         assert export.format({}) == {}
         assert export.format(0) == 0
-
+    
     def test_write_csv(self):
-        facility_type = model.FacilityType.get_by_key_name('hospital')
+        subject_type = model.SubjectType.get('haiti', 'hospital')
         fin = open('app/testdata/golden_file.csv', 'r')
         sout = StringIO.StringIO()
-        export.write_csv(sout, facility_type)
+        export.write_csv(sout, subject_type)
         assert sout.getvalue().strip() == fin.read().strip()
-    
