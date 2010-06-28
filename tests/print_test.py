@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import datetime
+import time
 
 from google.appengine.api import users
 
@@ -25,7 +26,9 @@ class PrintTest(SeleniumTestCase):
         self.put_account(actions=['*:view'])
         self.put_subject(
             'haiti', 'example.org/10',
-            title='title_within_10_miles', location=db.GeoPt(51.5, 0))
+            title='title_within_10_miles', location=db.GeoPt(51.5, 0),
+            total_beds=10, available_beds=5, address='address_foo',
+            contact_name='contact_name_foo')
         self.put_subject(
             'haiti', 'example.org/11',
             title='title_center', location=db.GeoPt(51.5, 0.01))
@@ -79,3 +82,30 @@ class PrintTest(SeleniumTestCase):
                          "//tr[@id='subject-2']/*[@class='subject-title']")
         self.assert_no_element(
                          "//tr[@id='subject-3']/*[@class='subject-title']")
+        
+        # Confirm that subject-2 shows the right available/total bed counts
+        self.assert_text(Regex('5'),
+                         "//tr[@id='subject-2']/*[@class='subject-beds-open']")
+        self.assert_text(Regex('10'),
+                         "//tr[@id='subject-2']/*" +
+                         "[@class='subject-beds-total']")
+        
+        # Confirm that subject-2 shows the right distance to subject-1
+        self.assert_text(Regex('0.4 miles.*'),
+                         "//tr[@id='subject-2']/*[@class='subject-distance']")
+        
+        # Confirm that subject-2 shows the correct address
+        self.assert_text(Regex('address_foo'),
+                         "//tr[@id='subject-2']/*[@class='subject-address']")
+        
+        # Confirm that subject-2 shows the correct information section
+        self.assert_text(Regex('contact_name_foo'),
+                         "//tr[@id='subject-2']/*" +
+                         "[@class='subject-general-info']")
+
+        # Test to make sure the proper number of facilities are rendering.
+        # Digit #1 [3] is the number of total facilities, digit #2 [2] is the
+        # number of facilities within 10 miles, and digit #3 [1] is the number
+        # with availability
+        self.assert_text(Regex('321'), 
+                         '//tbody[@id="print-summary-tbody"]')
