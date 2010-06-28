@@ -15,6 +15,7 @@
 from model import *
 from utils import *
 import access
+import bubble
 import calendar
 import csv
 import datetime
@@ -56,9 +57,17 @@ COLUMNS_BY_SUBJECT_TYPE = {
         ('commune_id', lambda f: f.get_value('commune_id')),
         ('commune_code', lambda f: f.get_value('commune_code')),
         ('sante_id', lambda f: f.get_value('sante_id')),
-        ('entry_last_updated', lambda f: f.get_value('timestamp'))
+        ('entry_last_updated', lambda f: get_last_updated_time(f))
     ],
 }
+
+def get_last_updated_time(s):
+    subdomain, subject_name = split_key_name(s)
+    st = SubjectType.get(subdomain, s.type)
+    value_info_extractor = bubble.VALUE_INFO_EXTRACTORS[subdomain][s.type]
+    (special, general, details) = value_info_extractor.extract(
+        s, st.attribute_names)
+    return max(detail.date for detail in details)
 
 def short_date(date):
     return '%s %d' % (calendar.month_abbr[date.month], date.day)
