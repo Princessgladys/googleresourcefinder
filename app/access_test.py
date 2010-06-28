@@ -40,15 +40,10 @@ class AccessTest(MediumTestCase):
                                email='test@example.com', user_id='test',
                                nickname='test', affiliation='test',
                                actions=['*:view', 'foo:add', 'bar:*'],
-                               requested_actions=['xyz:remove'])
-        self.no_email_account = Account(timestamp=datetime.datetime.now(),
-                                        description='description',
-                                        email='', user_id='', token='',
-                                        nickname='test', affiliation='test',
-                                        actions=[ACTIONS[0], ACTIONS[1]],
-                                        requested_actions=[ACTIONS[2]])
+                               requested_actions=['xyz:remove'],
+                               token='token_foo')
 
-        db.put([self.account, self.no_email_account])
+        db.put(self.account)
     
     def tearDown(self):
         for account in Account.all():

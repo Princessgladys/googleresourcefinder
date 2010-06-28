@@ -61,11 +61,12 @@ COLUMNS_BY_SUBJECT_TYPE = {
     ],
 }
 
-def get_last_updated_time(f):
-    f_type = FacilityType.get_by_key_name(f.type)
-    value_info_extractor = bubble.VALUE_INFO_EXTRACTORS[f.type]
+def get_last_updated_time(s):
+    subdomain, subject_name = split_key_name(s)
+    st = SubjectType.get(subdomain, s.type)
+    value_info_extractor = bubble.VALUE_INFO_EXTRACTORS[subdomain][s.type]
     (special, general, details) = value_info_extractor.extract(
-        f, f_type.attribute_names)
+        s, st.attribute_names)
     return max(detail.date for detail in details)
 
 def short_date(date):
