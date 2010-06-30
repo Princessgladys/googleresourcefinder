@@ -165,7 +165,7 @@ class Handler(webapp.RequestHandler):
 
         # Determine the subdomain.
         self.subdomain = ''
-        levels = self.request.headers['Host'].split('.')
+        levels = self.request.headers.get('Host', '').split('.')
         if levels[-2:] == ['appspot', 'com'] and len(levels) >= 4:
             # foo.resource-finder.appspot.com -> subdomain 'foo'
             # bar.kpy.latest.resource-finder.appspot.com -> subdomain 'bar'

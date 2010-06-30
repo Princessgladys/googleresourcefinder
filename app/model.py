@@ -329,18 +329,43 @@ class Subscription(db.Model):
         'weekly', # send during a weekly digest e-mail
         'monthly' # send during a monthly digest e-mail
     ]) # frequency of updates for this subject
+    
+    @staticmethod
+    def get(subject_name, user_email):
+        """Gets a Subscription entity by its subject_name and e-mail."""
+        return Subscription.get_by_key_name(subject_name + ':' + user_email +
+                                            ':')
+    
+    @staticmethod
+    def get_by_subject(subject_name):
+        """Gets a query for all PendingAlert with the given subject name."""
+        return filter_by_prefix(Subscription.all(), subject_name + ':')
 
-class PendingAlert(db.Model):
+class PendingAlert(MinimalSubject):
     """A pending notification for a user; waiting to be sent on a daily/weekly/
-    monthly basis, pending the frequency of the particular alrt. Top-level
+    monthly basis, pending the frequency of the particular alert. Top-level
     entity, has no parent.
     Key name: follows the format frequency:user_email:subject_name"""
     user_email = db.StringProperty(required=True) # user to alert
     subject_name = db.StringProperty(required=True) # key_name of subject
-    old_values = db.StringListProperty(required=True)
+    timestamp = db.DateTimeProperty() # creation time of the pending alert
     frequency = db.StringProperty(required=True, choices=[
         'immediate', # send an alert whenever the subject is updated
         'daily', # send during a daily digest e-mail
         'weekly', # send during a weekly digest e-mail
-        'monthly' # send during a monthly digest e-mail
+        'monthly' # send during a monthly digest e-mail [every 30 days]
     ]) # frequency of updates for this subject
+
+    @staticmethod
+    def get(frequency, user_email, subject_name):
+        """Gets a PendingAlert entity by its frequency, e-mail, and 
+		subject name."""
+        return PendingAlert.get_by_key_name(frequency + ':' + user_email +
+                                            ':' + subject_name + ':')
+    
+    @staticmethod
+    def get_by_frequency(frequency, user_email):
+        """Gets a query for all PendingAlert with the given frequency and
+        associated user e-mail."""
+        return filter_by_prefix(PendingAlert.all(), frequency + ':' +
+                                user_email + ':')

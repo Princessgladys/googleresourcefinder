@@ -452,10 +452,12 @@ class Edit(utils.Handler):
                                  subject_type, request, attribute,
                                  change_metadata)
                     changed_attributes_dict[name] = attribute
-                    changed_attribute_values['%s__old' % name] = \
-                        value_changed[0]
-                    changed_attribute_values['%s__new' % name] = \
-                        value_changed[1]
+                    changed_attribute_values[name] = [value_changed[0],
+                        value_changed[1], subject.get_author_nickname(
+                        attribute.key().name())]
+                    # To be sent to mail update system in form:
+                    # changed_attribute_values[attribute] = [old_value,
+                    #   new_value, author_of_change]
             
             if has_changes:
                 # Schedule a task to add a feed record.
@@ -473,8 +475,8 @@ class Edit(utils.Handler):
                 
                 # On edit, create a task to e-mail users who have subscribed
                 # to that subject.
-                attrs = changed_attribute_values.copy()
-                json_pickle_attrs = simplejson.dumps(pickle.dumps(attrs))
+                json_pickle_attrs = simplejson.dumps(pickle.dumps(
+                    changed_attribute_values))
                 
                 params = {}
                 params['subject_name'] = subject.key().name()
