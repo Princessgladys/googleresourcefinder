@@ -176,9 +176,6 @@ def main():
             '%s:%d' % (options.address, options.port), None, 'test', 'test')
         setup.setup_datastore()
 
-        model.Account(email='test@example.com', description='Test',
-                      actions=[':view', ':edit', 'grant']).put()
-
         # Gather the selected tests, or all the tests if none were specified.
         loader = unittest.defaultTestLoader
         suites = []

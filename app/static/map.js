@@ -50,12 +50,13 @@ STATUS_TEXT_COLORS = [null, '040', '040', '040'];
 // smart way so that they do not overlap.
 var MAX_MARKERS_TO_PRINT = 50;
 
-var METERS_TO_MILES = 0.000621371192;
-var METERS_TO_KM = 0.001;
+var METERS_PER_MILE = 1609.344;
+var METERS_PER_KM = 1000;
 
 // Temporary for v1, this should be user-settable in the future
 // TODO: Also need to update message in map.html that says "10 miles"
 var PRINT_RADIUS_MILES = 10;
+var PRINT_RADIUS_METERS = PRINT_RADIUS_MILES * METERS_PER_MILE;
 
 // TODO: Re-enable when monitoring is re-enabled
 var enable_freshness = false;
@@ -777,8 +778,8 @@ function update_print_subject_list() {
       var dist;
       if (typeof(dist_meters) === 'number') {
         dist = locale.DISTANCE({
-            MILES: format_number(dist_meters * METERS_TO_MILES, 1), 
-            KM: format_number(dist_meters * METERS_TO_KM, 2)});
+            MILES: format_number(dist_meters / METERS_PER_MILE, 1), 
+            KM: format_number(dist_meters / METERS_PER_KM, 2)});
       }
       var title = subject.values[attributes_by_name.title];
       var subject_title = title + ' - '
@@ -956,11 +957,12 @@ function enable_print_link() {
     return;
   }
   var subject = selected_subject;
-  var PRINT_URL = '/?print=yes&lat=${LAT}&lon=${LON}&rad=${RAD}';
   var location = subject.values[attributes_by_name.location];
   var title = subject.values[attributes_by_name.title];
-  print_link.href = render(PRINT_URL, {LAT: location.lat, LON: location.lon,
-       RAD: PRINT_RADIUS_MILES / METERS_TO_MILES});
+  print_link.href = print_url + render(
+      '&lat=${LAT}&lon=${LON}&rad=${RAD}',
+      {LAT: location.lat, LON: location.lon, RAD: PRINT_RADIUS_METERS}
+  );
   print_link.title = locale.PRINT_ENABLED_TOOLTIP({FACILITY_NAME: title});
   print_link.target = '_blank';
   print_link.onclick = null;
@@ -1172,14 +1174,15 @@ function select_subject(subject_i, ignore_current) {
 
   if (markers[selected_subject_i]) {
     show_loading(true);
-    var url = 'bubble?subject_name=' + selected_subject.name;
+    var url = bubble_url + (bubble_url.indexOf('?') >= 0 ? '&' : '?') +
+        'subject_name=' + selected_subject.name;
     _gaq.push(['_trackEvent', 'bubble', 'open', selected_subject.name]);
     jQuery.ajax({
       url: url,
       type: 'GET',
       timeout: 10000,
-      error: function(request, textStatus, errorThrown){
-        log(textStatus + ', ' + errorThrown);
+      error: function(request, text_status, error_thrown){
+        log(text_status + ', ' + error_thrown);
         alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
         show_loading(false);
       },

@@ -36,9 +36,9 @@ class RequestAccess(utils.Handler):
     def get(self):
         if not self.account:
             raise Redirect(users.create_login_url(self.request.uri))
-
-        self.render('templates/request_access.html', action='edit');
-
+        self.render('templates/request_access.html', action='edit',
+                    request_url=self.get_url('/request_access'),
+                    subdomain=self.subdomain)
 
     def post(self):
         if not self.account:
@@ -46,24 +46,26 @@ class RequestAccess(utils.Handler):
         action = self.params.action
 
         if action in self.account.actions:
-            #i18n: Requested permission action has been previously granted
-            message = _('You are already %(action)s' % {'action': action})
+            #i18n: Requested permission has been previously granted
+            message = _('You already have "%(action)s" permission' %
+                        {'action': action})
         elif action in self.account.requested_actions:
             message = _(
-                #i18n: Requested permission action has already been granted
-                'Your request for %(action)s is already registered'
-                % {'action': action})
+                #i18n: Request for permission is awaiting approval
+                'Your request for "%(action)s" permission is now pending' %
+                {'action': action})
         else:
             self.account.requested_actions.append(action)
-            #i18n: Requested permission action was registered
-            message = _('Request for becoming %(action)s was registered.'
-                        % {'action': action})
+            message = _(
+                #i18n: Request for permission is awaiting approval
+                'Your request for "%(action)s" permission is now pending' %
+                {'action': action})
             self.account.put()
 
         if self.params.embed:
             self.write(message)
         else:
-            raise Redirect('/')
+            raise Redirect(self.get_url('/'))
 
 if __name__ == '__main__':
     utils.run([('/request_access', RequestAccess)], debug=True)

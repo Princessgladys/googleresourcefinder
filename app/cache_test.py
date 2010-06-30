@@ -37,23 +37,32 @@ class JsonCacheTest(MediumTestCase):
         fr_json = 'fake fr json'
 
         # start out empty
-        assert cache.JSON.get('en') == None
-        assert cache.JSON.get('fr') == None
+        assert cache.JSON['foo'].get('en') == None
+        assert cache.JSON['foo'].get('fr') == None
+
+        # fill the cache for subdomain 'bar'
+        cache.JSON['bar'].set('en', 'bar en')
+        cache.JSON['bar'].set('fr', 'bar fr')
 
         # fill the cache for en only
-        cache.JSON.set('en', en_json)
-        assert cache.JSON.get('en') == en_json
-        assert cache.JSON.get('fr') == None
+        cache.JSON['foo'].set('en', en_json)
+        assert cache.JSON['foo'].get('en') == en_json
+        assert cache.JSON['foo'].get('fr') == None
 
         # now fill for fr
-        cache.JSON.set('fr', fr_json)
-        assert cache.JSON.get('en') == en_json
-        assert cache.JSON.get('fr') == fr_json
+        cache.JSON['foo'].set('fr', fr_json)
+        assert cache.JSON['foo'].get('en') == en_json
+        assert cache.JSON['foo'].get('fr') == fr_json
 
         # flush should clear all locales
-        cache.JSON.flush()
-        assert cache.JSON.get('en') == None
-        assert cache.JSON.get('fr') == None
+        cache.JSON['foo'].flush()
+        assert cache.JSON['foo'].get('en') == None
+        assert cache.JSON['foo'].get('fr') == None
+
+        # other subdomain should be unaffected
+        assert cache.JSON['bar'].get('en') == 'bar en'
+        assert cache.JSON['bar'].get('fr') == 'bar fr'
+
 
 class CacheTest(MediumTestCase):
     def setUp(self):
@@ -93,6 +102,6 @@ class CacheTest(MediumTestCase):
         assert memcache.get(cache.MESSAGES.memcache_key) != None
 
         # Partial flush of in-memory cache only
-        cache.MESSAGES.flush(flush_memcache=False)
+        cache.MESSAGES.flush_local()
         assert memcache.get(cache.MESSAGES.memcache_key) != None
         assert cache.MESSAGES.entities == None
