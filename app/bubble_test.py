@@ -43,17 +43,14 @@ def fake_get_message(ns, n):
 
 class BubbleTest(unittest.TestCase):
     def setUp(self):
-        self.real_auth_domain = os.environ.get('AUTH_DOMAIN')
+        self.real_auth_domain = os.environ.get('AUTH_DOMAIN', '')
         os.environ['AUTH_DOMAIN'] = 'test'
         self.real_get_message = bubble.get_message
         bubble.get_message = fake_get_message   
 
     def tearDown(self):
         bubble.get_message = self.real_get_message
-        if self.real_auth_domain:
-            os.environ['AUTH_DOMAIN'] = self.val
-        else:
-            os.environ['AUTH_DOMAIN'] = ''
+        os.environ['AUTH_DOMAIN'] = self.real_auth_domain
 
     def test_format(self):
         time = datetime.datetime(2010, 6, 2, 13, 21, 13, 97435)
@@ -78,7 +75,7 @@ class BubbleTest(unittest.TestCase):
         assert bubble.format(['fake_to_localize'], True == ['fake_localized'])
 
     def test_value_info_extractor(self):
-        s = model.Subject(key_name='example.org/123', type='hospital')
+        s = model.Subject(key_name='haiti:example.org/123', type='hospital')
         s.set_attribute('title', 'title_foo', datetime.datetime.now(),
                         users.User('test@example.com'),
                         'nickname_foo', 'affiliation_foo', 'comment_foo')
@@ -107,7 +104,7 @@ class BubbleTest(unittest.TestCase):
         affiliation = 'affiliation_foo'
         comment = 'comment_foo'
         
-        s = model.Subject(key_name='example.org/123', type='hospital')
+        s = model.Subject(key_name='haiti:example.org/123', type='hospital')
         s.set_attribute('title', 'title_foo', now, user, nickname, affiliation,
                         comment)
         s.set_attribute(HIDDEN_ATTRIBUTE_NAMES[0], 'hidden_value_foo', now,

@@ -15,6 +15,7 @@
 from model import *
 from utils import *
 import access
+import bubble
 import calendar
 import csv
 import datetime
@@ -23,7 +24,7 @@ import datetime
 # Each tuple has the column header and a lambda function that takes a
 # subject and a report and returns the column value
 COLUMNS_BY_SUBJECT_TYPE = {
-    'hospital': [
+    ('haiti', 'hospital'): [
         ('name', lambda f: f.get_value('title')),
         ('alt_name', lambda f: f.get_value('alt_title')),
         ('healthc_id', lambda f: f.get_value('healthc_id')),
@@ -56,9 +57,17 @@ COLUMNS_BY_SUBJECT_TYPE = {
         ('commune_id', lambda f: f.get_value('commune_id')),
         ('commune_code', lambda f: f.get_value('commune_code')),
         ('sante_id', lambda f: f.get_value('sante_id')),
-        ('entry_last_updated', lambda f: f.get_value('timestamp'))
+        ('entry_last_updated', lambda f: get_last_updated_time(f))
     ],
 }
+
+def get_last_updated_time(s):
+    subdomain, subject_name = split_key_name(s)
+    st = SubjectType.get(subdomain, s.type)
+    value_info_extractor = bubble.VALUE_INFO_EXTRACTORS[subdomain][s.type]
+    (special, general, details) = value_info_extractor.extract(
+        s, st.attribute_names)
+    return max(detail.date for detail in details)
 
 def short_date(date):
     return '%s %d' % (calendar.month_abbr[date.month], date.day)
@@ -68,12 +77,14 @@ def write_csv(out, subject_type):
        in CSV format, with a row for each subject"""
     writer = csv.writer(out)
 
-    subjects = fetch_all(Subject.all().filter('type =', subject_type))
-    columns = COLUMNS_BY_SUBJECT_TYPE[subject_type.key().name()]
+    subdomain, type_name = split_key_name(subject_type)
+    subjects = fetch_all(
+        Subject.all_in_subdomain(subdomain).filter('type =', type_name))
+    columns = COLUMNS_BY_SUBJECT_TYPE[(subdomain, type_name)]
     if columns:
         row = list(column[0] for column in columns)
     else:
-        row = [subject_type] + subject_type.attribute_names
+        row = [type_name] + subject_type.attribute_names
     writer.writerow(row)
 
     # Write a row for each subject.
@@ -83,7 +94,8 @@ def write_csv(out, subject_type):
             for column in columns:
                 row.append(format(column[1](subject)))
         else:
-            row = [subject.key().name()]
+            subdomain, subject_name = split_key_name(subject)
+            row = [subject_name]
             for name in subject_type.attribute_names:
                 value = get_value(subject, name)
                 row.append(format(value))
@@ -103,14 +115,14 @@ def format(value):
 
 class Export(Handler):
     def get(self):
-        subject_type = self.request.get('subject_type')
-        if subject_type:
+        if self.params.subject_type:
             # Get the selected subject type.
-            subject_type = SubjectType.get_by_key_name(subject_type)
+            subject_type = SubjectType.get(
+                self.subdomain, self.params.subject_type)
 
             # Construct a reasonable filename.
             timestamp = datetime.datetime.utcnow()
-            filename = '%s.csv' % subject_type.key().name()
+            filename = '%s.%s.csv' % (self.subdomain, self.params.subject_type)
             self.response.headers['Content-Type'] = 'text/csv'
             self.response.headers['Content-Disposition'] = \
                 'attachment; filename=' + filename
@@ -124,23 +136,20 @@ class Export(Handler):
             self.write('</head><body>')
             #i18n: Save a copy of the data in CSV format
             self.write('<h2>%s</h2>' % to_unicode(_("CSV Export")))
-            for ftype in SubjectType.all():
-                self.write('<form>')
-                self.write('<p>%s' % to_unicode(_(
-                    #i18n: Label for a selector to export data to CSV
-                    'Select subject type to export:')))
-                self.write('<select name="subject_type">')
-                for subject_type in SubjectType.all():
-                    # TODO(shakusa) SubjectType should have translated messages
-                    self.write(
-                        '<option value="%s">%s</option>' % (
-                        get_message('subject_type', subject_type.key().name()),
-                        subject_type.key().name()))
-                self.write('<p><input type=submit value="%s">' %
-                    #i18n: Button to export data to comma-separated-values
-                    #i18n: format.
-                    to_unicode(_('Export CSV')))
-                self.write('</form>')
+            self.write('<form>')
+            self.write('<p>%s' % to_unicode(_(
+                #i18n: Label for a selector to export data to CSV
+                'Select subject type to export:')))
+            self.write('<select name="subject_type">')
+            for subject_type in SubjectType.all_in_subdomain(self.subdomain):
+                # TODO(shakusa) SubjectType should have translated messages
+                subdomain, type_name = split_key_name(subject_type)
+                self.write('<option value="%s">%s</option>' % (
+                    type_name, type_name))
+            self.write('<p><input type=submit value="%s">' %
+                #i18n: Button to export data to comma-separated-value format.
+                to_unicode(_('Export CSV')))
+            self.write('</form>')
             self.write('</body></html>')
 
 if __name__ == '__main__':

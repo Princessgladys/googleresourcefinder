@@ -23,7 +23,7 @@
 {% comment %}
 #i18n: Name of the application.
 {% endcomment %}
-<title>{% trans "Resource Finder" %} ({{instance}})</title>
+<title>{% trans "Resource Finder" %} ({{subdomain}})</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <style>
 {% if not params.embed %}
@@ -54,7 +54,7 @@ tr.field.text { vertical-align: top; }
 {% endcomment %}
 <h1>{% trans "Edit" %} {{subject_title|escape}}</h1>
 
-<form method="post" id="edit" action="/edit">
+<form method="post" id="edit" action="{{edit_url}}">
   <input type="hidden" name="token" value="{{token}}"/>
   <input type="hidden" name="embed" value="{{params.embed|escape}}"/>
   <input type="hidden" name="cc" value="{{params.cc|escape}}"/>

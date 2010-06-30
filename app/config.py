@@ -20,7 +20,7 @@ LANGUAGES = [('en', 'English'),
              ('fr', u'Fran\u00e7ais'), # French
              ('ht', u'Krey\u00f2l'), # Kreyol
              ('es-419', u'Espa\u00F1ol'), # Spanish (Latin American)
-             ]
+            ]
 
 # A map from unavailable languages to the best available fallback languages.
 LANG_FALLBACKS = {'es': 'es-419'}
