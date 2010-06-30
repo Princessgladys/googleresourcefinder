@@ -80,12 +80,12 @@ class ExportTest(MediumTestCase):
     def setUp(self):
         def set_attr(subject, key, value):
             subject.set_attribute(key, value, self.time, self.user,
-                                   self.nickname, self.affiliation,
-                                   self.comment)
+                                  self.nickname, self.affiliation,
+                                  self.comment)
         MediumTestCase.setUp(self)
         min_attrs = [u'title', u'pcode', u'healthc_id', u'available_beds',
-            u'total_beds', u'services', u'contact_name', u'phone', u'address',
-            u'location']
+                     u'total_beds', u'services', u'contact_name', u'phone',
+                     u'address', u'location']
         self.time = datetime.datetime(2010, 06, 01, 12, 30, 50)
         self.user = users.User('test@example.com')
         self.nickname = 'nickname_foo'
@@ -98,9 +98,8 @@ class ExportTest(MediumTestCase):
         self.s = model.Subject(key_name='haiti:example.org/123',
                                type='hospital')
         text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
-        services_str = ','.join(SERVICES)
         set_attr(self.s, 'location', db.GeoPt(50.0, 0.1))
-        set_attr(self.s, 'services', services_str)
+        set_attr(self.s, 'services', SERVICES)
         for field in text_fields:
             set_attr(self.s, field, text_fields[field])
         for i in range(len(INT_FIELDS)):
