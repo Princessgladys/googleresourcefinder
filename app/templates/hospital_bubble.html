@@ -20,30 +20,30 @@
   <span class="title-row">
     <span class="title">{{special.title.value|escape}}</span>
     {% comment %}
-    #i18n: Link to edit the data for a facility record.
+    #i18n: Link to edit the data for a hospital record.
     {% endcomment %}
-    <a href='{{edit_link|escape}}'>{% trans "Edit this record" %}</a>
+    <a href='{{edit_url|escape}}'>{% trans "Edit this record" %}</a>
   </span>
   <h2>
     {% comment %}
-    #i18n: Proper name of an ID for a healthcare facility, no translation
-    #i18n: necessary.
+    #i18n: Proper name of an ID for a health facility defined by the 
+    #i18n: Pan-American Health Organization; no translation necessary.
     {% endcomment %}
-    {% trans "HealthC ID:" %} {{special.healthc_id.value|escape}} &#xb7;
+    {% trans "HealthC ID" %}: {{special.healthc_id.value|escape}} &#xb7;
     {% comment %}
-    #i18n: Proper name of an ID for a healthcare facility defined by the
-    #i18n: Pan-American Health Organization, no translation necessary.
+    #i18n: Proper name of an ID for a health facility defined by the 
+    #i18n: Haiti ministry of health (MSPP); no translation necessary.
     {% endcomment %}
-    {% trans "PCode:" %} {{special.pcode.value|escape}}<br>
+    {% trans "PCode" %}: {{special.pcode.value|escape}}<br>
     {% comment %}
     #i18n: Label for a date-time when the data was last updated
     {% endcomment %}
-    {% trans "Last updated:" %} {{last_updated|escape}}
+    {% trans "Last updated" %}: {{last_updated|escape}}
   </h2>
-  {% ifequal special.operational_status.value 'Closed or closing' %}
+  {% ifequal special.operational_status.raw 'CLOSED_OR_CLOSING' %}
     <div style="color:#a00; font-size:14px;">
       {% comment %}
-      #i18n: Note that a facility has been marked closed.
+      #i18n: Note that a health facility has been marked closed.
       {% endcomment %}
       {% blocktrans %}<strong>Note:</strong> This facility has been marked closed.{% endblocktrans %}
     </div>

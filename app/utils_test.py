@@ -41,70 +41,131 @@ from model import Account, Message
 class HandlerTest(MediumTestCase):
     def setUp(self):
         MediumTestCase.setUp(self)
-        self.request = webapp.Request(webob.Request.blank(
-            '/?embed=yes&action=view&rad=1.23').environ)
-        self.response = webapp.Response()
-        self.handler = utils.Handler()
-        self.handler.initialize(self.request, self.response)
+        Account(key_name='default', actions=['haiti:view']).put()
+        Account(email='foo@example.com', actions=['*:edit']).put()
 
-    def test_initialize(self):
-        assert self.handler.params.rad == 1.23
-        assert self.handler.params.embed == 'yes'
-        assert self.handler.params.action == 'view'
+    def simulate_request(self, path, user_email=None, **cookies):
+        request = webapp.Request(webob.Request.blank(path).environ)
+        response = webapp.Response()
+        for name, value in cookies.items():
+            request.cookies[name] = value
+        user = user_email and users.User(email=user_email)
+        handler = utils.Handler()
+        handler.initialize(request, response, user)
+        return handler
+
+    def tearDown(self):
+        db.delete(Account.get_by_key_name('default'))
+        db.delete(Account.all().filter('email =', 'foo@example.com').get())
+        MediumTestCase.tearDown(self)
+
+    def test_auto_params(self):
+        handler = self.simulate_request('/?rad=1.23&embed=YES&action=view')
+        assert handler.params.rad == 1.23
+        assert handler.params.embed == 'yes'
+        assert handler.params.action == 'view'
 
     def test_require_action_permitted(self):
-        """Confirms require_action_permitted is working correctly"""
-        assert_raises(utils.Redirect,
-                      self.handler.require_action_permitted, 'grant')
+        """Confirms require_action_permitted is working correctly."""
+        # User not logged in
+        handler = self.simulate_request('/?subdomain=haiti')
+        # 'grant' is not allowed
+        assert_raises(utils.Redirect, handler.require_action_permitted, 'grant')
+        # 'edit' is not allowed
+        assert_raises(utils.Redirect, handler.require_action_permitted, 'edit')
+        # 'view' should be allowed (due to the default permissions)
+        handler.require_action_permitted('view')
 
-        self.handler.account = Account(email='foo@example.com',
-                                       description='Test',
-                                       actions=['view', 'edit'])
+        # default 'view' permission should only apply to 'haiti' subdomain
+        handler = self.simulate_request('/?subdomain=xyz')
+        assert_raises(utils.Redirect, handler.require_action_permitted, 'view')
 
-        assert_raises(utils.ErrorMessage,
-                      self.handler.require_action_permitted, 'grant')
-        self.handler.require_action_permitted('view')
+        # User is logged in, but has no Account entity
+        handler = self.simulate_request('/?subdomain=haiti', 'bogus@bogus.com')
+        # 'grant' is not allowed
+        assert_raises(
+            utils.ErrorMessage, handler.require_action_permitted, 'grant')
+        # 'edit' is not allowed
+        assert_raises(
+            utils.ErrorMessage, handler.require_action_permitted, 'edit')
+        # 'view' should be allowed (due to the default permissions)
+        handler.require_action_permitted('view')
+
+        # default 'view' permission should only apply to 'haiti' subdomain
+        handler = self.simulate_request('/?subdomain=xyz', 'bogus@bogus.com')
+        assert_raises(
+            utils.ErrorMessage, handler.require_action_permitted, 'view')
+
+        # User is logged in, and has an Account entity
+        handler = self.simulate_request('/?subdomain=haiti', 'foo@example.com')
+        # 'grant' is still not allowed
+        assert_raises(
+            utils.ErrorMessage, handler.require_action_permitted, 'grant')
+        # 'edit' should be allowed
+        handler.require_action_permitted('edit')
+        # 'view' should still be allowed
+        handler.require_action_permitted('view')
 
     def test_require_logged_in_user(self):
         """Confirms require_logged_in_user is working correctly"""
-        assert_raises(utils.Redirect, self.handler.require_logged_in_user)
+        # User not logged in
+        handler = self.simulate_request('/?subdomain=haiti')
+        assert_raises(utils.Redirect, handler.require_logged_in_user)
 
-        self.handler.user = users.User(email='foo@example.com')
-        self.handler.require_logged_in_user()
+        # User is logged in
+        handler = self.simulate_request('/?subdomain=haiti', 'foo@example.com')
+        handler.require_logged_in_user()
 
-    def test_select_locale(self):
-        """Confirm select_locale works as expected"""
-        # English by default
-        self.handler.params.lang = ''
-        self.handler.select_locale()
-        assert self.handler.params.lang == 'en'
-        assert self.handler.params.maps_lang == 'en'
-        assert self.response.headers['Content-Language'] == 'en'
+    def test_select_lang(self):
+        """Confirm select_lang works as expected"""
+        # Default language should be English.
+        handler = self.simulate_request('/')
+        assert handler.params.lang == 'en'
+        assert handler.params.maps_lang == 'en'
+        assert handler.response.headers['Content-Language'] == 'en'
+        assert django.utils.translation.get_language() == 'en'
+        assert utils.get_lang() == 'en'
+        assert utils.get_locale() == 'en'
 
-        # test cookie
-        self.handler.params.lang = ''
-        self.handler.request.cookies['django_language'] = 'fr'
-        self.handler.select_locale()
-        assert self.handler.params.lang == 'fr'
-        assert self.handler.params.maps_lang == 'fr'
+        # Test the django_language cookie.
+        handler = self.simulate_request('/', django_language='fr')
+        assert handler.params.lang == 'fr'
+        assert handler.params.maps_lang == 'fr'
+        assert django.utils.translation.get_language() == 'fr'
+        assert utils.get_lang() == 'fr'
+        assert utils.get_locale() == 'fr'
 
-        # if self.params.lang is already set, don't change it.
-        self.handler.params.lang = 'ht'
-        self.handler.select_locale()
-        assert self.handler.params.lang == 'ht'
-        assert self.handler.params.maps_lang == 'fr'
+        # Test the 'lang' query parameter.
+        handler = self.simulate_request('/?lang=ht')
+        assert handler.params.lang == 'ht'
+        assert handler.params.maps_lang == 'fr'  # fallback
+        assert django.utils.translation.get_language() == 'ht'
+        assert utils.get_lang() == 'ht'
+        assert utils.get_locale() == 'ht'
 
-        # test alternate language code
-        alt_lang = config.ALTERNATE_LANG_CODES.keys()[0]
-        self.handler.params.lang = alt_lang
-        self.handler.select_locale()
-        assert self.handler.params.lang == config.ALTERNATE_LANG_CODES[alt_lang]
-
-        # test maps_lang and django language select
-        self.handler.params.lang = 'es-419'
-        self.handler.select_locale()
-        assert self.handler.params.lang == 'es-419'
+        # Test an alternate language code.
+        handler = self.simulate_request('/?lang=es')
+        assert handler.params.lang == 'es-419'
+        assert handler.params.maps_lang == 'es-419'
         assert django.utils.translation.get_language() == 'es-419'
+        assert utils.get_lang() == 'es-419'
+        assert utils.get_locale() == 'es_419'
+
+        # Force all the language settings to change.
+        handler = self.simulate_request('/?lang=fr')
+        assert handler.params.lang == 'fr'
+        assert handler.params.maps_lang == 'fr'
+        assert django.utils.translation.get_language() == 'fr'
+        assert utils.get_lang() == 'fr'
+        assert utils.get_locale() == 'fr'
+
+        # Test a language with a subcode.
+        handler = self.simulate_request('/?lang=es-419')
+        assert handler.params.lang == 'es-419'
+        assert handler.params.maps_lang == 'es-419'
+        assert django.utils.translation.get_language() == 'es-419'
+        assert utils.get_lang() == 'es-419'
+        assert utils.get_locale() == 'es_419'
 
 
 class UtilsTest(MediumTestCase):
