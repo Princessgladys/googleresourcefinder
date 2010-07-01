@@ -333,8 +333,7 @@ class Subscription(db.Model):
     @staticmethod
     def get(subject_name, user_email):
         """Gets a Subscription entity by its subject_name and e-mail."""
-        return Subscription.get_by_key_name(subject_name + ':' + user_email +
-                                            ':')
+        return Subscription.get_by_key_name(subject_name + ':' + user_email)
     
     @staticmethod
     def get_by_subject(subject_name):
@@ -359,9 +358,9 @@ class PendingAlert(MinimalSubject):
     @staticmethod
     def get(frequency, user_email, subject_name):
         """Gets a PendingAlert entity by its frequency, e-mail, and 
-		subject name."""
+        subject name."""
         return PendingAlert.get_by_key_name(frequency + ':' + user_email +
-                                            ':' + subject_name + ':')
+                                            ':' + subject_name)
     
     @staticmethod
     def get_by_frequency(frequency, user_email):
