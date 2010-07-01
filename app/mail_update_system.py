@@ -34,10 +34,12 @@ import pickle
 
 from google.appengine.api import mail
 from google.appengine.ext import db
+from google.appengine.ext.webapp import template
 
 import cache
 import utils
 from bubble import format
+from export import get_last_updated_time
 from feeds.xmlutils import Struct
 from model import Account, PendingAlert, Subject, SubjectType, Subscription
 from utils import _, Handler, simplejson
@@ -91,12 +93,12 @@ def fetch_updates(alert, subject):
         author = subject.get_author_nickname(old_values[i])
         alert_val = getattr(alert, old_values[i])
         if value != alert_val:
-            updated_attrs.append([
-                old_values[i], # attribute
-                alert_val, # new value
-                value, # old value
-                author # author of the change
-            ])
+            updated_attrs.append({
+                'attribute': old_values[i], # attribute
+                'old_value': alert_val, # old
+                'new_value': value, # new
+                'author': author # author of the change
+            })
     
     return updated_attrs
 
@@ -108,8 +110,14 @@ def form_plain_body(data):
         Struct(
             date=datetime
             changed_subjects={subject_key: {subject_title: [
-                [attribute, old_value, new_value, author],
-                [attribute, old_value, new_value, author]
+                { attribute: attr_foo,
+                  old_value: value_foo,
+                  new_value: value_bar,
+                  author: author_foo },
+                { attribute: attr_foo,
+                  old_value: value_foo,
+                  new_value: value_bar,
+                  author: author_foo }
             ]}}
         )
     """
@@ -119,14 +127,67 @@ def form_plain_body(data):
         updates = data.changed_subjects[subject_name][subject_title]
         body += subject_title.upper() + '\n'
         for update in updates:
-            body += '-> ' + str(update[0]) + ": " + str(update[2]) + ' '
-            body += '[Old Value: ' + str(update[1]) + '; Updated by: '
-            body += str(update[3]) + ']\n'
+            body += '-> ' + str(update['attribute']) + ": "
+            body += str(update['new_value']) + ' ' + '[Old Value: '
+            body += str(update['old_value']) + '; Updated by: '
+            body += str(update['author']) + ']\n'
         body += '\n'
     return body
 
+def form_html_body(data):
+    """Forms the HTML body for an e-mail. Expects the data to be input in
+    the same format as in form_plain_body(), with the optional addition of
+    an 'unchanged_subjects' field of the Struct. These will be displayed at
+    the bottom of the HTML e-mail for the purposes of digest information.
+    The 'unchanged_subjects' field, if present, should be a list of
+    subject names, i.e.:
+        [ subject_name1, subject_name2, subject_name3, ... ]
+    """
+    changed_subjects = []
+    for subject_key in data.changed_subjects:
+        subject = Subject.get_by_key_name(subject_key)
+        changed_subjects.append({
+            'name': subject_key,
+            'title': subject.get_value('title'),
+            'address': subject.get_value('address'),
+            'contact_number': subject.get_value('phone'),
+            'contact_email': subject.get_value('email'),
+            'available_beds': subject.get_value('available_beds'),
+            'total_beds': subject.get_value('total_beds'),
+            'last_updated': format(get_last_updated_time(subject)),
+            'changed_vals': data.changed_subjects[subject_key][
+                subject.get_value('title')]
+        })
+    
+    if 'unchanged_subjects' not in data:
+        data.unchanged_subjects = []
+    unchanged_subjects = []
+    for subject_key in data.unchanged_subjects:
+        subject = Subject.get_by_key_name(subject_key)
+        unchanged_subjects.append({
+            'name': subject_key,
+            'title': subject.get_value('title'),
+            'address': subject.get_value('address'),
+            'contact_number': subject.get_value('phone'),
+            'contact_email': subject.get_value('email'),
+            'available_beds': subject.get_value('available_beds'),
+            'total_beds': subject.get_value('total_beds'),
+            'last_updated': format(get_last_updated_time(subject))
+        })
+    
+    template_values = {
+        'date': data.time,
+        'nickname': data.nickname,
+        'changed_subjects': changed_subjects,
+        'unchanged_subjects': unchanged_subjects
+    }
+    
+    path = os.path.join(os.path.dirname(__file__),
+                        'templates/hospital_email.html')
+    return template.render(path, template_values)
 
-def send_email(locale, sender, to, subject, text_body):
+
+def send_email(locale, sender, to, subject, text_body, html_body):
     """Sends a single e-mail update.
     
     Args:
@@ -143,6 +204,7 @@ def send_email(locale, sender, to, subject, text_body):
     message.to = to
     message.subject = subject
     message.body = text_body
+    message.html = html_body
     
     message.send()
 
@@ -218,18 +280,12 @@ class MailUpdateSystem(Handler):
                                        subject.type)
         values = []
         for arg in self.request_data:
-            values.append([
-                arg, # attribute
-                self.request_data[arg][0], # old value
-                self.request_data[arg][1], # new value
-                self.request_data[arg][2] # author of update
-            ])
-        
-        email_data = Struct()
-        email_data.time = format(datetime.datetime.now())
-        email_data.changed_subjects = {self.params.subject_name: {
-            subject.get_value('title'): values}}
-        text_body = form_plain_body(email_data)
+            values.append({
+                'attribute': arg, # attribute
+                'old_value': self.request_data[arg][0], # old value
+                'new_value': self.request_data[arg][1], # new value
+                'author': self.request_data[arg][2] # author of update
+            })
         
         subscriptions = Subscription.get_by_subject(self.params.subject_name)
         for subscription in subscriptions:
@@ -255,10 +311,17 @@ class MailUpdateSystem(Handler):
                 # send out alerts for those with immediate update subscriptions
                 account = Account.all().filter('email =',
                                                subscription.user_email).get()
+                email_data = Struct()
+                email_data.time = format(datetime.datetime.now())
+                email_data.nickname = account.nickname or account.email
+                email_data.changed_subjects = {self.params.subject_name: {
+                    subject.get_value('title'): values}}
+                text_body = form_plain_body(email_data)
+                html_body = form_html_body(email_data)
                 send_email(account.locale,
                            'updates@resource-finder.appspotmail.com',
                            account.email, utils.to_unicode(
-                           _('Resource Finder Updates')), text_body)
+                           _('Resource Finder Updates')), text_body, html_body)
     
     def send_digests(self, frequency):
         """Sends out a digest update for the specified frequency. Currently
@@ -285,12 +348,14 @@ class MailUpdateSystem(Handler):
                 
             email_data = Struct()
             email_data.time = format(datetime.datetime.now())
+            email_data.nickname = account.nickname or account.email
             email_data.changed_subjects = subjects
             text_body = form_plain_body(email_data)
+            html_body = form_html_body(email_data)
             send_email(account.locale,
                        'updates@resource-finder.appspotmail.com',
                        account.email, utils.to_unicode(
-                       _('Resource Finder Updates')), text_body)
+                       _('Resource Finder Updates')), text_body, html_body)
             update_account_alert_time(account, frequency)
             db.delete(alerts_to_delete)
             db.put(account)

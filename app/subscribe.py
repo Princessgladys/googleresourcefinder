@@ -26,8 +26,8 @@ import pickle
 import utils
 from bubble import format
 from feeds.xmlutils import Struct
-from mail_update_system import fetch_updates, form_plain_body, send_email
-from mail_update_system import update_account_alert_time
+from mail_update_system import fetch_updates, form_html_body, form_plain_body
+from mail_update_system import send_email, update_account_alert_time
 from model import PendingAlert, Subject, Subscription
 from utils import _, db, Handler, run, simplejson
 
@@ -108,11 +108,13 @@ class Subscribe(Handler):
                 if new_frequency == 'immediate':
                     subject = Subject.get_by_key_name(old_alert.subject_name)
                     values = fetch_updates(old_alert, subject)
+                    nickname = self.account.nickname or self.account.email
                     email_data = Struct(time=format(datetime.datetime.now()),
-                                        changed_subjects={
+                                        nickname=nickname, changed_subjects={
                                         self.params.subject_name: {
                                         subject.get_value('title'): values}})
                     text_body = form_plain_body(email_data)
+                    html_body = form_html_body(email_data)
                     send_email(self.account.locale,
                                'updates@resource-finder.appspotmail.com',
                                self.account.email, utils.to_unicode(
