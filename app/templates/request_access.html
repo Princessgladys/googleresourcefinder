@@ -14,11 +14,11 @@
 # limitations under the License.
 {% endcomment %}
 
-<title>Resource Finder ({{instance}})</title>
+<title>Resource Finder ({{subdomain}})</title>
 
     <h1>Requests Approval</h1>
 
-    <form method="post" action="/request_access">
+    <form method="post" action="{{request_url}}">
       <input type="text" value="{{ action }}" name="action">
       <input type="submit" value="Request">
     </form>

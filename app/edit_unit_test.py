@@ -27,7 +27,7 @@ import utils
 from edit import ATTRIBUTE_TYPES
 from feeds.xmlutils import Struct
 from medium_test_case import MediumTestCase
-from model import Attribute, Facility, MinimalFacility, FacilityType, Report
+from model import Attribute, Subject, MinimalSubject, SubjectType, Report
         
 class EditTest(MediumTestCase):
     def setUp(self):
@@ -35,16 +35,16 @@ class EditTest(MediumTestCase):
         self.time = datetime.datetime(2010, 06, 15, 12, 30)
         self.change_time = datetime.datetime(2010, 06, 16, 12, 30)
         self.user = users.User('test@example.com')
-        self.f = Facility(key_name='example.org/123', type='hospital')
-        self.f.set_attribute('title', 'title_foo', self.time,
+        self.s = Subject(key_name='example.org/123', type='hospital')
+        self.s.set_attribute('title', 'title_foo', self.time,
                              self.user, 'nickname_foo', 'affiliation_foo',
                              'comment_foo')
-        self.f.set_attribute('pcode', 'pcode_foo',
+        self.s.set_attribute('pcode', 'pcode_foo',
                              self.time, self.user, 'nickname_foo',
                              'affiliation_foo', 'comment_foo')
-        self.mf = MinimalFacility(self.f, type='hospital')
+        self.ms = MinimalSubject(self.s, type='hospital')
         
-        self.ft = FacilityType(key_name='hospital',
+        self.st = SubjectType(key_name='hospital',
                                timestamp=datetime.datetime(2010, 06, 01),
                                attribute_names=['title', 'pcode'],
                                minimal_attribute_names=['title', 'total_beds'])
@@ -55,10 +55,10 @@ class EditTest(MediumTestCase):
             author='author_bar', author_nickname='nickname_bar',
             author_affiliation='affiliation_bar')
         
-        db.put([self.f, self.mf, self.ft])
+        db.put([self.s, self.ms, self.st])
     
     def teatDown(self):
-        db.delete([self.f, self.mf, self.ft])
+        db.delete([self.s, self.ms, self.st])
     
     def test_str_attr_type_class(self):
         str_attr_type = ATTRIBUTE_TYPES['str']
@@ -88,18 +88,18 @@ class EditTest(MediumTestCase):
                                  '/?organization_name=org_foo&' +
                                  'organization_name__comment=comment_foo'
                                  ).environ)
-        str_attr_type.apply_change(self.f, self.mf, self.report, self.ft,
+        str_attr_type.apply_change(self.s, self.ms, self.report, self.st,
                                    request, str_attr, self.change_metadata)
-        assert self.f.get_value('organization_name') == 'org_foo'
-        assert self.f.get_observed('organization_name') == self.change_time
-        assert self.f.get_author('organization_name') == 'author_bar'
-        assert (self.f.get_author_nickname('organization_name') ==
+        assert self.s.get_value('organization_name') == 'org_foo'
+        assert self.s.get_observed('organization_name') == self.change_time
+        assert self.s.get_author('organization_name') == 'author_bar'
+        assert (self.s.get_author_nickname('organization_name') ==
                 'nickname_bar')
-        assert (self.f.get_author_affiliation('organization_name') ==
+        assert (self.s.get_author_affiliation('organization_name') ==
                 'affiliation_bar')
-        assert self.f.get_comment('organization_name') == 'comment_foo'
+        assert self.s.get_comment('organization_name') == 'comment_foo'
         assert self.report.get_value('organization_name') == 'org_foo'
-        assert not self.mf.get_value('organization_name')
+        assert not self.ms.get_value('organization_name')
     
     def test_text_attr_type_class(self):
         text_attr = Attribute(key_name='text_attr', timestamp=self.time,
@@ -205,11 +205,11 @@ class EditTest(MediumTestCase):
         request = webapp.Request(webob.Request.blank(
                                  '/?total_beds=37&total_beds__comment=' +
                                  'comment_bar').environ)
-        int_attr_type.apply_change(self.f, self.mf, self.report, self.ft,
+        int_attr_type.apply_change(self.s, self.ms, self.report, self.st,
                                    request, int_attr, self.change_metadata)
-        assert self.f.get_value('total_beds') == 37
-        assert self.f.get_comment('total_beds') == 'comment_bar'
-        assert self.mf.get_value('total_beds') == 37
+        assert self.s.get_value('total_beds') == 37
+        assert self.s.get_comment('total_beds') == 'comment_bar'
+        assert self.ms.get_value('total_beds') == 37
     
     def test_float_attr_type_class(self):
         float_attr_type = ATTRIBUTE_TYPES['float']
@@ -357,12 +357,12 @@ class EditTest(MediumTestCase):
         request = webapp.Request(webob.Request.blank(
                                  '/?title=title_bar&editable.title="title_foo"'
                                  ).environ)
-        assert edit.has_changed(self.f, request, str_attr) == True
+        assert edit.has_changed(self.s, request, str_attr) == True
         
         request = webapp.Request(webob.Request.blank(
                                  '/?title=title_foo&editable.title="title_foo"'
                                  ).environ)
-        assert edit.has_changed(self.f, request, str_attr) == False
+        assert edit.has_changed(self.s, request, str_attr) == False
 
     def test_has_comment_changed(self):
         str_attr = Attribute(key_name='title', timestamp=self.time, type='str')
@@ -371,10 +371,10 @@ class EditTest(MediumTestCase):
                                  '/?title__comment=comment_bar&' +
                                  'editable.title__comment="title_foo"'
                                  ).environ)
-        assert edit.has_comment_changed(self.f, request, str_attr) == True
+        assert edit.has_comment_changed(self.s, request, str_attr) == True
         
         request = webapp.Request(webob.Request.blank(
                                  '/?title__comment=comment_foo&' +
                                  'editable.title__comment="title_foo"'
                                  ).environ)
-        assert edit.has_comment_changed(self.f, request, str_attr) == False
+        assert edit.has_comment_changed(self.s, request, str_attr) == False

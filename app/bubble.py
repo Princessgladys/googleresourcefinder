@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Handler for dynamically loading a bubble with attributes from a facility."""
+"""Handler for dynamically loading a bubble with attributes from a subject."""
 
 import cache
 import datetime
@@ -81,12 +81,12 @@ class ValueInfoExtractor:
         self.special_attribute_names = special_attribute_names
         self.localized_attribute_names = localized_attribute_names
 
-    def extract(self, facility, attribute_names):
-        """Extracts attributes from the given facility.
+    def extract(self, subject, attribute_names):
+        """Extracts attributes from the given subject.
 
         Args:
-          facility: facility from which to extract attributes
-          attribute_names: key_name of attributes to display for the facility
+          subject: subject from which to extract attributes
+          attribute_names: key_name of attributes to display for the subject
 
         Returns:
           A 3-tuple of specially-handled ValueInfos, non-special ValueInfos,
@@ -98,7 +98,7 @@ class ValueInfoExtractor:
         details = []
 
         for name in attribute_names:
-            value_info = self.get_value_info(facility, name)
+            value_info = self.get_value_info(subject, name)
             if not value_info:
                 continue
             if name in special:
@@ -108,16 +108,16 @@ class ValueInfoExtractor:
             details.append(value_info)
         return (special, general, details)
 
-    def get_value_info(self, facility, attribute_name):
-        observed = facility.get_observed(attribute_name)
+    def get_value_info(self, subject, attribute_name):
+        observed = subject.get_observed(attribute_name)
         if observed:
             return ValueInfo(
                 attribute_name,
-                facility.get_value(attribute_name),
+                subject.get_value(attribute_name),
                 attribute_name in self.localized_attribute_names,
-                facility.get_author_nickname(attribute_name),
-                facility.get_author_affiliation(attribute_name),
-                facility.get_comment(attribute_name),
+                subject.get_author_nickname(attribute_name),
+                subject.get_author_affiliation(attribute_name),
+                subject.get_comment(attribute_name),
                 observed)
 
 class HospitalValueInfoExtractor(ValueInfoExtractor):
@@ -126,44 +126,50 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
     def __init__(self):
         ValueInfoExtractor.__init__(
             self,
-            ['title', 'location', 'available_beds', 'total_beds',
-             'healthc_id', 'pcode', 'address', 'services', 'operational_status'],
+            ['title', 'location', 'available_beds', 'total_beds', 'healthc_id',
+             'pcode', 'address', 'services', 'operational_status'],
             # TODO(kpy): This list is redundant; see the comment above
             # in ValueInfoExtractor.
             ['services', 'organization_type', 'category', 'construction',
              'operational_status']
         )
 
-    def extract(self, facility, attribute_names):
+    def extract(self, subject, attribute_names):
         (special, general, details) = ValueInfoExtractor.extract(
-            self, facility, filter(lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
+            self, subject, filter(lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
                                    attribute_names))
-        value_info = ValueInfoExtractor.get_value_info(self, facility,
+        value_info = ValueInfoExtractor.get_value_info(self, subject,
             'operational_status')
         if value_info:
             general.append(value_info)
         return (special, general, details)
 
 VALUE_INFO_EXTRACTORS = {
-    'hospital': HospitalValueInfoExtractor(),
+    'haiti': {
+        'hospital': HospitalValueInfoExtractor(),
+    }
 }
 
 class Bubble(Handler):
     def get(self):
-        facility = model.Facility.get_by_key_name(self.params.facility_name)
-        if not facility:
-            #i18n: Error message for request missing facility name.
-            raise ErrorMessage(404, _('Invalid or missing facility name.'))
-        facility_type = cache.FACILITY_TYPES[facility.type]
+        # Need 'view' permission to see a bubble.
+        self.require_action_permitted('view')
 
-        value_info_extractor = VALUE_INFO_EXTRACTORS[facility.type]
+        subject = model.Subject.get(self.subdomain, self.params.subject_name)
+        if not subject:
+            #i18n: Error message for request missing subject name.
+            raise ErrorMessage(404, _('Invalid or missing subject name.'))
+        subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
+
+        value_info_extractor = VALUE_INFO_EXTRACTORS[
+            self.subdomain][subject.type]
         (special, general, details) = value_info_extractor.extract(
-            facility, facility_type.attribute_names)
-        edit_link = '/edit?facility_name=%s' % self.params.facility_name
+            subject, subject_type.attribute_names)
+        edit_url = self.get_url('/edit', subject_name=self.params.subject_name)
 
         self.render(value_info_extractor.template_name,
-                    edit_link=edit_link,
-                    facility_name=self.params.facility_name,
+                    edit_url=edit_url,
+                    subject_name=self.params.subject_name,
                     last_updated=max(detail.date for detail in details),
                     special=special,
                     general=general,

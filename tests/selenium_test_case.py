@@ -1,9 +1,10 @@
 from google.appengine.api import memcache, users
-from model import Facility, MinimalFacility, db
+from model import Account, MinimalSubject, Subject, db
 import datetime
 import os
 import re
 import selenium
+import scrape
 import time
 import unittest
 
@@ -78,12 +79,17 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
             raise Exception('TEST_CONFIG must be one of: %r' % CONFIGS.keys())
         self.config = CONFIGS[config_name]
 
+        # Start up Selenium.
         selenium.selenium.__init__(
             self, 'localhost', 4444, '*chrome', 'https://www.google.com/')
         self.start()
 
     def tearDown(self):
-        memcache.flush_all()
+        # Hitting any page with flush=yes will flush the appserver's caches.
+        s = scrape.Session()
+        s.go(self.config.base_url + '/help?flush=yes')
+
+        # Shut down Selenium.
         self.stop()
 
     def login(self, path):
@@ -102,32 +108,57 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
 
     # ---------------------------------------- datastore convenience methods
 
-    def put_facility(self, key_name, type='hospital', observed=None,
-                     email='test@example.com', nickname='nickname_foo',
-                     affiliation='affiliation_foo', comment='comment_foo',
-                     **attribute_values):
-        """Stores a Facility and its corresponding MinimalFacility."""
-        facility = Facility(key_name=key_name, type=type)
+    def set_default_permissions(self, actions):
+        """Sets the permissions for the special 'default' account."""
+        Account(key_name='default', actions=actions).put()
+
+    def delete_default_account(self):
+        """Deletes the special 'default' account."""
+        account = Account.get_by_key_name('default')
+        if account:
+            account.delete()
+
+    def put_account(self, **properties):
+        """Stores a test Account with the specified properties.  (By default,
+        the e-mail address is determined by the test configuration.)"""
+        account = Account(email=self.config.user_name)
+        for key, value in properties.items():
+            setattr(account, key, value)
+        account.put()
+
+    def delete_account(self):
+        """Deletes the test Account."""
+        account = Account.all().filter('email =', self.config.user_name).get()
+        if account:
+            account.delete()
+
+    def put_subject(self, subdomain, subject_name, type='hospital',
+                    observed=None, email='test@example.com',
+                    nickname='nickname_foo', affiliation='affiliation_foo',
+                    comment='comment_foo', **attribute_values):
+        """Stores a Subject and its corresponding MinimalSubject."""
+        key_name = subdomain + ':' + subject_name
+        subject = Subject(key_name=key_name, type=type)
         if observed is None:
             observed = datetime.datetime.now()
         user = users.User(email)
         for key, value in attribute_values.items():
-            facility.set_attribute(
+            subject.set_attribute(
                 key, value, observed, user, nickname, affiliation, comment)
-        facility.put()
-        minimal = MinimalFacility(facility, type=type)
+        subject.put()
+        minimal = MinimalSubject(subject, key_name=key_name, type=type)
         for key, value in attribute_values.items():
             minimal.set_attribute(key, value)
         minimal.put()
 
-    def delete_facility(self, key_name):
-        """Deletes a Facility and all its child entities from the datastore."""
-        facility = Facility.get_by_key_name(key_name)
-        children = db.Query(keys_only=True).ancestor(facility).fetch(200)
+    def delete_subject(self, subdomain, subject_name):
+        """Deletes a Subject and all its child entities from the datastore."""
+        subject = Subject.get(subdomain, subject_name)
+        children = db.Query(keys_only=True).ancestor(subject).fetch(200)
         while children:
             db.delete(children)
-            children = db.Query(keys_only=True).ancestor(facility).fetch(200)
-        db.delete(facility)
+            children = db.Query(keys_only=True).ancestor(subject).fetch(200)
+        db.delete(subject)
 
     # ----------------------------------------- Selenium convenience methods
 
@@ -150,35 +181,69 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
             time.sleep(0.2)
 
     def wait_for_element(self, locator):
-       """Waits until the given element is present."""
-       # For some reason, this wait doesn't always work unless we do it twice.
-       self.wait_until(self.is_element_present, locator)
-       self.wait_until(self.is_element_present, locator)
+        """Waits until the given element is present."""
+        # For some reason, this wait doesn't always work unless we do it twice.
+        self.wait_until(self.is_element_present, locator)
+        self.wait_until(self.is_element_present, locator)
+
+    def click_and_wait(self, locator):
+        """Clicks a link that is supposed to load a page, then waits for the
+        page to finish loading."""
+        self.click(locator)
+        self.wait_for_load()
+
+    def click_and_wait_for_new_window(self, link_id):
+        """Clicks a link that is supposed to open a new window, waits for the
+        new window to load, and switches to the new window for subsequent
+        Selenium commands."""
+        # Selenium can't detect new windows opened via target="_blank".  Our
+        # workaround for testing is to open a window before clicking the link
+        # and change the link to target our prepared window.
+        self.window_count = getattr(self, 'window_count', 0) + 1
+        window_id = 'window_%d' % self.window_count  # a new unique window ID
+        self.open_window('about:blank', window_id)
+
+        # Open the link in the new window.
+        self.run_script(
+            'document.getElementById(%r).target=%r' % (link_id, window_id))
+        self.click('id=' + link_id)
+
+        # Wait for the new window to finish loading.
+        self.select_window(window_id)
+        self.wait_for_load()
 
     def assert_element(self, locator):
-       """Asserts that the given element is present."""
-       self.assertTrue(self.is_element_present(locator),
-           'Element %s is unexpectedly missing' % locator)
+        """Asserts that the given element is present."""
+        self.assertTrue(self.is_element_present(locator),
+            'Element %s is unexpectedly missing' % locator)
 
     def assert_no_element(self, locator):
-       """Asserts that the given element is not present."""
-       self.assertFalse(self.is_element_present(locator),
-           'Element %s is unexpectedly present' % locator)
+        """Asserts that the given element is not present."""
+        self.assertFalse(self.is_element_present(locator),
+            'Element %s is unexpectedly present' % locator)
 
     def assert_text(self, string_or_regex, locator):
-       """Asserts that the text of the given element entirely matches the
-       given string or regular expression."""
-       text = self.get_text(locator)
-       self.assertTrue(
-           match(string_or_regex, text),
-           'Element %s: actual text %r does not match %r' %
-           (locator, text, string_or_regex))
+        """Asserts that the text of the given element entirely matches the
+        given string or regular expression."""
+        text = self.get_text(locator)
+        self.assertTrue(
+            match(string_or_regex, text),
+            'Element %s: actual text %r does not match %r' %
+            (locator, text, string_or_regex))
 
     def assert_value(self, string_or_regex, locator):
-       """Asserts that the entire value of the given element exactly matches
-       the given string, or matches the given regular expression."""
-       value = self.get_value(locator)
-       self.assertTrue(
-           match(string_or_regex, value),
-           'Element %s: actual value %r does not match %r' %
-           (locator, value, string_or_regex))
+        """Asserts that the entire value of the given element exactly matches
+        the given string, or matches the given regular expression."""
+        value = self.get_value(locator)
+        self.assertTrue(
+            match(string_or_regex, value),
+            'Element %s: actual value %r does not match %r' %
+            (locator, value, string_or_regex))
+
+    def assert_text_present(self, string):
+        """Asserts that the given text is present somewhere on the page."""
+        self.assertTrue(
+            self.is_text_present(string),
+            'Expected text %r is not present on page %s' %
+            (string, self.get_location())
+        )
