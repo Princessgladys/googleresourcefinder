@@ -37,17 +37,17 @@ class EditTest(MediumTestCase):
         self.user = users.User('test@example.com')
         self.f = Facility(key_name='example.org/123', type='hospital')
         self.f.set_attribute('title', 'title_foo', self.time,
-                        self.user, 'nickname_foo', 'affiliation_foo',
-                        'comment_foo')
+                             self.user, 'nickname_foo', 'affiliation_foo',
+                             'comment_foo')
         self.f.set_attribute('pcode', 'pcode_foo',
-                        self.time, self.user, 'nickname_foo',
-                        'affiliation_foo', 'comment_foo')
+                             self.time, self.user, 'nickname_foo',
+                             'affiliation_foo', 'comment_foo')
         self.mf = MinimalFacility(self.f, type='hospital')
         
         self.ft = FacilityType(key_name='hospital',
-                          timestamp=datetime.datetime(2010, 06, 01),
-                          attribute_names=['title', 'pcode'],
-                          minimal_attribute_names=['title', 'total_beds'])
+                               timestamp=datetime.datetime(2010, 06, 01),
+                               attribute_names=['title', 'pcode'],
+                               minimal_attribute_names=['title', 'total_beds'])
         self.report = Report(arrived=self.time, source='url_foo.bar',
                              author=self.user, observed=self.time)
         self.change_metadata = edit.ChangeMetadata(
@@ -57,6 +57,9 @@ class EditTest(MediumTestCase):
         
         db.put([self.f, self.mf, self.ft])
     
+    def teatDown(self):
+        db.delete([self.f, self.mf, self.ft])
+    
     def test_str_attr_type_class(self):
         str_attr_type = ATTRIBUTE_TYPES['str']
         str_attr = Attribute(key_name='organization_name', timestamp=self.time,
@@ -64,35 +67,36 @@ class EditTest(MediumTestCase):
         
         # test make_input() function
         assert (str_attr_type.make_input('title', '') == 
-            '<input name="title" value="" size=40>')
+                '<input name="title" value="" size=40>')
         assert (str_attr_type.make_input('title', 'title_foo') ==
-            '<input name="title" value="title_foo" size=40>')
+                '<input name="title" value="title_foo" size=40>')
         assert (str_attr_type.make_input('title&foo', '') == 
-            '<input name="title&amp;foo" value="" size=40>')
+                '<input name="title&amp;foo" value="" size=40>')
         
         # test to_stored_value() function
-        assert (str_attr_type.to_stored_value('title', 'title_foo', None,
-            None) == 'title_foo')
-        assert (str_attr_type.to_stored_value('title', ' title_foo\n\t', None,
-            None) == 'title_foo')
-        assert (str_attr_type.to_stored_value('title', u'\u2013', None,
-            None) == u'\u2013')
-        assert (str_attr_type.to_stored_value('title', '', None,
-            None) == None)
+        assert (str_attr_type.to_stored_value(
+                'title', 'title_foo', None, None) == 'title_foo')
+        assert (str_attr_type.to_stored_value(
+                'title', ' title_foo\n\t', None, None) == 'title_foo')
+        assert (str_attr_type.to_stored_value(
+                'title', u'\u2013', None, None) == u'\u2013')
+        assert (str_attr_type.to_stored_value(
+                'title', '', None, None) == None)
         
         # test apply_change() function
         request = webapp.Request(webob.Request.blank(
-            '/?organization_name=org_foo&' +
-            'organization_name__comment=comment_foo').environ)
+                                 '/?organization_name=org_foo&' +
+                                 'organization_name__comment=comment_foo'
+                                 ).environ)
         str_attr_type.apply_change(self.f, self.mf, self.report, self.ft,
                                    request, str_attr, self.change_metadata)
         assert self.f.get_value('organization_name') == 'org_foo'
         assert self.f.get_observed('organization_name') == self.change_time
         assert self.f.get_author('organization_name') == 'author_bar'
         assert (self.f.get_author_nickname('organization_name') ==
-            'nickname_bar')
+                'nickname_bar')
         assert (self.f.get_author_affiliation('organization_name') ==
-            'affiliation_bar')
+                'affiliation_bar')
         assert self.f.get_comment('organization_name') == 'comment_foo'
         assert self.report.get_value('organization_name') == 'org_foo'
         assert not self.mf.get_value('organization_name')
@@ -104,23 +108,24 @@ class EditTest(MediumTestCase):
         
         # test make_input() function
         assert (text_attr_type.make_input('title', '', text_attr) ==
-            '<textarea name="title" rows=5 cols=40></textarea>')
+                '<textarea name="title" rows=5 cols=40></textarea>')
         assert (text_attr_type.make_input('title', 'title_foo', text_attr) ==
-            '<textarea name="title" rows=5 cols=40>title_foo</textarea>')
+                '<textarea name="title" rows=5 cols=40>title_foo</textarea>')
         assert (text_attr_type.make_input('title', 'title&foo', text_attr) ==
-            '<textarea name="title" rows=5 cols=40>title&amp;foo</textarea>')
+                '<textarea name="title" rows=5 cols=40>title&amp;foo' +
+                '</textarea>')
         
         # test to_stored_value() function
-        assert (text_attr_type.to_stored_value('text_attr', 'value_foo', None,
-            text_attr) == 'value_foo')
-        assert type(text_attr_type.to_stored_value('text_attr', 'value_foo',
-            None, text_attr)) == db.Text
-        assert (text_attr_type.to_stored_value('text_attr', 0, None,
-            text_attr) == None)
-        assert (text_attr_type.to_stored_value('text_attr', [], None,
-            text_attr) == None)
-        assert (text_attr_type.to_stored_value('text_attr', '', None,
-            text_attr) == None)
+        assert (text_attr_type.to_stored_value(
+                'text_attr', 'value_foo', None, text_attr) == 'value_foo')
+        assert type(text_attr_type.to_stored_value(
+                    'text_attr', 'value_foo', None, text_attr)) == db.Text
+        assert (text_attr_type.to_stored_value(
+                'text_attr', 0, None, text_attr) == None)
+        assert (text_attr_type.to_stored_value(
+                'text_attr', [], None, text_attr) == None)
+        assert (text_attr_type.to_stored_value(
+                'text_attr', '', None, text_attr) == None)
         
     def test_contact_attr_type_class(self):
         contact_attr = Attribute(key_name='contact_information',
@@ -143,23 +148,24 @@ class EditTest(MediumTestCase):
         
         # test parse_input() function
         request = webapp.Request(webob.Request.blank(
-            '/?contact_information.name=Phil Fritzsche&' +
-            'contact_information.phone=555-555-3867&' +
-            'contact_information.email=test@example.com').environ)
+                                 '/?contact_information.name=Phil Fritzsche&' +
+                                 'contact_information.phone=555-555-3867&' +
+                                 'contact_information.email=test@example.com'
+                                 ).environ)
         assert (contact_attr_type.parse_input(None, 'contact_information',
-            None, request, contact_attr) == contact)
+                None, request, contact_attr) == contact)
         
         request = webapp.Request(webob.Request.blank(
-            '/?contact_information.name=&' +
-            'contact_information.phone=&' +
-            'contact_information.email=').environ)
+                                 '/?contact_information.name=&' +
+                                 'contact_information.phone=&' +
+                                 'contact_information.email=').environ)
         assert (contact_attr_type.parse_input(None, 'contact_information',
-            None, request, contact_attr) == None)
+                None, request, contact_attr) == None)
         
         request = webapp.Request(webob.Request.blank('/').environ)
         assert (contact_attr_type.parse_input(None, 'contact_information',
-            None, request, contact_attr) == None)
-
+                None, request, contact_attr) == None)
+    
     def test_date_attr_type_class(self):
         request = webapp.Request(webob.Request.blank('/').environ)
         date_attr = Attribute(key_name='date_attr', timestamp=self.time,
@@ -169,14 +175,14 @@ class EditTest(MediumTestCase):
         date = '2010-06-15'
         
         assert (date_attr_type.to_stored_value('date_attr', date, request,
-            date_attr) == datetime.datetime(2010, 06, 15))
+                date_attr) == datetime.datetime(2010, 06, 15))
         assert (date_attr_type.to_stored_value('date_attr', date + '\n',
-            request, date_attr) == datetime.datetime(2010, 06, 15))
+                request, date_attr) == datetime.datetime(2010, 06, 15))
         
         assert (date_attr_type.to_stored_value('date_attr', '', request,
-            date_attr) == None)
+                date_attr) == None)
         assert (date_attr_type.to_stored_value('date_attr', ' \n', request,
-            date_attr) == None)
+                date_attr) == None)
             
         try:
             date_attr_type.to_stored_value('date_attr', bad_date, request,
@@ -184,7 +190,7 @@ class EditTest(MediumTestCase):
             assert False # if this did not raise an exception, break
         except:
             assert True # if the exception was properly raised
-        
+    
     def test_int_attr_type_class(self):
         # test to_stored_value() function
         int_attr = Attribute(key_name='total_beds', timestamp=self.time,
@@ -197,13 +203,14 @@ class EditTest(MediumTestCase):
         
         # test apply_change() function with minimal_attribute change
         request = webapp.Request(webob.Request.blank(
-            '/?total_beds=37&total_beds__comment=comment_bar').environ)
+                                 '/?total_beds=37&total_beds__comment=' +
+                                 'comment_bar').environ)
         int_attr_type.apply_change(self.f, self.mf, self.report, self.ft,
                                    request, int_attr, self.change_metadata)
         assert self.f.get_value('total_beds') == 37
         assert self.f.get_comment('total_beds') == 'comment_bar'
         assert self.mf.get_value('total_beds') == 37
-
+    
     def test_float_attr_type_class(self):
         float_attr_type = ATTRIBUTE_TYPES['float']
         float_attr = Attribute(key_name='ratio_foo', timestamp=self.time,
@@ -211,11 +218,11 @@ class EditTest(MediumTestCase):
         
         # test make_input() function
         assert (float_attr_type.make_input('ratio_foo', 3.867, float_attr) ==
-            '<input name="ratio_foo" value="3.867" size=10>')
+                '<input name="ratio_foo" value="3.867" size=10>')
         assert (float_attr_type.make_input('ratio_foo', 3, float_attr) ==
-            '<input name="ratio_foo" value="3" size=10>')
+                '<input name="ratio_foo" value="3" size=10>')
         assert (float_attr_type.make_input('ratio_foo', 0, float_attr) ==
-            '<input name="ratio_foo" value="0" size=10>')
+                '<input name="ratio_foo" value="0" size=10>')
         
         # test to_stored_value() function
         assert float_attr_type.to_stored_value(None, 10, None, None) == 10.0
@@ -228,7 +235,7 @@ class EditTest(MediumTestCase):
         bool_attr_type = ATTRIBUTE_TYPES['bool']
         bool_attr = Attribute(key_name=name,
                               timestamp=self.time, type='bool')
-                              
+        
         # test make_input() function
         input = bool_attr_type.make_input(name, True, bool_attr)
         assert 'name="can_pick_up_patients"' in input
@@ -252,11 +259,11 @@ class EditTest(MediumTestCase):
 
         # test to_stored_value() function
         assert (bool_attr_type.to_stored_value(name, 'TRUE', None, bool_attr)
-            == True)
+                == True)
         assert (bool_attr_type.to_stored_value(name, 'FALSE', None, bool_attr)
-            == False)
+                == False)
         assert (bool_attr_type.to_stored_value(name, '', None, bool_attr) ==
-            None)
+                None)
         
     def test_choice_attr_type_class(self):
         choice_attr_type = ATTRIBUTE_TYPES['choice']
@@ -292,7 +299,7 @@ class EditTest(MediumTestCase):
         
         # test make_input() function
         input = multi_attr_type.make_input('services', ['foo', 'bar'],
-            multi_attr)
+                                           multi_attr)
         assert 'input type=checkbox' in input
         assert 'name="services.foo"' in input
         assert 'id="services.foo" checked' in input
@@ -305,13 +312,13 @@ class EditTest(MediumTestCase):
         
         # test to_stored_value() function
         request = webapp.Request(webob.Request.blank(
-            '/?services.foo=c&services.bar=c').environ)
+                                 '/?services.foo=c&services.bar=c').environ)
         assert (multi_attr_type.to_stored_value('services', [], request,
-            multi_attr) == choices)
+                multi_attr) == choices)
 
         request = webapp.Request(webob.Request.blank('/').environ)
         assert not (multi_attr_type.to_stored_value('services', [], request,
-            multi_attr))
+                    multi_attr))
 
     def test_geopt_attr_type_class(self):
         geopt_attr_type = ATTRIBUTE_TYPES['geopt']
@@ -330,40 +337,44 @@ class EditTest(MediumTestCase):
 
         # test to_stored_value() function
         request = webapp.Request(webob.Request.blank(
-            '/?location.lat=%g&location.lon=%g' % (location.lon, location.lat))
-            .environ)
+                                 '/?location.lat=%g&location.lon=%g' %
+                                 (location.lon, location.lat)).environ)
         assert (geopt_attr_type.to_stored_value('location', None, request,
-            geopt_attr) == db.GeoPt(location.lon, location.lat))
+                geopt_attr) == db.GeoPt(location.lon, location.lat))
         
         request = webapp.Request(webob.Request.blank(
-            '/?location.lat=&location.lon=').environ)
+                                 '/?location.lat=&location.lon=').environ)
         assert (geopt_attr_type.to_stored_value('location', None, request,
-            geopt_attr) == None)
+                geopt_attr) == None)
 
         request = webapp.Request(webob.Request.blank('/').environ)
         assert (geopt_attr_type.to_stored_value('location', None, request,
-            geopt_attr) == None)
+                geopt_attr) == None)
 
     def test_has_changed(self):
         str_attr = Attribute(key_name='title', timestamp=self.time, type='str')
         
         request = webapp.Request(webob.Request.blank(
-            '/?title=title_bar&editable.title="title_foo"').environ)
+                                 '/?title=title_bar&editable.title="title_foo"'
+                                 ).environ)
         assert edit.has_changed(self.f, request, str_attr) == True
         
         request = webapp.Request(webob.Request.blank(
-            '/?title=title_foo&editable.title="title_foo"').environ)
+                                 '/?title=title_foo&editable.title="title_foo"'
+                                 ).environ)
         assert edit.has_changed(self.f, request, str_attr) == False
 
     def test_has_comment_changed(self):
         str_attr = Attribute(key_name='title', timestamp=self.time, type='str')
         
         request = webapp.Request(webob.Request.blank(
-            '/?title__comment=comment_bar&' +
-            'editable.title__comment="title_foo"').environ)
+                                 '/?title__comment=comment_bar&' +
+                                 'editable.title__comment="title_foo"'
+                                 ).environ)
         assert edit.has_comment_changed(self.f, request, str_attr) == True
         
         request = webapp.Request(webob.Request.blank(
-            '/?title__comment=comment_foo&' +
-            'editable.title__comment="title_foo"').environ)
+                                 '/?title__comment=comment_foo&' +
+                                 'editable.title__comment="title_foo"'
+                                 ).environ)
         assert edit.has_comment_changed(self.f, request, str_attr) == False
