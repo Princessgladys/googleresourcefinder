@@ -20,10 +20,16 @@ Subscribe(utils.Handler): handles calls to /subscribe
 
 __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 
+import datetime
+import pickle
+
 import utils
-from mail_update_system import fetch_updates, form_body, send_email
-from model import PendingAlert, Subscription
-from utils import _, db, Handler, run
+from bubble import format
+from feeds.xmlutils import Struct
+from mail_update_system import fetch_updates, form_plain_body, send_email
+from mail_update_system import update_account_alert_time
+from model import PendingAlert, Subject, Subscription
+from utils import _, db, Handler, run, simplejson
 
 class Subscribe(Handler):
     """Handler for /subscribe. Used to handle subscription changes.
@@ -45,6 +51,7 @@ class Subscribe(Handler):
         self.action = self.request.get('action')
         self.require_logged_in_user()
         self.email = self.user.email()
+        self.subject_name = self.request.get('subject_name', '')
         if not self.account:
             #i18n: Error message for request missing subject name.
             raise ErrorMessage(404, _('Invalid or missing account e-mail.'))
@@ -63,53 +70,62 @@ class Subscribe(Handler):
     
     def subscribe(self):
         """Subscribes the current user to a particular subject."""
-        key_name = '%s:%s' % (self.params.subject_name, self.email)
+        key_name = '%s:%s' % (self.subject_name, self.email)
         frequency = (self.request.get('frequency') or
                      self.account.default_frequency)
         Subscription(key_name=key_name, frequency=frequency,
-                     subject_name=subject_name, user_email=self.email).put()
+                     subject_name=self.subject_name,
+                     user_email=self.email).put()
         update_account_alert_time(self.account, frequency, initial=True)
         db.put(self.account)
     
     def unsubscribe(self):
         """Unsubscribes the current user from a particular subject."""
-        subcription = Subscription.get(self.params.subject_name, email)
+        subscription = Subscription.get(self.subject_name, self.email)
         if subscription:
             db.delete(subscription)
         for freq in ['daily', 'weekly', 'monthly']:
-            alert = PendingAlert.get(freq, email, self.params.subject_name)
+            alert = PendingAlert.get(freq, self.email, self.subject_name)
             if alert:
                 db.delete(alert)
     
     def change_subscriptions(self):
         """Change's the current user's subscription to a list of subjects."""
-        for change in self.request.get('subject_changes'):
-            subject_key = change[0]
+        subject_changes = pickle.loads(str(simplejson.loads(
+                                       self.request.get('subject_changes'))))
+        for change in subject_changes:
+            subject_name = change[0]
             old_frequency = change[1]
             new_frequency = change[2] or self.account.default_frequency
             
-            key_name = '%s:%s' % (subject_key, self.email)
-            Subscription(key_name=key_name, user_email=self.email,
-                         subject_name=subject_key,
-                         frequency=new_frequency).put()
-            old_alert = PendingAlert.get(old_frequency, email, subject_key)
+            s = Subscription.get(subject_name, self.email)
+            s.frequency = new_frequency
+            db.put(s)
+            
+            old_alert = PendingAlert.get(old_frequency, self.email,
+                                         subject_name)
             if old_alert:
                 if new_frequency == 'immediate':
                     subject = Subject.get_by_key_name(old_alert.subject_name)
                     values = fetch_updates(old_alert, subject)
-                    body = form_plain_body({old_alert.subject_name: {
-                        subject.get_value('title'): values}})
+                    email_data = Struct(time=format(datetime.datetime.now()),
+                                        changed_subjects={
+                                        self.params.subject_name: {
+                                        subject.get_value('title'): values}})
+                    text_body = form_plain_body(email_data)
                     send_email(self.account.locale,
                                'updates@resource-finder.appspotmail.com',
                                self.account.email, utils.to_unicode(
-                               _('Resource Finder Updates')), body)
+                               _('Resource Finder Updates')), text_body)
                 else:
-                    new_key_name = '%s:%s:%s' % (frequency, email,
-                                                 self.params.subject_name)
+                    new_key_name = '%s:%s:%s' % (new_frequency,
+                                                 old_alert.user_email,
+                                                 subject_name)
                     alert = PendingAlert(key_name=new_key_name,
                                          user_email=old_alert.user_email,
                                          subject_name=old_alert.subject_name,
-                                         frequency=frequency)
+                                         frequency=new_frequency,
+                                         type=old_alert.type)
                     old_values = old_alert.dynamic_properties()
                     for i in range(len(old_values)):
                         alert.set_attribute(old_values[i],

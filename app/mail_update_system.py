@@ -55,6 +55,7 @@ settings.LOCALE_PATHS = (os.path.join(ROOT, 'locale'),)
 import django.utils.translation
 
 FREQUENCY_TO_TIMEDELTA = {
+    'immediate': datetime.timedelta(0),
     'daily': datetime.timedelta(1),
     'weekly': datetime.timedelta(7),
     'monthly': datetime.timedelta(30) # note: 'monthly' is every 30 days
@@ -62,7 +63,9 @@ FREQUENCY_TO_TIMEDELTA = {
 
 def get_timedelta(frequency):
     """Given a text frequency, converts it to a timedelta."""
-    return FREQUENCY_TO_TIMEDELTA[frequency]
+    if frequency in FREQUENCY_TO_TIMEDELTA:
+        return FREQUENCY_TO_TIMEDELTA[frequency]
+    return None
 
 
 def fetch_updates(alert, subject):
@@ -77,6 +80,8 @@ def fetch_updates(alert, subject):
               [attribute, new_value, old_value, author_foo ],
               [attribute, new_value, old_value, author_foo ] ]
     """
+    if not (alert and subject):
+        return
     updated_attrs = []
     subject_type = cache.SUBJECT_TYPES[subject.type]
     
@@ -137,12 +142,12 @@ def send_email(locale, sender, to, subject, text_body):
     message.sender = sender
     message.to = to
     message.subject = subject
-    message.body = body
+    message.body = text_body
     
     message.send()
 
 
-def update_account_alert_time(account, frequency, initial=False):
+def update_account_alert_time(account, frequency, now=None, initial=False):
     """Updates a particular account to send an alert at the appropriate
     later date, depending on the given frequency.
     
@@ -151,7 +156,9 @@ def update_account_alert_time(account, frequency, initial=False):
         frequency: used to determine how much to update by
         initial: (optional) tells the function to check if this is the first
             time setting the account's update times"""
-    new_time = datetime.datetime.now() + get_timedelta(frequency)
+    if not now:
+        now = datetime.datetime.now()
+    new_time = now + get_timedelta(frequency)
     if initial:
         if frequency == 'daily' and not account.next_daily_alert:
             account.next_daily_alert = new_time
@@ -264,7 +271,6 @@ class MailUpdateSystem(Handler):
         for account in accounts:
             pending_alerts = PendingAlert.get_by_frequency(frequency,
                                                            account.email)
-            
             alerts_to_delete = []
             subjects = {}
             for alert in pending_alerts:
@@ -276,7 +282,7 @@ class MailUpdateSystem(Handler):
             
             if not subjects:
                 continue
-            
+                
             email_data = Struct()
             email_data.time = format(datetime.datetime.now())
             email_data.changed_subjects = subjects
