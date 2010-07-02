@@ -40,7 +40,11 @@ settings.USE_I18N = True
 settings.LOCALE_PATHS = (os.path.join(ROOT, 'locale'),)
 import django.utils.translation
 
+sent_emails = []
+
 def fake_send_email(locale, sender, to, subject, text_body):
+    global sent_emails
+    sent_emails = []
     django.utils.translation.activate(locale)
     
     message = mail.EmailMessage()
@@ -48,6 +52,7 @@ def fake_send_email(locale, sender, to, subject, text_body):
     message.to = to
     message.subject = subject
     message.body = text_body
+    sent_emails.append(message)
     
     # add asserts for when testing the MailUpdateSystem class
     assert locale and sender and to and subject and text_body
@@ -132,6 +137,7 @@ class MailUpdateSystemTest(MediumTestCase):
         """Confirm that subscriptions are changed properly and PendingAlerts
         are removed / changed as appropriate."""
         # change subscription w/o pending alert from immediate to daily
+        global sent_emails
         subject_name = 'haiti:example.org/123'
         key_name_s = '%s:%s' % (subject_name, self.email)
         s = Subscription(key_name=key_name_s,
@@ -153,6 +159,7 @@ class MailUpdateSystemTest(MediumTestCase):
         pa = PendingAlert(key_name=key_name_pa, frequency='daily',
                           subject_name='haiti:example.org/123',
                           type='hospital', user_email='test@example.com')
+        setattr(pa, 'title', 'title_bar')
         db.put(pa)
         subject_changes = [[subject_name, 'daily', 'weekly']]
         json_pickle_changes = simplejson.dumps(pickle.dumps(subject_changes))
@@ -183,6 +190,9 @@ class MailUpdateSystemTest(MediumTestCase):
                 'immediate')
         for freq in ['daily', 'weekly', 'monthly']:
             assert not PendingAlert.get(freq, self.email, subject_name)
+        assert len(sent_emails) == 1
+        assert 'title__' in sent_emails[0].body
+        assert 'title_bar' in sent_emails[0].body
     
     def simulate_request(self, path):
         request = webapp.Request(webob.Request.blank(path).environ)

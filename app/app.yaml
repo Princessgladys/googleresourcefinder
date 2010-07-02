@@ -104,8 +104,8 @@ handlers:
   script: feed_provider.py
   login: admin
 
-- url: /mail_update_system
-  script: mail_update_system.py
+- url: /mail_alerts
+  script: mail_alerts.py
   login: admin
 
 - url: /subscribe

@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
-
 from google.appengine.api import users
 
 from model import db, Subject, MinimalSubject
@@ -25,7 +23,9 @@ class PrintTest(SeleniumTestCase):
         self.put_account(actions=['*:view'])
         self.put_subject(
             'haiti', 'example.org/10',
-            title='title_within_10_miles', location=db.GeoPt(51.5, 0))
+            title='title_within_10_miles', location=db.GeoPt(51.5, 0),
+            total_beds=10, available_beds=5, address='address_foo',
+            contact_name='contact_name_foo')
         self.put_subject(
             'haiti', 'example.org/11',
             title='title_center', location=db.GeoPt(51.5, 0.01))
@@ -79,3 +79,34 @@ class PrintTest(SeleniumTestCase):
                          "//tr[@id='subject-2']/*[@class='subject-title']")
         self.assert_no_element(
                          "//tr[@id='subject-3']/*[@class='subject-title']")
+        
+        # Confirm that subject-2 shows the right available/total bed counts
+        self.assert_text(Regex('5'),
+                         "//tr[@id='subject-2']/*[@class='subject-beds-open']")
+        self.assert_text(Regex('10'),
+                         "//tr[@id='subject-2']/*" +
+                         "[@class='subject-beds-total']")
+        
+        # Confirm that subject-2 shows the right distance to subject-1
+        self.assert_text(Regex('0.4 miles.*'),
+                         "//tr[@id='subject-2']/*[@class='subject-distance']")
+        
+        # Confirm that subject-2 shows the correct address
+        self.assert_text(Regex('address_foo'),
+                         "//tr[@id='subject-2']/*[@class='subject-address']")
+        
+        # Confirm that subject-2 shows the correct information section
+        self.assert_text(Regex('contact_name_foo'),
+                         "//tr[@id='subject-2']/*" +
+                         "[@class='subject-general-info']")
+
+        # Test to make sure the proper number of subjects are rendering.
+        # td[1] is the number of total subjects
+        # td[2] is the number of subjects less than 10 miles away
+        # td[3] is the number of subjects with availability
+        self.assert_text(Regex('3'), 
+                         '//tbody[@id="print-summary-tbody"]//tr//td[1]')
+        self.assert_text(Regex('2'), 
+                         '//tbody[@id="print-summary-tbody"]//tr//td[2]')
+        self.assert_text(Regex('1'), 
+                         '//tbody[@id="print-summary-tbody"]//tr//td[3]')
