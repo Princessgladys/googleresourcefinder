@@ -12,11 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.appengine.api.labs import taskqueue
+from google.appengine.api.labs.taskqueue import Task
+
 import cache
 import datetime
 import logging
 import model
+import pickle
 import re
+import StringIO
 import urlparse
 import utils
 import wsgiref
@@ -280,14 +285,15 @@ def apply_change(subject, minimal_subject, report, subject_type,
                                 change_metadata)
 
 def has_changed(subject, request, attribute):
-    """Returns True if the request has an input for the given attribute
-    and that attribute has changed from the previous value in subject."""
+    """Returns a tuple containing the previous and current values if the
+    request has an input for the given attribute and that attribute has changed
+    from the previous value in subject."""
     name = attribute.key().name()
     value = ATTRIBUTE_TYPES[attribute.type].to_stored_value(
         name, request.get(name, None), request, attribute)
     current = render_json(value)
     previous = request.get('editable.%s' % name, None)
-    return previous != current
+    return previous != current and (previous, current)
 
 def has_comment_changed(subject, request, attribute):
     """Returns True if the request has a comment for the given attribute
@@ -422,6 +428,8 @@ class Edit(utils.Handler):
                 utcnow, user, account.nickname, account.affiliation)
             has_changes = False
             changed_attributes_dict = {}
+            changed_attribute_values = {}
+            unchanged_attribute_values = {}
 
             for name in subject_type.attribute_names:
                 attribute = attributes[name]
@@ -447,7 +455,16 @@ class Edit(utils.Handler):
                                  subject_type, request, attribute,
                                  change_metadata)
                     changed_attributes_dict[name] = attribute
-
+                    changed_attribute_values[name] = (value_changed[0],
+                        value_changed[1], subject.get_author_nickname(
+                        attribute.key().name()))
+                    # To be sent to mail update system in form:
+                    # changed_attribute_values[attribute] = (old_value,
+                    #   new_value, author_of_change)
+                else:
+                    unchanged_attribute_values[name] = request.get(
+                        'editable.%s' % name, None)
+            
             if has_changes:
                 # Schedule a task to add a feed record.
                 # We can't really do this inside this transaction, since
@@ -461,6 +478,22 @@ class Edit(utils.Handler):
                 db.put([report, subject, minimal_subject])
                 cache.MINIMAL_SUBJECTS[self.subdomain].flush()
                 cache.JSON[self.subdomain].flush()
+                
+                # On edit, create a task to e-mail users who have subscribed
+                # to that subject.
+                json_pickle_attrs_changed = simplejson.dumps(
+                    pickle.dumps(changed_attribute_values))
+                json_pickle_attrs_unchanged = simplejson.dumps(
+                    pickle.dumps(unchanged_attribute_values[name]))
+                
+                params = {}
+                params['subject_name'] = subject.key().name()
+                params['action'] = 'subject_changed'
+                params['changed_data'] = json_pickle_attrs_changed
+                params['unchanged_data'] = json_pickle_attrs_unchanged
+                
+                taskqueue.add(url='/mail_alerts', method='POST',
+                              params=params, transactional=True)
 
         # Cannot run datastore queries in a transaction outside the entity group
         # being modified, so fetch the attributes here just in case

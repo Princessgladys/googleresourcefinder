@@ -288,6 +288,13 @@ class Account(db.Model):
                                        # '*' is a wildcard subdomain or verb)
     requested_actions = db.StringListProperty()  # permissions requested but
                                                  # not yet granted
+    locale = db.StringProperty() # user chosen locale
+    default_frequency = db.StringProperty() # default frequency for updates
+    next_daily_alert = db.DateTimeProperty() # next time to send a daily update
+    next_weekly_alert = db.DateTimeProperty() # next time to send a weekly
+                                              # update to the user
+    next_monthly_alert = db.DateTimeProperty() # next time to send a monthly
+                                               # update to the user
 
 class Message(db.Expando):
     """Internationalized strings for value identifiers.  Top-level entity,
@@ -309,3 +316,55 @@ class Dump(db.Model):
     base = db.SelfReference()  # if present, this dump is a clone of base
     source = db.StringProperty()  # URL identifying the source
     data = db.BlobProperty()  # received raw data
+    
+class Subscription(db.Model):
+    """A subscription by a user to receive notification when details for a
+    facility change. Top-level entity, has no parent.
+    Key name: follows the format subject_name:user_email"""
+    user_email = db.StringProperty(required=True) # user to alert
+    subject_name = db.StringProperty(required=True) # key_name of subject
+    frequency = db.StringProperty(required=True, choices=[
+        'immediate', # send an alert whenever the facility is updated
+        'daily', # send during a daily digest e-mail
+        'weekly', # send during a weekly digest e-mail
+        'monthly' # send during a monthly digest e-mail
+    ]) # frequency of updates for this subject
+    
+    @staticmethod
+    def get(subject_name, user_email):
+        """Gets a Subscription entity by its subject_name and e-mail."""
+        return Subscription.get_by_key_name(subject_name + ':' + user_email)
+    
+    @staticmethod
+    def get_by_subject(subject_name):
+        """Gets a query for all PendingAlert with the given subject name."""
+        return filter_by_prefix(Subscription.all(), subject_name + ':')
+
+class PendingAlert(MinimalSubject):
+    """A pending notification for a user; waiting to be sent on a daily/weekly/
+    monthly basis, pending the frequency of the particular alert. Top-level
+    entity, has no parent.
+    Key name: follows the format frequency:user_email:subject_name"""
+    user_email = db.StringProperty(required=True) # user to alert
+    subject_name = db.StringProperty(required=True) # key_name of subject
+    timestamp = db.DateTimeProperty() # creation time of the pending alert
+    frequency = db.StringProperty(required=True, choices=[
+        'immediate', # send an alert whenever the subject is updated
+        'daily', # send during a daily digest e-mail
+        'weekly', # send during a weekly digest e-mail
+        'monthly' # send during a monthly digest e-mail [every 30 days]
+    ]) # frequency of updates for this subject
+
+    @staticmethod
+    def get(frequency, user_email, subject_name):
+        """Gets a PendingAlert entity by its frequency, e-mail, and 
+        subject name."""
+        return PendingAlert.get_by_key_name(frequency + ':' + user_email +
+                                            ':' + subject_name)
+    
+    @staticmethod
+    def get_by_frequency(frequency, user_email):
+        """Gets a query for all PendingAlert with the given frequency and
+        associated user e-mail."""
+        return filter_by_prefix(PendingAlert.all(), frequency + ':' +
+                                user_email + ':')
