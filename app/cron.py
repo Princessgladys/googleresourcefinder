@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utils import *
 from google.appengine.api.labs import taskqueue
+
+from utils import *
 
 class Job(db.Model):
     """A periodically running job."""
