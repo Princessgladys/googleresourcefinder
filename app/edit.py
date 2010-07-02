@@ -427,6 +427,7 @@ class Edit(utils.Handler):
             has_changes = False
             changed_attributes_dict = {}
             changed_attribute_values = {}
+            unchanged_attribute_values = {}
 
             for name in subject_type.attribute_names:
                 attribute = attributes[name]
@@ -452,12 +453,15 @@ class Edit(utils.Handler):
                                  subject_type, request, attribute,
                                  change_metadata)
                     changed_attributes_dict[name] = attribute
-                    changed_attribute_values[name] = [value_changed[0],
+                    changed_attribute_values[name] = (value_changed[0],
                         value_changed[1], subject.get_author_nickname(
-                        attribute.key().name())]
+                        attribute.key().name()))
                     # To be sent to mail update system in form:
-                    # changed_attribute_values[attribute] = [old_value,
-                    #   new_value, author_of_change]
+                    # changed_attribute_values[attribute] = (old_value,
+                    #   new_value, author_of_change)
+                else:
+                    unchanged_attribute_values[name] = request.get(
+                        'editable.%s' % name, None)
             
             if has_changes:
                 # Schedule a task to add a feed record.
@@ -475,15 +479,18 @@ class Edit(utils.Handler):
                 
                 # On edit, create a task to e-mail users who have subscribed
                 # to that subject.
-                json_pickle_attrs = simplejson.dumps(pickle.dumps(
-                    changed_attribute_values))
+                json_pickle_attrs_changed = simplejson.dumps(
+                    pickle.dumps(changed_attribute_values))
+                json_pickle_attrs_unchanged = simplejson.dumps(
+                    pickle.dumps(unchanged_attribute_values[name]))
                 
                 params = {}
                 params['subject_name'] = subject.key().name()
                 params['action'] = 'subject_changed'
-                params['data'] = json_pickle_attrs
+                params['changed_data'] = json_pickle_attrs_changed
+                params['unchanged_data'] = json_pickle_attrs_unchanged
                 
-                taskqueue.add(url='/mail_update_system', method='POST',
+                taskqueue.add(url='/mail_alerts', method='POST',
                               params=params, transactional=True)
 
         # Cannot run datastore queries in a transaction outside the entity group

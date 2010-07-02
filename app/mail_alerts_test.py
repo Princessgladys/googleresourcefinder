@@ -22,11 +22,11 @@ import webob
 from google.appengine.api import mail
 from google.appengine.ext import db, webapp
 
-import mail_update_system
+import mail_alerts
 import utils
 from feeds.xmlutils import Struct
-from mail_update_system import get_timedelta, fetch_updates, form_plain_body
-from mail_update_system import update_account_alert_time
+from mail_alerts import get_timedelta, fetch_updates, format_plain_body
+from mail_alerts import update_account_alert_time
 from medium_test_case import MediumTestCase
 from model import Account, PendingAlert, Subject, SubjectType, Subscription
 from utils import simplejson, users
@@ -43,7 +43,11 @@ settings.USE_I18N = True
 settings.LOCALE_PATHS = (os.path.join(ROOT, 'locale'),)
 import django.utils.translation
 
+sent_emails = []
+
 def fake_send_email(locale, sender, to, subject, text_body):
+    global sent_emails
+    sent_emails = []
     django.utils.translation.activate(locale)
     
     message = mail.EmailMessage()
@@ -51,15 +55,16 @@ def fake_send_email(locale, sender, to, subject, text_body):
     message.to = to
     message.subject = subject
     message.body = text_body
+    sent_emails.append(message)
     
-    # add asserts for when testing the MailUpdateSystem class
+    # add asserts for when testing the MailAlerts class
     assert locale and sender and to and subject and text_body
     assert '@' in (sender and to)
     assert sender.find('.org') or sender.find('.com')
     assert to.find('.org') or to.find('.com')
     return message
 
-class MailUpdateSystemTest(MediumTestCase):
+class MailAlertsTest(MediumTestCase):
     def setUp(self):
         MediumTestCase.setUp(self)
         self.time = datetime.datetime(2010, 06, 01)
@@ -108,13 +113,13 @@ class MailUpdateSystemTest(MediumTestCase):
                                         'test_attr_foo', 'test_attr_bar',
                                         'test_attr_xyz'],
                                         minimal_attribute_names=['title'])
-        self.send_real_email = mail_update_system.send_email
-        mail_update_system.send_email = fake_send_email
+        self.send_real_email = mail_alerts.send_email
+        mail_alerts.send_email = fake_send_email
         db.put([self.account, self.subject, self.subject2, 
                 self.sub_immed, self.sub_daily, self.subject_type])
 
     def tearDown(self):
-        mail_update_system.send_email = self.send_real_email
+        mail_alerts.send_email = self.send_real_email
         db.delete([self.account, self.subject, self.subject2, 
                    self.sub_immed, self.sub_daily, self.subject_type])
 
@@ -133,12 +138,12 @@ class MailUpdateSystemTest(MediumTestCase):
         # sublist should contain the changed attribute, its old/new values,
         # and the author that made the change
         assert fetch_updates(self.pa, self.subject) == [
-            ['test_attr_bar', 'attr_bar', 'attr_bar_new', 'nickname_foo'],
-            ['test_attr_foo', 'attr_foo', 'attr_foo_new', 'nickname_foo']
+            ('test_attr_bar', 'attr_bar', 'attr_bar_new', 'nickname_foo'),
+            ('test_attr_foo', 'attr_foo', 'attr_foo_new', 'nickname_foo')
         ]
         self.set_attr(self.subject, 'test_attr_bar', 'attr_bar')
-        assert fetch_updates(self.pa, self.subject) == [['test_attr_foo',
-            'attr_foo', 'attr_foo_new', 'nickname_foo']]
+        assert fetch_updates(self.pa, self.subject) == [
+            ('test_attr_foo', 'attr_foo', 'attr_foo_new', 'nickname_foo')]
         
         # should return nothing if there are no updates
         self.set_attr(self.subject, 'test_attr_foo', 'attr_foo')
@@ -149,13 +154,13 @@ class MailUpdateSystemTest(MediumTestCase):
         assert not fetch_updates(self.pa, '')
         assert not fetch_updates('', '')
     
-    def test_form_plain_body(self):
+    def test_format_plain_body(self):
         """Confirms that the right attributes and their changes show up in
         the text to be sent to the user."""
         values = fetch_updates(self.pa, self.subject)
-        data = Struct(changed_subjects={self.subject.key().name(): {
-            self.subject.get_value('title'): values}})
-        plain_body = form_plain_body(data)
+        data = Struct(changed_subjects={self.subject.key().name(): (
+            self.subject.get_value('title'), values)})
+        plain_body = format_plain_body(data)
         
         # formatting may change but the title, attribute names, new/old values,
         # and the author should all be somewhere in the update. similarly,
@@ -171,16 +176,12 @@ class MailUpdateSystemTest(MediumTestCase):
         """Confirms that the send_email function properly formats a message
         in the mail.EmailMessage structure while updating the django
         translation to the given locale."""
-        email = mail_update_system.send_email('en', 'test@example.com',
+        email = mail_alerts.send_email('en', 'test@example.com',
                                               'test@example.org',
                                               'subject_foo', 'body_foo')
-        assert email.sender == 'test@example.com'
-        assert email.to == 'test@example.org'
-        assert email.subject == 'subject_foo'
-        assert email.body == 'body_foo'
         assert django.utils.translation.get_language() == 'en'
         
-        email = mail_update_system.send_email('fr', 'test@example.com', 
+        email = mail_alerts.send_email('fr', 'test@example.com', 
                                               'test@example.org',
                                               'subject_foo', 'body_foo')
         assert django.utils.translation.get_language() == 'fr'
@@ -207,26 +208,39 @@ class MailUpdateSystemTest(MediumTestCase):
         assert (self.account.next_monthly_alert ==
             datetime.datetime(2010, 07, 1))
     
-    def test_mail_update_system(self):
+    def test_mail_alerts(self):
+        global sent_emails
+        sent_emails = []
         """Simulates the class being called when a subject is changed and when
         a subject is not changed."""
         changed_vals = {'test_attr_foo': [
             'attr_old', 'attr_new', 'author_foo']}
-        json_pickle_attrs = simplejson.dumps(pickle.dumps(changed_vals))
+        unchanged_vals = {'test_attr_bar': 'attr_bar'}
+        json_pickle_attrs_c = simplejson.dumps(pickle.dumps(changed_vals))
+        json_pickle_attrs_uc = simplejson.dumps(pickle.dumps(unchanged_vals))
         
         # test to send an immediate e-mail update
         # should not raise an error if the e-mail was sent
         path = '/send_mail_updates?action=subject_changed&' + \
                'subject_name=haiti:example.org/123&' + \
-               'data=' + json_pickle_attrs
+               'changed_data=' + json_pickle_attrs_c + '&' + \
+               'unchanged_data=' + json_pickle_attrs_uc
         handler = self.simulate_request(path)
         handler.post()
+        assert len(sent_emails) == 1
+        assert 'title_foo' in sent_emails[0].body.lower()
+        assert 'test_attr_foo' in sent_emails[0].body
+        assert 'attr_old' in sent_emails[0].body
+        assert 'attr_new' in sent_emails[0].body
+        assert 'author_foo' in sent_emails[0].body
+        sent_emails = []
         
         # test to make sure a pending alert is created when a subject is
         # changed for a non-immediate subscription
         path = '/send_mail_updates?action=subject_changed&' + \
                'subject_name=haiti:example.org/456&' + \
-               'data=' + json_pickle_attrs
+               'changed_data=' + json_pickle_attrs_c + '&' + \
+               'unchanged_data=' + json_pickle_attrs_uc
         handler = self.simulate_request(path)
         handler.post()
         assert PendingAlert.get('daily', 'test@example.com',
@@ -237,6 +251,15 @@ class MailUpdateSystemTest(MediumTestCase):
         handler.post()
         assert not PendingAlert.get('daily', 'test@example.com',
                                     'haiti:example.org/456')
+        assert len(sent_emails) == 1
+        assert 'title_foo' in sent_emails[0].body.lower()
+        assert 'test_attr_bar' in sent_emails[0].body
+        assert 'test_attr_foo' in sent_emails[0].body
+        assert 'attr_bar_new' in sent_emails[0].body
+        assert 'attr_foo_new' in sent_emails[0].body
+        assert 'attr_bar' in sent_emails[0].body
+        assert 'attr_foo' in sent_emails[0].body
+        assert 'nickname_foo' in sent_emails[0].body
     
     def set_attr(self, subject, key, value):
         subject.set_attribute(key, value, self.time, self.user, self.nickname,
@@ -245,6 +268,6 @@ class MailUpdateSystemTest(MediumTestCase):
     def simulate_request(self, path):
         request = webapp.Request(webob.Request.blank(path).environ)
         response = webapp.Response()
-        handler = mail_update_system.MailUpdateSystem()
+        handler = mail_alerts.MailAlerts()
         handler.initialize(request, response, self.user)
         return handler
