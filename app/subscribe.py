@@ -26,8 +26,8 @@ import pickle
 import utils
 from bubble import format
 from feeds.xmlutils import Struct
-from mail_update_system import fetch_updates, form_html_body, form_plain_body
-from mail_update_system import send_email, update_account_alert_time
+from mail_alerts import fetch_updates, format_html_body, format_plain_body
+from mail_alerts import send_email, update_account_alert_time
 from model import PendingAlert, Subject, Subscription
 from utils import _, db, Handler, run, simplejson
 
@@ -93,10 +93,9 @@ class Subscribe(Handler):
         """Change's the current user's subscription to a list of subjects."""
         subject_changes = pickle.loads(str(simplejson.loads(
                                        self.request.get('subject_changes'))))
-        for change in subject_changes:
-            subject_name = change[0]
-            old_frequency = change[1]
-            new_frequency = change[2] or self.account.default_frequency
+        for subject_name, old_frequency, new_frequency in subject_changes:
+            if not new_frequency:
+                new_frequency = self.default_frequency
             
             s = Subscription.get(subject_name, self.email)
             s.frequency = new_frequency
@@ -109,12 +108,12 @@ class Subscribe(Handler):
                     subject = Subject.get_by_key_name(old_alert.subject_name)
                     values = fetch_updates(old_alert, subject)
                     nickname = self.account.nickname or self.account.email
-                    email_data = Struct(time=format(datetime.datetime.now()),
-                                        nickname=nickname, changed_subjects={
-                                        self.params.subject_name: {
-                                        subject.get_value('title'): values}})
-                    text_body = form_plain_body(email_data)
-                    html_body = form_html_body(email_data)
+                    email_data = Struct(
+                        time=format(datetime.datetime.now()),
+                        changed_subjects={self.params.subject_name: (
+                            subject.get_value('title'), values)})
+                    text_body = format_plain_body(email_data)
+                    html_body = format_html_body(email_data)
                     send_email(self.account.locale,
                                'updates@resource-finder.appspotmail.com',
                                self.account.email, utils.to_unicode(

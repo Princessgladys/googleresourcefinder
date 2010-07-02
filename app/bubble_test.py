@@ -126,3 +126,31 @@ class BubbleTest(unittest.TestCase):
         for detail in details:
             assert detail.value == 'title_foo' or detail.value == 'value_foo'
             assert detail.value != 'hidden_value_foo'
+
+    def test_vai_get_value_info(self):	
+        s = model.Subject(key_name='example.org/123', type='hospital')
+        s.set_attribute('title', 'title_foo', datetime.datetime(2010, 06, 01),
+                        users.User('test@example.com'),
+                        'nickname_foo', 'affiliation_foo\n', 'comment_\nfoo')
+        s.set_attribute('attribute_value', 'fake_to_localize',
+                        datetime.datetime(2010, 06, 01),
+                        users.User('test@example.com'),
+                        'nickname_foo', '\naffiliation_foo', 'comment_foo')
+        vai = ValueInfoExtractor(['title'], ['attribute_value'])
+        
+        vi = vai.get_value_info(s, 'title')
+        assert vi.label == 'foo'
+        assert vi.raw == 'title_foo'
+        assert vi.author == 'nickname_foo'
+        assert vi.affiliation == 'affiliation_foo '
+        assert vi.comment == 'comment_ foo'
+        assert vi.date == '2010-05-31 19:00:00 -05:00'
+
+        vi = vai.get_value_info(s, 'attribute_value')
+        assert vi.label == 'foo'
+        assert vi.raw == 'fake_to_localize'
+        assert vi.value ==  'fake_localized'
+        assert vi.author == 'nickname_foo'
+        assert vi.affiliation == ' affiliation_foo'
+        assert vi.comment == 'comment_foo'
+        assert vi.date == '2010-05-31 19:00:00 -05:00'

@@ -46,7 +46,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
 
 #. Error message for lacking edit permissions
-#: edit.py:439
+#: edit.py:441
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s pa gen pèmisyon edite %(a)s"
@@ -89,7 +89,7 @@ msgstr "Tout"
 #. Alternate name of a facility
 #: ../tools/setup.py:106
 msgid "Alternate name"
-msgstr "Altène non"
+msgstr ""
 
 #. Total number of unoccupied beds at a hospital.
 #: ../tools/setup.py:114
@@ -154,7 +154,7 @@ msgstr "Chanje"
 #. Instructions for a menu of deployed instances of the application
 #: templates/subdomain_menu.html:40
 msgid "Choose a site:"
-msgstr "Chwazi yon sit:"
+msgstr ""
 
 #. Category of health facility: Clinic
 #: ../tools/setup.py:179
@@ -379,7 +379,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Dat envalid : %(dat)r (bezwen ane-mwa-jou fòma)"
 
 #. Error message for request missing subject name.
-#: edit.py:335 bubble.py:161
+#: edit.py:337 bubble.py:161
 msgid "Invalid or missing subject name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -603,7 +603,7 @@ msgstr "Enprime yon list lopital nan lòd distans de ${FACILITY_NAME}"
 #. Link to privacy policy for the application
 #: templates/map.html:114
 msgid "Privacy"
-msgstr "Vi prive"
+msgstr "Prive"
 
 #. Type of organization: Public (government) organization
 #: ../tools/setup.py:172
@@ -616,7 +616,7 @@ msgid "Reachable by road"
 msgstr "Aksesib pa wout"
 
 #. Record updated successfully.
-#: edit.py:470
+#: edit.py:472
 msgid "Record updated."
 msgstr "Done a jou"
 
@@ -665,7 +665,7 @@ msgstr "Sèvis"
 #. Label for a control that filters a list of facilities
 #: static/locale.js:130
 msgid "Show"
-msgstr "Ekspoze"
+msgstr ""
 
 #. Link to sign into the app
 #: main.py:58
