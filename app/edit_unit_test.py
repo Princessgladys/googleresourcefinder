@@ -357,7 +357,7 @@ class EditTest(MediumTestCase):
         request = webapp.Request(webob.Request.blank(
                                  '/?title=title_bar&editable.title="title_foo"'
                                  ).environ)
-        assert edit.has_changed(self.s, request, str_attr) == True
+        assert edit.has_changed(self.s, request, str_attr)
         
         request = webapp.Request(webob.Request.blank(
                                  '/?title=title_foo&editable.title="title_foo"'
