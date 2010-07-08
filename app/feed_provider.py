@@ -16,7 +16,7 @@
 
 import logging
 import pickle
-from edxl_have import URI_PREFIXES, serialize
+from edxl_have import URI_PREFIXES, Hospital
 from feeds.feedutils import handle_entry_get, handle_feed_get, notify_hub
 from feeds.records import create_record
 from utils import ErrorMessage, Handler, run, taskqueue, _
@@ -26,17 +26,16 @@ def get_feed_id(request, feed_name):
     return request.host_url + '/feeds/' + feed_name
 
 
-def schedule_add_record(request, user, facility,
+def schedule_add_record(request, user, subject,
                         changed_attributes_dict, observed_time):
     """Enqueue a task to create a record."""
-    edxl_change = serialize(changed_attributes_dict)
     record = create_record(
         get_feed_id(request, 'delta'),
         user.email(),
         '', # title
-        facility.key().name(), # subject_id
+        subject.key().name(), # subject_id
         observed_time,
-        edxl_change)
+        Hospital.to_element(changed_attributes_dict))
 
     taskqueue.add(url='/tasks/add_feed_record',
         payload=pickle.dumps(record),

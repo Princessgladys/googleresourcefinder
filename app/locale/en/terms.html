@@ -6,10 +6,11 @@
 <style>
   body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
   h1 { font-size: 16px }
-  .footer {margin:3em 0 0; text-align:center; color: #666; }
+  .footer { margin: 3em 0 0; text-align: center; color: #666; }
+  .maincontent { width: 760px; margin: 15px; }
 </style>
 </head>
-<body>
+<body class="maincontent">
 <h1>Terms of Service for Google Resource Finder</h1>
 <p>Thanks for your interest in the Google Resource Finder (referred to below as "the Service").  The Service allows you to add, edit, and search for resource information in connection with location information and content provided by Google.
 
@@ -30,7 +31,7 @@
 <h4>Disclaimer</h4>
 <p>You acknowledge and agree that any content (including user-submitted content) made available or accessible through the Service is provided "as is," and you agree to use it at your own risk. Google makes no guarantee, representation or warranty of any kind, express or implied, arising by law or otherwise, including but not limited to, content, quality, accuracy, completeness, reliability, fitness for a particular purpose, usefulness, or that the Service will be uninterrupted or error-free.
 
-<p class="footer">&copy;2010 Google - <a href="/privacy">Google Resource Finder Privacy Policy</a> - <a href="http://www.google.com/about.html">About Google</a>
-{% include "../../templates/analytics.html" %} 
+{% include "footer.html" %}
+{% include "../../templates/analytics.html" %}
 </body>
 </html>

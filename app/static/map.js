@@ -50,12 +50,13 @@ STATUS_TEXT_COLORS = [null, '040', '040', '040'];
 // smart way so that they do not overlap.
 var MAX_MARKERS_TO_PRINT = 50;
 
-var METERS_TO_MILES = 0.000621371192;
-var METERS_TO_KM = 0.001;
+var METERS_PER_MILE = 1609.344;
+var METERS_PER_KM = 1000;
 
 // Temporary for v1, this should be user-settable in the future
 // TODO: Also need to update message in map.html that says "10 miles"
 var PRINT_RADIUS_MILES = 10;
+var PRINT_RADIUS_METERS = PRINT_RADIUS_MILES * METERS_PER_MILE;
 
 // TODO: Re-enable when monitoring is re-enabled
 var enable_freshness = false;
@@ -64,12 +65,12 @@ var enable_freshness = false;
 
 var attributes = [null];
 var attributes_by_name = {};  // {attribute_name: attribute_i}
-var facility_types = [null];
-var facilities = [null];
+var subject_types = [null];
+var subjects = [null];
 var divisions = [null];
 var messages = {};  // {namespace: {name: message}
 
-// ==== Columns shown in the facility table
+// ==== Columns shown in the subject table
 
 rf.get_services_from_values = function(values) {
   services = translate_values(
@@ -78,10 +79,10 @@ rf.get_services_from_values = function(values) {
   return services;
 }
 
-rf.get_services = function(facility) {
+rf.get_services = function(subject) {
   var services = '';
-  if (facility) {
-    var values = facility.values;
+  if (subject) {
+    var values = subject.values;
     services = rf.get_services_from_values(values);
   }
   return services;
@@ -143,17 +144,17 @@ var selected_filter_value = null;
 var selected_status_i = -1;
 var selected_division_i = -1;
 var selected_division = null;
-var selected_facility_i = -1;
-var selected_facility = null;
+var selected_subject_i = -1;
+var selected_subject = null;
 
-var facility_status_is = [];  // status of each facility for selected supplies
+var subject_status_is = [];  // status of each subject for selected supplies
 var bounds_match_selected_division = false;  // to skip redundant redraws
 
 // ==== Live API objects
 
 var map = null;
 var info = null;
-var markers = [];  // marker for each facility
+var markers = [];  // marker for each subject
 var marker_clusterer = null;  // clusters markers for efficient rendering
 var converted_markers_for_print = 0; // part of a hack for print support
 
@@ -300,13 +301,18 @@ function maybe_selected(selected) {
   return selected ? ' selected' : '';
 }
 
-function make_icon(title, status, detail, opt_icon, opt_icon_size) {
+function maybe_disabled(disabled) {
+  return disabled ? ' disabled' : '';
+}
+
+function make_icon(title, status, detail, opt_icon, opt_icon_size,
+    opt_icon_fill) {
   var text = detail ? title : '';
   var text_size = detail ? 10 : 0;
   var text_fill = STATUS_TEXT_COLORS[status];
   var icon = opt_icon || 'greek_cross_6w14';
   var icon_size = opt_icon_size || '16';
-  var icon_fill = STATUS_ICON_COLORS[status];
+  var icon_fill = opt_icon_fill || STATUS_ICON_COLORS[status];
   var icon_outline = 'fff';
   var params = [
       text, text_size, text_fill,
@@ -433,22 +439,26 @@ function convert_markers_for_print() {
   }
 }
 
-// Construct and set up the map markers for the facilities.
+// Construct and set up the map markers for the subjects.
 function initialize_markers() {
-  for (var f = 1; f < facilities.length; f++) {
-    var facility = facilities[f];
-    var location = facility.values[attributes_by_name.location];
-    var title = facility.values[attributes_by_name.title];
-    markers[f] = new google.maps.Marker({
+  for (var su = 1; su < subjects.length; su++) {
+    var subject = subjects[su];
+    var location = subject.values[attributes_by_name.location];
+    if (!location) {
+      markers[su] = null;
+      continue;
+    }
+    var title = subject.values[attributes_by_name.title];
+    markers[su] = new google.maps.Marker({
       position: new google.maps.LatLng(location.lat, location.lon),
       icon: make_icon(title, STATUS_UNKNOWN, false),
       title: title
     });
     if (!print) {
-      google.maps.event.addListener(markers[f], 'click', facility_selector(f));
+      google.maps.event.addListener(markers[su], 'click', subject_selector(su));
     }
-    if (!print || f <= MAX_MARKERS_TO_PRINT) {
-      facility.visible = true;
+    if (!print || su <= MAX_MARKERS_TO_PRINT) {
+      subject.visible = true;
     }
   }
 
@@ -478,14 +488,14 @@ function initialize_supply_selector() {
   }
   var tr = $$('tr');
   var cells = [];
-  for (var s = 1; s < supply_sets.length; s++) {
+  for (var ss = 1; ss < supply_sets.length; ss++) {
     cells.push($$('td', {
-      id: 'supply-set-' + s,
+      id: 'supply-set-' + ss,
       'class': 'supply-set',
-      onclick: supply_set_selector(s),
-      onmouseover: hover_activator('supply-set-' + s),
-      onmouseout: hover_deactivator('supply-set-' + s)
-    }, supply_sets[s].abbreviation));
+      onclick: supply_set_selector(ss),
+      onmouseover: hover_activator('supply-set-' + ss),
+      onmouseout: hover_deactivator('supply-set-' + ss)
+    }, supply_sets[ss].abbreviation));
   }
   set_children(tbody, tr);
   set_children(tr, cells);
@@ -511,14 +521,18 @@ function initialize_filters() {
     id: 'specialty-selector',
     name: 'specialty',
     onchange: function() {
-      select_filter.apply(null, $('specialty-selector').value.split(' '));
+      var value = $('specialty-selector').value.split(' ');
+      var trackedValue = value[1] ? value[1] : 'ANY';
+      _gaq.push(['_trackEvent', 'subject_list', 'filter',
+                 'Services contains ' + trackedValue]);
+      select_filter.apply(null, value);
     }
   });
   var options = [];
   options.push($$('option', {value: '0 '}, locale.ALL()));
   add_filter_options(options, attributes_by_name.services);
   set_children(selector, options);
-  set_children(tr, [$$('td', {}, [locale.SHOW(), selector])]);
+  set_children(tr, [$$('td', {}, [locale.SHOW() + ':', selector])]);
   set_children(tbody, tr);
 }
 
@@ -530,18 +544,18 @@ function initialize_division_header() {
   }
   var tr = $$('tr');
   var cells = [$$('th', {}, locale.DISTRICT())];
-  for (var s = 1; s <= MAX_STATUS; s++) {
-    cells.push($$('th', {'class': 'facility-count'},
-        $$('img', {src: make_icon('', s, false)})));
+  for (var st = 1; st <= MAX_STATUS; st++) {
+    cells.push($$('th', {'class': 'subject-count'},
+        $$('img', {src: make_icon('', st, false)})));
   }
-  cells.push($$('th', {'class': 'facility-count'}, 'All'));
+  cells.push($$('th', {'class': 'subject-count'}, 'All'));
   set_children(thead, tr);
   set_children(tr, cells);
 }
 
-// Add the header to the facility list.
-function initialize_facility_header() {
-  var thead = $('facility-thead');
+// Add the header to the subject list.
+function initialize_subject_header() {
+  var thead = $('subject-thead');
   if (!thead) {
     return;
   }
@@ -574,17 +588,17 @@ function initialize_print_headers() {
   if (!tbody) {
     return;
   }
-  var total_facilities = total_facility_count;
-  var local_facilities = facilities.length - 1;  // ignore the selected one
-  var available_facilities = 0;
-  for (var i = 1; i < facilities.length; i++) {
-    var values = facilities[i].values;
+  var total_subjects = total_subject_count;
+  var local_subjects = subjects.length - 1;  // ignore the selected one
+  var available_subjects = 0;
+  for (var i = 1; i < subjects.length; i++) {
+    var values = subjects[i].values;
     if (values && values[attributes_by_name.available_beds] > 0) {
-      available_facilities++;
+      available_subjects++;
     }
   }
 
-  if (facilities.length >= MAX_MARKERS_TO_PRINT) {
+  if (subjects.length >= MAX_MARKERS_TO_PRINT) {
     set_children($('header-print-subtitle'),
         locale.DISPLAYING_CLOSEST_N_FACILITIES(
             {NUM_FACILITIES: MAX_MARKERS_TO_PRINT}));
@@ -595,29 +609,29 @@ function initialize_print_headers() {
   }
 
   set_children($('print-subtitle'), locale.FACILITIES_IN_RANGE(
-      {NUM_FACILITIES: local_facilities,
+      {NUM_FACILITIES: local_subjects,
        RADIUS_MILES: PRINT_RADIUS_MILES}));
   set_children(tbody, $$('tr', {}, [
-      $$('td', {}, [total_facilities]),
-      $$('td', {}, [local_facilities]),
-      $$('td', {}, [available_facilities])]));
+      $$('td', {}, [total_subjects]),
+      $$('td', {}, [local_subjects]),
+      $$('td', {}, [available_subjects])]));
 }
 
 // ==== Display update routines
 
-// Set the map bounds to fit all facilities in the given division.
+// Set the map bounds to fit all subjects in the given division.
 function update_map_bounds(division_i) {
   if (bounds_match_selected_division && division_i === selected_division_i) {
     // The map hasn't been moved since it was last fit to this division.
     return;
   }
 
-  var facility_is = divisions[division_i].facility_is;
+  var subject_is = divisions[division_i].subject_is;
   var bounds = new google.maps.LatLngBounds();
-  for (var i = 0; i < facility_is.length; i++) {
-    var facility = facilities[facility_is[i]];
-    var location = facility.values[attributes_by_name.location];
-    if (location && facility.visible) {
+  for (var i = 0; i < subject_is.length; i++) {
+    var subject = subjects[subject_is[i]];
+    var location = subject.values[attributes_by_name.location];
+    if (location && subject.visible) {
       bounds.extend(new google.maps.LatLng(location.lat, location.lon));
     }
   }
@@ -625,23 +639,26 @@ function update_map_bounds(division_i) {
   bounds_match_selected_division = true;
 }
 
-// Update the facility map icons based on their status and the zoom level.
-function update_facility_icons() {
+// Update the subject map icons based on their status and the zoom level.
+function update_subject_icons() {
   var detail = map.getZoom() > 10;
   var markers_to_keep = [];
-  for (var f = 1; f < facilities.length; f++) {
-    if (markers[f]) {
-      var facility = facilities[f];
-      var s = facility_status_is[f];
-      var title = facility.values[attributes_by_name.title];
-      var icon_url = make_icon(title, s, detail);
-      facility.visible = false;
-      if (s == STATUS_GOOD) {
-        markers[f].setIcon(icon_url);
-        markers[f].setZIndex(STATUS_ZINDEXES[s]);
-        markers_to_keep.push(markers[f]);
-        if (!print || f <= MAX_MARKERS_TO_PRINT) {
-          facility.visible = true;
+  for (var su = 1; su < subjects.length; su++) {
+    if (markers[su]) {
+      var subject = subjects[su];
+      var st = subject_status_is[su];
+      var title = subject.values[attributes_by_name.title];
+      var icon_url = make_icon(title, st, detail);
+      if (is_subject_closed(subject)) {
+        icon_url = make_icon(title, st, detail, null, null, 'a00');
+      }
+      subject.visible = false;
+      if (st == STATUS_GOOD) {
+        markers[su].setIcon(icon_url);
+        markers[su].setZIndex(STATUS_ZINDEXES[st]);
+        markers_to_keep.push(markers[su]);
+        if (!print || su <= MAX_MARKERS_TO_PRINT) {
+          subject.visible = true;
         }
       }
     }
@@ -652,19 +669,19 @@ function update_facility_icons() {
   marker_clusterer.addMarkers(to_add);
 }
 
-// Fill in the facility legend.
-function update_facility_legend() {
+// Fill in the subject legend.
+function update_subject_legend() {
   if (!$('legend-tbody')) {
     return;
   }
   var rows = [];
   var stock = 'one dose';
-  for (var s = 1; s <= MAX_STATUS; s++) {
+  for (var st = 1; st <= MAX_STATUS; st++) {
     rows.push($$('tr', {'class': 'legend-row'}, [
       $$('th', {'class': 'legend-icon'},
-        $$('img', {src: make_icon('', s, false)})),
-      $$('td', {'class': 'legend-label status-' + s},
-        render(STATUS_LABEL_TEMPLATES[s], {
+        $$('img', {src: make_icon('', st, false)})),
+      $$('td', {'class': 'legend-label status-' + st},
+        render(STATUS_LABEL_TEMPLATES[st], {
           ALL_SUPPLIES: selected_supply_set.description_all,
           ANY_SUPPLY: selected_supply_set.description_any
         }))
@@ -673,30 +690,38 @@ function update_facility_legend() {
   set_children($('legend-tbody'), rows);
 }
 
-// Repopulate the facility list based on the selected division and status.
-function update_facility_list() {
-  if (!$('facility-tbody')) {
+// Repopulate the subject list based on the selected division and status.
+function update_subject_list() {
+  if (!$('subject-tbody')) {
     return;
   }
   var rows = [];
-  for (var i = 0; i < selected_division.facility_is.length; i++) {
-    var f = selected_division.facility_is[i];
-    var facility = facilities[f];
-    var facility_type = facility_types[facility.type];
+  for (var i = 0; i < selected_division.subject_is.length; i++) {
+    var su = selected_division.subject_is[i];
+    var subject = subjects[su];
+    var subject_type = subject_types[subject.type];
+    if (!markers[su]) {
+      // TODO(kpy): For now, subjects without locations are hidden
+      // from the list.  Once we have a way to show the detail window for
+      // subjects without locations, we can include them in the list.
+      continue;
+    }
     if (selected_status_i === 0 ||
-        facility_status_is[f] === selected_status_i) {
+        subject_status_is[su] === selected_status_i) {
       var row = $$('tr', {
-        id: 'facility-' + f,
-        'class': 'facility' + maybe_selected(f === selected_facility_i),
-        onclick: facility_selector(f),
-        onmouseover: hover_activator('facility-' + f),
-        onmouseout: hover_deactivator('facility-' + f)
+        id: 'subject-' + su,
+        'class': 'subject' +
+            maybe_disabled(is_subject_closed(subject)) +
+            maybe_selected(su === selected_subject_i),
+        onclick: subject_selector(su),
+        onmouseover: hover_activator('subject-' + su),
+        onmouseout: hover_deactivator('subject-' + su)
       });
-      var title = facility.values[attributes_by_name.title];
-      var cells = [$$('td', {'class': 'facility-title'}, title)];
-      if (facility) {
+      var title = subject.values[attributes_by_name.title];
+      var cells = [$$('td', {'class': 'subject-title'}, title)];
+      if (subject) {
         for (var c = 1; c < summary_columns.length; c++) {
-          var value = summary_columns[c].get_value(facility.values);
+          var value = summary_columns[c].get_value(subject.values);
           cells.push($$('td', {'class': 'value column_' + c}, value));
         }
       } else {
@@ -708,25 +733,25 @@ function update_facility_list() {
       rows.push(row);
     }
   }
-  set_children($('facility-tbody'), rows);
-  update_facility_list_size();
+  set_children($('subject-tbody'), rows);
+  update_subject_list_size();
 }
 
-// Populate the facility list for print view.
-function update_print_facility_list() {
-  if (!$('facility-print-tbody')) {
+// Populate the subject list for print view.
+function update_print_subject_list() {
+  if (!$('subject-print-tbody')) {
     return;
   }
   var rows = [];
-  for (var i = 0; i < selected_division.facility_is.length; i++) {
-    var f = selected_division.facility_is[i];
-    var facility = facilities[f];
-    var facility_type = facility_types[facility.type];
+  for (var i = 0; i < selected_division.subject_is.length; i++) {
+    var su = selected_division.subject_is[i];
+    var subject = subjects[su];
+    var subject_type = subject_types[subject.type];
     if (selected_status_i === 0 ||
-        facility_status_is[f] === selected_status_i) {
+        subject_status_is[su] === selected_status_i) {
       var row = $$('tr', {
-        id: 'facility-' + f,
-        'class': 'facility' + (i % 2 == 0 ? 'even' : 'odd')
+        id: 'subject-' + su,
+        'class': 'subject-' + (i % 2 == 0 ? 'even' : 'odd')
       });
       var cells = [];
       var total_beds;
@@ -735,8 +760,8 @@ function update_print_facility_list() {
       var general_info;
       var healthc_id;
       var pcode;
-      if (facility) {
-        var values = facility.values;
+      if (subject) {
+        var values = subject.values;
         total_beds = values[attributes_by_name.total_beds];
         open_beds = values[attributes_by_name.available_beds];
         address = values[attributes_by_name.address];
@@ -749,39 +774,39 @@ function update_print_facility_list() {
               + locale.PHONE_ABBREVIATION({PHONE: phone});
         }
       }
-      var dist_meters = facility.distance_meters;
+      var dist_meters = subject.distance_meters;
       var dist;
       if (typeof(dist_meters) === 'number') {
         dist = locale.DISTANCE({
-            MILES: format_number(dist_meters * METERS_TO_MILES, 1), 
-            KM: format_number(dist_meters * METERS_TO_KM, 2)});
+            MILES: format_number(dist_meters / METERS_PER_MILE, 1), 
+            KM: format_number(dist_meters / METERS_PER_KM, 2)});
       }
-      var title = facility.values[attributes_by_name.title];
-      var facility_name = title + ' - '
-        + locale.HEALTHC_ID() + ' ' + render(healthc_id)
-        + ' - ' + locale.FACILITY_PCODE() + ' ' + render(pcode);
-      cells.push($$('td', {'class': 'facility-beds-open'}, render(open_beds)));
-      cells.push($$('td', {'class': 'facility-beds-total'},render(total_beds)));
-      cells.push($$('td', {'class': 'facility-title'}, render(facility_name)));
-      cells.push($$('td', {'class': 'facility-distance'}, render(dist)));
-      cells.push($$('td', {'class': 'facility-address'}, render(address)));
-      cells.push($$('td', {'class': 'facility-general-info'},
+      var title = subject.values[attributes_by_name.title];
+      var subject_title = title + ' - '
+        + locale.HEALTHC_ID() + ': ' + render(healthc_id)
+        + ' - ' + locale.PCODE() + ': ' + render(pcode);
+      cells.push($$('td', {'class': 'subject-beds-open'}, render(open_beds)));
+      cells.push($$('td', {'class': 'subject-beds-total'},render(total_beds)));
+      cells.push($$('td', {'class': 'subject-title'}, render(subject_title)));
+      cells.push($$('td', {'class': 'subject-distance'}, render(dist)));
+      cells.push($$('td', {'class': 'subject-address'}, render(address)));
+      cells.push($$('td', {'class': 'subject-general-info'},
           render(general_info)));
       set_children(row, cells);
       rows.push(row);
     }
   }
-  set_children($('facility-print-tbody'), rows);
+  set_children($('subject-print-tbody'), rows);
 }
 
-// Update the height of the facility list to exactly fit the window.
-function update_facility_list_size() {
+// Update the height of the subject list to exactly fit the window.
+function update_subject_list_size() {
   var windowHeight = get_window_size()[1];
   var freshnessHeight = $('freshness').clientHeight;
-  var listTop = get_element_top($('facility-list'));
+  var listTop = get_element_top($('subject-list'));
   var listHeight = windowHeight - freshnessHeight - listTop;
-  $('facility-list').style.height = listHeight + 'px';
-  align_header_with_table($('facility-thead'), $('facility-tbody'));
+  $('subject-list').style.height = listHeight + 'px';
+  align_header_with_table($('subject-thead'), $('subject-tbody'));
 }
 
 // Update the width of header cells to match the table cells below.
@@ -802,29 +827,29 @@ function align_header_with_table(thead, tbody) {
   }
 }
 
-// Determine the status of each facility according to the user's filters.
-function update_facility_status_is() {
-  for (var f = 1; f < facilities.length; f++) {
-    var facility = facilities[f];
+// Determine the status of each subject according to the user's filters.
+function update_subject_status_is() {
+  for (var su = 1; su < subjects.length; su++) {
+    var subject = subjects[su];
     if (selected_filter_attribute_i <= 0) {
-      facility_status_is[f] = STATUS_GOOD;
-    } else if (!facility) {
-      facility_status_is[f] = STATUS_UNKNOWN;
+      subject_status_is[su] = STATUS_GOOD;
+    } else if (!subject) {
+      subject_status_is[su] = STATUS_UNKNOWN;
     } else {
-      facility_status_is[f] = STATUS_BAD;
+      subject_status_is[su] = STATUS_BAD;
       var a = selected_filter_attribute_i;
       if (attributes[a].type === 'multi') {
-        if (contains(facility.values[a] || [], selected_filter_value)) {
-          facility_status_is[f] = STATUS_GOOD;
+        if (contains(subject.values[a] || [], selected_filter_value)) {
+          subject_status_is[su] = STATUS_GOOD;
         }
       } else if (report.values[a] === selected_filter_value) {
-        facility_status_is[f] = STATUS_GOOD;
+        subject_status_is[su] = STATUS_GOOD;
       }
     }
   }
 }
 
-// Update the contents of the division list based on facility statuses. 
+// Update the contents of the division list based on subject statuses. 
 function update_division_list() {
   if (!$('division-tbody')) {
     return;
@@ -842,26 +867,26 @@ function update_division_list() {
       onmouseover: hover_activator('division-' + d),
       onmouseout: hover_deactivator('division-' + d)
     }, division.title)];
-    for (var s = 1; s <= MAX_STATUS; s++) {
-      var facility_is = filter(division.facility_is,
-        function (f) { return facility_status_is[f] === s; });
+    for (var st = 1; st <= MAX_STATUS; st++) {
+      var subject_is = filter(division.subject_is,
+        function (subject_i) { return subject_status_is[subject_i] === st; });
       cells.push($$('td', {
-        'id': 'division-' + d + '-status-' + s,
-        'class': 'facility-count status-' + s + maybe_selected(
-            d === selected_division_i && s === selected_status_i),
-        onclick: division_and_status_selector(d, s),
-        onmouseover: hover_activator('division-' + d + '-status-' + s),
-        onmouseout: hover_deactivator('division-' + d + '-status-' + s)
-      }, facility_is.length));
+        'id': 'division-' + d + '-status-' + st,
+        'class': 'subject-count status-' + st + maybe_selected(
+            d === selected_division_i && st === selected_status_i),
+        onclick: division_and_status_selector(d, st),
+        onmouseover: hover_activator('division-' + d + '-status-' + st),
+        onmouseout: hover_deactivator('division-' + d + '-status-' + st)
+      }, subject_is.length));
     }
     cells.push($$('td', {
       'id': 'division-' + d + '-status-0',
-      'class': 'facility-count status-0' + maybe_selected(
+      'class': 'subject-count status-0' + maybe_selected(
           d === selected_division_i && 0 === selected_status_i),
       onclick: division_and_status_selector(d, 0),
       onmouseover: hover_activator('division-' + d + '-status-0'),
       onmouseout: hover_deactivator('division-' + d + '-status-0')
-    }, division.facility_is.length));
+    }, division.subject_is.length));
     set_children(row, cells);
     rows.push(row);
   }
@@ -907,7 +932,7 @@ function update_freshness(timestamp) {
   window.setTimeout(function () { update_freshness(timestamp); }, timeout);
 }
 
-// Disable the print link in the user header.  This is done when no facilities
+// Disable the print link in the user header.  This is done when no subjects
 // are selected
 function disable_print_link() {
   var print_link = $('print-link');
@@ -916,6 +941,7 @@ function disable_print_link() {
   }
   print_link.href = 'javascript:void(0)';
   print_link.title = locale.PRINT_DISABLED_TOOLTIP();
+  print_link.target = '';  // prevent Selenium from opening a window in testing
   print_link.onclick = function() {
     // TODO: Use a nice model dialog instead of alert
     alert(locale.PRINT_DISABLED_TOOLTIP());
@@ -923,20 +949,22 @@ function disable_print_link() {
   };
 }
 
-// Enable the print link in the user header. This is done when a facility has
+// Enable the print link in the user header. This is done when a subject has
 // been selected.
 function enable_print_link() {
   var print_link = $('print-link');
   if (!print_link) {
     return;
   }
-  var f = selected_facility;
-  var PRINT_URL = '/?print=yes&lat=${LAT}&lon=${LON}&rad=${RAD}';
-  var location = f.values[attributes_by_name.location];
-  var title = f.values[attributes_by_name.title];
-  print_link.href = render(PRINT_URL, {LAT: location.lat, LON: location.lon,
-       RAD: PRINT_RADIUS_MILES / METERS_TO_MILES});
+  var subject = selected_subject;
+  var location = subject.values[attributes_by_name.location];
+  var title = subject.values[attributes_by_name.title];
+  print_link.href = print_url + render(
+      '&lat=${LAT}&lon=${LON}&rad=${RAD}',
+      {LAT: location.lat, LON: location.lon, RAD: PRINT_RADIUS_METERS}
+  );
   print_link.title = locale.PRINT_ENABLED_TOOLTIP({FACILITY_NAME: title});
+  print_link.target = '_blank';
   print_link.onclick = null;
 }
 
@@ -989,12 +1017,12 @@ function initialize_handlers() {
 function handle_window_resize() {
   if (!print) {
     align_header_with_table($('division-thead'), $('division-tbody'));
-    update_facility_list_size();
+    update_subject_list_size();
   }
 }
 
 function handle_zoom_changed() {
-  update_facility_icons(); // amount of detail in icons depends on zoom level
+  update_subject_icons(); // amount of detail in icons depends on zoom level
 }
 
 function handle_bounds_changed() {
@@ -1027,9 +1055,9 @@ function division_and_status_selector(division_i, status_i) {
   };
 }
 
-function facility_selector(facility_i) {
+function subject_selector(subject_i) {
   return function () {
-    select_facility(facility_i);
+    select_subject(subject_i);
   };
 }
 
@@ -1039,18 +1067,18 @@ function select_filter(attribute_i, value) {
   selected_filter_attribute_i = attribute_i;
   selected_filter_value = value;
 
-  // Apply the filter to the facility list.
-  update_facility_status_is();
+  // Apply the filter to the subject list.
+  update_subject_status_is();
 
-  // Update the facility icons to reflect their status.
-  update_facility_icons();
+  // Update the subject icons to reflect their status.
+  update_subject_icons();
 
-  // Update the facility counts in the division list.
+  // Update the subject counts in the division list.
   update_division_list();
 
   if (selected_division !== null) {
-    // Filter the list of facilities by the selected supply set.
-    update_facility_list();
+    // Filter the list of subjects by the selected supply set.
+    update_subject_list();
   }
 }
 
@@ -1065,27 +1093,27 @@ function select_supply_set(supply_set_i) {
 
   // Update the selection highlight.
   if($('supply-tbody')) {
-    for (var s = 1; s < supply_sets.length; s++) {
-      $('supply-set-' + s).className = 'supply-set' +
-          maybe_selected(s === supply_set_i);
+    for (var ss = 1; ss < supply_sets.length; ss++) {
+      $('supply-set-' + ss).className = 'supply-set' +
+          maybe_selected(ss === supply_set_i);
     }
   }
 
-  // Update the facility icon legend.
-  update_facility_legend();
+  // Update the subject icon legend.
+  update_subject_legend();
 
-  // Update the status of each facility.
-  update_facility_status_is();
+  // Update the status of each subject.
+  update_subject_status_is();
 
-  // Update the facility icons to reflect their status.
-  update_facility_icons();
+  // Update the subject icons to reflect their status.
+  update_subject_icons();
 
-  // Update the facility counts in the division list.
+  // Update the subject counts in the division list.
   update_division_list();
 
   if (selected_division !== null) {
-    // Filter the list of facilities by the selected supply set.
-    update_facility_list();
+    // Filter the list of subjects by the selected supply set.
+    update_subject_list();
   }
 }
 
@@ -1104,65 +1132,77 @@ function select_division_and_status(division_i, status_i) {
   // Update the selection highlight.
   if ($('division-thead')) {
     for (var d = 0; d < divisions.length; d++) {
-      for (var s = 0; s <= MAX_STATUS; s++) {
-        $('division-' + d + '-status-' + s).className =
-            'facility-count status-' + s +
-            maybe_selected(d === division_i && s === status_i);
+      for (var st = 0; st <= MAX_STATUS; st++) {
+        $('division-' + d + '-status-' + st).className =
+            'subject-count status-' + st +
+            maybe_selected(d === division_i && st === status_i);
       }
     }    
   }
 
-  // Filter the list of facilities by the selected division and status.
-  update_facility_list();
+  // Filter the list of subjects by the selected division and status.
+  update_subject_list();
 }
 
-function select_facility(facility_i, ignore_current) {
-  if (!ignore_current && facility_i === selected_facility_i) {
+function select_subject(subject_i, ignore_current) {
+  if (!ignore_current && subject_i === selected_subject_i) {
     return;
   }
   
   // Update the selection.
-  selected_facility_i = facility_i;
-  selected_facility = (facility_i <= 0) ? null : facilities[facility_i];
+  selected_subject_i = subject_i;
+  selected_subject = (subject_i <= 0) ? null : subjects[subject_i];
 
   // Update the selection highlight.
-  for (var f = 1; f < facilities.length; f++) {
-    var item = $('facility-' + f);
+  for (var su = 1; su < subjects.length; su++) {
+    var item = $('subject-' + su);
     if (item) {
-      item.className = 'facility' + maybe_selected(f === facility_i);
+      item.className = 'subject' +
+          maybe_disabled(is_subject_closed(subjects[su])) +
+          maybe_selected(su === selected_subject_i);
     }
   }
 
-  if (facility_i <= 0) {
+  if (subject_i <= 0) {
     // No selection.
     info.close();
     return;
   }
 
-  // Pop up the InfoWindow on the selected clinic.
+  // Pop up the InfoWindow on the selected clinic, if it has a location.
   info.close();
 
-  show_loading(true);
-  jQuery.ajax({
-    url: 'bubble?facility_name=' + selected_facility.name,
-    type: 'GET',
-    timeout: 10000,
-    error: function(request, textStatus, errorThrown){
-      log(textStatus + ', ' + errorThrown);
-      alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
-      show_loading(false);
-    },
-    success: function(result){
-      info.setContent(result);
-      info.open(map, markers[selected_facility_i]);
-      // Sets up the tabs and should be called after the DOM is created.
-      jQuery('#bubble-tabs').tabs();
-      show_loading(false);
-    }
-  });
+  if (markers[selected_subject_i]) {
+    show_loading(true);
+    var url = bubble_url + (bubble_url.indexOf('?') >= 0 ? '&' : '?') +
+        'subject_name=' + selected_subject.name;
+    _gaq.push(['_trackEvent', 'bubble', 'open', selected_subject.name]);
+    jQuery.ajax({
+      url: url,
+      type: 'GET',
+      timeout: 10000,
+      error: function(request, text_status, error_thrown){
+        log(text_status + ', ' + error_thrown);
+        alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
+        show_loading(false);
+      },
+      success: function(result){
+        info.setContent(result);
+        info.open(map, markers[selected_subject_i]);
+        // Sets up the tabs and should be called after the DOM is created.
+        jQuery('#bubble-tabs').tabs({
+          select: function(event, ui) {
+            _gaq.push(['_trackEvent', 'bubble', 'click ' + ui.panel.id,
+                       selected_subject.name]);
+          }
+        });
+        show_loading(false);
+      }
+    });
 
-  // Enable the Print link
-  enable_print_link();
+    // Enable the Print link (which requires a center location).
+    enable_print_link();
+  }
 }
 
 function show_loading(show) {
@@ -1173,10 +1213,10 @@ function show_loading(show) {
 
 function load_data(data) {
   attributes = data.attributes;
-  facility_types = data.facility_types;
-  facilities = data.facilities;
+  subject_types = data.subject_types;
+  subjects = data.subjects;
   messages = data.messages;
-  total_facility_count = data.total_facility_count;
+  total_subject_count = data.total_subject_count;
 
   attributes_by_name = {};
   for (var a = 1; a < attributes.length; a++) {
@@ -1189,24 +1229,24 @@ function load_data(data) {
     }
   }
 
-  var facility_is = [];
-  for (var i = 1; i < facilities.length; i++) {
-    facility_is.push(i);
+  var subject_is = [];
+  for (var i = 1; i < subjects.length; i++) {
+    subject_is.push(i);
   }
   divisions = [{
-    title: 'All arrondissements',
-    facility_is: facility_is
+    title: 'All divisions',
+    subject_is: subject_is
   }];
 
   if (!print) {
     // The print link is not shown in print view, no need to disable it
     disable_print_link();
-    // The supply selector, filters, division header and facility
+    // The supply selector, filters, division header and subject
     // header all do not appear in print view; don't bother initializing them.
     initialize_supply_selector();
     initialize_filters();
     initialize_division_header();
-    initialize_facility_header();    
+    initialize_subject_header();    
   }
 
   initialize_language_selector();
@@ -1220,7 +1260,7 @@ function load_data(data) {
 
   if (print) {
     initialize_print_headers();
-    update_print_facility_list();
+    update_print_subject_list();
   } else {
     handle_window_resize();
   }
@@ -1251,27 +1291,27 @@ function handle_monitor_notification() {
   }
 }
 
-function set_facility_attribute(facility_name, attribute_name, value) {
-  log(facility_name, attribute_name, value);
-  var facility_i = 0;
-  for (var f = 1; f < facilities.length; f++) {
-    if (facilities[f].name == facility_name) {
-      facility_i = f;
+function set_subject_attribute(subject_name, attribute_name, value) {
+  log(subject_name, attribute_name, value);
+  var subject_i = 0;
+  for (var su = 1; su < subjects.length; su++) {
+    if (subjects[su].name == subject_name) {
+      subject_i = su;
     }
   }
   var attribute_i = attributes_by_name[attribute_name];
-  if (facility_i) {
-    var facility = facilities[facility_i];
-    if (!facility) {
+  if (subject_i) {
+    var subject = subjects[subject_i];
+    if (!subject) {
       var nulls = [];
       for (var a = 0; a < attributes.length; a++) {
         nulls.push(null);
       }
-      facility.values = nulls;
+      subject.values = nulls;
     }
-    facility.values[attribute_i] = value;
+    subject.values[attribute_i] = value;
   }
-  update_facility_row(facility_i);
+  update_subject_row(subject_i);
 }
 
 var GLOW_COLORS = ['#ff4', '#ff4', '#ff5', '#ff6', '#ff8', '#ffa',
@@ -1302,13 +1342,13 @@ function glow_next() {
   }
 }
 
-function update_facility_row(facility_i) {
-  var row = $('facility-' + facility_i);
+function update_subject_row(subject_i) {
+  var row = $('subject-' + subject_i);
   var cell = row.firstChild;
-  var facility = facilities[facility_i];
+  var subject = subjects[subject_i];
   for (var c = 1; c < summary_columns.length; c++) {
     cell = cell.nextSibling;
-    var value = summary_columns[c].get_value(facility.values);
+    var value = summary_columns[c].get_value(subject.values);
     set_children(cell, value);
     cell.className = 'value column_' + c;
   }
@@ -1325,8 +1365,8 @@ function edit_handler(edit_url) {
     url: edit_url,
     success: function(data) {
       info.close();
-      info.setContent('<div class="facility-info">' + data + '</div>');
-      info.open(map, markers[selected_facility_i]);
+      info.setContent('<div class="subject-info">' + data + '</div>');
+      info.open(map, markers[selected_subject_i]);
       $j('#edit').ajaxForm({target: '#edit-status'});
     }
   });
@@ -1347,5 +1387,18 @@ function request_action_handler(request_url) {
   });
   return false;
 }
+
+// Returns true IFF the operational status of the subject is set to
+// CLOSED_OR_CLOSING
+function is_subject_closed(subject) {
+  if (subject) {
+    var op_status = subject.values[attributes_by_name.operational_status];
+    if (op_status == 'CLOSED_OR_CLOSING') {
+      return true;
+    }
+  }
+
+  return false;
+};
 
 log('map.js finished loading.');

@@ -23,7 +23,7 @@
 {% comment %}
 #i18n: Name of the application.
 {% endcomment %}
-<title>{% trans "Resource Finder" %} ({{instance}})</title>
+<title>{% trans "Resource Finder" %} ({{subdomain}})</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <style>
 {% if not params.embed %}
@@ -41,25 +41,25 @@ tr.field.text { vertical-align: top; }
 .dash { border-top: 3px dotted #000; margin: 12px; }
 </style>
 {% if not params.embed %}
+{% include "analytics.html" %}
 </head>
 <body>
-{% include "analytics.html" %}
 {% endif %}
 {% comment %}
-# NB: This probably should use blocktrans and include facility_name as a param
+# NB: This probably should use blocktrans and include subject_name as a param
 # to the message but that causes a UnicodeDecodeError when there is unicode
 # on the page, presumably because Django is defaulting to ascii encoding for
 # some reason.
-#i18n: Title for page to edit data about a facility
+#i18n: Title for page to edit data about a subject
 {% endcomment %}
-<h1>{% trans "Edit" %} {{facility_title|escape}}</h1>
+<h1>{% trans "Edit" %} {{subject_title|escape}}</h1>
 
-<form method="post" id="edit" action="/edit">
+<form method="post" id="edit" action="{{edit_url}}">
   <input type="hidden" name="token" value="{{token}}"/>
   <input type="hidden" name="embed" value="{{params.embed|escape}}"/>
   <input type="hidden" name="cc" value="{{params.cc|escape}}"/>
-  <input type="hidden" name="facility_name"
-      value="{{params.facility_name|escape}}"/>
+  <input type="hidden" name="subject_name"
+      value="{{params.subject_name|escape}}"/>
   <table>
     {% if not account.nickname %}
       <tr class="account">
@@ -131,6 +131,16 @@ tr.field.text { vertical-align: top; }
                    value="{{field.json|escape}}"/>
             <div id="{{field.name}}_errormsg" class="hidden"></div>
           </div>
+        </td>
+        <td>            
+            <div id="{{field.name}}__comment" class="comment" style="visibility:hidden">
+              {% comment %}
+              #i18n: Label for a text field to enter a comment about a change.
+              {% endcomment %}
+              &nbsp;&nbsp;{% trans 'Comment:' %} <input type="text"
+                name="{{field.name}}__comment" value="{{field.comment|escape}}"
+                class="comment">
+            </div>
         </td>
       </tr>
     {% endfor %}

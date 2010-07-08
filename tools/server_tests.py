@@ -20,6 +20,7 @@ which sets up the PYTHONPATH and other necessary environment variables."""
 
 import access
 import console
+import model
 import optparse
 import os
 import re
@@ -145,7 +146,7 @@ class SeleniumRunner(ProcessRunner):
             self, 'selenium', ['java', '-jar', os.environ['SELENIUM_JAR']])
 
 
-if __name__ == '__main__':
+def main():
     parser = optparse.OptionParser()
     parser.add_option('-a', '--address', help='appserver hostname')
     parser.add_option('-p', '--port', type='int', help='appserver port number')
@@ -173,18 +174,21 @@ if __name__ == '__main__':
         # Initialize the datastore.
         console.connect(
             '%s:%d' % (options.address, options.port), None, 'test', 'test')
-        setup.setup_new_datastore()
-        setup.add_account(email='test@example.com', description='Test',
-                          nickname='', affiliation='',
-                          actions=[':view', ':edit', 'grant'])
+        setup.setup_datastore()
 
-        # Gather all the tests.
+        # Gather the selected tests, or all the tests if none were specified.
         loader = unittest.defaultTestLoader
         suites = []
         for filename in os.listdir(os.environ['TESTS_DIR']):
             if filename.endswith('_test.py'):
                 module = filename[:-3]
-                suites.append(loader.loadTestsFromName(module))
+                if args:
+                    for pattern in args:
+                        if re.match(pattern, filename):
+                            suites.append(loader.loadTestsFromName(module))
+                            break
+                else:        
+                    suites.append(loader.loadTestsFromName(module))
 
         # Run the tests.
         print
@@ -198,3 +202,7 @@ if __name__ == '__main__':
         # Clean up all the subprocesses, no matter what happened.
         for runner in runners:
             runner.stop()
+
+
+if __name__ == '__main__':
+    main()

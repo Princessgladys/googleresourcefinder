@@ -14,6 +14,10 @@
 # limitations under the License.
 */
 
+.bubble {
+  min-width: 400px; /* without this, Firefox makes the bubble too narrow */
+}
+
 .bubble .title-row {
   margin: 0 4px 0 0;
 }
