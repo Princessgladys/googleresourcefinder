@@ -45,13 +45,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} établissements dans un rayon de ${RADIUS_MILES} miles"
 
 #. Error message for lacking edit permissions
-#: edit.py:441
+#: edit.py:448
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s n'a pas l'autorisation de modifier %(a)s"
 
 #. Form option to indicate that a value is not specified
-#: edit.py:169 edit.py:210 edit.py:195
+#: edit.py:200 edit.py:174 edit.py:215
 msgid "(unspecified)"
 msgstr "(non spécifié)"
 
@@ -88,7 +88,7 @@ msgstr "Tous"
 #. Alternate name of a facility
 #: ../tools/setup.py:106
 msgid "Alternate name"
-msgstr ""
+msgstr "Autre nom"
 
 #. Total number of unoccupied beds at a hospital.
 #: ../tools/setup.py:114
@@ -153,7 +153,7 @@ msgstr "Modification"
 #. Instructions for a menu of deployed instances of the application
 #: templates/subdomain_menu.html:40
 msgid "Choose a site:"
-msgstr ""
+msgstr "Choisir un site:"
 
 #. Category of health facility: Clinic
 #: ../tools/setup.py:179
@@ -248,7 +248,7 @@ msgid "District"
 msgstr "District"
 
 #. E-mail address
-#: ../tools/setup.py:124 edit.py:116
+#: edit.py:121 ../tools/setup.py:124
 msgid "E-mail"
 msgstr "E-mail"
 
@@ -373,12 +373,17 @@ msgid "Internal Medicine"
 msgstr "Médecine Interne"
 
 #. Error message for invalid date entry
-#: edit.py:138
+#: edit.py:143
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Date incorrecte : %(date)r  (format AAAA-MM-JJ requis)"
 
 #. Error message for request missing subject name.
-#: edit.py:337 bubble.py:161
+#: subscribe.py:57
+msgid "Invalid or missing account e-mail."
+msgstr "Nom d'établissement incorrect ou manquant"
+
+#. Error message for request missing subject name.
+#: bubble.py:159 edit.py:342
 msgid "Invalid or missing subject name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -403,7 +408,7 @@ msgid "Last updated"
 msgstr "Mise à jour :"
 
 #. Label for text input
-#: edit.py:231
+#: edit.py:236
 msgid "Latitude"
 msgstr "Latitude"
 
@@ -443,7 +448,7 @@ msgid "Location:"
 msgstr "Emplacement"
 
 #. Label for text input
-#: edit.py:235
+#: edit.py:240
 msgid "Longitude"
 msgstr "Longitude"
 
@@ -488,7 +493,7 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: edit.py:112 ../tools/setup.py:104
+#: ../tools/setup.py:104 edit.py:117
 msgid "Name"
 msgstr "Nom"
 
@@ -503,7 +508,7 @@ msgid "Neurosurgery"
 msgstr "Neurochirurgie"
 
 #. Form option for a false Boolean value
-#: bubble.py:48 edit.py:173 bubble_test.py:66
+#: bubble.py:48 edit.py:178 bubble_test.py:66
 msgid "No"
 msgstr "Non"
 
@@ -574,7 +579,7 @@ msgid "Pediatrics"
 msgstr "Pédiatrie"
 
 #. telephone number
-#: ../tools/setup.py:122 edit.py:114
+#: edit.py:119 ../tools/setup.py:122
 msgid "Phone"
 msgstr "Téléphone"
 
@@ -587,6 +592,11 @@ msgstr "Merci d'appeler pour connaître les disponibilités."
 #: ../tools/setup.py:246
 msgid "Postoperative Care"
 msgstr "Soins Postopératoires"
+
+#. old value for the attribute
+#: mail_alerts.py:127
+msgid "Previous value"
+msgstr "Valeur précédente"
 
 #. Link to print the current view of the application
 #: templates/map.html:99
@@ -615,7 +625,7 @@ msgid "Reachable by road"
 msgstr "Accessible en voiture"
 
 #. Record updated successfully.
-#: edit.py:472
+#: edit.py:502
 msgid "Record updated."
 msgstr "Enregistrement mis à jour"
 
@@ -646,6 +656,11 @@ msgstr "La demande pour devenir %(role)s  a été rejetée."
 msgid "Resource Finder"
 msgstr "Localisation de ressources"
 
+#. TODO: Add missing message description or meaning
+#: mail_alerts.py:267 mail_alerts.py:302 subscribe.py:118
+msgid "Resource Finder Updates"
+msgstr "Localisation de ressources"
+
 #. Button text to save data
 #: templates/edit.html:154
 msgid "Save"
@@ -664,7 +679,7 @@ msgstr "Services"
 #. Label for a control that filters a list of facilities
 #: static/locale.js:130
 msgid "Show"
-msgstr ""
+msgstr "Montrer"
 
 #. Link to sign into the app
 #: main.py:58
@@ -726,6 +741,11 @@ msgstr "Maçonnerie non armée"
 msgid "Updated"
 msgstr "Mise à jour :"
 
+#. who the attribute was updated by
+#: mail_alerts.py:130
+msgid "Updated by"
+msgstr "Mise à jour :"
+
 #. Error message for a value that is not a number
 #: static/locale.js:79
 msgid "Value must be a number."
@@ -752,7 +772,7 @@ msgid "X-Ray"
 msgstr "Radiographie"
 
 #. Form option for a true Boolean value
-#: bubble.py:48 bubble_test.py:65 edit.py:171
+#: edit.py:176 bubble.py:48 bubble_test.py:65
 msgid "Yes"
 msgstr "Oui"
 

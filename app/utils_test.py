@@ -283,9 +283,23 @@ class UtilsTest(MediumTestCase):
         dt = datetime.datetime(2010, 6, 14, 9, 15, 12)
         assert utils.to_local_isotime(dt) == '2010-06-14 04:15:12 -05:00'
 
+        dt = datetime.datetime(2010, 6, 14, 9, 15, 12, 3867)
+        assert (utils.to_local_isotime(dt) ==
+            '2010-06-14 04:15:12.003867 -05:00')
+        assert (utils.to_local_isotime(dt, clear_ms=True) == 
+            '2010-06-14 04:15:12 -05:00')
+
     def test_to_unicode(self):
         """Confirm to_unicode works as expected"""
         assert utils.to_unicode(None) == ''
         assert utils.to_unicode('') == ''
         assert utils.to_unicode('foo') == 'foo'
         assert utils.to_unicode('\xe2\x80\x92') == u'\u2012'
+
+    def test_value_or_dash(self):
+        """Confirm that value_or_dash works as expected"""
+        assert utils.value_or_dash(3) == 3
+        assert utils.value_or_dash('3') == '3'
+        assert utils.value_or_dash(0) == 0
+        assert utils.value_or_dash(None) == '\xe2\x80\x93'
+        assert utils.value_or_dash([]) == '\xe2\x80\x93'
