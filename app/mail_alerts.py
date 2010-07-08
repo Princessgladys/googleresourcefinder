@@ -35,9 +35,9 @@ import pickle
 from google.appengine.api import mail
 from google.appengine.ext import db
 
+import bubble
 import cache
 import utils
-from bubble import format
 from feeds.xmlutils import Struct
 from model import Account, PendingAlert, Subject, SubjectType, Subscription
 from utils import _, Handler, simplejson
@@ -57,14 +57,20 @@ import django.utils.translation
 FREQUENCY_TO_TIMEDELTA = {
     'immediate': datetime.timedelta(0),
     'daily': datetime.timedelta(1),
-    'weekly': datetime.timedelta(7),
-    'monthly': datetime.timedelta(30) # note: 'monthly' is every 30 days
+    'weekly': datetime.timedelta(7)
 }
 
-def get_timedelta(frequency):
+def get_timedelta(frequency, now=None):
     """Given a text frequency, converts it to a timedelta."""
     if frequency in FREQUENCY_TO_TIMEDELTA:
         return FREQUENCY_TO_TIMEDELTA[frequency]
+    elif frequency == 'monthly':
+        if not now:
+            now = datetime.datetime.now()
+        next_month = datetime.datetime(now.year, now.month + 1, now.day,
+                                       now.hour, now.minute, now.second,
+                                       now.microsecond)
+        return next_month - now
     return None
 
 
@@ -76,27 +82,23 @@ def fetch_updates(alert, subject):
         values, including the attribute, the old/new values, and the
         most recent author to update the value. Example:
         
-            [ [attribute, new_value, old_value, author_foo ],
-              [attribute, new_value, old_value, author_foo ],
-              [attribute, new_value, old_value, author_foo ] ]
+            [(attribute, {'old_value': value_foo,
+                          'new_value': value_bar,
+                          'author': author_foo})]
     """
     if not (alert and subject):
-        return
+        return []
     updated_attrs = []
-    subject_type = cache.SUBJECT_TYPES[subject.type]
     
     old_values = alert.dynamic_properties()
-    for i in range(len(old_values)):
-        value = subject.get_value(old_values[i])
-        author = subject.get_author_nickname(old_values[i])
-        alert_val = getattr(alert, old_values[i])
+    for attribute in old_values:
+        value = subject.get_value(attribute)
+        author = subject.get_author_nickname(attribute)
+        alert_val = getattr(alert, attribute)
         if value != alert_val:
-            updated_attrs.append((
-                old_values[i], # attribute
-                alert_val, # new value
-                value, # old value
-                author # author of the change
-            ))
+            updated_attrs.append((attribute, {'old_value': alert_val,
+                                              'new_value': value,
+                                              'author': author}))
     
     return updated_attrs
 
@@ -107,21 +109,19 @@ def format_plain_body(data):
         
         Struct(
             date=datetime
-            changed_subjects={subject_key: (subject_title, [
-                [attribute, old_value, new_value, author],
-                [attribute, old_value, new_value, author]
-            ])}
-        )
+            changed_subjects={subject_key: (subject_title, (attribute,
+                {'old_value': value_foo,
+                 'new_value': value_bar,
+                 'author': author_foo}))})
     """
     body = ''
     for subject_name in data.changed_subjects:
-        subject_title = data.changed_subjects[subject_name][0]
-        updates = data.changed_subjects[subject_name][1]
+        (subject_title, updates) = data.changed_subjects[subject_name]
         body += subject_title.upper() + '\n'
-        for update in updates:
-            attribute, old_value, new_value, author = update
-            body += u'-> %s: %s [Old Value: %s; Updated by: %s]\n' % (
-                _(attribute), new_value, old_value, author)
+        for attribute, info in updates:
+            body += u'-> %s: %s [%s: %s; %s: %s]\n' % (
+                attribute, info['new_value'], _('Old Value'), info['old_value'],
+                _('Updated by'), info['author'])
         body += '\n'
     return body
 
@@ -159,6 +159,7 @@ def update_account_alert_time(account, frequency, now=None, initial=False):
     if not now:
         now = datetime.datetime.now()
     new_time = now + get_timedelta(frequency)
+    
     if initial:
         if frequency == 'daily' and not account.next_daily_alert:
             account.next_daily_alert = new_time
@@ -217,15 +218,11 @@ class MailAlerts(Handler):
         """
         subject = Subject.get_by_key_name(self.params.subject_name)
         subject_type = SubjectType.get(self.subdomain, subject.type)
-        values = []
-        for (attribute, (old_value, new_value, author)) in \
-            self.changed_request_data.items():
-            values.append((attribute, old_value, new_value, author))
         
         email_data = Struct()
-        email_data.time = format(datetime.datetime.now())
+        email_data.time = bubble.format(datetime.datetime.now())
         email_data.changed_subjects = {self.params.subject_name: (
-            subject.get_value('title'), values)}
+            subject.get_value('title'), self.changed_request_data.items())}
         text_body = format_plain_body(email_data)
         
         subscriptions = Subscription.get_by_subject(self.params.subject_name)
@@ -241,8 +238,8 @@ class MailAlerts(Handler):
                     subject_name=subscription.subject_name,
                     frequency=subscription.frequency)
                 if not pa.timestamp:
-                    for (attribute, old_value, new_value, author) in values:
-                        setattr(pa, attribute, old_value) #(attr, old_value)
+                    for attribute, info in self.changed_request_data.items():
+                        setattr(pa, attribute, info['old_value'])
                     for attribute in self.unchanged_request_data:
                         setattr(pa, attribute,
                                 self.unchanged_request_data[attribute])
@@ -280,9 +277,9 @@ class MailAlerts(Handler):
             
             if not subjects:
                 continue
-                
+            
             email_data = Struct()
-            email_data.time = format(datetime.datetime.now())
+            email_data.time = bubble.format(datetime.datetime.now())
             email_data.changed_subjects = subjects
             text_body = format_plain_body(email_data)
             send_email(account.locale,
