@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
+import cache
+import re
 import sets
 import sys
-from google.appengine.api import memcache
 from feeds.geo import distance
-from utils import *
-from model import Alert, Attribute, Facility, FacilityType, Message
-from model import MinimalFacility
+from model import Attribute, Subject, SubjectType, Message, MinimalSubject
+from utils import Date, DateTime, HIDDEN_ATTRIBUTE_NAMES
+from utils import db, get_locale, simplejson, split_key_name
 
 def make_jobjects(entities, transformer, *args):
     """Run a sequence of entities through a transformer function that produces
@@ -42,122 +42,115 @@ def attribute_transformer(index, attribute):
             'type': attribute.type,
             'values': attribute.values}
 
-def facility_type_transformer(index, facility_type, attribute_is):
-    """Construct the JSON object for a FacilityType."""
-    return {'name': facility_type.key().name(),
-            'attribute_is':
-                [attribute_is[p] for p in filter(
-                    lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
-                    facility_type.minimal_attribute_names)]}
+def subject_type_transformer(index, subject_type, attribute_is):
+    """Construct the JSON object for a SubjectType."""
+    subdomain, type_name = split_key_name(subject_type)
+    return {'name': type_name,
+            'attribute_is': [attribute_is[name]
+                             for name in subject_type.minimal_attribute_names
+                             if name not in HIDDEN_ATTRIBUTE_NAMES]}
 
-def minimal_facility_transformer(index, facility, attributes, facility_types,
-                                 facility_type_is, center, radius, subscribed):
-    """Construct the JSON object for a Facility."""
+def minimal_subject_transformer(index, minimal_subject, attributes,
+                                subject_types, subject_type_is, center, radius):
+    """Construct the JSON object for a MinimalSubject."""
     # Gather all the attributes
     values = [None]
 
-    facility_type = filter(lambda f: f.key().name() == facility.type,
-                           facility_types)[0]
-
+    subject_type = subject_types[minimal_subject.type]
     for attribute in attributes:
         name = attribute.key().name()
-        if name in facility_type.minimal_attribute_names:
-            values.append(facility.get_value(name))
+        if name in subject_type.minimal_attribute_names:
+            values.append(minimal_subject.get_value(name))
         else:
             values.append(None)
 
     # Pack the results into an object suitable for JSON serialization.
-    subscribed = 'U' if facility.parent_key().name() in subscribed else 'S'
-    facility_jobject = {
-        'name': facility.parent_key().name(),
-        'type': facility_type_is[facility.type],
+    subdomain, subject_name = split_key_name(minimal_subject)
+    subject_jobject = {
+        'name': subject_name,
+        'type': subject_type_is[subdomain + ':' + minimal_subject.type],
         'values': values,
-        'subscribed': subscribed
     }
-    if facility.has_value('location'):
+    if minimal_subject.has_value('location'):
         location = {
-            'lat': facility.get_value('location').lat,
-            'lon': facility.get_value('location').lon
+            'lat': minimal_subject.get_value('location').lat,
+            'lon': minimal_subject.get_value('location').lon
         }
         if center:
-            facility_jobject['distance_meters'] = distance(location, center)
+            subject_jobject['distance_meters'] = distance(location, center)
 
-    if facility_jobject.get('distance_meters') > radius > 0:
+    dist = subject_jobject.get('distance_meters')
+    if center and (dist is None or dist > radius > 0):
         return None
 
-    return facility_jobject
+    return subject_jobject
 
 def json_encode(object):
     """Handle JSON encoding for non-primitive objects."""
-    if isinstance(object, Date) or isinstance(object, datetime.datetime):
+    if isinstance(object, Date) or isinstance(object, DateTime):
         return to_local_isotime(object)
     if isinstance(object, db.GeoPt):
-        return {'lat': object.lat, 'lon': object.lon}
+        return {'lat': '%.6f' % object.lat, 'lon': '%.6f' % object.lon}
     raise TypeError(repr(object) + ' is not JSON serializable')
 
 def clean_json(json):
     return re.sub(r'"(\w+)":', r'\1:', json)
 
-def render_json(center=None, radius=None):
-    """Dump the data as a JSON string."""
+def render_json(subdomain, center=None, radius=None):
+    """Dump the data for a subdomain as a JSON string."""
+    locale = get_locale()
+    json = cache.JSON[subdomain].get(locale)
+    if json and not center:
+        return json
 
-    # TODO(shakusa) Use memcache more!
-    user_alert = Alert.all().filter('user_email =',
-                                    users.get_current_user().email()).get()
-    facility_types = list(FacilityType.all())
+    subject_types = cache.SUBJECT_TYPES[subdomain]
 
     # Get the set of attributes to return
     attr_names = sets.Set()
-    for facility_type in facility_types:
-        attr_names = attr_names.union(facility_type.minimal_attribute_names)
+    for subject_type in subject_types.values():
+        attr_names = attr_names.union(subject_type.minimal_attribute_names)
     attr_names = attr_names.difference(HIDDEN_ATTRIBUTE_NAMES)
 
     # Get the subset of attributes to render.
-    attributes = [a for a in Attribute.all() if a.key().name() in attr_names]
+    attributes = [cache.ATTRIBUTES[a] for a in attr_names]
     attribute_jobjects, attribute_is = make_jobjects(
         attributes, attribute_transformer)
 
-    # Make JSON objects for the facility types.
-    facility_type_jobjects, facility_type_is = make_jobjects(
-        facility_types, facility_type_transformer, attribute_is)
+    # Make JSON objects for the subject types.
+    subject_type_jobjects, subject_type_is = make_jobjects(
+        subject_types.values(), subject_type_transformer, attribute_is)
 
-    # Make JSON objects for the facilities
-    facility_jobjects, facility_is = make_jobjects(
-        MinimalFacility.all().order(MinimalFacility.get_stored_name('title')),
-        minimal_facility_transformer, attributes, facility_types,
-        facility_type_is, center, radius, user_alert.facility_keys)
-    total_facility_count = len(facility_jobjects) - 1
-    logging.info("NUMBER OF FACILITIES %d" % total_facility_count)
+    # Make JSON objects for the subjects.
+    # Because storing the MinimalSubject entities into memcache is fairly
+    # slow (~3s for 1000 entities) and the JSON cache already provides almost
+    # all the benefit, we fetch the MinimalSubject entities directly from the
+    # datastore every time instead of letting the cache cache them.
+    minimal_subjects = \
+        cache.MINIMAL_SUBJECTS[subdomain].fetch_entities().values()
+    subject_jobjects, subject_is = make_jobjects(
+        sorted(minimal_subjects, key=lambda s: s.get_value('title')),
+        minimal_subject_transformer, attributes, subject_types,
+        subject_type_is, center, radius)
+    total_subject_count = len(minimal_subjects)
 
     # Sort by distance, if necessary.
     if center:
-        facility_jobjects.sort(key=lambda f: f and f.get('distance_meters'))
+        subject_jobjects.sort(key=lambda s: s and s.get('distance_meters'))
 
     # Get all the messages for the current language.
-    django_locale = django.utils.translation.to_locale(
-        django.utils.translation.get_language())
-    def load_messages(django_locale):
-        message_jobjects = {}
-        for message in Message.all():
-            namespace = message_jobjects.setdefault(message.namespace, {})
-            namespace[message.name] = getattr(message, django_locale)
-        return message_jobjects
-    message_jobjects = check_cache(
-        'messages_%s' % django_locale, load_messages, django_locale)
+    message_jobjects = {}
+    for message in cache.MESSAGES.values():
+        namespace = message_jobjects.setdefault(message.namespace, {})
+        namespace[message.name] = getattr(message, locale)
 
-    return clean_json(simplejson.dumps({
-        'total_facility_count': total_facility_count,
+    json = clean_json(simplejson.dumps({
+        'total_subject_count': total_subject_count,
         'attributes': attribute_jobjects,
-        'facility_types': facility_type_jobjects,
-        'facilities': facility_jobjects,
+        'subject_types': subject_type_jobjects,
+        'subjects': subject_jobjects,
         'messages': message_jobjects
     # set indent=2 to pretty-print; it blows up download size, so defaults off
     }, indent=None, default=json_encode))
-
-def check_cache(key, miss_function, *args):
-    ret = memcache.get(key)
-    if not ret:
-        ret = miss_function(*args)
-        if not memcache.add(key, ret):
-            logging.error('Memcache set of %s failed' % key)
-    return ret
+    if not center:
+        cache.JSON[subdomain].set(locale, json)
+    return json

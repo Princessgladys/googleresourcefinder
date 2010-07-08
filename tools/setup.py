@@ -12,14 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cache
 from access import *
 from extract_messages import parse_message, PATTERNS
 from feeds import crypto
 from model import *
 from utils import *
 
-def setup_facility_types():
-    """Sets up the attributes and facility types."""
+def setup_subdomains():
+    """Sets up the subdomain record."""
+    Subdomain(key_name='haiti').put()
+
+
+def setup_subject_types():
+    """Sets up the attributes and subject types."""
     def attr(type, name, values=[], edit_action=None):
         return Attribute(
             key_name=name, type=type, edit_action=edit_action, values=values)
@@ -41,7 +47,7 @@ def setup_facility_types():
               'INFECTIOUS_DISEASE', 'PEDIATRICS', 'POSTOPERATIVE_CARE',
               'REHABILITATION', 'OBSTETRICS_GYNECOLOGY', 'MENTAL_HEALTH',
               'DIALYSIS', 'LAB', 'X_RAY', 'CT_SCAN', 'BLOOD_BANK',
-              'CORPSE_REMOVAL']),
+              'MORTUARY_SERVICES']),
         attr('str', 'contact_name'),
         attr('str', 'phone'),
         attr('str', 'email'),
@@ -76,13 +82,13 @@ def setup_facility_types():
 
     db.put(attributes)
 
-    hospital = FacilityType(
-        key_name='hospital',
+    hospital = SubjectType(
+        key_name='haiti:hospital',
         attribute_names=[a.key().name() for a in attributes],
         minimal_attribute_names=['title', 'pcode', 'healthc_id',
                                  'available_beds', 'total_beds', 'services',
                                  'contact_name', 'phone', 'address',
-                                 'location'])
+                                 'location', 'operational_status'])
     db.put(hospital)
 
 
@@ -92,18 +98,17 @@ def setup_messages():
         return Message(namespace=namespace, name=name, **kw)
     name_message = lambda name, **kw: message('attribute_name', name, **kw)
     value_message = lambda name, **kw: message('attribute_value', name, **kw)
-    fac_type_message = lambda name, **kw: message('facility_type', name, **kw)
 
     messages = [
         #i18n: Name of a facility
-        name_message('title', en='Facility name'),
+        name_message('title', en='Name'),
         #i18n: Alternate name of a facility
-        name_message('alt_title', en='Alternate facility name'),
-        #i18n: Proper name of an ID for a healthcare facility defined by the
-        #i18n: Pan-American Health Organization, no translation necessary.
+        name_message('alt_title', en='Alternate name'),
+        #i18n: Proper name of an ID for a health facility defined by the 
+        #i18n: Haiti ministry of health (MSPP); no translation necessary.
         name_message('pcode', en='PCode'),
-        #i18n: Proper name of an ID for a healthcare facility, no translation
-        #i18n: necessary.
+        #i18n: Proper name of an ID for a health facility defined by the 
+        #i18n: Pan-American Health Organization; no translation necessary.
         name_message('healthc_id', en='HealthC ID'),
         #i18n: Total number of unoccupied beds at a hospital.
         name_message('available_beds', en='Available beds'),
@@ -170,27 +175,27 @@ def setup_messages():
 
         # category
 
-        #i18n: Category of facility: Clinic
+        #i18n: Category of health facility: Clinic
         value_message('CLINIC', en='Clinic'),
-        #i18n: Category of facility: A dispensary where medicine and medical
-        #i18n: supplies are given out.
+        #i18n: Category of health facility: A dispensary where medicine and
+        #i18n: medical supplies are given out.
         value_message('DISPENSARY', en='Dispensary'),
-        #i18n: Category of facility: Hospital.
+        #i18n: Category of health facility: Hospital.
         value_message('HOSPITAL', en='Hospital'),
-        #i18n: Category of facility: A mobile clinic.
+        #i18n: Category of health facility: A mobile clinic.
         value_message('MOBILE_CLINIC', en='Mobile clinic',),
 
         # construction
 
-        #i18n: Type of facility construction: concrete with metal and/or mesh
+        #i18n: Type of construction: concrete with metal and/or mesh
         #i18n: added to provide extra support against stresses
         value_message('REINFORCED_CONCRETE', en='Reinforced concrete'),
-        #i18n: Type of facility construction: walls constructed of clay brick
+        #i18n: Type of construction: walls constructed of clay brick
         #i18n: or concrete block
         value_message('UNREINFORCED_MASONRY', en='Unreinforced masonry'),
-        #i18n: Type of facility construction: timber jointed together with nails
+        #i18n: Type of construction: timber jointed together with nails
         value_message('WOOD_FRAME', en='Wood frame'),
-        #i18n: Type of facility construction: sun-dried clay bricks
+        #i18n: Type of construction: sun-dried clay bricks
         value_message('ADOBE', en='Adobe'),
 
         # operational_status
@@ -262,7 +267,8 @@ def setup_messages():
         #i18n: Service provided by a health facility (use Title Case).
         value_message('BLOOD_BANK', en='Blood Bank'),
         #i18n: Service provided by a health facility (use Title Case).
-        value_message('CORPSE_REMOVAL', en='Corpse Removal'),
+        #i18n: Meaning: Corpse removal
+        value_message('MORTUARY_SERVICES', en='Mortuary Services'),
     ]
 
     for locale in os.listdir(settings.LOCALE_PATHS[0]):
@@ -334,18 +340,19 @@ def to_js_string(string):
     return simplejson.dumps(string).replace("'", "\'")
 
 def setup_datastore():
-    """Sets up the facility types and translations in a datastore.  (Existing
-    the facility types and messages will be updated; existing Facility or
-    Report information will not be changed or deleted.)"""
-    setup_facility_types()
+    """Sets up the subject types and translations in a datastore.  (Existing
+    subject types and messages will be updated; existing Subject or Report
+    information will not be changed or deleted.)"""
+    setup_subdomains()
+    setup_subject_types()
     setup_messages()
-    memcache.flush_all()  # flush any cached messages
+    cache.flush_all()  # flush any cached entities
 
 def wipe_datastore(*kinds):
     """Deletes everything in the datastore except Accounts and Secrets.
     If 'kinds' is given, deletes only those kinds of entities."""
-    for kind in kinds or [Attribute, FacilityType, Message, Dump,
-                          MinimalFacility, Facility, Report]:
+    for kind in kinds or [Subdomain, Attribute, SubjectType, Message, Dump,
+                          MinimalSubject, Subject, Report]:
         keys = kind.all(keys_only=True).fetch(200)
         while keys:
             logging.info('%s: deleting %d...' % (kind.kind(), len(keys)))
@@ -359,9 +366,14 @@ def reset_datastore():
     setup_datastore()
 
 def add_account(email='test@example.com', description=None,
-                nickname=None, affiliation=None, actions=[':view', ':edit']):
+                nickname=None, affiliation=None,
+                actions=['*:view', '*:edit'], locale='en'):
     """Adds an Account entity to the datastore."""
     Account(email=email, description=description or email,
             nickname=nickname or email.split('@')[0],
             affiliation=affiliation or email.split('@')[1],
-            actions=actions).put()
+            actions=actions, locale=locale).put()
+
+def set_default_permissions(actions):
+    """Sets the list of default permissions, granted to all users."""
+    Account(key_name='default', actions=actions).put()

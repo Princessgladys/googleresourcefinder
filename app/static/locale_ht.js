@@ -72,13 +72,13 @@ locale = function() {
   //i18n: A place that provides a particular service
   messages.FACILITY = "Etablisman";
 
-  //i18n: Proper name of an ID for a healthcare facility defined by the
-  //i18n: Pan-American Health Organization, no translation necessary.
-  messages.FACILITY_PCODE = "PCode:";
+  //i18n: Proper name of an ID for a health facility defined by the 
+  //i18n: Haiti ministry of health (MSPP); no translation necessary.
+  messages.PCODE = "PCode";
 
-  //i18n: Proper name of an ID for a healthcare facility, no translation
-  //i18n: necessary.
-  messages.HEALTHC_ID = "ID HealthC:";
+  //i18n: Proper name of an ID for a health facility defined by the 
+  //i18n: Pan-American Health Organization; no translation necessary.
+  messages.HEALTHC_ID = "ID HealthC";
 
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
@@ -102,7 +102,7 @@ locale = function() {
   messages.SERVICES = "S\u00e8vis";
 
   //i18n: Label for a control that filters a list of facilities
-  messages.SHOW = "Ekspoze:";
+  messages.SHOW = "Montre";
 
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}: ${MINUTES} ${ZONE}";
