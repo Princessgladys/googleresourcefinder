@@ -68,7 +68,7 @@ def get_timedelta(frequency, now=None):
         if not now:
             now = datetime.datetime.now()
         next_month = datetime.datetime(now.year + (now.month / 12),
-                                       (now.month + 1) % 12, 1, now.hour,
+                                       (now.month % 12) + 1, 1, now.hour,
                                        now.minute, now.second, now.microsecond)
         return next_month - now
     return None
@@ -114,23 +114,21 @@ def format_plain_body(data):
                  'new_value': value_bar,
                  'author': author_foo}))})
     """
-    body = ''
+    body = u''
     for subject_name in data.changed_subjects:
         (subject_title, updates) = data.changed_subjects[subject_name]
         body += subject_title.upper() + '\n'
         for attribute, info in updates:
-            info['new_value'] = utils.value_or_dash(info['new_value'])
-            info['old_value'] = utils.value_or_dash(info['old_value'])
-            body += u'-> %s: %s [%s: %s; %s: %s]\n' % (
-                #i18n: changed attribute
-                utils.to_unicode(_(attribute)),
-                info['new_value'],
+            body += '-> %s: %s [%s: %s; %s: %s]\n' % (
+                #i18n: changed attribute name
+                attribute,
+                utils.to_unicode(utils.value_or_dash(info['new_value'])),
                 #i18n: old value for the attribute
-                utils.to_unicode(_('Old Value')),
-                info['old_value'],
+                utils.to_unicode(_('Previous value')),
+                utils.to_unicode(utils.value_or_dash(info['old_value'])),
                 #i18n: who the attribute was updated by
                 utils.to_unicode(_('Updated by')),
-                info['author'])
+                utils.to_unicode(info['author']))
         body += '\n'
     return body
 
@@ -264,8 +262,10 @@ class MailAlerts(Handler):
                                                subscription.user_email).get()
                 send_email(account.locale,
                            'updates@resource-finder.appspotmail.com',
-                           account.email, utils.to_unicode(
-                           _('Resource Finder Updates')), text_body)
+                           account.email,
+                           # i18n: subject of e-mail -> Resource Finder Updates
+                           utils.to_unicode(_('Resource Finder Updates')),
+                           text_body)
     
     def send_digests(self, frequency):
         """Sends out a digest update for the specified frequency. Currently

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for cache.py."""
+"""Tests for mail_alerts.py."""
 
 import datetime
 import os
@@ -230,6 +230,10 @@ class MailAlertsTest(MediumTestCase):
             2010, 03, 31))
         assert self.account.next_monthly_alert == datetime.datetime(
             2010, 04, 1)
+        update_account_alert_time(self.account, 'monthly', datetime.datetime(
+            2010, 11, 8))
+        assert self.account.next_monthly_alert == datetime.datetime(
+            2010, 12, 01)
     
     def test_mail_alerts(self):
         """Simulates the class being called when a subject is changed and when

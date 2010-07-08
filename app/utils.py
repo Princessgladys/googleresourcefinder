@@ -374,7 +374,7 @@ def value_or_dash(value):
     """Converts the given value to a unicode dash if the value does
     not exist and does not equal 0."""
     if not value and value != 0:
-        return u'\u2013'
+        return u'\u2013'.encode('utf-8')
     return value
 
 def run(*args, **kwargs):
