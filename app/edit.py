@@ -285,15 +285,14 @@ def apply_change(subject, minimal_subject, report, subject_type,
                                 change_metadata)
 
 def has_changed(subject, request, attribute):
-    """Returns a tuple containing the previous and current values if the
-    request has an input for the given attribute and that attribute has changed
-    from the previous value in subject."""
+    """Returns True if the request has an input for the given attribute
+    and that attribute has changed from the previous value in the subject."""
     name = attribute.key().name()
     value = ATTRIBUTE_TYPES[attribute.type].to_stored_value(
         name, request.get(name, None), request, attribute)
     current = render_json(value)
     previous = request.get('editable.%s' % name, None)
-    return previous != current and (previous, current)
+    return previous != current
 
 def has_comment_changed(subject, request, attribute):
     """Returns True if the request has a comment for the given attribute
@@ -428,7 +427,7 @@ class Edit(utils.Handler):
                 utcnow, user, account.nickname, account.affiliation)
             has_changes = False
             changed_attributes_dict = {}
-            changed_attribute_values = {}
+            changed_attribute_information = {}
             unchanged_attribute_values = {}
 
             for name in subject_type.attribute_names:
@@ -451,19 +450,19 @@ class Edit(utils.Handler):
                                'a': get_message('attribute_name',
                                                 attribute.key().name())})
                     has_changes = True
+                    change_info = {'old_value': subject.get_value(name)}
                     apply_change(subject, minimal_subject, report,
                                  subject_type, request, attribute,
                                  change_metadata)
+                    change_info['new_value'] = subject.get_value(name)
+                    change_info['author'] = subject.get_author_nickname(name)
+                    changed_attribute_information[name] = change_info
                     changed_attributes_dict[name] = attribute
-                    changed_attribute_values[name] = (value_changed[0],
-                        value_changed[1], subject.get_author_nickname(
-                        attribute.key().name()))
                     # To be sent to mail update system in form:
                     # changed_attribute_values[attribute] = (old_value,
                     #   new_value, author_of_change)
                 else:
-                    unchanged_attribute_values[name] = request.get(
-                        'editable.%s' % name, None)
+                    unchanged_attribute_values[name] = subject.get_value(name)
             
             if has_changes:
                 # Schedule a task to add a feed record.
@@ -482,9 +481,9 @@ class Edit(utils.Handler):
                 # On edit, create a task to e-mail users who have subscribed
                 # to that subject.
                 json_pickle_attrs_changed = simplejson.dumps(
-                    pickle.dumps(changed_attribute_values))
+                    pickle.dumps(changed_attribute_information))
                 json_pickle_attrs_unchanged = simplejson.dumps(
-                    pickle.dumps(unchanged_attribute_values[name]))
+                    pickle.dumps(unchanged_attribute_values))
                 
                 params = {}
                 params['subject_name'] = subject.key().name()

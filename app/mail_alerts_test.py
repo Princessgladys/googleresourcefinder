@@ -127,8 +127,14 @@ class MailAlertsTest(MediumTestCase):
         """Confirms that get_timedelta returns the correct timedeltas."""
         assert get_timedelta('daily') == datetime.timedelta(1)
         assert get_timedelta('weekly') == datetime.timedelta(7)
-        assert get_timedelta('monthly') == datetime.timedelta(30)
         assert get_timedelta('immediate') == datetime.timedelta(0)
+        
+        now = datetime.datetime(2010, 01, 01, 01, 30, 30, 567)
+        assert get_timedelta('monthly', now) == datetime.timedelta(31)
+        
+        now = datetime.datetime(2010, 02, 01, 01, 30, 30, 567)
+        assert get_timedelta('monthly', now) == datetime.timedelta(28)
+        
         assert get_timedelta('!') == None
     
     def test_fetch_updates(self):
@@ -138,12 +144,18 @@ class MailAlertsTest(MediumTestCase):
         # sublist should contain the changed attribute, its old/new values,
         # and the author that made the change
         assert fetch_updates(self.pa, self.subject) == [
-            ('test_attr_bar', 'attr_bar', 'attr_bar_new', 'nickname_foo'),
-            ('test_attr_foo', 'attr_foo', 'attr_foo_new', 'nickname_foo')
+            ('test_attr_bar', {'old_value': 'attr_bar',
+                              'new_value': 'attr_bar_new',
+                              'author': 'nickname_foo'}),
+            ('test_attr_foo', {'old_value': 'attr_foo',
+                              'new_value': 'attr_foo_new',
+                              'author': 'nickname_foo'})
         ]
         self.set_attr(self.subject, 'test_attr_bar', 'attr_bar')
         assert fetch_updates(self.pa, self.subject) == [
-            ('test_attr_foo', 'attr_foo', 'attr_foo_new', 'nickname_foo')]
+            ('test_attr_foo', {'old_value': 'attr_foo',
+                              'new_value': 'attr_foo_new',
+                              'author': 'nickname_foo'})]
         
         # should return nothing if there are no updates
         self.set_attr(self.subject, 'test_attr_foo', 'attr_foo')
@@ -213,8 +225,9 @@ class MailAlertsTest(MediumTestCase):
         sent_emails = []
         """Simulates the class being called when a subject is changed and when
         a subject is not changed."""
-        changed_vals = {'test_attr_foo': [
-            'attr_old', 'attr_new', 'author_foo']}
+        changed_vals = {'test_attr_foo': {'old_value': 'attr_old',
+                                          'new_value': 'attr_new',
+                                          'author': 'author_foo'}}
         unchanged_vals = {'test_attr_bar': 'attr_bar'}
         json_pickle_attrs_c = simplejson.dumps(pickle.dumps(changed_vals))
         json_pickle_attrs_uc = simplejson.dumps(pickle.dumps(unchanged_vals))
