@@ -67,9 +67,9 @@ def get_timedelta(frequency, now=None):
     elif frequency == 'monthly':
         if not now:
             now = datetime.datetime.now()
-        next_month = datetime.datetime(now.year, now.month + 1, now.day,
-                                       now.hour, now.minute, now.second,
-                                       now.microsecond)
+        next_month = datetime.datetime(now.year + (now.month / 12),
+                                       (now.month + 1) % 12, 1, now.hour,
+                                       now.minute, now.second, now.microsecond)
         return next_month - now
     return None
 
@@ -119,9 +119,18 @@ def format_plain_body(data):
         (subject_title, updates) = data.changed_subjects[subject_name]
         body += subject_title.upper() + '\n'
         for attribute, info in updates:
+            info['new_value'] = utils.value_or_dash(info['new_value'])
+            info['old_value'] = utils.value_or_dash(info['old_value'])
             body += u'-> %s: %s [%s: %s; %s: %s]\n' % (
-                attribute, info['new_value'], _('Old Value'), info['old_value'],
-                _('Updated by'), info['author'])
+                #i18n: changed attribute
+                utils.to_unicode(_(attribute)),
+                info['new_value'],
+                #i18n: old value for the attribute
+                utils.to_unicode(_('Old Value')),
+                info['old_value'],
+                #i18n: who the attribute was updated by
+                utils.to_unicode(_('Updated by')),
+                info['author'])
         body += '\n'
     return body
 
@@ -158,7 +167,9 @@ def update_account_alert_time(account, frequency, now=None, initial=False):
             time setting the account's update times"""
     if not now:
         now = datetime.datetime.now()
-    new_time = now + get_timedelta(frequency)
+        new_time = now + get_timedelta(frequency)
+    else:
+        new_time = now + get_timedelta(frequency, now)
     
     if initial:
         if frequency == 'daily' and not account.next_daily_alert:
@@ -220,7 +231,8 @@ class MailAlerts(Handler):
         subject_type = SubjectType.get(self.subdomain, subject.type)
         
         email_data = Struct()
-        email_data.time = bubble.format(datetime.datetime.now())
+        email_data.time = utils.to_local_isotime(datetime.datetime.now(),
+                                                 clear_ms=True)
         email_data.changed_subjects = {self.params.subject_name: (
             subject.get_value('title'), self.changed_request_data.items())}
         text_body = format_plain_body(email_data)
@@ -279,13 +291,16 @@ class MailAlerts(Handler):
                 continue
             
             email_data = Struct()
-            email_data.time = bubble.format(datetime.datetime.now())
+            email_data.time = utils.to_local_isotime(datetime.datetime.now(),
+                                                     clear_ms=True)
             email_data.changed_subjects = subjects
             text_body = format_plain_body(email_data)
             send_email(account.locale,
                        'updates@resource-finder.appspotmail.com',
-                       account.email, utils.to_unicode(
-                       _('Resource Finder Updates')), text_body)
+                       account.email,
+                       # i18n: subject of e-mail -> Resource Finder Updates
+                       utils.to_unicode( _('Resource Finder Updates')),
+                       text_body)
             update_account_alert_time(account, frequency)
             db.delete(alerts_to_delete)
             db.put(account)

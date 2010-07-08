@@ -327,7 +327,7 @@ class Subscription(db.Model):
         'immediate', # send an alert whenever the facility is updated
         'daily', # send during a daily digest e-mail
         'weekly', # send during a weekly digest e-mail
-        'monthly' # send during a monthly digest e-mail
+        'monthly' # send during a monthly digest e-mail on the 1st of the month
     ]) # frequency of updates for this subject
     
     @staticmethod
@@ -352,7 +352,7 @@ class PendingAlert(MinimalSubject):
         'immediate', # send an alert whenever the subject is updated
         'daily', # send during a daily digest e-mail
         'weekly', # send during a weekly digest e-mail
-        'monthly' # send during a monthly digest e-mail [every 30 days]
+        'monthly' # send during a monthly digest e-mail on the 1st of the month
     ]) # frequency of updates for this subject
 
     @staticmethod
