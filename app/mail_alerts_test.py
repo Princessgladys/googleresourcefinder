@@ -189,13 +189,13 @@ class MailAlertsTest(MediumTestCase):
         in the mail.EmailMessage structure while updating the django
         translation to the given locale."""
         email = mail_alerts.send_email('en', 'test@example.com',
-                                              'test@example.org',
-                                              'subject_foo', 'body_foo')
+                                             'test@example.org',
+                                             'subject_foo', 'body_foo')
         assert django.utils.translation.get_language() == 'en'
         
         email = mail_alerts.send_email('fr', 'test@example.com', 
-                                              'test@example.org',
-                                              'subject_foo', 'body_foo')
+                                             'test@example.org',
+                                             'subject_foo', 'body_foo')
         assert django.utils.translation.get_language() == 'fr'
     
     def test_update_account_alert_time(self):
@@ -219,21 +219,68 @@ class MailAlertsTest(MediumTestCase):
         update_account_alert_time(self.account, 'monthly', self.time)
         assert (self.account.next_monthly_alert ==
             datetime.datetime(2010, 07, 1))
+
+        # Test monthly updates; insure that it always returns the first of
+        # the next month.
+        update_account_alert_time(self.account, 'monthly', datetime.datetime(
+            2010, 12, 9))
+        assert self.account.next_monthly_alert == datetime.datetime(
+            2011, 01, 1)
+        update_account_alert_time(self.account, 'monthly', datetime.datetime(
+            2010, 03, 31))
+        assert self.account.next_monthly_alert == datetime.datetime(
+            2010, 04, 1)
     
     def test_mail_alerts(self):
-        global sent_emails
-        sent_emails = []
         """Simulates the class being called when a subject is changed and when
         a subject is not changed."""
-        changed_vals = {'test_attr_foo': {'old_value': 'attr_old',
+        global sent_emails
+        sent_emails = []
+        
+        # test to send and immediate e-mail update with a None value
+        # should render u'\u2013' instead of None
+        changed_vals = {'test_attr_foo': {'old_value': None,
                                           'new_value': 'attr_new',
                                           'author': 'author_foo'}}
         unchanged_vals = {'test_attr_bar': 'attr_bar'}
         json_pickle_attrs_c = simplejson.dumps(pickle.dumps(changed_vals))
         json_pickle_attrs_uc = simplejson.dumps(pickle.dumps(unchanged_vals))
-        
+        path = '/send_mail_updates?action=subject_changed&' + \
+               'subject_name=haiti:example.org/123&' + \
+               'changed_data=' + json_pickle_attrs_c + '&' + \
+               'unchanged_data=' + json_pickle_attrs_uc
+        handler = self.simulate_request(path)
+        handler.post()
+        assert len(sent_emails) == 1
+        assert u'\u2013' in sent_emails[0].body
+	assert 'attr_new' in sent_emails[0].body
+        assert sent_emails[0].body.count(u'\u2013') == 1
+        sent_emails = []
+
+        # test to send and immediate e-mail update with a None value
+        # should render u'\u2013' instead of None
+        changed_vals = {'test_attr_foo': {'old_value': 'attr_old',
+                                          'new_value': None,
+                                          'author': 'author_foo'}}
+        json_pickle_attrs_c = simplejson.dumps(pickle.dumps(changed_vals))
+        path = '/send_mail_updates?action=subject_changed&' + \
+               'subject_name=haiti:example.org/123&' + \
+               'changed_data=' + json_pickle_attrs_c + '&' + \
+               'unchanged_data=' + json_pickle_attrs_uc
+        handler = self.simulate_request(path)
+        handler.post()
+        assert len(sent_emails) == 1
+        assert u'\u2013' in sent_emails[0].body
+        assert 'attr_old' in sent_emails[0].body
+        assert sent_emails[0].body.count(u'\u2013') == 1
+        sent_emails = []
+
         # test to send an immediate e-mail update
         # should not raise an error if the e-mail was sent
+        changed_vals = {'test_attr_foo': {'old_value': 'attr_old',
+                                          'new_value': 'attr_new',
+                                          'author': 'author_foo'}}
+        json_pickle_attrs_c = simplejson.dumps(pickle.dumps(changed_vals))
         path = '/send_mail_updates?action=subject_changed&' + \
                'subject_name=haiti:example.org/123&' + \
                'changed_data=' + json_pickle_attrs_c + '&' + \
@@ -247,7 +294,7 @@ class MailAlertsTest(MediumTestCase):
         assert 'attr_new' in sent_emails[0].body
         assert 'author_foo' in sent_emails[0].body
         sent_emails = []
-        
+       
         # test to make sure a pending alert is created when a subject is
         # changed for a non-immediate subscription
         path = '/send_mail_updates?action=subject_changed&' + \

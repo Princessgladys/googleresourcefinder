@@ -40,7 +40,6 @@ handlers:
 
 - url: /grant_access
   script: grant_access.py
-  login: admin
 
 - url: /export
   script: export.py

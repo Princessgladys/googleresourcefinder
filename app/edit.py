@@ -458,9 +458,6 @@ class Edit(utils.Handler):
                     change_info['author'] = subject.get_author_nickname(name)
                     changed_attribute_information[name] = change_info
                     changed_attributes_dict[name] = attribute
-                    # To be sent to mail update system in form:
-                    # changed_attribute_values[attribute] = (old_value,
-                    #   new_value, author_of_change)
                 else:
                     unchanged_attribute_values[name] = subject.get_value(name)
             
