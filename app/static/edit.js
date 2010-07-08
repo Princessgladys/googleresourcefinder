@@ -174,7 +174,7 @@
   function make_visible_closure(div) {
     return function() {
       make_visible(div.id);
-    }
+    };
   }
 
   /**
@@ -192,13 +192,40 @@
         for (var div_index = 0; div_index < divs.length; div_index++) {
           var div = divs[div_index];
           if (div.className == "comment") {
-            tr.onclick = make_visible_closure(div);
             div.style.visibility = "hidden";
+            var closure = make_visible_closure(div);
+            var elements = get_edit_elements(tr);
+            for (var el_index = 0; el_index < elements.length; el_index++) {
+              var element = elements[el_index];
+              // Set onclick as well as onfocus for checkboxes, which don't
+              // always register a focus event when clicked (eg when clicking on
+              // the checkbox label)
+              element.onfocus = closure;
+              element.onclick = closure;
+            }
           }
         }
       }
     }
   }
+
+  function get_edit_elements(parent) {
+    var elements = [];
+    var element_index = 0;
+    var inputs = parent.getElementsByTagName('input');
+    for (var i = 0; i < inputs.length; i++) {
+      elements[element_index++] = inputs[i];
+    }
+    var selects = parent.getElementsByTagName('select');
+    for (var j = 0; j < selects.length; j++) {
+      elements[element_index++] = selects[j];
+    }
+    var textareas = parent.getElementsByTagName('textarea');
+    for (var k = 0; k < textareas.length; k++) {
+      elements[element_index++] = textareas[k];
+    }
+    return elements;
+  } 
 
   /**
    * Handler for a click of the save button.

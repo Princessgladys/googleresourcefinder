@@ -12,96 +12,125 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Renders and populates a settings page for the logged in user.
+"""Acts on HTTP POST requests to /subscribe and adds subscriptions to a user's
+alert information in the datastore.
 
-Accesses the Account and Alert data structures to retrieve any information
-pertaining to the logged in user that said user has control over changing.
-
-Settings(utils.handler): renders the page; handles GET and POST requests
+Subscribe(utils.Handler): handles calls to /subscribe
 """
 
 __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 
-import logging
-import model
+import datetime
+import pickle
 
-from utils import Handler
-from utils import db, run
+import utils
+from bubble import format
+from feeds.xmlutils import Struct
+from mail_alerts import fetch_updates, format_plain_body, send_email
+from mail_alerts import update_account_alert_time
+from model import PendingAlert, Subject, Subscription
+from utils import _, db, Handler, run, simplejson
 
 class Subscribe(Handler):
-    """Handler for /subscribe. Adds facility to user subscription list.
+    """Handler for /subscribe. Used to handle subscription changes.
     
     Attributes:
+        action: the desired action for this instance of the handler
         email: logged in user's email
-        account: current user's Account object from datastore [see model.py]
-        alert: current user's Alert object from datastore [see model.py]
-        frequencies: dictionary of frequencies for each facility the user is
-            subscribed to
-            
-    Functions:
-        get(): responds to HTTP GET requests; do nothing
-        post(): responds to HTTP POST requests; add facility to subscription
+    
+    Methods:
+        init(): handles initialization tasks for the class
+        post(): responds to POST requests; create/remove/edit subscriptions
+        subscribe(): subscribes the current user to a particular subject
+        unsubscribe(): desubscribes the current user from a particular subject
+        change_sub_frequency(): changes a praticular subscription's frequency
     """
     
     def init(self):
         """Checks for logged-in user and gathers necessary information."""
-
+        self.action = self.request.get('action')
         self.require_logged_in_user()
         self.email = self.user.email()
-        self.account = db.GqlQuery('SELECT * FROM Account WHERE email = :1',
-                                   self.email).get()
+        self.subject_name = self.request.get('subject_name', '')
         if not self.account:
-            #i18n: Error message for request missing facility name.
+            #i18n: Error message for request missing subject name.
             raise ErrorMessage(404, _('Invalid or missing account e-mail.'))
-        self.alert = db.GqlQuery('SELECT * FROM Alert WHERE user_email = :1',
-                                 self.email).get()
-        if self.alert:
-            self.frequencies = []
-            for i in range(len(self.alert.facility_keys)):
-                #TODO(pfritzsche): better way to get titles?
-                f = model.Facility.get_by_key_name(self.alert.facility_keys[i])
-                #use tuples to maintain order
-                self.frequencies.append((f.get_value('title'),
-                                         self.alert.facility_keys[i],
-                                         self.alert.frequencies[i]))
-
-    def get(self):
-        """Responds to HTTP GET requests to /subscribe."""
-        pass
-
+    
     def post(self):
-        """Responds to HTTP POST requests to /subscribe."""
+        """Responds to HTTP POST requests to /subscribe by adding / subtracting
+        user subscriptions to / from the datastore, as necessary."""
         self.init()
-
-        def update(request, alert, frequencies):
-            """Helper function; updates the facility alert list."""
-
-            if frequencies:
-                titles, keys, freqs = zip(*frequencies)
+        
+        if self.action == 'subscribe':
+            self.subscribe()
+        elif self.action == 'unsubscribe':
+            self.unsubscribe()
+        elif self.action == 'change_subscriptions':
+            self.change_subscriptions()
+    
+    def subscribe(self):
+        """Subscribes the current user to a particular subject."""
+        key_name = '%s:%s' % (self.subject_name, self.email)
+        frequency = (self.request.get('frequency') or
+                     self.account.default_frequency)
+        Subscription(key_name=key_name, frequency=frequency,
+                     subject_name=self.subject_name,
+                     user_email=self.email).put()
+        update_account_alert_time(self.account, frequency, initial=True)
+        db.put(self.account)
+    
+    def unsubscribe(self):
+        """Unsubscribes the current user from a particular subject."""
+        subscription = Subscription.get(self.subject_name, self.email)
+        if subscription:
+            db.delete(subscription)
+        for freq in ['daily', 'weekly', 'monthly']:
+            alert = PendingAlert.get(freq, self.email, self.subject_name)
+            if alert:
+                db.delete(alert)
+    
+    def change_subscriptions(self):
+        """Change's the current user's subscription to a list of subjects."""
+        subject_changes = pickle.loads(str(simplejson.loads(
+                                       self.request.get('subject_changes'))))
+        for subject_name, old_frequency, new_frequency in subject_changes:
+            if not new_frequency:
+                new_frequency = self.default_frequency
             
-            if frequencies and request.get('facility') in keys:
-                    # remove facility from list
-                    keys = list(keys)
-                    freqs = list(freqs)
-                    index = keys.index(request.get('facility'))
-                    del keys[index]
-                    del freqs[index]
-                    alert.facility_keys = keys
-                    alert.frequencies = freqs
-            else:
-                # add facility to list
-                frequencies.append((request.get('title'),
-                                    request.get('facility'),
-                                    alert.default_frequency))
-                frequencies.sort()
-                new_titles, new_keys, new_frequencies = zip(*frequencies)
-                alert.facility_keys = list(new_keys)
-                alert.frequencies = list(new_frequencies)
+            s = Subscription.get(subject_name, self.email)
+            s.frequency = new_frequency
+            db.put(s)
             
-            db.put(alert)
-
-        db.run_in_transaction(update, self.request, self.alert,
-            self.frequencies)
+            old_alert = PendingAlert.get(old_frequency, self.email,
+                                         subject_name)
+            if old_alert:
+                if new_frequency == 'immediate':
+                    subject = Subject.get_by_key_name(old_alert.subject_name)
+                    values = fetch_updates(old_alert, subject)
+                    email_data = Struct(
+                        time=format(datetime.datetime.now()),
+                        changed_subjects={self.params.subject_name: (
+                            subject.get_value('title'), values)})
+                    text_body = format_plain_body(email_data)
+                    send_email(self.account.locale,
+                               'updates@resource-finder.appspotmail.com',
+                               self.account.email, utils.to_unicode(
+                               _('Resource Finder Updates')), text_body)
+                else:
+                    new_key_name = '%s:%s:%s' % (new_frequency,
+                                                 old_alert.user_email,
+                                                 subject_name)
+                    alert = PendingAlert(key_name=new_key_name,
+                                         user_email=old_alert.user_email,
+                                         subject_name=old_alert.subject_name,
+                                         frequency=new_frequency,
+                                         type=old_alert.type)
+                    old_values = old_alert.dynamic_properties()
+                    for i in range(len(old_values)):
+                        alert.set_attribute(old_values[i],
+                                            getattr(old_alert, old_values[i]))
+                    db.put(alert)
+                db.delete(old_alert)
 
 if __name__ == '__main__':
     run([('/subscribe', Subscribe)], debug=True)

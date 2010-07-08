@@ -61,9 +61,9 @@ def load_hospitals(version, hospitals, division_map):
             version, id=key, type='arrondissement', name=division_map[key])
     db.put(divisions.values())
 
-    facilities = {}
+    subjects = {}
     for hospital in hospitals:
-        facility = Facility(
+        subject = Subject(
             version,
             type='hospital',
             id=make_key(hospital['name']),
@@ -72,5 +72,5 @@ def load_hospitals(version, hospitals, division_map):
             division=divisions[hospital['division']],
             divisions=[divisions[hospital['division']].key()]
         )
-        facilities[facility.id] = facility
-    db.put(facilities.values())
+        subjects[subject.id] = subject
+    db.put(subjects.values())

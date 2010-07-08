@@ -42,13 +42,11 @@
         margin-top: 24px }
 
 .print-datetime { text-align: right }
-.facility-background { background-color: #0a0; border: 1px solid #eee}
-#facility-list { background-color: #fff; margin-left: 8px; 
-                 border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
-#facility-list td, #facility-list th { border-right: 1px solid #eee; }
-.facilityeven { background-color: #f8f8f8 }
-.facilityodd { background-color: #f0f0f0 }
-.facility-beds-open, .facility-beds-total { font-size: 24px; font-weight: bold;
+#subject-list { background-color: #fff; border-left: 8px solid #0a0; }
+#subject-list td, #subject-list th { border-right: 1px solid #eee; }
+.subject-even { background-color: #f8f8f8 }
+.subject-odd { background-color: #f0f0f0 }
+.beds-open, .beds-total { font-size: 24px; font-weight: bold;
                                             text-align: center}
-.facility-beds-open { color: #888 }
-.facility-title { vertical-align: top; font-weight: bold; }
+.beds-open { color: #888 }
+.subject-title { vertical-align: top; font-weight: bold; }
