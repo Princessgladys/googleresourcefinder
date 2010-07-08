@@ -17,6 +17,9 @@ version: 1
 runtime: python
 api_version: 1
 
+inbound_services:
+- mail
+
 handlers:
 
 # -------------------------------------------- Subdomain-dependent endpoints
@@ -91,4 +94,12 @@ handlers:
 
 - url: /tasks/add_feed_record
   script: feed_provider.py
+  login: admin
+
+- url: /mail_alerts
+  script: mail_alerts.py
+  login: admin
+
+- url: /subscribe
+  script: subscribe.py
   login: admin
