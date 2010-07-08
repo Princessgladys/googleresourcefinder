@@ -16,7 +16,8 @@ import utils
 
 class Help(utils.Handler):
     def get(self):
-        self.render('locale/en/help.html', params=self.params)
+        locale = utils.get_locale()
+        self.render('locale/%s/help.html' % locale, params=self.params)
 
 if __name__ == '__main__':
     utils.run([('/help', Help)], debug=True)

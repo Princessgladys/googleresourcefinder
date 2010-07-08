@@ -1,5 +1,4 @@
-from google.appengine.api import users
-from model import *
+from model import Account, db
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import scrape
@@ -10,18 +9,20 @@ SERVICES = [
     'ORTHOPEDICS',
     'NEUROSURGERY',
     'VASCULAR_SURGERY',
-    'GENERAL_MEDICINE',
+    'INTERNAL_MEDICINE',
     'CARDIOLOGY',
     'INFECTIOUS_DISEASE',
     'PEDIATRICS',
     'POSTOPERATIVE_CARE',
+    'REHABILITATION',
     'OBSTETRICS_GYNECOLOGY',
+    'MENTAL_HEALTH',
     'DIALYSIS',
     'LAB',
     'X_RAY',
     'CT_SCAN',
     'BLOOD_BANK',
-    'CORPSE_REMOVAL',
+    'MORTUARY_SERVICES',
 ]
 
 # "name" attributes of the string input fields in the edit form.
@@ -42,35 +43,26 @@ STR_FIELDS = [
 class EditTest(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
-        f = Facility(key_name='example.org/123', type='hospital')
-        f.set_attribute('title', 'title_foo', datetime.datetime.now(),
-                        users.User('test@example.com'),
-                        'nickname_foo', 'affiliation_foo', 'comment_foo')
-        f.set_attribute('location', db.GeoPt(51.5, 0), datetime.datetime.now(),
-                        users.User('test@example.com'),
-                        'nickname_foo', 'affiliation_foo', 'comment_foo')
-        f.put()
-        mf = MinimalFacility(f, type='hospital')
-        mf.set_attribute('title', 'title_foo')
-        mf.set_attribute('location', db.GeoPt(51.5, 0))
-        mf.put()
+        self.put_subject(
+            'haiti', 'example.org/123',
+            title='title_foo', location=db.GeoPt(51.5, 0))
+        self.put_account(actions=['*:view', '*:edit'])  # allow edits
         self.s = scrape.Session()
-
+    
     def tearDown(self):
-        Facility.get_by_key_name('example.org/123').delete()
+        self.delete_subject('haiti', 'example.org/123')
+        self.delete_account()
         SeleniumTestCase.tearDown(self)
 
     def test_edit_link(self):
         """Confirms that the "Edit this record" link in the detail bubble
         goes to the edit form."""
-        self.login('/')
-        self.click('id=facility-1')
-        # For some reason, this wait doesn't always work unless we do it twice.
-        self.wait_for_element('link=Edit this record')
+        self.login('/?subdomain=haiti')
+        self.click('id=subject-1')
         self.wait_for_element('link=Edit this record')
         self.click('link=Edit this record')
         self.wait_for_load()
-        self.assertTrue('/edit?' in self.get_location())
+        assert '/edit?' in self.get_location()
 
     def test_edit_page(self):
         """Confirms that all the fields in the edit form save the entered
@@ -82,8 +74,7 @@ class EditTest(SeleniumTestCase):
         assert feed.first('atom:feed').all('atom:entry') == []
 
         # Go to the edit page
-        self.login('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
+        self.login_to_edit_page()
 
         # First-time edit should show nickname and affiliation fields
         self.assert_element('//input[@name="account_nickname"]')
@@ -107,10 +98,12 @@ class EditTest(SeleniumTestCase):
         text_fields['account_affiliation'] = 'Test'
         text_fields['available_beds'] = '   1'
         text_fields['total_beds'] = '2\t  '
+        text_fields['total_beds__comment'] = 'comment1'
         text_fields['location.lat'] = '18.537207 '
         text_fields['location.lon'] = '\t-72.349663'
+        text_fields['location__comment'] = 'comment2'
         checkbox_fields = dict(('services.' + name, True) for name in SERVICES)
-        select_fields = {'organization_type': 'COM', 'category': 'C/S',
+        select_fields = {'organization_type': 'NGO', 'category': 'CLINIC',
                          'construction': 'ADOBE', 'reachable_by_road': 'TRUE',
                          'can_pick_up_patients': 'FALSE',
                          'operational_status': 'NO_SURGICAL_CAPACITY'}
@@ -121,11 +114,10 @@ class EditTest(SeleniumTestCase):
         self.wait_for_load()
 
         # Check that we got back to the main map
-        self.assertEquals(self.config.base_url + '/', self.get_location())
+        assert self.get_location() == self.config.base_url + '/?subdomain=haiti'
 
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
+        self.open_edit_page()
 
         # Nickname and affiliation fields should not be shown this time
         self.assert_no_element('//input[@name="account_nickname"]')
@@ -134,10 +126,13 @@ class EditTest(SeleniumTestCase):
         del text_fields['account_affiliation']
 
         # Check that the new values were saved, and are pre-filled in the form
+        # except for comments which should remain empty.
         text_fields['available_beds'] = '1'  # whitespace should be gone
         text_fields['total_beds'] = '2'  # whitespace should be gone
         text_fields['location.lat'] = '18.537207'  # whitespace should be gone
         text_fields['location.lon'] = '-72.349663'  # whitespace should be gone
+        text_fields['total_beds__comment'] = ''
+        text_fields['location__comment'] = ''
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
         # Now empty everything
@@ -155,7 +150,7 @@ class EditTest(SeleniumTestCase):
         self.wait_for_load()
 
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
+        self.open_path('/edit?subdomain=haiti&subject_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
 
         # Check that everything is now empty or deselected
@@ -170,7 +165,7 @@ class EditTest(SeleniumTestCase):
         self.wait_for_load()
 
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
+        self.open_path('/edit?subdomain=haiti&subject_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
 
         # Check that the integer fields are actually zero, not empty
@@ -178,39 +173,131 @@ class EditTest(SeleniumTestCase):
         text_fields['total_beds'] = '0'
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
+        # TODO(kpy): This feature is disabled until we can debug it.
+        # Re-enable this test when the delta feed is working properly.
         # Check that feed is not empty now
-        feed = self.s.go('http://localhost:8081/feeds/delta')
-        assert feed.first('atom:feed')
-        assert feed.first('atom:feed').first('atom:entry')
+        # feed = self.s.go('http://localhost:8081/feeds/delta')
+        # assert feed.first('atom:feed')
+        # assert feed.first('atom:feed').first('atom:entry')
 
+    def test_comments(self):
+        text_fields = {}
+        
+        # Fill comment, but not available beds field ----------------------- #
 
+        # Go to the edit page
+        self.login_to_edit_page()
+        
+        # Fill in the form. Change available beds comment.
+        text_fields['account_nickname'] = 'Test'
+        text_fields['account_affiliation'] = 'Test'
+        text_fields['total_beds'] = ''
+        text_fields['total_beds__comment'] = 'comment_foo!'
+        text_fields['location.lat'] = '18.537207 '
+        text_fields['location.lon'] = '-72.349663'
+        checkbox_fields = {}
+        select_fields = {}
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+        
+        # Reload bubble, go to change details page, and confirm changes
+        self.save_and_load_bubble()
+        self.click('link=Change details')
+        assert self.is_text_present(u'Total beds: \u2013')
+        assert self.is_text_present('comment_foo!')
+        
+        # Fill available beds, but not comment field ----------------------- #
+        
+        # Nickname and affiliation fields should not be shown this time
+        del text_fields['account_nickname']
+        del text_fields['account_affiliation']
+        
+        # Return to the edit page
+        self.open_edit_page()
+        
+        # Change beds but without comment
+        text_fields['total_beds'] = '37'
+        text_fields['total_beds__comment'] = ''
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+        
+        # Reload bubble, go to change details page, and confirm changes
+        self.save_and_load_bubble()
+        self.click('link=Change details')
+        assert self.is_text_present('Total beds: 37')
+        assert not self.is_text_present('comment_foo!')
+        
+        # Fill available beds and comment fields --------------------------- #
+        
+        # Return to the edit page
+        self.open_edit_page()
+        
+        # Change total beds and comment fields.
+        text_fields['total_beds'] = '99'
+        text_fields['total_beds__comment'] = 'comment_bar!'
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+        
+        # Reload bubble, go to change details page, and confirm changes
+        self.save_and_load_bubble()
+        self.click('link=Change details')
+        assert self.is_text_present('Total beds: 99')
+        assert self.is_text_present('comment_bar!')
+        
+        # Delete both available beds and comment fields -------------------- #
+        
+        # Return to the edit page
+        self.open_edit_page()
+        
+        # Fill fields
+        text_fields['total_beds'] = ''
+        text_fields['total_beds__comment'] = ''
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+        
+        # Reload bubble and go to change details page
+        self.save_and_load_bubble()
+        self.click('link=Change details')
+        assert self.is_text_present(u'Total beds: \u2013')
+        assert not self.is_text_present('comment_bar!')
+        
+    def save_and_load_bubble(self):
+        # Submit the form
+        self.click('//input[@name="save"]')
+        self.wait_for_load()
+        
+        # Check that we got back to the main map
+        assert self.get_location() == self.config.base_url + '/?subdomain=haiti'
+        
+        # Test bubble change history comments
+        self.click('id=subject-1')
+        self.wait_for_element('link=Change details')
+        
+    def open_edit_page(self):
+        self.open_path('/edit?subdomain=haiti&subject_name=example.org/123')
+        self.assert_text(Regex('Edit.*'), '//h1')
+        
+    def login_to_edit_page(self):
+        self.login('/edit?subdomain=haiti&subject_name=example.org/123')
+        self.assert_text(Regex('Edit.*'), '//h1')
+        
     def fill_fields(self, text_fields, checkbox_fields, select_fields):
         """Fills in text fields, selects or deselects checkboxes, and
         makes drop-down selections.  Each of the arguments should be a
         dictionary of field names to values."""
         for name, value in text_fields.items():
-            input_xpath = '//input[@name="%s"]' % name
-            self.type(input_xpath, value)
+            self.type('//*[@name=%r]' % name, value)
         for name, value in checkbox_fields.items():
-            checkbox_xpath = '//input[@name="%s"]' % name
-            (value and self.check or self.uncheck)(checkbox_xpath)
+            (value and self.check or self.uncheck)('//*[@name=%r]' % name)
         for name, value in select_fields.items():
-            select_xpath = '//select[@name="%s"]' % name
-            self.select(select_xpath, 'value=' + value)
+            self.select('//*[@name=%r]' % name, 'value=' + value)
 
     def verify_fields(self, text_fields, checkbox_fields, select_fields):
         """Checks the values of text fields, state of checkboxes, and
         selection state of options.  Each of the arguments should be a
         dictionary of field names to values."""
         for name, value in text_fields.items():
-            input_xpath = '//input[@name="%s"]' % name
-            self.assert_value(value, input_xpath)
+            self.assert_value(value, '//*[@name=%r]' % name)
         for name, value in checkbox_fields.items():
-            checkbox_xpath = '//input[@name="%s"]' % name
-            self.assertEquals(value, self.is_checked(checkbox_xpath))
+            assert value == self.is_checked('//*[@name=%r]' % name)
         for name, value in select_fields.items():
-            select_xpath = '//select[@name="%s"]' % name
-            self.assertEquals([value], self.get_selected_values(select_xpath))
+            assert [value] == self.get_selected_values('//*[@name=%r]' % name)
 
     def verify_errors(self, text_fields):
         """Checks that all the given text fields have visible error messages.

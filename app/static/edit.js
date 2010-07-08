@@ -166,6 +166,66 @@
 
     return jQuery.inArray(false, valid_arr) == -1;
   }
+  
+  function make_visible(id) {
+    $(id).style.visibility = "visible";
+  }
+  
+  function make_visible_closure(div) {
+    return function() {
+      make_visible(div.id);
+    };
+  }
+
+  /**
+   * Initializes comment visibility and installs onclick handlers to make
+   * comments visible if their values are updated.
+   */
+  function init_comment_visibility() {
+    var trs = document.getElementsByTagName('tr');
+    for (var i = 0; i < trs.length; i++) {
+      var tr = trs[i];
+      var classes = tr.className.split(' ');
+      if (classes.length > 1) {
+        var divs = tr.getElementsByTagName('div');
+        var attribute_name = "";
+        for (var div_index = 0; div_index < divs.length; div_index++) {
+          var div = divs[div_index];
+          if (div.className == "comment") {
+            div.style.visibility = "hidden";
+            var closure = make_visible_closure(div);
+            var elements = get_edit_elements(tr);
+            for (var el_index = 0; el_index < elements.length; el_index++) {
+              var element = elements[el_index];
+              // Set onclick as well as onfocus for checkboxes, which don't
+              // always register a focus event when clicked (eg when clicking on
+              // the checkbox label)
+              element.onfocus = closure;
+              element.onclick = closure;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function get_edit_elements(parent) {
+    var elements = [];
+    var element_index = 0;
+    var inputs = parent.getElementsByTagName('input');
+    for (var i = 0; i < inputs.length; i++) {
+      elements[element_index++] = inputs[i];
+    }
+    var selects = parent.getElementsByTagName('select');
+    for (var j = 0; j < selects.length; j++) {
+      elements[element_index++] = selects[j];
+    }
+    var textareas = parent.getElementsByTagName('textarea');
+    for (var k = 0; k < textareas.length; k++) {
+      elements[element_index++] = textareas[k];
+    }
+    return elements;
+  } 
 
   /**
    * Handler for a click of the save button.
@@ -188,6 +248,7 @@
     $('edit').onsubmit = validate;
     $('save').onclick = save;
     $('cancel').onclick = cancel;
+    init_comment_visibility();
   }
 
   init();

@@ -22,6 +22,7 @@ import google.appengine.ext.webapp.util
 
 import StringIO
 import access
+import cache
 from calendar import timegm
 import cgi
 import cgitb
@@ -48,9 +49,9 @@ ROOT = os.path.dirname(__file__)
 # Set up localization.
 from django.conf import settings
 try:
-  settings.configure()
+    settings.configure()
 except:
-  pass
+    pass
 settings.LANGUAGE_CODE = 'en'
 settings.USE_I18N = True
 settings.LOCALE_PATHS = (os.path.join(ROOT, 'locale'),)
@@ -65,11 +66,21 @@ from django.utils.translation import gettext_lazy as _
 HIDDEN_ATTRIBUTE_NAMES = ['accuracy', 'region_id', 'district_id', 'commune_id',
                           'commune_code', 'sante_id']
 
+def fetch_all(query):
+    """Gets all the results of a query as efficiently as possible.  If the
+    query's results were previously obtained, they are reused."""
+    if not hasattr(query, 'results'):
+        # Calling fetch() is faster than iterating one by one.  'limit' can
+        # be arbitrarily large, but 'offset' cannot exceed 1000 -- so we
+        # only get one attempt.  We assume less than a million results.
+        query.results = query.fetch(1000000)
+    return query.results
+
 def strip(text):
     return text.strip()
 
 def validate_yes(text):
-    return (text.lower() == 'yes') and 'yes' or ''
+    return (text.lower() in ['y', 'yes']) and 'yes' or ''
 
 def validate_action(text):
     return text in access.ACTIONS and text
@@ -80,21 +91,39 @@ def validate_float(text):
     except ValueError:
         return None
 
+def get_lang():
+    """Gets the current Django language code (a lowercase language code
+    followed by an optional hyphen and lowercase subcode)."""
+    return django.utils.translation.get_language()
+
+def get_locale(lang=None):
+    """Gets the current Django locale code (a lowercase two-letter language
+    code followed by an optional underscore and uppercase country code),
+    or converts the specified Django language code to a locale code."""
+    return django.utils.translation.to_locale(lang or get_lang())
+
 def get_message(namespace, name):
-    message = model.Message.all().filter(
-        'namespace =', namespace).filter('name =', name).get()
-    django_locale = django.utils.translation.to_locale(
-        django.utils.translation.get_language())
-    return message and getattr(message, django_locale) or name
+    """Gets a translated message (in the current language)."""
+    message = cache.MESSAGES.get((namespace, name))
+    return message and getattr(message, get_locale()) or name
+
+def split_key_name(entity):
+    """Splits the key_name of a Subject or SubjectType entity into the
+    subdomain and the subject name, or the subdomain and the type name."""
+    return entity.key().name().split(':', 1)
 
 class Struct:
-    pass
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
 
 class Handler(webapp.RequestHandler):
     auto_params = {
         'embed': validate_yes,
-        'facility_name': strip,
-        'lang': strip,
+        'flush': validate_yes,
+        'subject_name': strip,  # without the subdomain (it would be redundant)
+        'subject_type': strip,  # without the subdomain (it would be redundant)
+        'lang': strip,  # a Django language code (e.g. 'en', 'fr-ca', 'pt-br')
         'lat': validate_float,
         'lon': validate_float,
         'print': validate_yes,
@@ -103,13 +132,13 @@ class Handler(webapp.RequestHandler):
     }
 
     def require_action_permitted(self, action):
-        """Raise and exception in case the user don't have the given action.
-           Redirect to login in case there is no user"""
-        if not self.account:
-            raise Redirect(users.create_login_url(self.request.uri))
-        if not access.check_action_permitted(self.account, action):
-            #i18n: Error message
-            raise ErrorMessage(403, _('Unauthorized user.'))
+        """Returns if and only if the given action is allowed.  Otherwise,
+        aborts with an error message or redirection to the login page."""
+        if access.check_action_permitted(self.account, self.subdomain, action):
+            return
+        self.require_logged_in_user()  # if not logged in, offer login page
+        #i18n: Error message
+        raise ErrorMessage(403, _('Unauthorized user.'))
 
     def require_logged_in_user(self):
         """Redirect to login in case there is no user"""
@@ -123,61 +152,112 @@ class Handler(webapp.RequestHandler):
     def write(self, text):
         self.response.out.write(text)
 
-    def initialize(self, request, response):
+    def initialize(self, request, response, user_for_test=None):
+        """Performs common initialization steps for all requests (subdomain
+        selection, language selection, query parameter validation)."""
         webapp.RequestHandler.initialize(self, request, response)
-        self.user = users.get_current_user()
+
+        self.user = user_for_test or users.get_current_user()
         self.account = access.check_and_log(request, self.user)
         for name in request.headers.keys():
             if name.lower().startswith('x-appengine'):
                 logging.debug('%s: %s' % (name, request.headers[name]))
+
+        # Determine the subdomain.
+        self.subdomain = ''
+        levels = self.request.headers.get('Host', '').split('.')
+        if levels[-2:] == ['appspot', 'com'] and len(levels) >= 4:
+            # foo.resource-finder.appspot.com -> subdomain 'foo'
+            # bar.kpy.latest.resource-finder.appspot.com -> subdomain 'bar'
+            self.subdomain = levels[0]
+        # The 'subdomain' query parameter always overrides the hostname.
+        self.subdomain = self.request.get('subdomain', self.subdomain)
+
+        # To be safe, we purge the in-memory portion of MinimalSubjectCache
+        # before each request to be sure we don't see stale data.
+        if self.subdomain:
+            cache.MINIMAL_SUBJECTS[self.subdomain].flush_local()
+
+        # Validate the query parameters and collect the validated values.
         self.params = Struct()
         for param in self.auto_params:
             validator = self.auto_params[param]
             setattr(self.params, param, validator(request.get(param, '')))
-        # Activate localization.
-        self.select_locale()
 
-        # Provide the non-localized URL of the current page.
+        # Flush all caches if "flush=yes" was set.
+        if self.params.flush:
+            cache.flush_all()
+
+        # Activate the appropriate language.
+        self.select_lang()
+
+        # Provide the language-independent URL of the current page.
         self.params.url_no_lang = set_url_param(self.request.url, 'lang', None)
         if '?' not in self.params.url_no_lang:
-          self.params.url_no_lang += '?'
+            self.params.url_no_lang += '?'
 
+        # Provide the list of available languages.
         self.params.languages = config.LANGUAGES
 
-        # Google Analytics account id
+        # Provide the Google Analytics account ID.
         self.params.analytics_id = get_secret('analytics_id')
 
-    def select_locale(self):
-        """Detect and activate the appropriate locale.  The 'lang' query
-           parameter has priority, then the rflang cookie, then the
-           default setting."""
-        # self.param.lang will use dashes (fr-CA), which is more common
-        # externally, but django wants underscores (fr_CA). If you need
-        # that version, use django.utils.translation.get_language()
-        self.params.lang = (self.params.lang or
+    def select_lang(self):
+        """Detect and activate the appropriate language.  The 'lang' query
+           parameter has priority, then the 'django_language' cookie, then the
+           default language in settings."""
+        # lang will be a Django language code: all lowercase, with a dash
+        # between the language and optional region (e.g. 'en', 'fr-ca').
+        lang = (
+            self.params.lang or
             self.request.cookies.get('django_language', None) or
-            settings.LANGUAGE_CODE)
-        # Check for and potentially convert an alternate language code
-        self.params.lang = config.ALTERNATE_LANG_CODES.get(
-            self.params.lang, self.params.lang)
-        if self.params.lang not in list(lang[0] for lang in config.LANGUAGES):
-          self.params.lang = settings.LANGUAGE_CODE
+            settings.LANGUAGE_CODE
+        ).replace('_', '-').lower()
 
-        self.params.maps_lang = config.GOOGLE_MAPS_ALTERNATE_LANG_CODES.get(
-            self.params.lang, self.params.lang)
+        # Check for and potentially convert an alternate language code.
+        if lang not in dict(config.LANGUAGES):
+            lang = config.LANG_FALLBACKS.get(lang, settings.LANGUAGE_CODE)
+
+        # Store the language settings in params.lang and params.maps_lang.
+        self.params.lang = lang
+        self.params.maps_lang = config.MAPS_LANG_FALLBACKS.get(lang, lang)
+
+        # Activate the selected language.
+        django.utils.translation.activate(lang)
         self.response.headers.add_header(
-            'Set-Cookie', 'django_language=%s' % self.params.lang)
-        django.utils.translation.activate(self.params.lang.replace('-', '_'))
-        self.response.headers.add_header('Content-Language', self.params.lang)
+            'Set-Cookie', 'django_language=%s' % lang)
+        self.response.headers.add_header('Content-Language', lang)
+
+    def get_subdomain_root(self, subdomain):
+        """Gets the URL to the main page for a subdomain."""
+        host = self.request.headers['Host']
+        levels = host.split('.')
+        if levels[-2:] == ['appspot', 'com']:
+            if len(levels) >= 5:  # kpy.latest.resource-finder.appspot.com
+                return 'http://%s.%s/' % (subdomain, '.'.join(levels[-5:]))
+            elif len(levels) >= 3:  # resource-finder.appspot.com
+                return 'http://%s.%s/' % (subdomain, '.'.join(levels[-3:]))
+        return 'http://%s/?subdomain=%s' % (host, subdomain)
+
+    def get_url(self, path, **params):
+        """Constructs a relative URL for a given path and query parameters,
+        preserving the current 'subdomain' parameter if there is one."""
+        if self.request.get('subdomain'):
+            params['subdomain'] = self.request.get('subdomain')
+        if params:
+            path += ('?' in path and '&' or '?') + urlencode(params)
+        return path
 
     def handle_exception(self, exception, debug_mode):
-        if isinstance(exception, Redirect):
+        """Handles an exception thrown by a handler method."""
+        if isinstance(exception, Redirect):  # redirection
             self.redirect(exception.url)
-        elif isinstance(exception, ErrorMessage):
+        elif isinstance(exception, ErrorMessage):  # user-facing error message
             self.error(exception.status)
             self.response.clear()
-            self.render('templates/error.html', message=exception.message)
-        else:
+            self.render('templates/error.html', message=exception.message,
+                        subdomain=self.subdomain)
+        else:  # unexpected error
             self.error(500)
             logging.exception(exception)
             if debug_mode:
@@ -231,34 +311,34 @@ def export(Kind):
     return results
 
 def to_utf8(string):
-  """If Unicode, encode to UTF-8; if 8-bit string, leave unchanged."""
-  if isinstance(string, unicode):
-    string = string.encode('utf-8')
-  return string
+    """If Unicode, encode to UTF-8; if 8-bit string, leave unchanged."""
+    if isinstance(string, unicode):
+        string = string.encode('utf-8')
+    return string
 
 def urlencode(params):
-  """Apply UTF-8 encoding to any Unicode strings in the parameter dict.
-  Leave 8-bit strings alone.  (urllib.urlencode doesn't support Unicode.)"""
-  keys = params.keys()
-  keys.sort()  # Sort the keys to get canonical ordering
-  return urllib.urlencode([
-      (to_utf8(key), to_utf8(params[key]))
-      for key in keys if isinstance(params[key], basestring)])
+    """Apply UTF-8 encoding to any Unicode strings in the parameter dict.
+    Leave 8-bit strings alone.  (urllib.urlencode doesn't support Unicode.)"""
+    keys = params.keys()
+    keys.sort()  # Sort the keys to get canonical ordering
+    return urllib.urlencode([
+        (to_utf8(key), to_utf8(params[key]))
+        for key in keys if isinstance(params[key], basestring)])
 
 def set_url_param(url, param, value):
-  """This modifies a URL, setting the given param to the specified value.  This
-  may add the param or override an existing value, or, if the value is None,
-  it will remove the param.  Note that value must be a basestring and can't be
-  an int, for example."""
-  url_parts = list(urlparse.urlparse(url))
-  params = dict(cgi.parse_qsl(url_parts[4]))
-  if value is None:
-    if param in params:
-      del(params[param])
-  else:
-    params[param] = value
-  url_parts[4] = urlencode(params)
-  return urlparse.urlunparse(url_parts)
+    """Modifies a URL, setting the given param to the specified value.  This
+    may add the param or override an existing value, or, if the value is None,
+    it will remove the param.  Note that value must be a basestring and can't be
+    an int, for example."""
+    url_parts = list(urlparse.urlparse(url))
+    params = dict(cgi.parse_qsl(url_parts[4]))
+    if value is None:
+        if param in params:
+            del(params[param])
+    else:
+        params[param] = value
+    url_parts[4] = urlencode(params)
+    return urlparse.urlunparse(url_parts)
 
 def to_posixtime(datetime):
     return timegm(datetime.utctimetuple()[:6])
@@ -271,10 +351,12 @@ def to_isotime(datetime):
         datetime = to_datetime(datetime)
     return datetime.isoformat() + 'Z'
 
-def to_local_isotime(utc_datetime):
-  # TODO(shakusa) Use local timezone instead of hard-coding Haitian time
-  utc_datetime = utc_datetime - TimeDelta(hours=5)
-  return utc_datetime.isoformat(' ') + ' -05:00'
+def to_local_isotime(utc_datetime, clear_ms=False):
+    # TODO(shakusa) Use local timezone instead of hard-coding Haitian time
+    if clear_ms:
+      utc_datetime = utc_datetime.replace(microsecond=0)
+    utc_datetime = utc_datetime - TimeDelta(hours=5)
+    return utc_datetime.isoformat(' ') + ' -05:00'
 
 def to_unicode(value):
     """Converts the given value to unicode. Django does not do this
@@ -288,10 +370,12 @@ def to_unicode(value):
     else:
         return u''
 
-def plural(n, singular='', plural='s'):
-    if not isinstance(n, (int, float)):
-        n = len(n)
-    return [plural, singular][n == 1]
+def value_or_dash(value):
+    """Converts the given value to a unicode dash if the value does
+    not exist and does not equal 0."""
+    if not value and value != 0:
+        return u'\u2013'.encode('utf-8')
+    return value
 
 def run(*args, **kwargs):
     webapp.util.run_wsgi_app(webapp.WSGIApplication(*args, **kwargs))
