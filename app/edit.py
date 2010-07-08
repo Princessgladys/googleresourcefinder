@@ -482,12 +482,13 @@ class Edit(utils.Handler):
                 json_pickle_attrs_unchanged = simplejson.dumps(
                     pickle.dumps(unchanged_attribute_values))
                 
-                params = {}
-                params['subject_name'] = subject.key().name()
-                params['action'] = 'subject_changed'
-                params['changed_data'] = json_pickle_attrs_changed
-                params['unchanged_data'] = json_pickle_attrs_unchanged
-                
+                params = {
+                    'subject_name': subject.key().name(),
+                    'action': 'subject_changed',
+                    'changed_data': json_pickle_attrs_changed,
+                    'unchanged_data': json_pickle_attrs_unchanged
+                }
+
                 taskqueue.add(url='/mail_alerts', method='POST',
                               params=params, transactional=True)
 

@@ -46,13 +46,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Error message for lacking edit permissions
-#: edit.py:441
+#: edit.py:448
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr ""
 
 #. Form option to indicate that a value is not specified
-#: edit.py:169 edit.py:210 edit.py:195
+#: edit.py:200 edit.py:174 edit.py:215
 msgid "(unspecified)"
 msgstr ""
 
@@ -249,7 +249,7 @@ msgid "District"
 msgstr ""
 
 #. E-mail address
-#: ../tools/setup.py:124 edit.py:116
+#: edit.py:121 ../tools/setup.py:124
 msgid "E-mail"
 msgstr ""
 
@@ -374,12 +374,17 @@ msgid "Internal Medicine"
 msgstr ""
 
 #. Error message for invalid date entry
-#: edit.py:138
+#: edit.py:143
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr ""
 
 #. Error message for request missing subject name.
-#: edit.py:337 bubble.py:161
+#: subscribe.py:57
+msgid "Invalid or missing account e-mail."
+msgstr ""
+
+#. Error message for request missing subject name.
+#: bubble.py:159 edit.py:342
 msgid "Invalid or missing subject name."
 msgstr ""
 
@@ -404,7 +409,7 @@ msgid "Last updated"
 msgstr ""
 
 #. Label for text input
-#: edit.py:231
+#: edit.py:236
 msgid "Latitude"
 msgstr ""
 
@@ -444,7 +449,7 @@ msgid "Location:"
 msgstr ""
 
 #. Label for text input
-#: edit.py:235
+#: edit.py:240
 msgid "Longitude"
 msgstr ""
 
@@ -489,7 +494,7 @@ msgid "NGO"
 msgstr ""
 
 #. a person's name
-#: edit.py:112 ../tools/setup.py:104
+#: ../tools/setup.py:104 edit.py:117
 msgid "Name"
 msgstr ""
 
@@ -504,7 +509,7 @@ msgid "Neurosurgery"
 msgstr ""
 
 #. Form option for a false Boolean value
-#: bubble.py:48 edit.py:173 bubble_test.py:66
+#: bubble.py:48 edit.py:178 bubble_test.py:66
 msgid "No"
 msgstr ""
 
@@ -575,7 +580,7 @@ msgid "Pediatrics"
 msgstr ""
 
 #. telephone number
-#: ../tools/setup.py:122 edit.py:114
+#: edit.py:119 ../tools/setup.py:122
 msgid "Phone"
 msgstr ""
 
@@ -587,6 +592,11 @@ msgstr ""
 #. Service provided by a health facility (use Title Case). care given after surgery until patient is discharged
 #: ../tools/setup.py:246
 msgid "Postoperative Care"
+msgstr ""
+
+#. old value for the attribute
+#: mail_alerts.py:127
+msgid "Previous value"
 msgstr ""
 
 #. Link to print the current view of the application
@@ -616,7 +626,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:472
+#: edit.py:502
 msgid "Record updated."
 msgstr ""
 
@@ -645,6 +655,11 @@ msgstr ""
 #. Name of the application.
 #: templates/subdomain_menu.html.py:35
 msgid "Resource Finder"
+msgstr ""
+
+#. TODO: Add missing message description or meaning
+#: mail_alerts.py:267 mail_alerts.py:302 subscribe.py:118
+msgid "Resource Finder Updates"
 msgstr ""
 
 #. Button text to save data
@@ -727,6 +742,11 @@ msgstr ""
 msgid "Updated"
 msgstr ""
 
+#. who the attribute was updated by
+#: mail_alerts.py:130
+msgid "Updated by"
+msgstr ""
+
 #. Error message for a value that is not a number
 #: static/locale.js:79
 msgid "Value must be a number."
@@ -753,7 +773,7 @@ msgid "X-Ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: bubble.py:48 bubble_test.py:65 edit.py:171
+#: edit.py:176 bubble.py:48 bubble_test.py:65
 msgid "Yes"
 msgstr ""
 

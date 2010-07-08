@@ -301,5 +301,5 @@ class UtilsTest(MediumTestCase):
         assert utils.value_or_dash(3) == 3
         assert utils.value_or_dash('3') == '3'
         assert utils.value_or_dash(0) == 0
-        assert utils.value_or_dash(None) == u'\u2013'
-        assert utils.value_or_dash([]) == u'\u2013'
+        assert utils.value_or_dash(None) == '\xe2\x80\x93'
+        assert utils.value_or_dash([]) == '\xe2\x80\x93'
