@@ -295,6 +295,8 @@ class Account(db.Model):
                                               # update to the user
     next_monthly_alert = db.DateTimeProperty() # next time to send a monthly
                                                # update to the user
+    # preferred format to receive e-mail in
+    email_format = db.StringProperty(choices=['plain', 'html'])
 
 class Message(db.Expando):
     """Internationalized strings for value identifiers.  Top-level entity,
