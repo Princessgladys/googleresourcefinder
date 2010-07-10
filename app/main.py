@@ -45,6 +45,7 @@ class Main(utils.Handler):
         if self.params.lat is not None and self.params.lon is not None:
             center = {'lat': self.params.lat, 'lon': self.params.lon}
         home_url = self.get_url('/')
+        settings_url = self.get_url('/settings')
         login_url = users.create_login_url(home_url)
         logout_url = users.create_logout_url(home_url)
         self.render('templates/map.html',
@@ -59,6 +60,7 @@ class Main(utils.Handler):
                     data=rendering.render_json(
                         self.subdomain, center, self.params.rad),
                     home_url=home_url,
+                    settings_url=settings_url,
                     export_url=self.get_export_url(),
                     print_url=self.get_url('/?print=yes'),
                     bubble_url=self.get_url('/bubble'),

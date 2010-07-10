@@ -145,8 +145,9 @@ class MailUpdateSystemTest(MediumTestCase):
                          subject_name='haiti:example.org/123',
                          user_email=self.email)
         db.put(s)
-        subject_changes = [[subject_name, 'immediate', 'daily']]
-        json_pickle_changes = simplejson.dumps(pickle.dumps(subject_changes))
+        subject_changes = [{'subject_name': subject_name, 'old_frequency':
+                            'immediate', 'new_frequency': 'daily'}]
+        json_pickle_changes = simplejson.dumps(subject_changes)
         handler = self.simulate_request('/subscribe?' +
                                         'action=change_subscriptions&' +
                                         'subject_changes=%s' %
@@ -161,8 +162,9 @@ class MailUpdateSystemTest(MediumTestCase):
                           type='hospital', user_email='test@example.com')
         setattr(pa, 'title', 'title_bar')
         db.put(pa)
-        subject_changes = [[subject_name, 'daily', 'weekly']]
-        json_pickle_changes = simplejson.dumps(pickle.dumps(subject_changes))
+        subject_changes = [{'subject_name': subject_name, 'old_frequency':
+                            'daily', 'new_frequency': 'weekly'}]
+        json_pickle_changes = simplejson.dumps(subject_changes)
         handler = self.simulate_request('/subscribe?' +
                                         'action=change_subscriptions&' +
                                         'subject_changes=%s' %
@@ -179,8 +181,9 @@ class MailUpdateSystemTest(MediumTestCase):
         self.set_attr(s, 'title', 'title_foo')
         db.put(s)
         
-        subject_changes = [[subject_name, 'weekly', 'immediate']]
-        json_pickle_changes = simplejson.dumps(pickle.dumps(subject_changes))
+        subject_changes = [{'subject_name': subject_name, 'old_frequency':
+                            'weekly', 'new_frequency': 'immediate'}]
+        json_pickle_changes = simplejson.dumps(subject_changes)
         handler = self.simulate_request('/subscribe?' +
                                         'action=change_subscriptions&' +
                                         'subject_changes=%s' %
