@@ -49,13 +49,13 @@ class Incoming(Handler):
         # each record
 
         # TODO(shakusa) Do we need to enforce read-only fields
-        # facility name (id), healthc_id, facility title ?
+        # subject name (id), healthc_id, subject title ?
 
         records = handle_feed_post(self.request, self.response)
 
         for record in records:
             # TODO: Now parse these records and apply the edits to Report,
-            # Facility, and MinimalFacility.
+            # Subject, and MinimalSubject.
             pass
 
 

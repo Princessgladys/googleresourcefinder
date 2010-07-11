@@ -19,7 +19,7 @@ body { margin: 0; }
 body, h2, th, td { font-family: helvetica, arial; font-size: 11px; }
 tr { vertical-align: baseline; }
 th { text-align: left; }
-.facility-info, .facility-info td, .legend-label { font-size: 11px; }
+.subject-info, .subject-info td, .legend-label { font-size: 11px; }
 .caption { font-size: 11px; font-weight: normal; color: #aaa; }
 .sep { padding: 0 2px }
 
@@ -47,8 +47,8 @@ th, td { padding: 2px 4px; }
 #legend-section { display: none; }
 #division-section { display: none; }
 .table-head { background: #e0e2e8; padding: 2px 0; }
-#facility-section { margin-top: 0; }
-#facility-section .table-head {
+#subject-section { margin-top: 0; }
+#subject-section .table-head {
     background: #fff; border-bottom: 1px solid #999; }
 #filter-section .table-head { display: none; }
 #filter-section .table-body { background: #eee; }
@@ -56,17 +56,17 @@ th, td { padding: 2px 4px; }
 .table-head img, .legend-icon img { position: relative; top: 2px; }
 .table-body { overflow-y: auto; }
 .table-body tr { color: #222; }
-#supply-tbody, #division-tbody, #facility-tbody { cursor: pointer; }
+#supply-tbody, #division-tbody, #subject-tbody { cursor: pointer; }
 #division-list { max-height: 190px; }  /* pad 2px*2 + 15px = 19px per row */
 #division-list tr { line-height: 15px; }
 .hover { background: #cdf; }
-#facility-list td { border-bottom: 1px solid #eee; }
+#subject-list td { border-bottom: 1px solid #eee; }
 td.supply-set { text-align: center; width: 2em;
     border-left: 1px solid #e0e2e8; border-bottom: 1px solid #e0e2e8; }
 td#supply-set-1 { border-left: none; }
 th.legend-icon { padding: 2px 4px; text-align: center; width: 2em; }
 td.legend-label { padding: 2px 4px 2px 0; }
-th.facility-count, td.facility-count { text-align: right; width: 2.5em; }
+th.subject-count, td.subject-count { text-align: right; width: 2.5em; }
 th.value, td.value { text-align: right; width: 4em; }
 th.column_1, td.column_1 { text-align: left; width: 18em; }
 th.value .beds, td.value .beds { float: right; padding-left: 0.5em; }
@@ -81,7 +81,7 @@ td.status-0 { color: #000; }
 td.status-1 { color: #080; }
 td.status-2 { color: #a00; }
 td.status-3 { color: #444; }
-td.facility-count.selected { color: #fff; }
+td.subject-count.selected { color: #fff; }
 
 /* Map area */
 #map, .hshadow, .vshadow { position: absolute; left: 400px; top: 30px; }
@@ -98,10 +98,10 @@ td.facility-count.selected { color: #fff; }
              font-size: 13px; background: #eee; width: 392px; }
 
 /* Map info windows */
-.facility-info h1 { font-size: 13px; }
-.facility-info h1, .facility-info h2 { margin: 0; color: #000; }
-.facility-info .attributes { margin: 1em 0; color: #666; }
-.facility-info .attribute .value { color: #000; }
-.facility-info .text { margin-left: 2em; }
+.subject-info h1 { font-size: 13px; }
+.subject-info h1, .subject-info h2 { margin: 0; color: #000; }
+.subject-info .attributes { margin: 1em 0; color: #666; }
+.subject-info .attribute .value { color: #000; }
+.subject-info .text { margin-left: 2em; }
 
 tr.disabled td { color: #aaa; }

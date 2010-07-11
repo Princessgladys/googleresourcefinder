@@ -19,48 +19,69 @@ import time
 import utils
 import UserDict
 
-import django.utils.translation
-
 from google.appengine.api import memcache
 
 """Caching layer for Resource Finder, taking advantage of both memcache
 and in-memory caches."""
 
 
+class CacheGroup:
+    """A group of caches, keyed by subdomain.  Instantiates the given cache
+    class for each subdomain the first time that cache is requested."""
+    def __init__(self, cache_class):
+        """'cache_class' should be a class that (a) has a flush() method and
+        (b) has a constructor taking one argument, a subdomain."""
+        self.cache_class = cache_class
+        self.caches = {}
+
+    def __getitem__(self, subdomain):
+        """Gets (and optionally creates) the cache for the given subdomain."""
+        if subdomain not in self.caches:
+            self.caches[subdomain] = self.cache_class(subdomain)
+        return self.caches[subdomain]
+
+    def flush(self):
+        """Flushes all the underlying caches."""
+        for cache in self.caches.values():
+            cache.flush()
+
+
 class JsonCache:
-    """Memcache layer for JSON rendered by rendering.py. Offers significant
-    startup performance increase."""
-    def _memcache_key(self, locale):
-        return '%s_%s' % (self.__class__.__name__, locale)
+    """Memcache layer for JSON rendered by rendering.py."""
+    def __init__(self, subdomain):
+        self.subdomain = subdomain
+
+    def get_memcache_key(self, locale):
+        return '%s:%s.%s' % (self.subdomain, self.__class__.__name__, locale)
 
     def set(self, locale, json):
-        """Sets the value in this cache for the given locale"""
-        if not memcache.set(self._memcache_key(locale), json):
-            logging.error('Memcache set of %s failed'
-                          % self._memcache_key(locale))
+        """Sets the value in this cache for the given locale."""
+        key = self.get_memcache_key(locale)
+        if not memcache.set(key, json):
+            logging.error('Memcache set of %s failed' % key)
 
     def get(self, locale):
-        """Gets the value in this cache for the given locale"""
-        return memcache.get(self._memcache_key(locale))
+        """Gets the value in this cache for the given locale."""
+        return memcache.get(self.get_memcache_key(locale))
 
     def flush(self):
         """Flushes the values in this cache for all locales."""
-        memcache.delete_multi(
-            list(self._memcache_key(django.utils.translation.to_locale(lang[0]))
-                 for lang in config.LANGUAGES))
+        locales = map(utils.get_locale, dict(config.LANGUAGES).keys())
+        memcache.delete_multi(map(self.get_memcache_key, locales))
 
 
 class Cache(UserDict.DictMixin):
-    """A cache that looks first in memory, then at memcache, then finally
-    loads data from the datastore. The in-memory cache lives for ttl seconds,
-    then is refreshed from memcache. The cache exposes a dictionary
-    interface."""
-    def __init__(self, ttl=30):
+    """A cache that looks first in local memory, then in a remote memcache,
+    then finally loads data from the datastore.  The local in-memory cache
+    lives for ttl seconds, then is refreshed from memcache.  Transparently
+    exposes a dictionary interface to the underlying cached dictionary."""
+    def __init__(self, subdomain='', ttl=30):
         assert ttl > 0
+        self.subdomain = subdomain
         self.entities = None
-        self.last_refresh = 0
-        self.ttl = ttl
-        self.memcache_key = self.__class__.__name__
+        self.last_refresh = 0  # last time data was loaded into local memory
+        self.ttl = ttl  # maximum age in seconds for data in local memory
+        self.memcache_key = subdomain + ':' + self.__class__.__name__
 
     def __getitem__(self, key):
         self.load()
@@ -89,23 +110,34 @@ class Cache(UserDict.DictMixin):
         """Fetch entities on a cache miss."""
         raise NotImplementedError()
 
-    def flush(self, flush_memcache=True):
-        """Flushes the in-memory cache and optionally memcache"""
-        if flush_memcache:
-            memcache.delete(self.memcache_key)
-        self.entities = None
+    def flush_local(self):
+        """Flushes the local in-memory cache."""
         self.last_refresh = 0
+        self.entities = None
+
+    def flush(self):
+        """Flushes the local in-memory cache and the remote memcache."""
+        self.flush_local()
+        memcache.delete(self.memcache_key)
+
+
+class SubjectTypeCache(Cache):
+    def fetch_entities(self):
+        entities = utils.fetch_all(
+            model.SubjectType.all_in_subdomain(self.subdomain))
+        return dict((e.key().name().split(':', 1)[1], e) for e in entities)
+
+
+class MinimalSubjectCache(Cache):
+    def fetch_entities(self):
+        entities = utils.fetch_all(
+            model.MinimalSubject.all_in_subdomain(self.subdomain))
+        return dict((e.key().name().split(':', 1)[1], e) for e in entities)
 
 
 class AttributeCache(Cache):
     def fetch_entities(self):
         entities = utils.fetch_all(model.Attribute.all())
-        return dict((e.key().name(), e) for e in entities)
-
-
-class FacilityTypeCache(Cache):
-    def fetch_entities(self):
-        entities = utils.fetch_all(model.FacilityType.all())
         return dict((e.key().name(), e) for e in entities)
 
 
@@ -115,21 +147,18 @@ class MessageCache(Cache):
         return dict(((e.namespace, e.name), e) for e in entities)
 
 
-class MinimalFacilityCache(Cache):
-    def fetch_entities(self):
-        entities = utils.fetch_all(model.MinimalFacility.all())
-        return dict((e.parent_key(), e) for e in entities)
+# These types have a separate cache for each subdomain.
+JSON = CacheGroup(JsonCache)
+SUBJECT_TYPES = CacheGroup(SubjectTypeCache)
+MINIMAL_SUBJECTS = CacheGroup(MinimalSubjectCache)
 
-
-JSON = JsonCache()
+# Each of these caches is shared across all subdomains.
 ATTRIBUTES = AttributeCache()
-FACILITY_TYPES = FacilityTypeCache()
 MESSAGES = MessageCache()
-MINIMAL_FACILITIES = MinimalFacilityCache()
 
-CACHES = [JSON, ATTRIBUTES, FACILITY_TYPES, MESSAGES, MINIMAL_FACILITIES]
+CACHES = [JSON, SUBJECT_TYPES, MINIMAL_SUBJECTS, ATTRIBUTES, MESSAGES]
 
 def flush_all():
-    """Flush all caches"""
+    """Flush all caches."""
     for cache in CACHES:
         cache.flush()

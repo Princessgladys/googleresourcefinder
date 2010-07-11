@@ -70,8 +70,7 @@ http://code.google.com/p/pubsubhubbub/wiki/DeveloperGettingStartedGuide
    http://localhost:8080/_ah/admin/datastore?kind=Record
 
 TODO: Once this part is implemented, verify that the corresponding
-Report, Facility and MinimalFacility records have been
-created/updated.
+Report, Subject and MinimalSubject records have been created/updated.
 """
 
 import datetime

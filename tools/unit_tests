@@ -6,4 +6,8 @@ update_hgignore
 
 echo
 echo "--- Running unit tests"
-nosetests -d $APP_DIR
+if [ -n "$1" ]; then
+  nosetests -d "$@"
+else
+  nosetests -d $APP_DIR
+fi
