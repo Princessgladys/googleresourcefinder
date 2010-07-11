@@ -23,14 +23,14 @@ from google.appengine.ext import db
 import logging
 from model import Account
 
-# Actions explained:
-# 'view' user can view the UI (unnecessary if default is 'anyone can view')
-# 'edit' user can edit basic fields of facilities (unnecessary if default is
-#          'any signed in user can make edits')
-# 'advanced_edit' user can edit all fields of facilities
-# 'add' user can add new facilities
-# 'remove' user can remove facilities from the UI (not delete them entirely)
-# 'grant' user can grant access to other users
+# Actions that are permitted/forbidden according to the 'actions' property:
+#     'view': view the UI (unnecessary if default is 'anyone can view')
+#     'edit': edit basic fields (unnecessary if default is
+#         'any signed in user can make edits')
+#     'advanced_edit': edit all fields
+#     'add': add new subjects
+#     'remove': remove subjects from the UI (not delete them entirely)
+#     'grant': grant access to other users
 ACTIONS = ['view', 'add', 'remove', 'edit', 'advanced_edit', 'grant']
 
 def check_token(token):
@@ -46,12 +46,27 @@ def check_request(request, user):
     if request.get('access_token'):
         return check_token(request.get('access_token'))
     if user:
-        return check_email(user.email()) or check_user_id(user.user_id())
+        if user.email():
+            return check_email(user.email())
+        if user.user_id():
+            return check_user_id(user.user_id())
 
-def check_action_permitted(account, action):
-    """Return True if the account is allowed to perform the given action"""
-    return account and (action in account.actions
-                        or ":%s" % action in account.actions)
+def get_default_permissions():
+    """Returns the list of default permissions granted to all users,
+    which resides in the special Account with key_name='default'."""
+    account = Account.get_by_key_name('default')
+    return account and account.actions or []
+
+def check_action_permitted(account, subdomain, action):
+    """Returns True if the account is allowed to perform the given action
+    in the given subdomain."""
+    # Items in the Account.actions list have the form subdomain + ':' + verb,
+    # where '*' can be used a wildcard for the subdomain or the verb.
+    actions = get_default_permissions() + (account and account.actions or [])
+    return ('%s:%s' % (subdomain, action) in actions or
+            '%s:*' % subdomain in actions or
+            '*:%s' % action in actions or
+            '*:*' in actions)
 
 def check_and_log(request, user):
     account = check_request(request, user)
@@ -61,7 +76,6 @@ def check_and_log(request, user):
         ' (access_token=%r, user=%r)'
         % (request.get('access_token'), user and user.email()))
     if not account and user:
-        # we create an account for a logged-in user with no actions
-        # but don't save it
+        # Create an account for this user with no actions, but don't save it.
         account = Account(description=user.nickname(), email=user.email())
     return account

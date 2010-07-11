@@ -1,4 +1,4 @@
-from model import db, Account
+from model import Account, db
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import scrape
@@ -22,7 +22,7 @@ SERVICES = [
     'X_RAY',
     'CT_SCAN',
     'BLOOD_BANK',
-    'CORPSE_REMOVAL',
+    'MORTUARY_SERVICES',
 ]
 
 # "name" attributes of the string input fields in the edit form.
@@ -43,17 +43,15 @@ STR_FIELDS = [
 class EditTest(SeleniumTestCase):
     def setUp(self):
         SeleniumTestCase.setUp(self)
-        self.put_facility(
-            'example.org/123', title='title_foo', location=db.GeoPt(51.5, 0))
+        self.put_subject(
+            'haiti', 'example.org/123',
+            title='title_foo', location=db.GeoPt(51.5, 0))
+        self.put_account(actions=['*:view', '*:edit'])  # allow edits
         self.s = scrape.Session()
 
     def tearDown(self):
-        self.delete_facility('example.org/123')
-        # Reset account to initial (no nickname, affiliation) state
-        a = Account.all().get()
-        a.nickname = ''
-        a.affiliation = ''
-        a.put()
+        self.delete_subject('haiti', 'example.org/123')
+        self.delete_account()
         SeleniumTestCase.tearDown(self)
 
     def test_edit_link(self):
@@ -211,7 +209,7 @@ class EditTest(SeleniumTestCase):
         self.wait_for_load()
 
         # Check that we got back to the main map
-        assert self.config.base_url + '/' == self.get_location()
+        assert self.get_location() == self.config.base_url + '/?subdomain=haiti'
 
         # Return to the edit page
         self.open_edit_page()
@@ -247,7 +245,7 @@ class EditTest(SeleniumTestCase):
         self.wait_for_load()
 
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
+        self.open_path('/edit?subdomain=haiti&subject_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
 
         # Check that everything is now empty or deselected
@@ -262,7 +260,7 @@ class EditTest(SeleniumTestCase):
         self.wait_for_load()
 
         # Return to the edit page
-        self.open_path('/edit?facility_name=example.org/123')
+        self.open_path('/edit?subdomain=haiti&subject_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
 
         # Check that the integer fields are actually zero, not empty
@@ -355,9 +353,9 @@ class EditTest(SeleniumTestCase):
         assert not self.is_text_present('comment_bar!')
 
     def edit(self):
-        """Goes to edit form for facility 1"""
+        """Goes to edit form for subject 1"""
         self.login('/')
-        self.click('id=facility-1')
+        self.click('id=subject-1')
         self.wait_for_element('link=Edit this record')
         self.click('link=Edit this record')
         self.wait_until(self.is_visible, 'edit-data')
@@ -368,18 +366,18 @@ class EditTest(SeleniumTestCase):
         self.wait_for_load()
 
         # Check that we got back to the main map
-        assert self.config.base_url + '/' == self.get_location()
-
+        assert self.get_location() == self.config.base_url + '/?subdomain=haiti'
+        
         # Test bubble change history comments
-        self.click('id=facility-1')
+        self.click('id=subject-1')
         self.wait_for_element('link=Change details')
 
     def open_edit_page(self):
-        self.open_path('/edit?facility_name=example.org/123')
+        self.open_path('/edit?subdomain=haiti&subject_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
 
     def login_to_edit_page(self):
-        self.login('/edit?facility_name=example.org/123')
+        self.login('/edit?subdomain=haiti&subject_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
 
     def fill_fields(self, text_fields, checkbox_fields, select_fields):

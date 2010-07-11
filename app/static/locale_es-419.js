@@ -54,13 +54,16 @@ locale = function() {
   messages.ERROR_LATITUDE_MUST_BE_NUMBER = "La latitud debe ser un n\u00famero";
 
   //i18n: Error message for not loading facility information successfully
-  messages.ERROR_LOADING_FACILITY_INFORMATION = "Error al cargar servicio de informaci\u00f3n.";
+  messages.ERROR_LOADING_FACILITY_INFORMATION = "Error al cargar instituci\u00f3n de informaci\u00f3n.";
 
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_INVALID = "La longitud debe estar entre -180 y 180";
 
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_MUST_BE_NUMBER = "La longitud debe ser un n\u00famero";
+
+  //i18n: Error message for not saving facility information successfully
+  messages.ERROR_SAVING_FACILITY_INFORMATION = "Error al guardar instituci\u00f3n de informaci\u00f3n.";
 
   //i18n: Error message for a value that is not a number
   messages.ERROR_VALUE_MUST_BE_NUMBER = "El valor debe ser un n\u00famero";
@@ -72,13 +75,13 @@ locale = function() {
   //i18n: A place that provides a particular service
   messages.FACILITY = "Instituci\u00f3n";
 
-  //i18n: Proper name of an ID for a healthcare facility defined by the
-  //i18n: Pan-American Health Organization, no translation necessary.
-  messages.FACILITY_PCODE = "PCode:";
+  //i18n: Proper name of an ID for a health facility defined by the 
+  //i18n: Haiti ministry of health (MSPP); no translation necessary.
+  messages.PCODE = "PCode";
 
-  //i18n: Proper name of an ID for a healthcare facility, no translation
-  //i18n: necessary.
-  messages.HEALTHC_ID = "ID HealthC:";
+  //i18n: Proper name of an ID for a health facility defined by the 
+  //i18n: Pan-American Health Organization; no translation necessary.
+  messages.HEALTHC_ID = "ID HealthC";
 
   //i18n: Message indicating loading hospital information
   messages.LOADING = "Cargando...";
@@ -111,7 +114,7 @@ locale = function() {
   messages.SERVICES = "Servicios";
 
   //i18n: Label for a control that filters a list of facilities
-  messages.SHOW = "Mostrar:";
+  messages.SHOW = "Mostrar";
 
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}:${MINUTES} ${ZONE}";

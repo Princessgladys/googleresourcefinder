@@ -26,14 +26,14 @@ def get_feed_id(request, feed_name):
     return request.host_url + '/feeds/' + feed_name
 
 
-def schedule_add_record(request, user, facility,
+def schedule_add_record(request, user, subject,
                         changed_attributes_dict, observed_time):
     """Enqueue a task to create a record."""
     record = create_record(
         get_feed_id(request, 'delta'),
         user.email(),
         '', # title
-        facility.key().name(), # subject_id
+        subject.key().name(), # subject_id
         observed_time,
         Hospital.to_element(changed_attributes_dict))
 

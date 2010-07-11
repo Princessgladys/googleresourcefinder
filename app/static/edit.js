@@ -265,9 +265,11 @@
   /**
    * Initializes event handlers for the page when not embedded on the main page.
    */
-  function init_edit(embed, opt_parent) {
+  function init_edit(embed, edit_url, opt_parent) {
     if (embed) {
-      $('save').onclick = inplace_edit_save;
+      $('save').onclick = function() {
+        inplace_edit_save(edit_url);
+      };
       $('cancel').onclick = inplace_edit_cancel;
       $('edit').onsubmit = function() {
         $('save').onclick();

@@ -22,7 +22,7 @@
   {% comment %}
   #i18n: Name of the application.
   {% endcomment %}
-  <title>{% trans "Resource Finder" %} ({{instance}})</title>
+  <title>{% trans "Resource Finder" %} ({{subdomain}})</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <!-- Stylesheets -->
   <link rel="stylesheet" href="static/map.css">
@@ -64,6 +64,8 @@
   <script type="text/javascript" src="static/edit.js"></script>
   <script type="text/javascript">
     var print = {% if params.print %} true {% else %} false {% endif %};
+    var print_url = '{{print_url}}';
+    var bubble_url = '{{bubble_url}}';
   </script>
 {% include "analytics.html" %}
 </head>
@@ -89,9 +91,9 @@
       {% comment %}
       #i18n: Link to return to the main page of the application
       {% endcomment %}
-      <a href="/">{% trans "Home" %}</a> <span class="sep">|</span>
+      <a href="{{home_url}}">{% trans "Home" %}</a> <span class="sep">|</span>
     {% else %}
-      <a id="print-link" href="#" target="_blank"
+      <a id="print-link" href="#"
          {% comment %}
          #i18n: Link to print the current view of the application
          {% endcomment %}
@@ -100,15 +102,18 @@
     {% comment %}
     #i18n: Link to go to a help page for the application
     {% endcomment %}
-    <a target="_blank" href="/help">{% trans "Help" %}</a> <span class="sep">|</span>
+    <a target="_blank" href="/help" id="help-link">{% trans "Help" %}</a>
+    <span class="sep">|</span>
     {% comment %}
     #i18n: Link to terms of service for the application
     {% endcomment %}
-    <a target="_blank" href="/terms">{% trans "Terms of Service" %}</a> <span class="sep">|</span>
+    <a target="_blank" href="/terms">{% trans "Terms of Service" %}</a>
+    <span class="sep">|</span>
     {% comment %}
     #i18n: Link to privacy policy for the application
     {% endcomment %}
-    <a target="_blank" href="/privacy">{% trans "Privacy" %}</a> <span class="sep">|</span>
+    <a target="_blank" href="/privacy">{% trans "Privacy" %}</a>
+    <span class="sep">|</span>
     <a href="{{loginout_url}}">{{loginout_text}}</a>
   </div>
   {% if params.print %}
@@ -157,7 +162,7 @@
       <thead>
         <tr>
           {% comment %}
-          #i18n: Name of the application.
+          #i18n: Total number of facilities shown on the map.
           {% endcomment %}
           <th>{% trans "Total facilities" %}</th>
           {% comment %}
@@ -190,7 +195,7 @@
     {% comment %}
     #i18n: Button to export data to comma-separated-values format.
     {% endcomment %}
-    <a target="_blank" href="{{export_link}}" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export CSV" %}</a> <span class="sep">|</span>
+    <a target="_blank" href="{{export_url}}" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export CSV" %}</a> <span class="sep">|</span>
 
     {% comment %}
     #i18n: Link to go to a page with past versions of the 'master' list

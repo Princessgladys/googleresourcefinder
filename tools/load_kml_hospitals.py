@@ -19,14 +19,14 @@ def load_hospitals(version, records):
         version, key_name='unknown', type='arrondissement', title='Unknown')
     db.put(unknown)
 
-    facilities = []
+    subjects = []
     reports = []
     for record in records:
         location = record['location']
-        facility_name = utils.make_name(record['title'])
-        facilities.append(Facility(
+        subject_name = utils.make_name(record['title'])
+        subjects.append(Subject(
             version,
-            key_name=facility_name,
+            key_name=subject_name,
             type='hospital',
             title=record['title'],
             location=db.GeoPt(location[1], location[0]),
@@ -37,14 +37,14 @@ def load_hospitals(version, records):
             comment = record['comment']
             report = Report(
                 version,
-                facility_name=facility_name,
+                subject_name=subject_name,
                 date=datetime.date.today(),
                 comments=db.Text(comment))
             match = BEDS_RE.search(comment)
             if match:
                 report.total_beds = int(match.group(1))
             reports.append(report)
-    db.put(facilities)
+    db.put(subjects)
     db.put(reports)
 
 def load_kml_file(version, filename):

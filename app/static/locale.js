@@ -75,6 +75,10 @@ locale = function() {
   messages.ERROR_LONGITUDE_MUST_BE_NUMBER =
       'Longitude must be a number.';
 
+  //i18n: Error message for not saving facility information successfully
+  messages.ERROR_SAVING_FACILITY_INFORMATION =
+      'Error saving facility information.';
+
   //i18n: Error message for a value that is not a number
   messages.ERROR_VALUE_MUST_BE_NUMBER =
       'Value must be a number.';
@@ -88,15 +92,15 @@ locale = function() {
   messages.FACILITY =
       'Facility';
 
-  //i18n: Proper name of an ID for a healthcare facility defined by the
-  //i18n: Pan-American Health Organization, no translation necessary.
-  messages.FACILITY_PCODE =
-      'PCode:';
+  //i18n: Proper name of an ID for a health facility defined by the 
+  //i18n: Haiti ministry of health (MSPP); no translation necessary.
+  messages.PCODE =
+      'PCode';
 
-  //i18n: Proper name of an ID for a healthcare facility, no translation
-  //i18n: necessary.
+  //i18n: Proper name of an ID for a health facility defined by the 
+  //i18n: Pan-American Health Organization; no translation necessary.
   messages.HEALTHC_ID =
-      'HealthC ID:';
+      'HealthC ID';
 
   //i18n: Message indicating loading hospital information
   messages.LOADING =
@@ -140,7 +144,7 @@ locale = function() {
 
   //i18n: Label for a control that filters a list of facilities
   messages.SHOW =
-      'Show:';
+      'Show';
 
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE =
