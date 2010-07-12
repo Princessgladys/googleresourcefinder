@@ -102,7 +102,7 @@ locale = function() {
   messages.SERVICES = "Services";
 
   //i18n: Label for a control that filters a list of facilities
-  messages.SHOW = "Show";
+  messages.SHOW = "Montrer";
 
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}:${MINUTES} ${ZONE}";
