@@ -210,10 +210,10 @@ class MailAlerts(Handler):
         self.init()
         
         if self.action == 'subject_changed':
-            self.changed_request_data = pickle.loads(
-                str(simplejson.loads(self.request.get('changed_data'))))
-            self.unchanged_request_data = pickle.loads(
-                str(simplejson.loads(self.request.get('unchanged_data'))))
+            self.changed_request_data = pickle.loads(simplejson.loads(
+                self.request.get('changed_data')).encode('latin-1'))
+            self.unchanged_request_data = pickle.loads(simplejson.loads(
+                self.request.get('unchanged_data')).encode('latin-1'))
             self.update_and_add_pending_alerts()
         else:
             for freq in ['daily', 'weekly', 'monthly']:

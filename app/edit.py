@@ -19,7 +19,6 @@ import cache
 import datetime
 import logging
 import model
-import pickle
 import re
 import StringIO
 import urlparse
@@ -477,16 +476,16 @@ class Edit(utils.Handler):
                 
                 # On edit, create a task to e-mail users who have subscribed
                 # to that subject.
-                json_pickle_attrs_changed = simplejson.dumps(
-                    pickle.dumps(changed_attribute_information))
-                json_pickle_attrs_unchanged = simplejson.dumps(
-                    pickle.dumps(unchanged_attribute_values))
+                json_attrs_changed = simplejson.dumps(pickle.dumps(
+                    unicode(changed_attribute_information, 'latin-1')))
+                json_attrs_unchanged = simplejson.dumps(pickle.dumps(
+                    unicode(unchanged_attribute_values, 'latin-1')))
                 
                 params = {
                     'subject_name': subject.key().name(),
                     'action': 'subject_changed',
-                    'changed_data': json_pickle_attrs_changed,
-                    'unchanged_data': json_pickle_attrs_unchanged
+                    'changed_data': json_attrs_changed,
+                    'unchanged_data': json_attrs_unchanged
                 }
 
                 taskqueue.add(url='/mail_alerts', method='POST',
