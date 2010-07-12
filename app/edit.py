@@ -474,14 +474,14 @@ class Edit(utils.Handler):
                 db.put([report, subject, minimal_subject])
                 cache.MINIMAL_SUBJECTS[self.subdomain].flush()
                 cache.JSON[self.subdomain].flush()
-                
+
                 # On edit, create a task to e-mail users who have subscribed
                 # to that subject.
                 json_pickle_attrs_changed = simplejson.dumps(
                     pickle.dumps(changed_attribute_information))
                 json_pickle_attrs_unchanged = simplejson.dumps(
                     pickle.dumps(unchanged_attribute_values))
-                
+
                 params = {
                     'subject_name': subject.key().name(),
                     'action': 'subject_changed',
@@ -500,7 +500,9 @@ class Edit(utils.Handler):
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
-            # TODO(shakusa) Create a task to refresh the cache
+            # Fire off a task to asynchronously refresh the cache
+            taskqueue.add(url='/refresh_cache?subdomain=%s' % self.subdomain,
+                          method='GET')
         else:
             raise Redirect(self.get_url('/'))
 

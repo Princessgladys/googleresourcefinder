@@ -100,6 +100,10 @@ handlers:
   script: mail_alerts.py
   login: admin
 
+- url: /refresh_cache
+  script: refresh_cache.py
+  login: admin
+
 - url: /subscribe
   script: subscribe.py
   login: admin
