@@ -1,4 +1,4 @@
-# Copyright 2009-2010 by Google Inc.
+# Copyright 2010 by Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,9 +48,13 @@ class Settings(Handler):
         home_url = self.get_url('/')
         logout_url = users.create_logout_url(home_url)
         frequencies = [
+            #i18n: Label for immediate e-mail updates
             {'en': 'immediate', 'trans': _('Immediate')},
+            #i18n: Label for daily e-mail updates
             {'en': 'daily', 'trans': _('Daily')},
+            #i18n: Label for weekly e-mail updates
             {'en': 'weekly', 'trans': _('Weekly')},
+            #i18n: Label for monthly e-mail updates
             {'en': 'monthly', 'trans': _('Monthly')}
         ]
 

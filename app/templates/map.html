@@ -14,9 +14,10 @@
 # limitations under the License.
 {% endcomment %}
 
-{% include "header.html" %}
+{% extends "base.html" %}
 {% load i18n %}
 
+{% block content %}
 <div id="map"></div>
 <div class="hshadow hs1"></div>
 <div class="hshadow hs2"></div>
@@ -88,3 +89,4 @@
 </script>
 </body>
 </html>
+{% endblock content %}

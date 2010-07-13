@@ -201,8 +201,8 @@ msgstr "Nombre de contacto"
 msgid "Country:"
 msgstr "País:"
 
-#. TODO: Add missing message description or meaning
-#: settings.py:52
+#. Label for daily e-mail updates
+#: settings.py:54
 msgid "Daily"
 msgstr "Diálisis"
 
@@ -217,7 +217,7 @@ msgid "Date and time"
 msgstr "Fecha y hora"
 
 #. Label for change default frequency box
-#: templates/settings.html:67
+#: templates/settings.html:93
 msgid "Default Frequency:"
 msgstr "Predeterminada de Frecuencias:"
 
@@ -264,12 +264,12 @@ msgid "E-mail"
 msgstr "Correo electrónico"
 
 #. Label for e-mail type radio buttons
-#: templates/settings.html:34
+#: templates/settings.html:60
 msgid "E-mail Format:"
 msgstr "Correo electrónico"
 
 #. Label for a language selector
-#: templates/settings.html:52
+#: templates/settings.html:78
 msgid "E-mail Language:"
 msgstr "Idioma:"
 
@@ -299,12 +299,12 @@ msgid "Error loading facility information."
 msgstr "Error al cargar servicio de información."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:151 templates/map.html:66
+#: export.py:151 templates/map.html:67
 msgid "Export CSV"
 msgstr "Exportar CSV"
 
 #. label for facility name
-#: templates/settings.html:89 static/locale.js:88
+#: templates/settings.html:115 static/locale.js:88
 msgid "Facility"
 msgstr "Institución"
 
@@ -364,12 +364,12 @@ msgid "HealthC ID"
 msgstr "ID HealthC"
 
 #. Link to go to a help page for the application
-#: templates/header.html:119
+#: templates/base.html:125
 msgid "Help"
 msgstr "Ayuda"
 
 #. Link to return to the main page of the application
-#: templates/header.html:101
+#: templates/base.html:103
 msgid "Home"
 msgstr "Página principal"
 
@@ -379,12 +379,12 @@ msgid "Hospital"
 msgstr "Hospital"
 
 #. Explains how to correct incorrect information that has been printed.
-#: templates/map.html:79
+#: templates/map.html:80
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr "Si la información es incorrecta o no está especificada, modificala en el sitio web:"
 
-#. TODO: Add missing message description or meaning
-#: settings.py:51
+#. Label for immediate e-mail updates
+#: settings.py:52
 msgid "Immediate"
 msgstr "Inmediato"
 
@@ -424,7 +424,7 @@ msgid "Lab"
 msgstr "Laboratorio"
 
 #. Label for a language selector
-#: templates/header.html:87
+#: templates/base.html:85
 msgid "Language:"
 msgstr "Idioma:"
 
@@ -459,7 +459,7 @@ msgid "Loader:"
 msgstr "Cargador:"
 
 #. Indicator that the application is loading.
-#: templates/header.html:165
+#: templates/base.html:171
 msgid "Loading..."
 msgstr "Cargando..."
 
@@ -508,8 +508,8 @@ msgstr "Variada"
 msgid "Mobile clinic"
 msgstr "Clínica móvil"
 
-#. TODO: Add missing message description or meaning
-#: settings.py:54
+#. Label for monthly e-mail updates
+#: settings.py:58
 msgid "Monthly"
 msgstr "Mensual"
 
@@ -549,7 +549,7 @@ msgid "No availability information"
 msgstr "No hay información de disponibilidad"
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:103
+#: templates/settings.html:129
 msgid "No facilities to display."
 msgstr "No hay instalaciones para mostrar."
 
@@ -620,7 +620,7 @@ msgid "Phone"
 msgstr "Teléfono"
 
 #. Label for "plain text" radio button
-#: templates/settings.html:38
+#: templates/settings.html:64
 msgid "Plain Text"
 msgstr "Texto Sin Formato"
 
@@ -640,7 +640,7 @@ msgid "Previous value"
 msgstr "Valor anterior"
 
 #. Link to print the current view of the application
-#: templates/header.html:107
+#: templates/base.html:112
 msgid "Print"
 msgstr "Imprimir"
 
@@ -651,7 +651,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Imprime una lista de hospitales por orden de distancia desde ${FACILITY_NAME}"
 
 #. Link to privacy policy for the application
-#: templates/header.html:129
+#: templates/base.html:135
 msgid "Privacy"
 msgstr "Privado"
 
@@ -693,7 +693,7 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "La solicitud para ser %(role)s se denegó."
 
 #. Name of the application.
-#: templates/header.html:158 templates/header.html.py:142
+#: templates/base.html.py:148 templates/base.html:164
 msgid "Resource Finder"
 msgstr "Localizador de recursos"
 
@@ -707,6 +707,11 @@ msgstr "Localizador de recursos"
 msgid "Save"
 msgstr "Guardar"
 
+#. TODO: Add missing message description or meaning
+#: templates/settings.html:42
+msgid "Saved."
+msgstr "Guardar"
+
 #. Label for a selector to export data to CSV
 #: export.py:142
 msgid "Select subject type to export:"
@@ -717,8 +722,13 @@ msgstr "Seleccionar el tipo de institución de la exportación:"
 msgid "Services"
 msgstr "Servicios"
 
+#. label for changing subjects to default frequency
+#: templates/settings.html:163
+msgid "Set Checked to Default"
+msgstr ""
+
 #. Settings page title
-#: templates/settings.html:26 templates/header.html:113
+#: templates/settings.html:52 templates/base.html:119
 msgid "Settings"
 msgstr "Ajustes"
 
@@ -733,7 +743,7 @@ msgid "Sign in"
 msgstr "Acceder"
 
 #. Link to sign out of the app
-#: settings.py:64 main.py:57
+#: settings.py:68 main.py:57
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
@@ -743,7 +753,7 @@ msgid "Supplies"
 msgstr "Suministros"
 
 #. Link to terms of service for the application
-#: templates/header.html:124
+#: templates/base.html:130
 msgid "Terms of Service"
 msgstr "Condiciones del servicio"
 
@@ -758,7 +768,7 @@ msgid "Total beds"
 msgstr "Cantidad total de camas"
 
 #. Total number of facilities shown on the map.
-#: templates/map.html:35
+#: templates/map.html:36
 msgid "Total facilities"
 msgstr "Cantidad total de instituciones"
 
@@ -782,6 +792,11 @@ msgstr "Universidad"
 msgid "Unreinforced masonry"
 msgstr "Mampostería no reforzada"
 
+#. label for unsubscribing from subjects
+#: templates/settings.html:169
+msgid "Unsubscribe from Checked"
+msgstr ""
+
 #. Label indicating a record was updated
 #: static/locale.js:138
 msgid "Updated"
@@ -803,12 +818,12 @@ msgid "Vascular Surgery"
 msgstr "Cirugía Vascular"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:71
+#: templates/map.html:72
 msgid "View Master List archive"
 msgstr "Ver archivo de la lista maestra"
 
-#. TODO: Add missing message description or meaning
-#: settings.py:53
+#. Label for weekly e-mail updates
+#: settings.py:56
 msgid "Weekly"
 msgstr "Semanal"
 
@@ -840,7 +855,7 @@ msgid "Your request for \"%(action)s\" permission is now pending"
 msgstr "Tu solicitud de %(role)s ya se registró"
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
-#: templates/map.html:45
+#: templates/map.html:46
 msgid "and with availability."
 msgstr "y con disponibilidad."
 
@@ -860,7 +875,7 @@ msgid "capacity"
 msgstr "capacidad"
 
 #. Header for the number of facilities less than 10 miles from a location.
-#: templates/map.html:40
+#: templates/map.html:41
 msgid "no more than 10 miles away"
 msgstr "a no más de 10 millas"
 

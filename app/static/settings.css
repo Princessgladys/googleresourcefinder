@@ -1,5 +1,5 @@
 /*
-# Copyright 2009-2010 by Google Inc.
+# Copyright 2010 by Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # limitations under the License.
 */
 
-.settings {
+#settings {
   padding: 10px 10px;
   width: 100%;
 }
@@ -22,7 +22,19 @@
 .settings-title {
   background-color: #d9d9d9;
   font-weight: bold;
-  font-size: 129%;
+  font-size: 140%;
+}
+
+.settings-email-type {
+  font-size: 13px;
+}
+
+.settings-locale {
+  font-size: 13px;
+}
+
+.settings-change-default {
+  font-size: 13px;
 }
 
 .settings-label-checkbox {
@@ -31,12 +43,12 @@
 
 .settings-label-subjectname {
   font-weight: bold;
-  font-size: 105%;
+  font-size: 125%;
 }
 
 .settings-label-frequency {
   font-weight: bold;
-  font-size: 105%;
+  font-size: 125%;
 }
 
 .settings-no-facilities {
@@ -44,8 +56,8 @@
   font-size: 110%;
 }
 
-.settings hr {
-  width: 95%;
+.settings-subject-name {
+  font-size: 13px;
 }
 
 .odd {

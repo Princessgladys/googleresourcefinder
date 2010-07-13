@@ -105,4 +105,3 @@ handlers:
 
 - url: /subscribe
   script: subscribe.py
-  login: admin
