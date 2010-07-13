@@ -92,11 +92,12 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         # Shut down Selenium.
         self.stop()
 
-    def login(self, path):
+    def login(self, path=None):
         """Navigates to the given path, logging in if necessary, and waits for
         the page to load.  Use this method to load the first page in a test.
         Returns True if a login form appeared and was submitted."""
-        self.open_path(path)
+        if path is not None:
+            self.open_path(path)
         if self.is_element_present(self.config.login_form):
             self.type(self.config.login_email, self.config.user_name)
             if 'password' in self.config:

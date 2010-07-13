@@ -290,8 +290,13 @@
       };
       $('cancel').onclick = inplace_edit_cancel;
       $('edit').onsubmit = function() {
-        $('save').onclick();
         return false;
+      };
+      $('edit').onkeypress = function(e) {
+        var event = e || window.event;
+        if (event.keyCode == 13) {
+          $('save').onclick();          
+        }
       };
     } else {
       $('save').onclick = save;

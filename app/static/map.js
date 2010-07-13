@@ -1150,11 +1150,7 @@ function select_division_and_status(division_i, status_i) {
   update_subject_list();
 }
 
-function select_subject(subject_i, ignore_current) {
-  if (!ignore_current && subject_i === selected_subject_i) {
-    return;
-  }
-  
+function select_subject(subject_i) {
   // Update the selection.
   selected_subject_i = subject_i;
   selected_subject = (subject_i <= 0) ? null : subjects[subject_i];
@@ -1270,7 +1266,7 @@ function show_temporary_status(message, duration) {
 
 // ==== Load data
 
-function load_data(data) {
+function load_data(data, selected_subject_name) {
   attributes = data.attributes;
   subject_types = data.subject_types;
   subjects = data.subjects;
@@ -1291,6 +1287,9 @@ function load_data(data) {
   var subject_is = [];
   for (var i = 1; i < subjects.length; i++) {
     subject_is.push(i);
+    if (selected_subject_name == subjects[i].name) {
+      selected_subject_i = i;
+    }
   }
   divisions = [{
     title: 'All divisions',
@@ -1316,6 +1315,9 @@ function load_data(data) {
 
   select_supply_set(DEFAULT_SUPPLY_SET_I);
   select_division_and_status(0, STATUS_GOOD);
+  if (selected_subject_i != -1) {
+    window.setTimeout(subject_selector(selected_subject_i), 500);
+  }
 
   if (print) {
     initialize_print_headers();
@@ -1468,7 +1470,7 @@ function inplace_edit_save(edit_url) {
       success: function(data) {
 	$('data').style.display = '';
 	$('edit-data').style.display = 'none';
-	select_subject(selected_subject_i, true);
+	select_subject(selected_subject_i);
 	show_temporary_status(locale.SAVED(), 5000);
       }
     });
