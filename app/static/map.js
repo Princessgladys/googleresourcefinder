@@ -470,16 +470,6 @@ function initialize_markers() {
 
 // ==== Display construction routines
 
-function initialize_language_selector() {
-  var select = $('lang-select');
-  if (!select) {
-    return;
-  }
-  select.onchange = function() {
-    window.location = select.options[select.selectedIndex].value;
-  };
-}
-
 // Set up the supply selector (currently unused).
 function initialize_supply_selector() {
   var tbody = $('supply-tbody');
@@ -1249,7 +1239,6 @@ function load_data(data) {
     initialize_subject_header();    
   }
 
-  initialize_language_selector();
   initialize_map();
   initialize_markers();
   initialize_handlers();

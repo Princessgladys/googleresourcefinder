@@ -6,19 +6,35 @@
  */
 
 /**
+ * JS Object for holding change information pertaining to a particular
+ * subscription.
+ * @param {string} subject_name the subject this change is about
+ * @param {string} old_frequency uesr's old frequency for this subscription
+ * @param {string} new_frequency desired frequency for the subscription
+ */
+function ChangeInfo(subject_name, old_frequency, new_frequency) {
+  this.subject_name = subject_name;
+  this.old_frequency = old_frequency;
+  this.new_frequency = new_frequency;
+}
+
+/**
  * Sends AJAX command to change current account's default frequency.
  * @param {string} subdomain current subdomain
- * @param {HTMLSelectelemtn} frequency the select menu with the frequency
+ * @param {HTMLSelectElement} frequency the select menu with the frequency
  *   options
  */
 function change_default_frequency(subdomain, frequency) {
   jQuery.ajax({
     type: "POST",
     url: "/subscribe",
-    data: "subdomain=" + subdomain + "&action=change_default_frequency&" +
-      "frequency=" + frequency.value,
+    data: "subdomain=" + subdomain + "&action=change_default_frequency" +
+      "&frequency=" + frequency.value,
     success: function(msg) {
-      window.location.reload();
+      show_saved();
+    },
+    error: function(xhr, text_status, error) {
+      alert(text_status);
     }
   });
 }
@@ -28,9 +44,9 @@ function change_default_frequency(subdomain, frequency) {
  * @param {string} subdomain current subdomain
  */
 function unsubscribe_checked(subdomain) {
-  var subjects = new Array();
+  var subjects = [];
   var boxes = document.getElementsByName('subject-checkboxes');
-  for (i = 0; i < boxes.length; i++) {
+  for (var i = 0; i < boxes.length; i++) {
     if (boxes[i].checked) {
       var subject = document.getElementById(boxes[i].value);
       subjects.push(subject.id);
@@ -40,10 +56,13 @@ function unsubscribe_checked(subdomain) {
   jQuery.ajax({
     type: "POST",
     url: "/subscribe",
-    data: "subdomain=" + subdomain + "&action=unsubscribe_multiple&" +
-      "subjects=" + JSON.stringify(subjects),
+    data: "subdomain=" + subdomain + "&action=unsubscribe_multiple" +
+      "&subjects=" + JSON.stringify(subjects),
     success: function(msg) {
       window.location.reload();
+    },
+    error: function(xhr, text_status, error) {
+      alert(text_status);
     }
   });
 }
@@ -51,31 +70,42 @@ function unsubscribe_checked(subdomain) {
 /**
  * Sets all checked off subjects to the account's default frequency.
  * @param {string} subdomain current subdomain
- * @param {string} default_frequency user's default frequency for updates
  */
-function set_checked_to_default(subdomain, default_frequency) {
-  var subjects = new Array();
+function set_checked_to_default(subdomain) {
+  var subjects = [];
   var boxes = document.getElementsByName('subject-checkboxes');
-  for (i = 0; i < boxes.length; i++) {
+  var default_frequency = document.getElementsByName('default-frequency')[0];
+  for (var i = 0; i < boxes.length; i++) {
     if (boxes[i].checked) {
-      var subject = document.getElementById(boxes[i].value);
-      var cells = subject.getElementsByTagName("input");
-      for (j = 1; j < cells.length; j++) {
-        if (cells[j].getAttribute('class'))
-          var old_frequency = cells[j].getAttribute('class');
-        if (cells[j].value == default_frequency)
-          cells[j].checked = true;
+      var freq_radios = document.getElementsByName(boxes[i].value + '_freq');
+      for (var j = 0; j < freq_radios.length; j++) {
+        if (freq_radios[j].getAttribute('class')) {
+          var old_frequency = freq_radios[j].getAttribute('class');
+          freq_radios[j].setAttribute('class', '');
+        }
+        if (freq_radios[j].value == default_frequency.value) {
+          freq_radios[j].checked = true;
+          freq_radios[j].setAttribute('class', default_frequency.value);
+        }
       }
-      subjects.push(new change_info(subject.id, old_frequency,
-                                    default_frequency));
+      if (old_frequency != default_frequency.value) {
+        subjects.push(new ChangeInfo(boxes[i].value, old_frequency,
+                                     default_frequency.value));
+      }
     }
   }
 
   jQuery.ajax({
     type: "POST",
     url: "/subscribe",
-    data: "subdomain=" + subdomain + "&action=change_subscriptions&" +
-      "subject_changes=" + JSON.stringify(subjects)
+    data: "subdomain=" + subdomain + "&action=change_subscriptions" +
+      "&subject_changes=" + JSON.stringify(subjects),
+    success: function(msg) {
+      show_saved();
+    },
+    error: function(xhr, text_status, error) {
+      alert(text_status);
+    }
   });
 }
 
@@ -88,8 +118,14 @@ function change_email_format(subdomain, email_format) {
   jQuery.ajax({
     type: "POST",
     url: "/subscribe",
-    data: "subdomain=" + subdomain + "&action=change_email_format&" +
-      "email_format=" + email_format
+    data: "subdomain=" + subdomain + "&action=change_email_format" +
+      "&email_format=" + email_format,
+   success: function(msg) {
+      show_saved();
+    },
+    error: function(xhr, text_status, error) {
+      alert(text_status);
+    }
   });
 }
 
@@ -102,8 +138,14 @@ function change_locale(subdomain, locale) {
   jQuery.ajax({
     type: "POST",
     url: "/subscribe",
-    data: "subdomain=" + subdomain + "&action=change_locale&" +
-      "locale=" + locale.value
+    data: "subdomain=" + subdomain + "&action=change_locale" +
+      "&locale=" + locale.value,
+    success: function(msg) {
+      show_saved();
+    },
+    error: function(xhr, text_status, error) {
+      alert(text_status);
+    }
   });
 }
 
@@ -121,21 +163,11 @@ function change_frequency(subdomain, subject_name, old_frequency,
     url: "/subscribe",
     data: "subdomain=" + subdomain + "&action=change_subscription" +
       "&subject_name=" + subject_name + "&old_frequency=" + old_frequency +
-      "&new_frequency=" + new_frequency
+      "&new_frequency=" + new_frequency,
+    success: function(msg) {
+      show_saved();
+    }
   });
-}
-
-/**
- * JS Object for holding change information pertaining to a particular
- * subscription.
- * @param {string} subject_name the subject this change is about
- * @param {string} old_frequency uesr's old frequency for this subscription
- * @param {string} new_frequency desired frequency for the subscription
- */
-function change_info(subject_name, old_frequency, new_frequency) {
-  this.subject_name = subject_name;
-  this.old_frequency = old_frequency;
-  this.new_frequency = new_frequency;
 }
 
 /**
@@ -145,8 +177,8 @@ function change_info(subject_name, old_frequency, new_frequency) {
 function check_uncheck_all() {
   var all_box = document.getElementsByName('subjects-check-all')[0];
   var boxes = document.getElementsByName('subject-checkboxes');
-  for (i = 0; i < boxes.length; i++) {
-    boxes[i].checked = (all_box.checked == true);
+  for (var i = 0; i < boxes.length; i++) {
+    boxes[i].checked = all_box.checked;
   }
 }
 
@@ -159,7 +191,7 @@ function check_checkboxes() {
   var all_box = document.getElementsByName('subjects-check-all')[0];
   var boxes = document.getElementsByName('subject-checkboxes');
   var all_true = true;
-  for (i = 0; i < boxes.length; i++) {
+  for (var i = 0; i < boxes.length; i++) {
     if (boxes[i].checked == false) {
       all_box.checked = false;
       all_true = false;
@@ -169,5 +201,20 @@ function check_checkboxes() {
   if (all_true) {
     all_box.checked = true;
   }
+}
+
+/**
+ * Displays a message at the top of the screen notifying the user that a save
+ * has been made.
+ */
+function show_saved(data, text_status, xhr) {
+  flip_saved(true);
+  setTimeout(function() {
+    flip_saved(false);
+  }, 2000);
+}
+
+function flip_saved(show) {
+  document.getElementById("loading").style.display = show ? '' : 'none';
 }
 

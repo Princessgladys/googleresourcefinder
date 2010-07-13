@@ -1,5 +1,5 @@
 {% comment %}
-# Copyright 2009-2010 by Ka-Ping Yee
+# Copyright 2010 by Google Inc
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,10 +14,36 @@
 # limitations under the License.
 {% endcomment %}
 
-{% include "header.html" %}
+{% extends "base.html" %}
 {% load i18n %}
 
-<table class="settings">
+{% block stylesheets %}
+  <link rel="stylesheet" href="static/settings.css">
+{% endblock stylesheets %}
+
+<!-- remove google maps api -->
+{% block google-maps-api %}
+{% endblock google-maps-api %}
+
+{% block javascript-includes %}
+  <script type="text/javascript" src="static/settings.js"></script>
+{% endblock javascript-includes %}
+
+<!-- remove print link -->
+{% block print-link %}
+{% endblock print-link %}
+
+<!-- remove settings link -->
+{% block settings-link %}
+{% endblock settings-link %}
+
+<!-- replace loading div with saved -->
+{% block loading %}
+<div id="loading" class="loading" style='display: none;'>{% trans "Saved." %}</div>
+{% endblock loading %}
+
+{% block content %}
+<table id="settings">
   <tr>
     <td colspan="6" class="settings-title">
       {% comment %}
@@ -26,8 +52,8 @@
       {% trans "Settings" %}
     </td>
   </tr>
-  <tr class="email-type">
-    <td colspan="6">
+  <tr>
+    <td colspan="6" class="settings-email-type">
       {% comment %}
       #i18n: Label for e-mail type radio buttons
       {% endcomment %}
@@ -44,8 +70,8 @@
         {% ifequal user_email_format 'html' %} checked{% endifequal %}>
     </td>
   </tr>
-  <tr class="locale">
-    <td colspan="6">
+  <tr>
+    <td colspan="6" class="settings-locale">
       {% comment %}
       #i18n: Label for a language selector
       {% endcomment %}
@@ -105,18 +131,18 @@
   </tr>
   {% endif %}
   {% for subject in subjects %}
-  <tr id="{{subject.name}}" class="{% if forloop.counter|divisibleby:2 %}even"
-    "{% else %}odd{% endif %}">
-    <td class="subject-checkbox">
+  <tr id="{{subject.name}}" class="{% if forloop.counter|divisibleby:2 %}even
+    {% else %}odd{% endif %}">
+    <td class="settings-subject-checkbox">
       <center><input type="checkbox" name="subject-checkboxes"
         value="{{subject.name}}" onClick="check_checkboxes();"></center>
     </td>
-    <td class="subject-name">
+    <td class="settings-subject-name">
       {{subject.title}}
     </td>
     {% for frequency in frequencies %}
     <td>
-      <center><input type="radio" name="{{subject.name}}"
+      <center><input type="radio" name="{{subject.name}}_freq"
           {% ifequal frequency.en subject.frequency %}class="{{frequency.en}}"
           {% endifequal %}
           value="{{frequency.en}}" onClick="change_frequency('{{subdomain}}',
@@ -130,10 +156,17 @@
   <tr>
     <td></td>
     <td>
-      <button onClick="set_checked_to_default('{{subdomain}}',
-        '{{user_frequency}}');">Set Checked to Default</button>
+      <button onClick="set_checked_to_default('{{subdomain}}');">
+        {% comment %}
+        #i18n: label for changing subjects to default frequency
+        {% endcomment %}
+        {% trans "Set Checked to Default" %}
+      </button>
       <button onClick="unsubscribe_checked('{{subdomain}}')">
-        Unsubscribe from Checked</button>
+        {% comment %}
+        #i18n: label for unsubscribing from subjects
+        {% endcomment %}
+        {% trans "Unsubscribe from Checked" %}</button>
     </td>
   </tr>
   {% endif %}
@@ -141,3 +174,4 @@
 
 </body>
 </html>
+{% endblock content %}
