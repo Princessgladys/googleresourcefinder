@@ -501,8 +501,8 @@ class Edit(utils.Handler):
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
             # Fire off a task to asynchronously refresh the cache
-            taskqueue.add(url='/refresh_cache?subdomain=%s' % self.subdomain,
-                          method='GET')
+            taskqueue.add(url='/refresh_cache?lang=%s&subdomain=%s'
+                          % (self.params.lang, self.subdomain), method='GET')
         else:
             raise Redirect(self.get_url('/'))
 

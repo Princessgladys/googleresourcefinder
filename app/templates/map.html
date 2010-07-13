@@ -216,7 +216,15 @@
 
 <script>
   jQuery(document).ready(function() {
-    load_data({{data}});
+    load_data({{data}}, '{{params.subject_name}}');
+    {% if params.embed %}
+      {% comment %}
+        We get here if redirected from the 'Sign-in to edit' link in the bubble
+        through the sign-in form.
+      {% endcomment %}
+      
+      inplace_edit_handler('{{edit_url|escape}}');
+    {% endif %}
   });
 </script>
 </body>

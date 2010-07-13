@@ -47,23 +47,25 @@ class EditTest(SeleniumTestCase):
             'haiti', 'example.org/123',
             title='title_foo', location=db.GeoPt(51.5, 0))
         self.put_account(actions=['*:view', '*:edit'])  # allow edits
+        self.set_default_permissions(actions=['*:view']) # allow view by default
         self.s = scrape.Session()
 
     def tearDown(self):
         self.delete_subject('haiti', 'example.org/123')
         self.delete_account()
+        self.delete_default_account()
         SeleniumTestCase.tearDown(self)
 
     def test_edit_link(self):
         """Confirms that the "Edit this record" link in the detail bubble
         goes to the edit form."""
-        self.edit()
+        self.edit(login=True)
 
     def test_inplace_edit(self):
         """In-place edit: Confirms that all the fields in the in-place edit
         form save the entered values, and these values appear pre-filled when
         the form is loaded."""
-        self.edit()
+        self.edit(login=True)
 
         # First-time edit should show nickname and affiliation fields
         self.assert_element('//input[@name="account_nickname"]')
@@ -102,7 +104,7 @@ class EditTest(SeleniumTestCase):
         self.click('//input[@name="save"]')
         self.wait_until(self.is_visible, 'data')
 
-        # Return to the edit page
+        # Return to the edit form
         self.edit()
 
         # Nickname and affiliation fields should not be shown this time
@@ -135,7 +137,7 @@ class EditTest(SeleniumTestCase):
         self.click('//input[@name="save"]')
         self.wait_until(self.is_visible, 'data')
 
-        # Return to the edit page
+        # Return to the edit form
         self.edit()
 
         # Check that everything is now empty or deselected
@@ -149,13 +151,116 @@ class EditTest(SeleniumTestCase):
         self.click('//input[@name="save"]')
         self.wait_until(self.is_visible, 'data')
 
-        # Return to the edit page
+        # Return to the edit form
         self.edit()
 
         # Check that the integer fields are actually zero, not empty
         text_fields['available_beds'] = '0'
         text_fields['total_beds'] = '0'
         self.verify_fields(text_fields, checkbox_fields, select_fields)
+
+    def test_inplace_edit_signed_out(self):
+        """In-place edit starting from signed out:"""
+        self.open_path('/')
+
+        # Open a bubble
+        self.click('id=subject-1')
+        self.wait_for_element('link=Sign in to edit')
+
+        # Click Sign in to edit
+        self.click_and_wait('link=Sign in to edit')
+
+        # Login in at the login screen
+        self.login()
+
+        # Wait for the edit form to appear
+        self.wait_until(self.is_visible, 'edit-data')
+        self.assert_element('//input[@name="account_nickname"]')
+
+    def test_inplace_edit_comments(self):
+        """Tests comments and bubble reload during in-place edit."""
+        text_fields = {}
+
+        # Fill comment, but not available beds field ----------------------- #
+
+        self.edit(login=True)
+
+        # Fill in the form. Change available beds comment.
+        text_fields['account_nickname'] = 'Test'
+        text_fields['account_affiliation'] = 'Test'
+        text_fields['total_beds'] = ''
+        text_fields['total_beds__comment'] = 'comment_foo!'
+        text_fields['location.lat'] = '18.537207 '
+        text_fields['location.lon'] = '-72.349663'
+        checkbox_fields = {}
+        select_fields = {}
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+
+        self.click('//input[@name="save"]')
+        self.wait_until(self.is_visible, 'data')
+
+        # Go to change details page, and confirm changes
+        self.click('link=Change details')
+        assert self.is_text_present(u'Total beds: \u2013')
+        assert self.is_text_present('comment_foo!')
+
+        # Fill available beds, but not comment field ----------------------- #
+
+        # Nickname and affiliation fields should not be shown this time
+        del text_fields['account_nickname']
+        del text_fields['account_affiliation']
+
+        # Return to the edit form
+        self.edit()
+
+        # Change beds but without comment
+        text_fields['total_beds'] = '37'
+        text_fields['total_beds__comment'] = ''
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+
+        self.click('//input[@name="save"]')
+        self.wait_until(self.is_visible, 'data')
+
+        # Go to change details page, and confirm changes
+        self.click('link=Change details')
+        assert self.is_text_present('Total beds: 37')
+        assert not self.is_text_present('comment_foo!')
+
+        # Fill available beds and comment fields --------------------------- #
+
+        # Return to the edit form
+        self.edit()
+
+        # Change total beds and comment fields.
+        text_fields['total_beds'] = '99'
+        text_fields['total_beds__comment'] = 'comment_bar!'
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+
+        self.click('//input[@name="save"]')
+        self.wait_until(self.is_visible, 'data')
+
+        # Go to change details page, and confirm changes
+        self.click('link=Change details')
+        assert self.is_text_present('Total beds: 99')
+        assert self.is_text_present('comment_bar!')
+
+        # Delete both available beds and comment fields -------------------- #
+
+        # Return to the edit form
+        self.edit()
+
+        # Fill fields
+        text_fields['total_beds'] = ''
+        text_fields['total_beds__comment'] = ''
+        self.fill_fields(text_fields, checkbox_fields, select_fields)
+
+        self.click('//input[@name="save"]')
+        self.wait_until(self.is_visible, 'data')
+
+        # Go to change details page, and confirm changes
+        self.click('link=Change details')
+        assert self.is_text_present(u'Total beds: \u2013')
+        assert not self.is_text_present('comment_bar!')
 
     def test_edit_page(self):
         """Separate-page edit: Confirms that all the fields in the edit form
@@ -351,9 +456,12 @@ class EditTest(SeleniumTestCase):
         assert self.is_text_present(u'Total beds: \u2013')
         assert not self.is_text_present('comment_bar!')
 
-    def edit(self):
+    def edit(self, login=False):
         """Goes to edit form for subject 1"""
-        self.login('/')
+        if login:
+            self.open_path('/')
+            self.click_and_wait('link=Sign in')
+            self.login()
         self.click('id=subject-1')
         self.wait_for_element('link=Edit this record')
         self.click('link=Edit this record')
@@ -366,7 +474,7 @@ class EditTest(SeleniumTestCase):
 
         # Check that we got back to the main map
         assert self.get_location() == self.config.base_url + '/?subdomain=haiti'
-        
+
         # Test bubble change history comments
         self.click('id=subject-1')
         self.wait_for_element('link=Change details')
