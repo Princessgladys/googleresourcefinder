@@ -19,6 +19,7 @@ import cache
 import datetime
 import logging
 import model
+import pickle
 import re
 import StringIO
 import urlparse
@@ -475,11 +476,13 @@ class Edit(utils.Handler):
                 cache.JSON[self.subdomain].flush()
                 
                 # On edit, create a task to e-mail users who have subscribed
-                # to that subject.
-                json_attrs_changed = simplejson.dumps(pickle.dumps(
-                    unicode(changed_attribute_information, 'latin-1')))
-                json_attrs_unchanged = simplejson.dumps(pickle.dumps(
-                    unicode(unchanged_attribute_values, 'latin-1')))
+                # to that subject. Values are converted to unicode due to
+                # an issue where simplejson will not convert from pickle's
+                # 8-bit output to unicode; initial values must also be unicode.
+                json_attrs_changed = simplejson.dumps(unicode(
+                    pickle.dumps(changed_attribute_information), 'latin-1'))
+                json_attrs_unchanged = simplejson.dumps(unicode(
+                    pickle.dumps(unchanged_attribute_values), 'latin-1'))
                 
                 params = {
                     'subject_name': subject.key().name(),

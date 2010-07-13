@@ -210,6 +210,8 @@ class MailAlerts(Handler):
         self.init()
         
         if self.action == 'subject_changed':
+            # Values encoded to latin-1 before unpickling due to pickle
+            # needing 8-bit input, matching its original output.
             self.changed_request_data = pickle.loads(simplejson.loads(
                 self.request.get('changed_data')).encode('latin-1'))
             self.unchanged_request_data = pickle.loads(simplejson.loads(

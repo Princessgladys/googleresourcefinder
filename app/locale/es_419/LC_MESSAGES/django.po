@@ -626,7 +626,7 @@ msgid "Reachable by road"
 msgstr "Acceso a través de carretera"
 
 #. Record updated successfully.
-#: edit.py:502
+#: edit.py:504
 msgid "Record updated."
 msgstr "Registro actualizado."
 
@@ -658,7 +658,7 @@ msgid "Resource Finder"
 msgstr "Localizador de recursos"
 
 #. TODO: Add missing message description or meaning
-#: mail_alerts.py:267 mail_alerts.py:302 subscribe.py:118
+#: mail_alerts.py:304 mail_alerts.py:269 subscribe.py:118
 msgid "Resource Finder Updates"
 msgstr "Localizador de recursos"
 
