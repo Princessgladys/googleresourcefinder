@@ -53,6 +53,9 @@ locale = function() {
   //i18n: Error message for invalid latitude.
   messages.ERROR_LATITUDE_MUST_BE_NUMBER = "La latitud debe ser un n\u00famero";
 
+  //i18n: Error message for not loading edit form successfully
+  messages.ERROR_LOADING_EDIT_FORM = "Error al cargar editar formulario.";
+
   //i18n: Error message for not loading facility information successfully
   messages.ERROR_LOADING_FACILITY_INFORMATION = "Error al cargar instituci\u00f3n de informaci\u00f3n.";
 

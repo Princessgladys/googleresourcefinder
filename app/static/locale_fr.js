@@ -53,8 +53,11 @@ locale = function() {
   //i18n: Error message for invalid latitude.
   messages.ERROR_LATITUDE_MUST_BE_NUMBER = "Latitude doit \u00eatre un nombre";
 
+  //i18n: Error message for not loading edit form successfully
+  messages.ERROR_LOADING_EDIT_FORM = "Erreur lors du chargement de modifier le formulaire.";
+
   //i18n: Error message for not loading facility information successfully
-  messages.ERROR_LOADING_FACILITY_INFORMATION = "informations sur l'erreur installation de chargement";
+  messages.ERROR_LOADING_FACILITY_INFORMATION = "Erreur lors du chargement des informations de installation.";
 
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_INVALID = "Longitude doit \u00eatre comprise entre -180 et 180";
@@ -63,7 +66,7 @@ locale = function() {
   messages.ERROR_LONGITUDE_MUST_BE_NUMBER = "Longitude doit \u00eatre un nombre";
 
   //i18n: Error message for not saving facility information successfully
-  messages.ERROR_SAVING_FACILITY_INFORMATION = "informations sur l'erreur installation enregistrement";
+  messages.ERROR_SAVING_FACILITY_INFORMATION = "Erreur lors du enregistrement des informations de installation.";
 
   //i18n: Error message for a value that is not a number
   messages.ERROR_VALUE_MUST_BE_NUMBER = "La valeur doit \u00eatre un nombre";

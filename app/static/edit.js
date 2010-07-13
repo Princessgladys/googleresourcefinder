@@ -48,6 +48,7 @@
   /**
    * Validates the name field, present the first time a user
    * makes an edit. If the field is not present, returns true.
+   * @return {boolean} - true if the field is valid or not present
    */
   function validate_name() {
     var nickname = $('account_nickname');
@@ -60,6 +61,7 @@
   /**
    * Validates the affiliation field, present the first time a user
    * makes an edit. If the field is not present, returns true.
+   * @return {boolean} - true if the field is valid or not present
    */
   function validate_affil() {
     var affiliation = $('account_affiliation');
@@ -75,6 +77,7 @@
    * @param input {Element} input - the input element to validate
    * @param opt_error {string|null} opt_error - optional error message. If
    * missing, a generic "Field is required" message is used.
+   * @return {boolean} - true if the input is valid
    */
   function validate_required_string(input, opt_error) {
     var value = input.value ? jQuery.trim(input.value) : null;
@@ -153,8 +156,8 @@
    * @return {boolean} - true if the "save" button was not pressed or all 
    * inputs are valid, otherwise false
    */
-  function validate(embed) {
-    if (!embed && button_click !== 'save') {
+  function validate() {
+    if (button_click !== 'save') {
       return true;
     }
 
@@ -187,14 +190,23 @@
     }
     return !failed;
   }
-  
-  function make_unhidden(id) {
-    $(id).style.display = "";
+
+  /**
+   * Makes the element with the given id visible.
+   * @param {string} id - the id of the element to make visible
+   */  
+  function make_visible(id) {
+    $(id).style.display = '';
   }
-  
-  function make_unhidden_closure(div) {
+
+  /**
+   * Returns a closure that when called will make the given element visible.
+   * @param {Element} elem - the element to make visible
+   * @return {function} the closure
+   */
+  function make_visible_closure(elem) {
     return function() {
-      make_unhidden(div.id);
+      make_visible(elem.id);
     };
   }
 
@@ -214,7 +226,7 @@
         for (var div_index = 0; div_index < divs.length; div_index++) {
           var div = divs[div_index];
           if (div.className == "comment") {
-            var closure = make_unhidden_closure(div);
+            var closure = make_visible_closure(div);
             var elements = get_edit_elements(tr);
             for (var el_index = 0; el_index < elements.length; el_index++) {
               var element = elements[el_index];
@@ -230,18 +242,24 @@
     }
   }
 
-  function get_edit_elements(parent) {
+  /**
+   * Returns the 'editable' elements (inputs, selects, textareas) with
+   * the given ancestor.
+   * @param {Element} ancestor - the ancestor
+   * @return {Array} - editable elements
+   */
+  function get_edit_elements(ancestor) {
     var elements = [];
     var element_index = 0;
-    var inputs = parent.getElementsByTagName('input');
+    var inputs = ancestor.getElementsByTagName('input');
     for (var i = 0; i < inputs.length; i++) {
       elements[element_index++] = inputs[i];
     }
-    var selects = parent.getElementsByTagName('select');
+    var selects = ancestor.getElementsByTagName('select');
     for (var j = 0; j < selects.length; j++) {
       elements[element_index++] = selects[j];
     }
-    var textareas = parent.getElementsByTagName('textarea');
+    var textareas = ancestor.getElementsByTagName('textarea');
     for (var k = 0; k < textareas.length; k++) {
       elements[element_index++] = textareas[k];
     }
@@ -279,7 +297,7 @@
       $('save').onclick = save;
       $('cancel').onclick = cancel;
       $('edit').onsubmit = function() {
-        return validate(false);
+        return validate();
       };
     }
     init_edit_comments(opt_parent);

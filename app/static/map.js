@@ -1423,9 +1423,15 @@ function inplace_edit_handler(edit_url) {
   // InfoWindow so that it resizes correctly.
   log('Editing in place:', edit_url);
 
+  show_loading(true);
   $j.ajax({
     url: edit_url,
     type: 'GET',
+    error: function(request, textStatus, errorThrown) {
+      log(textStatus + ', ' + errorThrown);
+      alert(locale.ERROR_LOADING_EDIT_FORM());
+      show_loading(false);
+    },
     success: function(data) {
       var edit_data = $('edit-data');
       edit_data.innerHTML = data;
@@ -1437,6 +1443,7 @@ function inplace_edit_handler(edit_url) {
 
       $('data').style.display = 'none';
       init_edit(true, edit_url, edit_data);
+      show_loading(false);
     }
   });
 
@@ -1444,7 +1451,8 @@ function inplace_edit_handler(edit_url) {
 }
 
 function inplace_edit_save(edit_url) {
-  if (validate(true)) {
+  save();
+  if (validate()) {
     log('Saving in place');
 
     show_status(locale.SAVING());
@@ -1452,7 +1460,7 @@ function inplace_edit_save(edit_url) {
       url: edit_url,
       type: 'POST',
       data: $j('#edit').serialize(),
-      error: function(request, textStatus, errorThrown){
+      error: function(request, textStatus, errorThrown) {
 	log(textStatus + ', ' + errorThrown);
 	alert(locale.ERROR_SAVING_FACILITY_INFORMATION());
 	show_loading(false);
@@ -1470,6 +1478,7 @@ function inplace_edit_save(edit_url) {
 }
 
 function inplace_edit_cancel() {
+      cancel();
       $('data').style.display = '';
       $('edit-data').style.display = 'none';
 }

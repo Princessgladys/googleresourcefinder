@@ -59,7 +59,6 @@ class EditTest(SeleniumTestCase):
         goes to the edit form."""
         self.edit()
 
-    # TODO(shakusa) This could probably use some more cleanup
     def test_inplace_edit(self):
         """In-place edit: Confirms that all the fields in the in-place edit
         form save the entered values, and these values appear pre-filled when
