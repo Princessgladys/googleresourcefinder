@@ -94,7 +94,7 @@ class StrAttributeType(AttributeType):
 
 class TextAttributeType(AttributeType):
     def make_input(self, name, value, attribute):
-        return '<textarea name="%s" rows=5 cols=34>%s</textarea>' % (
+        return '<textarea name="%s" rows=5 cols=40>%s</textarea>' % (
             html_escape(name), html_escape(value or ''))
 
     def to_stored_value(self, name, value, request, attribute):
