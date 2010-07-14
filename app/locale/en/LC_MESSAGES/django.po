@@ -46,7 +46,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Error message for lacking edit permissions
-#: edit.py:448
+#: edit.py:358
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr ""
@@ -384,7 +384,7 @@ msgid "Invalid or missing account e-mail."
 msgstr ""
 
 #. Error message for request missing subject name.
-#: bubble.py:159 edit.py:342
+#: edit.py:425 bubble.py:159
 msgid "Invalid or missing subject name."
 msgstr ""
 
@@ -626,7 +626,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:504
+#: edit.py:507
 msgid "Record updated."
 msgstr ""
 
