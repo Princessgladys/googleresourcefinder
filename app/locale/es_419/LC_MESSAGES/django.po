@@ -698,7 +698,7 @@ msgid "Resource Finder"
 msgstr "Localizador de recursos"
 
 #. TODO: Add missing message description or meaning
-#: mail_alerts.py:267 mail_alerts.py:302 subscribe.py:147
+#: subscribe.py:149 mail_alerts.py:267 mail_alerts.py:302
 msgid "Resource Finder Updates"
 msgstr "Localizador de recursos"
 
@@ -723,9 +723,9 @@ msgid "Services"
 msgstr "Servicios"
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:163
+#: templates/settings.html:164
 msgid "Set Checked to Default"
-msgstr ""
+msgstr "Seleccionados para Establecer por Defecto"
 
 #. Settings page title
 #: templates/settings.html:52 templates/base.html:119
@@ -793,9 +793,9 @@ msgid "Unreinforced masonry"
 msgstr "Mampostería no reforzada"
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:169
+#: templates/settings.html:171
 msgid "Unsubscribe from Checked"
-msgstr ""
+msgstr "Darse de Baja de Comprobarse"
 
 #. Label indicating a record was updated
 #: static/locale.js:138

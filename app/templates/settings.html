@@ -156,13 +156,15 @@
   <tr>
     <td></td>
     <td>
-      <button onClick="set_checked_to_default('{{subdomain}}');">
+      <button onClick="set_checked_to_default('{{subdomain}}');"
+        id="button-set-to-default">
         {% comment %}
         #i18n: label for changing subjects to default frequency
         {% endcomment %}
         {% trans "Set Checked to Default" %}
       </button>
-      <button onClick="unsubscribe_checked('{{subdomain}}')">
+      <button onClick="unsubscribe_checked('{{subdomain}}')"
+        id="button-unsubscribe-checked">
         {% comment %}
         #i18n: label for unsubscribing from subjects
         {% endcomment %}

@@ -698,7 +698,7 @@ msgid "Resource Finder"
 msgstr ""
 
 #. TODO: Add missing message description or meaning
-#: mail_alerts.py:267 mail_alerts.py:302 subscribe.py:147
+#: subscribe.py:149 mail_alerts.py:267 mail_alerts.py:302
 msgid "Resource Finder Updates"
 msgstr ""
 
@@ -723,7 +723,7 @@ msgid "Services"
 msgstr ""
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:163
+#: templates/settings.html:164
 msgid "Set Checked to Default"
 msgstr ""
 
@@ -793,7 +793,7 @@ msgid "Unreinforced masonry"
 msgstr ""
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:169
+#: templates/settings.html:171
 msgid "Unsubscribe from Checked"
 msgstr ""
 

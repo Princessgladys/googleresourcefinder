@@ -132,7 +132,77 @@ class MailUpdateSystemTest(MediumTestCase):
         handler = self.simulate_request('/subscribe?action=unsubscribe&' +
                                         'subject_name=haiti:example.org/789')
         handler.post()
-    
+
+    def test_unsubscribe_multiple(self):
+        """Confirm that all specified subscriptions are removed per post
+        request."""
+        s1 = Subscription(key_name='haiti:example.org/123:test@example.com',
+                          user_email='test@example.com', frequency='immediate',
+                          subject_name='haiti:example.org/123')
+        s2 = Subscription(key_name='haiti:example.org/456:test@example.com',
+                          user_email='test@example.com', frequency='immediate',
+                          subject_name='haiti:example.org/456')
+        db.put([s1, s2])
+
+        json = simplejson.dumps(['haiti:example.org/123',
+                                 'haiti:example.org/456'])
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
+                                        'action=unsubscribe_multiple&' +
+                                        'subjects=' + json)
+        handler.post()
+        assert not Subscription.all().get()
+
+        db.put([s1, s2])
+        json = simplejson.dumps(['haiti:example.org/123'])
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
+                                        'action=unsubscribe_multiple&' +
+                                        'subjects=' + json)
+        handler.post()
+        assert not Subscription.get('haiti:example.org/123', self.email)
+        assert Subscription.get('haiti:example.org/456', self.email)
+
+        db.put([s1, s2])
+        json = simplejson.dumps([])
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
+                                        'action=unsubscribe_multiple&' +
+                                        'subjects=' + json)
+        handler.post()
+        assert Subscription.get('haiti:example.org/123', self.email)
+        assert Subscription.get('haiti:example.org/456', self.email)
+
+    def test_change_locale(self):
+        """Confirm that the account's locale parameter is changed."""
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
+                                        'action=change_locale&' +
+                                        'locale=fr')
+        handler.post()
+        assert Account.all().get().locale == 'fr'
+
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
+                                        'action=change_locale')
+        handler.post()
+        assert Account.all().get().locale == 'fr'
+
+    def test_change_email_format(self):
+        """Confirm that the account's email_format parameter is changed."""
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
+                                        'action=change_email_format&' +
+                                        'email_format=plain')
+        handler.post()
+        assert Account.all().get().email_format == 'plain'
+
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
+                                        'action=change_email_format&' +
+                                        'email_format=html')
+        handler.post()
+        assert Account.all().get().email_format == 'html'
+
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
+                                        'action=change_email_format&' +
+                                        'email_format=plane')
+        handler.post()
+        assert Account.all().get().email_format == 'html'
+
     def test_change_subscriptions(self):
         """Confirm that subscriptions are changed properly and PendingAlerts
         are removed / changed as appropriate."""
@@ -196,7 +266,16 @@ class MailUpdateSystemTest(MediumTestCase):
         assert len(sent_emails) == 1
         assert 'title__' in sent_emails[0].body
         assert 'title_bar' in sent_emails[0].body
-    
+
+    def test_change_default_frequency(self):
+        """Confirms that the account's default frequency is changed."""
+        assert Account.all().get().default_frequency == 'immediate'
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
+                                        'action=change_default_frequency&' +
+                                        'frequency=monthly')
+        handler.post()
+        assert Account.all().get().default_frequency == 'monthly'
+
     def simulate_request(self, path):
         request = webapp.Request(webob.Request.blank(path).environ)
         response = webapp.Response()
