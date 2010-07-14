@@ -39,6 +39,9 @@
 
 <!-- replace loading div with saved -->
 {% block loading %}
+{% comment %}
+#i18n: Notice that a change has been saved.
+{% endcomment %}
 <div id="loading" class="loading" style='display: none;'>{% trans "Saved." %}</div>
 {% endblock loading %}
 
@@ -110,7 +113,7 @@
     </td>
     <td class="settings-label-subjectname">
       {% comment %}
-      #i18n: label for facility name
+      #i18n: A place that provides a particular service
       {% endcomment %}
       {% trans "Facility" %}
     </td>

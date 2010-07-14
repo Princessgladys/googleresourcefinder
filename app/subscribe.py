@@ -145,8 +145,10 @@ class Subscribe(Handler):
                 text_body = format_plain_body(email_data)
                 send_email(self.account.locale,
                            'updates@resource-finder.appspotmail.com',
-                           self.account.email, utils.to_unicode(
-                           _('Resource Finder Updates')), text_body)
+                           self.account.email,
+                           # i18n: subject of e-mail -> Resource Finder Updates
+                           utils.to_unicode(_('Resource Finder Updates')),
+                           text_body)
             else:
                 new_key_name = '%s:%s:%s' % (new_frequency,
                                              old_alert.user_email,
