@@ -113,11 +113,11 @@ class EditTest(MediumTestCase):
 
         # test make_input() function
         assert (text_attr_type.make_input('title', '', text_attr) ==
-                '<textarea name="title" rows=5 cols=34></textarea>')
+                '<textarea name="title" rows=5 cols=40></textarea>')
         assert (text_attr_type.make_input('title', 'title_foo', text_attr) ==
-                '<textarea name="title" rows=5 cols=34>title_foo</textarea>')
+                '<textarea name="title" rows=5 cols=40>title_foo</textarea>')
         assert (text_attr_type.make_input('title', 'title&foo', text_attr) ==
-                '<textarea name="title" rows=5 cols=34>title&amp;foo' +
+                '<textarea name="title" rows=5 cols=40>title&amp;foo' +
                 '</textarea>')
 
         # test to_stored_value() function
@@ -404,7 +404,7 @@ class EditTest(MediumTestCase):
         edit.update(key_name, self.st, request, self.user, self.account,
                     attributes, self.subdomain, False)
 
-        # test unicode
+        # test unicode (url encoded to %C3%89 here)
         request_text = '/?subdomain=haiti&' + \
                        'subject_name=paho.org%2FHealthC_ID%2F1129136&' + \
                        'title=Marriane+%C3%89&' + \
