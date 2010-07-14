@@ -496,7 +496,6 @@ class Edit(utils.Handler):
 
         logging.info("record by user: %s" % self.user)
 
-        
         # Cannot run datastore queries in a transaction outside the entity group
         # being modified, so fetch the attributes here just in case
         attributes = cache.ATTRIBUTES.load()
@@ -506,9 +505,6 @@ class Edit(utils.Handler):
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
-            # Fire off a task to asynchronously refresh the cache
-            taskqueue.add(url='/refresh_cache?lang=%s&subdomain=%s'
-                          % (self.params.lang, self.subdomain), method='GET')
         else:
             raise Redirect(self.get_url('/'))
 
