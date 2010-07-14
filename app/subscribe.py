@@ -122,8 +122,10 @@ class Subscribe(Handler):
 
     def change_email_format(self):
         """Changes the current user's preferred e-mail format."""
-        self.account.email_format = self.request.get('email_format',
-                                                     self.account.email_format)
+        format = self.request.get('email_format', self.account.email_format)
+        if format not in ['plain', 'html']:
+            return
+        self.account.email_format = format
         db.put(self.account)
 
     def change_subscription(self, subject_name, old_frequency, new_frequency):
