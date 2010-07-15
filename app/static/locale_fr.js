@@ -110,6 +110,9 @@ locale = function() {
   //i18n: Label indicating a record was updated
   messages.UPDATED = "Mise \u00e0 jour\u00a0:";
 
+  //i18n: Eror message, shown when an error occurs.
+  messages.ERROR = "Une erreur est survenue. Veuillez r\u00e9essayer plus tard.";
+
   function message_renderer(name) {
     return function (params) {
       return render(messages[name], params);
