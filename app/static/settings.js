@@ -34,7 +34,7 @@ function change_default_frequency(subdomain, frequency) {
       show_saved();
     },
     error: function(xhr, text_status, error) {
-      alert(text_status);
+      alert(locale.ERROR());
     }
   });
 }
@@ -62,7 +62,7 @@ function unsubscribe_checked(subdomain) {
       window.location.reload();
     },
     error: function(xhr, text_status, error) {
-      alert(text_status);
+      alert(locale.ERROR());
     }
   });
 }
@@ -79,8 +79,10 @@ function set_checked_to_default(subdomain) {
     if (boxes[i].checked) {
       var freq_radios = document.getElementsByName(boxes[i].value + '_freq');
       for (var j = 0; j < freq_radios.length; j++) {
+        // the radio buttons only have one class per subject; if the class
+        // exists, then that radio button's value is the current/old frequency
         if (freq_radios[j].getAttribute('class')) {
-          var old_frequency = freq_radios[j].getAttribute('class');
+          var old_frequency = freq_radios[j].value;
           freq_radios[j].setAttribute('class', '');
         }
         if (freq_radios[j].value == default_frequency.value) {
@@ -104,7 +106,7 @@ function set_checked_to_default(subdomain) {
       show_saved();
     },
     error: function(xhr, text_status, error) {
-      alert(text_status);
+      alert(locale.ERROR());
     }
   });
 }
@@ -124,7 +126,7 @@ function change_email_format(subdomain, email_format) {
       show_saved();
     },
     error: function(xhr, text_status, error) {
-      alert(text_status);
+      alert(locale.ERROR());
     }
   });
 }
@@ -144,7 +146,7 @@ function change_locale(subdomain, locale) {
       show_saved();
     },
     error: function(xhr, text_status, error) {
-      alert(text_status);
+      alert(locale.ERROR());
     }
   });
 }

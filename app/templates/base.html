@@ -26,17 +26,17 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <!-- Stylesheets -->
   <link rel="stylesheet" href="static/map.css">
+  <!--[if lt IE 8]>
+    <link rel="stylesheet" href="static/map-ie.css">
+  <![endif]-->
   {% block stylesheets %}
   <link rel="stylesheet" type="text/css" media="all"
-        href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css" > 
+        href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css" >
   <link rel="stylesheet" href="static/bubble.css">
   {% if params.print %}
     <link rel="stylesheet" href="static/map-print.css">
   {% endif %}
   {% endblock stylesheets %}
-  <!--[if lt IE 8]>
-    <link rel="stylesheet" href="static/map-ie.css">
-  <![endif]-->
   
   {% block google-maps-api %}
   <!-- Google Maps API -->
@@ -104,13 +104,11 @@
     {% endif %}
     {% endblock home-link %}
     {% block print-link %}
-    {% if not params.print %}
       <a id="print-link" href="#"
          {% comment %}
          #i18n: Link to print the current view of the application
          {% endcomment %}
          class="print-link-disabled">{% trans "Print" %}</a> <span class="sep">|</span>
-    {% endif %}
     {% endblock print-link %}
     {% block settings-link %}
       {% comment %}

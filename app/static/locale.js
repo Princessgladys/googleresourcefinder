@@ -138,6 +138,10 @@ locale = function() {
   messages.UPDATED =
       'Updated';
 
+  //i18n: Eror message, shown when an error occurs.
+  messages.ERROR = 
+      'An error has occured. Please try again later.';
+
   function message_renderer(name) {
     return function (params) {
       return render(messages[name], params);
