@@ -201,6 +201,11 @@ msgstr "Non pou kontak"
 msgid "Country:"
 msgstr "Peyi"
 
+#. Label for daily e-mail updates
+#: settings.py:54
+msgid "Daily"
+msgstr "Dyaliz"
+
 #. Level of destruction
 #: ../tools/setup.py:146
 msgid "Damage"
@@ -210,6 +215,11 @@ msgstr "Domaj"
 #: templates/hospital_bubble.html:160
 msgid "Date and time"
 msgstr "Jou  ak  lè"
+
+#. Label for change default frequency box
+#: templates/settings.html:96
+msgid "Default Frequency:"
+msgstr "Frekans Estanda:"
 
 #. Meaning: administrative division
 #: ../tools/setup.py:126
@@ -251,7 +261,17 @@ msgstr "Distri"
 #. E-mail address
 #: edit.py:121 ../tools/setup.py:124
 msgid "E-mail"
-msgstr "Adrès elektronik"
+msgstr "Adrès elektronik:"
+
+#. Label for e-mail type radio buttons
+#: templates/settings.html:63
+msgid "E-mail Format:"
+msgstr "Adrès elektronik fòma:"
+
+#. Label for a language selector
+#: templates/settings.html:81
+msgid "E-mail Language:"
+msgstr "Lang:"
 
 #. Title for page to edit data about a subject
 #: templates/edit.html:55
@@ -279,12 +299,12 @@ msgid "Error loading facility information."
 msgstr "Erè transpòte etablisman enfòmasyon."
 
 #. Button to export data to comma-separated-value format.
-#: templates/map.html:197 export.py:151
+#: export.py:151 templates/map.html:67
 msgid "Export CSV"
 msgstr "Ekspote CSV"
 
 #. A place that provides a particular service
-#: templates/print_data.html:57 templates/data.html:92 static/locale.js:88
+#: static/locale.js:88 templates/settings.html:118
 msgid "Facility"
 msgstr "Etablisman"
 
@@ -344,12 +364,12 @@ msgid "HealthC ID"
 msgstr "ID HealthC"
 
 #. Link to go to a help page for the application
-#: templates/map.html:104
+#: templates/base.html:125
 msgid "Help"
 msgstr "Ed"
 
 #. Link to return to the main page of the application
-#: templates/map.html:93
+#: templates/base.html:103
 msgid "Home"
 msgstr "Paj akèy"
 
@@ -359,9 +379,14 @@ msgid "Hospital"
 msgstr "Lopital"
 
 #. Explains how to correct incorrect information that has been printed.
-#: templates/map.html:210
+#: templates/map.html:80
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr "Si yon enfòmasyon ta manke ou byen ta mal ekri, ale sou sit entènèt la"
+
+#. Label for immediate e-mail updates
+#: settings.py:52
+msgid "Immediate"
+msgstr "Imedyat"
 
 #. Service provided by a health facility (use Title Case). Meaning: specializing in treating communicable diseases
 #: ../tools/setup.py:240
@@ -379,7 +404,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Dat envalid : %(dat)r (bezwen ane-mwa-jou fòma)"
 
 #. Error message for request missing subject name.
-#: subscribe.py:57
+#: settings.py:33 subscribe.py:58
 msgid "Invalid or missing account e-mail."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -399,7 +424,7 @@ msgid "Lab"
 msgstr "Laboratwa"
 
 #. Label for a language selector
-#: templates/map.html:79
+#: templates/base.html:85
 msgid "Language:"
 msgstr "Lang:"
 
@@ -434,7 +459,7 @@ msgid "Loader:"
 msgstr "Program pou telechaje"
 
 #. Indicator that the application is loading.
-#: templates/map.html:149
+#: templates/base.html:171
 msgid "Loading..."
 msgstr "Transpòte..."
 
@@ -483,6 +508,11 @@ msgstr "Etabisman Miks"
 msgid "Mobile clinic"
 msgstr "Klinik mobil"
 
+#. Label for monthly e-mail updates
+#: settings.py:58
+msgid "Monthly"
+msgstr "Chak mwa"
+
 #. Service provided by a health facility (use Title Case). Meaning: Corpse removal
 #: ../tools/setup.py:271
 msgid "Mortuary Services"
@@ -517,6 +547,11 @@ msgstr "Pa dakò"
 #: templates/hospital_bubble.html:89
 msgid "No availability information"
 msgstr "Pa gen enfòmasyon ki koresponn"
+
+#. message saying no facilities are subscribed to
+#: templates/settings.html:132
+msgid "No facilities to display."
+msgstr "Pa gen fasilite yo afiche."
 
 #. Error message
 #: grant_access.py:76
@@ -584,6 +619,11 @@ msgstr "Pedyatrik"
 msgid "Phone"
 msgstr "Telefòn"
 
+#. Label for "plain text" radio button
+#: templates/settings.html:67
+msgid "Plain Text"
+msgstr "Tèks"
+
 #. Indicates a user should call for availability of beds and services at a hospital.
 #: templates/hospital_bubble.html:83
 msgid "Please call for availability information."
@@ -600,7 +640,7 @@ msgid "Previous value"
 msgstr "Anvan valè"
 
 #. Link to print the current view of the application
-#: templates/map.html:99
+#: templates/base.html:112
 msgid "Print"
 msgstr "Enprime"
 
@@ -611,7 +651,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Enprime yon list lopital nan lòd distans de ${FACILITY_NAME}"
 
 #. Link to privacy policy for the application
-#: templates/map.html:114
+#: templates/base.html:135
 msgid "Privacy"
 msgstr "Prive"
 
@@ -653,18 +693,23 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "Rekèt pou %(role)s la refise"
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35
+#: templates/base.html.py:148 templates/base.html:164
 msgid "Resource Finder"
 msgstr "Chèche resous"
 
 #. TODO: Add missing message description or meaning
-#: mail_alerts.py:304 mail_alerts.py:269 subscribe.py:118
+#: mail_alerts.py:304 subscribe.py:150 mail_alerts.py:269
 msgid "Resource Finder Updates"
 msgstr "Chèche resous"
 
 #. Button text to save data
 #: templates/edit.html:154
 msgid "Save"
+msgstr "Anrejistre"
+
+#. Notice that a change has been saved.
+#: templates/settings.html:45
+msgid "Saved."
 msgstr "Anrejistre"
 
 #. Label for a selector to export data to CSV
@@ -677,18 +722,28 @@ msgstr "Idantite kalite etablisman ekspòtasyon"
 msgid "Services"
 msgstr "Sèvis"
 
+#. label for changing subjects to default frequency
+#: templates/settings.html:167
+msgid "Set Checked to Default"
+msgstr "Mete Tcheke Estanda"
+
+#. Settings page title
+#: templates/base.html:119 templates/settings.html:55
+msgid "Settings"
+msgstr "Anviwònman"
+
 #. Label for a control that filters a list of facilities
 #: static/locale.js:130
 msgid "Show"
 msgstr "Montre"
 
 #. Link to sign into the app
-#: main.py:58
+#: main.py:59
 msgid "Sign in"
 msgstr "Mete Anprent"
 
 #. Link to sign out of the app
-#: main.py:56
+#: settings.py:68 main.py:57
 msgid "Sign out"
 msgstr "Sòti"
 
@@ -698,7 +753,7 @@ msgid "Supplies"
 msgstr "Prodwi"
 
 #. Link to terms of service for the application
-#: templates/map.html:109
+#: templates/base.html:130
 msgid "Terms of Service"
 msgstr "Kondisyon yo pou itilizasyon"
 
@@ -713,7 +768,7 @@ msgid "Total beds"
 msgstr "Kantite kaban-n"
 
 #. Total number of facilities shown on the map.
-#: templates/map.html:166
+#: templates/map.html:36
 msgid "Total facilities"
 msgstr "Kantite disponib"
 
@@ -737,6 +792,11 @@ msgstr "Inivesite"
 msgid "Unreinforced masonry"
 msgstr "Pa ranfòse konkrè"
 
+#. label for unsubscribing from subjects
+#: templates/settings.html:174
+msgid "Unsubscribe from Checked"
+msgstr "Koupe Abònman nan Tcheke"
+
 #. Label indicating a record was updated
 #: static/locale.js:138
 msgid "Updated"
@@ -758,9 +818,14 @@ msgid "Vascular Surgery"
 msgstr "Chiriji Vaskilè"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:202
+#: templates/map.html:72
 msgid "View Master List archive"
 msgstr "Ekspoze achiv nan lis mastè"
+
+#. Label for weekly e-mail updates
+#: settings.py:56
+msgid "Weekly"
+msgstr "Chak semèn"
 
 #. Type of construction: timber jointed together with nails
 #: ../tools/setup.py:197
@@ -790,12 +855,12 @@ msgid "Your request for \"%(action)s\" permission is now pending"
 msgstr "Demand ou pou %(role)s la deja enrejistre"
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
-#: templates/map.html:176
+#: templates/map.html:46
 msgid "and with availability."
 msgstr "Avek anpil abilite"
 
 #. a user with no identity
-#: main.py:53
+#: main.py:54
 msgid "anonymous"
 msgstr "anonim"
 
@@ -810,7 +875,7 @@ msgid "capacity"
 msgstr "Kapasite"
 
 #. Header for the number of facilities less than 10 miles from a location.
-#: templates/map.html:171
+#: templates/map.html:41
 msgid "no more than 10 miles away"
 msgstr "Pa depase 10 mil"
 

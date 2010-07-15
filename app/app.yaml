@@ -50,6 +50,12 @@ handlers:
 - url: /bubble
   script: bubble.py
 
+- url: /settings
+  script: settings.py
+
+- url: /subscribe
+  script: subscribe.py
+
 # Public machine endpoints.
 
 - url: /feeds/.*
@@ -100,6 +106,3 @@ handlers:
   script: mail_alerts.py
   login: admin
 
-- url: /subscribe
-  script: subscribe.py
-  login: admin
