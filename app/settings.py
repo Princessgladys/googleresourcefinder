@@ -15,6 +15,7 @@
 __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 
 import logging
+from operator import itemgetter
 
 from google.appengine.api import users
 
@@ -24,18 +25,19 @@ from utils import _, Handler, run
 SETTINGS_PATH = 'templates/settings.html'
 
 class Settings(Handler):
-    
+
     def init(self):
         """Checks for logged-in user and gathers necessary information."""
         self.require_logged_in_user()
         if not self.account:
             #i18n: Error message for request missing subject name.
             raise ErrorMessage(404, _('Invalid or missing account e-mail.'))
-    
+
     def get(self):
         self.init()
-       
-        subscriptions = Subscription.all().filter('user_email =', self.account.email)
+
+        subscriptions = Subscription.all().filter('user_email =',
+                                                  self.account.email)
         subjects = []
         for subscription in subscriptions:
             subject = Subject.get_by_key_name(subscription.subject_name)
@@ -44,6 +46,7 @@ class Settings(Handler):
                 'title': subject.get_value('title'),
                 'frequency': subscription.frequency
             })
+        subjects = sorted(subjects, key=itemgetter('title'))
 
         home_url = self.get_url('/')
         logout_url = users.create_logout_url(home_url)

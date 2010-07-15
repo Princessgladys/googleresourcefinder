@@ -110,6 +110,9 @@ locale = function() {
   //i18n: Label indicating a record was updated
   messages.UPDATED = "Remete an fonksyon";
 
+  //i18n: Eror message, shown when an error occurs.
+  messages.ERROR = "Gen yon er\u00e8 ki te f\u00e8t. Tanpri, eseye ank\u00f2 pi ta.";
+
   function message_renderer(name) {
     return function (params) {
       return render(messages[name], params);

@@ -24,6 +24,9 @@ import datetime
 import logging
 import pickle
 
+from django.conf import settings
+
+import config
 import utils
 from bubble import format
 from feeds.xmlutils import Struct
@@ -98,11 +101,11 @@ class Subscribe(Handler):
         """Unsubscribes the current user from a particular subject."""
         subscription = Subscription.get(self.subject_name, self.email)
         if subscription:
-            db.delete(subscription)
-        for freq in ['daily', 'weekly', 'monthly']:
-            alert = PendingAlert.get(freq, self.email, self.subject_name)
+            alert = PendingAlert.get(subscription.frequency, self.email,
+                                     self.subject_name)
             if alert:
                 db.delete(alert)
+            db.delete(subscription)
 
     def unsubscribe_multiple(self):
         """Unsubscribes the current user from all subjects."""
@@ -117,18 +120,24 @@ class Subscribe(Handler):
 
     def change_locale(self):
         """Changes the current user's locale."""
-        self.account.locale = self.request.get('locale', self.account.locale)
+        locale = self.request.get('locale', self.account.locale)
+        if locale not in dict(config.LANGUAGES):
+            locale = config.LANG_FALLBACKS.get(lang, settings.LANGUAGE_code)
+        self.account.locale = locale
         db.put(self.account)
 
     def change_email_format(self):
         """Changes the current user's preferred e-mail format."""
         format = self.request.get('email_format', self.account.email_format)
         if format not in ['plain', 'html']:
-            return
+            self.error(400) # bad request
         self.account.email_format = format
         db.put(self.account)
 
     def change_subscription(self, subject_name, old_frequency, new_frequency):
+        if ((old_frequency and new_frequency) not in
+            Subscription.frequency.choices):
+            self.error(400) # bad request
         s = Subscription.get(subject_name, self.email)
         s.frequency = new_frequency
         db.put(s)
@@ -176,6 +185,8 @@ class Subscribe(Handler):
     def change_default_frequency(self):
         frequency = self.request.get('frequency',
                                      self.account.default_frequency)
+        if frequency not in Subscription.frequency.choices:
+            self.error(400) # bad request
         self.account.default_frequency = frequency
         db.put(self.account)
 
