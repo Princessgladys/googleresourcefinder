@@ -21,6 +21,7 @@ import webob
 
 from google.appengine.api import mail
 from google.appengine.ext import db, webapp
+from google.appengine.ext.db import BadValueError
 
 import subscribe
 import utils
@@ -119,7 +120,7 @@ class MailUpdateSystemTest(MediumTestCase):
         assert not Subscription.get_by_key_name(key_name_s)
         
         # should also remove pending alerts if they exist
-        key_name_pa = 'daily:test@example.com:haiti:example.org/123'
+        key_name_pa = 'immediate:test@example.com:haiti:example.org/123'
         pa = PendingAlert(key_name=key_name_pa, frequency='daily',
                           subject_name='haiti:example.org/123',
                           type='hospital', user_email='test@example.com')
@@ -200,8 +201,7 @@ class MailUpdateSystemTest(MediumTestCase):
         handler = self.simulate_request('/subscribe?subdomain=haiti&' +
                                         'action=change_email_format&' +
                                         'email_format=plane')
-        handler.post()
-        assert Account.all().get().email_format == 'html'
+        self.assertRaises(BadValueError, handler.post)
 
     def test_change_subscriptions(self):
         """Confirm that subscriptions are changed properly and PendingAlerts

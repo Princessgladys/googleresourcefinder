@@ -111,7 +111,7 @@ locale = function() {
   messages.UPDATED = "Actualizado";
 
   //i18n: Eror message, shown when an error occurs.
-  messages.ERROR = "Se ha producido un error. Int\u00e9ntalo de nuevo m\u00e0s tarde.";
+  messages.ERROR = "An error has occurred. Please try again later.";
 
   function message_renderer(name) {
     return function (params) {

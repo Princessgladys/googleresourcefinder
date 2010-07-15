@@ -21,7 +21,9 @@
   <link rel="stylesheet" href="static/settings.css">
 {% endblock stylesheets %}
 
-<!-- remove google maps api -->
+{% comment %}
+# Remove Google Maps API
+{% endcomment %}
 {% block google-maps-api %}
 {% endblock google-maps-api %}
 
@@ -30,14 +32,21 @@
 {% endblock javascript-includes %}
 
 <!-- remove print link -->
+{% comment %}
+# Remove print link
+{% endcomment %}
 {% block print-link %}
 {% endblock print-link %}
 
-<!-- remove settings link -->
+{% comment %}
+# Remove settings link
+{% endcomment %}
 {% block settings-link %}
 {% endblock settings-link %}
 
-<!-- replace loading div with saved -->
+{% comment %}
+# Replace loading div with saved
+{% endcomment %}
 {% block loading %}
 {% comment %}
 #i18n: Notice that a change has been saved.
@@ -146,8 +155,6 @@
     {% for frequency in frequencies %}
     <td>
       <center><input type="radio" name="{{subject.name}}_freq"
-          {% ifequal frequency.en subject.frequency %}class="{{frequency.en}}"
-          {% endifequal %}
           value="{{frequency.en}}" onClick="change_frequency('{{subdomain}}',
           '{{subject.name}}', '{{subject.frequency}}', '{{frequency.en}}');"
           {% ifequal frequency.en subject.frequency %}checked{% endifequal %}></center>
