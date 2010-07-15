@@ -79,17 +79,14 @@ function set_checked_to_default(subdomain) {
     if (boxes[i].checked) {
       var freq_radios = document.getElementsByName(boxes[i].value + '_freq');
       for (var j = 0; j < freq_radios.length; j++) {
-        // the radio buttons only have one class per subject; if the class
-        // exists, then that radio button's value is the current/old frequency
-        if (freq_radios[j].getAttribute('class')) {
+        if (freq_radios[j].checked) {
           var old_frequency = freq_radios[j].value;
-          freq_radios[j].setAttribute('class', '');
         }
         if (freq_radios[j].value == default_frequency.value) {
-          freq_radios[j].checked = true;
-          freq_radios[j].setAttribute('class', default_frequency.value);
+          var new_frequency_index = j;
         }
       }
+      freq_radios[new_frequency_index].checked = true;
       if (old_frequency != default_frequency.value) {
         subjects.push(new ChangeInfo(boxes[i].value, old_frequency,
                                      default_frequency.value));
