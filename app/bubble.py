@@ -161,11 +161,11 @@ class Bubble(Handler):
         if model.Subscription.get('%s:%s' % (self.subdomain,
                                              self.params.subject_name),
                                   self.user.email()):
-            #i18n: Label to subscribe to a subject
+            #i18n: Label to unsubscribe to a subject
             subscribed = _('Unsubscribe')
         else:
-            #i18n: Label to unsubscribe from a subject
-            subscribed = _('Subscribe')
+            #i18n: Label to subscribe from a subject
+            subscribed = _('Subscribe to E-mail Updates')
 
         subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
 

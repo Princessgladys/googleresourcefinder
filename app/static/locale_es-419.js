@@ -44,6 +44,9 @@ locale = function() {
   //i18n: Meaning: administrative division
   messages.DISTRICT = "Distrito";
 
+  //i18n: Eror message, shown when an error occurs.
+  messages.ERROR = "Ha ocurrido un error. Vuelve a intentarlo m\u00e1s tarde.";
+
   //i18n: Error message for required field.
   messages.ERROR_FIELD_IS_REQUIRED = "Este campo es requerido.";
 
@@ -104,14 +107,17 @@ locale = function() {
   //i18n: Label for a control that filters a list of facilities
   messages.SHOW = "Mostrar";
 
+  //i18n: Label to subscribe from a subject
+  messages.SUBSCRIBE_TO_UPDATES = "Suscribirse a las Actualizaciones por Correo Electr\u00f3nico";
+
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}:${MINUTES} ${ZONE}";
 
+  //i18n: Label to unsubscribe to a subject
+  messages.UNSUBSCRIBE = "Darse de Baja de Comprobarse";
+
   //i18n: Label indicating a record was updated
   messages.UPDATED = "Actualizado";
-
-  //i18n: Eror message, shown when an error occurs.
-  messages.ERROR = "An error has occurred. Please try again later.";
 
   function message_renderer(name) {
     return function (params) {

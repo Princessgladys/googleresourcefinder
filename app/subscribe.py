@@ -112,11 +112,12 @@ class Subscribe(Handler):
         subjects = simplejson.loads(self.request.get('subjects'))
         for subject_name in subjects:
             subscription = Subscription.get(subject_name, self.email)
-            alert = PendingAlert.get(subscription.frequency, self.email,
-                                     subscription.subject_name)
-            if alert:
-                db.delete(alert)
-            db.delete(subscription)
+            if subscription:
+                alert = PendingAlert.get(subscription.frequency, self.email,
+                                         subscription.subject_name)
+                if alert:
+                    db.delete(alert)
+                db.delete(subscription)
 
     def change_locale(self):
         """Changes the current user's locale."""
@@ -135,8 +136,8 @@ class Subscribe(Handler):
         db.put(self.account)
 
     def change_subscription(self, subject_name, old_frequency, new_frequency):
-        if ((old_frequency and new_frequency) not in
-            Subscription.frequency.choices):
+        if ((old_frequency not in Subscription.frequency.choices) and
+            (new_frequency not in Subscription.frequency.choices)):
             self.error(400) # bad request
         s = Subscription.get(subject_name, self.email)
         s.frequency = new_frequency
