@@ -244,11 +244,13 @@ class MailAlertsTest(MediumTestCase):
         # test to send and immediate e-mail update with a None value
         # should render u'\u2013' instead of None
         changed_vals = {'test_attr_foo': {'old_value': None,
-                                          'new_value': 'attr_new',
+                                          'new_value': u'attr_new\xef',
                                           'author': 'author_foo'}}
         unchanged_vals = {'test_attr_bar': 'attr_bar'}
-        json_pickle_attrs_c = simplejson.dumps(pickle.dumps(changed_vals))
-        json_pickle_attrs_uc = simplejson.dumps(pickle.dumps(unchanged_vals))
+        json_pickle_attrs_c = simplejson.dumps(unicode(
+            pickle.dumps(changed_vals), 'latin-1'))
+        json_pickle_attrs_uc = simplejson.dumps(unicode(
+            pickle.dumps(unchanged_vals), 'latin-1'))
         path = '/send_mail_updates?action=subject_changed&' + \
                'subject_name=haiti:example.org/123&' + \
                'changed_data=' + json_pickle_attrs_c + '&' + \
@@ -257,6 +259,7 @@ class MailAlertsTest(MediumTestCase):
         handler.post()
         assert len(sent_emails) == 1
         assert u'\u2013' in sent_emails[0].body
+        assert u'\xef' in sent_emails[0].body
 	assert 'attr_new' in sent_emails[0].body
         assert sent_emails[0].body.count(u'\u2013') == 1
         sent_emails = []

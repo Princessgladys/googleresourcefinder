@@ -322,6 +322,89 @@ def get_source_url(request):
     parsed_url = urlparse.urlparse(source_url)
     return len(parsed_url) > 1 and '://'.join(parsed_url[:2]) or None
 
+def update(key, subject_type, request, user, account, attributes, subdomain,
+           transactional=True):
+    subject = db.get(key)
+    minimal_subject = model.MinimalSubject.get_by_subject(subject)
+    utcnow = datetime.datetime.utcnow().replace(microsecond=0)
+    report = model.Report(
+        subject,
+        arrived=utcnow,
+        source=get_source_url(request),
+        author=user,
+        observed=utcnow)
+    change_metadata = ChangeMetadata(
+        utcnow, user, account.nickname, account.affiliation)
+    has_changes = False
+    changed_attributes_dict = {}
+    changed_attribute_information = {}
+    unchanged_attribute_values = {}
+
+    for name in subject_type.attribute_names:
+        attribute = attributes[name]
+        # To change an attribute, it has to have been marked editable
+        # at the time the page was rendered, the new value has to be
+        # different than the one in the subject at the time the page
+        # rendered, and the user has to have permission to edit it now.
+        value_changed = has_changed(subject, request, attribute)
+        comment_changed = has_comment_changed(
+            subject, request, attribute)
+        if (is_editable(request, attribute) and
+            (value_changed or comment_changed)):
+            if not can_edit(account, subdomain, attribute):
+                raise ErrorMessage(
+                    403, _(
+                    #i18n: Error message for lacking edit permissions
+                    '%(user)s does not have permission to edit %(a)s')
+                    % {'user': user.email(),
+                       'a': get_message('attribute_name',
+                                        attribute.key().name())})
+            has_changes = True
+            change_info = {'old_value': subject.get_value(name)}
+            apply_change(subject, minimal_subject, report,
+                         subject_type, request, attribute,
+                         change_metadata)
+            change_info['new_value'] = subject.get_value(name)
+            change_info['author'] = subject.get_author_nickname(name)
+            changed_attribute_information[name] = change_info
+            changed_attributes_dict[name] = attribute
+        else:
+            unchanged_attribute_values[name] = subject.get_value(name)
+    
+    if has_changes:
+        # Schedule a task to add a feed record.
+        # We can't really do this inside this transaction, since
+        # feed records are not part of the entity group.
+        # Transactional tasks is the closest we can get.
+        # TODO(kpy): This is disabled for now because it causes
+        # intermittent exceptions.  Re-enable it when we have it
+        # tested and working.
+        # schedule_add_record(self.request, user,
+        #     subject, changed_attributes_dict, utcnow)
+        db.put([report, subject, minimal_subject])
+        cache.MINIMAL_SUBJECTS[subdomain].flush()
+        cache.JSON[subdomain].flush()
+        
+        # On edit, create a task to e-mail users who have subscribed
+        # to that subject. Values are converted to unicode due to
+        # an issue where simplejson will not convert from pickle's
+        # 8-bit output to unicode; initial values must also be unicode.
+        json_attrs_changed = simplejson.dumps(unicode(
+            pickle.dumps(changed_attribute_information), 'latin-1'))
+        json_attrs_unchanged = simplejson.dumps(unicode(
+            pickle.dumps(unchanged_attribute_values), 'latin-1'))
+        
+        params = {
+            'subject_name': subject.key().name(),
+            'action': 'subject_changed',
+            'changed_data': json_attrs_changed,
+            'unchanged_data': json_attrs_unchanged
+        }
+
+        taskqueue.add(url='/mail_alerts', method='POST',
+                      params=params, transactional=transactional)
+
+
 # ==== Handler for the edit page =============================================
 
 class Edit(utils.Handler):
@@ -413,90 +496,12 @@ class Edit(utils.Handler):
 
         logging.info("record by user: %s" % self.user)
 
-        def update(key, subject_type, request, user, account, attributes):
-            subject = db.get(key)
-            minimal_subject = model.MinimalSubject.get_by_subject(subject)
-            utcnow = datetime.datetime.utcnow().replace(microsecond=0)
-            report = model.Report(
-                subject,
-                arrived=utcnow,
-                source=get_source_url(request),
-                author=user,
-                observed=utcnow)
-            change_metadata = ChangeMetadata(
-                utcnow, user, account.nickname, account.affiliation)
-            has_changes = False
-            changed_attributes_dict = {}
-            changed_attribute_information = {}
-            unchanged_attribute_values = {}
-
-            for name in subject_type.attribute_names:
-                attribute = attributes[name]
-                # To change an attribute, it has to have been marked editable
-                # at the time the page was rendered, the new value has to be
-                # different than the one in the subject at the time the page
-                # rendered, and the user has to have permission to edit it now.
-                value_changed = has_changed(subject, request, attribute)
-                comment_changed = has_comment_changed(
-                    subject, request, attribute)
-                if (is_editable(request, attribute) and
-                    (value_changed or comment_changed)):
-                    if not can_edit(account, self.subdomain, attribute):
-                        raise ErrorMessage(
-                            403, _(
-                            #i18n: Error message for lacking edit permissions
-                            '%(user)s does not have permission to edit %(a)s')
-                            % {'user': user.email(),
-                               'a': get_message('attribute_name',
-                                                attribute.key().name())})
-                    has_changes = True
-                    change_info = {'old_value': subject.get_value(name)}
-                    apply_change(subject, minimal_subject, report,
-                                 subject_type, request, attribute,
-                                 change_metadata)
-                    change_info['new_value'] = subject.get_value(name)
-                    change_info['author'] = subject.get_author_nickname(name)
-                    changed_attribute_information[name] = change_info
-                    changed_attributes_dict[name] = attribute
-                else:
-                    unchanged_attribute_values[name] = subject.get_value(name)
-            
-            if has_changes:
-                # Schedule a task to add a feed record.
-                # We can't really do this inside this transaction, since
-                # feed records are not part of the entity group.
-                # Transactional tasks is the closest we can get.
-                # TODO(kpy): This is disabled for now because it causes
-                # intermittent exceptions.  Re-enable it when we have it
-                # tested and working.
-                # schedule_add_record(self.request, user,
-                #     subject, changed_attributes_dict, utcnow)
-                db.put([report, subject, minimal_subject])
-                cache.MINIMAL_SUBJECTS[self.subdomain].flush()
-                cache.JSON[self.subdomain].flush()
-
-                # On edit, create a task to e-mail users who have subscribed
-                # to that subject.
-                json_pickle_attrs_changed = simplejson.dumps(
-                    pickle.dumps(changed_attribute_information))
-                json_pickle_attrs_unchanged = simplejson.dumps(
-                    pickle.dumps(unchanged_attribute_values))
-
-                params = {
-                    'subject_name': subject.key().name(),
-                    'action': 'subject_changed',
-                    'changed_data': json_pickle_attrs_changed,
-                    'unchanged_data': json_pickle_attrs_unchanged
-                }
-
-                taskqueue.add(url='/mail_alerts', method='POST',
-                              params=params, transactional=True)
-
         # Cannot run datastore queries in a transaction outside the entity group
         # being modified, so fetch the attributes here just in case
         attributes = cache.ATTRIBUTES.load()
         db.run_in_transaction(update, self.subject.key(), self.subject_type,
-                              self.request, self.user, self.account, attributes)
+                              self.request, self.user, self.account,
+                              attributes, self.subdomain)
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))

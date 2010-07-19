@@ -23,19 +23,23 @@ from google.appengine.ext import db
 from google.appengine.ext import webapp
 
 import edit
+import simplejson
 import utils
 from edit import ATTRIBUTE_TYPES
 from feeds.xmlutils import Struct
 from medium_test_case import MediumTestCase
-from model import Attribute, Subject, MinimalSubject, SubjectType, Report
+from model import Account, Attribute, Subject, MinimalSubject, SubjectType
+from model import Report
 
 class EditTest(MediumTestCase):
     def setUp(self):
         MediumTestCase.setUp(self)
+        self.subdomain = 'haiti'
         self.time = datetime.datetime(2010, 06, 15, 12, 30)
         self.change_time = datetime.datetime(2010, 06, 16, 12, 30)
-        self.user = users.User('test@example.com')
-        self.s = Subject(key_name='example.org/123', type='hospital')
+        self.email = 'test@example.com'
+        self.user = users.User(self.email)
+        self.s = Subject(key_name='haiti:example.org/123', type='hospital')
         self.s.set_attribute('title', 'title_foo', self.time,
                              self.user, 'nickname_foo', 'affiliation_foo',
                              'comment_foo')
@@ -54,6 +58,7 @@ class EditTest(MediumTestCase):
             observed=self.change_time,
             author='author_bar', author_nickname='nickname_bar',
             author_affiliation='affiliation_bar')
+        self.account = Account(email=self.email, actions=['*:*'], locale='en')
 
         db.put([self.s, self.ms, self.st])
 
@@ -66,11 +71,11 @@ class EditTest(MediumTestCase):
                              type='str')
 
         # test make_input() function
-        assert (str_attr_type.make_input('title', '') == 
+        assert (str_attr_type.make_input('title', '') ==
                 '<input name="title" value="" size=40>')
         assert (str_attr_type.make_input('title', 'title_foo') ==
                 '<input name="title" value="title_foo" size=40>')
-        assert (str_attr_type.make_input('title&foo', '') == 
+        assert (str_attr_type.make_input('title&foo', '') ==
                 '<input name="title&amp;foo" value="" size=40>')
 
         # test to_stored_value() function
@@ -378,3 +383,34 @@ class EditTest(MediumTestCase):
                                  'editable.title__comment="title_foo"'
                                  ).environ)
         assert edit.has_comment_changed(self.s, request, str_attr) == False
+
+    def test_update(self):
+        """Confirms that update works properly even when sent unicode
+        unicode characters via post. The edit.update() calls will throw an
+        error if the test fails."""
+        # test non-unicode
+        key_name = self.s.key()
+        request_text = '/?subdomain=haiti' + \
+                       '&title=title_foo&editable.title="title_bar"' + \
+                       '&pcode=pcode_foo&editable.pcode="pcode_foo"' + \
+                       '&save=Save'
+        request = webapp.Request(webob.Request.blank(request_text).environ)
+        attributes = {
+            u'title': Attribute(key_name='title', type='str',
+                                edit_action='*:*'),
+            u'pcode': Attribute(key_name='pcode', type='str',
+                                edit_action='*:*')
+        }
+        edit.update(key_name, self.st, request, self.user, self.account,
+                    attributes, self.subdomain, False)
+
+        # test unicode (url encoded to %C3%89 here)
+        request_text = '/?subdomain=haiti&' + \
+                       'subject_name=paho.org%2FHealthC_ID%2F1129136&' + \
+                       'title=Marriane+%C3%89&' + \
+                       'editable.title=%22Marriane%22&title__comment=' + \
+                       '&save=Save&pcode=pcode_foo&' + \
+                       'editable.pcode="pcode_foo"&pcode__comment='
+        request = webapp.Request(webob.Request.blank(request_text).environ)
+        edit.update(key_name, self.st, request, self.user, self.account,
+                    attributes, self.subdomain, False)
