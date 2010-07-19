@@ -575,7 +575,6 @@ function initialize_print_headers() {
 
   set_children($('site-url'),
     window.location.protocol + '//' + window.location.host); 
-  $('freshness').style.display = 'none';
 
   var date = format_date(now);
   var time = format_time(now);
@@ -1253,7 +1252,9 @@ function load_data(data) {
   initialize_map();
   initialize_markers();
   initialize_handlers();
-  update_freshness(data.timestamp);
+  if ($('freshness')) {
+    update_freshness(data.timestamp);
+  }
 
   select_supply_set(DEFAULT_SUPPLY_SET_I);
   select_division_and_status(0, STATUS_GOOD);

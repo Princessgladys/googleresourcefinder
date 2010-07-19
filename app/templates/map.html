@@ -20,11 +20,9 @@
 {% comment %}
 # Title, home, and print link blocks left in for potential overrides in
 # other files.
+# TODO(pfritzsche): Figure out why the blocks are necessary; according
+# kpy, they should not be necessary for overriding grandparents of a file.
 {% endcomment %}
-
-{% block title %}
-{{block.super}}
-{% endblock title %}
 
 {% block home-link %}
 {{block.super}}
@@ -33,6 +31,10 @@
 {% block print-link %}
 {{block.super}}
 {% endblock print-link %}
+
+{% block title %}
+{{block.super}}
+{% endblock title %}
 
 {% block stylesheets %}
   <link rel="stylesheet" href="static/map.css">
@@ -61,6 +63,13 @@
   </script>
 {% endblock javascript-includes %}
 
+{% comment %}
+# Include block for potential overrides
+{% endcomment %}
+{% block language-select %}
+{{block.super}}
+{% endblock language-select %}
+
 {% block content %}
 <div id="map"></div>
 <div class="hshadow hs1"></div>
@@ -79,7 +88,8 @@
 {% endblock data %}
 </div>
 
-<div id="freshness" class="gmnoprint">
+{% block freshness %}
+<div id="freshness">
   <span id="freshness-text"></span>
   <div>
     {% comment %}
@@ -93,9 +103,10 @@
     <a target="_blank" href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files" onclick="_gaq.push(['_trackEvent', 'outbound', 'masterlist', this.href])">{% trans "View Master List archive" %}</a>
   </div>
 </div>
+{% endblock freshness %}
 
-{% block sub-content %}
-{% endblock sub-content %}
+{% block footer %}
+{% endblock footer %}
 
 <script>
   jQuery(document).ready(function() {

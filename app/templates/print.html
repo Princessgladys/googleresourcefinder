@@ -32,6 +32,12 @@
 <link rel="stylesheet" href="static/map-print.css">
 {% endblock stylesheets %}
 
+{% comment %}
+# Remove language selector
+{% endcomment %}
+{% block language-select %}
+{% endblock language-select %}
+
 {% block title %}
 <div class="print-header">
   <table width="100%" cellspacing=0 cellpadding=0 border=0>
@@ -85,7 +91,13 @@
   {% include "print_data.html" %}
 {% endblock data %}
 
-{% block sub-content %}
+{% comment %}
+# Remove freshness tags from map
+{% endcomment %}
+{% block freshness %}
+{% endblock freshness %}
+
+{% block footer %}
 <div id="print-update-instructions">
     {% comment %}
     #i18n: Explains how to correct incorrect information that has been printed.
@@ -93,5 +105,5 @@
     {% trans "If any information is wrong or missing, please correct it on the web site:" %}
     <span id="site-url"></span>
   </div>
-{% endblock sub-content %}
+{% endblock footer %}
 
