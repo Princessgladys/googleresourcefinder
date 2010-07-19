@@ -49,16 +49,18 @@ class MainTestCase(SeleniumTestCase):
 
         # 'view' permission provided by default; should go straight to map.
         self.set_default_permissions(['*:view'])
-        self.open_path('/')
+        self.open_path('/?flush=yes')
         self.wait_for_element('map')
 
         # Even with 'edit' granted by default, editing should still need login.
         self.set_default_permissions(['*:view', '*:edit'])
-        self.open_path('/edit?subdomain=haiti&subject_name=example.org/1000')
+        self.open_path(
+            '/edit?subdomain=haiti&subject_name=example.org/1000&flush=yes')
         self.wait_for_element(self.config.login_form)
 
         # After login, editing should be allowed.
-        self.login('/edit?subdomain=haiti&subject_name=example.org/1000')
+        self.login(
+            '/edit?subdomain=haiti&subject_name=example.org/1000&flush-yse')
         self.assert_text(Regex('Edit.*'), '//h1')
 
     def test_elements_present(self):

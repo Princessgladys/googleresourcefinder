@@ -147,6 +147,17 @@ class MessageCache(Cache):
         return dict(((e.namespace, e.name), e) for e in entities)
 
 
+class DefaultAccountCache(Cache):
+    key_name = 'default'
+
+    def fetch_entities(self):
+        key_name = DefaultAccountCache.key_name
+        return {key_name: model.Account.get_by_key_name(key_name)}
+
+    def get(self):
+        return self.__getitem__(DefaultAccountCache.key_name)
+
+
 # These types have a separate cache for each subdomain.
 JSON = CacheGroup(JsonCache)
 SUBJECT_TYPES = CacheGroup(SubjectTypeCache)
@@ -155,8 +166,10 @@ MINIMAL_SUBJECTS = CacheGroup(MinimalSubjectCache)
 # Each of these caches is shared across all subdomains.
 ATTRIBUTES = AttributeCache()
 MESSAGES = MessageCache()
+DEFAULT_ACCOUNT = DefaultAccountCache()
 
-CACHES = [JSON, SUBJECT_TYPES, MINIMAL_SUBJECTS, ATTRIBUTES, MESSAGES]
+CACHES = [JSON, SUBJECT_TYPES, MINIMAL_SUBJECTS, ATTRIBUTES, MESSAGES,
+          DEFAULT_ACCOUNT]
 
 def flush_all():
     """Flush all caches."""
