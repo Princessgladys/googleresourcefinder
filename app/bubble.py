@@ -168,7 +168,8 @@ class Bubble(Handler):
         edit_url = self.get_url('/edit', subject_name=self.params.subject_name,
                                 embed='yes')
         login_url = users.create_login_url(
-          self.get_url('/', subject_name=self.params.subject_name, embed='yes'))
+            self.get_url('/', subject_name=self.params.subject_name,
+                         embed='yes'))
 
         self.render(value_info_extractor.template_name,
                     user=self.user,

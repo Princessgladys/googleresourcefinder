@@ -15,11 +15,11 @@
 import rendering
 import utils
 
-class RefreshCache(utils.Handler):
-    """Refreshes caches, presumably via an asynchronous task."""
+class RefreshJsonCache(utils.Handler):
+    """Refreshes the json cache, presumably via an asynchronous task."""
     def get(self):
         if self.subdomain:
-          rendering.render_json(self.subdomain)
+            rendering.render_json(self.subdomain)
 
 if __name__ == '__main__':
-    utils.run([('/refresh_cache', RefreshCache)], debug=True)
+    utils.run([('/refresh_json_cache', RefreshJsonCache)], debug=True)
