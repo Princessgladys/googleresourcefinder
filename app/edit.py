@@ -500,8 +500,8 @@ class Edit(utils.Handler):
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
-            # Fire off a task to asynchronously refresh the cache
-            taskqueue.add(url='/refresh_cache?lang=%s&subdomain=%s'
+            # Fire off a task to asynchronously refresh the JSON cache
+            taskqueue.add(url='/refresh_json_cache?lang=%s&subdomain=%s'
                           % (self.params.lang, self.subdomain), method='GET')
         else:
             raise Redirect(self.get_url('/'))

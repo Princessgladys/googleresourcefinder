@@ -70,11 +70,8 @@ var subjects = [null];
 var divisions = [null];
 var messages = {};  // {namespace: {name: message}
 
-// ==== Global status message fields
-
-var status_message = false;
-var status_temporary = false;
-var status_timeout;
+// Timer for temporary status messages
+var status_timer;
 
 // ==== Columns shown in the subject table
 
@@ -1063,6 +1060,10 @@ function division_and_status_selector(division_i, status_i) {
 
 function subject_selector(subject_i) {
   return function () {
+    if ($('edit-data').style.display != 'none') {
+      // Cancel inplace-edit if a new marker is selected
+      inplace_edit_cancel();
+    }
     select_subject(subject_i);
   };
 }
@@ -1179,7 +1180,7 @@ function select_subject(subject_i) {
     var url = bubble_url + (bubble_url.indexOf('?') >= 0 ? '&' : '?') +
         'subject_name=' + selected_subject.name;
     _gaq.push(['_trackEvent', 'bubble', 'open', selected_subject.name]);
-    jQuery.ajax({
+    $j.ajax({
       url: url,
       type: 'GET',
       timeout: 10000,
@@ -1192,23 +1193,23 @@ function select_subject(subject_i) {
         info.setContent(result);
         info.open(map, markers[selected_subject_i]);
         // Sets up the tabs and should be called after the DOM is created.
-        jQuery('#bubble-tabs').tabs({
+        $j('#bubble-tabs').tabs({
           select: function(event, ui) {
             _gaq.push(['_trackEvent', 'bubble', 'click ' + ui.panel.id,
                        selected_subject.name]);
           }
         });
 
-        var bubbleAvailability = $('bubble-availability');
-        var bubbleCapacity = $('bubble-capacity');
+        var bubble_availability = $('bubble-availability');
+        var bubble_capacity = $('bubble-capacity');
 
-        if (bubbleAvailability) {
+        if (bubble_availability) {
           selected_subject.values[attributes_by_name.available_beds] =
-              bubbleAvailability.innerHTML;          
+              bubble_availability.innerHTML;          
         }
-        if (bubbleCapacity) {
+        if (bubble_capacity) {
           selected_subject.values[attributes_by_name.total_beds] =
-              bubbleCapacity.innerHTML; 
+              bubble_capacity.innerHTML; 
         }
         update_subject_row(subject_i);
 
@@ -1221,47 +1222,35 @@ function select_subject(subject_i) {
   }
 }
 
-function update_status() {
+function show_loading(show) {
+  show_status(show ? locale.LOADING() : null);
+}
+
+function show_status(message, opt_duration) {
+  if (status_timer) {
+    // wait for the timer to finish
+    return;
+  }
+
+  update_status(message);
+
+  if (opt_duration) {
+    status_timer = setTimeout(function () { 
+      update_status(null);
+      status_timer = null;
+    }, opt_duration);
+  }
+}
+
+function update_status(message) {
   var status = $('loading');
 
-  if (status_temporary) {
-    status.innerHTML = status_temporary;
-    status.style.display = '';
-  } else if (status_message) {
-    status.innerHTML = status_message;
+  if (message) {
+    status.innerHTML = message;
     status.style.display = '';
   } else {
     status.style.display = 'none';
   }
-}
-
-function show_status(message) {
-  status_message = message;
-  update_status();
-}
-
-function clear_status() {
-  status_message = false;
-  update_status();
-}
-
-function show_loading(show) {
-  if (show) {
-    show_status(locale.LOADING());    
-  } else {
-    clear_status();
-  }
-}
-
-function show_temporary_status(message, duration) {
-  status_temporary = message;
-  update_status();
-
-  clearTimeout(status_timeout);
-  status_timeout = setTimeout(function () { 
-    status_temporary = false;
-    update_status();
-  }, duration);
 }
 
 // ==== Load data
@@ -1316,7 +1305,11 @@ function load_data(data, selected_subject_name) {
   select_supply_set(DEFAULT_SUPPLY_SET_I);
   select_division_and_status(0, STATUS_GOOD);
   if (selected_subject_i != -1) {
-    window.setTimeout(subject_selector(selected_subject_i), 500);
+    // Selecting the subject causes an info window to open on the map. The map
+    // is not fully initialized until after load finishes, so delay this.
+    setTimeout(function() {
+      select_subject(selected_subject_i);
+    }, 250);
   }
 
   if (print) {
@@ -1465,13 +1458,14 @@ function inplace_edit_save(edit_url) {
       error: function(request, textStatus, errorThrown) {
 	log(textStatus + ', ' + errorThrown);
 	alert(locale.ERROR_SAVING_FACILITY_INFORMATION());
-	show_loading(false);
+	show_status(null);
       },
       success: function(data) {
 	$('data').style.display = '';
 	$('edit-data').style.display = 'none';
 	select_subject(selected_subject_i);
-	show_temporary_status(locale.SAVED(), 5000);
+	show_status(locale.SAVED(), 5000);
+        _gaq.push(['_trackEvent', 'edit', 'save', selected_subject.name]);
       }
     });
   }
@@ -1480,9 +1474,10 @@ function inplace_edit_save(edit_url) {
 }
 
 function inplace_edit_cancel() {
-      cancel();
-      $('data').style.display = '';
-      $('edit-data').style.display = 'none';
+  cancel();
+  $('data').style.display = '';
+  $('edit-data').style.display = 'none';
+  _gaq.push(['_trackEvent', 'edit', 'cancel', selected_subject.name]);
 }
 
 function request_action_handler(request_url) {
