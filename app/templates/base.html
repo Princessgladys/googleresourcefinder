@@ -58,7 +58,8 @@
 <body>
 <div id="viewport"></div>
 <div class="header">
-  <div class="lang gmnoprint">
+  {% block language-select %}
+  <div class="lang">
     {% comment %}
     #i18n: Label for a language selector
     {% endcomment %}
@@ -71,6 +72,7 @@
     {% endfor %}
     </select>
   </div>
+  {% endblock language-select %}
   <div class="user">
     <strong>{{authorization}}</strong> <span class="sep">|</span>
     {% comment %}
