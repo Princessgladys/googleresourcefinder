@@ -497,8 +497,9 @@ class Edit(utils.Handler):
         logging.info("record by user: %s" % self.user)
 
         # Cannot run datastore queries in a transaction outside the entity group
-        # being modified, so fetch the attributes here just in case
+        # being modified, so fetch the attributes and default account here
         attributes = cache.ATTRIBUTES.load()
+        cache.DEFAULT_ACCOUNT.load()
         db.run_in_transaction(update, self.subject.key(), self.subject_type,
                               self.request, self.user, self.account,
                               attributes, self.subdomain)

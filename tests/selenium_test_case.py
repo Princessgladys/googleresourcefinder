@@ -1,12 +1,15 @@
-from google.appengine.api import memcache, users
-from model import Account, MinimalSubject, Subject, db
 import datetime
 import os
 import re
 import selenium
-import scrape
 import time
 import unittest
+
+from google.appengine.api import memcache, users
+
+import cache
+import scrape
+from model import Account, MinimalSubject, Subject, db
 
 
 class Struct:
@@ -112,12 +115,14 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
     def set_default_permissions(self, actions):
         """Sets the permissions for the special 'default' account."""
         Account(key_name='default', actions=actions).put()
+        cache.DEFAULT_ACCOUNT.flush()
 
     def delete_default_account(self):
         """Deletes the special 'default' account."""
         account = Account.get_by_key_name('default')
         if account:
             account.delete()
+        cache.DEFAULT_ACCOUNT.flush()
 
     def put_account(self, **properties):
         """Stores a test Account with the specified properties.  (By default,
