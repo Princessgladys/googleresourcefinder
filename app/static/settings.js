@@ -34,6 +34,7 @@ function change_default_frequency(subdomain, frequency) {
       show_saved();
     },
     error: function(xhr, text_status, error) {
+      log(text_status + ', ' + error);
       alert(locale.ERROR());
     }
   });
@@ -62,6 +63,7 @@ function unsubscribe_checked(subdomain) {
       window.location.reload();
     },
     error: function(xhr, text_status, error) {
+      log(text_status + ', ' + error);
       alert(locale.ERROR());
     }
   });
@@ -103,6 +105,7 @@ function set_checked_to_default(subdomain) {
       show_saved();
     },
     error: function(xhr, text_status, error) {
+      log(text_status + ', ' + error);
       alert(locale.ERROR());
     }
   });
@@ -123,6 +126,7 @@ function change_email_format(subdomain, email_format) {
       show_saved();
     },
     error: function(xhr, text_status, error) {
+      log(text_status + ', ' + error);
       alert(locale.ERROR());
     }
   });
@@ -143,6 +147,7 @@ function change_locale(subdomain, locale) {
       show_saved();
     },
     error: function(xhr, text_status, error) {
+      log(text_status + ', ' + error);
       alert(locale.ERROR());
     }
   });
@@ -216,4 +221,21 @@ function show_saved(data, text_status, xhr) {
 function flip_saved(show) {
   document.getElementById("loading").style.display = show ? '' : 'none';
 }
+
+// Print a message to the Safari or Firebug console.
+function log() {
+  // The strange way this function is written seems to be the only one
+  // working on IE
+  if (typeof console === 'undefined') {
+    return;
+  }
+  if (console && console.log) {
+    if (console.log.apply) {
+      console.log.apply(console, arguments);
+    } else {
+      console.log(arguments[0]);
+    }
+  }
+}
+
 

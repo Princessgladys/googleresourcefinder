@@ -12,7 +12,7 @@
  * {string} subject_name the subject being [un/]subscribed to/from
  */
 function subscribe_on_off(element, subdomain, subject_name) {
-  var on_off = element.innerHTML == "Subscribe";
+  var on_off = element.innerHTML == locale.SUBSCRIBE_TO_UPDATES();
 
   var post_data = "action=";
   post_data += on_off ? "subscribe" : "unsubscribe";
@@ -24,9 +24,11 @@ function subscribe_on_off(element, subdomain, subject_name) {
     url: "/subscribe",
     data: post_data,
     success: function(msg) {
-      element.innerHTML = on_off ? "Unsubscribe" : "Subscribe";
+      element.innerHTML = on_off ? locale.UNSUBSCRIBE() : 
+          locale.SUBSCRIBE_TO_UPDATES();
     },
     error: function(xhr, text_status, error) {
+      log(text_status + ', ' + error);
       alert(locale.ERROR());
     }
   });

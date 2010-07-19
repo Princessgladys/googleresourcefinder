@@ -51,6 +51,10 @@ locale = function() {
   messages.DISTRICT =
       'District';
 
+  //i18n: Eror message, shown when an error occurs.
+  messages.ERROR =
+      'An error has occurred. Please try again later.';
+
   //i18n: Error message for required field.
   messages.ERROR_FIELD_IS_REQUIRED =
       'Field is required.';
@@ -130,17 +134,21 @@ locale = function() {
   messages.SHOW =
       'Show';
 
+  //i18n: Label to subscribe from a subject
+  messages.SUBSCRIBE_TO_UPDATES =
+      'Subscribe to E-mail Updates';
+
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE =
       '${HOURS}:${MINUTES} ${ZONE}';
 
+  //i18n: Label to unsubscribe to a subject
+  messages.UNSUBSCRIBE =
+      'Unsubscribe';
+
   //i18n: Label indicating a record was updated
   messages.UPDATED =
       'Updated';
-
-  //i18n: Eror message, shown when an error occurs.
-  messages.ERROR = 
-      'An error has occurred. Please try again later.';
 
   function message_renderer(name) {
     return function (params) {

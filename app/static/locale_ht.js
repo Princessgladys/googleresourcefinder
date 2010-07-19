@@ -44,6 +44,9 @@ locale = function() {
   //i18n: Meaning: administrative division
   messages.DISTRICT = "Distri";
 
+  //i18n: Eror message, shown when an error occurs.
+  messages.ERROR = "Gen yon er\u00e8 ki te f\u00e8t. Tanpri, eseye ank\u00f2 pi ta.";
+
   //i18n: Error message for required field.
   messages.ERROR_FIELD_IS_REQUIRED = "Dom\u00e8n sa obligatwa.";
 
@@ -104,14 +107,17 @@ locale = function() {
   //i18n: Label for a control that filters a list of facilities
   messages.SHOW = "Montre";
 
+  //i18n: Label to subscribe from a subject
+  messages.SUBSCRIBE_TO_UPDATES = "Ab\u00f2nman imel mizajou";
+
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}: ${MINUTES} ${ZONE}";
 
+  //i18n: Label to unsubscribe to a subject
+  messages.UNSUBSCRIBE = "Koupe Ab\u00f2nman nan Tcheke";
+
   //i18n: Label indicating a record was updated
   messages.UPDATED = "Remete an fonksyon";
-
-  //i18n: Eror message, shown when an error occurs.
-  messages.ERROR = "An error has occurred. Please try again later.";
 
   function message_renderer(name) {
     return function (params) {
