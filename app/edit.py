@@ -324,6 +324,22 @@ def get_source_url(request):
 
 def update(key, subject_type, request, user, account, attributes, subdomain,
            transactional=True):
+    """Given a subject, subject type, and request information from the
+    edit page, this performs required updates to the subject's stored
+    information if changes have been made. Also triggers a taskqueue event to
+    run the mail alerts system for any new changes.
+
+    Args:
+        key: key_name of the potentially changed subject
+        subject_type: type of the subject
+        request: http request information
+        user: current user
+        account: current user's account
+        attributes: a list of attributes for this subject
+        subdomain: the current subdomain
+        transactional: (optional) True if this function is being run in
+            transaction
+    """
     subject = db.get(key)
     minimal_subject = model.MinimalSubject.get_by_subject(subject)
     utcnow = datetime.datetime.utcnow().replace(microsecond=0)
