@@ -63,6 +63,10 @@ locale = function() {
   messages.ERROR_LATITUDE_MUST_BE_NUMBER =
       'Latitude must be a number.';
 
+  //i18n: Error message for not loading edit form successfully
+  messages.ERROR_LOADING_EDIT_FORM =
+      'Error loading edit form.';
+
   //i18n: Error message for not loading facility information successfully
   messages.ERROR_LOADING_FACILITY_INFORMATION =
       'Error loading facility information.';
@@ -74,6 +78,10 @@ locale = function() {
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_MUST_BE_NUMBER =
       'Longitude must be a number.';
+
+  //i18n: Error message for not saving facility information successfully
+  messages.ERROR_SAVING_FACILITY_INFORMATION =
+      'Error saving facility information.';
 
   //i18n: Error message for a value that is not a number
   messages.ERROR_VALUE_MUST_BE_NUMBER =
@@ -98,6 +106,10 @@ locale = function() {
   messages.HEALTHC_ID =
       'HealthC ID';
 
+  //i18n: Message indicating loading hospital information
+  messages.LOADING =
+    'Loading...';
+
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS =
@@ -121,6 +133,14 @@ locale = function() {
   //i18n: Tooltip explaining a 'Print' link
   messages.PRINT_ENABLED_TOOLTIP =
       'Print a list of hospitals in order of distance from ${FACILITY_NAME}';
+
+  //i18n: Message indicating hospital information has been saved
+  messages.SAVED =
+    'Your edit has been saved';
+
+  //i18n: Message indicating saving hospital information
+  messages.SAVING =
+    'Saving...';
 
   //i18n: work done by someone that benefits another
   messages.SERVICES =

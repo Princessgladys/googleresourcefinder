@@ -53,14 +53,20 @@ locale = function() {
   //i18n: Error message for invalid latitude.
   messages.ERROR_LATITUDE_MUST_BE_NUMBER = "Latitude doit \u00eatre un nombre";
 
+  //i18n: Error message for not loading edit form successfully
+  messages.ERROR_LOADING_EDIT_FORM = "Erreur lors du chargement de modifier le formulaire.";
+
   //i18n: Error message for not loading facility information successfully
-  messages.ERROR_LOADING_FACILITY_INFORMATION = "informations sur l'erreur installation de chargement";
+  messages.ERROR_LOADING_FACILITY_INFORMATION = "Erreur lors du chargement des informations de installation.";
 
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_INVALID = "Longitude doit \u00eatre comprise entre -180 et 180";
 
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_MUST_BE_NUMBER = "Longitude doit \u00eatre un nombre";
+
+  //i18n: Error message for not saving facility information successfully
+  messages.ERROR_SAVING_FACILITY_INFORMATION = "Erreur lors du enregistrement des informations de installation.";
 
   //i18n: Error message for a value that is not a number
   messages.ERROR_VALUE_MUST_BE_NUMBER = "La valeur doit \u00eatre un nombre";
@@ -80,6 +86,9 @@ locale = function() {
   //i18n: Pan-American Health Organization; no translation necessary.
   messages.HEALTHC_ID = "ID HealthC";
 
+  //i18n: Message indicating loading hospital information
+  messages.LOADING = "Chargement...";
+
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "janv. f\u00e9vr. mars avr. mai juin juil. ao\u00fbt sept. oct. nov. d\u00e9c.".split(' ');
@@ -97,6 +106,12 @@ locale = function() {
 
   //i18n: Tooltip explaining a 'Print' link
   messages.PRINT_ENABLED_TOOLTIP = "Imprimer une liste d'h\u00f4pitaux tri\u00e9s selon la distance qui les s\u00e9pare de ${FACILITY_NAME}";
+
+  //i18n: Message indicating hospital information has been saved
+  messages.SAVED = "Vos modifications ont \u00e9t\u00e9 enregistr\u00e9es";
+
+  //i18n: Message indicating saving hospital information
+  messages.SAVING = "Enregistrement...";
 
   //i18n: work done by someone that benefits another
   messages.SERVICES = "Services";

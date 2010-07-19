@@ -94,7 +94,7 @@ class StrAttributeType(AttributeType):
 
 class TextAttributeType(AttributeType):
     def make_input(self, name, value, attribute):
-        return '<textarea name="%s" rows=5 cols=40>%s</textarea>' % (
+        return '<textarea name="%s" rows=5 cols=34>%s</textarea>' % (
             html_escape(name), html_escape(value or ''))
 
     def to_stored_value(self, name, value, request, attribute):
@@ -505,6 +505,9 @@ class Edit(utils.Handler):
         if self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
+            # Fire off a task to asynchronously refresh the JSON cache
+            taskqueue.add(url='/refresh_json_cache?lang=%s&subdomain=%s'
+                          % (self.params.lang, self.subdomain), method='GET')
         else:
             raise Redirect(self.get_url('/'))
 

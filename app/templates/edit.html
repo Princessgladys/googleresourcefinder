@@ -54,7 +54,7 @@ tr.field.text { vertical-align: top; }
 {% endcomment %}
 <h1>{% trans "Edit" %} {{subject_title|escape}}</h1>
 
-<form method="post" id="edit" action="{{edit_url}}">
+<form method="post" id="edit" action="{{edit_url|escape}}">
   <input type="hidden" name="token" value="{{token}}"/>
   <input type="hidden" name="embed" value="{{params.embed|escape}}"/>
   <input type="hidden" name="cc" value="{{params.cc|escape}}"/>
@@ -64,6 +64,9 @@ tr.field.text { vertical-align: top; }
     {% if not account.nickname %}
       <tr class="account">
         <td colspan="2" class="instructions">
+          {% comment %}
+          #TODO(shakusa) Make instructions fit in same-page-edit without horizontal scrolling.
+          {% endcomment %}
           {% comment %}
           #i18n: Instructions to enter a person's name and organizational
           #i18n: affiliation.
@@ -131,9 +134,11 @@ tr.field.text { vertical-align: top; }
                    value="{{field.json|escape}}"/>
             <div id="{{field.name}}_errormsg" class="hidden"></div>
           </div>
+      {% if not params.embed %}
         </td>
-        <td>            
-            <div id="{{field.name}}__comment" class="comment" style="visibility:hidden">
+        <td>
+      {% endif %}
+            <div id="{{field.name}}__comment" class="comment" style="display:none">
               {% comment %}
               #i18n: Label for a text field to enter a comment about a change.
               {% endcomment %}
@@ -151,11 +156,13 @@ tr.field.text { vertical-align: top; }
         {% comment %}
         #i18n: Button text to save data
         {% endcomment %}
-        <input type="submit" name="save" id="save" value="{% trans 'Save' %}">
+        <input type="{% if params.embed %}button{% else %}submit{% endif %}"
+               name="save" id="save" value="{% trans 'Save' %}">
         {% comment %}
         #i18n: Button text to cancel and return to the home page
         {% endcomment %}
-        <input type="submit" name="cancel" id="cancel" value="{% trans 'Cancel' %}">
+        <input type="{% if params.embed %}button{% else %}submit{% endif %}"
+               name="cancel" id="cancel" value="{% trans 'Cancel' %}">
         <span id="edit-status"></span>
       </td>
     </tr>
@@ -174,6 +181,7 @@ tr.field.text { vertical-align: top; }
 {% else %}
   <script type="text/javascript" src="static/locale_{{params.lang}}.js"></script>
 {% endifequal %}
+  <script type="text/javascript">init_edit(false, '{{edit_url|escape}}')</script>
 </body>
 </html>
 {% endif %}
