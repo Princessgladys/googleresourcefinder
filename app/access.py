@@ -19,8 +19,11 @@ There is also a token system for allowing access to anonymous users by passing
 them a url.
 """
 
-from google.appengine.ext import db
 import logging
+
+from google.appengine.ext import db
+
+import cache
 from model import Account
 
 # Actions that are permitted/forbidden according to the 'actions' property:
@@ -54,7 +57,7 @@ def check_request(request, user):
 def get_default_permissions():
     """Returns the list of default permissions granted to all users,
     which resides in the special Account with key_name='default'."""
-    account = Account.get_by_key_name('default')
+    account = cache.DEFAULT_ACCOUNT.get()
     return account and account.actions or []
 
 def check_action_permitted(account, subdomain, action):

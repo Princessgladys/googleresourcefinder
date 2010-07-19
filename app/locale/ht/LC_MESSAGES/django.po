@@ -636,7 +636,7 @@ msgid "Reachable by road"
 msgstr "Aksesib pa wout"
 
 #. Record updated successfully.
-#: edit.py:507
+#: edit.py:508
 msgid "Record updated."
 msgstr "Done a jou"
 

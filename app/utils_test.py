@@ -41,8 +41,9 @@ from model import Account, Message
 class HandlerTest(MediumTestCase):
     def setUp(self):
         MediumTestCase.setUp(self)
-        Account(key_name='default', actions=['haiti:view']).put()
         Account(email='foo@example.com', actions=['*:edit']).put()
+        Account(key_name='default', actions=['haiti:view']).put()
+        cache.DEFAULT_ACCOUNT.flush()
 
     def simulate_request(self, path, user_email=None, **cookies):
         request = webapp.Request(webob.Request.blank(path).environ)
