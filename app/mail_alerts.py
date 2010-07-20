@@ -36,10 +36,10 @@ from google.appengine.api import mail
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 
+import bubble
 import cache
 import utils
-from bubble import format
-from export import get_last_updated_time
+from export import format, get_last_updated_time
 from feeds.xmlutils import Struct
 from model import Account, PendingAlert, Subject, SubjectType, Subscription
 from utils import _, Handler, simplejson
@@ -59,71 +59,78 @@ import django.utils.translation
 FREQUENCY_TO_TIMEDELTA = {
     'immediate': datetime.timedelta(0),
     'daily': datetime.timedelta(1),
-    'weekly': datetime.timedelta(7),
-    'monthly': datetime.timedelta(30) # note: 'monthly' is every 30 days
+    'weekly': datetime.timedelta(7)
 }
 
-def get_timedelta(frequency):
+def get_timedelta(frequency, now=None):
     """Given a text frequency, converts it to a timedelta."""
     if frequency in FREQUENCY_TO_TIMEDELTA:
         return FREQUENCY_TO_TIMEDELTA[frequency]
+    elif frequency == 'monthly':
+        if not now:
+            now = datetime.datetime.now()
+        next_month = datetime.datetime(now.year + (now.month / 12),
+                                       (now.month % 12) + 1, 1, now.hour,
+                                       now.minute, now.second, now.microsecond)
+        return next_month - now
     return None
 
 
 def fetch_updates(alert, subject):
     """For a given alert and subject, finds any updated values.
-    
+
     Returns:
         A list of dictionary mappings of attributes and their updated
         values, including the attribute, the old/new values, and the
         most recent author to update the value. Example:
-        
-            [ [attribute, new_value, old_value, author_foo ],
-              [attribute, new_value, old_value, author_foo ],
-              [attribute, new_value, old_value, author_foo ] ]
+
+            [(attribute, {'old_value': value_foo,
+                          'new_value': value_bar,
+                          'author': author_foo})]
     """
     if not (alert and subject):
-        return
+        return []
     updated_attrs = []
-    subject_type = cache.SUBJECT_TYPES[subject.type]
-    
+
     old_values = alert.dynamic_properties()
-    for i in range(len(old_values)):
-        value = subject.get_value(old_values[i])
-        author = subject.get_author_nickname(old_values[i])
-        alert_val = getattr(alert, old_values[i])
+    for attribute in old_values:
+        value = subject.get_value(attribute)
+        author = subject.get_author_nickname(attribute)
+        alert_val = getattr(alert, attribute)
         if value != alert_val:
-            updated_attrs.append((
-                old_values[i], # attribute
-                alert_val, # new value
-                value, # old value
-                author # author of the change
-            ))
-    
+            updated_attrs.append((attribute, {'old_value': alert_val,
+                                              'new_value': value,
+                                              'author': author}))
+
     return updated_attrs
 
 
 def format_plain_body(data):
     """Forms the plain text body for an e-mail. Expects the data to be input
     in the following format:
-        
+
         Struct(
             date=datetime
-            changed_subjects={subject_key: (subject_title, [
-                [attribute, old_value, new_value, author],
-                [attribute, old_value, new_value, author]
-            ])}
-        )
+            changed_subjects={subject_key: (subject_title, (attribute,
+                {'old_value': value_foo,
+                 'new_value': value_bar,
+                 'author': author_foo}))})
     """
-    body = ''
+    body = u''
     for subject_name in data.changed_subjects:
-        subject_title = data.changed_subjects[subject_name][0]
-        updates = data.changed_subjects[subject_name][1]
+        (subject_title, updates) = data.changed_subjects[subject_name]
         body += subject_title.upper() + '\n'
-        for update in updates:
-            attribute, old_value, new_value, author = update
-            body += u'-> %s: %s [Old Value: %s; Updated by: %s]\n' % (
-                _(str(attribute)), new_value, old_value, author)
+        for attribute, info in updates:
+            body += '-> %s: %s [%s: %s; %s: %s]\n' % (
+                #i18n: changed attribute name
+                attribute,
+                utils.to_unicode(utils.value_or_dash(info['new_value'])),
+                #i18n: old value for the attribute
+                utils.to_unicode(_('Previous value')),
+                utils.to_unicode(utils.value_or_dash(info['old_value'])),
+                #i18n: who the attribute was updated by
+                utils.to_unicode(_('Updated by')),
+                utils.to_unicode(info['author']))
         body += '\n'
     return body
 
@@ -138,10 +145,14 @@ def format_html_body(data):
         [ subject_name1, subject_name2, subject_name3, ... ]
     """
     changed_subjects = []
-    for subject_key in data.changed_subjects:
-        subject = Subject.get_by_key_name(subject_key)
+    for subject_name in data.changed_subjects:
+        subject = Subject.get_by_key_name(subject_name)
+        updates = data.changed_subjects[subject_name][1]
+        for attribute, info in updates:
+            info['new_value'] = utils.value_or_dash(info['new_value'])
+            info['old_value'] = utils.value_or_dash(info['old_value'])
         changed_subjects.append({
-            'name': subject_key,
+            'name': subject_name,
             'title': subject.get_value('title'),
             'address': subject.get_value('address'),
             'contact_number': subject.get_value('phone'),
@@ -149,63 +160,65 @@ def format_html_body(data):
             'available_beds': subject.get_value('available_beds'),
             'total_beds': subject.get_value('total_beds'),
             'last_updated': format(get_last_updated_time(subject)),
-            'changed_vals': data.changed_subjects[subject_key][1]
+            'changed_vals': updates
         })
-    
-    if 'unchanged_subjects' not in data:
-        data.unchanged_subjects = []
+
     unchanged_subjects = []
-    for subject_key in data.unchanged_subjects:
-        subject = Subject.get_by_key_name(subject_key)
-        unchanged_subjects.append({
-            'name': subject_key,
-            'title': subject.get_value('title'),
-            'address': subject.get_value('address'),
-            'contact_number': subject.get_value('phone'),
-            'contact_email': subject.get_value('email'),
-            'available_beds': subject.get_value('available_beds'),
-            'total_beds': subject.get_value('total_beds'),
-            'last_updated': format(get_last_updated_time(subject))
-        })
-    
+    if 'unchanged_subjects' in data:
+        for subject in data.unchanged_subjects:
+            unchanged_subjects.append({
+                'name': subject.key().name(),
+                'title': subject.get_value('title'),
+                'address': subject.get_value('address'),
+                'contact_number': subject.get_value('phone'),
+                'contact_email': subject.get_value('email'),
+                'available_beds': subject.get_value('available_beds'),
+                'total_beds': subject.get_value('total_beds'),
+                'last_updated': format(get_last_updated_time(subject))
+            })
+
     template_values = {
         'date': data.time,
         'nickname': data.nickname,
+        'subdomain': data.subdomain,
         'changed_subjects': changed_subjects,
         'unchanged_subjects': unchanged_subjects
     }
-    
+
     path = os.path.join(os.path.dirname(__file__),
                         'templates/hospital_email.html')
     return template.render(path, template_values)
 
 
-def send_email(locale, sender, to, subject, text_body, html_body):
+def send_email(locale, sender, to, subject, body, format):
     """Sends a single e-mail update.
-    
+
     Args:
         locale: the locale whose language to use for the email
         sender: the e-mail address of the person sending the e-mail
         to: the user to send the update to
         subject: the subject line of the e-mail
-        text_body: the text to use as the body of the e-mail [plain text]
+        body: the text/html to use as the body of the e-mail
+        format: the form [text or html] the body is in
     """
     django.utils.translation.activate(locale)
-    
+
     message = mail.EmailMessage()
     message.sender = sender
     message.to = to
     message.subject = subject
-    message.body = text_body
-    message.html = html_body
-    
+    if format == 'plain':
+        message.body = body
+    elif format == 'html':
+        message.html = body
+
     message.send()
 
 
 def update_account_alert_time(account, frequency, now=None, initial=False):
     """Updates a particular account to send an alert at the appropriate
     later date, depending on the given frequency.
-    
+
     Args:
         account: the account whose time is to be updated
         frequency: used to determine how much to update by
@@ -213,7 +226,10 @@ def update_account_alert_time(account, frequency, now=None, initial=False):
             time setting the account's update times"""
     if not now:
         now = datetime.datetime.now()
-    new_time = now + get_timedelta(frequency)
+        new_time = now + get_timedelta(frequency)
+    else:
+        new_time = now + get_timedelta(frequency, now)
+
     if initial:
         if frequency == 'daily' and not account.next_daily_alert:
             account.next_daily_alert = new_time
@@ -229,12 +245,17 @@ def update_account_alert_time(account, frequency, now=None, initial=False):
         elif frequency == 'monthly':
             account.next_monthly_alert = new_time
 
+FORMAT_EMAIL = {
+    'html': format_html_body,
+    'plain': format_plain_body
+}
+
 class MailAlerts(Handler):
     """Handler for /mail_alerts. Used to handle e-mail update sending.
-    
+
     Attributes:
         action: the specific action to be taken by the class
-            
+
     Methods:
         init(): handles initialization tasks for the class
         post(): responds to HTTP POST requests
@@ -242,28 +263,30 @@ class MailAlerts(Handler):
             sends out immediate updates; called when a subject is changed
         send_digests(): sends out a digest update for the specified frequency
     """
-    
+
     def init(self):
         """Handles any useful initialization tasks for the class."""
         self.action = self.request.get('action')
-    
+
     def post(self):
         """Responds to HTTP POST requests. This function either (queues up
         future daily/weekly/monthly updates and sends immediate updates) or
         (sends out daily/weekly/monthly digest updates).
         """
         self.init()
-        
+
         if self.action == 'subject_changed':
-            self.changed_request_data = pickle.loads(
-                str(simplejson.loads(self.request.get('changed_data'))))
-            self.unchanged_request_data = pickle.loads(
-                str(simplejson.loads(self.request.get('unchanged_data'))))
+            # Values encoded to latin-1 before unpickling due to pickle
+            # needing 8-bit input, matching its original output.
+            self.changed_request_data = pickle.loads(simplejson.loads(
+                self.request.get('changed_data')).encode('latin-1'))
+            self.unchanged_request_data = pickle.loads(simplejson.loads(
+                self.request.get('unchanged_data')).encode('latin-1'))
             self.update_and_add_pending_alerts()
         else:
             for freq in ['daily', 'weekly', 'monthly']:
                 self.send_digests(freq)
-    
+
     def update_and_add_pending_alerts(self):
         """Called when a subject is changed. It creates PendingAlerts for
         any subscription for the changed subject. Also sends out alerts to
@@ -272,11 +295,7 @@ class MailAlerts(Handler):
         """
         subject = Subject.get_by_key_name(self.params.subject_name)
         subject_type = SubjectType.get(self.subdomain, subject.type)
-        values = []
-        for (attribute, (old_value, new_value, author)) in \
-            self.changed_request_data.items():
-            values.append((attribute, old_value, new_value, author))
-        
+
         subscriptions = Subscription.get_by_subject(self.params.subject_name)
         for subscription in subscriptions:
             if subscription.frequency != 'immediate':
@@ -290,30 +309,36 @@ class MailAlerts(Handler):
                     subject_name=subscription.subject_name,
                     frequency=subscription.frequency)
                 if not pa.timestamp:
-                    for (attribute, old_value, new_value, author) in values:
-                        setattr(pa, attribute, old_value) #(attr, old_value)
+                    for attribute, info in self.changed_request_data.items():
+                        if info['old_value'] == '\xe2\x80\x93':
+                            setattr(pa, attribute, None)
+                        else:
+                            setattr(pa, attribute, info['old_value'])
                     for attribute in self.unchanged_request_data:
                         setattr(pa, attribute,
                                 self.unchanged_request_data[attribute])
                     pa.timestamp = datetime.datetime.now()
                     db.put(pa)
-            
+
             else:
                 # send out alerts for those with immediate update subscriptions
                 account = Account.all().filter('email =',
                                                subscription.user_email).get()
                 email_data = Struct()
-                email_data.time = format(datetime.datetime.now())
+                email_data.time = utils.to_local_isotime(datetime.datetime.now(),
+                                                         clear_ms=True)
                 email_data.nickname = account.nickname or account.email
+                email_data.subdomain = self.subdomain
                 email_data.changed_subjects = {self.params.subject_name: (
-                    subject.get_value('title'), values)}
-                text_body = format_plain_body(email_data)
-                html_body = format_html_body(email_data)
+                    subject.get_value('title'), self.changed_request_data.items())}
+                body = FORMAT_EMAIL[account.email_format](email_data)
                 send_email(account.locale,
                            'updates@resource-finder.appspotmail.com',
-                           account.email, utils.to_unicode(
-                           _('Resource Finder Updates')), text_body, html_body)
-    
+                           account.email,
+                           # i18n: subject of e-mail -> Resource Finder Updates
+                           utils.to_unicode(_('Resource Finder Updates')),
+                           body, account.email_format)
+
     def send_digests(self, frequency):
         """Sends out a digest update for the specified frequency. Currently
         available choices for the supplied frequency are ['daily', 'weekly',
@@ -326,27 +351,41 @@ class MailAlerts(Handler):
             pending_alerts = PendingAlert.get_by_frequency(frequency,
                                                            account.email)
             alerts_to_delete = []
-            subjects = {}
-            for alert in pending_alerts:
-                subj = Subject.get_by_key_name(alert.subject_name)
-                values = fetch_updates(alert, subj)
-                subjects[subj.key().name()] = (subj.get_value('title'),
-                    values)
-                alerts_to_delete.append(alert)
-            
-            if not subjects:
+            unchanged_subjects = []
+            changed_subjects = {}
+            for subscription in Subscription.all().filter('user_email =',
+                                                          account.email):
+                subject = Subject.get_by_key_name(subscription.subject_name)
+                pa = PendingAlert.get(frequency, account.email,
+                                      subscription.subject_name)
+                if pa:
+                    values = fetch_updates(pa, subject)
+                    changed_subjects[subject.key().name()] = (
+                        subject.get_value('title'), values)
+                    alerts_to_delete.append(pa)
+                else:
+                    if len(unchanged_subjects) >= 3:
+                        continue
+                    unchanged_subjects.append(subject)
+
+            if not changed_subjects and (account.email_format == 'plain' or
+                not unchanged_subjects):
                 continue
-                
+
             email_data = Struct()
-            email_data.time = format(datetime.datetime.now())
+            email_data.time = utils.to_local_isotime(datetime.datetime.now(),
+                                                     clear_ms=True)
             email_data.nickname = account.nickname or account.email
-            email_data.changed_subjects = subjects
-            text_body = format_plain_body(email_data)
-            html_body = format_html_body(email_data)
+            email_data.subdomain = self.subdomain
+            email_data.changed_subjects = changed_subjects
+            email_data.unchanged_subjects = unchanged_subjects
+            body = FORMAT_EMAIL[account.email_format](email_data)
             send_email(account.locale,
                        'updates@resource-finder.appspotmail.com',
-                       account.email, utils.to_unicode(
-                       _('Resource Finder Updates')), text_body, html_body)
+                       account.email,
+                       # i18n: subject of e-mail -> Resource Finder Updates
+                       utils.to_unicode( _('Resource Finder Updates')),
+                       body, account.email_format)
             update_account_alert_time(account, frequency)
             db.delete(alerts_to_delete)
             db.put(account)
