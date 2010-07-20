@@ -47,7 +47,11 @@ class Main(utils.Handler):
         home_url = self.get_url('/')
         login_url = users.create_login_url(home_url)
         logout_url = users.create_logout_url(home_url)
-        self.render('templates/map.html',
+        if self.params.__dict__.get('print'):
+            template = 'templates/print.html'
+        else:
+            template = 'templates/map.html'
+        self.render(template,
                     params=self.params,
                     user=user,
                     #i18n: a user with no identity

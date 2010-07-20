@@ -30,8 +30,8 @@ th { text-align: left; }
 .header .lang { position: absolute; left: 400px; top: 0px; padding: 2px 8px;
                 z-index: 2 }
 .header .title { position: absolute: left: 0px; top: 0px; padding: 4px;
-                 font-size: 18px; color: #fff; background: #333; width: 392px;
-                 height: 30px; }
+                 font-size: 18px; color: #fff; background: #333; width: 392px; }
+.header .title a { text-decoration: none; color: #fff; }
 .loading { position: absolute; left:48%; top: 0px; padding: 3px; z-index: 5;
            background-color:#FFF1A8; font-size: 13px; font-weight: bold; }
 

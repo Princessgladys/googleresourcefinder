@@ -157,13 +157,11 @@ tr.field.text { vertical-align: top; }
           {% comment %}
           #i18n: Button text to save data
           {% endcomment %}
-          <input type="{% if params.embed %}button{% else %}submit{% endif %}"
-                 name="save" id="save" value="{% trans 'Save' %}">
+          <input type="{% if params.embed %}button{% else %}submit{% endif %}" name="save" id="save" value="{% trans 'Save' %}">
           {% comment %}
           #i18n: Button text to cancel and return to the home page
           {% endcomment %}
-          <input type="{% if params.embed %}button{% else %}submit{% endif %}"
-                 name="cancel" id="cancel" value="{% trans 'Cancel' %}">
+          <input type="{% if params.embed %}button{% else %}submit{% endif %}" name="cancel" id="cancel" value="{% trans 'Cancel' %}">
         </div>
         <span id="edit-status"></span>
         {% if params.embed %}
