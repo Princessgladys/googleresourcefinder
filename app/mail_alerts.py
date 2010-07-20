@@ -41,7 +41,8 @@ import cache
 import utils
 from export import format, get_last_updated_time
 from feeds.xmlutils import Struct
-from model import Account, PendingAlert, Subject, SubjectType, Subscription
+from model import Account, PendingAlert, Subdomain, Subject, SubjectType
+from model import Subscription
 from utils import _, Handler, simplejson
 
 # Set up localization.
@@ -147,12 +148,14 @@ def format_html_body(data):
     changed_subjects = []
     for subject_name in data.changed_subjects:
         subject = Subject.get_by_key_name(subject_name)
+        no_subdomain_name = subject_name.split(':')[1]
         updates = data.changed_subjects[subject_name][1]
         for attribute, info in updates:
             info['new_value'] = utils.value_or_dash(info['new_value'])
             info['old_value'] = utils.value_or_dash(info['old_value'])
         changed_subjects.append({
             'name': subject_name,
+            'no_subdomain_name': no_subdomain_name,
             'title': subject.get_value('title'),
             'address': subject.get_value('address'),
             'contact_number': subject.get_value('phone'),
@@ -166,8 +169,11 @@ def format_html_body(data):
     unchanged_subjects = []
     if 'unchanged_subjects' in data:
         for subject in data.unchanged_subjects:
+            subject_name = subject.key().name()
+            no_subdomain_name = subject_name.split(':')[1]
             unchanged_subjects.append({
-                'name': subject.key().name(),
+                'name': subject_name,
+                'no_subdomain_name': no_subdomain_name,
                 'title': subject.get_value('title'),
                 'address': subject.get_value('address'),
                 'contact_number': subject.get_value('phone'),
@@ -284,8 +290,9 @@ class MailAlerts(Handler):
                 self.request.get('unchanged_data')).encode('latin-1'))
             self.update_and_add_pending_alerts()
         else:
-            for freq in ['daily', 'weekly', 'monthly']:
-                self.send_digests(freq)
+            for subdomain in Subdomain.all():
+              for freq in ['daily', 'weekly', 'monthly']:
+                  self.send_digests(freq, subdomain.key().name())
 
     def update_and_add_pending_alerts(self):
         """Called when a subject is changed. It creates PendingAlerts for
@@ -294,7 +301,7 @@ class MailAlerts(Handler):
         subject.
         """
         subject = Subject.get_by_key_name(self.params.subject_name)
-        subject_type = SubjectType.get(self.subdomain, subject.type)
+        subdomain = self.params.subject_name.split(':')[0]
 
         subscriptions = Subscription.get_by_subject(self.params.subject_name)
         for subscription in subscriptions:
@@ -328,18 +335,21 @@ class MailAlerts(Handler):
                 email_data.time = utils.to_local_isotime(datetime.datetime.now(),
                                                          clear_ms=True)
                 email_data.nickname = account.nickname or account.email
-                email_data.subdomain = self.subdomain
+                email_data.subdomain = subdomain
                 email_data.changed_subjects = {self.params.subject_name: (
                     subject.get_value('title'), self.changed_request_data.items())}
                 body = FORMAT_EMAIL[account.email_format](email_data)
+                # i18n: subject of e-mail -> Resource Finder Updates
+                email_subject = '%s %s %s' % (
+                    subdomain.title(),
+                    utils.to_unicode(_('Resource Finder Updates')),
+                    email_data.time)
                 send_email(account.locale,
                            'updates@resource-finder.appspotmail.com',
-                           account.email,
-                           # i18n: subject of e-mail -> Resource Finder Updates
-                           utils.to_unicode(_('Resource Finder Updates')),
+                           account.email, email_subject,
                            body, account.email_format)
 
-    def send_digests(self, frequency):
+    def send_digests(self, frequency, subdomain):
         """Sends out a digest update for the specified frequency. Currently
         available choices for the supplied frequency are ['daily', 'weekly',
         'monthly']. Also removes pending alerts once an e-mail has been sent
@@ -376,15 +386,18 @@ class MailAlerts(Handler):
             email_data.time = utils.to_local_isotime(datetime.datetime.now(),
                                                      clear_ms=True)
             email_data.nickname = account.nickname or account.email
-            email_data.subdomain = self.subdomain
+            email_data.subdomain = subdomain
             email_data.changed_subjects = changed_subjects
             email_data.unchanged_subjects = unchanged_subjects
             body = FORMAT_EMAIL[account.email_format](email_data)
+            # i18n: subject of e-mail -> Resource Finder Updates
+            email_subject = '%s %s %s' % (
+                subdomain.title(),
+                utils.to_unicode(_('Resource Finder Updates')),
+                email_data.time)
             send_email(account.locale,
                        'updates@resource-finder.appspotmail.com',
-                       account.email,
-                       # i18n: subject of e-mail -> Resource Finder Updates
-                       utils.to_unicode( _('Resource Finder Updates')),
+                       account.email, email_subject,
                        body, account.email_format)
             update_account_alert_time(account, frequency)
             db.delete(alerts_to_delete)

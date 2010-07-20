@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for cache.py."""
+"""Tests for subscribe.py."""
 
 import datetime
 import os

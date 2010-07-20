@@ -18,7 +18,7 @@ import cache
 import datetime
 import logging
 import model
-from utils import db, get_message, run, to_local_isotime
+from utils import db, get_message, run, to_local_isotime, value_or_dash
 from utils import ErrorMessage, Handler, HIDDEN_ATTRIBUTE_NAMES
 
 def format(value, localize=False):
@@ -46,9 +46,7 @@ def format(value, localize=False):
         return (latitude + ', ' + longitude).encode('utf-8')
     if isinstance (value, bool):
         return value and format(_('Yes')) or format(_('No'))
-    if value or value == 0:
-        return value
-    return u'\u2013'.encode('utf-8')
+    return value_or_dash(value)
 
 class ValueInfo:
     """Simple struct used by the django template to extract values"""

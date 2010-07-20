@@ -351,8 +351,10 @@ def to_isotime(datetime):
         datetime = to_datetime(datetime)
     return datetime.isoformat() + 'Z'
 
-def to_local_isotime(utc_datetime):
+def to_local_isotime(utc_datetime, clear_ms=False):
     # TODO(shakusa) Use local timezone instead of hard-coding Haitian time
+    if clear_ms:
+      utc_datetime = utc_datetime.replace(microsecond=0)
     utc_datetime = utc_datetime - TimeDelta(hours=5)
     return utc_datetime.isoformat(' ') + ' -05:00'
 
@@ -367,6 +369,13 @@ def to_unicode(value):
         return str(value).decode('utf-8')
     else:
         return u''
+
+def value_or_dash(value):
+    """Converts the given value to a unicode dash if the value does
+    not exist and does not equal 0."""
+    if not value and value != 0:
+        return u'\u2013'.encode('utf-8')
+    return value
 
 def run(*args, **kwargs):
     webapp.util.run_wsgi_app(webapp.WSGIApplication(*args, **kwargs))
