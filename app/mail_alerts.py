@@ -390,7 +390,7 @@ class MailAlerts(Handler):
             body = FORMAT_EMAIL[account.email_format](email_data)
             email_subject = '%s %s %s' % (
                 subdomain.title(),
-				# i18n: subject of e-mail -> Resource Finder Updates
+                # i18n: subject of e-mail -> Resource Finder Updates
                 utils.to_unicode(_('Resource Finder Updates')),
                 email_data.time)
             send_email(account.locale,
