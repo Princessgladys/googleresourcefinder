@@ -84,7 +84,91 @@
 
 <div id="data">
 {% block data %}
-  {% include "data.html" %}
+<div id="supply-section" class="section">
+  <div class="table-head">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <thead id="supply-thead">
+        <tr>
+          {% comment %}
+          #i18n: Header for a list of provisions
+          {% endcomment %}
+          <th>{% trans "Supplies" %}</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <div class="table-body">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <tbody id="supply-tbody"></tbody>
+    </table>
+  </div>
+</div>
+<div id="filter-section" class="section">
+  <div class="table-head">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <thead id="filter-thead">
+        <tr>
+          {% comment %}
+          #i18n: Header for a list of filters to restrict a list of data being
+          #i18n: viewed.
+          {% endcomment %}
+          <th>{% trans "Filters" %}</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <div class="table-body">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <tbody id="filter-tbody"></tbody>
+    </table>
+  </div>
+</div>
+<div id="legend-section" class="section">
+  <div class="table-body">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <tbody id="legend-tbody"></tbody>
+    </table>
+  </div>
+</div>
+<div id="division-section" class="section">
+  <div class="table-head">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <thead id="division-thead">
+        <tr>
+          {% comment %}
+          #i18n: Meaning: administrative division
+          {% endcomment %}
+          <th>{% trans "District" %}</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <div class="table-body" id="division-list">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <tbody id="division-tbody"></tbody>
+    </table>
+  </div>
+</div>
+<div id="subject-section" class="section">
+  <div class="table-head">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <thead id="subject-thead">
+        <tr>
+          {% comment %}
+          #i18n: A place that provides a particular service
+          {% endcomment %}
+          <th>{% trans "Facility" %}</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <div class="table-body" id="subject-list">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <tbody id="subject-tbody">
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock data %}
 </div>
 
