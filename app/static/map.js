@@ -1435,6 +1435,10 @@ function inplace_edit_handler(edit_url) {
       var windowHeight = get_window_size()[1];
       var editTop = get_element_top(edit_data);
       edit_data.style.height = (windowHeight - editTop) + 'px';
+      var edit_bar = $('edit_bar');
+      if (edit_bar) {
+        document.body.appendChild(edit_bar);
+      }
 
       $('data').style.display = 'none';
       init_edit(true, edit_url, edit_data);
@@ -1463,6 +1467,7 @@ function inplace_edit_save(edit_url) {
       success: function(data) {
 	$('data').style.display = '';
 	$('edit-data').style.display = 'none';
+        remove_edit_bar();
 	select_subject(selected_subject_i);
 	show_status(locale.SAVED(), 5000);
         _gaq.push(['_trackEvent', 'edit', 'save', selected_subject.name]);
@@ -1477,7 +1482,15 @@ function inplace_edit_cancel() {
   cancel();
   $('data').style.display = '';
   $('edit-data').style.display = 'none';
+  remove_edit_bar();
   _gaq.push(['_trackEvent', 'edit', 'cancel', selected_subject.name]);
+}
+
+function remove_edit_bar() {
+  var edit_bar = $('edit_bar');
+  if (edit_bar) {
+    document.body.removeChild(edit_bar);
+  }
 }
 
 function request_action_handler(request_url) {

@@ -122,7 +122,7 @@ msgid "Can pick up patients"
 msgstr ""
 
 #. TODO: Add missing message description or meaning
-#: templates/edit.html:165
+#: templates/edit.html:166
 msgid "Cancel"
 msgstr ""
 
@@ -289,7 +289,7 @@ msgid "Error saving facility information."
 msgstr ""
 
 #. Button to export data to comma-separated-value format.
-#: export.py:151 templates/map.html:198
+#: export.py:151 templates/map.html:200
 msgid "Export CSV"
 msgstr ""
 
@@ -354,12 +354,12 @@ msgid "HealthC ID"
 msgstr ""
 
 #. Link to go to a help page for the application
-#: templates/map.html:105
+#: templates/map.html:107
 msgid "Help"
 msgstr ""
 
 #. Link to return to the main page of the application
-#: templates/map.html:94
+#: templates/map.html:96
 msgid "Home"
 msgstr ""
 
@@ -369,7 +369,7 @@ msgid "Hospital"
 msgstr ""
 
 #. Explains how to correct incorrect information that has been printed.
-#: templates/map.html:212
+#: templates/map.html:214
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr ""
 
@@ -409,7 +409,7 @@ msgid "Lab"
 msgstr ""
 
 #. Label for a language selector
-#: templates/map.html:80
+#: templates/map.html:82
 msgid "Language:"
 msgstr ""
 
@@ -444,7 +444,7 @@ msgid "Loader:"
 msgstr ""
 
 #. Indicator that the application is loading.
-#: templates/map.html:150 static/locale.js:110
+#: templates/map.html:152 static/locale.js:110
 msgid "Loading..."
 msgstr ""
 
@@ -610,7 +610,7 @@ msgid "Previous value"
 msgstr ""
 
 #. Link to print the current view of the application
-#: templates/map.html:100
+#: templates/map.html:102
 msgid "Print"
 msgstr ""
 
@@ -621,7 +621,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr ""
 
 #. Link to privacy policy for the application
-#: templates/map.html:115
+#: templates/map.html:117
 msgid "Privacy"
 msgstr ""
 
@@ -673,7 +673,7 @@ msgid "Resource Finder Updates"
 msgstr ""
 
 #. TODO: Add missing message description or meaning
-#: templates/edit.html:160
+#: templates/edit.html:161
 msgid "Save"
 msgstr ""
 
@@ -698,7 +698,7 @@ msgid "Show"
 msgstr ""
 
 #. Link to sign into the app
-#: main.py:58
+#: main.py:59
 msgid "Sign in"
 msgstr ""
 
@@ -708,7 +708,7 @@ msgid "Sign in to edit"
 msgstr ""
 
 #. Link to sign out of the app
-#: main.py:56
+#: main.py:57
 msgid "Sign out"
 msgstr ""
 
@@ -718,7 +718,7 @@ msgid "Supplies"
 msgstr ""
 
 #. Link to terms of service for the application
-#: templates/map.html:110
+#: templates/map.html:112
 msgid "Terms of Service"
 msgstr ""
 
@@ -733,7 +733,7 @@ msgid "Total beds"
 msgstr ""
 
 #. Total number of facilities shown on the map.
-#: templates/map.html:167
+#: templates/map.html:169
 msgid "Total facilities"
 msgstr ""
 
@@ -778,7 +778,7 @@ msgid "Vascular Surgery"
 msgstr ""
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:203
+#: templates/map.html:205
 msgid "View Master List archive"
 msgstr ""
 
@@ -815,12 +815,12 @@ msgid "Your request for \"%(action)s\" permission is now pending"
 msgstr ""
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
-#: templates/map.html:177
+#: templates/map.html:179
 msgid "and with availability."
 msgstr ""
 
 #. a user with no identity
-#: main.py:53
+#: main.py:54
 msgid "anonymous"
 msgstr ""
 
@@ -835,7 +835,7 @@ msgid "capacity"
 msgstr ""
 
 #. Header for the number of facilities less than 10 miles from a location.
-#: templates/map.html:172
+#: templates/map.html:174
 msgid "no more than 10 miles away"
 msgstr ""
 
