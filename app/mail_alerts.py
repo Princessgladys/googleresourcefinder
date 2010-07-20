@@ -291,8 +291,8 @@ class MailAlerts(Handler):
             self.update_and_add_pending_alerts()
         else:
             for subdomain in Subdomain.all():
-              for freq in ['daily', 'weekly', 'monthly']:
-                  self.send_digests(freq, subdomain.key().name())
+                for freq in ['daily', 'weekly', 'monthly']:
+                    self.send_digests(freq, subdomain.key().name())
 
     def update_and_add_pending_alerts(self):
         """Called when a subject is changed. It creates PendingAlerts for
@@ -339,9 +339,9 @@ class MailAlerts(Handler):
                 email_data.changed_subjects = {self.params.subject_name: (
                     subject.get_value('title'), self.changed_request_data.items())}
                 body = FORMAT_EMAIL[account.email_format](email_data)
-                # i18n: subject of e-mail -> Resource Finder Updates
                 email_subject = '%s %s %s' % (
                     subdomain.title(),
+                    # i18n: subject of e-mail -> Resource Finder Updates
                     utils.to_unicode(_('Resource Finder Updates')),
                     email_data.time)
                 send_email(account.locale,
@@ -373,9 +373,7 @@ class MailAlerts(Handler):
                     changed_subjects[subject.key().name()] = (
                         subject.get_value('title'), values)
                     alerts_to_delete.append(pa)
-                else:
-                    if len(unchanged_subjects) >= 3:
-                        continue
+                elif len(unchanged_subjects) <= 3:
                     unchanged_subjects.append(subject)
 
             if not changed_subjects and (account.email_format == 'plain' or
@@ -390,9 +388,9 @@ class MailAlerts(Handler):
             email_data.changed_subjects = changed_subjects
             email_data.unchanged_subjects = unchanged_subjects
             body = FORMAT_EMAIL[account.email_format](email_data)
-            # i18n: subject of e-mail -> Resource Finder Updates
             email_subject = '%s %s %s' % (
                 subdomain.title(),
+				# i18n: subject of e-mail -> Resource Finder Updates
                 utils.to_unicode(_('Resource Finder Updates')),
                 email_data.time)
             send_email(account.locale,

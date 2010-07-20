@@ -42,7 +42,7 @@ import django.utils.translation
 
 sent_emails = []
 
-def fake_send_email(locale, sender, to, subject, text_body):
+def fake_send_email(locale, sender, to, subject, body, format):
     global sent_emails
     sent_emails = []
     django.utils.translation.activate(locale)
@@ -51,11 +51,14 @@ def fake_send_email(locale, sender, to, subject, text_body):
     message.sender = sender
     message.to = to
     message.subject = subject
-    message.body = text_body
+    if format == 'html':
+        message.html = body
+    else:
+        message.body = body
     sent_emails.append(message)
     
     # add asserts for when testing the MailUpdateSystem class
-    assert locale and sender and to and subject and text_body
+    assert locale and sender and to and subject and body
     assert '@' in (sender and to)
     assert sender.find('.org') or sender.find('.com')
     assert to.find('.org') or to.find('.com')
@@ -76,7 +79,7 @@ class MailUpdateSystemTest(MediumTestCase):
         self.locale = 'en'
         self.account = Account(email=self.email, actions=['*:*'],
                                default_frequency=self.default_frequency,
-                               locale=self.locale)
+                               locale=self.locale, email_format='plain')
         db.put(self.account)
 
     def tearDown(self):
