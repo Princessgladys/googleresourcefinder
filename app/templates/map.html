@@ -24,6 +24,8 @@
   {% endcomment %}
   <title>{% trans "Resource Finder" %} ({{subdomain}})</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <!-- IE8 Compatibility View is required for Maps to work -->
+  <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
   <!-- Stylesheets -->
   <link rel="stylesheet" href="static/map.css">
   {% if params.print %}
@@ -217,10 +219,12 @@
 <script>
   jQuery(document).ready(function() {
     load_data({{data}}, '{{params.subject_name}}');
-    {% if params.embed %}
+    {% if params.embed and user %}
       {% comment %}
         We get here if redirected from the 'Sign-in to edit' link in the bubble
-        through the sign-in form.
+        through the sign-in form. Need to check if the user exists to prevent
+        strange behavior when copy/pasting a link with embed=yes to a browser
+        that is not yet signed in.
       {% endcomment %}
       
       inplace_edit_handler('{{edit_url|escape}}');

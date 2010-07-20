@@ -49,6 +49,7 @@ class Main(utils.Handler):
         logout_url = users.create_logout_url(home_url)
         self.render('templates/map.html',
                     params=self.params,
+                    user=user,
                     #i18n: a user with no identity
                     authorization=user and user.email() or _('anonymous'),
                     loginout_url=user and logout_url or login_url,

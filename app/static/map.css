@@ -96,6 +96,8 @@ td.subject-count.selected { color: #fff; }
 .vs3 { height: 4px; opacity: 0.03; filter:alpha(opacity=3); }
 #freshness { position: absolute; left: 0; bottom: 0; padding: 4px;
              font-size: 13px; background: #eee; width: 392px; }
+#edit_bar { position: absolute; left: 0; bottom: 0; padding: 4px;
+            background: #eee; width: 377px; }
 
 /* Map info windows */
 .subject-info h1 { font-size: 13px; }
