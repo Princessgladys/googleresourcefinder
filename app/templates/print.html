@@ -1,0 +1,109 @@
+{% comment %}
+# Copyright 2010 by Google Inc
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+{% extends "map.html" %}
+{% load i18n %}
+
+{% block home-link %}
+{% include "home_link.html" %}
+{% endblock home-link %}
+
+{% comment %}
+# Remove print link
+{% endcomment %}
+{% block print-link %}
+{% endblock print-link %}
+
+{% block stylesheets %}
+{{block.super}}
+<link rel="stylesheet" href="static/map-print.css">
+{% endblock stylesheets %}
+
+{% comment %}
+# Remove language selector
+{% endcomment %}
+{% block language-select %}
+{% endblock language-select %}
+
+{% block title %}
+<div class="print-header">
+  <table width="100%" cellspacing=0 cellpadding=0 border=0>
+    <tbody>
+      <tr>
+        <td valign=top>
+          {% comment %}
+          #i18n: Name of the application.
+          {% endcomment %}
+          <span class="print-title">{% trans "Resource Finder" %}</span><br/>
+          <span class="print-subtitle" id="header-print-subtitle"></span>
+        </td>
+        <td valign=top class="print-datetime">
+          <span class="print-date" id="header-print-date"></span><br/>
+          <span class="print-time" id="header-print-time"></span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock title %}
+
+{% block print-summary %}
+  <div class="print-summary">
+    <table cellspacing=0 cellpadding=0 border=0 align=center>
+      <thead>
+        <tr>
+          {% comment %}
+          #i18n: Total number of facilities shown on the map.
+          {% endcomment %}
+          <th>{% trans "Total facilities" %}</th>
+          {% comment %}
+          #i18n: Header for the number of facilities less than 10 miles from
+          #i18n: a location.
+          {% endcomment %}
+          <th>{% trans "no more than 10 miles away" %}</th>
+          {% comment %}
+          #i18n: Header for the number of facilities with available beds.
+          #i18n: OK to translate without the 'and' if it makes more sense
+          {% endcomment %}
+          <th>{% trans "and with availability." %}</th>
+        </tr>
+      </thead>
+      <tbody id="print-summary-tbody">
+      </tbody>
+    </table>
+  </div>
+{% endblock print-summary %}
+
+{% block data %}
+  {% include "print_data.html" %}
+{% endblock data %}
+
+{% comment %}
+# Remove freshness tags from map
+{% endcomment %}
+{% block freshness %}
+{% endblock freshness %}
+
+{% block footer %}
+<div id="print-update-instructions">
+    {% comment %}
+    #i18n: Explains how to correct incorrect information that has been printed.
+    {% endcomment %}
+    {% trans "If any information is wrong or missing, please correct it on the web site:" %}
+    <span id="site-url"></span>
+  </div>
+{% endblock footer %}
+

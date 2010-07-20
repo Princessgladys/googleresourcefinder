@@ -45,7 +45,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} établissements dans un rayon de ${RADIUS_MILES} miles"
 
 #. Error message for lacking edit permissions
-#: edit.py:358
+#: edit.py:374
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s n'a pas l'autorisation de modifier %(a)s"
@@ -120,8 +120,8 @@ msgstr "Scanner"
 msgid "Can pick up patients"
 msgstr "Peut passer prendre les patients"
 
-#. TODO: Add missing message description or meaning
-#: templates/edit.html:166
+#. Button text to cancel and return to the home page
+#: templates/edit.html:164
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -288,7 +288,7 @@ msgid "Error saving facility information."
 msgstr "Erreur lors du enregistrement des informations de installation."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:151 templates/map.html:200
+#: templates/map.html:99 export.py:151
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
@@ -353,12 +353,12 @@ msgid "HealthC ID"
 msgstr "ID HealthC"
 
 #. Link to go to a help page for the application
-#: templates/map.html:107
+#: templates/base.html:95
 msgid "Help"
 msgstr "Aide"
 
 #. Link to return to the main page of the application
-#: templates/map.html:96
+#: templates/home_link.html:22
 msgid "Home"
 msgstr "Accueil"
 
@@ -368,7 +368,7 @@ msgid "Hospital"
 msgstr "Hôpital"
 
 #. Explains how to correct incorrect information that has been printed.
-#: templates/map.html:214
+#: templates/print.html:105
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr "En cas d'informations incorrectes ou manquantes, veuillez apporter les modifications souhaitées sur le site Web :"
 
@@ -393,7 +393,7 @@ msgid "Invalid or missing account e-mail."
 msgstr "Nom d'établissement incorrect ou manquant"
 
 #. Error message for request missing subject name.
-#: edit.py:425 bubble.py:161
+#: edit.py:441 bubble.py:161
 msgid "Invalid or missing subject name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -408,7 +408,7 @@ msgid "Lab"
 msgstr "Laboratoire"
 
 #. Label for a language selector
-#: templates/map.html:82
+#: templates/base.html:66
 msgid "Language:"
 msgstr "Langue :"
 
@@ -443,7 +443,7 @@ msgid "Loader:"
 msgstr "Outil de chargement :"
 
 #. Indicator that the application is loading.
-#: templates/map.html:152 static/locale.js:110
+#: templates/base.html:123 static/locale.js:110
 msgid "Loading..."
 msgstr "Chargement..."
 
@@ -609,7 +609,7 @@ msgid "Previous value"
 msgstr "Valeur précédente"
 
 #. Link to print the current view of the application
-#: templates/map.html:102
+#: templates/base.html:89
 msgid "Print"
 msgstr "Imprimer"
 
@@ -620,7 +620,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Imprimer une liste d'hôpitaux triés selon la distance qui les sépare de ${FACILITY_NAME}"
 
 #. Link to privacy policy for the application
-#: templates/map.html:117
+#: templates/base.html:105
 msgid "Privacy"
 msgstr "Privé"
 
@@ -635,7 +635,7 @@ msgid "Reachable by road"
 msgstr "Accessible en voiture"
 
 #. Record updated successfully.
-#: edit.py:508
+#: edit.py:524
 msgid "Record updated."
 msgstr "Enregistrement mis à jour"
 
@@ -662,7 +662,7 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "La demande pour devenir %(role)s  a été rejetée."
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35
+#: templates/base.html.py:115 templates/print.html:50
 msgid "Resource Finder"
 msgstr "Localisation de ressources"
 
@@ -671,8 +671,8 @@ msgstr "Localisation de ressources"
 msgid "Resource Finder Updates"
 msgstr "Localisation de ressources"
 
-#. TODO: Add missing message description or meaning
-#: templates/edit.html:161
+#. Button text to save data
+#: templates/edit.html:160
 msgid "Save"
 msgstr "Enregistrer"
 
@@ -697,7 +697,7 @@ msgid "Show"
 msgstr "Montrer"
 
 #. Link to sign into the app
-#: main.py:59
+#: main.py:63
 msgid "Sign in"
 msgstr "Connexion"
 
@@ -707,7 +707,7 @@ msgid "Sign in to edit"
 msgstr "Connectez-vous pour apporter des modifications."
 
 #. Link to sign out of the app
-#: main.py:57
+#: main.py:61
 msgid "Sign out"
 msgstr "Déconnexion"
 
@@ -717,7 +717,7 @@ msgid "Supplies"
 msgstr "Matériel"
 
 #. Link to terms of service for the application
-#: templates/map.html:112
+#: templates/base.html:100
 msgid "Terms of Service"
 msgstr "Conditions d'utilisation"
 
@@ -732,7 +732,7 @@ msgid "Total beds"
 msgstr "Lits au total"
 
 #. Total number of facilities shown on the map.
-#: templates/map.html:169
+#: templates/print.html:71
 msgid "Total facilities"
 msgstr "Nombre d'établissements au total"
 
@@ -777,7 +777,7 @@ msgid "Vascular Surgery"
 msgstr "Chirurgie Vasculaire"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:205
+#: templates/map.html:104
 msgid "View Master List archive"
 msgstr "Accéder aux archives (en anglais)"
 
@@ -814,12 +814,12 @@ msgid "Your request for \"%(action)s\" permission is now pending"
 msgstr "Votre demande pour devenir %(role)s  est déjà enregistrée."
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
-#: templates/map.html:179
+#: templates/print.html:81
 msgid "and with availability."
 msgstr "avec disponibilités"
 
 #. a user with no identity
-#: main.py:54
+#: main.py:58
 msgid "anonymous"
 msgstr "anonyme"
 
@@ -834,7 +834,7 @@ msgid "capacity"
 msgstr "capacité"
 
 #. Header for the number of facilities less than 10 miles from a location.
-#: templates/map.html:174
+#: templates/print.html:76
 msgid "no more than 10 miles away"
 msgstr "à moins de 10 miles"
 

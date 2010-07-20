@@ -46,7 +46,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
 
 #. Error message for lacking edit permissions
-#: edit.py:358
+#: edit.py:374
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s pa gen pèmisyon edite %(a)s"
@@ -121,8 +121,8 @@ msgstr "CT Eskanè"
 msgid "Can pick up patients"
 msgstr "Ka al chache malad"
 
-#. TODO: Add missing message description or meaning
-#: templates/edit.html:166
+#. Button text to cancel and return to the home page
+#: templates/edit.html:164
 msgid "Cancel"
 msgstr "Anile"
 
@@ -289,7 +289,7 @@ msgid "Error saving facility information."
 msgstr "Erè anrejistreman etablisman enfòmasyon."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:151 templates/map.html:200
+#: templates/map.html:99 export.py:151
 msgid "Export CSV"
 msgstr "Ekspote CSV"
 
@@ -354,12 +354,12 @@ msgid "HealthC ID"
 msgstr "ID HealthC"
 
 #. Link to go to a help page for the application
-#: templates/map.html:107
+#: templates/base.html:95
 msgid "Help"
 msgstr "Ed"
 
 #. Link to return to the main page of the application
-#: templates/map.html:96
+#: templates/home_link.html:22
 msgid "Home"
 msgstr "Paj akèy"
 
@@ -369,7 +369,7 @@ msgid "Hospital"
 msgstr "Lopital"
 
 #. Explains how to correct incorrect information that has been printed.
-#: templates/map.html:214
+#: templates/print.html:105
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr "Si yon enfòmasyon ta manke ou byen ta mal ekri, ale sou sit entènèt la"
 
@@ -394,7 +394,7 @@ msgid "Invalid or missing account e-mail."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
 #. Error message for request missing subject name.
-#: edit.py:425 bubble.py:161
+#: edit.py:441 bubble.py:161
 msgid "Invalid or missing subject name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -409,7 +409,7 @@ msgid "Lab"
 msgstr "Laboratwa"
 
 #. Label for a language selector
-#: templates/map.html:82
+#: templates/base.html:66
 msgid "Language:"
 msgstr "Lang:"
 
@@ -444,7 +444,7 @@ msgid "Loader:"
 msgstr "Program pou telechaje"
 
 #. Indicator that the application is loading.
-#: templates/map.html:152 static/locale.js:110
+#: templates/base.html:123 static/locale.js:110
 msgid "Loading..."
 msgstr "Transpòte..."
 
@@ -610,7 +610,7 @@ msgid "Previous value"
 msgstr "Anvan valè"
 
 #. Link to print the current view of the application
-#: templates/map.html:102
+#: templates/base.html:89
 msgid "Print"
 msgstr "Enprime"
 
@@ -621,7 +621,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Enprime yon list lopital nan lòd distans de ${FACILITY_NAME}"
 
 #. Link to privacy policy for the application
-#: templates/map.html:117
+#: templates/base.html:105
 msgid "Privacy"
 msgstr "Prive"
 
@@ -636,7 +636,7 @@ msgid "Reachable by road"
 msgstr "Aksesib pa wout"
 
 #. Record updated successfully.
-#: edit.py:508
+#: edit.py:524
 msgid "Record updated."
 msgstr "Done a jou"
 
@@ -663,7 +663,7 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "Rekèt pou %(role)s la refise"
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35
+#: templates/base.html.py:115 templates/print.html:50
 msgid "Resource Finder"
 msgstr "Chèche resous"
 
@@ -672,8 +672,8 @@ msgstr "Chèche resous"
 msgid "Resource Finder Updates"
 msgstr "Chèche resous"
 
-#. TODO: Add missing message description or meaning
-#: templates/edit.html:161
+#. Button text to save data
+#: templates/edit.html:160
 msgid "Save"
 msgstr "Anrejistre"
 
@@ -698,7 +698,7 @@ msgid "Show"
 msgstr "Montre"
 
 #. Link to sign into the app
-#: main.py:59
+#: main.py:63
 msgid "Sign in"
 msgstr "Mete Anprent"
 
@@ -708,7 +708,7 @@ msgid "Sign in to edit"
 msgstr "Tanpri siyen nan reekri"
 
 #. Link to sign out of the app
-#: main.py:57
+#: main.py:61
 msgid "Sign out"
 msgstr "Sòti"
 
@@ -718,7 +718,7 @@ msgid "Supplies"
 msgstr "Prodwi"
 
 #. Link to terms of service for the application
-#: templates/map.html:112
+#: templates/base.html:100
 msgid "Terms of Service"
 msgstr "Kondisyon yo pou itilizasyon"
 
@@ -733,7 +733,7 @@ msgid "Total beds"
 msgstr "Kantite kaban-n"
 
 #. Total number of facilities shown on the map.
-#: templates/map.html:169
+#: templates/print.html:71
 msgid "Total facilities"
 msgstr "Kantite disponib"
 
@@ -778,7 +778,7 @@ msgid "Vascular Surgery"
 msgstr "Chiriji Vaskilè"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:205
+#: templates/map.html:104
 msgid "View Master List archive"
 msgstr "Ekspoze achiv nan lis mastè"
 
@@ -815,12 +815,12 @@ msgid "Your request for \"%(action)s\" permission is now pending"
 msgstr "Demand ou pou %(role)s la deja enrejistre"
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
-#: templates/map.html:179
+#: templates/print.html:81
 msgid "and with availability."
 msgstr "Avek anpil abilite"
 
 #. a user with no identity
-#: main.py:54
+#: main.py:58
 msgid "anonymous"
 msgstr "anonim"
 
@@ -835,7 +835,7 @@ msgid "capacity"
 msgstr "Kapasite"
 
 #. Header for the number of facilities less than 10 miles from a location.
-#: templates/map.html:174
+#: templates/print.html:76
 msgid "no more than 10 miles away"
 msgstr "Pa depase 10 mil"
 
