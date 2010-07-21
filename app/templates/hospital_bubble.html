@@ -24,7 +24,8 @@
     {% endcomment %}
     <a href='{{edit_url|escape}}'>{% trans "Edit this record" %}</a>
     <span class="sep">|</span>
-    <a onClick="subscribe_on_off(this, '{{subdomain}}', '{{subject_name|escape}}')"
+    <a onClick="subscribe_on_off(this, '{{subdomain}}',
+      '{{subject_name|escape}}', '{{frequency}}')"
       href="#">{{subscribed}}</a>
   </span>
   <h2>

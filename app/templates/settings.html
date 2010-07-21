@@ -83,21 +83,6 @@
     </td>
   </tr>
   <tr>
-    <td colspan="6" class="settings-locale">
-      {% comment %}
-      #i18n: Label for a language selector
-      {% endcomment %}
-      {% trans "E-mail Language:" %}
-      <select name="locale" onChange="change_locale('{{subdomain}}', this);">
-      {% for lang in params.languages %}
-        <option value="{{lang.0}}"
-          {% ifequal lang.0 locale %} selected{% endifequal %}>
-          {{lang.1}}</option>
-      {% endfor %}
-      </select>
-    </td>
-  </tr>
-  <tr>
     <td colspan="6" class="settings-change-default">
       {% comment %}
       #i18n: Label for change default frequency box

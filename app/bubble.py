@@ -179,6 +179,7 @@ class Bubble(Handler):
                     edit_url=edit_url,
                     subdomain=self.subdomain,
                     subscribed=subscribed,
+                    frequency=self.account.default_frequency or '',
                     subject_name=self.params.subject_name,
                     last_updated=max(detail.date for detail in details),
                     special=special,
