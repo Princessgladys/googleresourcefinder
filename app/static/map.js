@@ -1201,8 +1201,8 @@ function show_loading(show) {
   show_status(show ? locale.LOADING() : null);
 }
 
-function show_status(message, opt_duration) {
-  if (status_timer) {
+function show_status(message, opt_duration, opt_override) {
+  if (status_timer && !(opt_override)) {
     // wait for the timer to finish
     return;
   }

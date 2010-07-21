@@ -37,7 +37,7 @@ function subscribe_on_off(element, subdomain, subject_name, frequency) {
     success: function(msg) {
       element.innerHTML = on_off ? locale.UNSUBSCRIBE() : 
           locale.SUBSCRIBE_TO_UPDATES();
-      show_status(display_message, 5000);
+      show_status(display_message, 5000, true);
     },
     error: function(xhr, text_status, error) {
       log(text_status + ', ' + error);
