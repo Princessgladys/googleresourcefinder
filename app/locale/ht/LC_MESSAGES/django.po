@@ -645,7 +645,7 @@ msgid "Postoperative Care"
 msgstr "Swen Aprè Operasyon"
 
 #. old value for the attribute
-#: mail_alerts.py:165
+#: mail_alerts.py:176
 msgid "Previous value"
 msgstr "Anvan valè"
 
@@ -708,13 +708,8 @@ msgid "Resource Finder"
 msgstr "Chèche resous"
 
 #. TODO: Add missing message description or meaning
-#: mail_alerts.py:73
+#: mail_alerts.py:80
 msgid "Resource Finder %s Update"
-msgstr "Chèche resous"
-
-#. TODO: Add missing message description or meaning
-#: subscribe.py:123
-msgid "Resource Finder Updates"
 msgstr "Chèche resous"
 
 #. Button text to save data
@@ -818,7 +813,7 @@ msgid "Updated"
 msgstr "Remete an fonksyon"
 
 #. who the attribute was updated by
-#: mail_alerts.py:168
+#: mail_alerts.py:179
 msgid "Updated by"
 msgstr "Remete an fonksyon"
 

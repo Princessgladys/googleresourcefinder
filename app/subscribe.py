@@ -26,8 +26,8 @@ import pickle
 import utils
 from bubble import format
 from feeds.xmlutils import Struct
-from mail_alerts import FORMAT_EMAIL, fetch_updates, send_email
-from mail_alerts import update_account_alert_time
+from mail_alerts import FORMAT_EMAIL, fetch_updates, format_email_subject
+from mail_alerts import send_email, update_account_alert_time
 from model import PendingAlert, Subject, Subscription
 from utils import _, db, Handler, run, simplejson
 
@@ -117,11 +117,8 @@ class Subscribe(Handler):
                         subject.get_value('title'), values)}
                     body = FORMAT_EMAIL[self.account.email_format](
                         email_data, self.account.locale)
-                    email_subject = '%s %s %s' % (
-                        self.subdomain.title(),
-                        # i18n: subject of e-mail -> Resource Finder Updates
-                        utils.to_unicode(_('Resource Finder Updates')),
-                        email_data.time)
+                    email_subject = format_email_subject(self.subdomain,
+                                                         old_frequency)
                     send_email(self.account.locale,
                                'updates@resource-finder.appspotmail.com',
                                self.account.email, email_subject,

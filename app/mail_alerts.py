@@ -17,9 +17,14 @@
 Accesses the Account data structure to retrieve subject updates for each user,
 then sends out information to each user per their subscription settings.
 
+format_email_subject(subdomain, frequency): generates an e-mail subject line
 get_timedelta(account, subject): returns a text frequency as a timedelta
 fetch_updates(): returns a dictionary of updated values for the given subject
-format_plain_body(values): forms the e-mail body for an update e-mail in text
+order_and_format_updates(updates, subject_type, locale): sorts and formats the
+    updates as specified by the subject type for the updates
+format_update(update, locale): translates and formats a particular update
+format_plain_body(values, locale): forms the e-mail body for an update in text
+format_html_body(values, locale): forms the e-mail body in html
 send_email(): sends an e-mail with the supplied information
 update_account_alert_time(): updates an account's next_%freq%_alert time
 MailAlerts(utils.Handler): handler class to send e-mail updates
@@ -66,6 +71,8 @@ FREQUENCY_TO_TIMEDELTA = {
 }
 
 def format_email_subject(subdomain, frequency):
+    """Given a subdomain and frequency, formats an appropriate subject line for
+    an update e-mail."""
     frequency = _(str(frequency.title()))
     subject = '%s %s: %s' % (
         subdomain.title(),
@@ -120,6 +127,8 @@ def fetch_updates(alert, subject):
 
 
 def order_and_format_updates(updates, subject_type, locale):
+    """Orders attribute updates in the same order specified by
+    subject_type.attribute_names, in the given locale."""
     updates_by_name = dict((update['attribute'], update) for update in updates)
     formatted_attrs = []
     for name in subject_type.attribute_names:
@@ -130,6 +139,8 @@ def order_and_format_updates(updates, subject_type, locale):
 
 
 def format_update(update, locale):
+    """Insures that the attribute and old/new values of an update are translated
+    and properly formatted."""
     update['attribute'] = utils.get_message('attribute_name',
                                             update['attribute'],
                                             locale)
