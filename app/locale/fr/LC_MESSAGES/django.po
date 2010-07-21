@@ -91,7 +91,7 @@ msgid "Alternate name"
 msgstr "Autre nom"
 
 #. Label; available beds
-#: templates/hospital_email.html.py:207 templates/hospital_email.html:96
+#: templates/hospital_email.html.py:194 templates/hospital_email.html:97
 msgid "Available"
 msgstr "Lits disponibles"
 
@@ -131,7 +131,7 @@ msgid "Cancel"
 msgstr "Annuler"
 
 #. Label; total beds
-#: templates/hospital_email.html:100 templates/hospital_email.html.py:211
+#: templates/hospital_email.html:101 templates/hospital_email.html.py:198
 msgid "Capacity"
 msgstr "capacité"
 
@@ -268,12 +268,12 @@ msgid "Edit"
 msgstr "Modifier"
 
 #. TODO: Add missing message description or meaning
-#: templates/hospital_email.html:155 templates/hospital_email.html.py:190
+#: templates/hospital_email.html:177
 msgid "Edit This Record"
 msgstr "Modifier cet enregistrement"
 
 #. Link to edit the data for a hospital record.
-#: templates/hospital_bubble.html:25
+#: templates/hospital_email.html:82 templates/hospital_bubble.html:25
 msgid "Edit this record"
 msgstr "Modifier cet enregistrement"
 
@@ -298,7 +298,7 @@ msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
 #. Label for facilities with changes
-#: templates/hospital_email.html:68
+#: templates/hospital_email.html:63
 msgid "Facilities with Changes"
 msgstr "Installations avec des Changements"
 
@@ -318,7 +318,7 @@ msgid "Faith-based"
 msgstr "Confessionnelle"
 
 #. Label; field or attribute
-#: templates/hospital_email.html:117
+#: templates/hospital_email.html:116
 msgid "Field"
 msgstr "Établissement mixte"
 
@@ -348,7 +348,7 @@ msgid "First select a hospital from the list on the left. Then Print will print 
 msgstr "Sélectionnez d'abord un hôpital dans la liste de gauche, puis cliquez sur \"Imprimer\" pour imprimer une liste d'hôpitaux triés en fonction de la distance qui les sépare de votre sélection."
 
 #. Label to tell users to check website for more information
-#: templates/hospital_email.html:238
+#: templates/hospital_email.html:223
 msgid "For more information on all subscribed facilities, please visit"
 msgstr "Pour plus d'informations sur toutes les installations souscrit, visitez"
 
@@ -373,7 +373,7 @@ msgid "HealthC ID"
 msgstr "ID HealthC"
 
 #. Greting
-#: templates/hospital_email.html:41
+#: templates/hospital_email.html:36
 msgid "Hello"
 msgstr "Aide"
 
@@ -418,7 +418,7 @@ msgid "Invalid or missing account e-mail."
 msgstr "Nom d'établissement incorrect ou manquant"
 
 #. Error message for request missing subject name.
-#: edit.py:441 bubble.py:159
+#: edit.py:442 bubble.py:159
 msgid "Invalid or missing subject name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -438,7 +438,7 @@ msgid "Language:"
 msgstr "Langue :"
 
 #. Label for the last update time
-#: templates/hospital_email.html:86 templates/hospital_email.html.py:196
+#: templates/hospital_email.html:87 templates/hospital_email.html.py:183
 msgid "Last Updated:"
 msgstr "Mise à jour :"
 
@@ -548,7 +548,7 @@ msgid "Neurosurgery"
 msgstr "Neurochirurgie"
 
 #. Label for new value
-#: templates/hospital_email.html:122
+#: templates/hospital_email.html:121
 msgid "New Value"
 msgstr "Nouvelle Valeur"
 
@@ -579,7 +579,7 @@ msgid "Obstetrics and Gynecology"
 msgstr "Obstétrique et Gynécologie"
 
 #. Label for old value
-#: templates/hospital_email.html:127
+#: templates/hospital_email.html:126
 msgid "Old Value"
 msgstr "Ancienne Valeur"
 
@@ -638,18 +638,13 @@ msgstr "Téléphone"
 msgid "Please call for availability information."
 msgstr "Merci d'appeler pour connaître les disponibilités."
 
-#. Description of update e-mail
-#: templates/hospital_email.html:49
-msgid "Please find your updates below. To change the frequency of these emails, please visit your"
-msgstr "S'il vous plaît trouver vos mises à jour ci-dessous. Pour changer la fréquence de ces e-mails, s'il vous plaît consulter votre"
-
 #. Service provided by a health facility (use Title Case). care given after surgery until patient is discharged
 #: ../tools/setup.py:246
 msgid "Postoperative Care"
 msgstr "Soins Postopératoires"
 
 #. old value for the attribute
-#: mail_alerts.py:130
+#: mail_alerts.py:165
 msgid "Previous value"
 msgstr "Valeur précédente"
 
@@ -680,7 +675,7 @@ msgid "Reachable by road"
 msgstr "Accessible en voiture"
 
 #. Record updated successfully.
-#: edit.py:524
+#: edit.py:525
 msgid "Record updated."
 msgstr "Enregistrement mis à jour"
 
@@ -712,7 +707,12 @@ msgid "Resource Finder"
 msgstr "Localisation de ressources"
 
 #. TODO: Add missing message description or meaning
-#: mail_alerts.py:394 subscribe.py:124 mail_alerts.py:345
+#: mail_alerts.py:73
+msgid "Resource Finder %s Update"
+msgstr "Localisation de ressources"
+
+#. TODO: Add missing message description or meaning
+#: subscribe.py:123
 msgid "Resource Finder Updates"
 msgstr "Localisation de ressources"
 
@@ -732,7 +732,7 @@ msgid "Services"
 msgstr "Services"
 
 #. TODO: Add missing message description or meaning
-#: templates/hospital_email.html:55 templates/hospital_email.html.py:258
+#: templates/hospital_email.html.py:243 templates/hospital_email.html:50
 msgid "Settings Page"
 msgstr "Paramètres"
 
@@ -767,9 +767,14 @@ msgid "Thanks for adding content to Resource Finder. To get started please creat
 msgstr "Merci pour l'ajout de contenu à l'application \"Localisation de ressources\". Pour commencer, merci de créer un nom d'utilisateur et nous indiquer votre affiliation. Cette information sera affichée à côté de l'information que vous avez ajoutée ou modifiée. Voir aussi les <a target=\"_blank\" href=\"/TOS\">Conditions d'utilisation</a> and <a target=\"_blank\" href=\"/privacy\">Règles de confidentialité</a> (en anglais)."
 
 #. Label to tell users how to update subscription setttings
-#: templates/hospital_email.html:252
+#: templates/hospital_email.html:237
 msgid "To change subscription settings, please visit the"
 msgstr "Pour modifier les paramètres d'abonnement, s'il vous plaît visitez le"
+
+#. Description of update e-mail
+#: templates/hospital_email.html:44
+msgid "To change the frequency of these emails, please visit your"
+msgstr "S'il vous plaît trouver vos mises à jour ci-dessous. Pour changer la fréquence de ces e-mails, s'il vous plaît consulter votre"
 
 #. Total number of beds at a hospital
 #: ../tools/setup.py:116
@@ -792,7 +797,7 @@ msgid "Unauthorized user."
 msgstr "utilisateur non autorisé"
 
 #. Label for unchanged and subscribed facilities
-#: templates/hospital_email.html:172
+#: templates/hospital_email.html:159
 msgid "Unchanged Subscribed Facilities"
 msgstr "Inchangée Enstallations Souscrit"
 
@@ -812,12 +817,12 @@ msgid "Updated"
 msgstr "Mise à jour :"
 
 #. who the attribute was updated by
-#: mail_alerts.py:133
+#: mail_alerts.py:168
 msgid "Updated by"
 msgstr "Mise à jour :"
 
 #. Label for user
-#: templates/hospital_email.html:133
+#: templates/hospital_email.html:132
 msgid "User"
 msgstr "L'Utilisateur"
 
@@ -832,7 +837,7 @@ msgid "Vascular Surgery"
 msgstr "Chirurgie Vasculaire"
 
 #. TODO: Add missing message description or meaning
-#: templates/hospital_email.html.py:184 templates/hospital_email.html:81
+#: templates/hospital_email.html:171
 msgid "View Full Record"
 msgstr "Enregistrer la Vue"
 
@@ -840,6 +845,11 @@ msgstr "Enregistrer la Vue"
 #: templates/map.html:103
 msgid "View Master List archive"
 msgstr "Accéder aux archives (en anglais)"
+
+#. TODO: Add missing message description or meaning
+#: templates/hospital_email.html:76
+msgid "View full record"
+msgstr "Enregistrer la Vue"
 
 #. Type of construction: timber jointed together with nails
 #: ../tools/setup.py:197

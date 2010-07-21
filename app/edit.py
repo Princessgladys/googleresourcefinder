@@ -353,7 +353,7 @@ def update(key, subject_type, request, user, account, attributes, subdomain,
         utcnow, user, account.nickname, account.affiliation)
     has_changes = False
     changed_attributes_dict = {}
-    changed_attribute_information = {}
+    changed_attribute_information = []
     unchanged_attribute_values = {}
 
     for name in subject_type.attribute_names:
@@ -376,13 +376,14 @@ def update(key, subject_type, request, user, account, attributes, subdomain,
                        'a': get_message('attribute_name',
                                         attribute.key().name())})
             has_changes = True
-            change_info = {'old_value': subject.get_value(name)}
+            change_info = {'attribute': name,
+                           'old_value': subject.get_value(name)}
             apply_change(subject, minimal_subject, report,
                          subject_type, request, attribute,
                          change_metadata)
             change_info['new_value'] = subject.get_value(name)
             change_info['author'] = subject.get_author_nickname(name)
-            changed_attribute_information[name] = change_info
+            changed_attribute_information.append(change_info)
             changed_attributes_dict[name] = attribute
         else:
             unchanged_attribute_values[name] = subject.get_value(name)

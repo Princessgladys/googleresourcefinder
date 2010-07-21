@@ -152,18 +152,21 @@ class MailAlertsTest(MediumTestCase):
         # sublist should contain the changed attribute, its old/new values,
         # and the author that made the change
         assert fetch_updates(self.pa, self.subject) == [
-            ('test_attr_bar', {'old_value': 'attr_bar',
-                              'new_value': 'attr_bar_new',
-                              'author': 'nickname_foo'}),
-            ('test_attr_foo', {'old_value': 'attr_foo',
-                              'new_value': 'attr_foo_new',
-                              'author': 'nickname_foo'})
+            {'attribute': 'test_attr_bar',
+             'old_value': 'attr_bar',
+             'new_value': 'attr_bar_new',
+             'author': 'nickname_foo'},
+            {'attribute': 'test_attr_foo',
+             'old_value': 'attr_foo',
+             'new_value': 'attr_foo_new',
+             'author': 'nickname_foo'}
         ]
         self.set_attr(self.subject, 'test_attr_bar', 'attr_bar')
         assert fetch_updates(self.pa, self.subject) == [
-            ('test_attr_foo', {'old_value': 'attr_foo',
-                              'new_value': 'attr_foo_new',
-                              'author': 'nickname_foo'})]
+            {'attribute': 'test_attr_foo',
+             'old_value': 'attr_foo',
+             'new_value': 'attr_foo_new',
+             'author': 'nickname_foo'}]
         
         # should return nothing if there are no updates
         self.set_attr(self.subject, 'test_attr_foo', 'attr_foo')
@@ -180,7 +183,7 @@ class MailAlertsTest(MediumTestCase):
         values = fetch_updates(self.pa, self.subject)
         data = Struct(changed_subjects={self.subject.key().name(): (
             self.subject.get_value('title'), values)})
-        plain_body = format_plain_body(data)
+        plain_body = format_plain_body(data, 'en')
         
         # formatting may change but the title, attribute names, new/old values,
         # and the author should all be somewhere in the update. similarly,
@@ -200,7 +203,7 @@ class MailAlertsTest(MediumTestCase):
             self.subject.get_value('title'), values)},
             time=utils.to_local_isotime(datetime.datetime.now(), clear_ms=True),
             nickname='nickname_bar', subdomain='haiti')
-        html_body = format_html_body(data)
+        html_body = format_html_body(data, 'en')
 
         # ditto above comment in test_format_plain_body
         assert 'title_foo' in html_body.lower()
@@ -276,9 +279,10 @@ class MailAlertsTest(MediumTestCase):
         
         # test to send and immediate e-mail update with a None value
         # should render u'\u2013' instead of None
-        changed_vals = {'test_attr_foo': {'old_value': None,
-                                          'new_value': u'attr_new\xef',
-                                          'author': 'author_foo'}}
+        changed_vals = [{'attribute': 'test_attr_foo',
+                         'old_value': None,
+                         'new_value': u'attr_new\xef',
+                         'author': 'author_foo'}]
         unchanged_vals = {'test_attr_bar': 'attr_bar'}
         json_pickle_attrs_c = simplejson.dumps(unicode(
             pickle.dumps(changed_vals), 'latin-1'))
@@ -299,9 +303,10 @@ class MailAlertsTest(MediumTestCase):
 
         # test to send and immediate e-mail update with a None value
         # should render u'\u2013' instead of None
-        changed_vals = {'test_attr_foo': {'old_value': 'attr_old',
-                                          'new_value': None,
-                                          'author': 'author_foo'}}
+        changed_vals = [{'attribute': 'test_attr_foo',
+                         'old_value': 'attr_old',
+                         'new_value': None,
+                         'author': 'author_foo'}]
         json_pickle_attrs_c = simplejson.dumps(pickle.dumps(changed_vals))
         path = '/mail_alerts?action=subject_changed&' + \
                'subject_name=haiti:example.org/123&' + \
@@ -317,9 +322,10 @@ class MailAlertsTest(MediumTestCase):
 
         # test to send an immediate e-mail update
         # should not raise an error if the e-mail was sent
-        changed_vals = {'test_attr_foo': {'old_value': 'attr_old',
-                                          'new_value': 'attr_new',
-                                          'author': 'author_foo'}}
+        changed_vals = [{'attribute': 'test_attr_foo',
+                         'old_value': 'attr_old',
+                         'new_value': 'attr_new',
+                         'author': 'author_foo'}]
         json_pickle_attrs_c = simplejson.dumps(pickle.dumps(changed_vals))
         path = '/mail_alerts?action=subject_changed&' + \
                'subject_name=haiti:example.org/123&' + \
@@ -370,9 +376,10 @@ class MailAlertsTest(MediumTestCase):
         global sent_emails
         sent_emails = []
 
-        changed_vals = {'test_attr_foo': {'old_value': None,
-                                          'new_value': u'attr_new\xef',
-                                          'author': 'author_foo'}}
+        changed_vals = [{'attribute': 'test_attr_foo',
+                         'old_value': None,
+                         'new_value': u'attr_new\xef',
+                         'author': 'author_foo'}]
         unchanged_vals = {'test_attr_bar': 'attr_bar'}
         json_pickle_attrs_c = simplejson.dumps(unicode(
             pickle.dumps(changed_vals), 'latin-1'))
