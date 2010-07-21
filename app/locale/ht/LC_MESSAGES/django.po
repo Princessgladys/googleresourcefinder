@@ -91,6 +91,11 @@ msgstr "Tout"
 msgid "Alternate name"
 msgstr "Altène non"
 
+#. Label; available beds
+#: templates/hospital_email.html.py:194 templates/hospital_email.html:97
+msgid "Available"
+msgstr "Kabann disponib "
+
 #. Total number of unoccupied beds at a hospital.
 #: ../tools/setup.py:114
 msgid "Available beds"
@@ -125,6 +130,11 @@ msgstr "Ka al chache malad"
 #: templates/edit.html:158
 msgid "Cancel"
 msgstr "Anile"
+
+#. Label; total beds
+#: templates/hospital_email.html:101 templates/hospital_email.html.py:198
+msgid "Capacity"
+msgstr "Kapasite"
 
 #. Service provided by a health facility (use Title Case). Meaning: branch of medicine dealing with the heart
 #: ../tools/setup.py:237
@@ -251,15 +261,20 @@ msgstr "Distri"
 #. E-mail address
 #: edit.py:121 ../tools/setup.py:124
 msgid "E-mail"
-msgstr "Adrès elektronik"
+msgstr "Adrès elektronik:"
 
 #. Title for page to edit data about a subject
 #: templates/edit.html:55
 msgid "Edit"
 msgstr "Reekri"
 
+#. TODO: Add missing message description or meaning
+#: templates/hospital_email.html:177
+msgid "Edit This Record"
+msgstr "modifye enregistreman sa"
+
 #. Link to edit the data for a hospital record.
-#: templates/hospital_bubble.html:25
+#: templates/hospital_email.html:82 templates/hospital_bubble.html:25
 msgid "Edit this record"
 msgstr "modifye enregistreman sa"
 
@@ -283,6 +298,11 @@ msgstr "Erè transpòte etablisman enfòmasyon."
 msgid "Export CSV"
 msgstr "Ekspote CSV"
 
+#. Label for facilities with changes
+#: templates/hospital_email.html:63
+msgid "Facilities with Changes"
+msgstr "Fasilite ak Chanjman"
+
 #. A place that provides a particular service
 #: templates/print.html:129 templates/map.html:160 static/locale.js:88
 msgid "Facility"
@@ -297,6 +317,11 @@ msgstr "Enfòmasyon sou etablisman "
 #: ../tools/setup.py:162
 msgid "Faith-based"
 msgstr "Baze sou konfyans"
+
+#. Label; field or attribute
+#: templates/hospital_email.html:116
+msgid "Field"
+msgstr "Etabisman Miks"
 
 #. Facility operational status: as functional as a field hospital
 #: ../tools/setup.py:208
@@ -323,6 +348,11 @@ msgstr "Filtè yo"
 msgid "First select a hospital from the list on the left. Then Print will print a list of hospitals in order of distance from your selection."
 msgstr "Premyeman chwazi yon lopital ki nan bò goch la. Lè sa a enprimant la pral enprime yon lis lopital soti nan zòn ou ye a"
 
+#. Label to tell users to check website for more information
+#: templates/hospital_email.html:223
+msgid "For more information on all subscribed facilities, please visit"
+msgstr "Pou plis enfòmasyon sou tout fasilite yo enskri, ale nan"
+
 #. Type of organization: For-profit organization
 #: ../tools/setup.py:164
 msgid "For-profit"
@@ -342,6 +372,11 @@ msgstr "Chiriji Jeneral"
 #: templates/hospital_bubble.html:32 ../tools/setup.py:112 static/locale.js:98
 msgid "HealthC ID"
 msgstr "ID HealthC"
+
+#. Greting
+#: templates/hospital_email.html:36
+msgid "Hello"
+msgstr "Ed"
 
 #. Link to go to a help page for the application
 #: templates/base.html:95
@@ -384,7 +419,7 @@ msgid "Invalid or missing account e-mail."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
 #. Error message for request missing subject name.
-#: edit.py:441 bubble.py:159
+#: edit.py:442 bubble.py:159
 msgid "Invalid or missing subject name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -402,6 +437,11 @@ msgstr "Laboratwa"
 #: templates/base.html:66
 msgid "Language:"
 msgstr "Lang:"
+
+#. Label for the last update time
+#: templates/hospital_email.html:87 templates/hospital_email.html.py:183
+msgid "Last Updated:"
+msgstr "Misajou"
 
 #. Label for a date-time when the data was last updated
 #: templates/hospital_bubble.html:41
@@ -508,6 +548,11 @@ msgstr "Non (obligatwa)"
 msgid "Neurosurgery"
 msgstr "Nerochiriji"
 
+#. Label for new value
+#: templates/hospital_email.html:121
+msgid "New Value"
+msgstr "New Valè"
+
 #. Form option for a false Boolean value
 #: bubble.py:48 edit.py:178 bubble_test.py:66
 msgid "No"
@@ -533,6 +578,11 @@ msgstr "Pa gen kapasite chiriji"
 #: ../tools/setup.py:254
 msgid "Obstetrics and Gynecology"
 msgstr "Obstetrik ak Jinekoloji"
+
+#. Label for old value
+#: templates/hospital_email.html:126
+msgid "Old Value"
+msgstr "Ansyen Valè"
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
 #: static/locale.js:108
@@ -595,7 +645,7 @@ msgid "Postoperative Care"
 msgstr "Swen Aprè Operasyon"
 
 #. old value for the attribute
-#: mail_alerts.py:127
+#: mail_alerts.py:165
 msgid "Previous value"
 msgstr "Anvan valè"
 
@@ -626,7 +676,7 @@ msgid "Reachable by road"
 msgstr "Aksesib pa wout"
 
 #. Record updated successfully.
-#: edit.py:524
+#: edit.py:525
 msgid "Record updated."
 msgstr "Done a jou"
 
@@ -653,12 +703,17 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "Rekèt pou %(role)s la refise"
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35
+#: templates/base.html.py:115
 msgid "Resource Finder"
 msgstr "Chèche resous"
 
 #. TODO: Add missing message description or meaning
-#: mail_alerts.py:304 mail_alerts.py:269 subscribe.py:118
+#: mail_alerts.py:73
+msgid "Resource Finder %s Update"
+msgstr "Chèche resous"
+
+#. TODO: Add missing message description or meaning
+#: subscribe.py:123
 msgid "Resource Finder Updates"
 msgstr "Chèche resous"
 
@@ -676,6 +731,11 @@ msgstr "Idantite kalite etablisman ekspòtasyon"
 #: ../tools/setup.py:118 static/locale.js:126
 msgid "Services"
 msgstr "Sèvis"
+
+#. TODO: Add missing message description or meaning
+#: templates/hospital_email.html.py:243 templates/hospital_email.html:50
+msgid "Settings Page"
+msgstr "Anviwònman"
 
 #. Label for a control that filters a list of facilities
 #: static/locale.js:130
@@ -707,6 +767,16 @@ msgstr "Kondisyon yo pou itilizasyon"
 msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/terms\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
 msgstr "Mesi paske ou ajoute enfòmasyon sou Chèche Resous. Pou kòmanse tanpri kreye yon kont epi di nou afilyasyon ou. Enfòmasyon sa a pral parèt a kote enfòmasyon ou ajoute oswa korije. Epitou wè <a target=\"_blank\" href=\"/TOS\">Kondisyon yo pou itilizasyon</a> ak <a target=\"_blank\" href=\"/privacy\">Pwoteksyon vi prive</a> (nan lang angle)."
 
+#. Label to tell users how to update subscription setttings
+#: templates/hospital_email.html:237
+msgid "To change subscription settings, please visit the"
+msgstr "Pou chanje anviwònman abònman, tanpri ale nan"
+
+#. Description of update e-mail
+#: templates/hospital_email.html:44
+msgid "To change the frequency of these emails, please visit your"
+msgstr "Tanpri jwenn dènye enfòmasyon ou anba. Pou chanje frekans sa yo e may-yo, tanpri vizite ou"
+
 #. Total number of beds at a hospital
 #: ../tools/setup.py:116
 msgid "Total beds"
@@ -727,6 +797,11 @@ msgstr "Sit entenet"
 msgid "Unauthorized user."
 msgstr "San otorizasyon User"
 
+#. Label for unchanged and subscribed facilities
+#: templates/hospital_email.html:159
+msgid "Unchanged Subscribed Facilities"
+msgstr "Chanje Abòne Fasilite"
+
 #. Type of organization: Organization associated with a university
 #: ../tools/setup.py:174
 msgid "University"
@@ -743,9 +818,14 @@ msgid "Updated"
 msgstr "Remete an fonksyon"
 
 #. who the attribute was updated by
-#: mail_alerts.py:130
+#: mail_alerts.py:168
 msgid "Updated by"
 msgstr "Remete an fonksyon"
+
+#. Label for user
+#: templates/hospital_email.html:132
+msgid "User"
+msgstr "Itilizatè"
 
 #. Error message for a value that is not a number
 #: static/locale.js:79
@@ -757,10 +837,20 @@ msgstr "Valè dwe yon nimewo"
 msgid "Vascular Surgery"
 msgstr "Chiriji Vaskilè"
 
+#. TODO: Add missing message description or meaning
+#: templates/hospital_email.html:171
+msgid "View Full Record"
+msgstr "Gade Tout Dosye"
+
 #. Link to go to a page with past versions of the 'master' list
 #: templates/map.html:187
 msgid "View Master List archive"
 msgstr "Ekspoze achiv nan lis mastè"
+
+#. TODO: Add missing message description or meaning
+#: templates/hospital_email.html:76
+msgid "View full record"
+msgstr "Gade Tout Dosye"
 
 #. Type of construction: timber jointed together with nails
 #: ../tools/setup.py:197

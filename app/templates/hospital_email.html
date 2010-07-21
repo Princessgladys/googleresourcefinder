@@ -1,0 +1,247 @@
+{% comment %}
+# Copyright 2009-2010 by Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+{% load i18n %}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="0" cellspacing="0"
+    style="font-family: arial, sans-serif; font-size: 12px;">
+  <tbody>
+    <tr>
+      <td colspan="4">
+        {% comment %}
+        #i18n: Greting
+        {% endcomment %}
+        {% trans "Hello" %} {{ nickname }},</td>
+    </tr>
+    <br />
+    <tr>
+      <td colspan="4">
+        {% comment %}
+        #i18n: Description of update e-mail
+        {% endcomment %}
+        {% trans "To change the frequency of these emails, please visit your" %}
+        {% comment %}
+        #i18n: Label for settings page
+        {% endcomment %}
+        <a
+          href="http://resource-finder.appspot.com/settings?subdomain={{subdomain}}"
+          style="color:#0000CC;">{% trans "Settings Page" %}</a>.
+      </td>
+    </tr>
+
+    <tr><td colspan="4">
+      <table style="padding: 10px 0px; text-align: left; width: 100%;">
+        {% if changed_subjects %}
+        <tr style="font-size: 12px; font-weight: bold;
+            text-decoration: underline; padding: 0; border: 0;">
+            <td colspan="4">
+              {% comment %}
+              #i18n: Label for facilities with changes
+              {% endcomment %}
+              {% trans "Facilities with Changes" %}</td>
+        </tr>
+        {% endif %}
+        {% for subject in changed_subjects %}
+          <tr style="background-color: #E5ECF9;">
+            <td colspan="2">
+              <b>{{ subject.title|escape }}</b>
+              <font size="-2">
+              {% comment %}
+              #i18n: Label to view a full subject record
+              {% endcomment %}
+              <a
+                href="http://resource-finder.appspot.com/bubble?subdomain={{subdomain}}&subject_name={{ subject.no_subdomain_name|escape }}"
+                style="color:#0000CC;">{% trans "View full record" %}</a> |
+              {% comment %}
+              #i18n: Label for link to edit a subject record
+              {% endcomment %}
+              <a
+                href="http://resource-finder.appspot.com/edit?subdomain={{subdomain}}&subject_name={{ subject.no_subdomain_name|escape }}"
+                style="color:#0000CC;">{% trans "Edit this record" %}</a></font><br />
+              <font color="#676767">&nbsp;&nbsp;
+                {% comment %}
+                #i18n: Label for the last update time
+                {% endcomment %}
+                {% trans "Last Updated:" %} {{ subject.last_updated|escape }}
+              </font><br />
+              &nbsp;&nbsp;<font color="green">
+                {{ subject.available_beds|escape }}</font>
+                / {{ subject.total_beds|escape }}
+                <font size="-2">
+                  (<font color="green">
+                    {% comment %}
+                    #i18n: Label; available beds
+                    {% endcomment %}
+                    {% trans "Available" %}</font> /
+                    {% comment %}
+                    #i18n: Label; total beds
+                    {% endcomment %}
+                    {% trans "Capacity" %} )
+                </font>
+            </td>
+            <td colspan="2">
+              {{ subject.address|escape }}<br />
+              {{ subject.contact_number|escape }}<br />
+              {{ subject.contact_email|escape }}
+            </td>
+          </tr>
+          <tr style="font-weight: bold; color: black; text-align: left;">
+            <td style="width: 20%; padding-right: 1em;
+              border-bottom: 1px solid #E5ECF9; padding: 4px;">
+              {% comment %}
+              #i18n: Label; field or attribute
+              {% endcomment %}
+              {% trans "Field" %}</td>
+            <td style="width: 30%; border-bottom: 1px solid #E5ECF9;">
+              {% comment %}
+              #i18n: Label for new value
+              {% endcomment %}
+              {% trans "New Value" %}</td>
+            <td style="width: 30%; border-bottom: 1px solid #E5ECF9;">
+              {% comment %}
+              #i18n: Label for old value
+              {% endcomment %}
+              {% trans "Old Value" %}</td>
+            <td style="width: 30%; padding-right: 1em;
+              border-bottom: 1px solid #E5ECF9;">
+              {% comment %}
+              #i18n: Label for user
+              {% endcomment %}
+              {% trans "User" %}</td>
+          </tr>
+          {% for changed_val in subject.changed_vals %}
+            <tr style="vertical-align: text-top;">
+              <td>{{ changed_val.attribute }}</td>
+              <td>{{ changed_val.new_value }}</td>
+              <td style="color: #676767; text-decoration: line-through;">
+                {{ changed_val.old_value }}</td>
+              <td>{{ changed_val.author }}</td>
+            </tr>
+          {% endfor %}
+          <tr>
+            <td colspan="4" style="border-bottom: 1px solid #E5ECF9;"></td>
+          </tr>
+        {% endfor %}
+      </table>
+    </td></tr>
+
+    <tr>
+    {% if unchanged_subjects %}
+      <table style="padding: 10px 0px; text-align: left; width: 100%;">
+        <tr style="font-size: 12px; font-weight: bold;
+            text-decoration: underline; padding: 0; border: 0;">
+            <th colspan="4">
+              {% comment %}
+              #i18n: Label for unchanged and subscribed facilities
+              {% endcomment %}
+              {% trans "Unchanged Subscribed Facilities" %}</td>
+        </tr>
+        {% for subject in unchanged_subjects %}
+          <tr style="background-color: #E5ECF9;">
+            <td colspan="2">
+              <b>{{ subject.title|escape }}</b>
+              <font size="-2">
+              {% comment %}
+              #i18n: Label to view a full subject record
+              {% endcomment %}
+              <a
+                href="http://resource-finder.appspot.com/bubble?subdomain={{subdomain}}&subject_name={{ subject.no_subdomain_name|escape }}"
+                style="color:#0000CC;">{% trans "View Full Record" %}</a> |
+              {% comment %}
+              #i18n: Label for link to edit a subject record
+              {% endcomment %}
+              <a
+                href="http://resource-finder.appspot.com/edit?subdomain={{subdomain}}&subject_name={{ subject.no_subdomain_name|escape }}"
+                style="color:#0000CC;">{% trans "Edit This Record" %}</a></font><br />
+
+              {% comment %}
+              #i18n: Label for the last update time
+              {% endcomment %}
+              <font color="#676767">&nbsp;&nbsp;
+                {% trans "Last Updated:" %} {{ subject.last_updated|escape }}</font><br />
+
+              &nbsp;&nbsp;<font color="green">
+                {{ subject.available_beds|escape }}</font>
+                / {{ subject.total_beds|escape }}
+
+               <font size="-2">
+                (<font color="green">
+                 {% comment %}
+                 #i18n: Label; available beds
+                 {% endcomment %}
+                 {% trans "Available" %}</font> /
+                 {% comment %}
+                 #i18n: Label; total beds
+                 {% endcomment %}
+                 {% trans "Capacity" %} )
+                </font>
+            </td>
+
+            <td colspan="2">
+              {{ subject.address|escape }}<br />
+              {{ subject.contact_number|escape }}<br />
+              {{ subject.contact_email|escape }}
+            </td>
+          </tr>
+          {% if not forloop.last %}
+          <tr>
+            <td colspan="4">&nbsp;
+            </td>
+          </tr>
+          {% endif %}
+        {% endfor %}
+      </table>
+      {% endif %}
+    </tr>
+    <tr>
+      <td colspan="4"><br />
+        {% comment %}
+        #i18n: Label to tell users to check website for more information
+        {% endcomment %}
+        {% trans "For more information on all subscribed facilities, please visit" %}
+        {% comment %}
+        #18n: Name of the application
+        {% endcomment %}
+        <a href="http://resource-finder.appspot.com/?subdomain={{subdomain}}"
+          style="color:#0000CC;">{% trans "Resource Finder" %}</a>.
+  </tbody>
+</table>
+
+<p style="padding: 2px; border-top: 1px solid #3366CC; text-align: center;
+  color: #676767; font-size: 10px;"><br />
+  {% comment %}
+  #i18n: Label to tell users how to update subscription setttings
+  {% endcomment %}
+  {% trans "To change subscription settings, please visit the" %}
+  {% comment %}
+  #i18n: Label for settings page
+  {% endcomment %}
+  <a href="http://resource-finder.appspot.com/settings?subdomain={{subdomain}}" target="_blank"
+     style="color:#0000CC;">
+  {% trans "Settings Page" %}</a>
+</div>
+
+</body>
+</html>

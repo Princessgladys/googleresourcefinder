@@ -102,10 +102,10 @@ def get_locale(lang=None):
     or converts the specified Django language code to a locale code."""
     return django.utils.translation.to_locale(lang or get_lang())
 
-def get_message(namespace, name):
+def get_message(namespace, name, locale=''):
     """Gets a translated message (in the current language)."""
     message = cache.MESSAGES.get((namespace, name))
-    return message and getattr(message, get_locale()) or name
+    return message and getattr(message, locale or get_locale()) or name
 
 def split_key_name(entity):
     """Splits the key_name of a Subject or SubjectType entity into the
@@ -357,6 +357,10 @@ def to_local_isotime(utc_datetime, clear_ms=False):
       utc_datetime = utc_datetime.replace(microsecond=0)
     utc_datetime = utc_datetime - TimeDelta(hours=5)
     return utc_datetime.isoformat(' ') + ' -05:00'
+
+def to_local_isotime_day(time):
+    isotime = to_local_isotime(time)
+    return isotime[:isotime.find(' ')]
 
 def to_unicode(value):
     """Converts the given value to unicode. Django does not do this

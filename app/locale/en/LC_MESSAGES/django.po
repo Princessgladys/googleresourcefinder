@@ -91,6 +91,11 @@ msgstr ""
 msgid "Alternate name"
 msgstr ""
 
+#. Label; available beds
+#: templates/hospital_email.html.py:194 templates/hospital_email.html:97
+msgid "Available"
+msgstr ""
+
 #. Total number of unoccupied beds at a hospital.
 #: ../tools/setup.py:114
 msgid "Available beds"
@@ -124,6 +129,11 @@ msgstr ""
 #. Button text to cancel and return to the home page
 #: templates/edit.html:158
 msgid "Cancel"
+msgstr ""
+
+#. Label; total beds
+#: templates/hospital_email.html:101 templates/hospital_email.html.py:198
+msgid "Capacity"
 msgstr ""
 
 #. Service provided by a health facility (use Title Case). Meaning: branch of medicine dealing with the heart
@@ -258,8 +268,13 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
+#. TODO: Add missing message description or meaning
+#: templates/hospital_email.html:177
+msgid "Edit This Record"
+msgstr ""
+
 #. Link to edit the data for a hospital record.
-#: templates/hospital_bubble.html:25
+#: templates/hospital_email.html:82 templates/hospital_bubble.html:25
 msgid "Edit this record"
 msgstr ""
 
@@ -283,6 +298,11 @@ msgstr ""
 msgid "Export CSV"
 msgstr ""
 
+#. Label for facilities with changes
+#: templates/hospital_email.html:63
+msgid "Facilities with Changes"
+msgstr ""
+
 #. A place that provides a particular service
 #: templates/print.html:129 templates/map.html:160 static/locale.js:88
 msgid "Facility"
@@ -296,6 +316,11 @@ msgstr ""
 #. Type of organization: Faith-based organization
 #: ../tools/setup.py:162
 msgid "Faith-based"
+msgstr ""
+
+#. Label; field or attribute
+#: templates/hospital_email.html:116
+msgid "Field"
 msgstr ""
 
 #. Facility operational status: as functional as a field hospital
@@ -323,6 +348,11 @@ msgstr ""
 msgid "First select a hospital from the list on the left. Then Print will print a list of hospitals in order of distance from your selection."
 msgstr ""
 
+#. Label to tell users to check website for more information
+#: templates/hospital_email.html:223
+msgid "For more information on all subscribed facilities, please visit"
+msgstr ""
+
 #. Type of organization: For-profit organization
 #: ../tools/setup.py:164
 msgid "For-profit"
@@ -341,6 +371,11 @@ msgstr ""
 #. Proper name of an ID for a health facility defined by the  Pan-American Health Organization; no translation necessary.
 #: templates/hospital_bubble.html:32 ../tools/setup.py:112 static/locale.js:98
 msgid "HealthC ID"
+msgstr ""
+
+#. Greting
+#: templates/hospital_email.html:36
+msgid "Hello"
 msgstr ""
 
 #. Link to go to a help page for the application
@@ -384,7 +419,7 @@ msgid "Invalid or missing account e-mail."
 msgstr ""
 
 #. Error message for request missing subject name.
-#: edit.py:441 bubble.py:159
+#: edit.py:442 bubble.py:159
 msgid "Invalid or missing subject name."
 msgstr ""
 
@@ -401,6 +436,11 @@ msgstr ""
 #. Label for a language selector
 #: templates/base.html:66
 msgid "Language:"
+msgstr ""
+
+#. Label for the last update time
+#: templates/hospital_email.html:87 templates/hospital_email.html.py:183
+msgid "Last Updated:"
 msgstr ""
 
 #. Label for a date-time when the data was last updated
@@ -508,6 +548,11 @@ msgstr ""
 msgid "Neurosurgery"
 msgstr ""
 
+#. Label for new value
+#: templates/hospital_email.html:121
+msgid "New Value"
+msgstr ""
+
 #. Form option for a false Boolean value
 #: bubble.py:48 edit.py:178 bubble_test.py:66
 msgid "No"
@@ -532,6 +577,11 @@ msgstr ""
 #. Service provided by a health facility (use Title Case). Meaning: Obstetrics deals with childbirth and care of the mother. Meaning: Gynecology deals with diseases and hygiene of women
 #: ../tools/setup.py:254
 msgid "Obstetrics and Gynecology"
+msgstr ""
+
+#. Label for old value
+#: templates/hospital_email.html:126
+msgid "Old Value"
 msgstr ""
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
@@ -595,7 +645,7 @@ msgid "Postoperative Care"
 msgstr ""
 
 #. old value for the attribute
-#: mail_alerts.py:127
+#: mail_alerts.py:165
 msgid "Previous value"
 msgstr ""
 
@@ -626,7 +676,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:524
+#: edit.py:525
 msgid "Record updated."
 msgstr ""
 
@@ -653,12 +703,17 @@ msgid "Request for becoming %(action)s was denied."
 msgstr ""
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35
+#: templates/base.html.py:115
 msgid "Resource Finder"
 msgstr ""
 
 #. TODO: Add missing message description or meaning
-#: mail_alerts.py:304 mail_alerts.py:269 subscribe.py:118
+#: mail_alerts.py:73
+msgid "Resource Finder %s Update"
+msgstr ""
+
+#. TODO: Add missing message description or meaning
+#: subscribe.py:123
 msgid "Resource Finder Updates"
 msgstr ""
 
@@ -675,6 +730,11 @@ msgstr ""
 #. work done by someone that benefits another
 #: ../tools/setup.py:118 static/locale.js:126
 msgid "Services"
+msgstr ""
+
+#. TODO: Add missing message description or meaning
+#: templates/hospital_email.html.py:243 templates/hospital_email.html:50
+msgid "Settings Page"
 msgstr ""
 
 #. Label for a control that filters a list of facilities
@@ -707,6 +767,16 @@ msgstr ""
 msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/terms\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
 msgstr ""
 
+#. Label to tell users how to update subscription setttings
+#: templates/hospital_email.html:237
+msgid "To change subscription settings, please visit the"
+msgstr ""
+
+#. Description of update e-mail
+#: templates/hospital_email.html:44
+msgid "To change the frequency of these emails, please visit your"
+msgstr ""
+
 #. Total number of beds at a hospital
 #: ../tools/setup.py:116
 msgid "Total beds"
@@ -727,6 +797,11 @@ msgstr ""
 msgid "Unauthorized user."
 msgstr ""
 
+#. Label for unchanged and subscribed facilities
+#: templates/hospital_email.html:159
+msgid "Unchanged Subscribed Facilities"
+msgstr ""
+
 #. Type of organization: Organization associated with a university
 #: ../tools/setup.py:174
 msgid "University"
@@ -743,8 +818,13 @@ msgid "Updated"
 msgstr ""
 
 #. who the attribute was updated by
-#: mail_alerts.py:130
+#: mail_alerts.py:168
 msgid "Updated by"
+msgstr ""
+
+#. Label for user
+#: templates/hospital_email.html:132
+msgid "User"
 msgstr ""
 
 #. Error message for a value that is not a number
@@ -757,9 +837,19 @@ msgstr ""
 msgid "Vascular Surgery"
 msgstr ""
 
+#. TODO: Add missing message description or meaning
+#: templates/hospital_email.html:171
+msgid "View Full Record"
+msgstr ""
+
 #. Link to go to a page with past versions of the 'master' list
 #: templates/map.html:187
 msgid "View Master List archive"
+msgstr ""
+
+#. TODO: Add missing message description or meaning
+#: templates/hospital_email.html:76
+msgid "View full record"
 msgstr ""
 
 #. Type of construction: timber jointed together with nails
