@@ -157,6 +157,16 @@ class Bubble(Handler):
         if not subject:
             #i18n: Error message for request missing subject name.
             raise ErrorMessage(404, _('Invalid or missing subject name.'))
+
+        if model.Subscription.get('%s:%s' % (self.subdomain,
+                                             self.params.subject_name),
+                                  self.user.email()):
+            #i18n: Label to unsubscribe to a subject
+            subscribed = _('Unsubscribe')
+        else:
+            #i18n: Label to subscribe from a subject
+            subscribed = _('Subscribe to E-mail Updates')
+
         subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
 
         value_info_extractor = VALUE_INFO_EXTRACTORS[
@@ -167,6 +177,9 @@ class Bubble(Handler):
 
         self.render(value_info_extractor.template_name,
                     edit_url=edit_url,
+                    subdomain=self.subdomain,
+                    subscribed=subscribed,
+                    frequency=self.account.default_frequency or '',
                     subject_name=self.params.subject_name,
                     last_updated=max(detail.date for detail in details),
                     special=special,

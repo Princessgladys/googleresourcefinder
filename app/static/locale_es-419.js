@@ -44,6 +44,12 @@ locale = function() {
   //i18n: Meaning: administrative division
   messages.DISTRICT = "Distrito";
 
+  //i18n: Saved message; e-mail subscription has been saved
+  messages.EMAIL_SUBSCRIPTION_SAVED = "E-mail de suscripci\u00f3n establecido en actualizaciones ${FREQUENCY}. Utilice la ${START_LINK}configuraci\u00f3n${END_LINK} de p\u00e1gina para cambiar la configuraci\u00f3n de suscripci\u00f3n.";
+
+  //i18n: Eror message, shown when an error occurs.
+  messages.ERROR = "Ha ocurrido un error. Vuelve a intentarlo m\u00e1s tarde.";
+
   //i18n: Error message for required field.
   messages.ERROR_FIELD_IS_REQUIRED = "Este campo es requerido.";
 
@@ -80,6 +86,9 @@ locale = function() {
   //i18n: Pan-American Health Organization; no translation necessary.
   messages.HEALTHC_ID = "ID HealthC";
 
+  //i18n: Message indicating loading hospital information
+  messages.LOADING = "Cargando...";
+
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "Ene feb mar abr may jun jul ago sept oct nov dic".split(' ');
@@ -104,8 +113,17 @@ locale = function() {
   //i18n: Label for a control that filters a list of facilities
   messages.SHOW = "Mostrar";
 
+  //i18n: Label to subscribe from a subject
+  messages.SUBSCRIBE_TO_UPDATES = "Suscribirse a las Actualizaciones por Correo Electr\u00f3nico";
+
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}:${MINUTES} ${ZONE}";
+
+  //i18n: Label to unsubscribe to a subject
+  messages.UNSUBSCRIBE = "Darse de Baja de Comprobarse";
+
+  //i18n: Message indicating the user is unsubscribed
+  messages.UNSUBSCRIBED = "Dados de baja.";
 
   //i18n: Label indicating a record was updated
   messages.UPDATED = "Actualizado";

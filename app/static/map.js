@@ -70,6 +70,9 @@ var subjects = [null];
 var divisions = [null];
 var messages = {};  // {namespace: {name: message}
 
+// Timer for temporary status messages
+var status_timer;
+
 // ==== Columns shown in the subject table
 
 rf.get_services_from_values = function(values) {
@@ -469,16 +472,6 @@ function initialize_markers() {
 }
 
 // ==== Display construction routines
-
-function initialize_language_selector() {
-  var select = $('lang-select');
-  if (!select) {
-    return;
-  }
-  select.onchange = function() {
-    window.location = select.options[select.selectedIndex].value;
-  };
-}
 
 // Set up the supply selector (currently unused).
 function initialize_supply_selector() {
@@ -1176,7 +1169,7 @@ function select_subject(subject_i, ignore_current) {
     var url = bubble_url + (bubble_url.indexOf('?') >= 0 ? '&' : '?') +
         'subject_name=' + selected_subject.name;
     _gaq.push(['_trackEvent', 'bubble', 'open', selected_subject.name]);
-    jQuery.ajax({
+    $j.ajax({
       url: url,
       type: 'GET',
       timeout: 10000,
@@ -1189,7 +1182,7 @@ function select_subject(subject_i, ignore_current) {
         info.setContent(result);
         info.open(map, markers[selected_subject_i]);
         // Sets up the tabs and should be called after the DOM is created.
-        jQuery('#bubble-tabs').tabs({
+        $j('#bubble-tabs').tabs({
           select: function(event, ui) {
             _gaq.push(['_trackEvent', 'bubble', 'click ' + ui.panel.id,
                        selected_subject.name]);
@@ -1205,7 +1198,50 @@ function select_subject(subject_i, ignore_current) {
 }
 
 function show_loading(show) {
-  $('loading').style.display = show ? '' : 'none';
+  show_status(show ? locale.LOADING() : null);
+}
+
+function show_status(message, opt_duration) {
+  if (status_timer) {
+    // wait for the timer to finish
+    return;
+  }
+
+  update_status(message);
+
+  if (opt_duration) {
+    status_timer = setTimeout(function () { 
+      update_status(null);
+      status_timer = null;
+    }, opt_duration);
+  }
+}
+
+function update_status(message) {
+  var status = $('loading');
+
+  if (message) {
+    var browser_width = get_browser_width();
+    status.style.left = 0;
+    status.innerHTML = message;
+    status.style.display = '';
+    if (status.clientWidth / browser_width > 0.7) {
+      status.style.width = browser_width * 0.7;
+    }
+    status.style.left = (browser_width / 2) - (status.clientWidth / 2);
+  } else {
+    status.style.display = 'none';
+  }
+}
+
+function get_browser_width() {
+  if (window.innerWidth) { //most browsers should support this
+    return window.innerWidth;
+  } else if (document.body) { //catch for those that don't
+    return document.body.offsetWidth;
+  } else { //any others [ie6] should definitely support this
+    return document.getElementsByTagName('body')[0].offsetWidth;
+  }
 }
 
 // ==== Load data
@@ -1248,7 +1284,6 @@ function load_data(data) {
     initialize_subject_header();    
   }
 
-  initialize_language_selector();
   initialize_map();
   initialize_markers();
   initialize_handlers();
