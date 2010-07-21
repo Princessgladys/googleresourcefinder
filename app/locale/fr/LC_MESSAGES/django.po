@@ -66,7 +66,7 @@ msgid "Accuracy"
 msgstr "Précision"
 
 #. Header for a street address
-#: ../tools/setup.py:132 templates/hospital_bubble.html:120 templates/print_data.html:66
+#: templates/print.html:138 ../tools/setup.py:132 templates/hospital_bubble.html:120
 msgid "Address"
 msgstr "Adresse"
 
@@ -101,7 +101,7 @@ msgid "Available beds"
 msgstr "Lits disponibles"
 
 #. Heading for number of available beds and number of total beds in a hospital.
-#: templates/print_data.html:52
+#: templates/print.html:124
 msgid "Beds open / total"
 msgstr "Lits libres/total"
 
@@ -248,12 +248,12 @@ msgid "Displaying facilities within ${RADIUS_MILES} miles"
 msgstr "Tous les établissements dans un rayon de ${RADIUS_MILES} miles"
 
 #. Header for a distance from the current subject to another location
-#: templates/print_data.html:62
+#: templates/print.html:134
 msgid "Distance"
 msgstr "Distance"
 
 #. Meaning: administrative division
-#: templates/data.html:73 static/locale.js:51 ../tools/setup.py:128
+#: ../tools/setup.py:128 templates/map.html:141 static/locale.js:51
 msgid "District"
 msgstr "District"
 
@@ -293,7 +293,7 @@ msgid "Error loading facility information."
 msgstr "informations sur l'erreur installation de chargement"
 
 #. Button to export data to comma-separated-value format.
-#: export.py:151 templates/map.html:98
+#: templates/map.html:182 export.py:151
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
@@ -303,7 +303,7 @@ msgid "Facilities with Changes"
 msgstr "Installations avec des Changements"
 
 #. A place that provides a particular service
-#: templates/print_data.html:57 templates/data.html:92 static/locale.js:88
+#: templates/print.html:129 templates/map.html:160 static/locale.js:88
 msgid "Facility"
 msgstr "Établissement"
 
@@ -338,7 +338,7 @@ msgid "Field is required."
 msgstr "Ce champ est obligatoire."
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/data.html:47
+#: templates/map.html:115
 msgid "Filters"
 msgstr "Filtres"
 
@@ -358,7 +358,7 @@ msgid "For-profit"
 msgstr "À but lucratif"
 
 #. Header for general information about a subject
-#: templates/print_data.html:70
+#: templates/print.html:142
 msgid "General Info"
 msgstr "Informations générales"
 
@@ -393,7 +393,7 @@ msgid "Hospital"
 msgstr "Hôpital"
 
 #. Explains how to correct incorrect information that has been printed.
-#: templates/print.html:105
+#: templates/print.html:166
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr "En cas d'informations incorrectes ou manquantes, veuillez apporter les modifications souhaitées sur le site Web :"
 
@@ -702,7 +702,7 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "La demande pour devenir %(role)s  a été rejetée."
 
 #. Name of the application.
-#: templates/base.html.py:115 templates/print.html:50 templates/base.html:25
+#: templates/base.html.py:115
 msgid "Resource Finder"
 msgstr "Localisation de ressources"
 
@@ -752,7 +752,7 @@ msgid "Sign out"
 msgstr "Déconnexion"
 
 #. Header for a list of provisions
-#: templates/data.html:27
+#: templates/map.html:95
 msgid "Supplies"
 msgstr "Matériel"
 
@@ -842,7 +842,7 @@ msgid "View Full Record"
 msgstr "Enregistrer la Vue"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:103
+#: templates/map.html:187
 msgid "View Master List archive"
 msgstr "Accéder aux archives (en anglais)"
 
