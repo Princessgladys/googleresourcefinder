@@ -113,9 +113,10 @@ class Subscribe(Handler):
                     email_data.nickname = self.account.nickname or \
                         self.account.email
                     email_data.subdomain = self.subdomain
-                    email_data.changed_subjects = {self.params.subject_name: (
+                    email_data.changed_subjects = {subject_name: (
                         subject.get_value('title'), values)}
-                    body = FORMAT_EMAIL[self.account.email_format](email_data)
+                    body = FORMAT_EMAIL[self.account.email_format](
+                        email_data, self.account.locale)
                     email_subject = '%s %s %s' % (
                         self.subdomain.title(),
                         # i18n: subject of e-mail -> Resource Finder Updates

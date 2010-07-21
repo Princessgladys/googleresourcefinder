@@ -180,7 +180,8 @@ class MailUpdateSystemTest(MediumTestCase):
         # the e-mail is sent
         s = Subject(key_name=subject_name, type='hospital', author=self.user)
         self.set_attr(s, 'title', 'title_foo')
-        db.put(s)
+        st = SubjectType(key_name='haiti:hospital')
+        db.put([s, st])
         
         subject_changes = [[subject_name, 'weekly', 'immediate']]
         json_pickle_changes = simplejson.dumps(pickle.dumps(subject_changes))
@@ -194,8 +195,8 @@ class MailUpdateSystemTest(MediumTestCase):
         for freq in ['daily', 'weekly', 'monthly']:
             assert not PendingAlert.get(freq, self.email, subject_name)
         assert len(sent_emails) == 1
-        assert 'title__' in sent_emails[0].body
-        assert 'title_bar' in sent_emails[0].body
+        assert 'TITLE_FOO' in sent_emails[0].body
+        db.delete([s, st])
     
     def simulate_request(self, path):
         request = webapp.Request(webob.Request.blank(path).environ)

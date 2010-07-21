@@ -31,6 +31,7 @@ import datetime
 import logging
 import os
 import pickle
+from operator import itemgetter
 
 from google.appengine.api import mail
 from google.appengine.ext import db
@@ -39,7 +40,8 @@ from google.appengine.ext.webapp import template
 import bubble
 import cache
 import utils
-from export import format, get_last_updated_time
+from bubble import format
+from export import get_last_updated_time
 from feeds.xmlutils import Struct
 from model import Account, PendingAlert, Subdomain, Subject, SubjectType
 from model import Subscription
@@ -62,6 +64,17 @@ FREQUENCY_TO_TIMEDELTA = {
     'daily': datetime.timedelta(1),
     'weekly': datetime.timedelta(7)
 }
+
+def format_email_subject(subdomain, frequency):
+    frequency = _(str(frequency.title()))
+    subject = '%s %s: %s' % (
+        subdomain.title(),
+        # i18n: subject of e-mail -> Resource Finder Update
+        utils.to_unicode(_('Resource Finder %s Update' %
+                           frequency)),
+        utils.to_local_isotime_day(datetime.datetime.now()))
+    return subject
+
 
 def get_timedelta(frequency, now=None):
     """Given a text frequency, converts it to a timedelta."""
@@ -99,14 +112,33 @@ def fetch_updates(alert, subject):
         author = subject.get_author_nickname(attribute)
         alert_val = getattr(alert, attribute)
         if value != alert_val:
-            updated_attrs.append((attribute, {'old_value': alert_val,
-                                              'new_value': value,
-                                              'author': author}))
-
+            updated_attrs.append({'attribute': attribute,
+                                  'old_value': alert_val,
+                                  'new_value': value,
+                                  'author': author})
     return updated_attrs
 
 
-def format_plain_body(data):
+def order_and_format_updates(updates, subject_type, locale):
+    updates_by_name = dict((update['attribute'], update) for update in updates)
+    formatted_attrs = []
+    for name in subject_type.attribute_names:
+        if name in updates_by_name:
+            formatted_attrs.append(format_update(updates_by_name[name],
+                                                 locale))
+    return formatted_attrs
+
+
+def format_update(update, locale):
+    update['attribute'] = utils.get_message('attribute_name',
+                                            update['attribute'],
+                                            locale)
+    update['new_value'] = format(update['new_value'], True)
+    update['old_value'] = format(update['old_value'], True)
+    return update
+
+
+def format_plain_body(data, locale):
     """Forms the plain text body for an e-mail. Expects the data to be input
     in the following format:
 
@@ -120,23 +152,26 @@ def format_plain_body(data):
     body = u''
     for subject_name in data.changed_subjects:
         (subject_title, updates) = data.changed_subjects[subject_name]
+        subject = Subject.get_by_key_name(subject_name)
+        subdomain = subject_name.split(':')[0]
+        subject_type = SubjectType.get(subdomain, subject.type)
+        updates = order_and_format_updates(updates, subject_type, locale)
         body += subject_title.upper() + '\n'
-        for attribute, info in updates:
+        for update in updates:
             body += '-> %s: %s [%s: %s; %s: %s]\n' % (
-                #i18n: changed attribute name
-                attribute,
-                utils.to_unicode(utils.value_or_dash(info['new_value'])),
+                utils.get_message('attribute_name', update['attribute'], locale),
+                utils.to_unicode(format(update['new_value'], True)),
                 #i18n: old value for the attribute
                 utils.to_unicode(_('Previous value')),
-                utils.to_unicode(utils.value_or_dash(info['old_value'])),
+                utils.to_unicode(format(update['old_value'], True)),
                 #i18n: who the attribute was updated by
                 utils.to_unicode(_('Updated by')),
-                utils.to_unicode(info['author']))
+                utils.to_unicode(update['author']))
         body += '\n'
     return body
 
 
-def format_html_body(data):
+def format_html_body(data, locale):
     """Forms the HTML body for an e-mail. Expects the data to be input in
     the same format as in format_plain_body(), with the optional addition of
     an 'unchanged_subjects' field of the Struct. These will be displayed at
@@ -148,23 +183,23 @@ def format_html_body(data):
     changed_subjects = []
     for subject_name in data.changed_subjects:
         subject = Subject.get_by_key_name(subject_name)
-        no_subdomain_name = subject_name.split(':')[1]
-        updates = data.changed_subjects[subject_name][1]
-        for attribute, info in updates:
-            info['new_value'] = utils.value_or_dash(info['new_value'])
-            info['old_value'] = utils.value_or_dash(info['old_value'])
+        subdomain, no_subdomain_name = subject_name.split(':')
+        subject_type = SubjectType.get(subdomain, subject.type)
+        updates = order_and_format_updates(
+            data.changed_subjects[subject_name][1], subject_type, locale)
         changed_subjects.append({
             'name': subject_name,
             'no_subdomain_name': no_subdomain_name,
-            'title': subject.get_value('title'),
-            'address': subject.get_value('address'),
-            'contact_number': subject.get_value('phone'),
-            'contact_email': subject.get_value('email'),
-            'available_beds': subject.get_value('available_beds'),
-            'total_beds': subject.get_value('total_beds'),
+            'title': format(subject.get_value('title')),
+            'address': format(subject.get_value('address')),
+            'contact_number': format(subject.get_value('phone')),
+            'contact_email': format(subject.get_value('email')),
+            'available_beds': format(subject.get_value('available_beds')),
+            'total_beds': format(subject.get_value('total_beds')),
             'last_updated': format(get_last_updated_time(subject)),
             'changed_vals': updates
         })
+    changed_subjects = sorted(changed_subjects, key=itemgetter('title'))
 
     unchanged_subjects = []
     if 'unchanged_subjects' in data:
@@ -175,16 +210,16 @@ def format_html_body(data):
                 'name': subject_name,
                 'no_subdomain_name': no_subdomain_name,
                 'title': subject.get_value('title'),
-                'address': subject.get_value('address'),
-                'contact_number': subject.get_value('phone'),
-                'contact_email': subject.get_value('email'),
-                'available_beds': subject.get_value('available_beds'),
-                'total_beds': subject.get_value('total_beds'),
+                'address': format(subject.get_value('address')),
+                'contact_number': format(subject.get_value('phone')),
+                'contact_email': format(subject.get_value('email')),
+                'available_beds': format(subject.get_value('available_beds')),
+                'total_beds': format(subject.get_value('total_beds')),
                 'last_updated': format(get_last_updated_time(subject))
             })
+        unchanged_subjects = sorted(unchanged_subjects, key=itemgetter('title'))
 
     template_values = {
-        'date': data.time,
         'nickname': data.nickname,
         'subdomain': data.subdomain,
         'changed_subjects': changed_subjects,
@@ -316,11 +351,12 @@ class MailAlerts(Handler):
                     subject_name=subscription.subject_name,
                     frequency=subscription.frequency)
                 if not pa.timestamp:
-                    for attribute, info in self.changed_request_data.items():
-                        if info['old_value'] == '\xe2\x80\x93':
-                            setattr(pa, attribute, None)
+                    for update in self.changed_request_data:
+                        if update['old_value'] == '\xe2\x80\x93':
+                            setattr(pa, update['attribute'], None)
                         else:
-                            setattr(pa, attribute, info['old_value'])
+                            setattr(pa, update['attribute'],
+                                    update['old_value'])
                     for attribute in self.unchanged_request_data:
                         setattr(pa, attribute,
                                 self.unchanged_request_data[attribute])
@@ -332,18 +368,14 @@ class MailAlerts(Handler):
                 account = Account.all().filter('email =',
                                                subscription.user_email).get()
                 email_data = Struct()
-                email_data.time = utils.to_local_isotime(datetime.datetime.now(),
-                                                         clear_ms=True)
                 email_data.nickname = account.nickname or account.email
                 email_data.subdomain = subdomain
                 email_data.changed_subjects = {self.params.subject_name: (
-                    subject.get_value('title'), self.changed_request_data.items())}
-                body = FORMAT_EMAIL[account.email_format](email_data)
-                email_subject = '%s %s %s' % (
-                    subdomain.title(),
-                    # i18n: subject of e-mail -> Resource Finder Updates
-                    utils.to_unicode(_('Resource Finder Updates')),
-                    email_data.time)
+                    subject.get_value('title'), self.changed_request_data)}
+                body = FORMAT_EMAIL[account.email_format](email_data,
+                                                          account.locale)
+                email_subject = format_email_subject(subdomain,
+                                                     subscription.frequency)
                 send_email(account.locale,
                            'updates@resource-finder.appspotmail.com',
                            account.email, email_subject,
@@ -373,7 +405,7 @@ class MailAlerts(Handler):
                     changed_subjects[subject.key().name()] = (
                         subject.get_value('title'), values)
                     alerts_to_delete.append(pa)
-                elif len(unchanged_subjects) <= 3:
+                else:
                     unchanged_subjects.append(subject)
 
             if not changed_subjects and (account.email_format == 'plain' or
@@ -381,18 +413,13 @@ class MailAlerts(Handler):
                 continue
 
             email_data = Struct()
-            email_data.time = utils.to_local_isotime(datetime.datetime.now(),
-                                                     clear_ms=True)
             email_data.nickname = account.nickname or account.email
             email_data.subdomain = subdomain
             email_data.changed_subjects = changed_subjects
             email_data.unchanged_subjects = unchanged_subjects
-            body = FORMAT_EMAIL[account.email_format](email_data)
-            email_subject = '%s %s %s' % (
-                subdomain.title(),
-                # i18n: subject of e-mail -> Resource Finder Updates
-                utils.to_unicode(_('Resource Finder Updates')),
-                email_data.time)
+            body = FORMAT_EMAIL[account.email_format](email_data,
+                                                      account.locale)
+            email_subject = format_email_subject(subdomain, frequency)
             send_email(account.locale,
                        'updates@resource-finder.appspotmail.com',
                        account.email, email_subject,
