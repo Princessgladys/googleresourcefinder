@@ -44,6 +44,9 @@ locale = function() {
   //i18n: Meaning: administrative division
   messages.DISTRICT = "Distri";
 
+  //i18n: Saved message; e-mail subscription has been saved
+  messages.EMAIL_SUBSCRIPTION_SAVED = "E-mail subscription saved to ${FREQUENCY} updates. Use the ${START_LINK}Settings${END_LINK} page to change subscription settings.";
+
   //i18n: Eror message, shown when an error occurs.
   messages.ERROR = "Gen yon er\u00e8 ki te f\u00e8t. Tanpri, eseye ank\u00f2 pi ta.";
 
@@ -83,6 +86,9 @@ locale = function() {
   //i18n: Pan-American Health Organization; no translation necessary.
   messages.HEALTHC_ID = "ID HealthC";
 
+  //i18n: Message indicating loading hospital information
+  messages.LOADING = "Transp\u00f2te...";
+
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "Janvye, Fevriye, Mas, Avril, Me, Jen, jiy\u00e8, Out, septanm, Okt\u00f2b, Novanm, Desanm".split(' ');
@@ -115,6 +121,9 @@ locale = function() {
 
   //i18n: Label to unsubscribe to a subject
   messages.UNSUBSCRIBE = "Koupe Ab\u00f2nman nan Tcheke";
+
+  //i18n: Message indicating the user is unsubscribed
+  messages.UNSUBSCRIBED = "Unsubscribed.";
 
   //i18n: Label indicating a record was updated
   messages.UPDATED = "Remete an fonksyon";

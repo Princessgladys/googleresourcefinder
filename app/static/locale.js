@@ -51,6 +51,10 @@ locale = function() {
   messages.DISTRICT =
       'District';
 
+  //i18n: Saved message; e-mail subscription has been saved
+  messages.EMAIL_SUBSCRIPTION_SAVED =
+      'E-mail subscription saved to ${FREQUENCY} updates. Use the ${START_LINK}Settings${END_LINK} page to change subscription settings.';
+
   //i18n: Eror message, shown when an error occurs.
   messages.ERROR =
       'An error has occurred. Please try again later.';
@@ -102,6 +106,10 @@ locale = function() {
   messages.HEALTHC_ID =
       'HealthC ID';
 
+  //i18n: Message indicating loading hospital information
+  messages.LOADING =
+    'Loading...';
+
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS =
@@ -145,6 +153,10 @@ locale = function() {
   //i18n: Label to unsubscribe to a subject
   messages.UNSUBSCRIBE =
       'Unsubscribe';
+
+  //i18n: Message indicating the user is unsubscribed
+  messages.UNSUBSCRIBED =
+      'Unsubscribed.';
 
   //i18n: Label indicating a record was updated
   messages.UPDATED =

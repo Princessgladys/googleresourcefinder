@@ -163,6 +163,12 @@ class Handler(webapp.RequestHandler):
             if name.lower().startswith('x-appengine'):
                 logging.debug('%s: %s' % (name, request.headers[name]))
 
+        # change account locale if necessary
+        locale = self.request.get('lang', '')
+        if locale and locale != self.account.locale:
+            self.account.locale = locale
+            db.put(self.account)
+
         # Determine the subdomain.
         self.subdomain = ''
         levels = self.request.headers.get('Host', '').split('.')

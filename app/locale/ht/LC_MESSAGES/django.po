@@ -22,7 +22,7 @@ msgid "${DATE} at ${TIME}"
 msgstr "${DATE} a ${TIME}"
 
 #. Time format (example 14:32 UTC-4)
-#: static/locale.js:142
+#: static/locale.js:150
 #, sh-format
 msgid "${HOURS}:${MINUTES} ${ZONE}"
 msgstr "${HOURS}: ${MINUTES} ${ZONE}"
@@ -40,7 +40,7 @@ msgid "${MONTH} ${DAY}, ${YEAR}"
 msgstr "${MONTH} ${DAY}, ${YEAR}"
 
 #. Number of facilities within range of a location. (example: 5 Facilities within 10 miles)
-#: static/locale.js:88
+#: static/locale.js:92
 #, sh-format
 msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
@@ -57,7 +57,7 @@ msgid "(unspecified)"
 msgstr "(pa espesifye)"
 
 #. Note that a health facility has been marked closed.
-#: templates/hospital_bubble.html:51
+#: templates/hospital_bubble.html:52
 msgid "<strong>Note:</strong> This facility has been marked closed."
 msgstr "<strong>Remak:</strong> etablisman sa a te make fèmen."
 
@@ -67,7 +67,7 @@ msgid "Accuracy"
 msgstr "Presizyon"
 
 #. Header for a street address
-#: templates/hospital_bubble.html:123 ../tools/setup.py:132 templates/print_data.html:66
+#: ../tools/setup.py:132 templates/print_data.html:66 templates/hospital_bubble.html:124
 msgid "Address"
 msgstr "Adrès"
 
@@ -92,7 +92,7 @@ msgid "Alternate name"
 msgstr "Altène non"
 
 #. Eror message, shown when an error occurs.
-#: static/locale.js:55
+#: static/locale.js:59
 msgid "An error has occurred. Please try again later."
 msgstr "Gen yon erè ki te fèt. Tanpri, eseye ankò pi ta."
 
@@ -142,17 +142,17 @@ msgid "Category"
 msgstr "Kategori"
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:151
+#: templates/hospital_bubble.html:152
 msgid "Change"
 msgstr "Chanje"
 
 #. Header for the history of changes in data for a facility
-#: templates/hospital_bubble.html:113
+#: templates/hospital_bubble.html:114
 msgid "Change details"
 msgstr "Chanje done"
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:159
+#: templates/hospital_bubble.html:160
 msgid "Change note"
 msgstr "Chanje"
 
@@ -217,7 +217,7 @@ msgid "Damage"
 msgstr "Domaj"
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:163
+#: templates/hospital_bubble.html:164
 msgid "Date and time"
 msgstr "Jou  ak  lè"
 
@@ -278,6 +278,12 @@ msgstr "Adrès elektronik fòma:"
 msgid "E-mail Language:"
 msgstr "Lang:"
 
+#. Saved message; e-mail subscription has been saved
+#: static/locale.js:55
+#, sh-format
+msgid "E-mail subscription set to ${FREQUENCY} updates. Use the ${START_LINK}Settings${END_LINK} page to change subscription settings."
+msgstr "Abònman imel mete mizajou ${FREQUENCY}. Itilize paj nan {$START_LINK}anviwònman{$END_LINK} chanje anviwònman abònman."
+
 #. Title for page to edit data about a subject
 #: templates/edit.html:55
 msgid "Edit"
@@ -289,7 +295,7 @@ msgid "Edit this record"
 msgstr "modifye enregistreman sa"
 
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:155
+#: templates/hospital_bubble.html:156
 msgid "Edited by"
 msgstr "Moun ki reekri a"
 
@@ -299,7 +305,7 @@ msgid "Error"
 msgstr "Erè"
 
 #. Error message for not loading facility information successfully
-#: static/locale.js:71
+#: static/locale.js:75
 msgid "Error loading facility information."
 msgstr "Erè transpòte etablisman enfòmasyon."
 
@@ -309,12 +315,12 @@ msgid "Export CSV"
 msgstr "Ekspote CSV"
 
 #. A place that provides a particular service
-#: templates/settings.html:127 static/locale.js:92
+#: templates/settings.html:127 static/locale.js:96
 msgid "Facility"
 msgstr "Etablisman"
 
 #. Header for details about a facility
-#: templates/hospital_bubble.html:108
+#: templates/hospital_bubble.html:109
 msgid "Facility details"
 msgstr "Enfòmasyon sou etablisman "
 
@@ -334,7 +340,7 @@ msgid "Field hospital co-located with hospital"
 msgstr "Terren lopital ki chita ka lopital"
 
 #. Error message for required field.
-#: static/locale.js:59
+#: static/locale.js:63
 msgid "Field is required."
 msgstr "Domèn sa obligatwa."
 
@@ -344,7 +350,7 @@ msgid "Filters"
 msgstr "Filtè yo"
 
 #. Tooltip explaining how to enable print mode
-#: static/locale.js:121
+#: static/locale.js:129
 msgid "First select a hospital from the list on the left. Then Print will print a list of hospitals in order of distance from your selection."
 msgstr "Premyeman chwazi yon lopital ki nan bò goch la. Lè sa a enprimant la pral enprime yon lis lopital soti nan zòn ou ye a"
 
@@ -364,7 +370,7 @@ msgid "General Surgery"
 msgstr "Chiriji Jeneral"
 
 #. Proper name of an ID for a health facility defined by the  Pan-American Health Organization; no translation necessary.
-#: ../tools/setup.py:112 static/locale.js:102 templates/hospital_bubble.html:35
+#: ../tools/setup.py:112 templates/hospital_bubble.html:36 static/locale.js:106
 msgid "HealthC ID"
 msgstr "ID HealthC"
 
@@ -419,7 +425,7 @@ msgid "Invalid or missing subject name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
 #. Abbreviated months of the year.
-#: static/locale.js:107
+#: static/locale.js:115
 msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
 msgstr "Janvye, Fevriye, Mas, Avril, Me, Jen, jiyè, Out, septanm, Oktòb, Novanm, Desanm"
 
@@ -434,7 +440,7 @@ msgid "Language:"
 msgstr "Lang:"
 
 #. Label for a date-time when the data was last updated
-#: templates/hospital_bubble.html:44
+#: templates/hospital_bubble.html:45
 msgid "Last updated"
 msgstr "Misajou"
 
@@ -444,12 +450,12 @@ msgid "Latitude"
 msgstr "Latitd"
 
 #. Error message for invalid latitude.
-#: static/locale.js:67
+#: static/locale.js:71
 msgid "Latitude must be a number."
 msgstr "Latitd dwe yon nimewo"
 
 #. Error message for invalid latitude.
-#: static/locale.js:63
+#: static/locale.js:67
 msgid "Latitude must be between -90 and 90."
 msgstr "Latitd dwe ant -90 ak 90"
 
@@ -464,7 +470,7 @@ msgid "Loader:"
 msgstr "Program pou telechaje"
 
 #. Indicator that the application is loading.
-#: templates/base.html:170
+#: templates/base.html:170 static/locale.js:110
 msgid "Loading..."
 msgstr "Transpòte..."
 
@@ -474,7 +480,7 @@ msgid "Location"
 msgstr "Kote"
 
 #. Geographic coordinates of a location on earth.
-#: templates/hospital_bubble.html:132
+#: templates/hospital_bubble.html:133
 msgid "Location:"
 msgstr "Kote"
 
@@ -484,12 +490,12 @@ msgid "Longitude"
 msgstr "Lonjitd"
 
 #. Error message for invalid longitude.
-#: static/locale.js:79
+#: static/locale.js:83
 msgid "Longitude must be a number."
 msgstr "Lonjitd dwe yon nimewo"
 
 #. Error message for invalid longitude.
-#: static/locale.js:75
+#: static/locale.js:79
 msgid "Longitude must be between -180 and 180."
 msgstr "Lonjitd dwe ant -180 ak 180"
 
@@ -549,7 +555,7 @@ msgid "No"
 msgstr "Pa dakò"
 
 #. Indicates there is no availability information for this  hospital.
-#: templates/hospital_bubble.html:92
+#: templates/hospital_bubble.html:93
 msgid "No availability information"
 msgstr "Pa gen enfòmasyon ki koresponn"
 
@@ -575,7 +581,7 @@ msgid "Obstetrics and Gynecology"
 msgstr "Obstetrik ak Jinekoloji"
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
-#: static/locale.js:112
+#: static/locale.js:120
 msgid "Open/Total Beds"
 msgstr "Kabann disponib/total"
 
@@ -605,7 +611,7 @@ msgid "Orthopedics"
 msgstr "Otopedik"
 
 #. Proper name of an ID for a health facility defined by the  Haiti ministry of health (MSPP); no translation necessary.
-#: static/locale.js:97 templates/hospital_bubble.html:40 ../tools/setup.py:109
+#: static/locale.js:101 templates/hospital_bubble.html:41 ../tools/setup.py:109
 msgid "PCode"
 msgstr "PCode"
 
@@ -630,7 +636,7 @@ msgid "Plain Text"
 msgstr "Tèks"
 
 #. Indicates a user should call for availability of beds and services at a hospital.
-#: templates/hospital_bubble.html:86
+#: templates/hospital_bubble.html:87
 msgid "Please call for availability information."
 msgstr "Tanpri rele pou enfomasyon disponib"
 
@@ -650,7 +656,7 @@ msgid "Print"
 msgstr "Enprime"
 
 #. Tooltip explaining a 'Print' link
-#: static/locale.js:126
+#: static/locale.js:134
 #, sh-format
 msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Enprime yon list lopital nan lòd distans de ${FACILITY_NAME}"
@@ -723,7 +729,7 @@ msgid "Select subject type to export:"
 msgstr "Idantite kalite etablisman ekspòtasyon"
 
 #. work done by someone that benefits another
-#: ../tools/setup.py:118 static/locale.js:130
+#: ../tools/setup.py:118 static/locale.js:138
 msgid "Services"
 msgstr "Sèvis"
 
@@ -738,7 +744,7 @@ msgid "Settings"
 msgstr "Anviwònman"
 
 #. Label for a control that filters a list of facilities
-#: static/locale.js:134
+#: static/locale.js:142
 msgid "Show"
 msgstr "Montre"
 
@@ -753,7 +759,7 @@ msgid "Sign out"
 msgstr "Sòti"
 
 #. Label to subscribe from a subject
-#: static/locale.js:138 bubble.py:168
+#: static/locale.js:146 bubble.py:168
 msgid "Subscribe to E-mail Updates"
 msgstr "Abònman imel mizajou"
 
@@ -803,7 +809,7 @@ msgid "Unreinforced masonry"
 msgstr "Pa ranfòse konkrè"
 
 #. Label to unsubscribe to a subject
-#: bubble.py:165 static/locale.js:146
+#: bubble.py:165 static/locale.js:154
 msgid "Unsubscribe"
 msgstr "Koupe Abònman nan Tcheke"
 
@@ -812,8 +818,13 @@ msgstr "Koupe Abònman nan Tcheke"
 msgid "Unsubscribe from Checked"
 msgstr "Koupe Abònman nan Tcheke"
 
+#. Message indicating the user is unsubscribed
+#: static/locale.js:158
+msgid "Unsubscribed."
+msgstr "Dezabone."
+
 #. Label indicating a record was updated
-#: static/locale.js:150
+#: static/locale.js:162
 msgid "Updated"
 msgstr "Remete an fonksyon"
 
@@ -823,7 +834,7 @@ msgid "Updated by"
 msgstr "Remete an fonksyon"
 
 #. Error message for a value that is not a number
-#: static/locale.js:83
+#: static/locale.js:87
 msgid "Value must be a number."
 msgstr "Valè dwe yon nimewo"
 
@@ -880,12 +891,12 @@ msgid "anonymous"
 msgstr "anonim"
 
 #. Heading for number of available beds at a hospital
-#: templates/hospital_bubble.html:60
+#: templates/hospital_bubble.html:61
 msgid "availability"
 msgstr "Disponibilite"
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:64
+#: templates/hospital_bubble.html:65
 msgid "capacity"
 msgstr "Kapasite"
 
@@ -895,13 +906,13 @@ msgid "no more than 10 miles away"
 msgstr "Pa depase 10 mil"
 
 #. Very short abbreviation for a phone number, indended to disambiguate from a fax number.  (example: p 555-555-5555)
-#: static/locale.js:117
+#: static/locale.js:125
 #, sh-format
 msgid "p ${PHONE}"
 msgstr "t ${PHONE}"
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:69
+#: templates/hospital_bubble.html:70
 msgid "services"
 msgstr "sèvis"
 
