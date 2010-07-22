@@ -222,7 +222,7 @@ msgid "Date and time"
 msgstr "Fecha y hora"
 
 #. Label for change default frequency box
-#: templates/settings.html:95
+#: templates/settings.html:94
 msgid "Default Frequency:"
 msgstr "Predeterminada de Frecuencias:"
 
@@ -259,7 +259,7 @@ msgid "Distance"
 msgstr "Distancia"
 
 #. Meaning: administrative division
-#: ../tools/setup.py:128 templates/map.html:141 static/locale.js:51
+#: templates/map.html:142 ../tools/setup.py:128 static/locale.js:51
 msgid "District"
 msgstr "Distrito"
 
@@ -269,15 +269,9 @@ msgid "E-mail"
 msgstr "Correo electrónico"
 
 #. Label for e-mail type radio buttons
-#: templates/settings.html:77
+#: templates/settings.html:76
 msgid "E-mail Format:"
 msgstr "Correo electrónico"
-
-#. Saved message; e-mail subscription has been saved
-#: static/locale.js:55
-#, sh-format
-msgid "E-mail subscription saved to ${FREQUENCY} updates. Use the ${START_LINK}Settings${END_LINK} page to change subscription settings."
-msgstr "E-mail de suscripción establecido en actualizaciones ${FREQUENCY}. Utilice la ${START_LINK}configuración${END_LINK} de página para cambiar la configuración de suscripción."
 
 #. Title for page to edit data about a subject
 #: templates/edit.html:55
@@ -305,12 +299,12 @@ msgid "Error loading facility information."
 msgstr "Error al cargar servicio de información."
 
 #. Button to export data to comma-separated-value format.
-#: templates/map.html:182 export.py:151
+#: export.py:151 templates/map.html:183
 msgid "Export CSV"
 msgstr "Exportar CSV"
 
 #. A place that provides a particular service
-#: templates/settings.html:117 templates/print.html:129 templates/map.html:160 static/locale.js:96
+#: templates/settings.html:116 templates/print.html:129 static/locale.js:96 templates/map.html:161
 msgid "Facility"
 msgstr "Institución"
 
@@ -340,7 +334,7 @@ msgid "Field is required."
 msgstr "Este campo es requerido."
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:115
+#: templates/map.html:116
 msgid "Filters"
 msgstr "Filtros"
 
@@ -555,7 +549,7 @@ msgid "No availability information"
 msgstr "No hay información de disponibilidad"
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:131
+#: templates/settings.html:130
 msgid "No facilities to display."
 msgstr "No hay instalaciones para mostrar."
 
@@ -626,7 +620,7 @@ msgid "Phone"
 msgstr "Teléfono"
 
 #. Label for "plain text" radio button
-#: templates/settings.html:81
+#: templates/settings.html:80
 msgid "Plain Text"
 msgstr "Texto Sin Formato"
 
@@ -714,7 +708,7 @@ msgid "Save"
 msgstr "Guardar"
 
 #. Notice that a change has been saved.
-#: templates/settings.html:59
+#: templates/settings.html:58
 msgid "Saved."
 msgstr "Guardar"
 
@@ -729,12 +723,12 @@ msgid "Services"
 msgstr "Servicios"
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:164
+#: templates/settings.html:163
 msgid "Set Checked to Default"
 msgstr "Seleccionados para Establecer por Defecto"
 
 #. Link to go to the settings page of the application
-#: templates/settings.html:69 templates/base.html:95
+#: templates/settings.html:68 templates/base.html:95
 msgid "Settings"
 msgstr "Ajustes"
 
@@ -755,11 +749,11 @@ msgstr "Cerrar sesión"
 
 #. Label to subscribe from a subject
 #: static/locale.js:146 bubble.py:168
-msgid "Subscribe to E-mail Updates"
+msgid "Subscribe to email updates"
 msgstr "Suscribirse a las Actualizaciones por Correo Electrónico"
 
 #. Header for a list of provisions
-#: templates/map.html:95
+#: templates/map.html:96
 msgid "Supplies"
 msgstr "Suministros"
 
@@ -809,7 +803,7 @@ msgid "Unsubscribe"
 msgstr "Darse de Baja de Comprobarse"
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:171
+#: templates/settings.html:170
 msgid "Unsubscribe from Checked"
 msgstr "Darse de Baja de Comprobarse"
 
@@ -839,7 +833,7 @@ msgid "Vascular Surgery"
 msgstr "Cirugía Vascular"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:187
+#: templates/map.html:188
 msgid "View Master List archive"
 msgstr "Ver archivo de la lista maestra"
 
@@ -868,6 +862,12 @@ msgstr "Sí"
 #, python-format
 msgid "You already have \"%(action)s\" permission"
 msgstr "Ya eres %(role)s "
+
+#. Saved message; e-mail subscription has been saved
+#: static/locale.js:55
+#, sh-format
+msgid "You will receive ${FREQUENCY} email updates for this facility. Use the ${START_LINK}Settings${END_LINK} page to change subscription settings."
+msgstr "Usted recibirá actualizaciones ${FREQUENCY} de correo electrónico para este servicio. Utilice la ${START_LINK}Configuración${END_LINK} de página para cambiar la configuración de suscripción."
 
 #. Request for permission is awaiting approval
 #: request_access.py:61 request_access.py:55

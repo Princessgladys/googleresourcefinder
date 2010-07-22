@@ -45,7 +45,7 @@ locale = function() {
   messages.DISTRICT = "Distrito";
 
   //i18n: Saved message; e-mail subscription has been saved
-  messages.EMAIL_SUBSCRIPTION_SAVED = "E-mail de suscripci\u00f3n establecido en actualizaciones ${FREQUENCY}. Utilice la ${START_LINK}configuraci\u00f3n${END_LINK} de p\u00e1gina para cambiar la configuraci\u00f3n de suscripci\u00f3n.";
+  messages.EMAIL_SUBSCRIPTION_SAVED = "Usted recibir\u00e1 actualizaciones ${FREQUENCY} de correo electr\u00f3nico para este servicio. Utilice la ${START_LINK}Configuraci\u00f3n${END_LINK} de p\u00e1gina para cambiar la configuraci\u00f3n de suscripci\u00f3n.";
 
   //i18n: Eror message, shown when an error occurs.
   messages.ERROR = "Ha ocurrido un error. Vuelve a intentarlo m\u00e1s tarde.";

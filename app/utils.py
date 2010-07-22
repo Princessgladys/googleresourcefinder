@@ -163,12 +163,6 @@ class Handler(webapp.RequestHandler):
             if name.lower().startswith('x-appengine'):
                 logging.debug('%s: %s' % (name, request.headers[name]))
 
-        # change account locale if necessary
-        locale = self.request.get('lang', '')
-        if locale and self.account and locale != self.account.locale:
-            self.account.locale = locale
-            db.put(self.account)
-
         # Determine the subdomain.
         self.subdomain = ''
         levels = self.request.headers.get('Host', '').split('.')
@@ -227,6 +221,11 @@ class Handler(webapp.RequestHandler):
         # Store the language settings in params.lang and params.maps_lang.
         self.params.lang = lang
         self.params.maps_lang = config.MAPS_LANG_FALLBACKS.get(lang, lang)
+
+       # change account locale if necessary
+        if self.account and lang != self.account.locale:
+            self.account.locale = lang
+            db.put(self.account)
 
         # Activate the selected language.
         django.utils.translation.activate(lang)
