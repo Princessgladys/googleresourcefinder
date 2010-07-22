@@ -74,7 +74,6 @@ class SettingsTest(SeleniumTestCase):
         frequency options rendered properly."""
         # make sure all three buttons load properly
         self.login_to_settings_page()
-        assert ['en'] == self.get_selected_values('//*[@name="locale"]')
         assert (['immediate'] ==
                 self.get_selected_values('//*[@name="default-frequency"]'))
         assert self.is_checked('//*[@name="email-type"][@value="html"]')
@@ -87,14 +86,7 @@ class SettingsTest(SeleniumTestCase):
         self.wait_for_load()
         assert (['monthly'] ==
                 self.get_selected_values('//*[@name="default-frequency"]'))
-
-        # change select field and make sure account was changed
-        # also make sure that the saved box appears
-        self.select('//*[@name="locale"]', 'value=fr')
-        self.wait_for_element('//div[@id="loading"]')
-        account = Account.all().filter('email =', self.email).get()
-        assert account.locale == 'fr'
-
+ 
     def test_subjects(self):
         """Confirms that the facilities list loaded properly."""
         # make sure all subjects are present

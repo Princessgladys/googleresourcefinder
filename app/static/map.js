@@ -1202,7 +1202,7 @@ function show_loading(show) {
 }
 
 function show_status(message, opt_duration, opt_override) {
-  if (status_timer && !(opt_override)) {
+  if (status_timer && !opt_override) {
     // wait for the timer to finish
     return;
   }
@@ -1210,7 +1210,7 @@ function show_status(message, opt_duration, opt_override) {
   update_status(message);
 
   if (opt_duration) {
-    status_timer = setTimeout(function () { 
+    status_timer = setTimeout(function () {
       update_status(null);
       status_timer = null;
     }, opt_duration);
@@ -1222,16 +1222,20 @@ function update_status(message) {
 
   if (message) {
     var browser_width = get_browser_width();
-    status.style.left = 0;
+    status.style.left = -10000;
     status.innerHTML = message;
     status.style.display = '';
+    status.style.width = '';
+    // check added to make sure that the display message does not
+    // take up too much screen real estate
     if (status.clientWidth / browser_width > 0.7) {
-      status.style.width = browser_width * 0.7;
+      status.style.width = Math.round(0.7 * browser_width) + "px";
     }
     status.style.left = (browser_width / 2) - (status.clientWidth / 2);
   } else {
     status.style.display = 'none';
   }
+
 }
 
 function get_browser_width() {

@@ -53,7 +53,7 @@ locale = function() {
 
   //i18n: Saved message; e-mail subscription has been saved
   messages.EMAIL_SUBSCRIPTION_SAVED =
-      'E-mail subscription saved to ${FREQUENCY} updates. Use the ${START_LINK}Settings${END_LINK} page to change subscription settings.';
+      'You will receive ${FREQUENCY} email updates for this facility. Use the ${START_LINK}Settings${END_LINK} page to change subscription settings.';
 
   //i18n: Eror message, shown when an error occurs.
   messages.ERROR =
@@ -144,7 +144,7 @@ locale = function() {
 
   //i18n: Label to subscribe from a subject
   messages.SUBSCRIBE_TO_UPDATES =
-      'Subscribe to E-mail Updates';
+      'Subscribe to email updates';
 
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE =

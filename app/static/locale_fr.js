@@ -45,7 +45,7 @@ locale = function() {
   messages.DISTRICT = "District";
 
   //i18n: Saved message; e-mail subscription has been saved
-  messages.EMAIL_SUBSCRIPTION_SAVED = "Abonnement e-mail mis \u00e0 jour ${FREQUENCY}. Utilisez la page des ${START_LINK}param\u00e8tres${END_LINK} pour modifier les param\u00e8tres d'abonnement.";
+  messages.EMAIL_SUBSCRIPTION_SAVED = "Vous recevrez par courriel des mises \u00e0 jour ${FREQUENCY} pour cette installation. Utilisez la page des ${START_LINK}Param\u00e8tres${END_LINK} pour modifier les param\u00e8tres d'abonnement.";
 
   //i18n: Eror message, shown when an error occurs.
   messages.ERROR = "Une erreur s'est produite. Veuillez r\u00e9essayer ult\u00e9rieurement.";

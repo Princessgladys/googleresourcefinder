@@ -45,7 +45,7 @@ locale = function() {
   messages.DISTRICT = "Distri";
 
   //i18n: Saved message; e-mail subscription has been saved
-  messages.EMAIL_SUBSCRIPTION_SAVED = "Ab\u00f2nman imel sove mizajou ${FREQUENCY}. Itilize paj nan ${START_LINK}Anviw\u00f2nman{$END_LINK} chanje anviw\u00f2nman ab\u00f2nman.";
+  messages.EMAIL_SUBSCRIPTION_SAVED = "Ou ap resevwa ${FREQUENCY} d\u00e8nye imel pou etablisman sa a. S\u00e8vi ak paj la ${START_LINK}Anviw\u00f2nman${END_LINK} chanje anviw\u00f2nman ab\u00f2nman.";
 
   //i18n: Eror message, shown when an error occurs.
   messages.ERROR = "Gen yon er\u00e8 ki te f\u00e8t. Tanpri, eseye ank\u00f2 pi ta.";

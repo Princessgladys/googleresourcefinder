@@ -165,7 +165,7 @@ class Bubble(Handler):
             subscribed = _('Unsubscribe')
         else:
             #i18n: Label to subscribe from a subject
-            subscribed = _('Subscribe to E-mail Updates')
+            subscribed = _('Subscribe to email updates')
 
         subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
 
