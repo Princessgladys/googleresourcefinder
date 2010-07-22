@@ -1414,7 +1414,11 @@ function update_subject_row(subject_i, opt_glow) {
 
 // ==== In-place editing
 
-function inplace_edit_handler(edit_url) {
+/**
+ * Handler to start inplace editing in the left-hand panel.
+ * @param {String} edit_url - URL to load the edit form via AJAX
+ */
+function inplace_edit_start(edit_url) {
   // Use AJAX to load the form in the InfoWindow, then reopen the
   // InfoWindow so that it resizes correctly.
   log('Editing in place:', edit_url);
@@ -1450,6 +1454,12 @@ function inplace_edit_handler(edit_url) {
   return false;
 }
 
+/**
+ * Handler for the save button on the inplace edit form.
+ * Posts the data from the edit form and reloads the bubble with the
+ * new values.
+ * @param {String} edit_url - URL to post the edit form via AJAX
+ */
 function inplace_edit_save(edit_url) {
   save();
   if (validate()) {
@@ -1479,6 +1489,10 @@ function inplace_edit_save(edit_url) {
   return false;
 }
 
+/**
+ * Handler for the cancel button on the inplace edit form.
+ * Hides the in-place edit form, returning to the facility list view.
+ */
 function inplace_edit_cancel() {
   cancel();
   $('data').style.display = '';
