@@ -1207,6 +1207,7 @@ function show_status(message, opt_duration, opt_override) {
     return;
   }
 
+  clearTimeout(status_timer);
   update_status(message);
 
   if (opt_duration) {
@@ -1222,7 +1223,7 @@ function update_status(message) {
 
   if (message) {
     var browser_width = get_browser_width();
-    status.style.left = -10000;
+    status.style.left = "-10000px";
     status.innerHTML = message;
     status.style.display = '';
     status.style.width = '';

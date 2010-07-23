@@ -326,7 +326,7 @@ class Subscription(db.Model):
     user_email = db.StringProperty(required=True) # user to alert
     subject_name = db.StringProperty(required=True) # key_name of subject
     frequency = db.StringProperty(required=True, choices=[
-        'immediate', # send an alert whenever the facility is updated
+        'instant', # send an alert whenever the facility is updated
         'daily', # send during a daily digest e-mail
         'weekly', # send during a weekly digest e-mail
         'monthly' # send during a monthly digest e-mail on the 1st of the month
@@ -351,7 +351,7 @@ class PendingAlert(MinimalSubject):
     subject_name = db.StringProperty(required=True) # key_name of subject
     timestamp = db.DateTimeProperty() # creation time of the pending alert
     frequency = db.StringProperty(required=True, choices=[
-        'immediate', # send an alert whenever the subject is updated
+        'instant', # send an alert whenever the subject is updated
         'daily', # send during a daily digest e-mail
         'weekly', # send during a weekly digest e-mail
         'monthly' # send during a monthly digest e-mail on the 1st of the month

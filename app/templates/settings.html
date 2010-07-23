@@ -65,7 +65,7 @@
       {% comment %}
       #i18n: Settings page title
       {% endcomment %}
-      {% trans "Settings" %}
+      {% trans "Email Subscription Settings" %}
     </td>
   </tr>
   <tr>
@@ -73,17 +73,18 @@
       {% comment %}
       #i18n: Label for e-mail type radio buttons
       {% endcomment %}
-      {% trans "E-mail Format:" %}
-      {% comment %}
-      #i18n: Label for "plain text" radio button
-      {% endcomment %}
-      {% trans "Plain Text" %}
+      {% trans "Email format:" %}
       <input type="radio" name="email-type" value="plain"
         onClick="change_email_format('{{subdomain}}', 'plain');"
         {% ifequal user_email_format 'plain' %} checked{% endifequal %}>
-        HTML<input type="radio" name="email-type" value="html"
+        {% comment %}
+        #i18n: Label for "plain text" radio button
+        {% endcomment %}
+        {% trans "Plain text" %}
+      <input type="radio" name="email-type" value="html"
         onClick="change_email_format('{{subdomain}}', 'html');"
         {% ifequal user_email_format 'html' %} checked{% endifequal %}>
+        HTML
     </td>
   </tr>
   <tr>
@@ -91,7 +92,7 @@
       {% comment %}
       #i18n: Label for change default frequency box
       {% endcomment %}
-      {% trans "Default Frequency:" %}
+      {% trans "Default frequency:" %}
       <select name="default-frequency"
         onChange="change_default_frequency('{{subdomain}}', this)">
         {% for frequency in frequencies %}
@@ -160,14 +161,14 @@
         {% comment %}
         #i18n: label for changing subjects to default frequency
         {% endcomment %}
-        {% trans "Set Checked to Default" %}
+        {% trans "Set checked to default" %}
       </button>
       <button onClick="unsubscribe_checked('{{subdomain}}')"
         id="button-unsubscribe-checked">
         {% comment %}
         #i18n: label for unsubscribing from subjects
         {% endcomment %}
-        {% trans "Unsubscribe from Checked" %}</button>
+        {% trans "Unsubscribe from checked" %}</button>
     </td>
   </tr>
   {% endif %}

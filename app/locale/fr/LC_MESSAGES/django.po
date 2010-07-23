@@ -221,8 +221,8 @@ msgid "Date and time"
 msgstr "Date et heure"
 
 #. Label for change default frequency box
-#: templates/settings.html:94
-msgid "Default Frequency:"
+#: templates/settings.html:95
+msgid "Default frequency:"
 msgstr "Fréquence par Défaut:"
 
 #. Meaning: administrative division
@@ -267,11 +267,6 @@ msgstr "District"
 msgid "E-mail"
 msgstr "E-mail"
 
-#. Label for e-mail type radio buttons
-#: templates/settings.html:76
-msgid "E-mail Format:"
-msgstr "Format E-mail:"
-
 #. Title for page to edit data about a subject
 #: templates/edit.html:55
 msgid "Edit"
@@ -286,6 +281,16 @@ msgstr "Modifier cet enregistrement"
 #: templates/hospital_bubble.html:156
 msgid "Edited by"
 msgstr "Modifié par"
+
+#. Settings page title
+#: templates/settings.html:68
+msgid "Email Subscription Settings"
+msgstr "Paramètres d'Abonnement par Courriel"
+
+#. Label for e-mail type radio buttons
+#: templates/settings.html:76
+msgid "Email format:"
+msgstr "Format E-mail:"
 
 #. Header for an error message.
 #: templates/error.html:28
@@ -303,7 +308,7 @@ msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
 #. A place that provides a particular service
-#: templates/settings.html:116 templates/print.html:129 static/locale.js:96 templates/map.html:161
+#: templates/settings.html:117 templates/print.html:129 static/locale.js:96 templates/map.html:161
 msgid "Facility"
 msgstr "Établissement"
 
@@ -382,15 +387,15 @@ msgstr "Hôpital"
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr "En cas d'informations incorrectes ou manquantes, veuillez apporter les modifications souhaitées sur le site Web :"
 
-#. Label for immediate e-mail updates
-#: settings.py:55
-msgid "Immediate"
-msgstr "Immédiat"
-
 #. Service provided by a health facility (use Title Case). Meaning: specializing in treating communicable diseases
 #: ../tools/setup.py:240
 msgid "Infectious Disease"
 msgstr "Maladies Infectieuses"
+
+#. Label for instant e-mail updates
+#: settings.py:55
+msgid "Instant"
+msgstr "Immédiat"
 
 #. Service provided by a health facility (use Title Case). Meaning: deals with diagnosis and (non-surgical) treatment of Meaning: diseases of the internal organs
 #: ../tools/setup.py:234
@@ -548,7 +553,7 @@ msgid "No availability information"
 msgstr "Aucune information concernant les disponibilités"
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:130
+#: templates/settings.html:131
 msgid "No facilities to display."
 msgstr "Aucune installation à afficher."
 
@@ -619,8 +624,8 @@ msgid "Phone"
 msgstr "Téléphone"
 
 #. Label for "plain text" radio button
-#: templates/settings.html:80
-msgid "Plain Text"
+#: templates/settings.html:83
+msgid "Plain text"
 msgstr "Texte"
 
 #. Indicates a user should call for availability of beds and services at a hospital.
@@ -722,12 +727,12 @@ msgid "Services"
 msgstr "Services"
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:163
-msgid "Set Checked to Default"
+#: templates/settings.html:164
+msgid "Set checked to default"
 msgstr "Ensemble Contrôlé par Défaut"
 
 #. Link to go to the settings page of the application
-#: templates/settings.html:68 templates/base.html:95
+#: templates/base.html:95
 msgid "Settings"
 msgstr "Paramètres"
 
@@ -802,8 +807,8 @@ msgid "Unsubscribe"
 msgstr "Vous Désabonner de Vérifier"
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:170
-msgid "Unsubscribe from Checked"
+#: templates/settings.html:171
+msgid "Unsubscribe from checked"
 msgstr "Vous Désabonner de Vérifier"
 
 #. Message indicating the user is unsubscribed

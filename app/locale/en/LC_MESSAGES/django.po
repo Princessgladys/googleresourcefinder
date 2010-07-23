@@ -222,8 +222,8 @@ msgid "Date and time"
 msgstr ""
 
 #. Label for change default frequency box
-#: templates/settings.html:94
-msgid "Default Frequency:"
+#: templates/settings.html:95
+msgid "Default frequency:"
 msgstr ""
 
 #. Meaning: administrative division
@@ -268,11 +268,6 @@ msgstr ""
 msgid "E-mail"
 msgstr ""
 
-#. Label for e-mail type radio buttons
-#: templates/settings.html:76
-msgid "E-mail Format:"
-msgstr ""
-
 #. Title for page to edit data about a subject
 #: templates/edit.html:55
 msgid "Edit"
@@ -286,6 +281,16 @@ msgstr ""
 #. Header a column of user who made the edits
 #: templates/hospital_bubble.html:156
 msgid "Edited by"
+msgstr ""
+
+#. Settings page title
+#: templates/settings.html:68
+msgid "Email Subscription Settings"
+msgstr ""
+
+#. Label for e-mail type radio buttons
+#: templates/settings.html:76
+msgid "Email format:"
 msgstr ""
 
 #. Header for an error message.
@@ -304,7 +309,7 @@ msgid "Export CSV"
 msgstr ""
 
 #. A place that provides a particular service
-#: templates/settings.html:116 templates/print.html:129 static/locale.js:96 templates/map.html:161
+#: templates/settings.html:117 templates/print.html:129 static/locale.js:96 templates/map.html:161
 msgid "Facility"
 msgstr ""
 
@@ -383,14 +388,14 @@ msgstr ""
 msgid "If any information is wrong or missing, please correct it on the web site:"
 msgstr ""
 
-#. Label for immediate e-mail updates
-#: settings.py:55
-msgid "Immediate"
-msgstr ""
-
 #. Service provided by a health facility (use Title Case). Meaning: specializing in treating communicable diseases
 #: ../tools/setup.py:240
 msgid "Infectious Disease"
+msgstr ""
+
+#. Label for instant e-mail updates
+#: settings.py:55
+msgid "Instant"
 msgstr ""
 
 #. Service provided by a health facility (use Title Case). Meaning: deals with diagnosis and (non-surgical) treatment of Meaning: diseases of the internal organs
@@ -549,7 +554,7 @@ msgid "No availability information"
 msgstr ""
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:130
+#: templates/settings.html:131
 msgid "No facilities to display."
 msgstr ""
 
@@ -620,8 +625,8 @@ msgid "Phone"
 msgstr ""
 
 #. Label for "plain text" radio button
-#: templates/settings.html:80
-msgid "Plain Text"
+#: templates/settings.html:83
+msgid "Plain text"
 msgstr ""
 
 #. Indicates a user should call for availability of beds and services at a hospital.
@@ -723,12 +728,12 @@ msgid "Services"
 msgstr ""
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:163
-msgid "Set Checked to Default"
+#: templates/settings.html:164
+msgid "Set checked to default"
 msgstr ""
 
 #. Link to go to the settings page of the application
-#: templates/settings.html:68 templates/base.html:95
+#: templates/base.html:95
 msgid "Settings"
 msgstr ""
 
@@ -803,8 +808,8 @@ msgid "Unsubscribe"
 msgstr ""
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:170
-msgid "Unsubscribe from Checked"
+#: templates/settings.html:171
+msgid "Unsubscribe from checked"
 msgstr ""
 
 #. Message indicating the user is unsubscribed

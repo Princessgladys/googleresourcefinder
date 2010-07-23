@@ -145,7 +145,7 @@ class Subscribe(Handler):
         old_alert = PendingAlert.get(old_frequency, self.email,
                                      subject_name)
         if old_alert:
-            if new_frequency == 'immediate':
+            if new_frequency == 'instant':
                 subject = Subject.get_by_key_name(old_alert.subject_name)
                 values = fetch_updates(old_alert, subject)
                 email_data = Struct(

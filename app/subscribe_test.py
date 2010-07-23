@@ -73,7 +73,7 @@ class MailUpdateSystemTest(MediumTestCase):
         self.affiliation = 'affiliation_foo'
         self.comment = 'comment_foo'
         self.email = self.user.email()
-        self.default_frequency = 'immediate'
+        self.default_frequency = 'instant'
         self.locale = 'en'
         self.account = Account(email=self.email, actions=['*:*'],
                                default_frequency=self.default_frequency,
@@ -103,7 +103,7 @@ class MailUpdateSystemTest(MediumTestCase):
         handler.post()
         s = Subscription.get('haiti:example.org/123', 'test@example.com')
         assert s
-        assert s.frequency == 'immediate'
+        assert s.frequency == 'instant'
         
     def test_unsubscribe(self):
         """Confirm that a subscription is removed on post request."""
@@ -120,7 +120,7 @@ class MailUpdateSystemTest(MediumTestCase):
         assert not Subscription.get_by_key_name(key_name_s)
         
         # should also remove pending alerts if they exist
-        key_name_pa = 'immediate:test@example.com:haiti:example.org/123'
+        key_name_pa = 'instant:test@example.com:haiti:example.org/123'
         pa = PendingAlert(key_name=key_name_pa, frequency='daily',
                           subject_name='haiti:example.org/123',
                           type='hospital', user_email='test@example.com')
@@ -138,10 +138,10 @@ class MailUpdateSystemTest(MediumTestCase):
         """Confirm that all specified subscriptions are removed per post
         request."""
         s1 = Subscription(key_name='haiti:example.org/123:test@example.com',
-                          user_email='test@example.com', frequency='immediate',
+                          user_email='test@example.com', frequency='instant',
                           subject_name='haiti:example.org/123')
         s2 = Subscription(key_name='haiti:example.org/456:test@example.com',
-                          user_email='test@example.com', frequency='immediate',
+                          user_email='test@example.com', frequency='instant',
                           subject_name='haiti:example.org/456')
         db.put([s1, s2])
 
@@ -206,7 +206,7 @@ class MailUpdateSystemTest(MediumTestCase):
     def test_change_subscriptions(self):
         """Confirm that subscriptions are changed properly and PendingAlerts
         are removed / changed as appropriate."""
-        # change subscription w/o pending alert from immediate to daily
+        # change subscription w/o pending alert from instant to daily
         global sent_emails
         subject_name = 'haiti:example.org/123'
         key_name_s = '%s:%s' % (subject_name, self.email)
@@ -216,7 +216,7 @@ class MailUpdateSystemTest(MediumTestCase):
                          user_email=self.email)
         db.put(s)
         subject_changes = [{'subject_name': subject_name, 'old_frequency':
-                            'immediate', 'new_frequency': 'daily'}]
+                            'instant', 'new_frequency': 'daily'}]
         json_pickle_changes = simplejson.dumps(subject_changes)
         handler = self.simulate_request('/subscribe?' +
                                         'action=change_subscriptions&' +
@@ -244,7 +244,7 @@ class MailUpdateSystemTest(MediumTestCase):
         assert not PendingAlert.get_by_key_name(key_name_pa)
         assert PendingAlert.get('weekly', self.email, subject_name)
         
-        # change subscription with pending alert to immediate. make sure
+        # change subscription with pending alert to instant. make sure
         # that pending alerts are deleted and no errors are thrown when
         # the e-mail is sent
         s = Subject(key_name=subject_name, type='hospital', author=self.user)
@@ -252,7 +252,7 @@ class MailUpdateSystemTest(MediumTestCase):
         db.put(s)
         
         subject_changes = [{'subject_name': subject_name, 'old_frequency':
-                            'weekly', 'new_frequency': 'immediate'}]
+                            'weekly', 'new_frequency': 'instant'}]
         json_pickle_changes = simplejson.dumps(subject_changes)
         handler = self.simulate_request('/subscribe?' +
                                         'action=change_subscriptions&' +
@@ -260,7 +260,7 @@ class MailUpdateSystemTest(MediumTestCase):
                                         json_pickle_changes)
         handler.post()
         assert (Subscription.get_by_key_name(key_name_s).frequency ==
-                'immediate')
+                'instant')
         for freq in ['daily', 'weekly', 'monthly']:
             assert not PendingAlert.get(freq, self.email, subject_name)
         assert len(sent_emails) == 1
@@ -269,7 +269,7 @@ class MailUpdateSystemTest(MediumTestCase):
 
     def test_change_default_frequency(self):
         """Confirms that the account's default frequency is changed."""
-        assert Account.all().get().default_frequency == 'immediate'
+        assert Account.all().get().default_frequency == 'instant'
         handler = self.simulate_request('/subscribe?subdomain=haiti&' +
                                         'action=change_default_frequency&' +
                                         'frequency=monthly')
