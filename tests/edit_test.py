@@ -68,12 +68,14 @@ class EditTest(SeleniumTestCase):
         def login(self):
             self.login_to_edit_page()
 
-        def reload(self):
+        def save(self):
+            self.click('//input[@name="save"]')
             self.wait_for_load()
             # Check that we got back to the main map
             assert (self.get_location() == self.config.base_url
                     + '/?subdomain=haiti')
-            # Return to the edit page
+
+        def edit(self):
             self.open_edit_page()
 
         # Check that feed is empty
@@ -81,7 +83,7 @@ class EditTest(SeleniumTestCase):
         assert feed.first('atom:feed')
         assert feed.first('atom:feed').all('atom:entry') == []
 
-        self.run_edit(login, reload)
+        self.run_edit(login, save, edit)
 
         # TODO(kpy): This feature is disabled until we can debug it.
         # Re-enable this test when the delta feed is working properly.
@@ -98,14 +100,16 @@ class EditTest(SeleniumTestCase):
         def login(self):
             self.edit(login=True)
 
-        def reload(self):
+        def save(self):
+            self.click('//input[@name="save"]')
             self.wait_until(self.is_visible, 'data')
-            # Return to the edit form
+
+        def edit(self):
             self.edit()
 
-        self.run_edit(login, reload)
+        self.run_edit(login, save, edit)
 
-    def run_edit(self, login_func, reload_func):
+    def run_edit(self, login_func, save_func, edit_func):
         """Runs the edit flow, for use in both inplace and separate page
         editing."""
 
@@ -145,9 +149,12 @@ class EditTest(SeleniumTestCase):
         self.fill_fields(text_fields, checkbox_fields, select_fields)
 
         # Submit the form
-        self.click('//input[@name="save"]')
+        save_func(self)
 
-        reload_func(self)
+        # Check that the facility list is updated
+        self.assert_text(Regex('.*1 / 2.*General Surgery.*'), 'id=subject-1')
+
+        edit_func(self)
 
         # Nickname and affiliation fields should not be shown this time
         self.assert_no_element('//input[@name="account_nickname"]')
@@ -176,9 +183,8 @@ class EditTest(SeleniumTestCase):
         self.fill_fields(text_fields, checkbox_fields, select_fields)
 
         # Submit the form
-        self.click('//input[@name="save"]')
-
-        reload_func(self)
+        save_func(self)
+        edit_func(self)
 
         # Check that everything is now empty or deselected
         self.verify_fields(text_fields, checkbox_fields, select_fields)
@@ -190,7 +196,8 @@ class EditTest(SeleniumTestCase):
         # Submit the form
         self.click('//input[@name="save"]')
 
-        reload_func(self)
+        save_func(self)
+        edit_func(self)
 
         # Check that the integer fields are actually zero, not empty
         text_fields['available_beds'] = '0'

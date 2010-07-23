@@ -1201,6 +1201,7 @@ function select_subject(subject_i) {
 
         var bubble_availability = $('bubble-availability');
         var bubble_capacity = $('bubble-capacity');
+        var bubble_services = $('bubble-services');
 
         if (bubble_availability) {
           selected_subject.values[attributes_by_name.available_beds] =
@@ -1209,6 +1210,10 @@ function select_subject(subject_i) {
         if (bubble_capacity) {
           selected_subject.values[attributes_by_name.total_beds] =
               bubble_capacity.innerHTML; 
+        }
+        if (bubble_services) {
+          selected_subject.values[attributes_by_name.services] =
+              bubble_services.innerHTML; 
         }
         update_subject_row(subject_i);
 
