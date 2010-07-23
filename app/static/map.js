@@ -355,8 +355,7 @@ function initialize_map() {
     url: make_icon(null, 1, null, 'greek_cross_12w30', '32'),
     height: 32,
     width: 32,
-    opt_textColor: '#fff',
-    Z: '#fff' // See http://code.google.com/p/google-maps-utility-library-v3/issues/detail?id=6    
+    textColor: '#fff'
   };
   // Turn off clustering in print view.
   var max_zoom = print ? -1 : 14;
