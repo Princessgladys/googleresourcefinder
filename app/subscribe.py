@@ -26,8 +26,8 @@ import pickle
 import utils
 from bubble import format
 from feeds.xmlutils import Struct
-from mail_alerts import fetch_updates, format_plain_body, send_email
-from mail_alerts import update_account_alert_time
+from mail_alerts import FORMAT_EMAIL, fetch_updates, format_email_subject
+from mail_alerts import send_email, update_account_alert_time
 from model import PendingAlert, Subject, Subscription
 from utils import _, db, Handler, run, simplejson
 
@@ -107,15 +107,23 @@ class Subscribe(Handler):
                 if new_frequency == 'immediate':
                     subject = Subject.get_by_key_name(old_alert.subject_name)
                     values = fetch_updates(old_alert, subject)
-                    email_data = Struct(
-                        time=format(datetime.datetime.now()),
-                        changed_subjects={self.params.subject_name: (
-                            subject.get_value('title'), values)})
-                    text_body = format_plain_body(email_data)
+                    email_data = Struct()
+                    email_data.time = utils.to_local_isotime(
+                        datetime.datetime.now(), clear_ms=True)
+                    email_data.nickname = self.account.nickname or \
+                        self.account.email
+                    email_data.subdomain = self.subdomain
+                    email_data.changed_subjects = {subject_name: (
+                        subject.get_value('title'), values)}
+                    body = FORMAT_EMAIL[self.account.email_format](
+                        email_data, self.account.locale)
+                    email_subject = format_email_subject(self.subdomain,
+                                                         old_frequency)
                     send_email(self.account.locale,
                                'updates@resource-finder.appspotmail.com',
-                               self.account.email, utils.to_unicode(
-                               _('Resource Finder Updates')), text_body)
+                               self.account.email, email_subject,
+                               body, self.account.email_format)
+
                 else:
                     new_key_name = '%s:%s:%s' % (new_frequency,
                                                  old_alert.user_email,
