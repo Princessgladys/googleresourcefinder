@@ -662,7 +662,7 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "La demande pour devenir %(role)s  a été rejetée."
 
 #. Name of the application.
-#: templates/base.html.py:115 templates/base.html:25
+#: templates/subdomain_menu.html.py:35
 msgid "Resource Finder"
 msgstr "Localisation de ressources"
 

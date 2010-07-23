@@ -663,7 +663,7 @@ msgid "Request for becoming %(action)s was denied."
 msgstr ""
 
 #. Name of the application.
-#: templates/base.html.py:115 templates/base.html:25
+#: templates/subdomain_menu.html.py:35
 msgid "Resource Finder"
 msgstr ""
 
