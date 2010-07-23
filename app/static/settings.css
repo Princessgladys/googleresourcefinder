@@ -22,18 +22,11 @@
 .settings-title {
   background-color: #d9d9d9;
   font-weight: bold;
-  font-size: 140%;
+  font-size: 125%;
 }
 
-.settings-email-type {
-  font-size: 13px;
-}
-
-.settings-locale {
-  font-size: 13px;
-}
-
-.settings-change-default {
+.settings-email-type, .settings-locale, .settings-change-default,
+.settings-subject-name {
   font-size: 13px;
 }
 
@@ -41,23 +34,10 @@
   width: 0%;
 }
 
-.settings-label-subjectname {
-  font-weight: bold;
-  font-size: 125%;
-}
-
-.settings-label-frequency {
-  font-weight: bold;
-  font-size: 125%;
-}
-
+.settings-label-subjectname, .settings-label-frequency,
 .settings-no-facilities {
   font-weight: bold;
   font-size: 110%;
-}
-
-.settings-subject-name {
-  font-size: 13px;
 }
 
 .odd {

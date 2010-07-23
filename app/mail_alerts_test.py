@@ -80,7 +80,7 @@ class MailAlertsTest(MediumTestCase):
         self.sub_immed = Subscription(key_name='haiti:example.org/123:' +
                                       self.user.email(),
                                       user_email=self.user.email(),
-                                      frequency='immediate',
+                                      frequency='instant',
                                       subject_name='haiti:example.org/123')
         self.sub_daily = Subscription(key_name='haiti:example.org/456:' +
                                       self.user.email(), 
@@ -127,7 +127,7 @@ class MailAlertsTest(MediumTestCase):
         """Confirms that get_timedelta returns the correct timedeltas."""
         assert get_timedelta('daily') == datetime.timedelta(1)
         assert get_timedelta('weekly') == datetime.timedelta(7)
-        assert get_timedelta('immediate') == datetime.timedelta(0)
+        assert get_timedelta('instant') == datetime.timedelta(0)
         
         now = datetime.datetime(2010, 01, 01, 01, 30, 30, 567)
         assert get_timedelta('monthly', now) == datetime.timedelta(31)
@@ -241,7 +241,7 @@ class MailAlertsTest(MediumTestCase):
         global sent_emails
         sent_emails = []
         
-        # test to send and immediate e-mail update with a None value
+        # test to send and instant e-mail update with a None value
         # should render u'\u2013' instead of None
         changed_vals = {'test_attr_foo': {'old_value': None,
                                           'new_value': u'attr_new\xef',
@@ -264,7 +264,7 @@ class MailAlertsTest(MediumTestCase):
         assert sent_emails[0].body.count(u'\u2013') == 1
         sent_emails = []
 
-        # test to send and immediate e-mail update with a None value
+        # test to send and instant e-mail update with a None value
         # should render u'\u2013' instead of None
         changed_vals = {'test_attr_foo': {'old_value': 'attr_old',
                                           'new_value': None,
@@ -282,7 +282,7 @@ class MailAlertsTest(MediumTestCase):
         assert sent_emails[0].body.count(u'\u2013') == 1
         sent_emails = []
 
-        # test to send an immediate e-mail update
+        # test to send an instant e-mail update
         # should not raise an error if the e-mail was sent
         changed_vals = {'test_attr_foo': {'old_value': 'attr_old',
                                           'new_value': 'attr_new',
@@ -303,7 +303,7 @@ class MailAlertsTest(MediumTestCase):
         sent_emails = []
        
         # test to make sure a pending alert is created when a subject is
-        # changed for a non-immediate subscription
+        # changed for a non-instant subscription
         path = '/send_mail_updates?action=subject_changed&' + \
                'subject_name=haiti:example.org/456&' + \
                'changed_data=' + json_pickle_attrs_c + '&' + \

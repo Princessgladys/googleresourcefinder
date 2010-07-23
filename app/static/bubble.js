@@ -24,7 +24,9 @@ function subscribe_on_off(element, subdomain, subject_name, frequency) {
     type: "POST",
     url: "/subscribe",
     data: post_data,
-    success: display_saved_message(element, subscribing, subdomain, frequency),
+    success: function(msg) {
+      display_saved_message(element, subscribing, subdomain, frequency);
+    },
     error: function(xhr, text_status, error) {
       log(text_status + ', ' + error);
       alert(locale.ERROR());

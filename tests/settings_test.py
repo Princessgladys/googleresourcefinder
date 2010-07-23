@@ -30,7 +30,7 @@ class SettingsTest(SeleniumTestCase):
         self.email = 'test@example.com'
         self.put_subject('haiti', 'example.org/123', title='title_foo')
         self.put_subject('haiti', 'example.org/456', title='title_bar')
-        self.put_account(default_frequency='immediate',
+        self.put_account(default_frequency='instant',
                          locale='en',
                          email_format='html',
                          actions=['*:*'])
@@ -74,7 +74,7 @@ class SettingsTest(SeleniumTestCase):
         frequency options rendered properly."""
         # make sure all three buttons load properly
         self.login_to_settings_page()
-        assert (['immediate'] ==
+        assert (['instant'] ==
                 self.get_selected_values('//*[@name="default-frequency"]'))
         assert self.is_checked('//*[@name="email-type"][@value="html"]')
 
@@ -103,9 +103,9 @@ class SettingsTest(SeleniumTestCase):
         self.click('//*[@id="button-set-to-default"]')
 
         assert self.is_checked(
-            '//*[@name="haiti:example.org/123_freq"][@value="immediate"]')
+            '//*[@name="haiti:example.org/123_freq"][@value="instant"]')
         assert self.is_checked(
-            '//*[@name="haiti:example.org/456_freq"][@value="immediate"]')
+            '//*[@name="haiti:example.org/456_freq"][@value="instant"]')
 
         # make sure that unsubscribe from checked works; remove only one subject
         self.click(
@@ -129,4 +129,5 @@ class SettingsTest(SeleniumTestCase):
 
     def login_to_settings_page(self):
         self.login('/settings?subdomain=haiti')
-        self.assert_text(Regex('Settings.*'), '//td[@class="settings-title"]')
+        self.assert_text(Regex('Email Subscription Settings.*'),
+                         '//td[@class="settings-title"]')

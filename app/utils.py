@@ -211,6 +211,7 @@ class Handler(webapp.RequestHandler):
         lang = (
             self.params.lang or
             self.request.cookies.get('django_language', None) or
+            self.account and self.account.locale or
             settings.LANGUAGE_CODE
         ).replace('_', '-').lower()
 

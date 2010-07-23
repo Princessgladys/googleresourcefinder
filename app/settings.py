@@ -51,8 +51,8 @@ class Settings(Handler):
         home_url = self.get_url('/')
         logout_url = users.create_logout_url(home_url)
         frequencies = [
-            #i18n: Label for immediate e-mail updates
-            {'en': 'immediate', 'trans': _('Immediate')},
+            #i18n: Label for instant e-mail updates
+            {'en': 'instant', 'trans': _('Instant')},
             #i18n: Label for daily e-mail updates
             {'en': 'daily', 'trans': _('Daily')},
             #i18n: Label for weekly e-mail updates
