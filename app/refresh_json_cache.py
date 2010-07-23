@@ -1,5 +1,4 @@
-/*
-# Copyright 2009-2010 by Ka-Ping Yee
+# Copyright 2010 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-*/
-/* These CSS rules are only for IE 7 and earlier. */
-body { width: 100%; height: 100%; }
-.header .title { width: 399px; }
-#map, .vshadow { width:expression(document.body.clientWidth-400); }
-#data, #map, .hshadow { height:expression(document.body.clientHeight-30); }
-#supply-section { margin-top: 0; }
-#freshness { position: absolute; left: 0; bottom: 0; padding: 6px 4px 0px; }
-#edit_bar { position: absolute; left: 0; bottom: 0; padding: 6px 4px 0px;
-            width: 384px; }
+
+import rendering
+import utils
+
+class RefreshJsonCache(utils.Handler):
+    """Refreshes the json cache, presumably via an asynchronous task."""
+    def get(self):
+        if self.subdomain:
+            rendering.render_json(self.subdomain)
+
+if __name__ == '__main__':
+    utils.run([('/refresh_json_cache', RefreshJsonCache)], debug=True)

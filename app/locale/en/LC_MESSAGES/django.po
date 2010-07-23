@@ -290,7 +290,17 @@ msgstr ""
 
 #. Error message for not loading facility information successfully
 #: static/locale.js:67
+msgid "Error loading edit form."
+msgstr ""
+
+#. Error message for not loading facility information successfully
+#: static/locale.js:71
 msgid "Error loading facility information."
+msgstr ""
+
+#. Error message for not saving facility information successfully
+#: static/locale.js:83
+msgid "Error saving facility information."
 msgstr ""
 
 #. Button to export data to comma-separated-value format.
@@ -717,6 +727,11 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
+#. Message indicating saving hospital information
+#: static/locale.js:142
+msgid "Saving..."
+msgstr ""
+
 #. Label for a selector to export data to CSV
 #: export.py:142
 msgid "Select subject type to export:"
@@ -740,6 +755,11 @@ msgstr ""
 #. Link to sign into the app
 #: main.py:62
 msgid "Sign in"
+msgstr ""
+
+#. Link to sign in to edit the data for a hospital record.
+#: templates/hospital_bubble.html:31
+msgid "Sign in to edit"
 msgstr ""
 
 #. Link to sign out of the app
@@ -866,6 +886,11 @@ msgstr ""
 #: request_access.py:50
 #, python-format
 msgid "You already have \"%(action)s\" permission"
+msgstr ""
+
+#. Message indicating hospital information has been saved
+#: static/locale.js:138
+msgid "Your edit has been saved"
 msgstr ""
 
 #. Request for permission is awaiting approval

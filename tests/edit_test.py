@@ -47,34 +47,73 @@ class EditTest(SeleniumTestCase):
             'haiti', 'example.org/123',
             title='title_foo', location=db.GeoPt(51.5, 0))
         self.put_account(actions=['*:view', '*:edit'])  # allow edits
+        self.set_default_permissions(actions=['*:view']) # allow view by default
         self.s = scrape.Session()
-    
+
     def tearDown(self):
         self.delete_subject('haiti', 'example.org/123')
         self.delete_account()
+        self.delete_default_account()
         SeleniumTestCase.tearDown(self)
 
     def test_edit_link(self):
         """Confirms that the "Edit this record" link in the detail bubble
         goes to the edit form."""
-        self.login('/?subdomain=haiti')
-        self.click('id=subject-1')
-        self.wait_for_element('link=Edit this record')
-        self.click('link=Edit this record')
-        self.wait_for_load()
-        assert '/edit?' in self.get_location()
+        self.edit(login=True)
 
     def test_edit_page(self):
-        """Confirms that all the fields in the edit form save the entered
-        values, and these values appear pre-filled when the form is loaded."""
+        """Separate-page edit: Confirms that all the fields in the edit form
+        save the entered values, and these values appear pre-filled when the
+        form is loaded."""
+        def login(self):
+            self.login_to_edit_page()
+
+        def save(self):
+            self.click('//input[@name="save"]')
+            self.wait_for_load()
+            # Check that we got back to the main map
+            assert (self.get_location() == self.config.base_url
+                    + '/?subdomain=haiti')
+
+        def edit(self):
+            self.open_edit_page()
 
         # Check that feed is empty
         feed = self.s.go('http://localhost:8081/feeds/delta')
         assert feed.first('atom:feed')
         assert feed.first('atom:feed').all('atom:entry') == []
 
-        # Go to the edit page
-        self.login_to_edit_page()
+        self.run_edit(login, save, edit)
+
+        # TODO(kpy): This feature is disabled until we can debug it.
+        # Re-enable this test when the delta feed is working properly.
+        # Check that feed is not empty now
+        # feed = self.s.go('http://localhost:8081/feeds/delta')
+        # assert feed.first('atom:feed')
+        # assert feed.first('atom:feed').first('atom:entry')
+
+    def test_inplace_edit(self):
+        """In-place edit: Confirms that all the fields in the in-place edit
+        form save the entered values, and these values appear pre-filled when
+        the form is loaded."""
+
+        def login(self):
+            self.edit(login=True)
+
+        def save(self):
+            self.click('//input[@name="save"]')
+            self.wait_until(self.is_visible, 'data')
+
+        def edit(self):
+            self.edit()
+
+        self.run_edit(login, save, edit)
+
+    def run_edit(self, login_func, save_func, edit_func):
+        """Runs the edit flow, for use in both inplace and separate page
+        editing."""
+
+        login_func(self)
 
         # First-time edit should show nickname and affiliation fields
         self.assert_element('//input[@name="account_nickname"]')
@@ -110,14 +149,12 @@ class EditTest(SeleniumTestCase):
         self.fill_fields(text_fields, checkbox_fields, select_fields)
 
         # Submit the form
-        self.click('//input[@name="save"]')
-        self.wait_for_load()
+        save_func(self)
 
-        # Check that we got back to the main map
-        assert self.get_location() == self.config.base_url + '/?subdomain=haiti'
+        # Check that the facility list is updated
+        self.assert_text(Regex('.*1 / 2.*General Surgery.*'), 'id=subject-1')
 
-        # Return to the edit page
-        self.open_edit_page()
+        edit_func(self)
 
         # Nickname and affiliation fields should not be shown this time
         self.assert_no_element('//input[@name="account_nickname"]')
@@ -146,12 +183,8 @@ class EditTest(SeleniumTestCase):
         self.fill_fields(text_fields, checkbox_fields, select_fields)
 
         # Submit the form
-        self.click('//input[@name="save"]')
-        self.wait_for_load()
-
-        # Return to the edit page
-        self.open_path('/edit?subdomain=haiti&subject_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
+        save_func(self)
+        edit_func(self)
 
         # Check that everything is now empty or deselected
         self.verify_fields(text_fields, checkbox_fields, select_fields)
@@ -162,32 +195,49 @@ class EditTest(SeleniumTestCase):
 
         # Submit the form
         self.click('//input[@name="save"]')
-        self.wait_for_load()
 
-        # Return to the edit page
-        self.open_path('/edit?subdomain=haiti&subject_name=example.org/123')
-        self.assert_text(Regex('Edit.*'), '//h1')
+        save_func(self)
+        edit_func(self)
 
         # Check that the integer fields are actually zero, not empty
         text_fields['available_beds'] = '0'
         text_fields['total_beds'] = '0'
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
-        # TODO(kpy): This feature is disabled until we can debug it.
-        # Re-enable this test when the delta feed is working properly.
-        # Check that feed is not empty now
-        # feed = self.s.go('http://localhost:8081/feeds/delta')
-        # assert feed.first('atom:feed')
-        # assert feed.first('atom:feed').first('atom:entry')
+    def test_edit_comments(self):
+        """Tests comments and bubble reload during in-place edit."""
+        def login(self):
+            self.login_to_edit_page()
 
-    def test_comments(self):
+        def save(self):
+            self.save_and_load_bubble()
+
+        def edit(self):
+            self.open_edit_page()
+
+        self.run_edit_comments(login, save, edit)
+
+    def test_inplace_edit_comments(self):
+        """Tests comments and bubble reload during in-place edit."""
+        def login(self):
+            self.edit(login=True)
+
+        def save(self):
+            self.click('//input[@name="save"]')
+            self.wait_until(self.is_visible, 'data')
+
+        def edit(self):
+            self.edit()
+
+        self.run_edit_comments(login, save, edit)
+
+    def run_edit_comments(self, login_func, save_func, edit_func):
         text_fields = {}
-        
+
         # Fill comment, but not available beds field ----------------------- #
 
-        # Go to the edit page
-        self.login_to_edit_page()
-        
+        login_func(self)
+
         # Fill in the form. Change available beds comment.
         text_fields['account_nickname'] = 'Test'
         text_fields['account_affiliation'] = 'Test'
@@ -198,85 +248,120 @@ class EditTest(SeleniumTestCase):
         checkbox_fields = {}
         select_fields = {}
         self.fill_fields(text_fields, checkbox_fields, select_fields)
-        
+
         # Reload bubble, go to change details page, and confirm changes
-        self.save_and_load_bubble()
+        save_func(self)
+
         self.click('link=Change details')
         assert self.is_text_present(u'Total beds: \u2013')
         assert self.is_text_present('comment_foo!')
-        
+
         # Fill available beds, but not comment field ----------------------- #
-        
+
         # Nickname and affiliation fields should not be shown this time
         del text_fields['account_nickname']
         del text_fields['account_affiliation']
-        
-        # Return to the edit page
-        self.open_edit_page()
-        
+
+        # Return to the edit form
+        edit_func(self)
+
         # Change beds but without comment
         text_fields['total_beds'] = '37'
         text_fields['total_beds__comment'] = ''
         self.fill_fields(text_fields, checkbox_fields, select_fields)
-        
-        # Reload bubble, go to change details page, and confirm changes
-        self.save_and_load_bubble()
+
+        save_func(self)
+
+        # Go to change details page, and confirm changes
         self.click('link=Change details')
         assert self.is_text_present('Total beds: 37')
         assert not self.is_text_present('comment_foo!')
-        
+
         # Fill available beds and comment fields --------------------------- #
-        
-        # Return to the edit page
-        self.open_edit_page()
-        
+
+        # Return to the edit form
+        edit_func(self)
+
         # Change total beds and comment fields.
         text_fields['total_beds'] = '99'
         text_fields['total_beds__comment'] = 'comment_bar!'
         self.fill_fields(text_fields, checkbox_fields, select_fields)
-        
+
         # Reload bubble, go to change details page, and confirm changes
-        self.save_and_load_bubble()
+        save_func(self)
+
+        # Go to change details page, and confirm changes
         self.click('link=Change details')
         assert self.is_text_present('Total beds: 99')
         assert self.is_text_present('comment_bar!')
-        
+
         # Delete both available beds and comment fields -------------------- #
-        
-        # Return to the edit page
-        self.open_edit_page()
-        
+
+        # Return to the edit form
+        edit_func(self)
+
         # Fill fields
         text_fields['total_beds'] = ''
         text_fields['total_beds__comment'] = ''
         self.fill_fields(text_fields, checkbox_fields, select_fields)
-        
+
         # Reload bubble and go to change details page
-        self.save_and_load_bubble()
+        save_func(self)
+
+        # Go to change details page, and confirm changes
         self.click('link=Change details')
         assert self.is_text_present(u'Total beds: \u2013')
         assert not self.is_text_present('comment_bar!')
-        
+
+    def test_inplace_edit_signed_out(self):
+        """In-place edit starting from signed out:"""
+        self.open_path('/')
+
+        # Open a bubble
+        self.click('id=subject-1')
+        self.wait_for_element('link=Sign in to edit')
+
+        # Click Sign in to edit
+        self.click_and_wait('link=Sign in to edit')
+
+        # Login in at the login screen
+        self.login()
+
+        # Wait for the edit form to appear
+        self.wait_until(self.is_visible, 'edit-data')
+        self.assert_element('//input[@name="account_nickname"]')
+
+    def edit(self, login=False):
+        """Goes to edit form for subject 1"""
+        if login:
+            self.open_path('/')
+            self.click_and_wait('link=Sign in')
+            self.login()
+        self.click('id=subject-1')
+        self.wait_for_element('link=Edit this record')
+        self.click('link=Edit this record')
+        self.wait_until(self.is_visible, 'edit-data')
+
     def save_and_load_bubble(self):
         # Submit the form
         self.click('//input[@name="save"]')
         self.wait_for_load()
-        
+
         # Check that we got back to the main map
         assert self.get_location() == self.config.base_url + '/?subdomain=haiti'
-        
+
         # Test bubble change history comments
         self.click('id=subject-1')
         self.wait_for_element('link=Change details')
-        
+
     def open_edit_page(self):
         self.open_path('/edit?subdomain=haiti&subject_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
-        
+
     def login_to_edit_page(self):
         self.login('/edit?subdomain=haiti&subject_name=example.org/123')
         self.assert_text(Regex('Edit.*'), '//h1')
-        
+
     def fill_fields(self, text_fields, checkbox_fields, select_fields):
         """Fills in text fields, selects or deselects checkboxes, and
         makes drop-down selections.  Each of the arguments should be a
