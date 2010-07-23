@@ -30,6 +30,10 @@
       {% endcomment %}
       <a href="{{login_url|escape}}">{% trans "Sign in to edit" %}</a>
     {% endif %}
+    <span class="sep">|</span>
+    <a onClick="subscribe_on_off(this, '{{subdomain}}',
+      '{{subject_name|escape}}', '{{frequency}}');"
+      href="#">{{subscribed}}</a>
   </span>
   <h2>
     {% comment %}

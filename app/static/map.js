@@ -472,16 +472,6 @@ function initialize_markers() {
 
 // ==== Display construction routines
 
-function initialize_language_selector() {
-  var select = $('lang-select');
-  if (!select) {
-    return;
-  }
-  select.onchange = function() {
-    window.location = select.options[select.selectedIndex].value;
-  };
-}
-
 // Set up the supply selector (currently unused).
 function initialize_supply_selector() {
   var tbody = $('supply-tbody');
@@ -1204,15 +1194,16 @@ function select_subject(subject_i) {
 
         if (bubble_availability) {
           selected_subject.values[attributes_by_name.available_beds] =
-              bubble_availability.innerHTML;          
+              bubble_availability.innerHTML;
         }
         if (bubble_capacity) {
           selected_subject.values[attributes_by_name.total_beds] =
-              bubble_capacity.innerHTML; 
+              bubble_capacity.innerHTML;
         }
-        if (bubble_services) {
+        if (bubble_services
+            && bubble_services.innerHTML.trim() != render(null)) {
           selected_subject.values[attributes_by_name.services] =
-              bubble_services.innerHTML; 
+              bubble_services.innerHTML;
         }
         update_subject_row(subject_i);
 
@@ -1229,16 +1220,17 @@ function show_loading(show) {
   show_status(show ? locale.LOADING() : null);
 }
 
-function show_status(message, opt_duration) {
-  if (status_timer) {
+function show_status(message, opt_duration, opt_override) {
+  if (status_timer && !opt_override) {
     // wait for the timer to finish
     return;
   }
 
+  clearTimeout(status_timer);
   update_status(message);
 
   if (opt_duration) {
-    status_timer = setTimeout(function () { 
+    status_timer = setTimeout(function () {
       update_status(null);
       status_timer = null;
     }, opt_duration);
@@ -1249,10 +1241,30 @@ function update_status(message) {
   var status = $('loading');
 
   if (message) {
+    var browser_width = get_browser_width();
+    status.style.left = "-10000px";
     status.innerHTML = message;
     status.style.display = '';
+    status.style.width = '';
+    // check added to make sure that the display message does not
+    // take up too much screen real estate
+    if (status.clientWidth / browser_width > 0.7) {
+      status.style.width = Math.round(0.7 * browser_width) + "px";
+    }
+    status.style.left = (browser_width / 2) - (status.clientWidth / 2);
   } else {
     status.style.display = 'none';
+  }
+
+}
+
+function get_browser_width() {
+  if (window.innerWidth) { //most browsers should support this
+    return window.innerWidth;
+  } else if (document.body) { //catch for those that don't
+    return document.body.offsetWidth;
+  } else { //any others [ie6] should definitely support this
+    return document.getElementsByTagName('body')[0].offsetWidth;
   }
 }
 
@@ -1299,7 +1311,6 @@ function load_data(data, selected_subject_name) {
     initialize_subject_header();    
   }
 
-  initialize_language_selector();
   initialize_map();
   initialize_markers();
   initialize_handlers();
