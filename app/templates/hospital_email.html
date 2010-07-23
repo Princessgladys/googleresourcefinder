@@ -1,3 +1,5 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 {% comment %}
 # Copyright 2009-2010 by Google Inc.
 #
@@ -16,9 +18,6 @@
 
 {% load i18n %}
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -31,9 +30,9 @@
     <tr>
       <td colspan="4">
         {% comment %}
-        #i18n: Greting
+        #i18n: Greeting
         {% endcomment %}
-        {% trans "Hello" %} {{ nickname }},</td>
+        {% trans "Hello" %} {{nickname}},</td>
     </tr>
     <br />
     <tr>
@@ -41,13 +40,13 @@
         {% comment %}
         #i18n: Description of update e-mail
         {% endcomment %}
-        {% trans "To change the frequency of these emails, please visit your" %}
+        {% trans "To change the frequency of these emails, please visit the" %}
         {% comment %}
         #i18n: Label for settings page
         {% endcomment %}
         <a
-          href="http://resource-finder.appspot.com/settings?subdomain={{subdomain}}"
-          style="color:#0000CC;">{% trans "Settings Page" %}</a>.
+          href="{{domain}}/settings?subdomain={{subdomain}}"
+          style="color:#0000CC;">{% trans "Settings page" %}</a>.
       </td>
     </tr>
 
@@ -66,29 +65,29 @@
         {% for subject in changed_subjects %}
           <tr style="background-color: #E5ECF9;">
             <td colspan="2">
-              <b>{{ subject.title|escape }}</b>
+              <b>{{subject.title|escape}}</b>
               <font size="-2">
               {% comment %}
               #i18n: Label to view a full subject record
               {% endcomment %}
               <a
-                href="http://resource-finder.appspot.com/bubble?subdomain={{subdomain}}&subject_name={{ subject.no_subdomain_name|escape }}"
+                href="{{domain}}/bubble?subdomain={{subdomain}}&subject_name={{subject.no_subdomain_name|escape}}"
                 style="color:#0000CC;">{% trans "View full record" %}</a> |
               {% comment %}
               #i18n: Label for link to edit a subject record
               {% endcomment %}
               <a
-                href="http://resource-finder.appspot.com/edit?subdomain={{subdomain}}&subject_name={{ subject.no_subdomain_name|escape }}"
+                href="{{domain}}/edit?subdomain={{subdomain}}&subject_name={{subject.no_subdomain_name|escape}}"
                 style="color:#0000CC;">{% trans "Edit this record" %}</a></font><br />
               <font color="#676767">&nbsp;&nbsp;
                 {% comment %}
                 #i18n: Label for the last update time
                 {% endcomment %}
-                {% trans "Last Updated:" %} {{ subject.last_updated|escape }}
+                {% trans "Last Updated:" %} {{subject.last_updated|escape}}
               </font><br />
               &nbsp;&nbsp;<font color="green">
-                {{ subject.available_beds|escape }}</font>
-                / {{ subject.total_beds|escape }}
+                {{subject.available_beds|escape}}</font>
+                / {{subject.total_beds|escape}}
                 <font size="-2">
                   (<font color="green">
                     {% comment %}
@@ -102,9 +101,9 @@
                 </font>
             </td>
             <td colspan="2">
-              {{ subject.address|escape }}<br />
-              {{ subject.contact_number|escape }}<br />
-              {{ subject.contact_email|escape }}
+              {{subject.address|escape}}<br />
+              {{subject.contact_number|escape}}<br />
+              {{subject.contact_email|escape}}
             </td>
           </tr>
           <tr style="font-weight: bold; color: black; text-align: left;">
@@ -133,11 +132,11 @@
           </tr>
           {% for changed_val in subject.changed_vals %}
             <tr style="vertical-align: text-top;">
-              <td>{{ changed_val.attribute }}</td>
-              <td>{{ changed_val.new_value }}</td>
+              <td>{{changed_val.attribute}}</td>
+              <td>{{changed_val.new_value}}</td>
               <td style="color: #676767; text-decoration: line-through;">
-                {{ changed_val.old_value }}</td>
-              <td>{{ changed_val.author }}</td>
+                {{changed_val.old_value}}</td>
+              <td>{{changed_val.author}}</td>
             </tr>
           {% endfor %}
           <tr>
@@ -161,30 +160,30 @@
         {% for subject in unchanged_subjects %}
           <tr style="background-color: #E5ECF9;">
             <td colspan="2">
-              <b>{{ subject.title|escape }}</b>
+              <b>{{subject.title|escape}}</b>
               <font size="-2">
               {% comment %}
               #i18n: Label to view a full subject record
               {% endcomment %}
               <a
-                href="http://resource-finder.appspot.com/bubble?subdomain={{subdomain}}&subject_name={{ subject.no_subdomain_name|escape }}"
+                href="{{domain}}/bubble?subdomain={{subdomain}}&subject_name={{subject.no_subdomain_name|escape}}"
                 style="color:#0000CC;">{% trans "View Full Record" %}</a> |
               {% comment %}
               #i18n: Label for link to edit a subject record
               {% endcomment %}
               <a
-                href="http://resource-finder.appspot.com/edit?subdomain={{subdomain}}&subject_name={{ subject.no_subdomain_name|escape }}"
+                href="{{domain}}/edit?subdomain={{subdomain}}&subject_name={{subject.no_subdomain_name|escape}}"
                 style="color:#0000CC;">{% trans "Edit This Record" %}</a></font><br />
 
               {% comment %}
               #i18n: Label for the last update time
               {% endcomment %}
               <font color="#676767">&nbsp;&nbsp;
-                {% trans "Last Updated:" %} {{ subject.last_updated|escape }}</font><br />
+                {% trans "Last Updated:" %} {{subject.last_updated|escape}}</font><br />
 
               &nbsp;&nbsp;<font color="green">
-                {{ subject.available_beds|escape }}</font>
-                / {{ subject.total_beds|escape }}
+                {{subject.available_beds|escape}}</font>
+                / {{subject.total_beds|escape}}
 
                <font size="-2">
                 (<font color="green">
@@ -200,9 +199,9 @@
             </td>
 
             <td colspan="2">
-              {{ subject.address|escape }}<br />
-              {{ subject.contact_number|escape }}<br />
-              {{ subject.contact_email|escape }}
+              {{subject.address|escape}}<br />
+              {{subject.contact_number|escape}}<br />
+              {{subject.contact_email|escape}}
             </td>
           </tr>
           {% if not forloop.last %}
@@ -224,7 +223,7 @@
         {% comment %}
         #18n: Name of the application
         {% endcomment %}
-        <a href="http://resource-finder.appspot.com/?subdomain={{subdomain}}"
+        <a href="{{domain}}/?subdomain={{subdomain}}"
           style="color:#0000CC;">{% trans "Resource Finder" %}</a>.
   </tbody>
 </table>
@@ -238,9 +237,9 @@
   {% comment %}
   #i18n: Label for settings page
   {% endcomment %}
-  <a href="http://resource-finder.appspot.com/settings?subdomain={{subdomain}}" target="_blank"
+  <a href="{{domain}}/settings?subdomain={{subdomain}}" target="_blank"
      style="color:#0000CC;">
-  {% trans "Settings Page" %}</a>
+  {% trans "Settings page" %}</a>
 </div>
 
 </body>
