@@ -1461,7 +1461,6 @@ function inplace_edit_start(edit_url) {
  * @param {String} edit_url - URL to post the edit form via AJAX
  */
 function inplace_edit_save(edit_url) {
-  save();
   if (validate()) {
     log('Saving in place');
 
@@ -1494,7 +1493,6 @@ function inplace_edit_save(edit_url) {
  * Hides the in-place edit form, returning to the facility list view.
  */
 function inplace_edit_cancel() {
-  cancel();
   $('data').style.display = '';
   $('edit-data').style.display = 'none';
   remove_edit_bar();

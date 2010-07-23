@@ -157,10 +157,6 @@ function validate_geopt(inputs) {
  * inputs are valid, otherwise false
  */
 function validate() {
-  if (button_click !== 'save') {
-    return true;
-  }
-
   var failed = false;
   function confirm(valid, element) {
     if (!valid && !failed) {
@@ -302,6 +298,9 @@ function init_edit(embed, edit_url, opt_parent) {
     $('save').onclick = save;
     $('cancel').onclick = cancel;
     $('edit').onsubmit = function() {
+      if (button_click !== 'save') {
+        return true;
+      }
       return validate();
     };
   }
