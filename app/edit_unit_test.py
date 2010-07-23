@@ -113,11 +113,11 @@ class EditTest(MediumTestCase):
 
         # test make_input() function
         assert (text_attr_type.make_input('title', '', text_attr) ==
-                '<textarea name="title" rows=5 cols=40></textarea>')
+                '<textarea name="title" rows=5 cols=34></textarea>')
         assert (text_attr_type.make_input('title', 'title_foo', text_attr) ==
-                '<textarea name="title" rows=5 cols=40>title_foo</textarea>')
+                '<textarea name="title" rows=5 cols=34>title_foo</textarea>')
         assert (text_attr_type.make_input('title', 'title&foo', text_attr) ==
-                '<textarea name="title" rows=5 cols=40>title&amp;foo' +
+                '<textarea name="title" rows=5 cols=34>title&amp;foo' +
                 '</textarea>')
 
         # test to_stored_value() function

@@ -70,6 +70,9 @@ var subjects = [null];
 var divisions = [null];
 var messages = {};  // {namespace: {name: message}
 
+// Timer for temporary status messages
+var status_timer;
+
 // ==== Columns shown in the subject table
 
 rf.get_services_from_values = function(values) {
@@ -1056,6 +1059,10 @@ function division_and_status_selector(division_i, status_i) {
 
 function subject_selector(subject_i) {
   return function () {
+    if ($('edit-data').style.display != 'none') {
+      // Cancel inplace-edit if a new marker is selected
+      inplace_edit_cancel();
+    }
     select_subject(subject_i);
   };
 }
@@ -1143,11 +1150,7 @@ function select_division_and_status(division_i, status_i) {
   update_subject_list();
 }
 
-function select_subject(subject_i, ignore_current) {
-  if (!ignore_current && subject_i === selected_subject_i) {
-    return;
-  }
-  
+function select_subject(subject_i) {
   // Update the selection.
   selected_subject_i = subject_i;
   selected_subject = (subject_i <= 0) ? null : subjects[subject_i];
@@ -1176,7 +1179,7 @@ function select_subject(subject_i, ignore_current) {
     var url = bubble_url + (bubble_url.indexOf('?') >= 0 ? '&' : '?') +
         'subject_name=' + selected_subject.name;
     _gaq.push(['_trackEvent', 'bubble', 'open', selected_subject.name]);
-    jQuery.ajax({
+    $j.ajax({
       url: url,
       type: 'GET',
       timeout: 10000,
@@ -1189,12 +1192,26 @@ function select_subject(subject_i, ignore_current) {
         info.setContent(result);
         info.open(map, markers[selected_subject_i]);
         // Sets up the tabs and should be called after the DOM is created.
-        jQuery('#bubble-tabs').tabs({
+        $j('#bubble-tabs').tabs({
           select: function(event, ui) {
             _gaq.push(['_trackEvent', 'bubble', 'click ' + ui.panel.id,
                        selected_subject.name]);
           }
         });
+
+        var bubble_availability = $('bubble-availability');
+        var bubble_capacity = $('bubble-capacity');
+
+        if (bubble_availability) {
+          selected_subject.values[attributes_by_name.available_beds] =
+              bubble_availability.innerHTML;          
+        }
+        if (bubble_capacity) {
+          selected_subject.values[attributes_by_name.total_beds] =
+              bubble_capacity.innerHTML; 
+        }
+        update_subject_row(subject_i);
+
         show_loading(false);
       }
     });
@@ -1205,12 +1222,39 @@ function select_subject(subject_i, ignore_current) {
 }
 
 function show_loading(show) {
-  $('loading').style.display = show ? '' : 'none';
+  show_status(show ? locale.LOADING() : null);
+}
+
+function show_status(message, opt_duration) {
+  if (status_timer) {
+    // wait for the timer to finish
+    return;
+  }
+
+  update_status(message);
+
+  if (opt_duration) {
+    status_timer = setTimeout(function () { 
+      update_status(null);
+      status_timer = null;
+    }, opt_duration);
+  }
+}
+
+function update_status(message) {
+  var status = $('loading');
+
+  if (message) {
+    status.innerHTML = message;
+    status.style.display = '';
+  } else {
+    status.style.display = 'none';
+  }
 }
 
 // ==== Load data
 
-function load_data(data) {
+function load_data(data, selected_subject_name) {
   attributes = data.attributes;
   subject_types = data.subject_types;
   subjects = data.subjects;
@@ -1231,6 +1275,9 @@ function load_data(data) {
   var subject_is = [];
   for (var i = 1; i < subjects.length; i++) {
     subject_is.push(i);
+    if (selected_subject_name == subjects[i].name) {
+      selected_subject_i = i;
+    }
   }
   divisions = [{
     title: 'All divisions',
@@ -1258,6 +1305,13 @@ function load_data(data) {
 
   select_supply_set(DEFAULT_SUPPLY_SET_I);
   select_division_and_status(0, STATUS_GOOD);
+  if (selected_subject_i != -1) {
+    // Selecting the subject causes an info window to open on the map. The map
+    // is not fully initialized until after load finishes, so delay this.
+    setTimeout(function() {
+      select_subject(selected_subject_i);
+    }, 250);
+  }
 
   if (print) {
     initialize_print_headers();
@@ -1343,7 +1397,7 @@ function glow_next() {
   }
 }
 
-function update_subject_row(subject_i) {
+function update_subject_row(subject_i, opt_glow) {
   var row = $('subject-' + subject_i);
   var cell = row.firstChild;
   var subject = subjects[subject_i];
@@ -1353,25 +1407,103 @@ function update_subject_row(subject_i) {
     set_children(cell, value);
     cell.className = 'value column_' + c;
   }
-  glow(row);
+  if (opt_glow) {
+    glow(row);
+  }
 }
 
 // ==== In-place editing
 
-function edit_handler(edit_url) {
+/**
+ * Handler to start inplace editing in the left-hand panel.
+ * @param {String} edit_url - URL to load the edit form via AJAX
+ */
+function inplace_edit_start(edit_url) {
   // Use AJAX to load the form in the InfoWindow, then reopen the
   // InfoWindow so that it resizes correctly.
   log('Editing in place:', edit_url);
+
+  show_loading(true);
   $j.ajax({
     url: edit_url,
+    type: 'GET',
+    error: function(request, textStatus, errorThrown) {
+      log(textStatus + ', ' + errorThrown);
+      alert(locale.ERROR_LOADING_EDIT_FORM());
+      show_loading(false);
+    },
     success: function(data) {
-      info.close();
-      info.setContent('<div class="subject-info">' + data + '</div>');
-      info.open(map, markers[selected_subject_i]);
-      $j('#edit').ajaxForm({target: '#edit-status'});
+      var edit_data = $('edit-data');
+      edit_data.innerHTML = data;
+      edit_data.style.display = '';
+
+      var windowHeight = get_window_size()[1];
+      var editTop = get_element_top(edit_data);
+      edit_data.style.height = (windowHeight - editTop) + 'px';
+      var edit_bar = $('edit_bar');
+      if (edit_bar) {
+        document.body.appendChild(edit_bar);
+      }
+
+      $('data').style.display = 'none';
+      init_edit(true, edit_url, edit_data);
+      show_loading(false);
     }
   });
+
   return false;
+}
+
+/**
+ * Handler for the save button on the inplace edit form.
+ * Posts the data from the edit form and reloads the bubble with the
+ * new values.
+ * @param {String} edit_url - URL to post the edit form via AJAX
+ */
+function inplace_edit_save(edit_url) {
+  if (validate()) {
+    log('Saving in place');
+
+    show_status(locale.SAVING());
+    $j.ajax({
+      url: edit_url,
+      type: 'POST',
+      data: $j('#edit').serialize(),
+      error: function(request, textStatus, errorThrown) {
+	log(textStatus + ', ' + errorThrown);
+	alert(locale.ERROR_SAVING_FACILITY_INFORMATION());
+	show_status(null);
+      },
+      success: function(data) {
+	$('data').style.display = '';
+	$('edit-data').style.display = 'none';
+        remove_edit_bar();
+	select_subject(selected_subject_i);
+	show_status(locale.SAVED(), 5000);
+        _gaq.push(['_trackEvent', 'edit', 'save', selected_subject.name]);
+      }
+    });
+  }
+
+  return false;
+}
+
+/**
+ * Handler for the cancel button on the inplace edit form.
+ * Hides the in-place edit form, returning to the facility list view.
+ */
+function inplace_edit_cancel() {
+  $('data').style.display = '';
+  $('edit-data').style.display = 'none';
+  remove_edit_bar();
+  _gaq.push(['_trackEvent', 'edit', 'cancel', selected_subject.name]);
+}
+
+function remove_edit_bar() {
+  var edit_bar = $('edit_bar');
+  if (edit_bar) {
+    document.body.removeChild(edit_bar);
+  }
 }
 
 function request_action_handler(request_url) {

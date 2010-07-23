@@ -21,6 +21,8 @@ import model
 from utils import db, get_message, run, to_local_isotime, value_or_dash
 from utils import ErrorMessage, Handler, HIDDEN_ATTRIBUTE_NAMES
 
+from google.appengine.api import users
+
 def format(value, localize=False):
     """Formats values in a way that is suitable to display in the bubble.
     If 'localize' is true, the value is treated as a localizable message key or
@@ -163,9 +165,15 @@ class Bubble(Handler):
             self.subdomain][subject.type]
         (special, general, details) = value_info_extractor.extract(
             subject, subject_type.attribute_names)
-        edit_url = self.get_url('/edit', subject_name=self.params.subject_name)
+        edit_url = self.get_url('/edit', subject_name=self.params.subject_name,
+                                embed='yes')
+        login_url = users.create_login_url(
+            self.get_url('/', subject_name=self.params.subject_name,
+                         embed='yes'))
 
         self.render(value_info_extractor.template_name,
+                    user=self.user,
+                    login_url=login_url,
                     edit_url=edit_url,
                     subject_name=self.params.subject_name,
                     last_updated=max(detail.date for detail in details),

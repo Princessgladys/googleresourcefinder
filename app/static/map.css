@@ -38,6 +38,7 @@ th { text-align: left; }
 /* Data area */
 #data { position: absolute; left: 0px; width: 400px; top: 30px; bottom: 0; }
 #data table { width: 100%; padding: 0; cursor: default; }
+#edit-data { position: absolute; left: 0px; width: 400px; top: 30px; bottom: 0; background: #fff; overflow-y: auto; }
 th, td { padding: 2px 4px; }
 .section { margin-top: 10px; }
 .section:first-child { margin-top: 0; }
@@ -95,6 +96,8 @@ td.subject-count.selected { color: #fff; }
 .vs3 { height: 4px; opacity: 0.03; filter:alpha(opacity=3); }
 #freshness { position: absolute; left: 0; bottom: 0; padding: 4px;
              font-size: 13px; background: #eee; width: 392px; }
+#edit_bar { position: absolute; left: 0; bottom: 0; padding: 4px;
+            background: #eee; width: 377px; }
 
 /* Map info windows */
 .subject-info h1 { font-size: 13px; }

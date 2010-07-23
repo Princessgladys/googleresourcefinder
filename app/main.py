@@ -53,6 +53,7 @@ class Main(utils.Handler):
             template = 'templates/map.html'
         self.render(template,
                     params=self.params,
+                    user=user,
                     #i18n: a user with no identity
                     authorization=user and user.email() or _('anonymous'),
                     loginout_url=user and logout_url or login_url,
@@ -66,6 +67,9 @@ class Main(utils.Handler):
                     export_url=self.get_export_url(),
                     print_url=self.get_url('/?print=yes'),
                     bubble_url=self.get_url('/bubble'),
+                    edit_url=self.get_url('/edit',
+                                          subject_name=self.params.subject_name,
+                                          embed='yes'),
                     subdomain=self.subdomain)
 
     def get_export_url(self):
