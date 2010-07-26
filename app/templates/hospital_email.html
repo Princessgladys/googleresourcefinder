@@ -41,12 +41,13 @@
         #i18n: Description of update e-mail
         {% endcomment %}
         {% trans "To change the frequency of these emails, please visit the" %}
-        {% comment %}
-        #i18n: Label for settings page
-        {% endcomment %}
         <a
           href="{{domain}}/settings?subdomain={{subdomain}}"
-          style="color:#0000CC;">{% trans "Settings page" %}</a>.
+          style="color:#0000CC;">
+          {% comment %}
+          #i18n: Label for settings page
+          {% endcomment %}
+          {% trans "Settings page" %}</a>.
       </td>
     </tr>
 
@@ -67,18 +68,21 @@
             <td colspan="2">
               <b>{{subject.title|escape}}</b>
               <font size="-2">
-              {% comment %}
-              #i18n: Label to view a full subject record
-              {% endcomment %}
               <a
                 href="{{domain}}/bubble?subdomain={{subdomain}}&subject_name={{subject.no_subdomain_name|escape}}"
-                style="color:#0000CC;">{% trans "View full record" %}</a> |
-              {% comment %}
-              #i18n: Label for link to edit a subject record
-              {% endcomment %}
+                style="color:#0000CC;">
+                {% comment %}
+                #i18n: Label to view a full subject record
+                {% endcomment %}
+                {% trans "View full record" %}</a> |
               <a
                 href="{{domain}}/edit?subdomain={{subdomain}}&subject_name={{subject.no_subdomain_name|escape}}"
-                style="color:#0000CC;">{% trans "Edit this record" %}</a></font><br />
+                style="color:#0000CC;">
+                {% comment %}
+                #i18n: Label for link to edit a subject record
+                {% endcomment %}
+                {% trans "Edit this record" %}</a>
+              </font><br />
               <font color="#676767">&nbsp;&nbsp;
                 {% comment %}
                 #i18n: Label for the last update time
@@ -132,11 +136,11 @@
           </tr>
           {% for changed_val in subject.changed_vals %}
             <tr style="vertical-align: text-top;">
-              <td>{{changed_val.attribute}}</td>
-              <td>{{changed_val.new_value}}</td>
+              <td>{{changed_val.attribute}}&nbsp;</td>
+              <td>{{changed_val.new_value}}&nbsp;</td>
               <td style="color: #676767; text-decoration: line-through;">
-                {{changed_val.old_value}}</td>
-              <td>{{changed_val.author}}</td>
+                {{changed_val.old_value}}&nbsp;</td>
+              <td>{{changed_val.author}}&nbsp;</td>
             </tr>
           {% endfor %}
           <tr>
@@ -162,19 +166,21 @@
             <td colspan="2">
               <b>{{subject.title|escape}}</b>
               <font size="-2">
-              {% comment %}
-              #i18n: Label to view a full subject record
-              {% endcomment %}
               <a
                 href="{{domain}}/bubble?subdomain={{subdomain}}&subject_name={{subject.no_subdomain_name|escape}}"
-                style="color:#0000CC;">{% trans "View Full Record" %}</a> |
-              {% comment %}
-              #i18n: Label for link to edit a subject record
-              {% endcomment %}
+                style="color:#0000CC;">
+                {% comment %}
+                #i18n: Label to view a full subject record
+                {% endcomment %}
+                {% trans "View full record" %}</a> |
               <a
                 href="{{domain}}/edit?subdomain={{subdomain}}&subject_name={{subject.no_subdomain_name|escape}}"
-                style="color:#0000CC;">{% trans "Edit This Record" %}</a></font><br />
-
+                style="color:#0000CC;">
+                {% comment %}
+                #i18n: Label for link to edit a subject record
+                {% endcomment %}
+                {% trans "Edit this record" %}</a>
+              </font><br />
               {% comment %}
               #i18n: Label for the last update time
               {% endcomment %}
@@ -220,11 +226,12 @@
         #i18n: Label to tell users to check website for more information
         {% endcomment %}
         {% trans "For more information on all subscribed facilities, please visit" %}
-        {% comment %}
-        #18n: Name of the application
-        {% endcomment %}
         <a href="{{domain}}/?subdomain={{subdomain}}"
-          style="color:#0000CC;">{% trans "Resource Finder" %}</a>.
+          style="color:#0000CC;">
+          {% comment %}
+          #18n: Name of the application
+          {% endcomment %}
+          {% trans "Resource Finder" %}</a>.
   </tbody>
 </table>
 
@@ -234,12 +241,12 @@
   #i18n: Label to tell users how to update subscription setttings
   {% endcomment %}
   {% trans "To change subscription settings, please visit the" %}
-  {% comment %}
-  #i18n: Label for settings page
-  {% endcomment %}
   <a href="{{domain}}/settings?subdomain={{subdomain}}" target="_blank"
-     style="color:#0000CC;">
-  {% trans "Settings page" %}</a>
+    style="color:#0000CC;">
+    {% comment %}
+    #i18n: Label for settings page
+    {% endcomment %}
+    {% trans "Settings page" %}</a>
 </div>
 
 </body>

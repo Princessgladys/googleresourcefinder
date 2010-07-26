@@ -294,7 +294,7 @@ def fetch(url, payload=None, previous_data=None):
     return dump
 
 def format(value, localize=False):
-    """Formats values in a way that is suitable to display in the bubble.
+    """Formats values in a way that is suitable to display to a user.
     If 'localize' is true, the value is treated as a localizable message key or
     list of message keys to be looked up in the 'attribute_value' namespace."""
     if localize:
