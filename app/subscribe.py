@@ -52,6 +52,7 @@ class Subscribe(Handler):
         self.require_logged_in_user()
         self.email = self.user.email()
         self.subject_name = self.request.get('subject_name', '')
+        self.domain = self.request.headers.get('Host', '')
         if not self.account:
             #i18n: Error message for request missing subject name.
             raise ErrorMessage(404, _('Invalid or missing account e-mail.'))
@@ -107,16 +108,15 @@ class Subscribe(Handler):
                 if new_frequency == 'immediate':
                     subject = Subject.get_by_key_name(old_alert.subject_name)
                     values = fetch_updates(old_alert, subject)
-                    email_data = Struct()
-                    email_data.time = utils.to_local_isotime(
-                        datetime.datetime.now(), clear_ms=True)
-                    email_data.nickname = self.account.nickname or \
-                        self.account.email
-                    email_data.subdomain = self.subdomain
-                    email_data.changed_subjects = {subject_name: (
-                        subject.get_value('title'), values)}
-                    body = FORMAT_EMAIL[self.account.email_format](
-                        email_data, self.account.locale)
+                    email_data = Struct(
+                        nickname=self.account.nickname or self.account.email,
+                        domain=self.domain,
+                        subdomain=self.subdomain,
+                        changed_subjects={subject_name: (
+                            subject.get_value('title'), values)}
+                    )
+                    email_formatter = FORMAT_EMAIL[subject.type](self.account)
+                    body = email_formatter.format_body(email_data)
                     email_subject = format_email_subject(self.subdomain,
                                                          old_frequency)
                     send_email(self.account.locale,

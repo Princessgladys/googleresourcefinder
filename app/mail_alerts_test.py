@@ -22,11 +22,12 @@ import webob
 from google.appengine.api import mail
 from google.appengine.ext import db, webapp
 
+import cache
 import mail_alerts
 import utils
 from feeds.xmlutils import Struct
-from mail_alerts import get_timedelta, fetch_updates, format_plain_body
-from mail_alerts import format_html_body, update_account_alert_time
+from mail_alerts import FORMAT_EMAIL, get_timedelta, fetch_updates
+from mail_alerts import update_account_alert_time
 from medium_test_case import MediumTestCase
 from model import Account, PendingAlert, Subdomain, Subject, SubjectType
 from model import Subscription
@@ -50,7 +51,7 @@ def fake_send_email(locale, sender, to, subject, body, email_format):
     global sent_emails
     sent_emails = []
     django.utils.translation.activate(locale)
-    
+
     message = mail.EmailMessage()
     message.sender = sender
     message.to = to
@@ -60,7 +61,7 @@ def fake_send_email(locale, sender, to, subject, body, email_format):
     else:
         message.body = body
     sent_emails.append(message)
-    
+
     # add asserts for when testing the MailAlerts class
     assert locale and sender and to and subject and body
     assert '@' in (sender and to)
@@ -71,6 +72,7 @@ def fake_send_email(locale, sender, to, subject, body, email_format):
 class MailAlertsTest(MediumTestCase):
     def setUp(self):
         MediumTestCase.setUp(self)
+        cache.flush_all()
         self.time = datetime.datetime(2010, 06, 01)
         self.user = users.User('test@example.com')
         self.nickname = 'nickname_foo'
@@ -88,7 +90,7 @@ class MailAlertsTest(MediumTestCase):
                                       frequency='immediate',
                                       subject_name='haiti:example.org/123')
         self.sub_daily = Subscription(key_name='haiti:example.org/456:' +
-                                      self.user.email(), 
+                                      self.user.email(),
                                       user_email=self.user.email(),
                                       frequency='daily',
                                       subject_name='haiti:example.org/456')
@@ -136,15 +138,15 @@ class MailAlertsTest(MediumTestCase):
         assert get_timedelta('daily') == datetime.timedelta(1)
         assert get_timedelta('weekly') == datetime.timedelta(7)
         assert get_timedelta('immediate') == datetime.timedelta(0)
-        
+
         now = datetime.datetime(2010, 01, 01, 01, 30, 30, 567)
         assert get_timedelta('monthly', now) == datetime.timedelta(31)
-        
+
         now = datetime.datetime(2010, 02, 01, 01, 30, 30, 567)
         assert get_timedelta('monthly', now) == datetime.timedelta(28)
-        
+
         assert get_timedelta('!') == None
-    
+
     def test_fetch_updates(self):
         """Confirms that fetch_updates returns updated attributes in the
         appropriate format."""
@@ -167,53 +169,54 @@ class MailAlertsTest(MediumTestCase):
              'old_value': 'attr_foo',
              'new_value': 'attr_foo_new',
              'author': 'nickname_foo'}]
-        
+
         # should return nothing if there are no updates
         self.set_attr(self.subject, 'test_attr_foo', 'attr_foo')
         assert not fetch_updates(self.pa, self.subject)
-        
+
         # if either value is equal to None, should return nothing
         assert not fetch_updates('', self.subject)
         assert not fetch_updates(self.pa, '')
         assert not fetch_updates('', '')
-    
-    def test_format_plain_body(self):
+
+    def test_email_formatter(self):
         """Confirms that the right attributes and their changes show up in
         the text to be sent to the user."""
+        # test for plain text body types
         values = fetch_updates(self.pa, self.subject)
         data = Struct(changed_subjects={self.subject.key().name(): (
             self.subject.get_value('title'), values)})
-        plain_body = format_plain_body(data, 'en')
-        
+        email_formatter = FORMAT_EMAIL[self.subject.type](self.account)
+        body = email_formatter.format_body(data)
+
         # formatting may change but the title, attribute names, new/old values,
         # and the author should all be somewhere in the update. similarly,
         # values that have not changed should not be present
-        assert 'title_foo' in plain_body.lower()
-        assert ('test_attr_bar' and 'test_attr_foo') in plain_body
-        assert ('attr_bar_new' and 'attr_foo_new') in plain_body
-        assert ('attr_bar' and 'attr_foo') in plain_body
-        assert 'nickname_foo' in plain_body
-        assert not 'xyz' in plain_body
+        assert 'title_foo' in body.lower()
+        assert ('test_attr_bar' and 'test_attr_foo') in body
+        assert ('attr_bar_new' and 'attr_foo_new') in body
+        assert ('attr_bar' and 'attr_foo') in body
+        assert 'nickname_foo' in body
+        assert not 'xyz' in body
 
-    def test_format_html_body(self):
-        """Confirms that the right attributes and their changes show up in the
-        html to be sent to the user."""
-        values = fetch_updates(self.pa, self.subject)
+        # test for HTML body types
         data = Struct(changed_subjects={self.subject.key().name(): (
             self.subject.get_value('title'), values)},
             time=utils.to_local_isotime(datetime.datetime.now(), clear_ms=True),
-            nickname='nickname_bar', subdomain='haiti')
-        html_body = format_html_body(data, 'en')
+            nickname='nickname_bar', subdomain='haiti', domain='localhost')
+        self.account.email_format = 'html'
+        email_formatter = FORMAT_EMAIL[self.subject.type](self.account)
+        body = email_formatter.format_body(data)
 
         # ditto above comment in test_format_plain_body
-        assert 'title_foo' in html_body.lower()
-        assert ('test_attr_bar' and 'test_attr_foo') in html_body
-        assert ('attr_bar_new' and 'attr_foo_new') in html_body
-        assert ('attr_bar' and 'attr_foo') in html_body
-        assert 'nickname_foo' in html_body
-        assert 'nickname_bar' in html_body
-        assert not 'xyz' in html_body
-    
+        assert 'title_foo' in body.lower()
+        assert ('test_attr_bar' and 'test_attr_foo') in body
+        assert ('attr_bar_new' and 'attr_foo_new') in body
+        assert ('attr_bar' and 'attr_foo') in body
+        assert 'nickname_foo' in body
+        assert 'nickname_bar' in body
+        assert not 'xyz' in body
+
     def test_send_email(self):
         """Confirms that the send_email function properly formats a message
         in the mail.EmailMessage structure while updating the django
@@ -225,15 +228,15 @@ class MailAlertsTest(MediumTestCase):
                                        'body_foo',
                                        'plain')
         assert django.utils.translation.get_language() == 'en'
-        
+
         email = mail_alerts.send_email('fr',
-                                       'test@example.com', 
+                                       'test@example.com',
                                        'test@example.org',
                                        'subject_foo',
                                        'body_foo',
                                        'plain')
         assert django.utils.translation.get_language() == 'fr'
-    
+
     def test_update_account_alert_time(self):
         """Confirms that the given account's next_%freq%_alert datetimes are
         updated according to the given frequency."""
@@ -245,7 +248,7 @@ class MailAlertsTest(MediumTestCase):
         update_account_alert_time(self.account, 'daily', datetime.datetime(
             2010, 06, 5), True)
         assert self.account.next_daily_alert == datetime.datetime(2010, 06, 2)
-        
+
         # When initial flag is not set to true, update accordingly.
         update_account_alert_time(self.account, 'daily', self.time)
         assert self.account.next_daily_alert == datetime.datetime(2010, 06, 2)
@@ -270,13 +273,13 @@ class MailAlertsTest(MediumTestCase):
             2010, 11, 8))
         assert self.account.next_monthly_alert == datetime.datetime(
             2010, 12, 01)
-    
+
     def test_mail_alerts(self):
         """Simulates the class being called when a subject is changed and when
         a subject is not changed."""
         global sent_emails
         sent_emails = []
-        
+
         # test to send and immediate e-mail update with a None value
         # should render u'\u2013' instead of None
         changed_vals = [{'attribute': 'test_attr_foo',
@@ -340,7 +343,7 @@ class MailAlertsTest(MediumTestCase):
         assert 'attr_new' in sent_emails[0].body
         assert 'author_foo' in sent_emails[0].body
         sent_emails = []
-       
+
         # test to make sure a pending alert is created when a subject is
         # changed for a non-immediate subscription
         path = '/mail_alerts?action=subject_changed&' + \
@@ -351,7 +354,7 @@ class MailAlertsTest(MediumTestCase):
         handler.post()
         assert PendingAlert.get('daily', 'test@example.com',
                                 'haiti:example.org/456')
-        
+
         # now send the alert
         handler = self.simulate_request('/mail_alerts')
         handler.post()
@@ -400,7 +403,7 @@ class MailAlertsTest(MediumTestCase):
     def set_attr(self, subject, key, value):
         subject.set_attribute(key, value, self.time, self.user, self.nickname,
                               self.affiliation, self.comment)
-    
+
     def simulate_request(self, path):
         request = webapp.Request(webob.Request.blank(path).environ)
         response = webapp.Response()

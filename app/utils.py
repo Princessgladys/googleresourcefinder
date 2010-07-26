@@ -321,13 +321,10 @@ def format(value, localize=False):
     return value_or_dash(value)
 
 def get_last_updated_time(s):
-    import bubble
     subdomain, subject_name = split_key_name(s)
-    st = SubjectType.get(subdomain, s.type)
-    value_info_extractor = bubble.VALUE_INFO_EXTRACTORS[subdomain][s.type]
-    (special, general, details) = value_info_extractor.extract(
-        s, st.attribute_names)
-    return max(detail.date for detail in details)
+    st = cache.SUBJECT_TYPES[subdomain][s.type]
+    return max(s.get_observed(name) for name in st.attribute_names if
+               s.get_observed(name))
 
 def decompress(data):
     file = gzip.GzipFile(fileobj=StringIO.StringIO(data))
