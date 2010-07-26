@@ -23,10 +23,11 @@ fetch_updates(): returns a dictionary of updated values for the given subject
 order_and_format_updates(updates, subject_type, locale): sorts and formats the
     updates as specified by the subject type for the updates
 format_update(update, locale): translates and formats a particular update
-format_plain_body(values, locale): forms the e-mail body for an update in text
-format_html_body(values, locale): forms the e-mail body in html
 send_email(): sends an e-mail with the supplied information
 update_account_alert_time(): updates an account's next_%freq%_alert time
+EmailFormatter: base class to create formatted text for e-mail updates
+HospitalEmailFormatter(EmailFormatter): extension for formatting specific to
+    hospital e-mail updates
 MailAlerts(utils.Handler): handler class to send e-mail updates
 """
 
@@ -36,6 +37,7 @@ import datetime
 import logging
 import os
 import pickle
+from copy import deepcopy
 from operator import itemgetter
 
 from google.appengine.api import mail
@@ -45,7 +47,7 @@ from google.appengine.ext.webapp import template
 import cache
 import utils
 from feeds.xmlutils import Struct
-from model import Account, PendingAlert, Subdomain, Subject, SubjectType
+from model import Account, PendingAlert, Subdomain, Subject
 from model import Subscription
 from utils import _, format, get_last_updated_time, Handler, simplejson
 
@@ -203,19 +205,31 @@ def update_account_alert_time(account, frequency, now=None, initial=False):
 
 
 class EmailFormatter:
-    """Base class to format update e-mails."""
+    """Base class to format update e-mails.
 
-    def __init__(account):
+    Attributes:
+        email_format: the preferred e-mail format for this account
+        locale: the account's locale
+
+    Methods:
+        __init__: constructor; requires the user's account
+        format_body: formats the body of an e-mail according to the account's
+            local and e-mail format preferences
+        format_plain_body: formats a generic plain text e-mail update
+        format_html_body: placeholder; override in subclass for HTML formatting
+    """
+
+    def __init__(self, account):
         self.email_format = account.email_format
         self.locale = account.locale
 
-    def format_body(data):
+    def format_body(self, data):
         if self.email_format == 'plain':
-            self.format_plain_body(data)
+            return self.format_plain_body(data)
         else:
-            self.format_html_body(data)
+            return self.format_html_body(data)
 
-    def format_plain_body(data):
+    def format_plain_body(self, data):
         """Forms the plain text body for an e-mail. Expects the data to be input
         in the following format:
 
@@ -231,14 +245,13 @@ class EmailFormatter:
             (subject_title, updates) = data.changed_subjects[subject_name]
             subject = Subject.get_by_key_name(subject_name)
             subdomain = subject_name.split(':')[0]
-            subject_type = cache.SUBJECT_TYPES[subject.type]
+            subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
             updates = order_and_format_updates(updates, subject_type,
                                                self.locale)
             body += subject_title.upper() + '\n'
             for update in updates:
                 body += '-> %s: %s [%s: %s; %s: %s]\n' % (
-                    utils.get_message('attribute_name', update['attribute'],
-                                      self.locale),
+                    update['attribute'],
                     utils.to_unicode(format(update['new_value'], True)),
                     #i18n: old value for the attribute
                     utils.to_unicode(_('Previous value')),
@@ -249,11 +262,20 @@ class EmailFormatter:
             body += '\n'
         return body
 
+    def format_html_body(self, data):
+        """Placeholder function. Requires override by subclass [example in
+        HospitalEmailFormatter]."""
+        pass
+
 
 class HospitalEmailFormatter(EmailFormatter):
-    """Class to format update e-mails for hospital subject types."""
+    """Class to format update e-mails for hospital subject types.
+    
+    Methods:
+        format_html_body: formats an HTML e-mail update
+    """
 
-    def format_html_body(data):
+    def format_html_body(self, data):
         """Forms the HTML body for an e-mail. Expects the data to be input in
         the same format as in format_plain_body(), with the optional addition of
         an 'unchanged_subjects' field of the Struct. These will be displayed at
@@ -266,7 +288,7 @@ class HospitalEmailFormatter(EmailFormatter):
         for subject_name in data.changed_subjects:
             subject = Subject.get_by_key_name(subject_name)
             subdomain, no_subdomain_name = subject_name.split(':')
-            subject_type = SubjectType.get(subdomain, subject.type)
+            subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
             updates = order_and_format_updates(
                 data.changed_subjects[subject_name][1], subject_type,
                 self.locale)
@@ -340,6 +362,11 @@ class MailAlerts(Handler):
         self.appspot_email = 'updates@resource-finder.appspotmail.com'
         self.action = self.request.get('action')
 
+        # Calls made from taskqueue don't have a 'Host' attribute in the headers
+        # dictionary. Domain must be parsed out from the full url.
+        self.domain = self.request.url[
+            :self.request.url.find(self.request.path)]
+
     def post(self):
         """Responds to HTTP POST requests. This function either (queues up
         future daily/weekly/monthly updates and sends immediate updates) or
@@ -398,14 +425,16 @@ class MailAlerts(Handler):
                 # send out alerts for those with immediate update subscriptions
                 account = Account.all().filter('email =',
                                                subscription.user_email).get()
-                email_data = Struct()
-                email_data.nickname = account.nickname or account.email
-                email_data.domain = self.request.headers.get('Host', '')
-                email_data.subdomain = subdomain
-                email_data.changed_subjects = {self.params.subject_name: (
-                    subject.get_value('title'), self.changed_request_data)}
+                email_data = Struct(
+                    nickname=account.nickname or account.email,
+                    domain=self.domain,
+                    subdomain=subdomain,
+                    changed_subjects={self.params.subject_name: (
+                        subject.get_value('title'),
+                        deepcopy(self.changed_request_data))}
+                )
                 email_formatter = FORMAT_EMAIL[subject.type](account)
-                body = email_formatter.format_body(email-data)
+                body = email_formatter.format_body(email_data)
                 email_subject = format_email_subject(subdomain,
                                                      subscription.frequency)
                 send_email(account.locale, self.appspot_email,
@@ -444,10 +473,11 @@ class MailAlerts(Handler):
                 continue
 
             email_data = Struct(
-                'nickname': account.nickname or account.email,
-                'subdomain': subdomain,
-                'changed_subjects': changed_subjects,
-                'unchanged_subjects': unchanged_subjects
+                nickname=account.nickname or account.email,
+                domain=self.domain,
+                subdomain=subdomain,
+                changed_subjects=changed_subjects,
+                unchanged_subjects=unchanged_subjects
             )
             email_formatter = FORMAT_EMAIL[subject.type](account)
             body = email_formatter.format_body(email_data)
