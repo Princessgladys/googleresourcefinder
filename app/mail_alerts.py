@@ -75,9 +75,8 @@ def format_email_subject(subdomain, frequency):
     frequency = _(str(frequency.title()))
     subject = '%s %s: %s' % (
         subdomain.title(),
-        # i18n: subject of e-mail -> Resource Finder Update
-        utils.to_unicode(_('Resource Finder %s Update' %
-                           frequency)),
+        #i18n: subject of e-mail -> Resource Finder Update
+        utils.to_unicode(_('Resource Finder %s Update' % frequency)),
         utils.to_local_isotime_day(datetime.datetime.now()))
     return subject
 
@@ -264,8 +263,10 @@ class EmailFormatter:
 
     def format_html_body(self, data):
         """Placeholder function. Requires override by subclass [example in
-        HospitalEmailFormatter]."""
-        pass
+        HospitalEmailFormatter].
+
+        Returns NotImplementedErrors if not overridden."""
+        raise NotImplementedError
 
 
 class HospitalEmailFormatter(EmailFormatter):
@@ -410,6 +411,9 @@ class MailAlerts(Handler):
                     frequency=subscription.frequency)
                 if not pa.timestamp:
                     for update in self.changed_request_data:
+                        # None type objects come back from being pickled as the
+                        # unicode dash. If one is found, set the attribute in
+                        # the PendingAlert to None.
                         if update['old_value'] == '\xe2\x80\x93':
                             setattr(pa, update['attribute'], None)
                         else:

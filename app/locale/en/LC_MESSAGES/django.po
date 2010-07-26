@@ -92,7 +92,7 @@ msgid "Alternate name"
 msgstr ""
 
 #. Label; available beds
-#: templates/hospital_email.html.py:193 templates/hospital_email.html:96
+#: templates/hospital_email.html:100 templates/hospital_email.html.py:199
 msgid "Available"
 msgstr ""
 
@@ -132,7 +132,7 @@ msgid "Cancel"
 msgstr ""
 
 #. Label; total beds
-#: templates/hospital_email.html.py:197 templates/hospital_email.html:100
+#: templates/hospital_email.html.py:203 templates/hospital_email.html:104
 msgid "Capacity"
 msgstr ""
 
@@ -268,13 +268,8 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-#. TODO: Add missing message description or meaning
-#: templates/hospital_email.html:176
-msgid "Edit This Record"
-msgstr ""
-
-#. Link to edit the data for a hospital record.
-#: templates/hospital_email.html:81 templates/hospital_bubble.html:26
+#. Label for link to edit a subject record
+#: templates/hospital_email.html.py:182
 msgid "Edit this record"
 msgstr ""
 
@@ -309,7 +304,7 @@ msgid "Export CSV"
 msgstr ""
 
 #. Label for facilities with changes
-#: templates/hospital_email.html:62
+#: templates/hospital_email.html:63
 msgid "Facilities with Changes"
 msgstr ""
 
@@ -329,7 +324,7 @@ msgid "Faith-based"
 msgstr ""
 
 #. Label; field or attribute
-#: templates/hospital_email.html:115
+#: templates/hospital_email.html:119
 msgid "Field"
 msgstr ""
 
@@ -359,7 +354,7 @@ msgid "First select a hospital from the list on the left. Then Print will print 
 msgstr ""
 
 #. Label to tell users to check website for more information
-#: templates/hospital_email.html:222
+#: templates/hospital_email.html:228
 msgid "For more information on all subscribed facilities, please visit"
 msgstr ""
 
@@ -449,7 +444,7 @@ msgid "Language:"
 msgstr ""
 
 #. Label for the last update time
-#: templates/hospital_email.html:86 templates/hospital_email.html.py:182
+#: templates/hospital_email.html:90 templates/hospital_email.html.py:188
 msgid "Last Updated:"
 msgstr ""
 
@@ -559,7 +554,7 @@ msgid "Neurosurgery"
 msgstr ""
 
 #. Label for new value
-#: templates/hospital_email.html:120
+#: templates/hospital_email.html:124
 msgid "New Value"
 msgstr ""
 
@@ -590,7 +585,7 @@ msgid "Obstetrics and Gynecology"
 msgstr ""
 
 #. Label for old value
-#: templates/hospital_email.html:125
+#: templates/hospital_email.html:129
 msgid "Old Value"
 msgstr ""
 
@@ -655,7 +650,7 @@ msgid "Postoperative Care"
 msgstr ""
 
 #. old value for the attribute
-#: mail_alerts.py:257
+#: mail_alerts.py:256
 msgid "Previous value"
 msgstr ""
 
@@ -717,7 +712,7 @@ msgstr ""
 msgid "Resource Finder"
 msgstr ""
 
-#. TODO: Add missing message description or meaning
+#. subject of e-mail -> Resource Finder Update
 #: mail_alerts.py:79
 msgid "Resource Finder %s Update"
 msgstr ""
@@ -742,8 +737,8 @@ msgstr ""
 msgid "Services"
 msgstr ""
 
-#. TODO: Add missing message description or meaning
-#: templates/hospital_email.html.py:242 templates/hospital_email.html:49
+#. Label for settings page
+#: templates/hospital_email.html.py:249 templates/hospital_email.html:50
 msgid "Settings page"
 msgstr ""
 
@@ -783,7 +778,7 @@ msgid "Thanks for adding content to Resource Finder. To get started please creat
 msgstr ""
 
 #. Label to tell users how to update subscription setttings
-#: templates/hospital_email.html:236
+#: templates/hospital_email.html:243
 msgid "To change subscription settings, please visit the"
 msgstr ""
 
@@ -813,7 +808,7 @@ msgid "Unauthorized user."
 msgstr ""
 
 #. Label for unchanged and subscribed facilities
-#: templates/hospital_email.html:158
+#: templates/hospital_email.html:162
 msgid "Unchanged Subscribed Facilities"
 msgstr ""
 
@@ -833,12 +828,12 @@ msgid "Updated"
 msgstr ""
 
 #. who the attribute was updated by
-#: mail_alerts.py:260
+#: mail_alerts.py:259
 msgid "Updated by"
 msgstr ""
 
 #. Label for user
-#: templates/hospital_email.html:131
+#: templates/hospital_email.html:135
 msgid "User"
 msgstr ""
 
@@ -852,18 +847,13 @@ msgstr ""
 msgid "Vascular Surgery"
 msgstr ""
 
-#. TODO: Add missing message description or meaning
-#: templates/hospital_email.html:170
-msgid "View Full Record"
-msgstr ""
-
 #. Link to go to a page with past versions of the 'master' list
 #: templates/map.html:188
 msgid "View Master List archive"
 msgstr ""
 
-#. TODO: Add missing message description or meaning
-#: templates/hospital_email.html:75
+#. Label to view a full subject record
+#: templates/hospital_email.html:77 templates/hospital_email.html.py:175
 msgid "View full record"
 msgstr ""
 
