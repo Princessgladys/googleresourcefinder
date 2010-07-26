@@ -773,7 +773,7 @@ msgid "Sign out"
 msgstr "Sòti"
 
 #. Label to subscribe from a subject
-#: static/locale.js:162 bubble.py:170
+#: bubble.py:172 static/locale.js:162
 msgid "Subscribe to email updates"
 msgstr "Abònman imel mizajou"
 

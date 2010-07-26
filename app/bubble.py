@@ -160,16 +160,16 @@ class Bubble(Handler):
             #i18n: Error message for request missing subject name.
             raise ErrorMessage(404, _('Invalid or missing subject name.'))
 
-        if self.user and model.Subscription.get('%s:%s' % (self.subdomain,
-                                                self.params.subject_name),
-                                  self.user.email()):
-            #i18n: Label to unsubscribe to a subject
-            subscribed = _('Unsubscribe')
-        elif self.user:
+        if self.user:
+            subject_name = '%s:%s' % (self.subdomain, self.params.subject_name)
+            if model.Subscription.get(subject_name, self.user.email()):
+                #i18n: Label to unsubscribe to a subject
+                subscribed = _('Unsubscribe')
+            else:
+                subscribed = ''
+        else:
             #i18n: Label to subscribe from a subject
             subscribed = _('Subscribe to email updates')
-        else:
-            subscribed = ''
 
         subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
 
