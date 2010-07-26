@@ -1201,7 +1201,7 @@ function select_subject(subject_i) {
               bubble_capacity.innerHTML;
         }
         if (bubble_services
-            && bubble_services.innerHTML.trim() != render(null)) {
+            && $j.trim(bubble_services.innerHTML) != render(null)) {
           selected_subject.values[attributes_by_name.services] =
               bubble_services.innerHTML;
         }
