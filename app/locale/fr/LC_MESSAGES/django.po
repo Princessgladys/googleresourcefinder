@@ -772,7 +772,7 @@ msgid "Sign out"
 msgstr "Déconnexion"
 
 #. Label to subscribe from a subject
-#: bubble.py:172 static/locale.js:162
+#: static/locale.js:162 bubble.py:170
 msgid "Subscribe to email updates"
 msgstr "Abonnez-vous aux mises à jour par courriel"
 
