@@ -24,27 +24,26 @@ class Record(db.Model):
     type_name = db.StringProperty(required=True)  # XML type in Clark notation
     subject_id = db.StringProperty(required=True)  # thing this record is about
     title = db.StringProperty()  # title or summary string
-    author_email = db.StringProperty(required=True)  # author identifier
+    author_uri = db.StringProperty(required=True)  # author identifier
     observed = db.DateTimeProperty(required=True)  # UTC timestamp
     arrived = db.DateTimeProperty(auto_now=True)  # UTC timestamp
     content = db.TextProperty()  # serialized XML document
 
 
-def create_record(feed_id, author_email, title, subject_id, observed, element):
+def create_record(feed_id, author_uri, title, subject_id, observed, element):
     """Wraps XML Element in a record."""
     return Record(
         feed_id=feed_id,
         type_name=element.tag,
         subject_id=subject_id,
         title=title,
-        author_email=author_email,
+        author_uri=author_uri,
         observed=observed,
         content=xmlutils.serialize(element))
 
-def put_record(feed_id, author_email, title, subject_id, observed, element):
+def put_record(*args):
     """Stores an XML Element as a record."""
-    record = create_record(feed_id, author_email,
-        title, subject_id, observed, element)
+    record = create_record(*args)
     record.put()
     return record
 
@@ -63,4 +62,3 @@ def get_latest_arrived(feed_id, limit=None, arrived_after=None):
     if arrived_after:
         query = query.filter('arrived >', arrived_after)
     return query.fetch(min(limit or 100, 100))
-

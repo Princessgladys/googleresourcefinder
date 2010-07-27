@@ -623,7 +623,7 @@ msgstr "Enprime yon list lopital nan lòd distans de ${FACILITY_NAME}"
 #. Link to privacy policy for the application
 #: templates/base.html:105
 msgid "Privacy"
-msgstr "Prive"
+msgstr "Vi prive"
 
 #. Type of organization: Public (government) organization
 #: ../tools/setup.py:172

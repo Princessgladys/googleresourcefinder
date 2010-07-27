@@ -7,7 +7,6 @@ of an XML document to or from a Python value.  The type and structure of
 the Python value is up to the Converter.
 """
 
-import copy
 try:
     import xml.etree.cElementTree as ElementTree
 except ImportError:
@@ -29,10 +28,10 @@ def element(tag, *attributes_and_text_and_children):
         else:
             if not isinstance(arg, list):
                 arg = [arg]
-            for child in arg:  # text or child elements
-                if isinstance(child, basestring):
+            for child in arg:  # text content or child elements
+                if isinstance(child, basestring):  # text content
                     element.text = (element.text or '') + child
-                else:
+                elif child is not None:  # child elements
                     element.append(child)
     return element
 
@@ -74,7 +73,7 @@ def parse(string):
 
 def serialize(root, uri_prefixes={}, pretty_print=True):
     """Serializes XML to a string."""
-    root_copy = copy.deepcopy(root)
+    root_copy = ElementTree.fromstring(ElementTree.tostring(root))
     set_prefixes(root_copy, uri_prefixes)
     if pretty_print:
         indent(root_copy)
@@ -87,7 +86,7 @@ def read(file):
 def write(file, root, uri_prefixes={}, pretty_print=True):
     """Writes an XML tree to a file, using the given map of namespace URIs to
     prefixes, and adding nice indentation."""
-    root_copy = copy.deepcopy(root)
+    root_copy = ElementTree.fromstring(ElementTree.tostring(root))
     set_prefixes(root_copy, uri_prefixes)
     if pretty_print:
         indent(root_copy)

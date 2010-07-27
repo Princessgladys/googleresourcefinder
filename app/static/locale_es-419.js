@@ -54,10 +54,10 @@ locale = function() {
   messages.ERROR_LATITUDE_MUST_BE_NUMBER = "La latitud debe ser un n\u00famero";
 
   //i18n: Error message for not loading edit form successfully
-  messages.ERROR_LOADING_EDIT_FORM = "Error al cargar editar formulario.";
+  messages.ERROR_LOADING_EDIT_FORM = "Error loading edit form.";
 
   //i18n: Error message for not loading facility information successfully
-  messages.ERROR_LOADING_FACILITY_INFORMATION = "Error al cargar instituci\u00f3n de informaci\u00f3n.";
+  messages.ERROR_LOADING_FACILITY_INFORMATION = "Error al cargar servicio de informaci\u00f3n.";
 
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_INVALID = "La longitud debe estar entre -180 y 180";
@@ -66,7 +66,7 @@ locale = function() {
   messages.ERROR_LONGITUDE_MUST_BE_NUMBER = "La longitud debe ser un n\u00famero";
 
   //i18n: Error message for not saving facility information successfully
-  messages.ERROR_SAVING_FACILITY_INFORMATION = "Error al guardar instituci\u00f3n de informaci\u00f3n.";
+  messages.ERROR_SAVING_FACILITY_INFORMATION = "Error saving facility information.";
 
   //i18n: Error message for a value that is not a number
   messages.ERROR_VALUE_MUST_BE_NUMBER = "El valor debe ser un n\u00famero";
@@ -108,10 +108,10 @@ locale = function() {
   messages.PRINT_ENABLED_TOOLTIP = "Imprime una lista de hospitales por orden de distancia desde ${FACILITY_NAME}";
 
   //i18n: Message indicating hospital information has been saved
-  messages.SAVED = "Sus cambios se han guardado";
+  messages.SAVED = "Your edit has been saved";
 
   //i18n: Message indicating saving hospital information
-  messages.SAVING = "Guardando...";
+  messages.SAVING = "Saving...";
 
   //i18n: work done by someone that benefits another
   messages.SERVICES = "Servicios";

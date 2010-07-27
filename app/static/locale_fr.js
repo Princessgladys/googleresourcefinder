@@ -54,10 +54,10 @@ locale = function() {
   messages.ERROR_LATITUDE_MUST_BE_NUMBER = "Latitude doit \u00eatre un nombre";
 
   //i18n: Error message for not loading edit form successfully
-  messages.ERROR_LOADING_EDIT_FORM = "Erreur lors du chargement de modifier le formulaire.";
+  messages.ERROR_LOADING_EDIT_FORM = "Error loading edit form.";
 
   //i18n: Error message for not loading facility information successfully
-  messages.ERROR_LOADING_FACILITY_INFORMATION = "Erreur lors du chargement des informations de installation.";
+  messages.ERROR_LOADING_FACILITY_INFORMATION = "informations sur l'erreur installation de chargement";
 
   //i18n: Error message for invalid longitude.
   messages.ERROR_LONGITUDE_INVALID = "Longitude doit \u00eatre comprise entre -180 et 180";
@@ -66,7 +66,7 @@ locale = function() {
   messages.ERROR_LONGITUDE_MUST_BE_NUMBER = "Longitude doit \u00eatre un nombre";
 
   //i18n: Error message for not saving facility information successfully
-  messages.ERROR_SAVING_FACILITY_INFORMATION = "Erreur lors du enregistrement des informations de installation.";
+  messages.ERROR_SAVING_FACILITY_INFORMATION = "Error saving facility information.";
 
   //i18n: Error message for a value that is not a number
   messages.ERROR_VALUE_MUST_BE_NUMBER = "La valeur doit \u00eatre un nombre";
@@ -108,16 +108,16 @@ locale = function() {
   messages.PRINT_ENABLED_TOOLTIP = "Imprimer une liste d'h\u00f4pitaux tri\u00e9s selon la distance qui les s\u00e9pare de ${FACILITY_NAME}";
 
   //i18n: Message indicating hospital information has been saved
-  messages.SAVED = "Vos modifications ont \u00e9t\u00e9 enregistr\u00e9es";
+  messages.SAVED = "Your edit has been saved";
 
   //i18n: Message indicating saving hospital information
-  messages.SAVING = "Enregistrement...";
+  messages.SAVING = "Saving...";
 
   //i18n: work done by someone that benefits another
   messages.SERVICES = "Services";
 
   //i18n: Label for a control that filters a list of facilities
-  messages.SHOW = "Montrer";
+  messages.SHOW = "Afficher";
 
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}:${MINUTES} ${ZONE}";

@@ -54,7 +54,7 @@ locale = function() {
   messages.ERROR_LATITUDE_MUST_BE_NUMBER = "Latitd dwe yon nimewo";
 
   //i18n: Error message for not loading edit form successfully
-  messages.ERROR_LOADING_EDIT_FORM = "Er\u00e8 transp\u00f2te reekri f\u00f2m.";
+  messages.ERROR_LOADING_EDIT_FORM = "Error loading edit form.";
 
   //i18n: Error message for not loading facility information successfully
   messages.ERROR_LOADING_FACILITY_INFORMATION = "Er\u00e8 transp\u00f2te etablisman enf\u00f2masyon.";
@@ -66,7 +66,7 @@ locale = function() {
   messages.ERROR_LONGITUDE_MUST_BE_NUMBER = "Lonjitd dwe yon nimewo";
 
   //i18n: Error message for not saving facility information successfully
-  messages.ERROR_SAVING_FACILITY_INFORMATION = "Er\u00e8 anrejistreman etablisman enf\u00f2masyon.";
+  messages.ERROR_SAVING_FACILITY_INFORMATION = "Error saving facility information.";
 
   //i18n: Error message for a value that is not a number
   messages.ERROR_VALUE_MUST_BE_NUMBER = "Val\u00e8 dwe yon nimewo";
@@ -108,16 +108,16 @@ locale = function() {
   messages.PRINT_ENABLED_TOOLTIP = "Enprime yon list lopital nan l\u00f2d distans de ${FACILITY_NAME}";
 
   //i18n: Message indicating hospital information has been saved
-  messages.SAVED = "Nou anrejistre chanjman ou";
+  messages.SAVED = "Your edit has been saved";
 
   //i18n: Message indicating saving hospital information
-  messages.SAVING = "Anrejistre...";
+  messages.SAVING = "Saving...";
 
   //i18n: work done by someone that benefits another
   messages.SERVICES = "S\u00e8vis";
 
   //i18n: Label for a control that filters a list of facilities
-  messages.SHOW = "Montre";
+  messages.SHOW = "Ekspoze";
 
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}: ${MINUTES} ${ZONE}";

@@ -144,6 +144,7 @@ class IncomingTest(ScrapeTestCase):
             rec.delete()
         
         doc = self.s.go(self.URL, data=DATA)
+        print doc.content
         assert self.s.status == 200
         assert doc.content == ''
 
