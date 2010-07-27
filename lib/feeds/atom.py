@@ -29,13 +29,17 @@ def add_atom_prefix(uri_prefixes):
 def create_entry(record):
     """Constructs an Element for an Atom entry for the given record."""
     atom_id = record.feed_id + '/' + str(record.key().id())
+    author = xmlutils.element('{%s}author' % ATOM_NS,
+        xmlutils.element('{%s}uri' % ATOM_NS, record.author_uri))
+    if record.author_uri.startswith('mailto:'):
+        author.append(xmlutils.element(
+            '{%s}email' % ATOM_NS, record.author_uri.split(':', 1)[1]))
     return xmlutils.element('{%s}entry' % ATOM_NS,
-        xmlutils.element('{%s}author' % ATOM_NS,
-            xmlutils.element('{%s}email' % ATOM_NS, record.author_email)),
         xmlutils.element('{%s}id' % ATOM_NS, atom_id),
-        xmlutils.element('{%s}title' % ATOM_NS, record.title),
+        author,
         xmlutils.element('{%s}updated' % ATOM_NS,
             time_formats.to_rfc3339(record.arrived)),
+        xmlutils.element('{%s}title' % ATOM_NS, record.title),
         xmlutils.element('{%s}subject' % STATUS_NS, record.subject_id),
         xmlutils.element('{%s}observed' % STATUS_NS,
             time_formats.to_rfc3339(record.observed)),
@@ -52,10 +56,10 @@ def create_feed(records, feed_id, hub=None):
     else:
         updated = datetime.datetime.utcnow()
     elements = [
-        xmlutils.element('{%s}title' % ATOM_NS, feed_id),
         xmlutils.element('{%s}id' % ATOM_NS, feed_id),
         xmlutils.element('{%s}updated' % ATOM_NS,
-            time_formats.to_rfc3339(updated))
+            time_formats.to_rfc3339(updated)),
+        xmlutils.element('{%s}title' % ATOM_NS, feed_id),
     ]
     if hub:
         elements.append(xmlutils.element('{%s}link' % ATOM_NS,

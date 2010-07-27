@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+<entry xmlns:status="http://schemas.google.com/status/2010"
+    xmlns:gs="http://schemas.google.com/spreadsheets/2006">
+  <author>
+<!-- Always a globally unique number, including "+" and country code.      -->
+    <uri>tel:+50912345678</uri>
+  </author>
+
+<!-- Unique ID of the facility to be updated.  Haiti users should mostly   -->
+<!-- only deal with the numeric part, so the producer of this XML entry    -->
+<!-- will generally prepend "paho.org/HealthC_ID/" for transmission.       -->
+  <status:subject>paho.org/HealthC_ID/1234567</status:subject>
+
+<!-- Always a complete RFC 3339 timestamp in UTC.                          -->
+  <status:observed>2010-06-29T15:27:39Z</status:observed>
+
+<!-- Every entry has exactly one <status:report> element, which contains   -->
+<!-- exactly one <status:record> element, which contains the data fields.  -->
+  <status:report type="{http://schemas.google.com/status/2010}record">
+    <status:record>
+
+<!-- All field values are specified with the <gs:field> tag.  Each field   -->
+<!-- can appear at most once, and all are optional.  Any field can be      -->
+<!-- present and empty, which indicates that this update should erase the  -->
+<!-- existing contents the field.  Field values are freeform strings       -->
+<!-- unless otherwise indicated in comments below.                         -->
+
+      <gs:field name="title">Title</gs:field>
+
+      <gs:field name="alt_title">Alternate Title</gs:field>
+
+<!-- The value of "available_beds", if present, must be an integer.        -->
+      <gs:field name="available_beds">55</gs:field>
+
+<!-- The value of "total_beds", if present, must be an integer.            -->
+      <gs:field name="total_beds">66</gs:field>
+
+<!-- "services" contains zero or more values separated by commas.          -->
+<!-- Permitted values are:                                                 -->
+<!--     GENERAL_SURGERY                                                   -->
+<!--     ORTHOPEDICS                                                       -->
+<!--     NEUROSURGERY                                                      -->
+<!--     VASCULAR_SURGERY                                                  -->
+<!--     INTERNAL_MEDICINE                                                 -->
+<!--     CARDIOLOGY                                                        -->
+<!--     INFECTIOUS_DISEASE                                                -->
+<!--     PEDIATRICS                                                        -->
+<!--     POSTOPERATIVE_CARE                                                -->
+<!--     REHABILITATION                                                    -->
+<!--     OBSTETRICS_GYNECOLOGY                                             -->
+<!--     MENTAL_HEALTH                                                     -->
+<!--     DIALYSIS                                                          -->
+<!--     LAB                                                               -->
+<!--     X_RAY                                                             -->
+<!--     CT_SCAN                                                           -->
+<!--     BLOOD_BANK                                                        -->
+<!--     MORTUARY_SERVICES                                                 -->
+      <gs:field name="services">ORTHOPEDICS,CARDIOLOGY,X_RAY</gs:field>
+
+      <gs:field name="contact_name">Name</gs:field>
+
+      <gs:field name="phone">+12 345-678-90</gs:field>
+
+      <gs:field name="email">user@example.com</gs:field>
+
+      <gs:field name="department">Ouest</gs:field>
+
+      <gs:field name="district">Léogâne</gs:field>
+
+      <gs:field name="commune">Petit-Goâve</gs:field>
+
+      <gs:field name="address">123 Example Street</gs:field>
+
+      <gs:field name="location">18.3037,-72.8636</gs:field>
+
+      <gs:field name="accuracy">Description of location accuracy.</gs:field>
+
+      <gs:field name="organization">Example Organization</gs:field>
+
+<!-- "organization_type" contains one of these permitted values:           -->
+<!--     PUBLIC                                                            -->
+<!--     FOR_PROFIT                                                        -->
+<!--     UNIVERSITY                                                        -->
+<!--     COMMUNITY                                                         -->
+<!--     NGO                                                               -->
+<!--     FAITH_BASED                                                       -->
+<!--     MILITARY                                                          -->
+<!--     MIXED                                                             -->
+      <gs:field name="organization_type">PUBLIC</gs:field>
+
+<!-- "category" contains one of these permitted values:                    -->
+<!--     HOSPITAL                                                          -->
+<!--     CLINIC                                                            -->
+<!--     MOBILE_CLINIC                                                     -->
+<!--     DISPENSARY                                                        -->
+      <gs:field name="category">HOSPITAL</gs:field>
+
+<!-- "construction" contains one of these permitted values:                -->
+<!--     REINFORCED_CONCRETE                                               -->
+<!--     UNREINFORCED_MASONRY                                              -->
+<!--     WOOD_FRAME                                                        -->
+<!--     ADOBE                                                             -->
+      <gs:field name="construction">REINFORCED_CONCRETE</gs:field>
+
+      <gs:field name="damage">Text describing building damage.</gs:field>
+
+<!-- "operational_status" contains one of these permitted values:          -->
+<!--     OPERATIONAL                                                       -->
+<!--     NO_SURGICAL_CAPACITY                                              -->
+<!--     FIELD_HOSPITAL                                                    -->
+<!--     FIELD_WITH_HOSPITAL                                               -->
+<!--     CLOSED_OR_CLOSING                                                 -->
+<!-- This field indicates the level of functionality.  "OPERATIONAL" means -->
+<!-- fully operational; "NO_SURGICAL_CAPACITY" means unable to perform     -->
+<!-- surgeries; "FIELD_HOSPITAL" means as functional as a field hospital;  -->
+<!-- "FIELD_WITH_HOSPITAL" means as functional as a field hospital that is -->
+<!-- co-located with a hospital; CLOSED_OR_CLOSING" means closed or in the -->
+<!-- process of closing.                                                   -->
+      <gs:field name="operational_status">OPERATIONAL</gs:field>
+
+      <gs:field name="comments">Arbitrary comment text goes here.</gs:field>
+
+<!-- "reachable_by_road" contains one of these permitted values:           -->
+<!--     TRUE                                                              -->
+<!--     FALSE                                                             -->
+      <gs:field name="reachable_by_road">TRUE</gs:field>
+
+<!-- "can_pick_up_patients" contains one of these permitted values:        -->
+<!--     TRUE                                                              -->
+<!--     FALSE                                                             -->
+      <gs:field name="can_pick_up_patients">FALSE</gs:field>
+
+    </status:record>
+  </status:report>
+</entry>
+</feed>

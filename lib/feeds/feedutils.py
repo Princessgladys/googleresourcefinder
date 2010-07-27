@@ -14,6 +14,8 @@
 
 """Support for feed providers backed by the XML record store."""
 
+from google.appengine.ext import db
+
 import atom
 import records
 import time_formats
@@ -23,7 +25,7 @@ from errors import ErrorMessage
 from xmlutils import qualify, parse
 
 HUB = 'http://pubsubhubbub.appspot.com'
-STATUS_NS = 'http://schemas.google.com/2010/status'
+STATUS_NS = 'http://schemas.google.com/status/2010'
 
 def notify_hub(feed_url):
     """Notifies a PubSubHubbub hub of new content."""
@@ -54,29 +56,31 @@ def create_response_etag(latest):
     timestamp = time_formats.to_rfc3339(arrival_time)
     return '"' + timestamp + '/' + sign('etag_key', timestamp) + '"'
 
-def handle_feed_get(request, response, feed_id, uri_prefixes={}):
+def handle_feed_get(request, response, uri_prefixes={}):
     """Handles a request for an Atom feed of XML records."""
+    feed_uri = request.uri
     etag, limit, arrived_after = check_request_etag(request.headers)
-    latest = records.get_latest_arrived(feed_id, limit, arrived_after)
+    latest = records.get_latest_arrived(feed_uri, limit, arrived_after)
 
     response.headers['Content-Type'] = 'application/atom+xml'
     if latest:  # Deliver the new entries.
         response.headers['ETag'] = create_response_etag(latest)
-        atom.write_feed(response.out, latest, feed_id, uri_prefixes, hub=HUB)
+        atom.write_feed(response.out, latest, feed_uri, uri_prefixes, hub=HUB)
     elif etag:  # If-None-Match was specified, and there was nothing new.
         response.set_status(304)
         response.headers['ETag'] = '"' + etag + '"'
     else:  # There are no entries in this feed.
-        atom.write_feed(response.out, latest, feed_id, uri_prefixes, hub=HUB)
+        atom.write_feed(response.out, latest, feed_uri, uri_prefixes, hub=HUB)
 
-def handle_entry_get(request, response, feed_id, entry_id, uri_prefixes={}):
+def handle_entry_get(request, response, uri_prefixes={}):
     """Handles a request for the Atom entry for an individual XML record."""
     try:
-        id = int(entry_id)
+        feed_uri, entry_key = request_uri.rsplit('/', 1)
+        id = int(entry_key)
     except ValueError:
         raise ErrorMessage(404, 'No such entry')
     record = records.Record.get_by_id(id)
-    if not record or record.feed_id != feed_id:
+    if not record or record.feed_id != feed_uri:
         raise ErrorMessage(404, 'No such entry')
 
     response.headers['Content-Type'] = 'application/atom+xml'
@@ -104,35 +108,41 @@ def get_optional_text(element, name, ns=None):
         return ''
     return child.text
 
-def handle_feed_post(request, response):
-    """Handles a post of incoming entries from PubSubHubbub."""
-    posted_records = []
+def handle_feed_post(request, response, feed_id=None):
+    """Handles a post of incoming entries, storing each entry as a record in
+    the datastore.  If feed_id is unspecified, the feed URI is obtained from
+    the <id> element of the posted content."""
+    records = []
     try:
         feed = parse(request.body)
     except SyntaxError, e:
         raise ErrorMessage(400, str(e))
     if feed.tag != qualify(atom.ATOM_NS, 'feed'):
         raise ErrorMessage(400, 'Incoming document is not an Atom feed')
-    feed_id = get_child(feed, 'id', atom.ATOM_NS)
+    if not feed_id:
+        feed_id = get_child(feed, 'id', atom.ATOM_NS).text
     for entry in feed.findall(qualify(atom.ATOM_NS, 'entry')):
-        # Get the Atom metadata.
-        entry_id = get_child(entry, 'id', atom.ATOM_NS)
-        author = get_child(entry, 'author', atom.ATOM_NS)
-        email = get_child(author, 'email', atom.ATOM_NS)
-        title = get_optional_text(entry, 'title', atom.ATOM_NS)
+        records.append(create_record_from_entry(entry, feed_id))
+    db.put(records)
+    return records
 
-        # Get the status report metadata (subject ID and observed time).
-        subject = get_child(entry, 'subject', STATUS_NS)
-        observed = time_formats.from_rfc3339(
-            get_child(entry, 'observed', STATUS_NS).text)
+def create_record_from_entry(entry, feed_id):
+    """Converts an XML entry element into a record."""
+    # Get the Atom metadata.
+    author = get_child(entry, 'author', atom.ATOM_NS)
+    author_uri = (get_optional_text(author, 'uri', atom.ATOM_NS) or
+                  'mailto:' + get_optional_text(author, 'email', atom.ATOM_NS))
+    title = get_optional_text(entry, 'title', atom.ATOM_NS)
 
-        # Get the content of the status report.
-        report = get_child(entry, 'report', STATUS_NS)
-        content = get_child(report, report.attrib.get('type'))
+    # Get the status report metadata (subject ID and observed time).
+    subject = get_child(entry, 'subject', STATUS_NS)
+    observed = time_formats.from_rfc3339(
+        get_child(entry, 'observed', STATUS_NS).text)
 
-        # Store the record.
-        posted_records.append(records.put_record(
-            feed_id.text, email.text, title, subject.text, observed, content))
-    notify_hub(feed_id.text)
-    return posted_records
+    # Get the content of the status report.
+    report = get_child(entry, 'report', STATUS_NS)
+    content = get_child(report, report.attrib.get('type'))
 
+    # Create the record entity.
+    return records.create_record(
+        feed_id, author_uri, title, subject.text, observed, content)
