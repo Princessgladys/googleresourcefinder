@@ -75,14 +75,14 @@
       {% endcomment %}
       {% trans "Email format:" %}
       <input type="radio" name="email-type" value="plain"
-        onClick="change_email_format('{{subdomain}}', 'plain');"
+        onclick="change_email_format('{{subdomain}}', 'plain');"
         {% ifequal user_email_format 'plain' %} checked{% endifequal %}>
         {% comment %}
         #i18n: Label for "plain text" radio button
         {% endcomment %}
         {% trans "Plain text" %}
       <input type="radio" name="email-type" value="html"
-        onClick="change_email_format('{{subdomain}}', 'html');"
+        onclick="change_email_format('{{subdomain}}', 'html');"
         {% ifequal user_email_format 'html' %} checked{% endifequal %}>
         HTML
     </td>
@@ -96,8 +96,8 @@
       <select name="default-frequency"
         onChange="change_default_frequency('{{subdomain}}', this)">
         {% for frequency in frequencies %}
-        <option value="{{frequency.en}}"
-          {% ifequal user_frequency frequency.en %}selected{% endifequal %}>
+        <option value="{{frequency.value}}"
+          {% ifequal user_frequency frequency.value %}selected{% endifequal %}>
           {{frequency.trans}}
         </option>
         {% endfor %}
@@ -108,7 +108,7 @@
   <tr>
     <td class="settings-label-checkbox">
       <center><input type="checkbox" name="subjects-check-all"
-        onClick="check_uncheck_all();"></center>
+        onclick="check_uncheck_all();"></center>
     </td>
     <td class="settings-label-subjectname">
       {% comment %}
@@ -137,7 +137,7 @@
     {% else %}odd{% endif %}">
     <td class="settings-subject-checkbox">
       <center><input type="checkbox" name="subject-checkboxes"
-        value="{{subject.name}}" onClick="check_checkboxes();"></center>
+        value="{{subject.name}}" onclick="check_checkboxes();"></center>
     </td>
     <td class="settings-subject-name">
       {{subject.title}}
@@ -145,9 +145,9 @@
     {% for frequency in frequencies %}
     <td>
       <center><input type="radio" name="{{subject.name}}_freq"
-          value="{{frequency.en}}" onClick="change_frequency('{{subdomain}}',
-          '{{subject.name}}', '{{subject.frequency}}', '{{frequency.en}}');"
-          {% ifequal frequency.en subject.frequency %}checked{% endifequal %}></center>
+          value="{{frequency.value}}" onclick="change_frequency('{{subdomain}}',
+          '{{subject.name}}', '{{subject.frequency}}', '{{frequency.value}}');"
+          {% ifequal frequency.value subject.frequency %}checked{% endifequal %}></center>
       </td>
     {% endfor %}
   </tr>
@@ -156,14 +156,14 @@
   <tr>
     <td></td>
     <td>
-      <button onClick="set_checked_to_default('{{subdomain}}');"
+      <button onclick="set_checked_to_default('{{subdomain}}');"
         id="button-set-to-default">
         {% comment %}
         #i18n: label for changing subjects to default frequency
         {% endcomment %}
         {% trans "Set checked to default" %}
       </button>
-      <button onClick="unsubscribe_checked('{{subdomain}}')"
+      <button onclick="unsubscribe_checked('{{subdomain}}')"
         id="button-unsubscribe-checked">
         {% comment %}
         #i18n: label for unsubscribing from subjects

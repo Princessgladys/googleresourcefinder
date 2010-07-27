@@ -89,8 +89,9 @@ class Subscribe(Handler):
     def subscribe(self):
         """Subscribes the current user to a particular subject."""
         key_name = '%s:%s' % (self.subject_name, self.email)
-        frequency = self.request.get('frequency',
-                                     self.account.default_frequency)
+        default = self.account.default_frequency if \
+            self.account.default_frequency else 'instant'
+        frequency = self.request.get('frequency', default)
         Subscription(key_name=key_name, frequency=frequency,
                      subject_name=self.subject_name,
                      user_email=self.email).put()
@@ -108,7 +109,7 @@ class Subscribe(Handler):
             db.delete(subscription)
 
     def unsubscribe_multiple(self):
-        """Unsubscribes the current user from all subjects."""
+        """Unsubscribes the current user from a specified list of subjects."""
         subjects = simplejson.loads(self.request.get('subjects'))
         for subject_name in subjects:
             subscription = Subscription.get(subject_name, self.email)

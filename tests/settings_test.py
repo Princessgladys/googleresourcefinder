@@ -88,7 +88,9 @@ class SettingsTest(SeleniumTestCase):
                 self.get_selected_values('//*[@name="default-frequency"]'))
  
     def test_subjects(self):
-        """Confirms that the facilities list loaded properly."""
+        """Confirms that the facilities list loaded properly and that the
+        buttons for changing default frequency, email format, and
+        subscribing/unsubscribing to facilities all work as expected."""
         # make sure all subjects are present
         self.login_to_settings_page()
         self.assert_text_present('title_foo')
