@@ -52,13 +52,13 @@ class Settings(Handler):
         logout_url = users.create_logout_url(home_url)
         frequencies = [
             #i18n: Label for instant e-mail updates
-            {'en': 'instant', 'trans': _('Instant')},
+            {'value': 'instant', 'trans': _('Instant')},
             #i18n: Label for daily e-mail updates
-            {'en': 'daily', 'trans': _('Daily')},
+            {'value': 'daily', 'trans': _('Daily')},
             #i18n: Label for weekly e-mail updates
-            {'en': 'weekly', 'trans': _('Weekly')},
+            {'value': 'weekly', 'trans': _('Weekly')},
             #i18n: Label for monthly e-mail updates
-            {'en': 'monthly', 'trans': _('Monthly')}
+            {'value': 'monthly', 'trans': _('Monthly')}
         ]
 
         self.render(SETTINGS_PATH,

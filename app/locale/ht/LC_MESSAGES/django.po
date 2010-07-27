@@ -57,7 +57,7 @@ msgid "(unspecified)"
 msgstr "(pa espesifye)"
 
 #. Note that a health facility has been marked closed.
-#: templates/hospital_bubble.html:59
+#: templates/hospital_bubble.html:72
 msgid "<strong>Note:</strong> This facility has been marked closed."
 msgstr "<strong>Remak:</strong> etablisman sa a te make fèmen."
 
@@ -67,7 +67,7 @@ msgid "Accuracy"
 msgstr "Presizyon"
 
 #. Header for a street address
-#: templates/print.html:138 ../tools/setup.py:132 templates/hospital_bubble.html:131
+#: templates/print.html:138 templates/hospital_bubble.html:144 ../tools/setup.py:132
 msgid "Address"
 msgstr "Adrès"
 
@@ -142,17 +142,17 @@ msgid "Category"
 msgstr "Kategori"
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:159
+#: templates/hospital_bubble.html:172
 msgid "Change"
 msgstr "Chanje"
 
 #. Header for the history of changes in data for a facility
-#: templates/hospital_bubble.html:121
+#: templates/hospital_bubble.html:134
 msgid "Change details"
 msgstr "Chanje done"
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:167
+#: templates/hospital_bubble.html:180
 msgid "Change note"
 msgstr "Chanje"
 
@@ -217,7 +217,7 @@ msgid "Damage"
 msgstr "Domaj"
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:171
+#: templates/hospital_bubble.html:184
 msgid "Date and time"
 msgstr "Jou  ak  lè"
 
@@ -279,7 +279,7 @@ msgid "Edit this record"
 msgstr "modifye enregistreman sa"
 
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:163
+#: templates/hospital_bubble.html:176
 msgid "Edited by"
 msgstr "Moun ki reekri a"
 
@@ -324,7 +324,7 @@ msgid "Facility"
 msgstr "Etablisman"
 
 #. Header for details about a facility
-#: templates/hospital_bubble.html:116
+#: templates/hospital_bubble.html:129
 msgid "Facility details"
 msgstr "Enfòmasyon sou etablisman "
 
@@ -374,7 +374,7 @@ msgid "General Surgery"
 msgstr "Chiriji Jeneral"
 
 #. Proper name of an ID for a health facility defined by the  Pan-American Health Organization; no translation necessary.
-#: templates/hospital_bubble.html:43 ../tools/setup.py:112 static/locale.js:114
+#: templates/hospital_bubble.html:56 static/locale.js:114 ../tools/setup.py:112
 msgid "HealthC ID"
 msgstr "ID HealthC"
 
@@ -444,7 +444,7 @@ msgid "Language:"
 msgstr "Lang:"
 
 #. Label for a date-time when the data was last updated
-#: templates/hospital_bubble.html:52
+#: templates/hospital_bubble.html:65
 msgid "Last updated"
 msgstr "Misajou"
 
@@ -484,7 +484,7 @@ msgid "Location"
 msgstr "Kote"
 
 #. Geographic coordinates of a location on earth.
-#: templates/hospital_bubble.html:140
+#: templates/hospital_bubble.html:153
 msgid "Location:"
 msgstr "Kote"
 
@@ -559,7 +559,7 @@ msgid "No"
 msgstr "Pa dakò"
 
 #. Indicates there is no availability information for this  hospital.
-#: templates/hospital_bubble.html:100
+#: templates/hospital_bubble.html:113
 msgid "No availability information"
 msgstr "Pa gen enfòmasyon ki koresponn"
 
@@ -615,7 +615,7 @@ msgid "Orthopedics"
 msgstr "Otopedik"
 
 #. Proper name of an ID for a health facility defined by the  Haiti ministry of health (MSPP); no translation necessary.
-#: static/locale.js:109 templates/hospital_bubble.html:48 ../tools/setup.py:109
+#: static/locale.js:109 templates/hospital_bubble.html:61 ../tools/setup.py:109
 msgid "PCode"
 msgstr "PCode"
 
@@ -640,7 +640,7 @@ msgid "Plain text"
 msgstr "Tèks"
 
 #. Indicates a user should call for availability of beds and services at a hospital.
-#: templates/hospital_bubble.html:94
+#: templates/hospital_bubble.html:107
 msgid "Please call for availability information."
 msgstr "Tanpri rele pou enfomasyon disponib"
 
@@ -713,7 +713,7 @@ msgid "Resource Finder"
 msgstr "Chèche resous"
 
 #. TODO: Add missing message description or meaning
-#: mail_alerts.py:304 mail_alerts.py:269 subscribe.py:160
+#: mail_alerts.py:304 mail_alerts.py:269 subscribe.py:161
 msgid "Resource Finder Updates"
 msgstr "Chèche resous"
 
@@ -763,7 +763,7 @@ msgid "Sign in"
 msgstr "Mete Anprent"
 
 #. Link to sign in to edit the data for a hospital record.
-#: templates/hospital_bubble.html:31
+#: templates/hospital_bubble.html:48
 msgid "Sign in to edit"
 msgstr "Tanpri siyen nan reekri"
 
@@ -772,8 +772,8 @@ msgstr "Tanpri siyen nan reekri"
 msgid "Sign out"
 msgstr "Sòti"
 
-#. Label to subscribe from a subject
-#: static/locale.js:162 bubble.py:170
+#. Label to subscribe to a subject
+#: templates/hospital_bubble.html:41 static/locale.js:162
 msgid "Subscribe to email updates"
 msgstr "Abònman imel mizajou"
 
@@ -822,8 +822,8 @@ msgstr "Inivesite"
 msgid "Unreinforced masonry"
 msgstr "Pa ranfòse konkrè"
 
-#. Label to unsubscribe to a subject
-#: bubble.py:167 static/locale.js:170
+#. Label to unsubscribe from a subject
+#: static/locale.js:170 templates/hospital_bubble.html:36
 msgid "Unsubscribe"
 msgstr "Koupe Abònman nan Tcheke"
 
@@ -916,12 +916,12 @@ msgid "anonymous"
 msgstr "anonim"
 
 #. Heading for number of available beds at a hospital
-#: templates/hospital_bubble.html:68
+#: templates/hospital_bubble.html:81
 msgid "availability"
 msgstr "Disponibilite"
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:72
+#: templates/hospital_bubble.html:85
 msgid "capacity"
 msgstr "Kapasite"
 
@@ -937,7 +937,7 @@ msgid "p ${PHONE}"
 msgstr "t ${PHONE}"
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:77
+#: templates/hospital_bubble.html:90
 msgid "services"
 msgstr "sèvis"
 
