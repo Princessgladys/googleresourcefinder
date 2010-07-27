@@ -622,7 +622,7 @@ msgstr "Imprimer une liste d'hôpitaux triés selon la distance qui les sépare 
 #. Link to privacy policy for the application
 #: templates/base.html:105
 msgid "Privacy"
-msgstr "Privé"
+msgstr "Confidentialité"
 
 #. Type of organization: Public (government) organization
 #: ../tools/setup.py:172

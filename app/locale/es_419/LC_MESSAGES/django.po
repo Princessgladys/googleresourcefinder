@@ -623,7 +623,7 @@ msgstr "Imprime una lista de hospitales por orden de distancia desde ${FACILITY_
 #. Link to privacy policy for the application
 #: templates/base.html:105
 msgid "Privacy"
-msgstr "Privado"
+msgstr "Privacidad"
 
 #. Type of organization: Public (government) organization
 #: ../tools/setup.py:172
