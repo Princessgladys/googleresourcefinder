@@ -20,8 +20,13 @@ class ErrorMessage(Exception):
         self.status = status
         self.message = message
 
+    def __str__(self):
+        return 'ErrorMessage(%r, %r)' % (self.status, self.message)
+
 class Redirect(Exception):
     """Raise this exception to redirect to another page."""
     def __init__(self, url):
         self.url = url
 
+    def __str__(self):
+        return 'Redirect(%r)' % self.url

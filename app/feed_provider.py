@@ -22,15 +22,11 @@ from feeds.records import create_record
 from utils import ErrorMessage, Handler, run, taskqueue, _
 
 
-def get_feed_id(request, feed_name):
-    return request.host_url + '/feeds/' + feed_name
-
-
 def schedule_add_record(request, user, subject,
                         changed_attributes_dict, observed_time):
     """Enqueue a task to create a record."""
     record = create_record(
-        get_feed_id(request, 'delta'),
+        request.host_url + '/feeds/delta',
         user.email(),
         '', # title
         subject.key().name(), # subject_id
@@ -43,16 +39,13 @@ def schedule_add_record(request, user, subject,
 
 
 class Feed(Handler):
-    def get(self, feed_name):
-        feed_id = get_feed_id(self.request, feed_name)
-        handle_feed_get(self.request, self.response, feed_id, URI_PREFIXES)
+    def get(self):
+        handle_feed_get(self.request, self.response, URI_PREFIXES)
 
 
 class Entry(Handler):
-    def get(self, feed_name, entry_id):
-        feed_id = get_feed_id(self.request, feed_name)
-        handle_entry_get(
-            self.request, self.response, feed_id, entry_id, URI_PREFIXES)
+    def get(self):
+        handle_entry_get(self.request, self.response, URI_PREFIXES)
 
 
 class AddRecord(Handler):
@@ -64,7 +57,7 @@ class AddRecord(Handler):
 
 
 if __name__ == '__main__':
-    run([('/feeds/([^/]+)', Feed),
-         ('/feeds/([^/]+)/([^/]+)', Entry),
+    run([(r'/feeds/\w+', Feed),
+         (r'/feeds/\w+/\d+', Entry),
          ('/tasks/add_feed_record', AddRecord),
          ], debug=True)
