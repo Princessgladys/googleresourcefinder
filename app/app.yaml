@@ -29,9 +29,6 @@ handlers:
 - url: /
   script: main.py
 
-- url: /foo
-  script: foo.py
-
 - url: /edit
   script: edit.py
 
