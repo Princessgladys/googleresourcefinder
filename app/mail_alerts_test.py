@@ -87,7 +87,7 @@ class MailAlertsTest(MediumTestCase):
         self.sub_immed = Subscription(key_name='haiti:example.org/123:' +
                                       self.user.email(),
                                       user_email=self.user.email(),
-                                      frequency='immediate',
+                                      frequency='instant',
                                       subject_name='haiti:example.org/123')
         self.sub_daily = Subscription(key_name='haiti:example.org/456:' +
                                       self.user.email(),
@@ -137,8 +137,8 @@ class MailAlertsTest(MediumTestCase):
         """Confirms that get_timedelta returns the correct timedeltas."""
         assert get_timedelta('daily') == datetime.timedelta(1)
         assert get_timedelta('weekly') == datetime.timedelta(7)
-        assert get_timedelta('immediate') == datetime.timedelta(0)
-
+        assert get_timedelta('instant') == datetime.timedelta(0)
+        
         now = datetime.datetime(2010, 01, 01, 01, 30, 30, 567)
         assert get_timedelta('monthly', now) == datetime.timedelta(31)
 
