@@ -15,3 +15,9 @@ indexes:
   - name: feed_id
   - name: arrived
     direction: desc
+
+- kind: XmlReport
+  properties:
+  - name: feed_name
+  - name: arrived
+    direction: desc
