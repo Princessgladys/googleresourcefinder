@@ -16,6 +16,9 @@ def qualify(ns, name):
     """Makes a namespace-qualified name."""
     return '{%s}%s' % (ns, name)
 
+
+# ==== Constructing and reading elements ===================================
+
 def element(tag, *attributes_and_text_and_children):
     """Creates an Element with the given tag and contents.  The arguments may
     include dictionaries of attributes, child elements, lists of child elements,
@@ -35,8 +38,20 @@ def element(tag, *attributes_and_text_and_children):
                     element.append(child)
     return element
 
+def parse(string):
+    """Parses XML from a string."""
+    return ElementTree.fromstring(string)
+
+def read(file):
+    """Reads an XML tree from a file."""
+    return ElementTree.parse(file)
+
+
+# ==== Serializing and writing elements ====================================
+
 def indent(element, level=0):
     """Adds indentation to an element subtree."""
+    # TODO(kpy): Make this non-mutating so we don't have to copy in serialize().
     indentation = '\n' + level*'  '
     if len(element):
         if not element.text or not element.text.strip():
@@ -61,15 +76,12 @@ def fix_name(name, uri_prefixes):
 
 def set_prefixes(root, uri_prefixes):
     """Replaces Clark qualified element names with specific given prefixes."""
+    # TODO(kpy): Make this non-mutating so we don't have to copy in serialize().
     for uri, prefix in uri_prefixes.items():
         root.set('xmlns:' + prefix, uri)
 
     for element in root.getiterator():
         element.tag = fix_name(element.tag, uri_prefixes)
-
-def parse(string):
-    """Parses XML from a string."""
-    return ElementTree.fromstring(string)
 
 def serialize(root, uri_prefixes={}, pretty_print=True):
     """Serializes XML to a string."""
@@ -78,10 +90,6 @@ def serialize(root, uri_prefixes={}, pretty_print=True):
     if pretty_print:
         indent(root_copy)
     return ElementTree.tostring(root_copy)
-
-def read(file):
-    """Reads an XML tree from a file."""
-    return ElementTree.parse(file)
 
 def write(file, root, uri_prefixes={}, pretty_print=True):
     """Writes an XML tree to a file, using the given map of namespace URIs to

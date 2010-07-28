@@ -16,39 +16,24 @@
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
-
-from feeds.feedutils import STATUS_NS, notify_hub
-from feeds.feedutils import handle_entry_get, handle_feed_get, handle_feed_post
-from feeds.records import create_record
-import sys, cgitb
-
-
-URI_PREFIXES = {STATUS_NS: 'status',
-                'http://schemas.google.com/spreadsheets/2006': 'gs'}
+from feeds import report_feeds
 
 
 class Feed(webapp.RequestHandler):
-    def get(self):
-        handle_feed_get(self.request, self.response, URI_PREFIXES)
+    def get(self, feed_name):
+        report_feeds.handle_feed_get(self.request, self.response, feed_name)
 
-    def post(self):
-        handle_feed_post(self.request, self.response, self.request.uri)
-
-    def handle_exception(self, exception, debug_mode):
-        """Handles an exception thrown by a handler method."""
-        self.error(500)
-        self.response.clear()
-        self.response.headers['Content-Type'] = 'text/html'
-        self.response.out.write(cgitb.html(sys.exc_info()))
+    def post(self, feed_name):
+        report_feeds.handle_feed_post(self.request, self.response, feed_name)
 
 
 class Entry(webapp.RequestHandler):
-    def get(self):
-        handle_entry_get(self.request, self.response, URI_PREFIXES)
+    def get(self, feed_name, entry_key):
+        report_feeds.handle_entry_get(self.request, self.response, feed_name)
 
 
 if __name__ == '__main__':
     run_wsgi_app(webapp.WSGIApplication([
-        (r'/feeds/\w+', Feed),
-        (r'/feeds/\w+/\d+', Entry)
+        (r'/feeds/(\w+)', Feed),
+        (r'/feeds/(\w+)/(\d+)', Entry)
     ]))

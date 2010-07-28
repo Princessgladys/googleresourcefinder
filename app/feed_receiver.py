@@ -17,7 +17,7 @@
 import logging
 
 from edxl_have import Hospital
-from feeds.feedutils import handle_feed_post
+from feeds.report_feeds import handle_feed_post
 from model import Report
 from utils import Handler, run
 
@@ -51,9 +51,10 @@ class Incoming(Handler):
         # TODO(shakusa) Do we need to enforce read-only fields
         # subject name (id), healthc_id, subject title ?
 
-        records = handle_feed_post(self.request, self.response)
+        # Store the incoming reports on the 'delta' feed.
+        reports = handle_feed_post(self.request, self.response, 'delta')
 
-        for record in records:
+        for report in reports:
             # TODO: Now parse these records and apply the edits to Report,
             # Subject, and MinimalSubject.
             pass
