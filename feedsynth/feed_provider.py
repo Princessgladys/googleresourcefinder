@@ -21,9 +21,6 @@ from feeds import report_feeds
 
 class Feed(webapp.RequestHandler):
     def get(self, feed_name):
-        if self.request.get('hub.challenge'):
-            self.response.out.write(self.request.get('hub.challenge'))
-            return
         """Emits the entries in the specified feed."""
         report_feeds.handle_feed_get(self.request, self.response, feed_name)
 
