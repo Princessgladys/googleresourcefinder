@@ -54,15 +54,12 @@ class Feed(Handler):
 
         # Store the incoming reports on the 'delta' feed.
         reports = report_feeds.handle_feed_post(
-            self.request, self.response, 'delta', set_source=True)
+            self.request, self.response, 'delta')
 
         for report in reports:
             # TODO: Now parse these records and apply the edits to Report,
             # Subject, and MinimalSubject.
             pass
-
-        # If there were new reports, notify the hub.
-        report_feeds.notify_hub(self.request.uri)
 
 
 class Entry(Handler):
