@@ -22,14 +22,14 @@ __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 
 import datetime
 import pickle
+import simplejson
 
 import utils
 from bubble import format
-from feeds.xmlutils import Struct
 from mail_alerts import fetch_updates, format_plain_body, send_email
 from mail_alerts import update_account_alert_time
 from model import PendingAlert, Subject, Subscription
-from utils import _, db, Handler, run, simplejson
+from utils import _, Handler, Struct, db, run
 
 class Subscribe(Handler):
     """Handler for /subscribe. Used to handle subscription changes.

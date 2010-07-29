@@ -27,8 +27,7 @@ import utils
 import wsgiref
 
 from access import check_action_permitted
-from feed_provider import schedule_add_record
-from feeds.crypto import sign, verify
+from feedlib.crypto import sign, verify
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
 from utils import db, get_message, html_escape, simplejson

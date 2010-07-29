@@ -19,12 +19,12 @@ api_version: 1
 
 handlers:
 - url: /feeds/.*
-  script: feed_provider.py
+  script: feeds.py
 
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin
 
 - url: /tasks/external
-  script: feeds/tasks_external.py
+  script: feedlib/tasks_external.py
   login: admin

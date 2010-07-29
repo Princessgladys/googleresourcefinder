@@ -38,9 +38,8 @@ from google.appengine.ext import db
 import bubble
 import cache
 import utils
-from feeds.xmlutils import Struct
 from model import Account, PendingAlert, Subject, SubjectType, Subscription
-from utils import _, Handler, simplejson
+from utils import _, Handler, Struct, simplejson
 
 # Set up localization.
 ROOT = os.path.dirname(__file__)

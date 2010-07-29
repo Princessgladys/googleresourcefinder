@@ -10,19 +10,7 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-- kind: Record
-  properties:
-  - name: feed_id
-  - name: arrived
-    direction: desc
-
 - kind: ReportEntry
-  properties:
-  - name: feed_name
-  - name: arrived
-    direction: desc
-
-- kind: XmlReport
   properties:
   - name: feed_name
   - name: arrived

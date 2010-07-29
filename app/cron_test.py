@@ -14,10 +14,6 @@
 
 """Tests for cron.py."""
 
-from feeds.xmlutils import Struct
-
-from cron import Job, Timestamp
-
 import cron
 import datetime
 import unittest
@@ -25,22 +21,22 @@ import unittest
 class CronTest(unittest.TestCase):
     def setUp(self):
         self.time = datetime.datetime(2010, 06, 16, 12, 30, 37)
-        self.job1 = Job(description='test', url='http://www.google.com/',
-                        payload='', method='GET', months=[],
-                        days_of_month=[self.time.day],
-                        weekdays=[],
-                        hours_of_day=[self.time.hour],
-                        minutes_of_hour=[self.time.minute])
+        self.job1 = cron.Job(description='test', url='http://www.google.com/',
+                             payload='', method='GET', months=[],
+                             days_of_month=[self.time.day],
+                             weekdays=[],
+                             hours_of_day=[self.time.hour],
+                             minutes_of_hour=[self.time.minute])
 
-        self.job2 = Job(description='test', url='http://www.google.com/',
-                        payload='', method='GET', months=[], 
-                        days_of_month=[self.time.day + 1],
-                        weekdays=[],
-                        hours_of_day=[self.time.hour + 1],
-                        minutes_of_hour=[self.time.minute + 1])
+        self.job2 = cron.Job(description='test', url='http://www.google.com/',
+                             payload='', method='GET', months=[], 
+                             days_of_month=[self.time.day + 1],
+                             weekdays=[],
+                             hours_of_day=[self.time.hour + 1],
+                             minutes_of_hour=[self.time.minute + 1])
         
-        Timestamp(key_name='cron',
-                  timestamp=self.time - datetime.timedelta(minutes=3)).put()
+        timestamp = self.time - datetime.timedelta(minutes=3)
+        cron.Timestamp(key_name='cron', timestamp=timestamp).put()
         
     def test_get_datetimes(self):
         times = cron.get_datetimes(self.time)

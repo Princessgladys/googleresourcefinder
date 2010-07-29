@@ -1,7 +1,6 @@
 """XML conversion for EDXL-HAVE."""
 
-from feeds import time_formats
-from feeds import xmlutils
+from feedlib import time_formats, xml_utils
 
 
 EDXL_HAVE_NS = 'urn:oasis:names:tc:emergency:EDXL:HAVE:1.0'
@@ -12,8 +11,8 @@ URI_PREFIXES = {
 }
 
 
-class HospitalStatus(xmlutils.Converter):
-    __metaclass__ = xmlutils.Singleton
+class HospitalStatus(xml_utils.Converter):
+    __metaclass__ = xml_utils.Singleton
     NS = EDXL_HAVE_NS
 
     def from_element(self, element):
@@ -25,8 +24,8 @@ class HospitalStatus(xmlutils.Converter):
             [Hospital.to_element('Hospital', hospital) for hospital in value])
 
 
-class Hospital(xmlutils.Converter):
-    __metaclass__ = xmlutils.Singleton
+class Hospital(xml_utils.Converter):
+    __metaclass__ = xml_utils.Singleton
     NS = EDXL_HAVE_NS
 
     def from_element(self, element):
@@ -62,45 +61,45 @@ class Hospital(xmlutils.Converter):
         )
 
 
-class Text(xmlutils.Converter):
-    __metaclass__ = xmlutils.Singleton
+class Text(xml_utils.Converter):
+    __metaclass__ = xml_utils.Singleton
     NS = EDXL_HAVE_NS
 
     def from_element(self, element):
         return element.text.strip()
 
     def to_element(self, name, value):
-        return xmlutils.element(self.qualify(name), value)
+        return xml_utils.element(self.qualify(name), value)
 
 
-class DateTime(xmlutils.Converter):
-    __metaclass__ = xmlutils.Singleton
+class DateTime(xml_utils.Converter):
+    __metaclass__ = xml_utils.Singleton
     NS = EDXL_HAVE_NS
 
     def from_element(self, element):
         return time_formats.from_rfc3339(element.text.strip())
 
     def to_element(self, name, value):
-        return xmlutils.element(
+        return xml_utils.element(
             self.qualify(name), time_formats.to_rfc3339(value))
 
 
-class GeoLocation(xmlutils.Converter):
-    __metaclass__ = xmlutils.Singleton
+class GeoLocation(xml_utils.Converter):
+    __metaclass__ = xml_utils.Singleton
     NS = EDXL_HAVE_NS
 
     def from_element(self, element):
-        point = element.find(xmlutils.qualify(GML_NS, 'Point'))
+        point = element.find(xml_utils.qualify(GML_NS, 'Point'))
         if point is not None:
-            pos = point.find(xmlutils.qualify(GML_NS, 'pos'))
+            pos = point.find(xml_utils.qualify(GML_NS, 'pos'))
             if pos is not None:
                 latitude, longitude = map(float, pos.text.split())
                 return (latitude, longitude)
 
     def to_element(self, name, value):
         return self.element(name,
-            xmlutils.element(xmlutils.qualify(GML_NS, 'Point'),
-                xmlutils.element(xmlutils.qualify(GML_NS, 'pos'),
+            xml_utils.element(xml_utils.qualify(GML_NS, 'Point'),
+                xml_utils.element(xml_utils.qualify(GML_NS, 'pos'),
                     '%g %g' % (latitude, longitude)
                 )
             )
@@ -109,9 +108,9 @@ class GeoLocation(xmlutils.Converter):
 
 def read(file):
     """Parses EDXL-HAVE <Hospital> elements and returns a list of records."""
-    hospitals = xmlutils.read(file).findall('.//{%s}Hospital' % EDXL_HAVE_NS)
+    hospitals = xml_utils.read(file).findall('.//{%s}Hospital' % EDXL_HAVE_NS)
     return map(Hospital.from_element, hospitals)
 
 def write(file, hospitals):
     """Writes a list of hospital elements as an EDXL-HAVE document."""
-    xmlutils.write(file, serialize(hospitals), URI_PREFIXES)
+    xml_utils.write(file, serialize(hospitals), URI_PREFIXES)

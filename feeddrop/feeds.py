@@ -16,7 +16,7 @@
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
-from feeds import report_feeds
+from feedlib import report_feeds
 
 
 class Feed(webapp.RequestHandler):
