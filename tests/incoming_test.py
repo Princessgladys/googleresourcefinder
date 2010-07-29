@@ -39,6 +39,10 @@ http://code.google.com/p/pubsubhubbub/wiki/DeveloperGettingStartedGuide
 
    c. Submit the form.
 
+   d. Navigate to http://localhost:8888/_ah/admin/queues
+
+   e. Run all tasks that are pending there until no more tasks are pending
+
    If successful, the form submission returns a 204 status which looks
    like nothing happened in your browser.  In the resourcefinder logs
    you should see two requests:
@@ -55,6 +59,10 @@ http://code.google.com/p/pubsubhubbub/wiki/DeveloperGettingStartedGuide
       - Topic: http://localhost:8080/static/sample_feed.xml
 
    c. Submit the form.
+
+   d. Navigate to http://localhost:8888/_ah/admin/queues
+
+   e. Run all tasks that are pending there until no more tasks are pending
 
    Again, if successul, nothing appears to happen in the browser.  The
    resourcefinder logs should show one request (and some other
