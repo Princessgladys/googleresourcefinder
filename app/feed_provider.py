@@ -39,13 +39,13 @@ def schedule_add_record(request, user, subject,
 
 
 class Feed(Handler):
-    def get(self):
-        handle_feed_get(self.request, self.response, URI_PREFIXES)
+    def get(self, feed_name):
+        handle_feed_get(self.request, self.response, feed_name)
 
 
 class Entry(Handler):
-    def get(self):
-        handle_entry_get(self.request, self.response, URI_PREFIXES)
+    def get(self, feed_name):
+        handle_entry_get(self.request, self.response, feed_name)
 
 
 class AddRecord(Handler):
@@ -57,7 +57,7 @@ class AddRecord(Handler):
 
 
 if __name__ == '__main__':
-    run([(r'/feeds/\w+', Feed),
+    run([(r'/feeds/(\w+)', Feed),
          (r'/feeds/\w+/\d+', Entry),
          ('/tasks/add_feed_record', AddRecord),
          ], debug=True)

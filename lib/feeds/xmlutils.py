@@ -19,12 +19,15 @@ def qualify(ns, name):
 
 # ==== Constructing and reading elements ===================================
 
-def element(tag, *attributes_and_text_and_children):
-    """Creates an Element with the given tag and contents.  The arguments may
-    include dictionaries of attributes, child elements, lists of child elements,
-    and text content for the element."""
+def create_element(tag, *args, **kwargs):
+    """Creates an Element with the given tag and contents.  The tag may be a
+    string or a (ns, name) tuple.  The arguments may include dictionaries of
+    attributes, child elements, lists of child elements, and text that is
+    concatenated to form the content of the element."""
+    if isinstance(tag, tuple):
+        tag = qualify(*tag)
     element = ElementTree.Element(tag)
-    for arg in attributes_and_text_and_children:
+    for arg in args:
         if isinstance(arg, dict):  # attributes
             for key, value in arg.items():
                 element.set(key, value)
@@ -36,6 +39,8 @@ def element(tag, *attributes_and_text_and_children):
                     element.text = (element.text or '') + child
                 elif child is not None:  # child elements
                     element.append(child)
+    for key, value in kwargs.items():  # attributes
+        element.set(key, value)
     return element
 
 def parse(string):
@@ -164,8 +169,8 @@ class Converter(object):
                 elements.append(self.to_element(name, struct[name]))
         return elements
 
-    def element(self, name, *attributes_and_text_and_children):
+    def create_element(self, name, *args, **kwargs):
         """Creates an element with the given name, qualified in this
-        Converter's default namespace.  See xmlutils.element."""
+        Converter's default namespace.  See xmlutils.create_element."""
         tag = self.qualify(name)
-        return element(tag, *attributes_and_text_and_children)
+        return create_element(tag, *args, **kwargs)

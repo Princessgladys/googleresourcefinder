@@ -17,17 +17,21 @@
 import unittest
 import xmlutils
         
-class XMLUtilsTest(unittest.TestCase):
-    def setUp(self):
-        self.tag = 'testing'
-        self.attributes_dict = {'attr1': 'hey', 'attr2': 'you'}
-        self.attributes_list = ['hi', 'you']
-        self.e1 = xmlutils.element(self.tag, self.attributes_dict)
-        self.e2 = xmlutils.element(self.tag, self.attributes_list)
-        self.e3 = xmlutils.element(self.tag, [self.e1, self.e2])
-        
-    def test_element(self):
-        assert self.e1.items() == self.attributes_dict.items()
-        assert self.e1.attrib == self.attributes_dict
-        assert self.e2.text == ''.join(self.attributes_list)
-        assert self.e3.getchildren() == [self.e1, self.e2]
+class XmlUtilsTest(unittest.TestCase):
+    def test_create_element(self):
+        e1 = xmlutils.create_element('a', p='hey', q='you')
+        e2 = xmlutils.create_element('b', ['good', 'bye'])
+        e3 = xmlutils.create_element('c', [e1, e2])
+        assert sorted(e1.items()) == [('p', 'hey'), ('q', 'you')]
+        assert e1.tag == 'a'
+        assert e1.attrib == {'p': 'hey', 'q': 'you'}
+        assert e2.tag == 'b'
+        assert e2.text == 'goodbye'
+        assert e3.tag == 'c'
+        assert e3.getchildren() == [e1, e2]
+        assert xmlutils.serialize(e3) == '''\
+<c>
+  <a p="hey" q="you" />
+  <b>goodbye</b>
+</c>
+'''
