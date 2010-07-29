@@ -43,7 +43,7 @@ import django.utils.translation
 
 sent_emails = []
 
-def fake_send_email(locale, sender, to, subject, text_body):
+def fake_send_email(locale, sender, to, subject, body, format):
     global sent_emails
     sent_emails = []
     django.utils.translation.activate(locale)
@@ -52,11 +52,14 @@ def fake_send_email(locale, sender, to, subject, text_body):
     message.sender = sender
     message.to = to
     message.subject = subject
-    message.body = text_body
+    if format == 'html':
+        message.html = body
+    else:
+        message.body = body
     sent_emails.append(message)
     
     # add asserts for when testing the MailUpdateSystem class
-    assert locale and sender and to and subject and text_body
+    assert locale and sender and to and subject and body
     assert '@' in (sender and to)
     assert sender.find('.org') or sender.find('.com')
     assert to.find('.org') or to.find('.com')
@@ -77,7 +80,7 @@ class MailUpdateSystemTest(MediumTestCase):
         self.locale = 'en'
         self.account = Account(email=self.email, actions=['*:*'],
                                default_frequency=self.default_frequency,
-                               locale=self.locale)
+                               locale=self.locale, email_format='plain')
         db.put(self.account)
 
     def tearDown(self):
@@ -249,7 +252,8 @@ class MailUpdateSystemTest(MediumTestCase):
         # the e-mail is sent
         s = Subject(key_name=subject_name, type='hospital', author=self.user)
         self.set_attr(s, 'title', 'title_foo')
-        db.put(s)
+        st = SubjectType(key_name='haiti:hospital')
+        db.put([s, st])
         
         subject_changes = [{'subject_name': subject_name, 'old_frequency':
                             'weekly', 'new_frequency': 'instant'}]
@@ -264,8 +268,8 @@ class MailUpdateSystemTest(MediumTestCase):
         for freq in ['daily', 'weekly', 'monthly']:
             assert not PendingAlert.get(freq, self.email, subject_name)
         assert len(sent_emails) == 1
-        assert 'title__' in sent_emails[0].body
-        assert 'title_bar' in sent_emails[0].body
+        assert 'TITLE_FOO' in sent_emails[0].body
+        db.delete([s, st])
 
     def test_change_default_frequency(self):
         """Confirms that the account's default frequency is changed."""
