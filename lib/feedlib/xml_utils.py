@@ -1,3 +1,17 @@
+# Copyright 2010 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """XML parsing and serialization framework.
 
 This framework helps you parse XML documents, which may have many levels
@@ -6,6 +20,8 @@ subclasses of Converter.  Each Converter describes how to convert a subtree
 of an XML document to or from a Python value.  The type and structure of
 the Python value is up to the Converter.
 """
+
+from struct import Struct
 
 try:
     import xml.etree.cElementTree as ElementTree
@@ -107,20 +123,6 @@ def write(file, root, uri_prefixes={}, pretty_print=True):
     # because 'UTF-8' differs from ElementTree's default, 'utf-8'.  According
     # to the XML 1.0 specification, 'UTF-8' is also the recommended spelling.
     ElementTree.ElementTree(root_copy).write(file, encoding='UTF-8')
-
-
-# ==== Record types ========================================================
-
-class Struct(dict):
-    """A dictionary whose values can also be accessed as attributes."""
-    def __init__(self, **kwargs):
-        self.update(kwargs)
-
-    def __getattr__(self, name):
-        return self[name]
-
-    def __setattr__(self, name, value):
-        self[name] = value
 
 
 # ==== Converter base class ================================================
