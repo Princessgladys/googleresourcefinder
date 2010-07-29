@@ -24,6 +24,23 @@
       #i18n: Link to edit the data for a hospital record.
       {% endcomment %}
       <a href="#" onclick="inplace_edit_start('{{edit_url|escape}}'); return false">{% trans "Edit this record" %}</a>
+      <span class="sep">|</span>
+      <a onclick="subscribe_on_off(this,
+        {% if subscribed %}true{% else %}false{% endif %}, '{{subdomain}}',
+        '{{subject_name|escape}}', '{{frequency}}');"
+        href="#">
+        {% if subscribed %}
+          {% comment %}
+          #i18n: Label to unsubscribe from a subject
+          {% endcomment %}
+          {% trans "Unsubscribe" %}
+        {% else %}
+          {% comment %}
+          #i18n: Label to subscribe to a subject
+          {% endcomment %}
+          {% trans "Subscribe to email updates" %}
+        {% endif %}
+      </a>
     {% else %}
       {% comment %}
       #i18n: Link to sign in to edit the data for a hospital record.

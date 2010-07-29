@@ -237,6 +237,15 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
             'Element %s: actual text %r does not match %r' %
             (locator, text, string_or_regex))
 
+    def assert_no_text(self, string_or_regex, locator):
+        """Asserts that the text of the given element does not contain the
+        given string or regular expression."""
+        text = self.get_text(locator)
+        self.assertFalse(
+            match(string_or_regex, text),
+            'Element %s: actual text %r does match %r' %
+            (locator, text, string_or_regex))
+
     def assert_value(self, string_or_regex, locator):
         """Asserts that the entire value of the given element exactly matches
         the given string, or matches the given regular expression."""
@@ -251,5 +260,13 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         self.assertTrue(
             self.is_text_present(string),
             'Expected text %r is not present on page %s' %
+            (string, self.get_location())
+        )
+
+    def assert_text_not_present(self, string):
+        """Asserts that the given text is not present anywhere on the page."""
+        self.assertFalse(
+            self.is_text_present(string),
+            'Unexpected text %r is present on page %s' %
             (string, self.get_location())
         )

@@ -55,7 +55,7 @@ settings.LOCALE_PATHS = (os.path.join(ROOT, 'locale'),)
 import django.utils.translation
 
 FREQUENCY_TO_TIMEDELTA = {
-    'immediate': datetime.timedelta(0),
+    'instant': datetime.timedelta(0),
     'daily': datetime.timedelta(1),
     'weekly': datetime.timedelta(7)
 }
@@ -194,7 +194,7 @@ class MailAlerts(Handler):
         init(): handles initialization tasks for the class
         post(): responds to HTTP POST requests
         update_and_add_pending_alerts(): queues up future digest alerts and
-            sends out immediate updates; called when a subject is changed
+            sends out instant updates; called when a subject is changed
         send_digests(): sends out a digest update for the specified frequency
     """
     
@@ -204,7 +204,7 @@ class MailAlerts(Handler):
     
     def post(self):
         """Responds to HTTP POST requests. This function either (queues up
-        future daily/weekly/monthly updates and sends immediate updates) or
+        future daily/weekly/monthly updates and sends instant updates) or
         (sends out daily/weekly/monthly digest updates).
         """
         self.init()
@@ -224,7 +224,7 @@ class MailAlerts(Handler):
     def update_and_add_pending_alerts(self):
         """Called when a subject is changed. It creates PendingAlerts for
         any subscription for the changed subject. Also sends out alerts to
-        users who were subscribed to immediate updates for this particular
+        users who were subscribed to instant updates for this particular
         subject.
         """
         subject = Subject.get_by_key_name(self.params.subject_name)
@@ -239,8 +239,8 @@ class MailAlerts(Handler):
         
         subscriptions = Subscription.get_by_subject(self.params.subject_name)
         for subscription in subscriptions:
-            if subscription.frequency != 'immediate':
-                # queue pending alerts for non-immediate update subscriptions
+            if subscription.frequency != 'instant':
+                # queue pending alerts for non-instant update subscriptions
                 key_name = '%s:%s:%s' % (subscription.frequency,
                                          subscription.user_email,
                                          subscription.subject_name)
@@ -259,7 +259,7 @@ class MailAlerts(Handler):
                     db.put(pa)
             
             else:
-                # send out alerts for those with immediate update subscriptions
+                # send out alerts for those with instant update subscriptions
                 account = Account.all().filter('email =',
                                                subscription.user_email).get()
                 send_email(account.locale,

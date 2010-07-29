@@ -211,6 +211,7 @@ class Handler(webapp.RequestHandler):
         lang = (
             self.params.lang or
             self.request.cookies.get('django_language', None) or
+            self.account and self.account.locale or
             settings.LANGUAGE_CODE
         ).replace('_', '-').lower()
 
@@ -221,6 +222,11 @@ class Handler(webapp.RequestHandler):
         # Store the language settings in params.lang and params.maps_lang.
         self.params.lang = lang
         self.params.maps_lang = config.MAPS_LANG_FALLBACKS.get(lang, lang)
+
+       # change account locale if necessary
+        if self.account and lang != self.account.locale:
+            self.account.locale = lang
+            db.put(self.account)
 
         # Activate the selected language.
         django.utils.translation.activate(lang)
