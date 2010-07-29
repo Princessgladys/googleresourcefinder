@@ -26,7 +26,6 @@ import edit
 import simplejson
 import utils
 from edit import ATTRIBUTE_TYPES
-from feeds.xmlutils import Struct
 from medium_test_case import MediumTestCase
 from model import Account, Attribute, Subject, MinimalSubject, SubjectType
 from model import Report
@@ -329,7 +328,7 @@ class EditTest(MediumTestCase):
         geopt_attr_type = ATTRIBUTE_TYPES['geopt']
         geopt_attr = Attribute(key_name='location', timestamp=self.time,
                                type='multi')
-        location = Struct(lat=40.7142, lon=-74.0064)
+        location = utils.Struct(lat=40.7142, lon=-74.0064)
 
         # test make_input() function
         input = geopt_attr_type.make_input('location', location, geopt_attr)

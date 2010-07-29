@@ -45,10 +45,10 @@ locale = function() {
   messages.DISTRICT = "Distrito";
 
   //i18n: Saved message; e-mail subscription has been saved
-  messages.EMAIL_SUBSCRIPTION_SAVED = "Usted recibir\u00e1 actualizaciones ${FREQUENCY} de correo electr\u00f3nico para este servicio. Utilice la ${START_LINK}Configuraci\u00f3n${END_LINK} de p\u00e1gina para cambiar la configuraci\u00f3n de suscripci\u00f3n.";
+  messages.EMAIL_SUBSCRIPTION_SAVED = "You will receive ${FREQUENCY} email updates for this facility. Use the ${START_LINK}Settings${END_LINK} page to change subscription settings.";
 
   //i18n: Eror message, shown when an error occurs.
-  messages.ERROR = "Ha ocurrido un error. Vuelve a intentarlo m\u00e1s tarde.";
+  messages.ERROR = "An error has occurred. Please try again later.";
 
   //i18n: Error message for required field.
   messages.ERROR_FIELD_IS_REQUIRED = "Este campo es requerido.";
@@ -126,16 +126,16 @@ locale = function() {
   messages.SHOW = "Mostrar";
 
   //i18n: Label to subscribe from a subject
-  messages.SUBSCRIBE_TO_UPDATES = "Suscribirse a las Actualizaciones por Correo Electr\u00f3nico";
+  messages.SUBSCRIBE_TO_UPDATES = "Subscribe to email updates";
 
   //i18n: Time format (example 14:32 UTC-4)
   messages.TIME_FORMAT_MEDIUM_WITH_ZONE = "${HOURS}:${MINUTES} ${ZONE}";
 
   //i18n: Label to unsubscribe to a subject
-  messages.UNSUBSCRIBE = "Darse de Baja de Comprobarse";
+  messages.UNSUBSCRIBE = "Unsubscribe";
 
   //i18n: Message indicating the user is unsubscribed
-  messages.UNSUBSCRIBED = "Dados de baja.";
+  messages.UNSUBSCRIBED = "Unsubscribed.";
 
   //i18n: Label indicating a record was updated
   messages.UPDATED = "Actualizado";

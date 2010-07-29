@@ -12,29 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Handler for feed posting requests."""
+"""Handler for the delta feed, which accepts external edits and publishes
+both internal and external edits."""
 
 import logging
 
-from edxl_have import Hospital
-from feeds.feedutils import handle_feed_post
-from model import Report
+from feedlib import report_feeds
 from utils import Handler, run
 
 
-class Incoming(Handler):
+class Feed(Handler):
+    def get(self):
+        """Emits entries in the delta feed; also handles subscription checks."""
+        challenge = self.request.get('hub.challenge')
+        if challenge:
+            # A hub is verifying a subscription request.  Confirm it.
+            # TODO(guido): Check other hub parameters.
+            # Reference:
+            # pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html
+            self.response.out.write(challenge)
 
-    def get(self, token=None):
-        """Subscription verification from hub."""
+        else:
+            report_feeds.handle_feed_get(self.request, self.response, 'delta')
 
-        # TODO(guido): Check other hub parameters.
-
-        # Reference:
-        # pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html
-        challenge = self.request.GET['hub.challenge']
-        self.response.out.write(challenge)
-
-    def post(self, token):
+    def post(self):
         """Feed update notification from hub."""
 
         # TODO(kpy): Remove this when it's been fully tested.
@@ -51,13 +52,21 @@ class Incoming(Handler):
         # TODO(shakusa) Do we need to enforce read-only fields
         # subject name (id), healthc_id, subject title ?
 
-        records = handle_feed_post(self.request, self.response)
+        # Store the incoming reports on the 'delta' feed.
+        reports = report_feeds.handle_feed_post(
+            self.request, self.response, 'delta')
 
-        for record in records:
+        for report in reports:
             # TODO: Now parse these records and apply the edits to Report,
             # Subject, and MinimalSubject.
             pass
 
 
+class Entry(Handler):
+    def get(self):
+        report_feeds.handle_entry_get(self.request, self.response, 'delta')
+
+
 if __name__ == '__main__':
-    run([('/incoming/([^/]+)', Incoming)], debug=True)
+    run([('/feeds/delta', Feed),
+         ('/feeds/delta/\d+', Entry)], debug=True)
