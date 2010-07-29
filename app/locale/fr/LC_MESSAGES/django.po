@@ -21,7 +21,7 @@ msgid "${DATE} at ${TIME}"
 msgstr "${DATE} à ${TIME}"
 
 #. Time format (example 14:32 UTC-4)
-#: static/locale.js:154
+#: static/locale.js:166
 #, sh-format
 msgid "${HOURS}:${MINUTES} ${ZONE}"
 msgstr "${HOURS}:${MINUTES} ${ZONE}"
@@ -39,7 +39,7 @@ msgid "${MONTH} ${DAY}, ${YEAR}"
 msgstr "${DAY} ${MONTH} ${YEAR}"
 
 #. Number of facilities within range of a location. (example: 5 Facilities within 10 miles)
-#: static/locale.js:92
+#: static/locale.js:100
 #, sh-format
 msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} établissements dans un rayon de ${RADIUS_MILES} miles"
@@ -56,7 +56,7 @@ msgid "(unspecified)"
 msgstr "(non spécifié)"
 
 #. Note that a health facility has been marked closed.
-#: templates/hospital_bubble.html:55
+#: templates/hospital_bubble.html:72
 msgid "<strong>Note:</strong> This facility has been marked closed."
 msgstr "<strong>Note:</strong> Cet établissement a été marquée fermée."
 
@@ -66,7 +66,7 @@ msgid "Accuracy"
 msgstr "Précision"
 
 #. Header for a street address
-#: templates/print.html:138 ../tools/setup.py:132 templates/hospital_bubble.html:127
+#: templates/print.html:138 templates/hospital_bubble.html:144 ../tools/setup.py:132
 msgid "Address"
 msgstr "Adresse"
 
@@ -89,6 +89,11 @@ msgstr "Tous"
 #: ../tools/setup.py:106
 msgid "Alternate name"
 msgstr "Autre nom"
+
+#. Eror message, shown when an error occurs.
+#: static/locale.js:59
+msgid "An error has occurred. Please try again later."
+msgstr "Une erreur s'est produite. Veuillez réessayer ultérieurement."
 
 #. Total number of unoccupied beds at a hospital.
 #: ../tools/setup.py:114
@@ -136,17 +141,17 @@ msgid "Category"
 msgstr "Catégorie"
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:155
+#: templates/hospital_bubble.html:172
 msgid "Change"
 msgstr "Modification"
 
 #. Header for the history of changes in data for a facility
-#: templates/hospital_bubble.html:117
+#: templates/hospital_bubble.html:134
 msgid "Change details"
 msgstr "Détails des modifications"
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:163
+#: templates/hospital_bubble.html:180
 msgid "Change note"
 msgstr "Modification"
 
@@ -200,15 +205,25 @@ msgstr "Nom de la personne à contacter"
 msgid "Country:"
 msgstr "Pays :"
 
+#. Label for daily e-mail updates
+#: settings.py:57
+msgid "Daily"
+msgstr "Dialyse"
+
 #. Level of destruction
 #: ../tools/setup.py:146
 msgid "Damage"
 msgstr "Degats"
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:167
+#: templates/hospital_bubble.html:184
 msgid "Date and time"
 msgstr "Date et heure"
+
+#. Label for change default frequency box
+#: templates/settings.html:95
+msgid "Default frequency:"
+msgstr "Fréquence par Défaut:"
 
 #. Meaning: administrative division
 #: ../tools/setup.py:126
@@ -243,7 +258,7 @@ msgid "Distance"
 msgstr "Distance"
 
 #. Meaning: administrative division
-#: templates/map.html:142 ../tools/setup.py:128 static/locale.js:51
+#: templates/map.html:143 static/locale.js:51 ../tools/setup.py:128
 msgid "District"
 msgstr "District"
 
@@ -263,9 +278,19 @@ msgid "Edit this record"
 msgstr "Modifier cet enregistrement"
 
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:159
+#: templates/hospital_bubble.html:176
 msgid "Edited by"
 msgstr "Modifié par"
+
+#. Settings page title
+#: templates/settings.html:68
+msgid "Email Subscription Settings"
+msgstr "Paramètres d'Abonnement par Courriel"
+
+#. Label for e-mail type radio buttons
+#: templates/settings.html:76
+msgid "Email format:"
+msgstr "Format E-mail:"
 
 #. Header for an error message.
 #: templates/error.html:28
@@ -273,32 +298,32 @@ msgid "Error"
 msgstr "Erreur"
 
 #. Error message for not loading edit form successfully
-#: static/locale.js:67
+#: static/locale.js:75
 msgid "Error loading edit form."
 msgstr "Erreur lors du chargement de modifier le formulaire."
 
 #. Error message for not loading facility information successfully
-#: static/locale.js:71
+#: static/locale.js:79
 msgid "Error loading facility information."
 msgstr "Erreur lors du chargement des informations de installation."
 
 #. Error message for not saving facility information successfully
-#: static/locale.js:83
+#: static/locale.js:91
 msgid "Error saving facility information."
 msgstr "Erreur lors du enregistrement des informations de installation."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:151 templates/map.html:183
+#: templates/map.html:184 export.py:151
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
 #. A place that provides a particular service
-#: templates/print.html:129 static/locale.js:96 templates/map.html:161
+#: templates/settings.html:117 templates/print.html:129 static/locale.js:104 templates/map.html:162
 msgid "Facility"
 msgstr "Établissement"
 
 #. Header for details about a facility
-#: templates/hospital_bubble.html:112
+#: templates/hospital_bubble.html:129
 msgid "Facility details"
 msgstr "Infos sur l'établissement"
 
@@ -318,17 +343,17 @@ msgid "Field hospital co-located with hospital"
 msgstr "Hôpital de campagne co-localisés avec un hôpital"
 
 #. Error message for required field.
-#: static/locale.js:55
+#: static/locale.js:63
 msgid "Field is required."
 msgstr "Ce champ est obligatoire."
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:116
+#: templates/map.html:117
 msgid "Filters"
 msgstr "Filtres"
 
 #. Tooltip explaining how to enable print mode
-#: static/locale.js:129
+#: static/locale.js:137
 msgid "First select a hospital from the list on the left. Then Print will print a list of hospitals in order of distance from your selection."
 msgstr "Sélectionnez d'abord un hôpital dans la liste de gauche, puis cliquez sur \"Imprimer\" pour imprimer une liste d'hôpitaux triés en fonction de la distance qui les sépare de votre sélection."
 
@@ -348,12 +373,12 @@ msgid "General Surgery"
 msgstr "Chirurgie Générale"
 
 #. Proper name of an ID for a health facility defined by the  Pan-American Health Organization; no translation necessary.
-#: ../tools/setup.py:112 templates/hospital_bubble.html:39 static/locale.js:106
+#: templates/hospital_bubble.html:56 static/locale.js:114 ../tools/setup.py:112
 msgid "HealthC ID"
 msgstr "ID HealthC"
 
 #. Link to go to a help page for the application
-#: templates/base.html:95
+#: templates/base.html:101
 msgid "Help"
 msgstr "Aide"
 
@@ -377,6 +402,11 @@ msgstr "En cas d'informations incorrectes ou manquantes, veuillez apporter les m
 msgid "Infectious Disease"
 msgstr "Maladies Infectieuses"
 
+#. Label for instant e-mail updates
+#: settings.py:55
+msgid "Instant"
+msgstr "Immédiat"
+
 #. Service provided by a health facility (use Title Case). Meaning: deals with diagnosis and (non-surgical) treatment of Meaning: diseases of the internal organs
 #: ../tools/setup.py:234
 msgid "Internal Medicine"
@@ -388,7 +418,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Date incorrecte : %(date)r  (format AAAA-MM-JJ requis)"
 
 #. Error message for request missing subject name.
-#: subscribe.py:57
+#: settings.py:34 subscribe.py:61
 msgid "Invalid or missing account e-mail."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -398,7 +428,7 @@ msgid "Invalid or missing subject name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
 #. Abbreviated months of the year.
-#: static/locale.js:115
+#: static/locale.js:123
 msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
 msgstr "janv. févr. mars avr. mai juin juil. août sept. oct. nov. déc."
 
@@ -413,7 +443,7 @@ msgid "Language:"
 msgstr "Langue :"
 
 #. Label for a date-time when the data was last updated
-#: templates/hospital_bubble.html:48
+#: templates/hospital_bubble.html:65
 msgid "Last updated"
 msgstr "Mise à jour :"
 
@@ -423,12 +453,12 @@ msgid "Latitude"
 msgstr "Latitude"
 
 #. Error message for invalid latitude.
-#: static/locale.js:63
+#: static/locale.js:71
 msgid "Latitude must be a number."
 msgstr "Latitude doit être un nombre"
 
 #. Error message for invalid latitude.
-#: static/locale.js:59
+#: static/locale.js:67
 msgid "Latitude must be between -90 and 90."
 msgstr "Latitude doit être comprise entre -90 et 90"
 
@@ -443,7 +473,7 @@ msgid "Loader:"
 msgstr "Outil de chargement :"
 
 #. Indicator that the application is loading.
-#: templates/base.html:123 static/locale.js:110
+#: templates/base.html:129 static/locale.js:118
 msgid "Loading..."
 msgstr "Chargement..."
 
@@ -453,7 +483,7 @@ msgid "Location"
 msgstr "Emplacement"
 
 #. Geographic coordinates of a location on earth.
-#: templates/hospital_bubble.html:136
+#: templates/hospital_bubble.html:153
 msgid "Location:"
 msgstr "Emplacement"
 
@@ -463,12 +493,12 @@ msgid "Longitude"
 msgstr "Longitude"
 
 #. Error message for invalid longitude.
-#: static/locale.js:79
+#: static/locale.js:87
 msgid "Longitude must be a number."
 msgstr "Longitude doit être un nombre"
 
 #. Error message for invalid longitude.
-#: static/locale.js:75
+#: static/locale.js:83
 msgid "Longitude must be between -180 and 180."
 msgstr "Longitude doit être comprise entre -180 et 180"
 
@@ -491,6 +521,11 @@ msgstr "Établissement mixte"
 #: ../tools/setup.py:186
 msgid "Mobile clinic"
 msgstr "Clinique mobile"
+
+#. Label for monthly e-mail updates
+#: settings.py:61
+msgid "Monthly"
+msgstr "Mensual"
 
 #. Service provided by a health facility (use Title Case). Meaning: Corpse removal
 #: ../tools/setup.py:271
@@ -523,9 +558,14 @@ msgid "No"
 msgstr "Non"
 
 #. Indicates there is no availability information for this  hospital.
-#: templates/hospital_bubble.html:96
+#: templates/hospital_bubble.html:113
 msgid "No availability information"
 msgstr "Aucune information concernant les disponibilités"
+
+#. message saying no facilities are subscribed to
+#: templates/settings.html:131
+msgid "No facilities to display."
+msgstr "Aucune installation à afficher."
 
 #. Error message
 #: grant_access.py:76
@@ -544,7 +584,7 @@ msgid "Obstetrics and Gynecology"
 msgstr "Obstétrique et Gynécologie"
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
-#: static/locale.js:120
+#: static/locale.js:128
 msgid "Open/Total Beds"
 msgstr "Lits libres/total"
 
@@ -574,7 +614,7 @@ msgid "Orthopedics"
 msgstr "Orthopédie"
 
 #. Proper name of an ID for a health facility defined by the  Haiti ministry of health (MSPP); no translation necessary.
-#: static/locale.js:101 ../tools/setup.py:109 templates/hospital_bubble.html:44
+#: static/locale.js:109 templates/hospital_bubble.html:61 ../tools/setup.py:109
 msgid "PCode"
 msgstr "PCode"
 
@@ -593,8 +633,13 @@ msgstr "Pédiatrie"
 msgid "Phone"
 msgstr "Téléphone"
 
+#. Label for "plain text" radio button
+#: templates/settings.html:83
+msgid "Plain text"
+msgstr "Texte"
+
 #. Indicates a user should call for availability of beds and services at a hospital.
-#: templates/hospital_bubble.html:90
+#: templates/hospital_bubble.html:107
 msgid "Please call for availability information."
 msgstr "Merci d'appeler pour connaître les disponibilités."
 
@@ -614,13 +659,13 @@ msgid "Print"
 msgstr "Imprimer"
 
 #. Tooltip explaining a 'Print' link
-#: static/locale.js:134
+#: static/locale.js:142
 #, sh-format
 msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Imprimer une liste d'hôpitaux triés selon la distance qui les sépare de ${FACILITY_NAME}"
 
 #. Link to privacy policy for the application
-#: templates/base.html:105
+#: templates/base.html:111
 msgid "Privacy"
 msgstr "Confidentialité"
 
@@ -667,7 +712,7 @@ msgid "Resource Finder"
 msgstr "Localisation de ressources"
 
 #. TODO: Add missing message description or meaning
-#: mail_alerts.py:304 mail_alerts.py:269 subscribe.py:118
+#: mail_alerts.py:304 mail_alerts.py:269 subscribe.py:161
 msgid "Resource Finder Updates"
 msgstr "Localisation de ressources"
 
@@ -676,8 +721,13 @@ msgstr "Localisation de ressources"
 msgid "Save"
 msgstr "Enregistrer"
 
+#. Notice that a change has been saved.
+#: templates/settings.html:58
+msgid "Saved."
+msgstr "Enregistrer"
+
 #. Message indicating saving hospital information
-#: static/locale.js:142
+#: static/locale.js:150
 msgid "Saving..."
 msgstr "Enregistrement..."
 
@@ -687,37 +737,52 @@ msgid "Select subject type to export:"
 msgstr "Sélectionnez le type d'établissement à l'exportation :"
 
 #. work done by someone that benefits another
-#: ../tools/setup.py:118 static/locale.js:146
+#: ../tools/setup.py:118 static/locale.js:154
 msgid "Services"
 msgstr "Services"
 
+#. label for changing subjects to default frequency
+#: templates/settings.html:164
+msgid "Set checked to default"
+msgstr "Ensemble Contrôlé par Défaut"
+
+#. Link to go to the settings page of the application
+#: templates/base.html:95
+msgid "Settings"
+msgstr "Paramètres"
+
 #. Label for a control that filters a list of facilities
-#: static/locale.js:150
+#: static/locale.js:158
 msgid "Show"
 msgstr "Montrer"
 
 #. Link to sign into the app
-#: main.py:63
+#: main.py:64
 msgid "Sign in"
 msgstr "Connexion"
 
 #. Link to sign in to edit the data for a hospital record.
-#: templates/hospital_bubble.html:31
+#: templates/hospital_bubble.html:48
 msgid "Sign in to edit"
 msgstr "Connectez-vous pour apporter des modifications."
 
 #. Link to sign out of the app
-#: main.py:61
+#: settings.py:71 main.py:62
 msgid "Sign out"
 msgstr "Déconnexion"
 
+#. Label to subscribe to a subject
+#: templates/hospital_bubble.html:41 static/locale.js:162
+msgid "Subscribe to email updates"
+msgstr "Abonnez-vous aux mises à jour par courriel"
+
 #. Header for a list of provisions
-#: templates/map.html:96
+#: templates/map.html:97
 msgid "Supplies"
 msgstr "Matériel"
 
 #. Link to terms of service for the application
-#: templates/base.html:100
+#: templates/base.html:106
 msgid "Terms of Service"
 msgstr "Conditions d'utilisation"
 
@@ -756,8 +821,23 @@ msgstr "Université"
 msgid "Unreinforced masonry"
 msgstr "Maçonnerie non armée"
 
+#. Label to unsubscribe from a subject
+#: static/locale.js:170 templates/hospital_bubble.html:36
+msgid "Unsubscribe"
+msgstr "Vous Désabonner de Vérifier"
+
+#. label for unsubscribing from subjects
+#: templates/settings.html:171
+msgid "Unsubscribe from checked"
+msgstr "Vous Désabonner de Vérifier"
+
+#. Message indicating the user is unsubscribed
+#: static/locale.js:174
+msgid "Unsubscribed."
+msgstr "Désabonné."
+
 #. Label indicating a record was updated
-#: static/locale.js:158
+#: static/locale.js:178
 msgid "Updated"
 msgstr "Mise à jour :"
 
@@ -767,7 +847,7 @@ msgid "Updated by"
 msgstr "Mise à jour :"
 
 #. Error message for a value that is not a number
-#: static/locale.js:87
+#: static/locale.js:95
 msgid "Value must be a number."
 msgstr "La valeur doit être un nombre"
 
@@ -777,9 +857,14 @@ msgid "Vascular Surgery"
 msgstr "Chirurgie Vasculaire"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:188
+#: templates/map.html:189
 msgid "View Master List archive"
 msgstr "Accéder aux archives (en anglais)"
+
+#. Label for weekly e-mail updates
+#: settings.py:59
+msgid "Weekly"
+msgstr "Hebdomadaire"
 
 #. Type of construction: timber jointed together with nails
 #: ../tools/setup.py:197
@@ -802,8 +887,14 @@ msgstr "Oui"
 msgid "You already have \"%(action)s\" permission"
 msgstr "Vous êtes déjà %(role)s ."
 
+#. Saved message; e-mail subscription has been saved
+#: static/locale.js:55
+#, sh-format
+msgid "You will receive ${FREQUENCY} email updates for this facility. Use the ${START_LINK}Settings${END_LINK} page to change subscription settings."
+msgstr "Vous recevrez par courriel des mises à jour ${FREQUENCY} pour cette installation. Utilisez la page des ${START_LINK}Paramètres${END_LINK} pour modifier les paramètres d'abonnement."
+
 #. Message indicating hospital information has been saved
-#: static/locale.js:138
+#: static/locale.js:146
 msgid "Your edit has been saved"
 msgstr "Vos modifications ont été enregistrées"
 
@@ -819,17 +910,17 @@ msgid "and with availability."
 msgstr "avec disponibilités"
 
 #. a user with no identity
-#: main.py:58
+#: main.py:59
 msgid "anonymous"
 msgstr "anonyme"
 
 #. Heading for number of available beds at a hospital
-#: templates/hospital_bubble.html:64
+#: templates/hospital_bubble.html:81
 msgid "availability"
 msgstr "disponibilités"
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:68
+#: templates/hospital_bubble.html:85
 msgid "capacity"
 msgstr "capacité"
 
@@ -839,13 +930,13 @@ msgid "no more than 10 miles away"
 msgstr "à moins de 10 miles"
 
 #. Very short abbreviation for a phone number, indended to disambiguate from a fax number.  (example: p 555-555-5555)
-#: static/locale.js:125
+#: static/locale.js:133
 #, sh-format
 msgid "p ${PHONE}"
 msgstr "t ${PHONE}"
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:73
+#: templates/hospital_bubble.html:90
 msgid "services"
 msgstr "services"
 

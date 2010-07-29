@@ -88,7 +88,13 @@
          {% endcomment %}
          class="print-link-disabled">{% trans "Print" %}</a> <span class="sep">|</span>
     {% endblock print-link %}
-
+    {% block settings-link %}
+      {% comment %}
+      #i18n: Link to go to the settings page of the application
+      {% endcomment %}
+      <a href="{{settings_url}}">{% trans "Settings" %}</a> <span
+        class="sep">|</span>
+    {% endblock settings-link %}
     {% comment %}
     #i18n: Link to go to a help page for the application
     {% endcomment %}
