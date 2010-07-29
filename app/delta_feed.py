@@ -12,27 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Handler for feed posting requests."""
+"""Handler for the delta feed, which accepts external edits and publishes
+both internal and external edits."""
 
 import logging
 
-from edxl_have import Hospital
-from feeds.report_feeds import handle_feed_post
-from model import Report
+from feeds import report_feeds
 from utils import Handler, run
 
 
-class Incoming(Handler):
+class Feed(Handler):
+    def get(self):
+        """Emits entries in the delta feed; also handles subscription checks."""
+        challenge = self.request.get('hub.challenge')
+        if challenge:
+            # A hub is verifying a subscription request.  Confirm it.
+            # TODO(guido): Check other hub parameters.
+            # Reference:
+            # pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html
+            self.response.out.write(challenge)
 
-    def get(self, token=None):
-        """Subscription verification from hub."""
-
-        # TODO(guido): Check other hub parameters.
-
-        # Reference:
-        # pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html
-        challenge = self.request.GET['hub.challenge']
-        self.response.out.write(challenge)
+        else:
+            report_feeds.handle_feed_get(self.request, self.response, 'delta')
 
     def post(self, token):
         """Feed update notification from hub."""
@@ -52,7 +53,8 @@ class Incoming(Handler):
         # subject name (id), healthc_id, subject title ?
 
         # Store the incoming reports on the 'delta' feed.
-        reports = handle_feed_post(self.request, self.response, 'delta')
+        reports = report_feeds.handle_feed_post(
+            self.request, self.response, 'delta', set_source=True)
 
         for report in reports:
             # TODO: Now parse these records and apply the edits to Report,
@@ -60,5 +62,11 @@ class Incoming(Handler):
             pass
 
 
+class Entry(Handler):
+    def get(self):
+        report_feeds.handle_entry_get(self.request, self.response, 'delta')
+
+
 if __name__ == '__main__':
-    run([('/incoming/([^/]+)', Incoming)], debug=True)
+    run([('/feeds/delta', Feed),
+         ('/feeds/delta/\d+', Entry)], debug=True)

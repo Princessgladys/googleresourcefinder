@@ -21,14 +21,17 @@ from feeds import report_feeds
 
 class Feed(webapp.RequestHandler):
     def get(self, feed_name):
+        """Emits the entries in the specified feed."""
         report_feeds.handle_feed_get(self.request, self.response, feed_name)
 
     def post(self, feed_name):
+        """Stores the posted entries on the specified feed."""
         report_feeds.handle_feed_post(self.request, self.response, feed_name)
 
 
 class Entry(webapp.RequestHandler):
     def get(self, feed_name, entry_key):
+        """Emits a single entry of the specified feed."""
         report_feeds.handle_entry_get(self.request, self.response, feed_name)
 
 
