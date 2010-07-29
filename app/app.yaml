@@ -101,3 +101,7 @@ handlers:
 - url: /tasks/external
   script: feedlib/tasks_external.py
   login: admin
+
+- url: /tasks/add_delta_entry
+  script: tasks_add_delta_entry.py
+  login: admin

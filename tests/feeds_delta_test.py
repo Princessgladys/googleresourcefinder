@@ -84,7 +84,7 @@ Report, Subject and MinimalSubject records have been created/updated.
 import datetime
 import urllib
 
-from feeds import records
+from feedlib.report_feeds import ReportEntry
 from scrape_test_case import ScrapeTestCase
 
 # An actual POST request body from pubsubhubbub.
@@ -92,7 +92,7 @@ from scrape_test_case import ScrapeTestCase
 # XML namespace (e.g. it recognizes <entry> but not <atom:entry>).  Brett
 # is working on fixing this.
 DATA = """<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns:have="urn:oasis:names:tc:emergency:EDXL:HAVE:1.0" xmlns:status="http://schemas.google.com/2010/status" xmlns="http://www.w3.org/2005/Atom" xmlns:gml="http://opengis.net/gml" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3">
+<feed xmlns:have="urn:oasis:names:tc:emergency:EDXL:HAVE:1.0" xmlns:report="http://schemas.google.com/report/2010" xmlns="http://www.w3.org/2005/Atom" xmlns:gml="http://opengis.net/gml" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3">
   <id>http://example.com/feeds/delta</id>
 
 <entry>
@@ -102,9 +102,9 @@ DATA = """<?xml version="1.0" encoding="utf-8"?>
     <id>http://example.com/feeds/delta/122</id>
     <title/>
     <updated>2010-03-16T09:13:48.224281Z</updated>
-    <status:subject>paho.org/HealthC_ID/1115006</status:subject>
-    <status:observed>2010-03-12T12:12:12Z</status:observed>
-    <status:report type="{urn:oasis:names:tc:emergency:EDXL:HAVE:1.0}Hospital">
+    <report:subject>paho.org/HealthC_ID/1115006</report:subject>
+    <report:observed>2010-03-12T12:12:12Z</report:observed>
+    <report:content type="{urn:oasis:names:tc:emergency:EDXL:HAVE:1.0}Hospital">
       <have:Hospital>
         <have:OrganizationInformation>
           <xnl:OrganisationName>
@@ -118,17 +118,30 @@ DATA = """<?xml version="1.0" encoding="utf-8"?>
         </have:OrganizationGeoLocation>
         <have:LastUpdateTime>2010-03-12T12:12:12Z</have:LastUpdateTime>
       </have:Hospital>
-    </status:report>
+    </report:content>
   </entry>
 </feed>
 """
 
 
-class IncomingTest(ScrapeTestCase):
-
-    TOKEN = 'mytoken'
-    URL = 'http://localhost:8081/incoming/' + TOKEN
+class DeltaTest(ScrapeTestCase):
+    URL = 'http://localhost:8081/feeds/delta?subdomain=haiti'
     TOPIC = 'http://localhost:8081/static/sample_feed.xml'
+    TOKEN = 'mytoken'
+
+    def setUp(self):
+        ScrapeTestCase.setUp(self)
+        for entry in ReportEntry.all():
+            entry.delete()
+
+    def tearDown(self):
+        for entry in ReportEntry.all():
+            entry.delete()
+        ScrapeTestCase.tearDown(self)
+
+    def test_empty_feed(self):
+        doc = self.s.go('http://localhost:8081/feeds/delta?subdomain=haiti')
+        assert doc.first('atom:feed')
 
     def test_subscription_verification(self):
         # Test GET request from the hub to verify subscription.
@@ -147,24 +160,20 @@ class IncomingTest(ScrapeTestCase):
     def test_feed_update_notification(self):
         # Test POST request from the hub to announce feed update.
 
-        # Erase all records from the datastore.
-        for rec in records.Record.all():
-            rec.delete()
-        
         doc = self.s.go(self.URL, data=DATA)
-        print doc.content
         assert self.s.status == 200
         assert doc.content == ''
 
         # Now a Record should have been written to the datastore.
-        assert records.Record.all().count() == 1
+        assert ReportEntry.all().count() == 1
 
-        record = records.Record.all().get()
-        assert record.feed_id == 'http://example.com/feeds/delta'
-        assert (record.type_name ==
+        entry = ReportEntry.all().get()
+        assert entry.external_entry_id == 'http://example.com/feeds/delta/122'
+        assert entry.external_feed_id == 'http://example.com/feeds/delta'
+        assert (entry.type_name ==
                 '{urn:oasis:names:tc:emergency:EDXL:HAVE:1.0}Hospital')
-        assert record.subject_id == 'paho.org/HealthC_ID/1115006'
-        assert record.title is None
-        assert record.author_email == 'foo@example.com'
-        assert record.observed == datetime.datetime(2010, 3, 12, 12, 12, 12)
+        assert entry.subject_id == 'paho.org/HealthC_ID/1115006'
+        assert entry.title is None
+        assert entry.author_uri == 'mailto:foo@example.com'
+        assert entry.observed == datetime.datetime(2010, 3, 12, 12, 12, 12)
         # Not checking: arrived (dynamic), content (large)

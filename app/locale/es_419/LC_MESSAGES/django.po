@@ -46,13 +46,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Instituciones dentro de${RADIUS_MILES} millas"
 
 #. Error message for lacking edit permissions
-#: edit.py:374
+#: edit.py:370
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s no tiene permiso para editar %(a)s"
 
 #. Form option to indicate that a value is not specified
-#: edit.py:200 edit.py:174 edit.py:215
+#: edit.py:199 edit.py:173 edit.py:214
 msgid "(unspecified)"
 msgstr "(No especificado)"
 
@@ -77,7 +77,7 @@ msgid "Adobe"
 msgstr "Adobe"
 
 #. Label for a required text box to enter organizational affiliation.
-#: templates/edit.html:98
+#: templates/edit.html:97
 msgid "Affiliation (required)"
 msgstr "Afiliación (requerido)"
 
@@ -122,7 +122,7 @@ msgid "Can pick up patients"
 msgstr "Puedes buscar pacientes"
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:164
+#: templates/edit.html:163
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -167,7 +167,7 @@ msgid "Closed or closing"
 msgstr "Cerrados o de cierre"
 
 #. Label for a text field to enter a comment about a change.
-#: templates/edit.html:145
+#: templates/edit.html:144
 msgid "Comment:"
 msgstr "Comentarios:"
 
@@ -249,7 +249,7 @@ msgid "District"
 msgstr "Distrito"
 
 #. E-mail address
-#: edit.py:121 ../tools/setup.py:124
+#: edit.py:120 ../tools/setup.py:124
 msgid "E-mail"
 msgstr "Correo electrónico"
 
@@ -384,7 +384,7 @@ msgid "Internal Medicine"
 msgstr "Medicina Interna"
 
 #. Error message for invalid date entry
-#: edit.py:143
+#: edit.py:142
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Fecha no válida: %(date)r (requiere un formato de DD-MM-AAAA)"
 
@@ -394,7 +394,7 @@ msgid "Invalid or missing account e-mail."
 msgstr "Nombre de la institución no válido o no especificado"
 
 #. Error message for request missing subject name.
-#: edit.py:441 bubble.py:161
+#: edit.py:427 bubble.py:161
 msgid "Invalid or missing subject name."
 msgstr "Nombre de la institución no válido o no especificado"
 
@@ -419,7 +419,7 @@ msgid "Last updated"
 msgstr "Actualizado"
 
 #. Label for text input
-#: edit.py:236
+#: edit.py:235
 msgid "Latitude"
 msgstr "Latitud"
 
@@ -459,7 +459,7 @@ msgid "Location:"
 msgstr "Ubicación"
 
 #. Label for text input
-#: edit.py:240
+#: edit.py:239
 msgid "Longitude"
 msgstr "Longitud"
 
@@ -504,12 +504,12 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: ../tools/setup.py:104 edit.py:117
+#: ../tools/setup.py:104 edit.py:116
 msgid "Name"
 msgstr "Nombre"
 
 #. Label for a required text box to enter a person's name
-#: templates/edit.html:82
+#: templates/edit.html:81
 msgid "Name (required)"
 msgstr "Nombre (requerido)"
 
@@ -519,7 +519,7 @@ msgid "Neurosurgery"
 msgstr "Neurocirugía"
 
 #. Form option for a false Boolean value
-#: edit.py:178 bubble.py:50 bubble_test.py:66
+#: edit.py:177 bubble.py:50 bubble_test.py:66
 msgid "No"
 msgstr "No"
 
@@ -590,7 +590,7 @@ msgid "Pediatrics"
 msgstr "Pediatría"
 
 #. telephone number
-#: edit.py:119 ../tools/setup.py:122
+#: edit.py:118 ../tools/setup.py:122
 msgid "Phone"
 msgstr "Teléfono"
 
@@ -605,7 +605,7 @@ msgid "Postoperative Care"
 msgstr "Cuidados Posoperatorios"
 
 #. old value for the attribute
-#: mail_alerts.py:127
+#: mail_alerts.py:126
 msgid "Previous value"
 msgstr "Valor anterior"
 
@@ -636,7 +636,7 @@ msgid "Reachable by road"
 msgstr "Acceso a través de carretera"
 
 #. Record updated successfully.
-#: edit.py:524
+#: edit.py:510
 msgid "Record updated."
 msgstr "Registro actualizado."
 
@@ -668,12 +668,12 @@ msgid "Resource Finder"
 msgstr "Localizador de recursos"
 
 #. TODO: Add missing message description or meaning
-#: mail_alerts.py:304 mail_alerts.py:269 subscribe.py:118
+#: mail_alerts.py:303 mail_alerts.py:268 subscribe.py:118
 msgid "Resource Finder Updates"
 msgstr "Localizador de recursos"
 
 #. Button text to save data
-#: templates/edit.html:160
+#: templates/edit.html:159
 msgid "Save"
 msgstr "Guardar"
 
@@ -723,7 +723,7 @@ msgid "Terms of Service"
 msgstr "Condiciones del servicio"
 
 #. Instructions to enter a person's name and organizational affiliation.
-#: templates/edit.html:74
+#: templates/edit.html:73
 msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/terms\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
 msgstr "Gracias por añadir contenido al Localizador de recursos. Para empezar por favor crea un nombre de usuario y dinos cual es tu afiliación. Esta información se mostrará junto a la información que has añadido o editado. También vea las <a target=\"_blank\" href=\"/TOS\">Condiciones de servicio </a> y <a target=\"_blank\" href=\"/privacy\">Política de privacidad</a> (en Inglés)."
 
@@ -743,7 +743,7 @@ msgid "URL:"
 msgstr "URL:"
 
 #. Error message
-#: utils.py:141
+#: utils.py:138
 msgid "Unauthorized user."
 msgstr "Sin autorización del usuario"
 
@@ -763,7 +763,7 @@ msgid "Updated"
 msgstr "Actualizado"
 
 #. who the attribute was updated by
-#: mail_alerts.py:130
+#: mail_alerts.py:129
 msgid "Updated by"
 msgstr "Actualizado"
 
@@ -793,7 +793,7 @@ msgid "X-Ray"
 msgstr "Rayos X"
 
 #. Form option for a true Boolean value
-#: edit.py:176 bubble_test.py:65 bubble.py:50
+#: edit.py:175 bubble_test.py:65 bubble.py:50
 msgid "Yes"
 msgstr "Sí"
 
