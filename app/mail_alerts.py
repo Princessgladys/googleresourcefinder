@@ -411,14 +411,7 @@ class MailAlerts(Handler):
                     frequency=subscription.frequency)
                 if not pa.timestamp:
                     for update in self.changed_request_data:
-                        # None type objects come back from being pickled as the
-                        # unicode dash. If one is found, set the attribute in
-                        # the PendingAlert to None.
-                        if update['old_value'] == '\xe2\x80\x93':
-                            setattr(pa, update['attribute'], None)
-                        else:
-                            setattr(pa, update['attribute'],
-                                    update['old_value'])
+                        setattr(pa, update['attribute'], update['old_value'])
                     for attribute in self.unchanged_request_data:
                         setattr(pa, attribute,
                                 self.unchanged_request_data[attribute])
