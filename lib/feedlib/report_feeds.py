@@ -27,7 +27,6 @@ from time_formats import from_rfc3339, to_rfc1123, to_rfc3339
 from xml_utils import create_element, qualify, parse, serialize, write
 
 HUB = 'http://pubsubhubbub.appspot.com'
-HUB = 'http://localhost:8888'
 ATOM_NS = 'http://www.w3.org/2005/Atom'
 REPORT_NS = 'http://schemas.google.com/report/2010'
 SPREADSHEETS_NS = 'http://schemas.google.com/spreadsheets/2006'

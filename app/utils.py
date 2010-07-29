@@ -32,7 +32,7 @@ from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
 from feedlib.crypto import get_secret
 from feedlib.errors import ErrorMessage, Redirect
-from feedlib.xml_utils import Struct
+from feedlib.struct import Struct
 import gzip
 from html import html_escape
 import logging
