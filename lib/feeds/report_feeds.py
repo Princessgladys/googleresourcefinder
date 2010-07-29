@@ -18,6 +18,7 @@ from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
 
 import datetime
+import pickle
 import tasks_external
 import urllib
 from crypto import sign, verify
@@ -26,6 +27,7 @@ from time_formats import from_rfc3339, to_rfc1123, to_rfc3339
 from xmlutils import create_element, qualify, parse, serialize, write
 
 HUB = 'http://pubsubhubbub.appspot.com'
+HUB = 'http://localhost:8888'
 ATOM_NS = 'http://www.w3.org/2005/Atom'
 REPORT_NS = 'http://schemas.google.com/report/2010'
 SPREADSHEETS_NS = 'http://schemas.google.com/spreadsheets/2006'
@@ -33,20 +35,26 @@ SPREADSHEETS_NS = 'http://schemas.google.com/spreadsheets/2006'
 
 class ReportEntry(db.Model):
     """Entity representing one received or provided XML report entry.
-    
     Each ReportEntry belongs to a local feed, identified by a 'feed_name',
     which is assumed to determine the URI of the feed served by this app.
-    If the ReportEntry was copied from an external feed, it has a 'source_uri'.
-    If the ReportEntry was created locally, its 'source_uri' is always ''."""
+
+    Original (locally created) report entries have a numeric key().id() from
+    which the Atom entry ID is generated, and always have 'external_entry_id'
+    and 'external_feed_id' set to ''.
+    
+    Clones of externally created entries have a key().name() formed by
+    pickling the tuple (feed_name, entry_id), and have non-empty values for
+    'external_entry_id' and 'external_feed_id'."""
     feed_name = db.StringProperty(required=True)  # local feed name
-    type_name = db.StringProperty(required=True)  # XML type in Clark notation
-    subject_id = db.StringProperty(required=True)  # thing this report is about
-    title = db.StringProperty()  # title or summary string
-    author_uri = db.StringProperty(required=True)  # author identifier
-    observed = db.DateTimeProperty(required=True)  # UTC timestamp
+    title = db.StringProperty(default='')  # title or summary string
     arrived = db.DateTimeProperty(auto_now=True)  # UTC timestamp
-    content = db.TextProperty()  # serialized XML document
-    source_uri = db.StringProperty(default='')  # URI of external source feed
+    author_uri = db.StringProperty(required=True)  # author identifier
+    subject_id = db.StringProperty(required=True)  # thing this report is about
+    observed = db.DateTimeProperty(required=True)  # UTC timestamp
+    type_name = db.StringProperty(required=True)  # XML type in Clark notation
+    content = db.TextProperty(default='')  # serialized XML document
+    external_entry_id = db.StringProperty(default='')  # external Atom entry ID
+    external_feed_id = db.StringProperty(default='')  # external Atom feed ID
 
     @staticmethod
     def get_latest_observed(feed_name, type_name, subject_id):
@@ -58,21 +66,48 @@ class ReportEntry(db.Model):
                                  .order('-observed')).get()
 
     @staticmethod
-    def get_latest_arrived(feed_name, source_uri=None, arrived_after=None,
-                           limit=None):
+    def get_latest_arrived(feed_name, external_feed_id=None,
+                           arrived_after=None, limit=None):
         """Gets a list of entries from the given local feed in order of
-        decreasing arrived time, with the given 'source_uri' if specified,
-        with an arrived time greater than 'arrived_after' if specified,
-        up to a maximum of 'limit' entries if specified."""
+        decreasing arrived time, with the given 'external_feed_id' if
+        specified, with an arrived time greater than 'arrived_after' if
+        specified, up to a maximum of 'limit' entries if specified."""
         query = (ReportEntry.all().filter('feed_name =', feed_name)
                                   .order('-arrived'))
-        if source_uri is not None:  # source_uri='' filters to local entries
-            query = query.filter('source_uri =', source_uri)
+        if external_feed_id is not None:
+            query = query.filter('external_feed_id =', external_feed_id)
         if arrived_after:
             query = query.filter('arrived >', arrived_after)
         if limit is None:
             limit = 100
         return query.fetch(min(limit, 100))
+
+    @staticmethod
+    def create_original(feed_name, title, author_uri, subject_id, observed,
+                        type_name, content):
+        # The datastore chooses a new numeric entity ID.
+        return ReportEntry(feed_name=feed_name,
+                           type_name=type_name,
+                           subject_id=subject_id,
+                           title=title,
+                           author_uri=author_uri,
+                           observed=observed,
+                           content=content)
+
+    @staticmethod
+    def create_clone(feed_name, title, author_uri, subject_id, observed,
+                     type_name, content, external_entry_id, external_feed_id):
+        key_name = pickle.dumps((feed_name, external_entry_id))
+        return ReportEntry(key_name=key_name,
+                           feed_name=feed_name,
+                           title=title,
+                           author_uri=author_uri,
+                           subject_id=subject_id,
+                           observed=observed,
+                           type_name=type_name,
+                           content=content,
+                           external_entry_id=external_entry_id,
+                           external_feed_id=external_feed_id)
 
 
 def add_uri_prefixes(uri_prefixes):
@@ -83,7 +118,7 @@ def add_uri_prefixes(uri_prefixes):
 
 def create_entry_element(entry, feed_uri):
     """Converts a ReportEntry entity into an Atom <entry> Element."""
-    entry_id = '%s/%d' % (feed_uri, entry.key().id())
+    entry_id = entry.external_entry_id or '%s/%d' % (feed_uri, entry.key().id())
     author = create_element(
         (ATOM_NS, 'author'),
         create_element((ATOM_NS, 'uri'), entry.author_uri))
@@ -93,16 +128,16 @@ def create_entry_element(entry, feed_uri):
     return create_element(
         (ATOM_NS, 'entry'),
         create_element((ATOM_NS, 'id'), entry_id),
-        create_element((REPORT_NS, 'subject'), entry.subject_id),
-        create_element((ATOM_NS, 'title'), entry.title),
-        author,
-        create_element((REPORT_NS, 'observed'), to_rfc3339(entry.observed)),
-        create_element((ATOM_NS, 'updated'), to_rfc3339(entry.arrived)),
-        create_element((REPORT_NS, 'content'),
-                       parse(entry.content), type=entry.type_name),
-        entry.source_uri and create_element(
+        entry.external_feed_id and create_element(
             (ATOM_NS, 'source'),
-            create_element((ATOM_NS, 'id'), entry.source_uri)))
+            create_element((ATOM_NS, 'id'), entry.external_feed_id)),
+        create_element((ATOM_NS, 'title'), entry.title),
+        create_element((ATOM_NS, 'updated'), to_rfc3339(entry.arrived)),
+        author,
+        create_element((REPORT_NS, 'subject'), entry.subject_id),
+        create_element((REPORT_NS, 'observed'), to_rfc3339(entry.observed)),
+        create_element((REPORT_NS, 'content'),
+                       parse(entry.content), type=entry.type_name))
 
 def create_feed_element(entries, feed_uri, hub=None):
     """Constructs an Atom <feed> element containing the given report entries."""
@@ -113,8 +148,8 @@ def create_feed_element(entries, feed_uri, hub=None):
         updated = datetime.datetime.utcnow()
     elements = [
         create_element((ATOM_NS, 'id'), feed_uri),
-        create_element((ATOM_NS, 'updated'), to_rfc3339(updated)),
         create_element((ATOM_NS, 'title'), feed_uri),
+        create_element((ATOM_NS, 'updated'), to_rfc3339(updated)),
         hub and create_element((ATOM_NS, 'link'), rel='hub', href=hub)
     ]
     elements += [create_entry_element(entry, feed_uri) for entry in entries]
@@ -193,7 +228,7 @@ def get_child(element, tag):
         tag = qualify(*tag)
     child = element.find(tag)
     if child is None:  # need "is None" because childless elements are false
-        raise ErrorMessage(400, '%s contains no %s' % (element.tag, name))
+        raise ErrorMessage(400, '%s contains no %s' % (element.tag, tag))
     return child
 
 def get_text(element, tag):
@@ -202,13 +237,18 @@ def get_text(element, tag):
         tag = qualify(*tag)
     return getattr(element.find(tag), 'text', '')
 
-def create_report_entry(entry_element, feed_name, source_uri=None):
-    """Converts an Atom <entry> Element into a ReportEntry entity."""
+def create_report_entry(entry_element, feed_name, external_feed_id=None):
+    """Converts an Atom <entry> Element into a ReportEntry entity.  If
+    'external_feed_id' is specified, the resulting entity is considered a
+    clone: the entity gets the specified external_feed_id, and the entry
+    element must contain an <id> which becomes the entity's external_entry_id.
+    Otherwise, the entity is stored as an original, with no external_feed_id
+    or external_entry_id."""
     # Get the Atom metadata.
+    title = get_text(entry_element, (ATOM_NS, 'title'))
     author_element = get_child(entry_element, (ATOM_NS, 'author'))
     author_uri = (get_text(author_element, (ATOM_NS, 'uri')) or
                   'mailto:' + get_text(author_element, (ATOM_NS, 'email')))
-    title = get_text(entry_element, (ATOM_NS, 'title'))
 
     # Get the report metadata (subject ID and observed time).
     subject_id = get_child(entry_element, (REPORT_NS, 'subject')).text
@@ -220,19 +260,23 @@ def create_report_entry(entry_element, feed_name, source_uri=None):
     type_name = content_element.attrib['type']
     enclosed_element = get_child(content_element, type_name)
 
-    return ReportEntry(feed_name=feed_name,
-                       type_name=type_name,
-                       subject_id=subject_id,
-                       title=title,
-                       author_uri=author_uri,
-                       observed=observed,
-                       content=serialize(enclosed_element),
-                       source_uri=source_uri or '')
+    if external_feed_id:
+        external_entry_id = get_child(entry_element, (ATOM_NS, 'id')).text
+        return ReportEntry.create_clone(
+            feed_name, title, author_uri, subject_id, observed, type_name,
+            serialize(enclosed_element), external_entry_id, external_feed_id)
+    else:
+        return ReportEntry.create_original(
+            feed_name, title, author_uri, subject_id, observed, type_name,
+            serialize(enclosed_element))
 
-def handle_feed_post(request, response, feed_name, set_source=False):
+def handle_feed_post(request, response, feed_name, store_as_original=False):
     """Handles a post of incoming entries, storing each entry as a report in
-    the specified local feed.  If set_source is true, the posted feed must have
-    an <id> element, which is set as the source_uri on each stored report."""
+    the specified local feed.  By default, the entries are assumed to belong
+    to an external feed, and the posted feed must contain an <id> element,
+    which determines the external_feed_id of the stored entries.  If
+    'store_as_original' is true, the entries are stored as originals, with no
+    external_entry_id or external_feed_id."""
     entries = []
     try:
         feed_element = parse(request.body)
@@ -240,9 +284,19 @@ def handle_feed_post(request, response, feed_name, set_source=False):
         raise ErrorMessage(400, str(e))
     if feed_element.tag != qualify(ATOM_NS, 'feed'):
         raise ErrorMessage(400, 'Incoming document is not an Atom feed')
-    source_uri = set_source and get_child(feed_element, (ATOM_NS, 'id')).text
+    if store_as_original:
+        external_feed_id = None
+    else:
+        external_feed_id = get_child(feed_element, (ATOM_NS, 'id')).text
     for entry_element in feed_element.findall(qualify(ATOM_NS, 'entry')):
-        entries.append(
-            create_report_entry(entry_element, feed_name, source_uri))
-    db.put(entries)
+        # To avoid duplicates, ignore entries that came from this app.
+        entry_id = get_text(entry_element, (ATOM_NS, 'id'))
+        if not entry_id.startswith(request.host_url + '/'):
+            entries.append(create_report_entry(
+                entry_element, feed_name, external_feed_id))
+
+    # If there are new reports to add, store them and notify the hub.
+    if entries:
+        db.put(entries)
+        notify_hub(request.uri)
     return entries

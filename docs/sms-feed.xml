@@ -2,7 +2,6 @@
 <feed xmlns="http://www.w3.org/2005/Atom"
     xmlns:report="http://schemas.google.com/report/2010"
     xmlns:gs="http://schemas.google.com/spreadsheets/2006">
-  <id>http://feeddrop.appspot.com/feeds/frontline-sms-haiti</id>
   <entry>
     <author>
 <!-- Always a globally unique number, including "+" and country code.      -->
