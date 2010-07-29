@@ -15,13 +15,13 @@
 """Tests for utils.py."""
 
 import unittest
-import xmlutils
+import xml_utils
         
 class XmlUtilsTest(unittest.TestCase):
     def test_create_element(self):
-        e1 = xmlutils.create_element('a', p='hey', q='you')
-        e2 = xmlutils.create_element('b', ['good', 'bye'])
-        e3 = xmlutils.create_element('c', [e1, e2])
+        e1 = xml_utils.create_element('a', p='hey', q='you')
+        e2 = xml_utils.create_element('b', ['good', 'bye'])
+        e3 = xml_utils.create_element('c', [e1, e2])
         assert sorted(e1.items()) == [('p', 'hey'), ('q', 'you')]
         assert e1.tag == 'a'
         assert e1.attrib == {'p': 'hey', 'q': 'you'}
@@ -29,7 +29,7 @@ class XmlUtilsTest(unittest.TestCase):
         assert e2.text == 'goodbye'
         assert e3.tag == 'c'
         assert e3.getchildren() == [e1, e2]
-        assert xmlutils.serialize(e3) == '''\
+        assert xml_utils.serialize(e3) == '''\
 <c>
   <a p="hey" q="you" />
   <b>goodbye</b>

@@ -99,5 +99,5 @@ handlers:
   login: admin
 
 - url: /tasks/external
-  script: feeds/tasks_external.py
+  script: feedlib/tasks_external.py
   login: admin

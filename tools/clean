@@ -5,4 +5,4 @@ set_up_symlinks
 update_hgignore
 
 find $PROJECT_DIR -name '*.pyc' -exec rm '{}' ';'
-find app feedsynth -type l -exec rm '{}' ';'
+find app feeddrop -type l -exec rm '{}' ';'

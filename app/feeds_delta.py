@@ -17,7 +17,7 @@ both internal and external edits."""
 
 import logging
 
-from feeds import report_feeds
+from feedlib import report_feeds
 from utils import Handler, run
 
 

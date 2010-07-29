@@ -171,6 +171,6 @@ class Converter(object):
 
     def create_element(self, name, *args, **kwargs):
         """Creates an element with the given name, qualified in this
-        Converter's default namespace.  See xmlutils.create_element."""
+        Converter's default namespace.  See xml_utils.create_element."""
         tag = self.qualify(name)
         return create_element(tag, *args, **kwargs)
