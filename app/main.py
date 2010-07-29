@@ -47,7 +47,7 @@ class Main(utils.Handler):
         home_url = self.get_url('/')
         login_url = users.create_login_url(home_url)
         logout_url = users.create_logout_url(home_url)
-        if self.params.__dict__.get('print'):
+        if self.params.get('print'):
             template = 'templates/print.html'
         else:
             template = 'templates/map.html'

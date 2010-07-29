@@ -103,6 +103,7 @@ class EditTest(SeleniumTestCase):
         def save(self):
             self.click('//input[@name="save"]')
             self.wait_until(self.is_visible, 'data')
+            self.wait_until(self.is_visible, 'id=subject-1')
 
         def edit(self):
             self.edit()
