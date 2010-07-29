@@ -371,7 +371,6 @@ def update(key, subject_type, request, user, account, attributes, subdomain,
                     % {'user': user.email(),
                        'a': get_message('attribute_name',
                                         attribute.key().name())})
-            has_changes = True
             change_info = {'old_value': subject.get_value(name)}
             apply_change(subject, minimal_subject, report,
                          subject_type, request, attribute,
@@ -383,7 +382,7 @@ def update(key, subject_type, request, user, account, attributes, subdomain,
         else:
             unchanged_attribute_values[name] = subject.get_value(name)
     
-    if has_changes:
+    if changed_attribute_information:
         # Store the changes.
         db.put([report, subject, minimal_subject])
         cache.MINIMAL_SUBJECTS[subdomain].flush()
