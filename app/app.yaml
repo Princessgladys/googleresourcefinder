@@ -49,11 +49,8 @@ handlers:
 
 # Public machine endpoints.
 
-- url: /feeds/.*
-  script: feed_provider.py
-
-- url: /incoming/.*
-  script: feed_receiver.py
+- url: /feeds/delta(/.*)?
+  script: delta_feed.py
 
 # ------------------------------------------ Subdomain-independent endpoints
 
@@ -87,10 +84,6 @@ handlers:
 
 - url: /cron
   script: cron.py
-  login: admin
-
-- url: /tasks/add_feed_record
-  script: feed_provider.py
   login: admin
 
 - url: /mail_alerts
