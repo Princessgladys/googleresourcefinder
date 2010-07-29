@@ -332,13 +332,14 @@ def urlencode(params):
         for key in keys if isinstance(params[key], basestring)])
 
 def url_pickle(data):
-    """Serializes a Python object into a 7-bit string (safe to use as a URL
-    parameter, and immune from Unicode encoding or decoding)."""
+    """Serializes a Python object into a 7-bit string.  Use this to pass Python
+    objects through query parameters.  The webob.Request decodes query params
+    as Unicode strings, so regular pickles will run into encoding problems."""
     return pickle.dumps(data).decode('latin-1').encode('utf-7')
 
-def url_unpickle(hex):
+def url_unpickle(data):
     """Deserializes a Python object that was serialized with url_pickle."""
-    return pickle.loads(hex.decode('utf-7').encode('latin-1'))
+    return pickle.loads(data.decode('utf-7').encode('latin-1'))
 
 def set_url_param(url, param, value):
     """Modifies a URL, setting the given param to the specified value.  This
