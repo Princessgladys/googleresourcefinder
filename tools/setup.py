@@ -15,7 +15,7 @@
 import cache
 from access import *
 from extract_messages import parse_message, PATTERNS
-from feeds import crypto
+from feedlib import crypto
 from model import *
 from utils import *
 

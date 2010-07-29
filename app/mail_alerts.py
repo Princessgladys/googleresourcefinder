@@ -38,9 +38,8 @@ from google.appengine.ext import db
 import bubble
 import cache
 import utils
-from feeds.xmlutils import Struct
 from model import Account, PendingAlert, Subject, SubjectType, Subscription
-from utils import _, Handler, simplejson
+from utils import _, Handler, Struct
 
 # Set up localization.
 ROOT = os.path.dirname(__file__)
@@ -212,10 +211,10 @@ class MailAlerts(Handler):
         if self.action == 'subject_changed':
             # Values encoded to latin-1 before unpickling due to pickle
             # needing 8-bit input, matching its original output.
-            self.changed_request_data = pickle.loads(simplejson.loads(
-                self.request.get('changed_data')).encode('latin-1'))
-            self.unchanged_request_data = pickle.loads(simplejson.loads(
-                self.request.get('unchanged_data')).encode('latin-1'))
+            self.changed_request_data = pickle.loads(
+                self.request.get('changed_data'))
+            self.unchanged_request_data = pickle.loads(
+                self.request.get('unchanged_data'))
             self.update_and_add_pending_alerts()
         else:
             for freq in ['daily', 'weekly', 'monthly']:
