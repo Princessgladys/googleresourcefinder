@@ -35,7 +35,7 @@ class Feed(Handler):
         else:
             report_feeds.handle_feed_get(self.request, self.response, 'delta')
 
-    def post(self, token):
+    def post(self):
         """Feed update notification from hub."""
 
         # TODO(kpy): Remove this when it's been fully tested.
@@ -60,6 +60,9 @@ class Feed(Handler):
             # TODO: Now parse these records and apply the edits to Report,
             # Subject, and MinimalSubject.
             pass
+
+        # If there were new reports, notify the hub.
+        report_feeds.notify_hub(self.request.uri)
 
 
 class Entry(Handler):

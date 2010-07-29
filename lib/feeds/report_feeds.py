@@ -14,9 +14,11 @@
 
 """Support for Atom feed providers backed by the data store."""
 
+from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
 
 import datetime
+import tasks_external
 import urllib
 from crypto import sign, verify
 from errors import ErrorMessage
@@ -130,10 +132,7 @@ def write_feed(file, entries, feed_uri, uri_prefixes={}, hub=None):
 
 def notify_hub(feed_uri):
     """Notifies a PubSubHubbub hub of new content at a given feed URI."""
-    data = urllib.urlencode({'hub.mode': 'publish', 'hub.url': feed_uri})
-    file = urllib.urlopen(HUB, data)
-    file.read()
-    file.close()
+    tasks_external.add(HUB, {'hub.mode': 'publish', 'hub.url': feed_uri})
 
 def check_request_etag(headers):
     """Determines etag, limit, arrived_after based on request headers."""
