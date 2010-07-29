@@ -708,7 +708,7 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "La solicitud para ser %(role)s se denegó."
 
 #. Name of the application.
-#: templates/print.html:50 templates/print.html.py:103
+#: templates/subdomain_menu.html.py:35
 msgid "Resource Finder"
 msgstr "Localizador de recursos"
 

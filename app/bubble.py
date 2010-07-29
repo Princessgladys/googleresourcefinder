@@ -163,8 +163,8 @@ class Bubble(Handler):
         subscribed = ''
         if self.user:
             subject_name = '%s:%s' % (self.subdomain, self.params.subject_name)
-            subscribed = True if model.Subscription.get(
-                subject_name, self.user.email()) else ''
+            subscribed = bool(model.Subscription.get(subject_name,
+                                                     self.user.email()))
 
         subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
 

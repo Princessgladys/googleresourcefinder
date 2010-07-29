@@ -137,7 +137,7 @@ class Subscribe(Handler):
         db.put(self.account)
 
     def change_subscription(self, subject_name, old_frequency, new_frequency):
-        if ((old_frequency not in Subscription.frequency.choices) and
+        if ((old_frequency not in Subscription.frequency.choices) or
             (new_frequency not in Subscription.frequency.choices)):
             self.error(400) # bad request
         s = Subscription.get(subject_name, self.email)

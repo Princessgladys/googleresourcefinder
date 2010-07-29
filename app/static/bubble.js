@@ -33,7 +33,8 @@ function subscribe_on_off(element, subscribed, subdomain, subject_name,
         subscribe_on_off(element, !subscribed, subdomain, subject_name,
             frequency);
       };
-      show_status(get_message(subscribed, subdomain, frequency), 5000, true);
+      show_status(get_subscription_message(subscribed, subdomain, frequency),
+                  5000, true);
     },
     error: function(xhr, text_status, error) {
       log(text_status + ', ' + error);
@@ -50,7 +51,7 @@ function subscribe_on_off(element, subscribed, subdomain, subject_name,
  * @param {string} frequency the frequency to set the subscription to
  * @return {string} the message to display
  */
-function get_message(subscribed, subdomain, frequency) {
+function get_subscription_message(subscribed, subdomain, frequency) {
   var message = '';
   if (!subscribed) {
     message = locale.EMAIL_SUBSCRIPTION_SAVED({
