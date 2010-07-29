@@ -1,0 +1,179 @@
+{% comment %}
+# Copyright 2010 by Google Inc
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="static/map.css">
+  <link rel="stylesheet" href="static/settings.css">
+{% endblock stylesheets %}
+
+{% comment %}
+# Remove Google Maps API
+{% endcomment %}
+{% block google-maps-api %}
+{% endblock google-maps-api %}
+
+{% block javascript-includes %}
+  <script type="text/javascript" src="static/settings.js"></script>
+{% endblock javascript-includes %}
+
+{% block home-link %}
+{% include "home_link.html" %}
+{% endblock home-link %}
+
+{% comment %}
+# Remove print link
+{% endcomment %}
+{% block print-link %}
+{% endblock print-link %}
+
+{% comment %}
+# Remove settings link
+{% endcomment %}
+{% block settings-link %}
+{% endblock settings-link %}
+
+{% comment %}
+# Replace loading div with saved
+{% endcomment %}
+{% block loading %}
+{% comment %}
+#i18n: Notice that a change has been saved.
+{% endcomment %}
+<div id="loading" class="loading" style='display: none;'>{% trans "Saved." %}</div>
+{% endblock loading %}
+
+{% block content %}
+<table id="settings">
+  <tr>
+    <td colspan="6" class="settings-title">
+      {% comment %}
+      #i18n: Settings page title
+      {% endcomment %}
+      {% trans "Email Subscription Settings" %}
+    </td>
+  </tr>
+  <tr>
+    <td colspan="6" class="settings-email-type">
+      {% comment %}
+      #i18n: Label for e-mail type radio buttons
+      {% endcomment %}
+      {% trans "Email format:" %}
+      <input type="radio" name="email-type" value="plain"
+        onclick="change_email_format('{{subdomain}}', 'plain');"
+        {% ifequal user_email_format 'plain' %} checked{% endifequal %}>
+        {% comment %}
+        #i18n: Label for "plain text" radio button
+        {% endcomment %}
+        {% trans "Plain text" %}
+      <input type="radio" name="email-type" value="html"
+        onclick="change_email_format('{{subdomain}}', 'html');"
+        {% ifequal user_email_format 'html' %} checked{% endifequal %}>
+        HTML
+    </td>
+  </tr>
+  <tr>
+    <td colspan="6" class="settings-change-default">
+      {% comment %}
+      #i18n: Label for change default frequency box
+      {% endcomment %}
+      {% trans "Default frequency:" %}
+      <select name="default-frequency"
+        onChange="change_default_frequency('{{subdomain}}', this)">
+        {% for frequency in frequencies %}
+        <option value="{{frequency.value}}"
+          {% ifequal user_frequency frequency.value %}selected{% endifequal %}>
+          {{frequency.trans}}
+        </option>
+        {% endfor %}
+      </select>
+    </td>
+  </tr>
+  {% if subjects %}
+  <tr>
+    <td class="settings-label-checkbox">
+      <center><input type="checkbox" name="subjects-check-all"
+        onclick="check_uncheck_all();"></center>
+    </td>
+    <td class="settings-label-subjectname">
+      {% comment %}
+      #i18n: A place that provides a particular service
+      {% endcomment %}
+      {% trans "Facility" %}
+    </td>
+    {% for frequency in frequencies %}
+      <td class="settings-label-frequency">
+        <center>{{frequency.trans}}</center>
+      </td>
+    {% endfor %}
+  </tr>
+  {% else %}
+  <tr>
+    <td colspan="6" class="settings-no-facilities">
+      {% comment %}
+      #i18n: message saying no facilities are subscribed to
+      {% endcomment %}
+      {% trans "No facilities to display." %}
+    </td>
+  </tr>
+  {% endif %}
+  {% for subject in subjects %}
+  <tr id="{{subject.name}}" class="{% if forloop.counter|divisibleby:2 %}even
+    {% else %}odd{% endif %}">
+    <td class="settings-subject-checkbox">
+      <center><input type="checkbox" name="subject-checkboxes"
+        value="{{subject.name}}" onclick="check_checkboxes();"></center>
+    </td>
+    <td class="settings-subject-name">
+      {{subject.title}}
+    </td>
+    {% for frequency in frequencies %}
+    <td>
+      <center><input type="radio" name="{{subject.name}}_freq"
+          value="{{frequency.value}}" onclick="change_frequency('{{subdomain}}',
+          '{{subject.name}}', '{{subject.frequency}}', '{{frequency.value}}');"
+          {% ifequal frequency.value subject.frequency %}checked{% endifequal %}></center>
+      </td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+  {% if subjects %}
+  <tr>
+    <td></td>
+    <td>
+      <button onclick="set_checked_to_default('{{subdomain}}');"
+        id="button-set-to-default">
+        {% comment %}
+        #i18n: label for changing subjects to default frequency
+        {% endcomment %}
+        {% trans "Set checked to default" %}
+      </button>
+      <button onclick="unsubscribe_checked('{{subdomain}}')"
+        id="button-unsubscribe-checked">
+        {% comment %}
+        #i18n: label for unsubscribing from subjects
+        {% endcomment %}
+        {% trans "Unsubscribe from checked" %}</button>
+    </td>
+  </tr>
+  {% endif %}
+</table>
+
+</body>
+</html>
+{% endblock content %}
