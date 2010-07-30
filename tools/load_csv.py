@@ -217,6 +217,7 @@ def convert_shoreland_record(record):
         'commune': ValueInfo(record.get('commune')),
         'address': ValueInfo(record.get('address')),
         'location': ValueInfo(location),
+        'accuracy': ValueInfo(record.get('accuracy')),
         'organization': ValueInfo(record.get('organization')),
         # The 'type' and 'category' columns are swapped.
         'organization_type':
