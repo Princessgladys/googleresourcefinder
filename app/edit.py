@@ -21,7 +21,7 @@ import logging
 import model
 import pickle
 import re
-import StringIO
+import simplejson
 import urlparse
 import utils
 import wsgiref
@@ -30,7 +30,7 @@ from access import check_action_permitted
 from feedlib.crypto import sign, verify
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
-from utils import db, get_message, html_escape, simplejson
+from utils import db, get_message, html_escape
 from utils import to_unicode, users, _
 
 XSRF_KEY_NAME = 'resource-finder-edit'
