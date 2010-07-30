@@ -133,16 +133,17 @@ def convert_shoreland_record(record):
         latitude = float(record['latitude'])
         longitude = float(record['longitude'])
         location = db.GeoPt(latitude, longitude)
-    except ValueError:
+    except (KeyError, ValueError):
         logging.warn('No location for %r (%s): latitude=%r longitude=%r' % (
             title, healthc_id, record.get('latitude'), record.get('longitude')))
         location = None
     observed = None
-    if record['entry_last_updated']:
+    if record.get('entry_last_updated'):
         observed = parse_shoreland_datetime(record['entry_last_updated'])
 
     # The CSV 'type' column maps to our 'category' attribute.
     CATEGORY_MAP = {
+        None: '',
         '': '',
         'Clinic': 'CLINIC',
         'Dispensary': 'DISPENSARY',
@@ -152,6 +153,7 @@ def convert_shoreland_record(record):
 
     # The CSV 'category' column maps to our 'organization_type' attribute.
     ORGANIZATION_TYPE_MAP = {
+        None: '',
         '': '',
         'Community': 'COMMUNITY',
         'Faith-Based Org': 'FAITH_BASED',
@@ -165,6 +167,7 @@ def convert_shoreland_record(record):
 
     # The CSV 'operational_status' column has two possible values.
     OPERATIONAL_STATUS_MAP = {
+        None: '',
         '': '',
         'Open': 'OPERATIONAL',
         'Closed or Closing': 'CLOSED_OR_CLOSING'
@@ -188,7 +191,7 @@ def convert_shoreland_record(record):
     service_list = []
     for keyword in record.get('services', '').split():
         service_list.append(SERVICE_MAP[keyword])
-    if record['services_last_updated']:
+    if record.get('services_last_updated'):
         services = ValueInfo(service_list, parse_shoreland_datetime(
             record['services_last_updated']))
     else:
@@ -202,34 +205,35 @@ def convert_shoreland_record(record):
         'available_beds': ValueInfo(None),
         # NOTE(kpy): Intentionally treating total_beds=0 as "number unknown".
         'total_beds': ValueInfo(
-            record['total_beds'] and int(record['total_beds']) or None,
-            comment=record['BED TRACKING COMMENTS']),
+            record.get('total_beds') and int(record['total_beds']) or None,
+            comment=record.get('BED TRACKING COMMENTS')),
         # Didn't bother to convert the 'services' field because it's empty
         # in the CSV from Shoreland.
-        'contact_name': ValueInfo(record['contact_name']),
-        'phone': ValueInfo(record['contact_phone']),
-        'email': ValueInfo(record['contact_email']),
-        'department': ValueInfo(record['department']),
-        'district': ValueInfo(record['district']),
-        'commune': ValueInfo(record['commune']),
-        'address': ValueInfo(record['address']),
+        'contact_name': ValueInfo(record.get('contact_name')),
+        'phone': ValueInfo(record.get('contact_phone')),
+        'email': ValueInfo(record.get('contact_email')),
+        'department': ValueInfo(record.get('department')),
+        'district': ValueInfo(record.get('district')),
+        'commune': ValueInfo(record.get('commune')),
+        'address': ValueInfo(record.get('address')),
         'location': ValueInfo(location),
-        'organization': ValueInfo(record['organization']),
+        'accuracy': ValueInfo(record.get('accuracy')),
+        'organization': ValueInfo(record.get('organization')),
         # The 'type' and 'category' columns are swapped.
         'organization_type':
-            ValueInfo(ORGANIZATION_TYPE_MAP[record['category']]),
-        'category': ValueInfo(CATEGORY_MAP[record['type']]),
+            ValueInfo(ORGANIZATION_TYPE_MAP[record.get('category')]),
+        'category': ValueInfo(CATEGORY_MAP[record.get('type')]),
         # Didn't bother to convert the 'construction' field because it's empty
         # in the CSV from Shoreland.
-        'damage': ValueInfo(record['damage']),
+        'damage': ValueInfo(record.get('damage')),
         'operational_status':
-            ValueInfo(OPERATIONAL_STATUS_MAP[record['operational_status']]),
+            ValueInfo(OPERATIONAL_STATUS_MAP[record.get('operational_status')]),
         'services': services,
-        'comments': ValueInfo(db.Text(record['comments'])),
-        'region_id': ValueInfo(record['region_id']),
-        'district_id': ValueInfo(record['district_id']),
-        'commune_id': ValueInfo(record['commune_id']),
-        'sante_id': ValueInfo(record['sante_id'])
+        'comments': ValueInfo(db.Text(record.get('comments', ''))),
+        'region_id': ValueInfo(record.get('region_id')),
+        'district_id': ValueInfo(record.get('district_id')),
+        'commune_id': ValueInfo(record.get('commune_id')),
+        'sante_id': ValueInfo(record.get('sante_id'))
     }
 
 def load_csv(
