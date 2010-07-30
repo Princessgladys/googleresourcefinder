@@ -1,3 +1,17 @@
+# Copyright 2010 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """XML parsing and serialization framework.
 
 This framework helps you parse XML documents, which may have many levels
@@ -7,7 +21,8 @@ of an XML document to or from a Python value.  The type and structure of
 the Python value is up to the Converter.
 """
 
-import copy
+from struct import Struct
+
 try:
     import xml.etree.cElementTree as ElementTree
 except ImportError:
@@ -17,27 +32,47 @@ def qualify(ns, name):
     """Makes a namespace-qualified name."""
     return '{%s}%s' % (ns, name)
 
-def element(tag, *attributes_and_text_and_children):
-    """Creates an Element with the given tag and contents.  The arguments may
-    include dictionaries of attributes, child elements, lists of child elements,
-    and text content for the element."""
+
+# ==== Constructing and reading elements ===================================
+
+def create_element(tag, *args, **kwargs):
+    """Creates an Element with the given tag and contents.  The tag may be a
+    string or a (ns, name) tuple.  The arguments may include dictionaries of
+    attributes, child elements, lists of child elements, and text that is
+    concatenated to form the content of the element."""
+    if isinstance(tag, tuple):
+        tag = qualify(*tag)
     element = ElementTree.Element(tag)
-    for arg in attributes_and_text_and_children:
+    for arg in args:
         if isinstance(arg, dict):  # attributes
             for key, value in arg.items():
                 element.set(key, value)
         else:
             if not isinstance(arg, list):
                 arg = [arg]
-            for child in arg:  # text or child elements
-                if isinstance(child, basestring):
+            for child in arg:  # text content or child elements
+                if isinstance(child, basestring):  # text content
                     element.text = (element.text or '') + child
-                else:
+                elif child is not None:  # child elements
                     element.append(child)
+    for key, value in kwargs.items():  # attributes
+        element.set(key, value)
     return element
+
+def parse(string):
+    """Parses XML from a string."""
+    return ElementTree.fromstring(string)
+
+def read(file):
+    """Reads an XML tree from a file."""
+    return ElementTree.parse(file)
+
+
+# ==== Serializing and writing elements ====================================
 
 def indent(element, level=0):
     """Adds indentation to an element subtree."""
+    # TODO(kpy): Make this non-mutating so we don't have to copy in serialize().
     indentation = '\n' + level*'  '
     if len(element):
         if not element.text or not element.text.strip():
@@ -62,32 +97,25 @@ def fix_name(name, uri_prefixes):
 
 def set_prefixes(root, uri_prefixes):
     """Replaces Clark qualified element names with specific given prefixes."""
+    # TODO(kpy): Make this non-mutating so we don't have to copy in serialize().
     for uri, prefix in uri_prefixes.items():
         root.set('xmlns:' + prefix, uri)
 
     for element in root.getiterator():
         element.tag = fix_name(element.tag, uri_prefixes)
 
-def parse(string):
-    """Parses XML from a string."""
-    return ElementTree.fromstring(string)
-
 def serialize(root, uri_prefixes={}, pretty_print=True):
     """Serializes XML to a string."""
-    root_copy = copy.deepcopy(root)
+    root_copy = ElementTree.fromstring(ElementTree.tostring(root))
     set_prefixes(root_copy, uri_prefixes)
     if pretty_print:
         indent(root_copy)
     return ElementTree.tostring(root_copy)
 
-def read(file):
-    """Reads an XML tree from a file."""
-    return ElementTree.parse(file)
-
 def write(file, root, uri_prefixes={}, pretty_print=True):
     """Writes an XML tree to a file, using the given map of namespace URIs to
     prefixes, and adding nice indentation."""
-    root_copy = copy.deepcopy(root)
+    root_copy = ElementTree.fromstring(ElementTree.tostring(root))
     set_prefixes(root_copy, uri_prefixes)
     if pretty_print:
         indent(root_copy)
@@ -95,20 +123,6 @@ def write(file, root, uri_prefixes={}, pretty_print=True):
     # because 'UTF-8' differs from ElementTree's default, 'utf-8'.  According
     # to the XML 1.0 specification, 'UTF-8' is also the recommended spelling.
     ElementTree.ElementTree(root_copy).write(file, encoding='UTF-8')
-
-
-# ==== Record types ========================================================
-
-class Struct(dict):
-    """A dictionary whose values can also be accessed as attributes."""
-    def __init__(self, **kwargs):
-        self.update(kwargs)
-
-    def __getattr__(self, name):
-        return self[name]
-
-    def __setattr__(self, name, value):
-        self[name] = value
 
 
 # ==== Converter base class ================================================
@@ -157,8 +171,8 @@ class Converter(object):
                 elements.append(self.to_element(name, struct[name]))
         return elements
 
-    def element(self, name, *attributes_and_text_and_children):
+    def create_element(self, name, *args, **kwargs):
         """Creates an element with the given name, qualified in this
-        Converter's default namespace.  See xmlutils.element."""
+        Converter's default namespace.  See xml_utils.create_element."""
         tag = self.qualify(name)
-        return element(tag, *attributes_and_text_and_children)
+        return create_element(tag, *args, **kwargs)
