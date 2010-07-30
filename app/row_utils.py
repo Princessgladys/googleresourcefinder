@@ -14,7 +14,8 @@
 
 """Serialization of attribute values to and from gs:field contents."""
 
-from feedlib import time_formats
+from feedlib import time_formats, xml_utils
+from feedlib.report_feeds import REPORT_NS, SPREADSHEETS_NS
 from google.appengine.ext import db
 import model
 
@@ -34,6 +35,17 @@ def serialize(attribute_name, value):
     if type == 'geopt':
         return unicode(value.lat) + ',' + unicode(value.lon)
 
+def serialize_to_elements(values, comments={}):
+    """Returns a list of <gs:field> elements for the given values and comments
+    (both are dictionaries keyed on attribute names)."""
+    fields = []
+    for name in values:
+        fields.append(xml_utils.create_element(
+            (SPREADSHEETS_NS, 'field'),
+            serialize(name, values[name]),
+            name in comments and {'comment': comments[name]} or None))
+    return fields
+
 def parse(attribute_name, string):
     """Parses a Unicode string into an attribute value."""
     type = model.Attribute.get_by_key_name(attribute_name).type
@@ -46,8 +58,19 @@ def parse(attribute_name, string):
     if type == 'float':
         return float(string)
     if type == 'bool':
-        return string == u'TRUE'
+        return string.upper() == u'TRUE'
     if type == 'multi':
         return string.split(',')
     if type == 'geopt':
         return db.GeoPt(*map(float, string.split(',')))
+
+def parse_from_elements(parent):
+    """Parses all the <gs:field> elements that are children of the given
+    element, returning a dictionary of values and a dictionary of comments."""
+    values = {}
+    comments = {}
+    for field in parent.findall(xml_utils.qualify(SPREADSHEETS_NS, 'field')):
+        name = field.attrib['name']
+        values[name] = parse(name, field.text)
+        comments[name] = field.get(xml_utils.qualify(REPORT_NS, 'comment'))
+    return values, comments

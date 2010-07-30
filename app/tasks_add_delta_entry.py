@@ -18,15 +18,15 @@ import pickle
 import row_utils
 from feedlib.report_feeds import ReportEntry, REPORT_NS, SPREADSHEETS_NS
 from feedlib import xml_utils
-from utils import ErrorMessage, Handler, run, taskqueue, _
+from utils import ErrorMessage, Handler, run, taskqueue, url_unpickle, _
 
 
 class AddDeltaEntry(Handler):
     def post(self):
         user_email = self.request.get('user_email')
         subject_name = self.request.get('subject_name')
-        observed = pickle.loads(self.request.get('observed'))
-        changes = pickle.loads(self.request.get('changed_data'))
+        observed = url_unpickle(self.request.get('observed'))
+        changes = url_unpickle(self.request.get('changed_data'))
         type_name = xml_utils.qualify(REPORT_NS, 'row')
         row = xml_utils.create_element(type_name)
         for name in changes:
