@@ -15,7 +15,6 @@
 from google.appengine.api.labs import taskqueue
 from google.appengine.api.labs.taskqueue import Task
 
-import StringIO
 import cache
 import datetime
 import logging
