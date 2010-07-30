@@ -23,7 +23,6 @@ from google.appengine.api import users
 from google.appengine.ext import db, webapp
 
 import mail_alerts
-import simplejson
 import utils
 from mail_alerts import get_timedelta, fetch_updates, format_plain_body
 from mail_alerts import update_account_alert_time

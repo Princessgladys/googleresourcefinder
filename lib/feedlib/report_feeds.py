@@ -14,16 +14,17 @@
 
 """Support for Atom feed providers backed by the data store."""
 
-from google.appengine.api.labs import taskqueue
-from google.appengine.ext import db
-
 import datetime
 import logging
 import pickle
-import tasks_external
 import urllib
-from crypto import sign, verify
+
+from google.appengine.api.labs import taskqueue
+from google.appengine.ext import db
+
+import crypto
 from errors import ErrorMessage
+import tasks_external
 from time_formats import from_rfc3339, to_rfc1123, to_rfc3339
 from xml_utils import create_element, qualify, parse, serialize, write
 
@@ -43,8 +44,8 @@ class ReportEntry(db.Model):
     and 'external_feed_id' set to ''.
     
     Clones of externally created entries have a key().name() formed by
-    pickling the tuple (feed_name, entry_id), and have non-empty values for
-    'external_entry_id' and 'external_feed_id'."""
+    pickling the tuple (feed_name, external_entry_id), and have non-empty
+    values for 'external_entry_id' and 'external_feed_id'."""
     feed_name = db.StringProperty(required=True)  # local feed name
     title = db.StringProperty(default='')  # title or summary string
     arrived = db.DateTimeProperty(auto_now=True)  # UTC timestamp
@@ -181,7 +182,7 @@ def check_request_etag(headers):
         try:
             etag = headers['If-None-Match'].strip().strip('"')
             timestamp, signature = etag.split('/')
-            if verify('etag_key', timestamp, signature):
+            if crypto.verify('etag_key', timestamp, signature):
                 return etag, None, from_rfc3339(timestamp)
         except (KeyError, ValueError):
             pass
@@ -191,7 +192,7 @@ def create_response_etag(entries):
     """Constructs the ETag response header for the given report entries."""
     arrival_time = entries and entries[0].arrived or 0
     timestamp = to_rfc3339(arrival_time)
-    return '"' + timestamp + '/' + sign('etag_key', timestamp) + '"'
+    return '"' + timestamp + '/' + crypto.sign('etag_key', timestamp) + '"'
 
 def handle_feed_get(request, response, feed_name, uri_prefixes={}):
     """Handles a request for an Atom feed of XML report entries."""

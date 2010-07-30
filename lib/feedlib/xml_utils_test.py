@@ -22,6 +22,7 @@ class XmlUtilsTest(unittest.TestCase):
         e1 = xml_utils.create_element('a', p='hey', q='you')
         e2 = xml_utils.create_element('b', ['good', 'bye'])
         e3 = xml_utils.create_element('c', [e1, e2])
+        e4 = xml_utils.create_element(('d', 'e'), [e1, e2])
         assert sorted(e1.items()) == [('p', 'hey'), ('q', 'you')]
         assert e1.tag == 'a'
         assert e1.attrib == {'p': 'hey', 'q': 'you'}
@@ -29,9 +30,10 @@ class XmlUtilsTest(unittest.TestCase):
         assert e2.text == 'goodbye'
         assert e3.tag == 'c'
         assert e3.getchildren() == [e1, e2]
-        assert xml_utils.serialize(e3) == '''\
-<c>
+        assert e4.tag == '{d}e'
+        assert xml_utils.serialize(e4) == '''\
+<ns0:e xmlns:ns0="d">
   <a p="hey" q="you" />
   <b>goodbye</b>
-</c>
+</ns0:e>
 '''
