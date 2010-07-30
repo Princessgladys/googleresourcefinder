@@ -35,8 +35,9 @@ class AddDeltaEntry(Handler):
                 {'name': name},
                 row_utils.serialize(name, changes[name]['new_value'])))
         ReportEntry.create_original(
-            'delta', '', 'mailto:' + user_email, subject_name, observed,
-            type_name, xml_utils.serialize(row)).put()
+            self.subdomain + '/delta', '', 'mailto:' + user_email,
+            subject_name, observed, type_name, xml_utils.serialize(row)
+        ).put()
 
 
 if __name__ == '__main__':
