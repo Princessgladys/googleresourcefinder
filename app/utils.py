@@ -37,8 +37,8 @@ from html import html_escape
 import logging
 import model
 import os
+import pickle
 import re
-import simplejson
 import sys
 import unicodedata
 import urllib
@@ -363,6 +363,16 @@ def urlencode(params):
     return urllib.urlencode([
         (to_utf8(key), to_utf8(params[key]))
         for key in keys if isinstance(params[key], basestring)])
+
+def url_pickle(data):
+    """Serializes a Python object into a 7-bit string.  Use this to pass Python
+    objects through query parameters.  The webob.Request decodes query params
+    as Unicode strings, so regular pickles will run into encoding problems."""
+    return pickle.dumps(data).decode('latin-1').encode('utf-7')
+
+def url_unpickle(data):
+    """Deserializes a Python object that was serialized with url_pickle."""
+    return pickle.loads(data.decode('utf-7').encode('latin-1'))
 
 def set_url_param(url, param, value):
     """Modifies a URL, setting the given param to the specified value.  This
