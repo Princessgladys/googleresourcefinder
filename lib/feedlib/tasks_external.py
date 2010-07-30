@@ -14,11 +14,12 @@
 
 """Generic handler for queueing tasks that call an external webhook."""
 
+import urllib
+
 from google.appengine.api.labs import taskqueue
 from google.appengine.api import urlfetch
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
-import urllib
 
 URL_PATH = '/tasks/external'
 
@@ -34,6 +35,7 @@ def add(external_url, external_params, method='POST'):
     external_payload = urllib.urlencode(external_params)
     taskqueue.add(url=URL_PATH, params={
         'url': external_url, 'payload': external_payload, 'method': method})
+
 
 if __name__ == '__main__':
     run_wsgi_app(webapp.WSGIApplication([(URL_PATH, External)], debug=True))

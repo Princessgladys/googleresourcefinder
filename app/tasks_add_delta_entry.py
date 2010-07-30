@@ -12,30 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Handler for feed retrieval requests."""
+"""Internal task to add an entry to the delta feed."""
 
-import pickle
+from feedlib import report_feeds, xml_utils
 import row_utils
-from feedlib.report_feeds import ReportEntry, REPORT_NS, SPREADSHEETS_NS
-from feedlib import xml_utils
-from utils import ErrorMessage, Handler, run, taskqueue, url_unpickle, _
+from utils import Handler, run, taskqueue, url_unpickle
 
 
 class AddDeltaEntry(Handler):
     def post(self):
         user_email = self.request.get('user_email')
+        author_uri = user_email and 'mailto:' + user_email or ''
         subject_name = self.request.get('subject_name')
         observed = url_unpickle(self.request.get('observed'))
         changes = url_unpickle(self.request.get('changed_data'))
-        type_name = xml_utils.qualify(REPORT_NS, 'row')
+        type_name = xml_utils.qualify(report_feeds.REPORT_NS, 'row')
         row = xml_utils.create_element(type_name)
         for name in changes:
             row.append(xml_utils.create_element(
-                (SPREADSHEETS_NS, 'field'),
+                (report_feeds.SPREADSHEETS_NS, 'field'),
                 {'name': name},
                 row_utils.serialize(name, changes[name]['new_value'])))
-        ReportEntry.create_original(
-            self.subdomain + '/delta', '', 'mailto:' + user_email,
+        report_feeds.ReportEntry.create_original(
+            self.subdomain + '/delta', '', author_uri,
             subject_name, observed, type_name, xml_utils.serialize(row)
         ).put()
 

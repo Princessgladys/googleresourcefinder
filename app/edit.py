@@ -390,7 +390,7 @@ def update(key, subject_type, request, user, account, attributes, subdomain,
         
         params = {
             'action': 'subject_changed',
-            'user_email': user.email(),
+            'user_email': user.email() or '',
             'subject_name': subject.key().name(),
             'observed': utils.url_pickle(utcnow),
             'changed_data': utils.url_pickle(changed_attribute_information),

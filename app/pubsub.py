@@ -19,23 +19,36 @@ import logging
 from google.appengine.api import urlfetch
 
 from feedlib import crypto, report_feeds
+from model import filter_by_prefix
 from utils import ErrorMessage, Handler, db, run, urlencode
 
 
 class PshbSubscription(db.Model):
-    """Represents a currently active subscription to an external feed."""
-    subdomain = db.StringProperty()
-    topic = db.StringProperty()
-    created = db.DateTimeProperty(auto_now_add=True)
+    """Represents a currently active subscription to an external feed.
+    Key name: subdomain + ':' + topic URL.  "Topic" is PSHB terminology."""
+    topic = db.StringProperty()  # feed URL that we are subscribed to
+    created = db.DateTimeProperty(auto_now_add=True)  # subscription start time
+
+    @staticmethod
+    def get(subdomain, topic):
+        """Gets a PshbSubscription entity by its subdomain and topic URL."""
+        return PshbSubscription.get_by_key_name(subdomain + ':' + topic)
+
+    @staticmethod
+    def all_in_subdomain(subdomain):
+        """Gets a query for all PshbSubscriptions in the given subdomain."""
+        return filter_by_prefix(PshbSubscription.all(), subdomain + ':')
 
     @staticmethod
     def subscribe(subdomain, topic):
+        """Adds a PshbSubscription for the given subdomain and topic."""
         PshbSubscription(key_name=subdomain + ':' + topic,
                          subdomain=subdomain, topic=topic).put()
 
     @staticmethod
     def unsubscribe(subdomain, topic):
-        sub = PshbSubscription.get_by_key_name(subdomain + ':' + topic)
+        """Removes the specified PshbSubscription, if it exists."""
+        sub = PshbSubscription.get(subdomain, topic)
         if sub:
             sub.delete()
 
@@ -50,7 +63,7 @@ class Pubsub(Handler):
         # Show the list of subscriptions and the form for adding a new one.
         self.render(
             'templates/pubsub.html', subdomain=self.subdomain, subscriptions=(
-                PshbSubscription.all().filter('subdomain =', self.subdomain)))
+                PshbSubscription.all_in_subdomain(self.subdomain)))
     
     def post(self):
         if not self.subdomain:

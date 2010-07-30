@@ -30,7 +30,6 @@ __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 import datetime
 import logging
 import os
-import pickle
 
 from google.appengine.api import mail
 from google.appengine.ext import db

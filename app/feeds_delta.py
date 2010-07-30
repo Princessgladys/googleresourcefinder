@@ -17,13 +17,14 @@ both internal and external edits."""
 
 import logging
 
-from feedlib import crypto, errors, report_feeds, xml_utils
 from google.appengine.ext import db
-from pubsub import PshbSubscription
-from utils import DateTime, Handler, Struct, run, split_key_name
+
 import cache
+from feedlib import crypto, errors, report_feeds, xml_utils
 import model
+import pubsub
 import row_utils
+from utils import DateTime, Handler, Struct, run, split_key_name
 
 
 def update_subject(subject, observed, account, source_url, values, comments={},
@@ -108,10 +109,10 @@ class Feed(Handler):
 
             # The request came from us.  Confirm it.
             if self.request.get('hub.mode') == 'subscribe':
-                PshbSubscription.subscribe(self.subdomain, topic)
+                pubsub.PshbSubscription.subscribe(self.subdomain, topic)
                 logging.info('Added subscription: ' + topic)
             else:
-                PshbSubscription.unsubscribe(self.subdomain, topic)
+                pubsub.PshbSubscription.unsubscribe(self.subdomain, topic)
                 logging.info('Removed subscription: ' + topic)
             self.response.out.write(self.request.get('hub.challenge'))
 

@@ -14,14 +14,15 @@
 
 """Serialization of attribute values to and from gs:field contents."""
 
+from google.appengine.ext import db
+
+import cache
 from feedlib import time_formats, xml_utils
 from feedlib.report_feeds import REPORT_NS, SPREADSHEETS_NS
-from google.appengine.ext import db
-import model
 
 def serialize(attribute_name, value):
     """Serializes a given attribute value to a Unicode string."""
-    type = model.Attribute.get_by_key_name(attribute_name).type
+    type = cache.ATTRIBUTES[attribute_name].type
     if type in ['str', 'text', 'contact', 'choice']:
         return value
     if type == 'date':
@@ -48,7 +49,7 @@ def serialize_to_elements(values, comments={}):
 
 def parse(attribute_name, string):
     """Parses a Unicode string into an attribute value."""
-    type = model.Attribute.get_by_key_name(attribute_name).type
+    type = cache.ATTRIBUTES[attribute_name].type
     if type in ['str', 'text', 'contact', 'choice']:
         return string
     if type == 'date':

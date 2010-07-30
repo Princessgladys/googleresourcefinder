@@ -1,4 +1,4 @@
-"""Tests for app/feed_receiver.py.
+"""Tests for app/feeds_delta.py.
 
 If you want to test with a real live pubsubhubbub instance, here's how
 to do it.  You'll be running your own pubsubhubbub instance locally,
