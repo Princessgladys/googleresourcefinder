@@ -15,11 +15,12 @@
 import cache
 import re
 import sets
+import simplejson
 import sys
 from feeds.geo import distance
 from model import Attribute, Subject, SubjectType, Message, MinimalSubject
 from utils import Date, DateTime, HIDDEN_ATTRIBUTE_NAMES
-from utils import db, get_locale, simplejson, split_key_name
+from utils import db, get_locale, split_key_name
 
 def make_jobjects(entities, transformer, *args):
     """Run a sequence of entities through a transformer function that produces

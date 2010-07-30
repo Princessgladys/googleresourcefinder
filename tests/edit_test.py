@@ -152,7 +152,8 @@ class EditTest(SeleniumTestCase):
         save_func(self)
 
         # Check that the facility list is updated
-        self.assert_text(Regex('.*1 / 2.*General Surgery.*'), 'id=subject-1')
+        regex = Regex('.*1 / 2.*General Surgery.*')
+        self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
 
         edit_func(self)
 
@@ -291,9 +292,10 @@ class EditTest(SeleniumTestCase):
         save_func(self)
 
         # Go to change details page, and confirm changes
+        self.wait_for_element('link=Change details')
         self.click('link=Change details')
-        assert self.is_text_present('Total beds: 99')
-        assert self.is_text_present('comment_bar!')
+        self.wait_until(self.is_text_present, 'Total beds: 99')
+        self.wait_until(self.is_text_present, 'comment_bar!')
 
         # Delete both available beds and comment fields -------------------- #
 

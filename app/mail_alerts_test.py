@@ -16,10 +16,10 @@
 
 import datetime
 import os
-import pickle
 import webob
 
 from google.appengine.api import mail
+from google.appengine.api import users
 from google.appengine.ext import db, webapp
 
 import mail_alerts
@@ -29,7 +29,6 @@ from mail_alerts import get_timedelta, fetch_updates, format_plain_body
 from mail_alerts import update_account_alert_time
 from medium_test_case import MediumTestCase
 from model import Account, PendingAlert, Subject, SubjectType, Subscription
-from utils import simplejson, users
 
 # Set up localization.
 ROOT = os.path.dirname(__file__)
@@ -247,14 +246,12 @@ class MailAlertsTest(MediumTestCase):
                                           'new_value': u'attr_new\xef',
                                           'author': 'author_foo'}}
         unchanged_vals = {'test_attr_bar': 'attr_bar'}
-        json_pickle_attrs_c = simplejson.dumps(unicode(
-            pickle.dumps(changed_vals), 'latin-1'))
-        json_pickle_attrs_uc = simplejson.dumps(unicode(
-            pickle.dumps(unchanged_vals), 'latin-1'))
-        path = '/send_mail_updates?action=subject_changed&' + \
-               'subject_name=haiti:example.org/123&' + \
-               'changed_data=' + json_pickle_attrs_c + '&' + \
-               'unchanged_data=' + json_pickle_attrs_uc
+        path = '/mail_alerts?' + utils.urlencode({
+            'action': 'subject_changed',
+            'subject_name': 'haiti:example.org/123',
+            'changed_data': utils.url_pickle(changed_vals),
+            'unchanged_data': utils.url_pickle(unchanged_vals)
+        })
         handler = self.simulate_request(path)
         handler.post()
         assert len(sent_emails) == 1
@@ -269,11 +266,12 @@ class MailAlertsTest(MediumTestCase):
         changed_vals = {'test_attr_foo': {'old_value': 'attr_old',
                                           'new_value': None,
                                           'author': 'author_foo'}}
-        json_pickle_attrs_c = simplejson.dumps(pickle.dumps(changed_vals))
-        path = '/send_mail_updates?action=subject_changed&' + \
-               'subject_name=haiti:example.org/123&' + \
-               'changed_data=' + json_pickle_attrs_c + '&' + \
-               'unchanged_data=' + json_pickle_attrs_uc
+        path = '/mail_alerts?' + utils.urlencode({
+            'action': 'subject_changed',
+            'subject_name': 'haiti:example.org/123',
+            'changed_data': utils.url_pickle(changed_vals),
+            'unchanged_data': utils.url_pickle(unchanged_vals)
+        })
         handler = self.simulate_request(path)
         handler.post()
         assert len(sent_emails) == 1
@@ -287,11 +285,12 @@ class MailAlertsTest(MediumTestCase):
         changed_vals = {'test_attr_foo': {'old_value': 'attr_old',
                                           'new_value': 'attr_new',
                                           'author': 'author_foo'}}
-        json_pickle_attrs_c = simplejson.dumps(pickle.dumps(changed_vals))
-        path = '/send_mail_updates?action=subject_changed&' + \
-               'subject_name=haiti:example.org/123&' + \
-               'changed_data=' + json_pickle_attrs_c + '&' + \
-               'unchanged_data=' + json_pickle_attrs_uc
+        path = '/mail_alerts?' + utils.urlencode({
+            'action': 'subject_changed',
+            'subject_name': 'haiti:example.org/123',
+            'changed_data': utils.url_pickle(changed_vals),
+            'unchanged_data': utils.url_pickle(unchanged_vals)
+        })
         handler = self.simulate_request(path)
         handler.post()
         assert len(sent_emails) == 1
@@ -304,10 +303,12 @@ class MailAlertsTest(MediumTestCase):
        
         # test to make sure a pending alert is created when a subject is
         # changed for a non-instant subscription
-        path = '/send_mail_updates?action=subject_changed&' + \
-               'subject_name=haiti:example.org/456&' + \
-               'changed_data=' + json_pickle_attrs_c + '&' + \
-               'unchanged_data=' + json_pickle_attrs_uc
+        path = '/mail_alerts?' + utils.urlencode({
+            'action': 'subject_changed',
+            'subject_name': 'haiti:example.org/456',
+            'changed_data': utils.url_pickle(changed_vals),
+            'unchanged_data': utils.url_pickle(unchanged_vals)
+        })
         handler = self.simulate_request(path)
         handler.post()
         assert PendingAlert.get('daily', 'test@example.com',
