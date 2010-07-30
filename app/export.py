@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from model import *
-from utils import *
-import access
-import bubble
 import calendar
 import csv
 import datetime
+
+import access
+import bubble
+import cache
+from model import *
+from utils import *
 
 # Maps a SubjectType key name to a list of tuples, one per column.
 # Each tuple has the column header and a lambda function that takes a
@@ -61,23 +63,24 @@ COLUMNS_BY_SUBJECT_TYPE = {
     ],
 }
 
-def get_last_updated_time(s):
-    subdomain, subject_name = split_key_name(s)
-    st = SubjectType.get(subdomain, s.type)
-    value_info_extractor = bubble.VALUE_INFO_EXTRACTORS[subdomain][s.type]
+def get_last_updated_time(subject):
+    subdomain, subject_name = split_key_name(subject)
+    type_name = subject.type
+    attribute_names = cache.SUBJECT_TYPES[subdomain][type_name].attribute_names
+    value_info_extractor = bubble.VALUE_INFO_EXTRACTORS[subdomain][type_name]
     (special, general, details) = value_info_extractor.extract(
-        s, st.attribute_names)
+        subject, attribute_names)
     return max(detail.date for detail in details)
 
 def short_date(date):
     return '%s %d' % (calendar.month_abbr[date.month], date.day)
 
-def write_csv(out, subject_type):
+def write_csv(out, subdomain, type_name):
     """Dump the attributes for all subjects of the given type
        in CSV format, with a row for each subject"""
     writer = csv.writer(out)
 
-    subdomain, type_name = split_key_name(subject_type)
+    subject_type = cache.SUBJECT_TYPES[subdomain][type_name]
     subjects = fetch_all(
         Subject.all_in_subdomain(subdomain).filter('type =', type_name))
     columns = COLUMNS_BY_SUBJECT_TYPE[(subdomain, type_name)]
@@ -115,20 +118,18 @@ def format(value):
 
 class Export(Handler):
     def get(self):
-        if self.params.subject_type:
-            # Get the selected subject type.
-            subject_type = SubjectType.get(
-                self.subdomain, self.params.subject_type)
+        type_name = self.params.subject_type
 
+        if type_name:
             # Construct a reasonable filename.
             timestamp = datetime.datetime.utcnow()
-            filename = '%s.%s.csv' % (self.subdomain, self.params.subject_type)
+            filename = '%s.%s.csv' % (self.subdomain, type_name)
             self.response.headers['Content-Type'] = 'text/csv'
             self.response.headers['Content-Disposition'] = \
                 'attachment; filename=' + filename
 
             # Write out the CSV data.
-            write_csv(self.response.out, subject_type)
+            write_csv(self.response.out, self.subdomain, type_name)
         else:
             self.write('<html><head>')
             self.write('<title>%s</title>' % to_unicode(_("Resource Finder")))
@@ -144,8 +145,8 @@ class Export(Handler):
             for subject_type in SubjectType.all_in_subdomain(self.subdomain):
                 # TODO(shakusa) SubjectType should have translated messages
                 subdomain, type_name = split_key_name(subject_type)
-                self.write('<option value="%s">%s</option>' % (
-                    type_name, type_name))
+                self.write('<option value="%s">%s</option>' %
+                           (type_name, type_name))
             self.write('<p><input type=submit value="%s">' %
                 #i18n: Button to export data to comma-separated-value format.
                 to_unicode(_('Export CSV')))
