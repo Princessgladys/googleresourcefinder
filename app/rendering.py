@@ -17,7 +17,7 @@ import re
 import sets
 import simplejson
 import sys
-from feeds.geo import distance
+from feedlib.geo import distance
 from model import Attribute, Subject, SubjectType, Message, MinimalSubject
 from utils import Date, DateTime, HIDDEN_ATTRIBUTE_NAMES
 from utils import db, get_locale, split_key_name

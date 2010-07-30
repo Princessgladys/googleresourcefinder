@@ -30,6 +30,7 @@ __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 import datetime
 import logging
 import os
+import pickle
 
 from google.appengine.api import mail
 from google.appengine.ext import db
@@ -37,9 +38,8 @@ from google.appengine.ext import db
 import bubble
 import cache
 import utils
-from feeds.xmlutils import Struct
 from model import Account, PendingAlert, Subject, SubjectType, Subscription
-from utils import _, Handler
+from utils import _, Handler, Struct
 
 # Set up localization.
 ROOT = os.path.dirname(__file__)

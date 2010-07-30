@@ -30,8 +30,9 @@ import config
 from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
-from feeds.crypto import get_secret
-from feeds.errors import ErrorMessage, Redirect
+from feedlib.crypto import get_secret
+from feedlib.errors import ErrorMessage, Redirect
+from feedlib.struct import Struct
 import gzip
 from html import html_escape
 import logging
@@ -111,10 +112,6 @@ def split_key_name(entity):
     """Splits the key_name of a Subject or SubjectType entity into the
     subdomain and the subject name, or the subdomain and the type name."""
     return entity.key().name().split(':', 1)
-
-class Struct:
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
 
 
 class Handler(webapp.RequestHandler):

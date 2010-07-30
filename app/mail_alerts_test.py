@@ -23,8 +23,8 @@ from google.appengine.api import users
 from google.appengine.ext import db, webapp
 
 import mail_alerts
+import simplejson
 import utils
-from feeds.xmlutils import Struct
 from mail_alerts import get_timedelta, fetch_updates, format_plain_body
 from mail_alerts import update_account_alert_time
 from medium_test_case import MediumTestCase
@@ -169,7 +169,7 @@ class MailAlertsTest(MediumTestCase):
         """Confirms that the right attributes and their changes show up in
         the text to be sent to the user."""
         values = fetch_updates(self.pa, self.subject)
-        data = Struct(changed_subjects={self.subject.key().name(): (
+        data = utils.Struct(changed_subjects={self.subject.key().name(): (
             self.subject.get_value('title'), values)})
         plain_body = format_plain_body(data)
         
