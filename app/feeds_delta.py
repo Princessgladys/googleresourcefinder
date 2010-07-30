@@ -33,11 +33,16 @@ def update_subject(subdomain, subject_name, observed, account, source_url,
     attributes.  'values' and 'comments' should both be dictionaries with
     attribute names as their keys."""
 
-    # The SubjectType is in a different entity group, so we have to obtain
-    # it outside of the transaction to get at the minimal_attribute_names.
+    # SubjectType and Attribute entities are in separate entity groups from
+    # the Subject, so we have to obtain them outside of the transaction.
     subject = model.Subject.get(subdomain, subject_name)
-    subject_type = model.SubjectType.get(subdomain, subject.type)
+    subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
     minimal_attribute_names = subject_type.minimal_attribute_names
+    editable_attributes = []
+    for name in subject_type.attribute_names:
+        if not cache.ATTRIBUTES[name].edit_action:
+            # Don't allow feeds to edit attributes that have an edit_action.
+            editable_attributes.append(name)
 
     # We'll use these to fill in the metadata on the subject. 
     user = account.get('user')
@@ -62,15 +67,17 @@ def update_subject(subdomain, subject_name, observed, account, source_url,
         # Fill in the new values on the Report and update the Subject.
         subject_changed = False
         for name in values:
-            report.set_attribute(name, values[name], comments.get(name))
-            last_observed = subject.get_observed(name)
-            # Only update the Subject if the incoming value is newer.
-            if last_observed is None or last_observed < observed:
-                subject_changed = True
-                subject.set_attribute(name, values[name], observed, user,
-                                      nickname, affiliation, comments.get(name))
-                if name in minimal_attribute_names:
-                    minimal_subject.set_attribute(name, values[name])
+            if name in editable_attributes:
+                report.set_attribute(name, values[name], comments.get(name))
+                last_observed = subject.get_observed(name)
+                # Only update the Subject if the incoming value is newer.
+                if last_observed is None or last_observed < observed:
+                    subject_changed = True
+                    subject.set_attribute(
+                        name, values[name], observed, user, nickname,
+                        affiliation, comments.get(name))
+                    if name in minimal_attribute_names:
+                        minimal_subject.set_attribute(name, values[name])
 
         # Store the new Report.
         db.put(report)
@@ -116,9 +123,6 @@ class Feed(Handler):
         # This involves changes to the data model so that we can store
         # the token along with the (maybe different) email associated with
         # each record
-
-        # TODO(shakusa) Do we need to enforce read-only fields
-        # subject name (id), healthc_id, subject title ?
 
         # Store the incoming reports on the 'delta' feed.
         entries = report_feeds.handle_feed_post(
