@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import cache
+import simplejson
 from access import *
 from extract_messages import parse_message, PATTERNS
 from feeds import crypto
