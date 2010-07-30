@@ -31,8 +31,8 @@ import config
 import utils
 from bubble import format
 from feeds.xmlutils import Struct
-from mail_alerts import fetch_updates, format_plain_body, send_email
-from mail_alerts import update_account_alert_time
+from mail_alerts import FORMAT_EMAIL, fetch_updates, format_email_subject
+from mail_alerts import send_email, update_account_alert_time
 from model import PendingAlert, Subject, Subscription
 from utils import _, db, Handler, run
 
@@ -57,6 +57,7 @@ class Subscribe(Handler):
         self.require_logged_in_user()
         self.email = self.user.email()
         self.subject_name = self.request.get('subject_name', '')
+        self.domain = self.request.headers.get('Host', '')
         if not self.account:
             #i18n: Error message for request missing subject name.
             raise ErrorMessage(404, _('Invalid or missing account e-mail.'))
@@ -138,6 +139,7 @@ class Subscribe(Handler):
         db.put(self.account)
 
     def change_subscription(self, subject_name, old_frequency, new_frequency):
+        """Change's the current user's subscription to a subject."""
         if ((old_frequency not in Subscription.frequency.choices) or
             (new_frequency not in Subscription.frequency.choices)):
             self.error(400) # bad request
@@ -151,16 +153,20 @@ class Subscribe(Handler):
                 subject = Subject.get_by_key_name(old_alert.subject_name)
                 values = fetch_updates(old_alert, subject)
                 email_data = Struct(
-                    time=format(datetime.datetime.now()),
-                    changed_subjects={self.params.subject_name: (
-                        subject.get_value('title'), values)})
-                text_body = format_plain_body(email_data)
+                    nickname=self.account.nickname or self.account.email,
+                    domain=self.domain,
+                    subdomain=self.subdomain,
+                    changed_subjects={subject_name: (
+                        subject.get_value('title'), values)}
+                )
+                email_formatter = FORMAT_EMAIL[subject.type](self.account)
+                body = email_formatter.format_body(email_data)
+                email_subject = format_email_subject(self.subdomain,
+                                                     old_frequency)
                 send_email(self.account.locale,
                            'updates@resource-finder.appspotmail.com',
-                           self.account.email,
-                           # i18n: subject of e-mail -> Resource Finder Updates
-                           utils.to_unicode(_('Resource Finder Updates')),
-                           text_body)
+                           self.account.email, email_subject,
+                           body, self.account.email_format)
             else:
                 new_key_name = '%s:%s:%s' % (new_frequency,
                                              old_alert.user_email,
@@ -176,7 +182,7 @@ class Subscribe(Handler):
                                         getattr(old_alert, old_values[i]))
                 db.put(alert)
             db.delete(old_alert)
-    
+
     def change_subscriptions(self):
         """Change's the current user's subscription to a list of subjects."""
         subject_changes = simplejson.loads(self.request.get('subject_changes'))
