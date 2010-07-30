@@ -82,6 +82,10 @@ handlers:
   script: $PYTHON_LIB/google/appengine/ext/appstats/ui.py
   login: admin
 
+- url: /pubsub
+  script: pubsub.py
+  login: admin
+
 # Machine administrative endpoints.
 
 - url: /remote_api

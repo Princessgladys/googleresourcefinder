@@ -17,16 +17,17 @@ both internal and external edits."""
 
 import logging
 
-from feedlib import errors, report_feeds, xml_utils
+from feedlib import crypto, errors, report_feeds, xml_utils
 from google.appengine.ext import db
-from utils import DateTime, Handler, Struct, run
+from pubsub import PshbSubscription
+from utils import DateTime, Handler, Struct, run, split_key_name
 import cache
 import model
 import row_utils
 
 
-def update_subject(subdomain, subject_name, observed, account, source_url,
-                   values, comments={}, arrived=None):
+def update_subject(subject, observed, account, source_url, values, comments={},
+                   arrived=None):
     """Applies a set of changes to a single subject with a single author,
     producing one new Report and updating one Subject and one MinimalSubject.
     'account' can be any object with 'user', 'nickname', and 'affiliation'
@@ -35,7 +36,7 @@ def update_subject(subdomain, subject_name, observed, account, source_url,
 
     # SubjectType and Attribute entities are in separate entity groups from
     # the Subject, so we have to obtain them outside of the transaction.
-    subject = model.Subject.get(subdomain, subject_name)
+    subdomain, subject_name = split_key_name(subject)
     subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
     minimal_attribute_names = subject_type.minimal_attribute_names
     editable_attributes = []
@@ -95,14 +96,24 @@ class Feed(Handler):
     def get(self):
         """Emits entries in the delta feed; also handles subscription checks."""
         if not self.subdomain:
-            raise errors.ErrorMessage(404, 'Not found')
-        challenge = self.request.get('hub.challenge')
-        if challenge:
-            # A hub is verifying a subscription request.  Confirm it.
-            # TODO(guido): Check other hub parameters.
-            # Reference:
+            raise errors.ErrorMessage(400, 'No subdomain specified.')
+
+        if self.request.get('hub.mode') in ['subscribe', 'unsubscribe']:
+            # Handle a subscription verification request.  Reference:
             # pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html
-            self.response.out.write(challenge)
+            topic = self.request.get('hub.topic')
+            signature = self.request.get('hub.verify_token')
+            if not crypto.verify('hub_verify', topic, signature):
+                raise errors.ErrorMessage(403, 'Invalid signature.')
+
+            # The request came from us.  Confirm it.
+            if self.request.get('hub.mode') == 'subscribe':
+                PshbSubscription.subscribe(self.subdomain, topic)
+                logging.info('Added subscription: ' + topic)
+            else:
+                PshbSubscription.unsubscribe(self.subdomain, topic)
+                logging.info('Removed subscription: ' + topic)
+            self.response.out.write(self.request.get('hub.challenge'))
 
         else:
             report_feeds.handle_feed_get(
@@ -113,16 +124,11 @@ class Feed(Handler):
         if not self.subdomain:
             raise errors.ErrorMessage(404, 'Not found')
 
-        # TODO(kpy): Remove this when it's been fully tested.
-        logging.info("POST headers:\n%s", self.request.headers)
-        logging.info("POST body:\n%s", self.request.body)
-
-        # TODO(guido): Check hub signature.
-
-        # TODO(shakusa) Implement an authorization token scheme
-        # This involves changes to the data model so that we can store
-        # the token along with the (maybe different) email associated with
-        # each record
+        # Check the signature on the request, to verify that this came from
+        # a hub that we subscribed to (and gave our hub_secret to).
+        hmac = crypto.sha1_hmac(crypto.get_key('hub_secret'), self.request.body)
+        if self.request.headers['X-Hub-Signature'] != 'sha1=' + hmac:
+            raise errors.ErrorMessage(403, 'Invalid signature.')
 
         # Store the incoming reports on the 'delta' feed.
         entries = report_feeds.handle_feed_post(
@@ -133,8 +139,19 @@ class Feed(Handler):
             account = Struct(user=None, nickname=entry.author_uri)
             row = xml_utils.parse(entry.content)
             values, comments = row_utils.parse_from_elements(row)
-            update_subject(self.subdomain, entry.subject_id, entry.observed,
-                           account, entry.external_feed_id, values, comments)
+            subject = model.Subject.get(self.subdomain, entry.subject_id)
+            if subject:
+                try:
+                    update_subject(subject, entry.observed, account,
+                                   entry.external_feed_id, values, comments,
+                                   entry.arrived)
+                    logging.info('Edit applied: %s -> %s' %
+                                 (entry.external_entry_id, entry.subject_id))
+                except:
+                    logging.exception('Edit failed: ' + entry.external_entry_id)
+            else:
+                logging.info('Entry %s had unknown subject %s' %
+                             (entry.external_entry_id, entry.subject_id))
 
 
 class Entry(Handler):

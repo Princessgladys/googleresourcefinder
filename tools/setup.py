@@ -16,7 +16,7 @@ import cache
 import simplejson
 from access import *
 from extract_messages import parse_message, PATTERNS
-from feedlib import crypto
+from feedlib import crypto, report_feeds
 from model import *
 from utils import *
 

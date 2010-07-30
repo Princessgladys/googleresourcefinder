@@ -18,6 +18,7 @@ from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
 
 import datetime
+import logging
 import pickle
 import tasks_external
 import urllib
@@ -27,6 +28,7 @@ from time_formats import from_rfc3339, to_rfc1123, to_rfc3339
 from xml_utils import create_element, qualify, parse, serialize, write
 
 HUB = 'http://pubsubhubbub.appspot.com'
+HUB = 'http://localhost:8888'
 ATOM_NS = 'http://www.w3.org/2005/Atom'
 REPORT_NS = 'http://schemas.google.com/report/2010'
 SPREADSHEETS_NS = 'http://schemas.google.com/spreadsheets/2006'
@@ -108,6 +110,9 @@ class ReportEntry(db.Model):
                            external_entry_id=external_entry_id,
                            external_feed_id=external_feed_id)
 
+    def get_entry_id(self, feed_uri):
+        """Gets the Atom entry ID for this entry, given its parent feed URI."""
+        return self.external_entry_id or '%s/%d' % (feed_uri, self.key().id())
 
 def add_uri_prefixes(uri_prefixes):
     """Adds the namespace prefixes used by this module to a dictionary."""
@@ -117,7 +122,6 @@ def add_uri_prefixes(uri_prefixes):
 
 def create_entry_element(entry, feed_uri):
     """Converts a ReportEntry entity into an Atom <entry> Element."""
-    entry_id = entry.external_entry_id or '%s/%d' % (feed_uri, entry.key().id())
     author = create_element(
         (ATOM_NS, 'author'),
         create_element((ATOM_NS, 'uri'), entry.author_uri))
@@ -126,7 +130,7 @@ def create_entry_element(entry, feed_uri):
         author.append(create_element((ATOM_NS, 'email'), email))
     return create_element(
         (ATOM_NS, 'entry'),
-        create_element((ATOM_NS, 'id'), entry_id),
+        create_element((ATOM_NS, 'id'), entry.get_entry_id(feed_uri)),
         entry.external_feed_id and create_element(
             (ATOM_NS, 'source'),
             create_element((ATOM_NS, 'id'), entry.external_feed_id)),
@@ -297,5 +301,7 @@ def handle_feed_post(request, response, feed_name, store_as_original=False):
     # If there are new reports to add, store them and notify the hub.
     if entries:
         db.put(entries)
+        for entry in entries:
+            logging.info('Stored entry: ' + entry.get_entry_id(request.uri))
         notify_hub(request.uri)
     return entries
