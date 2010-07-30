@@ -17,13 +17,15 @@ both internal and external edits."""
 
 import logging
 
-from feedlib import report_feeds
+from feedlib import errors, report_feeds
 from utils import Handler, run
 
 
 class Feed(Handler):
     def get(self):
         """Emits entries in the delta feed; also handles subscription checks."""
+        if not self.subdomain:
+            raise errors.ErrorMessage(404, 'Not found')
         challenge = self.request.get('hub.challenge')
         if challenge:
             # A hub is verifying a subscription request.  Confirm it.
@@ -33,10 +35,13 @@ class Feed(Handler):
             self.response.out.write(challenge)
 
         else:
-            report_feeds.handle_feed_get(self.request, self.response, 'delta')
+            report_feeds.handle_feed_get(
+                self.request, self.response, self.subdomain + '/delta')
 
     def post(self):
         """Feed update notification from hub."""
+        if not self.subdomain:
+            raise errors.ErrorMessage(404, 'Not found')
 
         # TODO(kpy): Remove this when it's been fully tested.
         logging.info("POST headers:\n%s", self.request.headers)
@@ -54,7 +59,7 @@ class Feed(Handler):
 
         # Store the incoming reports on the 'delta' feed.
         reports = report_feeds.handle_feed_post(
-            self.request, self.response, 'delta')
+            self.request, self.response, self.subdomain + '/delta')
 
         for report in reports:
             # TODO: Now parse these records and apply the edits to Report,
@@ -64,7 +69,8 @@ class Feed(Handler):
 
 class Entry(Handler):
     def get(self):
-        report_feeds.handle_entry_get(self.request, self.response, 'delta')
+        report_feeds.handle_entry_get(
+            self.request, self.response, self.subdomain + '/delta')
 
 
 if __name__ == '__main__':
