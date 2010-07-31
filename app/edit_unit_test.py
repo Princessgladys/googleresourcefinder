@@ -22,6 +22,7 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 
+import test_config  # must be imported first in unit tests
 import edit
 import simplejson
 import utils
@@ -29,6 +30,7 @@ from edit import ATTRIBUTE_TYPES
 from medium_test_case import MediumTestCase
 from model import Account, Attribute, Subject, MinimalSubject, SubjectType
 from model import Report
+
 
 class EditTest(MediumTestCase):
     def setUp(self):

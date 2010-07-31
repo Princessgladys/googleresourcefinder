@@ -27,7 +27,7 @@ import utils
 import wsgiref
 
 from access import check_action_permitted
-from feedlib.crypto import sign, verify
+from feedlib import crypto
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
 from utils import db, get_message, html_escape
@@ -454,7 +454,7 @@ class Edit(utils.Handler):
                     'value': self.subject.get_value(name)
                 })
 
-        token = sign(XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
+        token = crypto.sign(XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
 
         self.render('templates/edit.html',
             token=token, subject_title=self.subject.get_value('title'),
@@ -471,7 +471,7 @@ class Edit(utils.Handler):
         if self.request.get('cancel'):
             raise Redirect(self.get_url('/'))
 
-        if not verify(XSRF_KEY_NAME, self.user.user_id(),
+        if not crypto.verify(XSRF_KEY_NAME, self.user.user_id(),
             self.request.get('token')):
             raise ErrorMessage(403, 'Unable to submit data for %s'
                                % self.user.email())

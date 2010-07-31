@@ -23,12 +23,14 @@ from google.appengine.api import mail
 from google.appengine.ext import db, webapp
 from google.appengine.ext.db import BadValueError
 
+import test_config  # must be imported first in unit tests
 import simplejson
 import subscribe
 import utils
 from medium_test_case import MediumTestCase
 from model import Account, PendingAlert, Subject, SubjectType, Subscription
 from utils import users
+
 
 # Set up localization.
 ROOT = os.path.dirname(__file__)

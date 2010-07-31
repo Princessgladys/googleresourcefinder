@@ -18,6 +18,7 @@
 Instead of running this script directly, use the 'server_tests' shell script,
 which sets up the PYTHONPATH and other necessary environment variables."""
 
+import test_config  # must be imported first in tests
 import access
 import console
 import model

@@ -22,13 +22,14 @@ import urllib
 from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
 
+import config
 import crypto
 from errors import ErrorMessage
 import tasks_external
 from time_formats import from_rfc3339, to_rfc1123, to_rfc3339
 from xml_utils import create_element, qualify, parse, serialize, write
 
-HUB = 'https://pubsubhubbub.appspot.com'
+HUB = config.get('hub', 'https://pubsubhubbub.appspot.com')
 ATOM_NS = 'http://www.w3.org/2005/Atom'
 REPORT_NS = 'http://schemas.google.com/report/2010'
 SPREADSHEETS_NS = 'http://schemas.google.com/spreadsheets/2006'
@@ -168,9 +169,9 @@ def write_feed(file, entries, feed_uri, uri_prefixes={}, hub=None):
     feed_element = create_feed_element(entries, feed_uri, hub)
     write(file, feed_element, add_uri_prefixes(uri_prefixes))
 
-def notify_hub(feed_uri):
+def notify_hub(feed_uri, hub=HUB):
     """Notifies a PubSubHubbub hub of new content at a given feed URI."""
-    tasks_external.add(HUB, {'hub.mode': 'publish', 'hub.url': feed_uri})
+    tasks_external.add(hub, {'hub.mode': 'publish', 'hub.url': feed_uri})
 
 def check_request_etag(headers):
     """Determines etag, limit, arrived_after based on request headers."""

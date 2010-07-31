@@ -19,9 +19,8 @@ import unittest
 
 from google.appengine.api import users
 
+import test_config  # must be imported first in unit tests
 import access
-
-from access import ACTIONS
 from medium_test_case import MediumTestCase
 from model import Account
 from utils import Struct, db

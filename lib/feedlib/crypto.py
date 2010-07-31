@@ -12,55 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Storage for secrets and cryptographic operations."""
+"""Cryptographic operations.
 
-from google.appengine.ext import db
+The arguments to these functions refer to secret keys by name.  The actual keys
+are stored in configuration settings and created as needed (see config.py)."""
+
 import hashlib
 import hmac
 import pickle
-import random
 import time
 
-class Secret(db.Model):
-    """An application-wide secret, identified by its key_name."""
-    value = db.ByteStringProperty(required=True)
+import config
 
 
-def sha1_hmac(key, bytes):
+def sha1_hmac(key_name, bytes):
     """Computes a hexadecimal HMAC using the SHA1 digest algorithm."""
+    key = config.get_or_generate(key_name)
     return hmac.new(key, bytes, digestmod=hashlib.sha1).hexdigest()
 
-def sha256_hmac(key, bytes):
+def sha256_hmac(key_name, bytes):
     """Computes a hexadecimal HMAC using the SHA256 digest algorithm."""
+    key = config.get_or_generate(key_name)
     return hmac.new(key, bytes, digestmod=hashlib.sha256).hexdigest()
-
-def generate_random_key():
-    """Generates a random 32-byte key."""
-    # The key is in hexadecimal because PubSubHubbub runs into Unicode
-    # decoding problems with keys that contain non-7-bit characters.
-    return ''.join('%02x' % random.randrange(256) for i in range(32))
-
-def get_key(name):
-    """Gets a secret key with the given name, or creates a new random key."""
-    secret = Secret.get_by_key_name(name)
-    if not secret:
-        secret = Secret(key_name=name, value=generate_random_key())
-        secret.put()
-    return secret.value
-
-def get_secret(name, default=''):
-    """Gets the secret with the given name, or returns the default value."""
-    secret = Secret.get_by_key_name(name)
-    if secret:
-        return secret.value
-    return default
 
 def sign(key_name, data, lifetime=None):
     """Produces a signature for the given data.  If 'lifetime' is specified,
     the signature expires in 'lifetime' seconds."""
     expiry = lifetime and int(time.time() + lifetime) or 0
     bytes = pickle.dumps((data, expiry))
-    return sha256_hmac(get_key(key_name), bytes) + '.' + str(expiry)
+    return sha256_hmac(key_name, bytes) + '.' + str(expiry)
 
 def verify(key_name, data, signature):
     """Checks that a signature matches the given data and hasn't expired."""
@@ -71,4 +51,4 @@ def verify(key_name, data, signature):
         return False
     if expiry == 0 or time.time() < expiry:
         bytes = pickle.dumps((data, expiry))
-        return sha256_hmac(get_key(key_name), bytes) == mac
+        return sha256_hmac(key_name, bytes) == mac

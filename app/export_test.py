@@ -22,10 +22,12 @@ import unittest
 
 from google.appengine.api import users
 
+import test_config  # must be imported first in unit tests
 import export
 import model
 from medium_test_case import MediumTestCase
 from utils import db
+
 
 INT_FIELDS = [
     'available_beds',

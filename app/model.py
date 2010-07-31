@@ -288,6 +288,7 @@ class Account(db.Model):
                                        # '*' is a wildcard subdomain or verb)
     requested_actions = db.StringListProperty()  # permissions requested but
                                                  # not yet granted
+    # TODO(kpy): This is a language code, not a locale code.  Rename it.
     locale = db.StringProperty() # user chosen locale
     default_frequency = db.StringProperty() # default frequency for updates
     next_daily_alert = db.DateTimeProperty() # next time to send a daily update

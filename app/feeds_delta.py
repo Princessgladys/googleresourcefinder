@@ -125,9 +125,12 @@ class Feed(Handler):
         if not self.subdomain:
             raise errors.ErrorMessage(404, 'Not found')
 
+        logging.info('POST headers: %r' % self.request.headers)
+        logging.info('POST body: %r' % self.request.body)
+
         # Check the signature on the request, to verify that this came from
         # a hub that we subscribed to (and gave our hub_secret to).
-        hmac = crypto.sha1_hmac(crypto.get_key('hub_secret'), self.request.body)
+        hmac = crypto.sha1_hmac('hub_secret', self.request.body)
         if self.request.headers['X-Hub-Signature'] != 'sha1=' + hmac:
             raise errors.ErrorMessage(403, 'Invalid signature.')
 

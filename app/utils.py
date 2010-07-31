@@ -26,11 +26,10 @@ import cache
 from calendar import timegm
 import cgi
 import cgitb
-import config
 from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
-from feedlib.crypto import get_secret
+from feedlib import config
 from feedlib.errors import ErrorMessage, Redirect
 from feedlib.struct import Struct
 import gzip
@@ -61,11 +60,22 @@ import django.utils.translation
 # Handler is initialized.
 from django.utils.translation import gettext_lazy as _
 
+# Load configuration settings.
+LANGUAGES = [pair.split(':', 1) for pair in config.get('languages').split('|')]
+
+LANGUAGE_CODES = dict(LANGUAGES).keys()
+
+LANG_FALLBACKS = dict(
+    [pair.split(':') for pair in config.get('lang_fallbacks').split()])
+
+MAPS_LANG_FALLBACKS = dict(
+    [pair.split(':') for pair in config.get('maps_lang_fallbacks').split()])
+
 # Attributes exported to CSV that should currently remain hidden from the
 # info window bubble and edit view.
 # TODO(shakusa) Un-hide these post-v1 when view/edit support is better
-HIDDEN_ATTRIBUTE_NAMES = ['accuracy', 'region_id', 'district_id', 'commune_id',
-                          'commune_code', 'sante_id']
+HIDDEN_ATTRIBUTE_NAMES = config.get('hidden_attribute_names').split()
+
 
 def fetch_all(query):
     """Gets all the results of a query as efficiently as possible.  If the
@@ -194,10 +204,10 @@ class Handler(webapp.RequestHandler):
             self.params.url_no_lang += '?'
 
         # Provide the list of available languages.
-        self.params.languages = config.LANGUAGES
+        self.params.languages = LANGUAGES
 
         # Provide the Google Analytics account ID.
-        self.params.analytics_id = get_secret('analytics_id')
+        self.params.analytics_id = config.get('analytics_id')
 
     def select_lang(self):
         """Detect and activate the appropriate language.  The 'lang' query
@@ -213,12 +223,12 @@ class Handler(webapp.RequestHandler):
         ).replace('_', '-').lower()
 
         # Check for and potentially convert an alternate language code.
-        if lang not in dict(config.LANGUAGES):
-            lang = config.LANG_FALLBACKS.get(lang, settings.LANGUAGE_CODE)
+        if lang not in LANGUAGE_CODES:
+            lang = LANG_FALLBACKS.get(lang, settings.LANGUAGE_CODE)
 
         # Store the language settings in params.lang and params.maps_lang.
         self.params.lang = lang
-        self.params.maps_lang = config.MAPS_LANG_FALLBACKS.get(lang, lang)
+        self.params.maps_lang = MAPS_LANG_FALLBACKS.get(lang, lang)
 
        # change account locale if necessary
         if self.account and lang != self.account.locale:

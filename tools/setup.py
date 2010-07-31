@@ -16,9 +16,21 @@ import cache
 import simplejson
 from access import *
 from extract_messages import parse_message, PATTERNS
-from feedlib import crypto, report_feeds
+from feedlib import config, report_feeds
 from model import *
 from utils import *
+
+
+def setup_configs():
+    """Creates the default configuration settings."""
+    config.set(
+        hub='https://pubsubhubbub.appspot.com',
+        languages=u'en:English|fr:Fran\xe7ais|ht:Krey\xf2l|es-419:Espa\xf1ol',
+        lang_fallbacks='es:es-419',
+        maps_lang_fallbacks='ht:fr',
+        hidden_attribute_names=
+            'accuracy region_id district_id commune_id commune_code sante_id')
+
 
 def setup_subdomains():
     """Sets up the subdomain record."""
@@ -344,6 +356,7 @@ def setup_datastore():
     """Sets up the subject types and translations in a datastore.  (Existing
     subject types and messages will be updated; existing Subject or Report
     information will not be changed or deleted.)"""
+    setup_configs()
     setup_subdomains()
     setup_subject_types()
     setup_messages()

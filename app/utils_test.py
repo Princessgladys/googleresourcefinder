@@ -19,24 +19,21 @@ import os
 import webob
 import sets
 
+import django.utils.translation
 from google.appengine.api import memcache
 from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
-
 from nose.tools import assert_raises
 
+import test_config  # must be imported first in unit tests
 import access
 import cache
-import config
-import medium_test_case
-import utils
-
-import django.utils.translation
-
 from feedlib.errors import ErrorMessage, Redirect
 from medium_test_case import MediumTestCase
 from model import Account, Message
+import utils
+
 
 class HandlerTest(MediumTestCase):
     def setUp(self):
