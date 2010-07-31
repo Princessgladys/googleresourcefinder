@@ -17,7 +17,7 @@ fi
 if [ -n "$changed" ]; then
   ../tools/extract_messages ../tools/setup.py static/locale.js && \
       $APPENGINE_DIR/lib/django/django/bin/compile-messages.py "$@" && \
-      $PYTHON -c 'import setup; setup.setup_js_messages()' && \
+      $PYTHON -c 'import test_config, setup; setup.setup_js_messages()' && \
       touch messages.timestamp
 else
   echo 'Message files are up to date.'

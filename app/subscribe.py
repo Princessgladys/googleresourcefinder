@@ -27,7 +27,6 @@ import simplejson
 
 from django.conf import settings
 
-import config
 import utils
 from bubble import format
 from mail_alerts import fetch_updates, format_plain_body, send_email
@@ -122,9 +121,10 @@ class Subscribe(Handler):
 
     def change_locale(self):
         """Changes the current user's locale."""
+        # TODO(kpy): These are language codes, not locale codes; rename them.
         locale = self.request.get('locale', self.account.locale)
-        if locale not in dict(config.LANGUAGES):
-            locale = config.LANG_FALLBACKS.get(lang, settings.LANGUAGE_code)
+        if locale not in utils.LANGUAGE_CODES:
+            locale = utils.LANG_FALLBACKS.get(lang, settings.LANGUAGE_code)
         self.account.locale = locale
         db.put(self.account)
 

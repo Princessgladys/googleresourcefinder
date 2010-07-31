@@ -21,6 +21,7 @@ from utils import db, HIDDEN_ATTRIBUTE_NAMES
 
 import django.utils.translation
 
+import test_config  # must be imported first in unit tests
 import bubble
 import datetime
 import logging

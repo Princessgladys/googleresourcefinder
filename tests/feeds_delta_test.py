@@ -5,80 +5,59 @@ to do it.  You'll be running your own pubsubhubbub instance locally,
 since pubsubhubbub needs to make web requests to your app (which is
 running on localhost:8080).
 
-For steps 1-3 see also:
-http://code.google.com/p/pubsubhubbub/wiki/DeveloperGettingStartedGuide
+1.  Download and run pubsubhubbub with these commands (see also
+    http://code.google.com/p/pubsubhubbub/wiki/DeveloperGettingStartedGuide):
 
-1. Dowload the pubsubhubbub source code from:
-   http://code.google.com/p/pubsubhubbub/source/checkout
+    svn checkout http://pubsubhubbub.googlecode.com/svn/trunk/ pshb
+    dev_appserver.py --port 8888 --datastore_path=/tmp/pshb.ds pshb/hub
 
-2. Run the pubsubhubbub server code (in the hub subdirectory) using:
-   dev_appserver.py --port 8888 --datastore_path=/tmp/hub.datastore hub
+    TODO(kpy): configure the hub url in the app
+    TODO(kpy): create dummy data to edit in the app
 
-3. Check that it works by pointing your browser to:
-   http://localhost:8888
-   (Don't click on any links -- they don't work because they're https.)
+2.  In another shell, start resourcefinder:
 
-4. In another shell, run your resourcefinder instance in the usual way:
-   tools/gae run app
+    tools/gae run app --datastore_path=/tmp/rf.ds
 
-5. Drop a copy of docs/sample_feed.xml into the app/static directory:
-   cp docs/sample_feed.xml app/static
+3.  In yet another shell, start feeddrop:
 
-6. Check that this worked by pointing your browser to:
-   http://localhost:8080/static/sample_feed.xml
+    tools/gae run feeddrop --port 8081 --datastore_path=/tmp/feeddrop.ds
 
-7. Using your browser, send a subscription request to pubsubhubbub:
+4.  Using your browser, subscribe resourcefinder to a feeddrop feed:
 
-   a. Point your browser to http://localhost:8888/subscribe
+    a.  Navigate to: http://localhost:8080/pubsub?subdomain=haiti
+        (Make sure you are logged in as an administrator.)
 
-   b. Fill out the top form as follows:
+    b.  Enter the URL http://localhost:8081/feeds/test and click "Subscribe".
 
-      - Callback: http://localhost:8080/incoming/mytoken
-      - Topic: http://localhost:8080/static/sample_feed.xml
-      - Leave everything else default
+        "Asked hub to subscribe" should appear in the resourcefinder log.
 
-   c. Submit the form.
+    c.  Then navigate to: http://localhost:8888/_ah/admin/queues
 
-   d. Navigate to http://localhost:8888/_ah/admin/queues
+    d.  Run all tasks that are pending there until no more tasks are pending.
 
-   e. Run all tasks that are pending there until no more tasks are pending
+        "Added subscription" should appear in the resourcefinder log.
 
-   If successful, the form submission returns a 204 status which looks
-   like nothing happened in your browser.  In the resourcefinder logs
-   you should see two requests:
+5.  Post an entry to the feeddrop feed:
 
-   - "GET /static/sample_feed.xml HTTP/1.1" 200
-   - "GET /incoming/mytoken HTTP/1.1" 200
+    a.  Execute this command:
 
-8. Using your browser, send a publish request to pubsubhubbub:
+        curl --data-binary @docs/sms_edit.xml http://localhost:8081/feeds/test
 
-   a. Point your browser to http://localhost:8888/publish
+        "Stored entry" should appear in the feeddrop log.
 
-   b. Fill out the top form as follows:
+    b.  Run all pending tasks at http://localhost:8081/_ah/admin/queues
 
-      - Topic: http://localhost:8080/static/sample_feed.xml
+    c.  Run all pending tasks at http://localhost:8888/_ah/admin/queues
 
-   c. Submit the form.
+        "Edit applied" should appear in the resourcefinder log.
 
-   d. Navigate to http://localhost:8888/_ah/admin/queues
+6.  Using your browser, verify that the posted report has been stored:
 
-   e. Run all tasks that are pending there until no more tasks are pending
+    http://localhost:8080/_ah/admin/datastore?kind=ReportEntry
 
-   Again, if successul, nothing appears to happen in the browser.  The
-   resourcefinder logs should show one request (and some other
-   messages):
+7.  Using your browser, verify that the Subject was edited:
 
-   - "POST /incoming/mytoken HTTP/1.1" 200
-
-   (The body of this POST request should be similar to DATA below,
-   except it contains two records.)
-
-9. Using your browser, verify that two records corresponding to the
-   contents of docs/sample_feed.xml have been added to the datastore:
-   http://localhost:8080/_ah/admin/datastore?kind=Record
-
-TODO: Once this part is implemented, verify that the corresponding
-Report, Subject and MinimalSubject records have been created/updated.
+    http://localhost:8080/_ah/admin/datastore?kind=Subject
 """
 
 import datetime

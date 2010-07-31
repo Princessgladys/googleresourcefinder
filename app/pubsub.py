@@ -18,7 +18,7 @@ import logging
 
 from google.appengine.api import urlfetch
 
-from feedlib import crypto, report_feeds
+from feedlib import config, crypto, report_feeds
 from model import filter_by_prefix
 from utils import ErrorMessage, Handler, db, run, urlencode
 
@@ -83,7 +83,7 @@ class Pubsub(Handler):
             'hub.mode': mode,
             'hub.topic': topic,
             'hub.verify': 'async',
-            'hub.secret': crypto.get_key('hub_secret'),
+            'hub.secret': config.get_or_generate('hub_secret'),
             # Give the hub up to 10 minutes to call us back.
             'hub.verify_token': crypto.sign('hub_verify', topic, 600)
         }

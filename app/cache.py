@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import config
 import logging
 import model
 import time
@@ -66,7 +65,7 @@ class JsonCache:
 
     def flush(self):
         """Flushes the values in this cache for all locales."""
-        locales = map(utils.get_locale, dict(config.LANGUAGES).keys())
+        locales = map(utils.get_locale, utils.LANGUAGE_CODES)
         memcache.delete_multi(map(self.get_memcache_key, locales))
 
 

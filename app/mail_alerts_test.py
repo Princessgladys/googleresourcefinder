@@ -22,12 +22,14 @@ from google.appengine.api import mail
 from google.appengine.api import users
 from google.appengine.ext import db, webapp
 
+import test_config  # must be imported first in unit tests
 import mail_alerts
 import utils
 from mail_alerts import get_timedelta, fetch_updates, format_plain_body
 from mail_alerts import update_account_alert_time
 from medium_test_case import MediumTestCase
 from model import Account, PendingAlert, Subject, SubjectType, Subscription
+
 
 # Set up localization.
 ROOT = os.path.dirname(__file__)

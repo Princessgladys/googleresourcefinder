@@ -18,6 +18,9 @@ import cron
 import datetime
 import unittest
 
+import test_config  # must be imported first in unit tests
+
+
 class CronTest(unittest.TestCase):
     def setUp(self):
         self.time = datetime.datetime(2010, 06, 16, 12, 30, 37)

@@ -18,6 +18,7 @@ import cache
 import medium_test_case
 import os
 
+import test_config  # must be imported first in unit tests
 from google.appengine.api import memcache
 from google.appengine.ext import db
 from medium_test_case import MediumTestCase
