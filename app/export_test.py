@@ -131,8 +131,7 @@ class ExportTest(MediumTestCase):
         assert export.format(0) == 0
     
     def test_write_csv(self):
-        subject_type = model.SubjectType.get('haiti', 'hospital')
-        fin = open('app/testdata/golden_file.csv', 'r')
-        sout = StringIO.StringIO()
-        export.write_csv(sout, subject_type)
-        assert sout.getvalue().strip() == fin.read().strip()
+        golden_csv = open('app/testdata/golden_file.csv', 'r').read()
+        buffer = StringIO.StringIO()
+        export.write_csv(buffer, 'haiti', 'hospital')
+        assert buffer.getvalue().strip() == golden_csv.strip()
