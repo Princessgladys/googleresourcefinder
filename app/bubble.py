@@ -18,6 +18,7 @@ import cache
 import datetime
 import logging
 import model
+from rendering import to_json, to_minimal_subject_jobject
 from utils import db, get_message, run, to_local_isotime, value_or_dash
 from utils import ErrorMessage, Handler, HIDDEN_ATTRIBUTE_NAMES
 
@@ -179,18 +180,23 @@ class Bubble(Handler):
                          embed='yes'))
         frequency = self.account and self.account.default_frequency or 'instant'
 
-        self.render(value_info_extractor.template_name,
-                    user=self.user,
-                    login_url=login_url,
-                    edit_url=edit_url,
-                    subdomain=self.subdomain,
-                    subscribed=subscribed,
-                    frequency=frequency,
-                    subject_name=self.params.subject_name,
-                    last_updated=max(detail.date for detail in details),
-                    special=special,
-                    general=general,
-                    details=details)
+        html = self.render_to_string(
+            value_info_extractor.template_name,
+            user=self.user,
+            login_url=login_url,
+            edit_url=edit_url,
+            subdomain=self.subdomain,
+            subscribed=subscribed,
+            frequency=frequency,
+            subject_name=self.params.subject_name,
+            last_updated=max(detail.date for detail in details),
+            special=special,
+            general=general,
+            details=details)
+        json = to_minimal_subject_jobject(self.subdomain, subject)
+
+        self.response.headers['Content-Type'] = "application/json"
+        self.write(to_json({'html': html, 'json': json}))
 
 if __name__ == '__main__':
     run([('/bubble', Bubble)], debug=True)
