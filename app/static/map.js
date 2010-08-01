@@ -1178,7 +1178,7 @@ function select_subject(subject_i) {
         show_loading(false);
       },
       success: function(result){
-        info.setContent(result);
+        info.setContent(result.html);
         info.open(map, markers[selected_subject_i]);
         // Sets up the tabs and should be called after the DOM is created.
         $j('#bubble-tabs').tabs({
@@ -1188,23 +1188,7 @@ function select_subject(subject_i) {
           }
         });
 
-        var bubble_availability = $('bubble-availability');
-        var bubble_capacity = $('bubble-capacity');
-        var bubble_services = $('bubble-services');
-
-        if (bubble_availability) {
-          selected_subject.values[attributes_by_name.available_beds] =
-              bubble_availability.innerHTML;
-        }
-        if (bubble_capacity) {
-          selected_subject.values[attributes_by_name.total_beds] =
-              bubble_capacity.innerHTML;
-        }
-        if (bubble_services
-            && $j.trim(bubble_services.innerHTML) != render(null)) {
-          selected_subject.values[attributes_by_name.services] =
-              bubble_services.innerHTML;
-        }
+        subjects[subject_i].values = result.json.values;
         update_subject_row(subject_i);
 
         show_loading(false);

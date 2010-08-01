@@ -46,13 +46,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Error message for lacking edit permissions
-#: edit.py:374
+#: edit.py:369
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr ""
 
 #. Form option to indicate that a value is not specified
-#: edit.py:200 edit.py:174 edit.py:215
+#: edit.py:199 edit.py:173 edit.py:214
 msgid "(unspecified)"
 msgstr ""
 
@@ -112,7 +112,7 @@ msgid "Blood Bank"
 msgstr ""
 
 #. Save a copy of the data in CSV format
-#: export.py:138
+#: export.py:139
 msgid "CSV Export"
 msgstr ""
 
@@ -264,7 +264,7 @@ msgid "District"
 msgstr ""
 
 #. E-mail address
-#: ../tools/setup.py:125 edit.py:121
+#: ../tools/setup.py:125 edit.py:120
 msgid "E-mail"
 msgstr ""
 
@@ -314,7 +314,7 @@ msgid "Error saving facility information."
 msgstr ""
 
 #. Button to export data to comma-separated-value format.
-#: templates/map.html:184 export.py:151
+#: templates/map.html:184 export.py:152
 msgid "Export CSV"
 msgstr ""
 
@@ -414,7 +414,7 @@ msgid "Internal Medicine"
 msgstr ""
 
 #. Error message for invalid date entry
-#: edit.py:143
+#: edit.py:142
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr ""
 
@@ -424,7 +424,7 @@ msgid "Invalid or missing account e-mail."
 msgstr ""
 
 #. Error message for request missing subject name.
-#: edit.py:434 bubble.py:161
+#: edit.py:429 bubble.py:162
 msgid "Invalid or missing subject name."
 msgstr ""
 
@@ -449,7 +449,7 @@ msgid "Last updated"
 msgstr ""
 
 #. Label for text input
-#: edit.py:236
+#: edit.py:235
 msgid "Latitude"
 msgstr ""
 
@@ -489,7 +489,7 @@ msgid "Location:"
 msgstr ""
 
 #. Label for text input
-#: edit.py:240
+#: edit.py:239
 msgid "Longitude"
 msgstr ""
 
@@ -539,7 +539,7 @@ msgid "NGO"
 msgstr ""
 
 #. a person's name
-#: ../tools/setup.py:105 edit.py:117
+#: ../tools/setup.py:105 edit.py:116
 msgid "Name"
 msgstr ""
 
@@ -554,7 +554,7 @@ msgid "Neurosurgery"
 msgstr ""
 
 #. Form option for a false Boolean value
-#: edit.py:178 bubble.py:50 bubble_test.py:66
+#: edit.py:177 bubble_test.py:66 bubble.py:51
 msgid "No"
 msgstr ""
 
@@ -630,7 +630,7 @@ msgid "Pediatrics"
 msgstr ""
 
 #. telephone number
-#: edit.py:119 ../tools/setup.py:123
+#: edit.py:118 ../tools/setup.py:123
 msgid "Phone"
 msgstr ""
 
@@ -681,7 +681,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:517
+#: edit.py:512
 msgid "Record updated."
 msgstr ""
 
@@ -733,7 +733,7 @@ msgid "Saving..."
 msgstr ""
 
 #. Label for a selector to export data to CSV
-#: export.py:142
+#: export.py:143
 msgid "Select subject type to export:"
 msgstr ""
 
@@ -878,7 +878,7 @@ msgid "X-Ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: edit.py:176 bubble_test.py:65 bubble.py:50
+#: edit.py:175 bubble_test.py:65 bubble.py:51
 msgid "Yes"
 msgstr ""
 

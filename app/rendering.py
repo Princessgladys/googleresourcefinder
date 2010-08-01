@@ -94,8 +94,36 @@ def json_encode(object):
         return {'lat': '%.6f' % object.lat, 'lon': '%.6f' % object.lon}
     raise TypeError(repr(object) + ' is not JSON serializable')
 
-def clean_json(json):
+def compress_json(json):
+    """Compresses json output by removing quotes from keys. This makes the
+       return value invalid json (all json keys must be double-quoted), but
+       the result is still valid javascript."""
     return re.sub(r'"(\w+)":', r'\1:', json)
+
+def to_json(obj):
+    """Invokes simplejson.dumps to serialize the given object."""
+    # set indent=2 to pretty-print; it blows up download size, so defaults off
+    return simplejson.dumps(obj, indent=None, default=json_encode)
+
+def to_minimal_subject_jobject(subdomain, minimal_subject):
+    """Converts the given MinimalSubject into an object that can be passed
+    to to_json()."""
+    subject_types = cache.SUBJECT_TYPES[subdomain]
+
+    attr_names = sets.Set()
+    for subject_type in subject_types.values():
+        attr_names = attr_names.union(subject_type.minimal_attribute_names)
+    attr_names = attr_names.difference(HIDDEN_ATTRIBUTE_NAMES)
+    attributes = [cache.ATTRIBUTES[a] for a in attr_names]
+    attribute_jobjects, attribute_is = make_jobjects(
+        attributes, attribute_transformer)
+
+    subject_type_jobjects, subject_type_is = make_jobjects(
+        subject_types.values(), subject_type_transformer, attribute_is)
+
+    return minimal_subject_transformer(-1, minimal_subject, attributes,
+                                       subject_types, subject_type_is,
+                                       center=None, radius=None)
 
 def render_json(subdomain, center=None, radius=None):
     """Dump the data for a subdomain as a JSON string."""
@@ -144,14 +172,12 @@ def render_json(subdomain, center=None, radius=None):
         namespace = message_jobjects.setdefault(message.namespace, {})
         namespace[message.name] = getattr(message, locale)
 
-    json = clean_json(simplejson.dumps({
+    json = compress_json(to_json({
         'total_subject_count': total_subject_count,
         'attributes': attribute_jobjects,
         'subject_types': subject_type_jobjects,
         'subjects': subject_jobjects,
-        'messages': message_jobjects
-    # set indent=2 to pretty-print; it blows up download size, so defaults off
-    }, indent=None, default=json_encode))
+        'messages': message_jobjects}))
     if not center:
         cache.JSON[subdomain].set(locale, json)
     return json
