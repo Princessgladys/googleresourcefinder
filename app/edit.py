@@ -21,7 +21,7 @@ import logging
 import model
 import pickle
 import re
-import StringIO
+import simplejson
 import urlparse
 import utils
 import wsgiref
@@ -31,7 +31,7 @@ from feed_provider import schedule_add_record
 from feeds.crypto import sign, verify
 from rendering import clean_json, json_encode
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
-from utils import db, can_edit, get_message, html_escape, simplejson
+from utils import db, can_edit, get_message, html_escape
 from utils import to_unicode, users, _
 
 XSRF_KEY_NAME = 'resource-finder-edit'
@@ -398,19 +398,12 @@ def update(key, subject_type, request, user, account, attributes, subdomain,
         cache.JSON[subdomain].flush()
         
         # On edit, create a task to e-mail users who have subscribed
-        # to that subject. Values are converted to unicode due to
-        # an issue where simplejson will not convert from pickle's
-        # 8-bit output to unicode; initial values must also be unicode.
-        json_attrs_changed = simplejson.dumps(unicode(
-            pickle.dumps(changed_attribute_information), 'latin-1'))
-        json_attrs_unchanged = simplejson.dumps(unicode(
-            pickle.dumps(unchanged_attribute_values), 'latin-1'))
-        
+        # to that subject.
         params = {
             'subject_name': subject.key().name(),
             'action': 'subject_changed',
-            'changed_data': json_attrs_changed,
-            'unchanged_data': json_attrs_unchanged
+            'changed_data': utils.url_pickle(changed_attribute_information),
+            'unchanged_data': utils.url_pickle(unchanged_attribute_values)
         }
 
         taskqueue.add(url='/mail_alerts', method='POST',

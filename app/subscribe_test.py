@@ -23,11 +23,12 @@ from google.appengine.api import mail
 from google.appengine.ext import db, webapp
 from google.appengine.ext.db import BadValueError
 
+import simplejson
 import subscribe
 import utils
 from medium_test_case import MediumTestCase
 from model import Account, PendingAlert, Subject, SubjectType, Subscription
-from utils import simplejson, users
+from utils import users
 
 # Set up localization.
 ROOT = os.path.dirname(__file__)
@@ -254,7 +255,7 @@ class MailUpdateSystemTest(MediumTestCase):
         self.set_attr(s, 'title', 'title_foo')
         st = SubjectType(key_name='haiti:hospital')
         db.put([s, st])
-
+        
         subject_changes = [{'subject_name': subject_name, 'old_frequency':
                             'weekly', 'new_frequency': 'instant'}]
         json_pickle_changes = simplejson.dumps(subject_changes)
@@ -268,7 +269,7 @@ class MailUpdateSystemTest(MediumTestCase):
         for freq in ['daily', 'weekly', 'monthly']:
             assert not PendingAlert.get(freq, self.email, subject_name)
         assert len(sent_emails) == 1
-        assert 'title_foo' in sent_emails[0].body.lower()
+        assert 'TITLE_FOO' in sent_emails[0].body
         db.delete([s, st])
 
     def test_change_default_frequency(self):
