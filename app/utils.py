@@ -37,8 +37,8 @@ from html import html_escape
 import logging
 import model
 import os
+import pickle
 import re
-import simplejson
 import sys
 import unicodedata
 import urllib
@@ -364,6 +364,16 @@ def urlencode(params):
         (to_utf8(key), to_utf8(params[key]))
         for key in keys if isinstance(params[key], basestring)])
 
+def url_pickle(data):
+    """Serializes a Python object into a 7-bit string.  Use this to pass Python
+    objects through query parameters.  The webob.Request decodes query params
+    as Unicode strings, so regular pickles will run into encoding problems."""
+    return pickle.dumps(data).decode('latin-1').encode('utf-7')
+
+def url_unpickle(data):
+    """Deserializes a Python object that was serialized with url_pickle."""
+    return pickle.loads(data.decode('utf-7').encode('latin-1'))
+
 def set_url_param(url, param, value):
     """Modifies a URL, setting the given param to the specified value.  This
     may add the param or override an existing value, or, if the value is None,
@@ -419,6 +429,11 @@ def value_or_dash(value):
     if not value and value != 0:
         return u'\u2013'.encode('utf-8')
     return value
+
+def can_edit(account, subdomain, attribute):
+    """Returns True if the user can edit the given attribute."""
+    return not attribute.edit_action or access.check_action_permitted(
+        account, subdomain, attribute.edit_action)
 
 def run(*args, **kwargs):
     webapp.util.run_wsgi_app(webapp.WSGIApplication(*args, **kwargs))

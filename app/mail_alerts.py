@@ -45,11 +45,12 @@ from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 
 import cache
+import simplejson
 import utils
 from feeds.xmlutils import Struct
 from model import Account, PendingAlert, Subdomain, Subject
 from model import Subscription
-from utils import _, format, get_last_updated_time, Handler, simplejson
+from utils import _, format, get_last_updated_time, Handler
 
 # Set up localization.
 ROOT = os.path.dirname(__file__)
