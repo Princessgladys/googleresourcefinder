@@ -36,7 +36,6 @@ __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 import datetime
 import logging
 import os
-import pickle
 from copy import deepcopy
 from operator import itemgetter
 
@@ -45,7 +44,6 @@ from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 
 import cache
-import simplejson
 import utils
 from feeds.xmlutils import Struct
 from model import Account, PendingAlert, Subdomain, Subject
@@ -377,12 +375,10 @@ class MailAlerts(Handler):
         self.init()
 
         if self.action == 'subject_changed':
-            # Values encoded to latin-1 before unpickling due to pickle
-            # needing 8-bit input, matching its original output.
-            self.changed_request_data = pickle.loads(simplejson.loads(
-                self.request.get('changed_data')).encode('latin-1'))
-            self.unchanged_request_data = pickle.loads(simplejson.loads(
-                self.request.get('unchanged_data')).encode('latin-1'))
+            self.changed_request_data = utils.url_unpickle(
+                self.request.get('changed_data'))
+            self.unchanged_request_data = utils.url_unpickle(
+                self.request.get('unchanged_data'))
             self.update_and_add_pending_alerts()
         else:
             for subdomain in Subdomain.all():
@@ -412,14 +408,7 @@ class MailAlerts(Handler):
                     frequency=subscription.frequency)
                 if not pa.timestamp:
                     for update in self.changed_request_data:
-                        # None type objects come back from being pickled as the
-                        # unicode dash. If one is found, set the attribute in
-                        # the PendingAlert to None.
-                        if update['old_value'] == '\xe2\x80\x93':
-                            setattr(pa, update['attribute'], None)
-                        else:
-                            setattr(pa, update['attribute'],
-                                    update['old_value'])
+                        setattr(pa, update['attribute'], update['old_value'])
                     for attribute in self.unchanged_request_data:
                         setattr(pa, attribute,
                                 self.unchanged_request_data[attribute])
@@ -452,8 +441,9 @@ class MailAlerts(Handler):
         'monthly']. Also removes pending alerts once an e-mail has been sent
         and updates the account's next alert times.
         """
-        accounts = Account.all().filter('next_%s_alert <' % frequency,
-                                        datetime.datetime.now())
+        query = Account.all().filter('next_%s_alert <' % frequency,
+                                     datetime.datetime.now())
+        accounts = [account for account in query if account.email != None]
         for account in accounts:
             pending_alerts = PendingAlert.get_by_frequency(frequency,
                                                            account.email)
