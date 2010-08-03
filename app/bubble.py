@@ -127,7 +127,8 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
         ValueInfoExtractor.__init__(
             self,
             ['title', 'location', 'available_beds', 'total_beds', 'healthc_id',
-             'pcode', 'address', 'services', 'operational_status'],
+             'pcode', 'address', 'services', 'operational_status',
+             'alert_status'],
             # TODO(kpy): This list is redundant; see the comment above
             # in ValueInfoExtractor.
             ['services', 'organization_type', 'category', 'construction',
@@ -138,10 +139,14 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
         (special, general, details) = ValueInfoExtractor.extract(
             self, subject, filter(lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
                                    attribute_names))
-        value_info = ValueInfoExtractor.get_value_info(self, subject,
+        op_status_info = ValueInfoExtractor.get_value_info(self, subject,
             'operational_status')
-        if value_info:
-            general.append(value_info)
+        alert_status_info = ValueInfoExtractor.get_value_info(self, subject,
+            'alert_status')
+        if op_status_info:
+            general.append(op_status_info)
+        if alert_status_info:
+            general.append(alert_status_info)
         return (special, general, details)
 
 VALUE_INFO_EXTRACTORS = {

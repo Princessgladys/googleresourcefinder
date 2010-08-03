@@ -51,6 +51,7 @@ COLUMNS_BY_SUBJECT_TYPE = {
         ('construction', lambda f: f.get_value('construction')),
         ('damage', lambda f: f.get_value('damage')),
         ('operational_status', lambda f: f.get_value('operational_status')),
+        ('alert_status', lambda f: f.get_value('alert_status')),
         ('comments', lambda f: f.get_value('comments')),
         ('reachable_by_road', lambda f: f.get_value('reachable_by_road')),
         ('can_pick_up_patients', lambda f: f.get_value('can_pick_up_patients')),

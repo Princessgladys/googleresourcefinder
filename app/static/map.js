@@ -308,6 +308,10 @@ function maybe_disabled(disabled) {
   return disabled ? ' disabled' : '';
 }
 
+function maybe_on_alert(on_alert) {
+  return on_alert ? ' on-alert' : '';
+}
+
 function make_icon(title, status, detail, opt_icon, opt_icon_size,
     opt_icon_fill) {
   var text = detail ? title : '';
@@ -641,6 +645,8 @@ function update_subject_icons() {
       var title = subject.values[attributes_by_name.title];
       var icon_url = make_icon(title, st, detail);
       if (is_subject_closed(subject)) {
+        icon_url = make_icon(title, st, detail, null, null, '444');
+      } else if (is_subject_on_alert(subject)) {
         icon_url = make_icon(title, st, detail, null, null, 'a00');
       }
       subject.visible = false;
@@ -703,6 +709,7 @@ function update_subject_list() {
         id: 'subject-' + su,
         'class': 'subject' +
             maybe_disabled(is_subject_closed(subject)) +
+            maybe_on_alert(is_subject_on_alert(subject)) +
             maybe_selected(su === selected_subject_i),
         onclick: subject_selector(su),
         onmouseover: hover_activator('subject-' + su),
@@ -1150,6 +1157,7 @@ function select_subject(subject_i) {
     if (item) {
       item.className = 'subject' +
           maybe_disabled(is_subject_closed(subjects[su])) +
+          maybe_on_alert(is_subject_on_alert(subjects[su])) +
           maybe_selected(su === selected_subject_i);
     }
   }
@@ -1542,6 +1550,18 @@ function is_subject_closed(subject) {
   if (subject) {
     var op_status = subject.values[attributes_by_name.operational_status];
     if (op_status == 'CLOSED_OR_CLOSING') {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+// Returns true IFF the alert status of the subject is on
+function is_subject_on_alert(subject) {
+  if (subject) {
+    var alert_status = subject.values[attributes_by_name.alert_status];
+    if (alert_status) {
       return true;
     }
   }
