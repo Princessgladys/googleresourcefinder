@@ -1,0 +1,5 @@
+End-to-end tests of the application server go in this tests/ directory
+and are run by tools/server_tests.
+
+Unit tests for individual Python modules go in the directory next to the
+module (e.g. lib/feeds/geo_test.py).
