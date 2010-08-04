@@ -46,13 +46,13 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Instituciones dentro de${RADIUS_MILES} millas"
 
 #. Error message for lacking edit permissions
-#: edit.py:374
+#: edit.py:369
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s no tiene permiso para editar %(a)s"
 
 #. Form option to indicate that a value is not specified
-#: edit.py:200 edit.py:174 edit.py:215
+#: edit.py:199 edit.py:173 edit.py:214
 msgid "(unspecified)"
 msgstr "(No especificado)"
 
@@ -284,7 +284,7 @@ msgid "District"
 msgstr "Distrito"
 
 #. E-mail address
-#: edit.py:121 ../tools/setup.py:127
+#: edit.py:120 ../tools/setup.py:127
 msgid "E-mail"
 msgstr "Correo electrónico"
 
@@ -454,7 +454,7 @@ msgid "Internal Medicine"
 msgstr "Medicina Interna"
 
 #. Error message for invalid date entry
-#: edit.py:143
+#: edit.py:142
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Fecha no válida: %(date)r (requiere un formato de DD-MM-AAAA)"
 
@@ -464,7 +464,7 @@ msgid "Invalid or missing account e-mail."
 msgstr "Nombre de la institución no válido o no especificado"
 
 #. Error message for request missing subject name.
-#: edit.py:435 bubble.py:139
+#: bubble.py:140 edit.py:430
 msgid "Invalid or missing subject name."
 msgstr "Nombre de la institución no válido o no especificado"
 
@@ -494,7 +494,7 @@ msgid "Last updated"
 msgstr "Actualizado"
 
 #. Label for text input
-#: edit.py:236
+#: edit.py:235
 msgid "Latitude"
 msgstr "Latitud"
 
@@ -534,7 +534,7 @@ msgid "Location:"
 msgstr "Ubicación"
 
 #. Label for text input
-#: edit.py:240
+#: edit.py:239
 msgid "Longitude"
 msgstr "Longitud"
 
@@ -584,7 +584,7 @@ msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: ../tools/setup.py:107 edit.py:117
+#: ../tools/setup.py:107 edit.py:116
 msgid "Name"
 msgstr "Nombre"
 
@@ -604,7 +604,7 @@ msgid "New Value"
 msgstr "Nuevo valor"
 
 #. Form option for a false Boolean value
-#: utils_test.py:321 edit.py:178 utils.py:326
+#: edit.py:177 utils.py:332 utils_test.py:321
 msgid "No"
 msgstr "No"
 
@@ -685,7 +685,7 @@ msgid "Pediatrics"
 msgstr "Pediatría"
 
 #. telephone number
-#: edit.py:119 ../tools/setup.py:125
+#: edit.py:118 ../tools/setup.py:125
 msgid "Phone"
 msgstr "Teléfono"
 
@@ -736,7 +736,7 @@ msgid "Reachable by road"
 msgstr "Acceso a través de carretera"
 
 #. Record updated successfully.
-#: edit.py:518
+#: edit.py:513
 msgid "Record updated."
 msgstr "Registro actualizado."
 
@@ -963,7 +963,7 @@ msgid "X-Ray"
 msgstr "Rayos X"
 
 #. Form option for a true Boolean value
-#: edit.py:176 utils_test.py:320 utils.py:326
+#: edit.py:175 utils.py:332 utils_test.py:320
 msgid "Yes"
 msgstr "Sí"
 

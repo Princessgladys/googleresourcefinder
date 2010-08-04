@@ -185,6 +185,12 @@ class EditTest(SeleniumTestCase):
 
         # Submit the form
         save_func(self)
+
+        # Check that the facility list is updated to reflect the emptying
+        # Note the en-dash \u2013 implies "no value"
+        regex = Regex(u'.*\u2013 / \u2013')
+        self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
+
         edit_func(self)
 
         # Check that everything is now empty or deselected
@@ -198,6 +204,11 @@ class EditTest(SeleniumTestCase):
         self.click('//input[@name="save"]')
 
         save_func(self)
+
+        # Check that the facility list is updated to show the zeros
+        regex = Regex('.*0 / 0')
+        self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
+
         edit_func(self)
 
         # Check that the integer fields are actually zero, not empty
