@@ -71,6 +71,7 @@ def setup_subject_types():
         attr('choice', 'operational_status',
              ['OPERATIONAL', 'NO_SURGICAL_CAPACITY', 'FIELD_HOSPITAL',
               'FIELD_WITH_HOSPITAL', 'CLOSED_OR_CLOSING']),
+        attr('str', 'alert_status'),
         attr('text', 'comments'),
         attr('bool', 'reachable_by_road'),
         attr('bool', 'can_pick_up_patients'),
@@ -89,7 +90,8 @@ def setup_subject_types():
         minimal_attribute_names=['title', 'pcode', 'healthc_id',
                                  'available_beds', 'total_beds', 'services',
                                  'contact_name', 'phone', 'address',
-                                 'location', 'operational_status'])
+                                 'location', 'operational_status',
+                                 'alert_status'])
     db.put(hospital)
 
 
@@ -147,6 +149,8 @@ def setup_messages():
         name_message('damage', en='Damage'),
         #i18n: Whether or not a facility is fully operational.
         name_message('operational_status', en='Operational status'),
+        #i18n: Whether or not a facility is on alert status.
+        name_message('alert_status', en='Alert status'),
         #i18n: remarks
         name_message('comments', en='Comments'),
         #i18n: Whether or not a facility can be accessed by a road.

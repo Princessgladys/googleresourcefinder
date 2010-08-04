@@ -108,3 +108,4 @@ td.subject-count.selected { color: #fff; }
 .subject-info .text { margin-left: 2em; }
 
 tr.disabled td { color: #aaa; }
+tr.on-alert td { color: #a00; }

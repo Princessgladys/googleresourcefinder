@@ -32,12 +32,18 @@ class MainTestCase(SeleniumTestCase):
             'haiti', 'example.org/1001',
             title='title_foo2', location=db.GeoPt(50.5, 1),
             operational_status='CLOSED_OR_CLOSING')
+        self.put_subject(
+            'haiti', 'example.org/1002',
+            title='title_foo3', location=db.GeoPt(49.5, 2),
+            alert_status='alert_status_foo')
+        self.bubble_xpath = "//div[@class='bubble']/span/span[@class='title']"
 
     def tearDown(self):
         self.delete_account()
         self.delete_default_account()
         self.delete_subject('haiti', 'example.org/1000')
         self.delete_subject('haiti', 'example.org/1001')
+        self.delete_subject('haiti', 'example.org/1002')
         SeleniumTestCase.tearDown(self)
 
     def test_default_permissions(self):
@@ -93,33 +99,19 @@ class MainTestCase(SeleniumTestCase):
         # with correct name
         subject_xpath = '//tr[@id="subject-1"]'
         subject_title = self.get_text(subject_xpath + '/td')
-        bubble_xpath = "//div[@class='bubble']/span/span[@class='title']"
         self.click(subject_xpath)
-        self.wait_for_element(bubble_xpath)
-        self.assert_text(subject_title, bubble_xpath)
+        self.wait_for_element(self.bubble_xpath)
+        self.assert_text(subject_title, self.bubble_xpath)
 
     def test_closed_facilities(self):
         """Confirms that closed facilities appear grey in the facility list
         and have a warning message in their info bubble."""
-        self.login('/?subdomain=haiti')
-
-        # Wait for the facility list to populate.
-        self.wait_for_element('subject-2')
-
-        # Facility 1000 is open (black in list and no 'closed' message).
-        assert 'disabled' not in self.get_attribute(
-            '//tr[@id="subject-1"]/@class')
-        self.click('id=subject-1')
-        bubble_xpath = "//div[@class='bubble']/span/span[@class='title']"
-        self.wait_for_element(bubble_xpath)
-        assert not self.is_text_present(
-            'Note: This facility has been marked closed')
+        self.login_and_check_first_facility()
 
         # Facility 1001 is closed (grey in list and 'closed' message in bubble).
-        assert 'disabled' in self.get_attribute(
-            '//tr[@id="subject-2"]/@class')
+        assert 'disabled' in self.get_attribute('//tr[@id="subject-2"]/@class')
         self.click('id=subject-2')
-        self.wait_for_element(bubble_xpath)
+        self.wait_for_element(self.bubble_xpath)
         assert self.is_text_present(
             'Note: This facility has been marked closed')
 
@@ -127,7 +119,7 @@ class MainTestCase(SeleniumTestCase):
         self.open_path('/?subdomain=haiti&lang=fr')
         self.wait_for_element('subject-2')
         self.click('id=subject-2')
-        self.wait_for_element(bubble_xpath)
+        self.wait_for_element(self.bubble_xpath)
         assert self.is_text_present(
             u'Note: Cet \xe9tablissement a \xe9t\xe9 marqu\xe9e ferm\xe9e.')
 
@@ -144,6 +136,65 @@ class MainTestCase(SeleniumTestCase):
         # Facility 1000 should now be grey and have a 'closed' message.
         assert 'disabled' in self.get_attribute('//tr[@id="subject-1"]/@class')
         self.click('id=subject-1')
-        self.wait_for_element(bubble_xpath)
+        self.wait_for_element(self.bubble_xpath)
         assert self.is_text_present(
+            'Note: This facility has been marked closed')
+
+    def test_facilities_on_alert(self):
+        """Confirms that facilities on alert appear red in the facility list and
+        have an alert message in their info bubble."""
+        self.login_and_check_first_facility()
+
+        # Facility 1002 is on alert (red in list and alert message in bubble).
+        assert 'on-alert' in self.get_attribute('//tr[@id="subject-3"]/@class')
+        self.click('id=subject-3')
+        self.wait_for_element(self.bubble_xpath)
+        assert self.is_text_present('Alert: alert_status_foo')
+
+        # Add alert status to facility 1000
+        self.put_subject(
+            'haiti', 'example.org/1000',
+            title='title_foo1', location=db.GeoPt(51.5, 0),
+            alert_status='alert_status_bar')
+
+        # Reload and flush the cache so we see the changes.
+        self.open_path('/?subdomain=haiti&flush=yes')
+
+        # Facility 1000 should now be red and have an alert message.
+        assert 'on-alert' in self.get_attribute('//tr[@id="subject-1"]/@class')
+        self.click('id=subject-1')
+        self.wait_for_element(self.bubble_xpath)
+        assert self.is_text_present('Alert: alert_status_bar')
+
+        # Remove alert status from facility 1000
+        self.put_subject(
+            'haiti', 'example.org/1000',
+            title='title_foo1', location=db.GeoPt(51.5, 0),
+            alert_status='')
+
+        # Reload and flush the cache so we see the changes.
+        self.open_path('/?subdomain=haiti&flush=yes')
+
+        # Facility 1000 should now be red and have an alert message.
+        assert 'on-alert' not in self.get_attribute(
+            '//tr[@id="subject-1"]/@class')
+        self.click('id=subject-1')
+        self.wait_for_element(self.bubble_xpath)
+        assert not self.is_text_present('Alert: alert_status_bar')
+
+
+    def login_and_check_first_facility(self):
+        """Helper function. Logs into the haiti subdomain, waits for the list to
+        load, then checks to make sure that facility 1000 is open."""
+        self.login('/?subdomain=haiti')
+
+        # Wait for the facility list to populate.
+        self.wait_for_element('subject-3')
+
+        # Facility 1000 is open (black in list and no 'closed' message).
+        assert 'disabled' not in self.get_attribute(
+            '//tr[@id="subject-1"]/@class')
+        self.click('id=subject-1')
+        self.wait_for_element(self.bubble_xpath)
+        assert not self.is_text_present(
             'Note: This facility has been marked closed')
