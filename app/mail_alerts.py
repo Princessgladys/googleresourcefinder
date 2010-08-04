@@ -20,8 +20,6 @@ then sends out information to each user per their subscription settings.
 format_email_subject(subdomain, frequency): generates an e-mail subject line
 get_timedelta(account, subject): returns a text frequency as a timedelta
 fetch_updates(): returns a dictionary of updated values for the given subject
-order_and_format_updates(updates, subject_type, locale): sorts and formats the
-    updates as specified by the subject type for the updates
 format_update(update, locale): translates and formats a particular update
 send_email(): sends an e-mail with the supplied information
 update_account_alert_time(): updates an account's next_%freq%_alert time
@@ -48,7 +46,7 @@ import utils
 from feeds.xmlutils import Struct
 from model import Account, PendingAlert, Subdomain, Subject
 from model import Subscription
-from utils import _, format, get_last_updated_time, Handler
+from utils import _, format, get_last_updated_time, order_and_format_updates
 
 # Set up localization.
 ROOT = os.path.dirname(__file__)
@@ -121,18 +119,6 @@ def fetch_updates(alert, subject):
                                   'new_value': value,
                                   'author': author})
     return updated_attrs
-
-
-def order_and_format_updates(updates, subject_type, locale):
-    """Orders attribute updates in the same order specified by
-    subject_type.attribute_names, in the given locale."""
-    updates_by_name = dict((update['attribute'], update) for update in updates)
-    formatted_attrs = []
-    for name in subject_type.attribute_names:
-        if name in updates_by_name:
-            formatted_attrs.append(format_update(updates_by_name[name],
-                                                 locale))
-    return formatted_attrs
 
 
 def format_update(update, locale):
@@ -245,10 +231,11 @@ class EmailFormatter:
             subdomain = subject_name.split(':')[0]
             subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
             updates = order_and_format_updates(updates, subject_type,
-                                               self.locale)
-            body += subject_title.upper() + '\n'
+                                               self.locale, format_update)
+            body += 'UPDATE %s (%s %s)\n\n' % (subject_title, subdomain,
+                                             subject.get_value('healthc_id'))
             for update in updates:
-                body += '-> %s: %s [%s: %s; %s: %s]\n' % (
+                body += '%s %s\n-- %s: %s. %s: %s\n' % (
                     update['attribute'],
                     utils.to_unicode(format(update['new_value'], True)),
                     #i18n: old value for the attribute
@@ -291,7 +278,7 @@ class HospitalEmailFormatter(EmailFormatter):
             subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
             updates = order_and_format_updates(
                 data.changed_subjects[subject_name][1], subject_type,
-                self.locale)
+                self.locale, format_update)
             changed_subjects.append({
                 'name': subject_name,
                 'no_subdomain_name': no_subdomain_name,
@@ -343,7 +330,7 @@ FORMAT_EMAIL = {
     'hospital': HospitalEmailFormatter
 }
 
-class MailAlerts(Handler):
+class MailAlerts(utils.Handler):
     """Handler for /mail_alerts. Used to handle e-mail update sending.
 
     Attributes:

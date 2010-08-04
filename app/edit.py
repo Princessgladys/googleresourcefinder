@@ -30,7 +30,7 @@ from feed_provider import schedule_add_record
 from feeds.crypto import sign, verify
 from rendering import to_json
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
-from utils import db, get_message, html_escape
+from utils import db, can_edit, get_message, html_escape
 from utils import to_unicode, users, _
 
 XSRF_KEY_NAME = 'resource-finder-edit'
@@ -302,11 +302,6 @@ def is_editable(request, attribute):
     the request, indicating that the given field was editable by the user
     at the time the edit page was rendered."""
     return 'editable.%s' % attribute.key().name() in request.arguments()
-
-def can_edit(account, subdomain, attribute):
-    """Returns True if the user can edit the given attribute."""
-    return not attribute.edit_action or check_action_permitted(
-        account, subdomain, attribute.edit_action)
 
 def get_suggested_nickname(user):
     """Returns the suggested Account.nickname based on a user.nickname"""

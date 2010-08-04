@@ -113,3 +113,13 @@ handlers:
 - url: /subscribe
   script: subscribe.py
   login: admin
+
+# Incoming mail handlers.
+
+- url: /_ah/mail/updates@resource-finder.appspotmail.com
+  script: mail_editor.py
+  login: admin
+
+- url: /_ah/mail/.+
+  script: mailbox.py
+  login: admin

@@ -137,6 +137,7 @@ class Handler(webapp.RequestHandler):
         if access.check_action_permitted(self.account, self.subdomain, action):
             return
         self.require_logged_in_user()  # if not logged in, offer login page
+        logging.info('utils.py: unauthorized edit attempt')
         #i18n: Error message
         raise ErrorMessage(403, _('Unauthorized user.'))
 
@@ -435,6 +436,23 @@ def value_or_dash(value):
     if not value and value != 0:
         return u'\u2013'.encode('utf-8')
     return value
+
+def can_edit(account, subdomain, attribute):
+    """Returns True if the user can edit the given attribute."""
+    return not attribute.edit_action or access.check_action_permitted(
+        account, subdomain, attribute.edit_action)
+
+def order_and_format_updates(updates, subject_type, locale, format_function,
+                             attr_index='attribute'):
+    """Orders attribute updates in the same order specified by
+    subject_type.attribute_names, in the given locale."""
+    updates_by_name = dict((update[attr_index], update) for update in updates)
+    formatted_attrs = []
+    for name in subject_type.attribute_names:
+        if name in updates_by_name:
+            formatted_attrs.append(
+                format_function(updates_by_name[name], locale))
+    return formatted_attrs
 
 def run(*args, **kwargs):
     webapp.util.run_wsgi_app(webapp.WSGIApplication(*args, **kwargs))

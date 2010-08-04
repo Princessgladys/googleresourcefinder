@@ -19,9 +19,10 @@ import unittest
 
 from google.appengine.api import apiproxy_stub_map
 from google.appengine.api import datastore_file_stub
-from google.appengine.api.memcache import memcache_stub
+from google.appengine.api import mail_stub
 from google.appengine.api import user_service_stub
 from google.appengine.api.labs.taskqueue import taskqueue_stub
+from google.appengine.api.memcache import memcache_stub
 
 APP_ID = 'test'
 os.environ['APPLICATION_ID'] = APP_ID
@@ -34,8 +35,7 @@ class MediumTestCase(unittest.TestCase):
     appengine services."""
     def setUp(self):
         apiproxy_stub_map.apiproxy = apiproxy_stub_map.APIProxyStubMap()
-        stub = datastore_file_stub.DatastoreFileStub(APP_ID,'/dev/null',
-                                                     '/dev/null')
+        stub = datastore_file_stub.DatastoreFileStub(APP_ID, None)
         apiproxy_stub_map.apiproxy.RegisterStub('datastore_v3', stub)
 
         apiproxy_stub_map.apiproxy.RegisterStub(
@@ -46,6 +46,17 @@ class MediumTestCase(unittest.TestCase):
 
         apiproxy_stub_map.apiproxy.RegisterStub(
             'user', user_service_stub.UserServiceStub())
+
+        test_case = self
+        class MailStub(mail_stub.MailServiceStub):
+            def _GenerateLog(self, method, message, log, *args, **kwargs):
+                test_case.sent_messages.append(message)
+                return super(MailStub, self)._GenerateLog(
+                    method, message, log, *args, **kwargs)
+
+        self.sent_messages = []
+        apiproxy_stub_map.apiproxy.RegisterStub('mail', MailStub())
+
 
     def assert_contents_in_order(self, expected, actual):
         """"""
