@@ -146,8 +146,14 @@ class Handler(webapp.RequestHandler):
             raise Redirect(users.create_login_url(self.request.uri))
 
     def render(self, path, **params):
-        """Renders the template at the given path with the given parameters."""
-        self.write(webapp.template.render(os.path.join(ROOT, path), params))
+        """Renders the template at the given path with the given parameters
+        to response.out."""
+        self.write(self.render_to_string(path, **params))
+
+    def render_to_string(self, path, **params):
+        """Renders the template at the given path with the given parameters
+           to a string that is returned."""
+        return webapp.template.render(os.path.join(ROOT, path), params)
 
     def write(self, text):
         self.response.out.write(text)

@@ -21,7 +21,6 @@ import logging
 import model
 import pickle
 import re
-import simplejson
 import urlparse
 import utils
 import wsgiref
@@ -29,7 +28,7 @@ import wsgiref
 from access import check_action_permitted
 from feed_provider import schedule_add_record
 from feeds.crypto import sign, verify
-from rendering import clean_json, json_encode
+from rendering import to_json
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
 from utils import db, get_message, html_escape
 from utils import to_unicode, users, _
@@ -266,14 +265,10 @@ def make_input(subject, attribute):
     return ATTRIBUTE_TYPES[attribute.type].make_input(
         name, subject.get_value(name), attribute)
 
-def render_json(value):
-    """Renders the given value as json"""
-    return clean_json(simplejson.dumps(value, indent=None, default=json_encode))
-
 def render_attribute_as_json(subject, attribute):
     """Returns the value of this attribute as a JSON string"""
     name = attribute.key().name()
-    return render_json(subject.get_value(name))
+    return to_json(subject.get_value(name))
 
 def apply_change(subject, minimal_subject, report, subject_type,
                  request, attribute, change_metadata):
@@ -290,7 +285,7 @@ def has_changed(subject, request, attribute):
     name = attribute.key().name()
     value = ATTRIBUTE_TYPES[attribute.type].to_stored_value(
         name, request.get(name, None), request, attribute)
-    current = render_json(value)
+    current = to_json(value)
     previous = request.get('editable.%s' % name, None)
     return previous != current
 
