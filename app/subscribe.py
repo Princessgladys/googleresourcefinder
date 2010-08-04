@@ -150,7 +150,6 @@ class Subscribe(Handler):
                                      subject_name)
         if old_alert:
             if new_frequency == 'instant':
-                print 'here'
                 subject = Subject.get_by_key_name(old_alert.subject_name)
                 values = fetch_updates(old_alert, subject)
                 email_data = Struct(
