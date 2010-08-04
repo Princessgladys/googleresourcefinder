@@ -102,10 +102,10 @@ def get_locale(lang=None):
     or converts the specified Django language code to a locale code."""
     return django.utils.translation.to_locale(lang or get_lang())
 
-def get_message(namespace, name):
+def get_message(namespace, name, locale=''):
     """Gets a translated message (in the current language)."""
     message = cache.MESSAGES.get((namespace, name))
-    return message and getattr(message, get_locale()) or name
+    return message and getattr(message, locale or get_locale()) or name
 
 def split_key_name(entity):
     """Splits the key_name of a Subject or SubjectType entity into the
@@ -299,6 +299,39 @@ def fetch(url, payload=None, previous_data=None):
     dump.put()
     return dump
 
+def format(value, localize=False):
+    """Formats values in a way that is suitable to display to a user.
+    If 'localize' is true, the value is treated as a localizable message key or
+    list of message keys to be looked up in the 'attribute_value' namespace."""
+    if localize:
+        if isinstance(value, list):
+            value = [get_message('attribute_value', item) for item in value]
+        else:
+            value = get_message('attribute_value', value)
+    if isinstance(value, unicode):
+        return value.encode('utf-8')
+    if isinstance(value, str) and value != '':
+        return value.replace('\n', ' ')
+    if isinstance(value, list) and value != []:
+        return ', '.join(value).encode('utf-8')
+    if isinstance(value, DateTime):
+        return to_local_isotime(value.replace(microsecond=0))
+    if isinstance(value, db.GeoPt):
+        latitude = u'%.4f\u00b0 %s' % (
+            abs(value.lat), value.lat >= 0 and 'N' or 'S')
+        longitude = u'%.4f\u00b0 %s' % (
+            abs(value.lon), value.lon >= 0 and 'E' or 'W')
+        return (latitude + ', ' + longitude).encode('utf-8')
+    if isinstance (value, bool):
+        return value and format(_('Yes')) or format(_('No'))
+    return value_or_dash(value)
+
+def get_last_updated_time(s):
+    subdomain, subject_name = split_key_name(s)
+    st = cache.SUBJECT_TYPES[subdomain][s.type]
+    return max(s.get_observed(name) for name in st.attribute_names if
+               s.get_observed(name))
+
 def decompress(data):
     file = gzip.GzipFile(fileobj=StringIO.StringIO(data))
     try:
@@ -373,6 +406,10 @@ def to_local_isotime(utc_datetime, clear_ms=False):
       utc_datetime = utc_datetime.replace(microsecond=0)
     utc_datetime = utc_datetime - TimeDelta(hours=5)
     return utc_datetime.isoformat(' ') + ' -05:00'
+
+def to_local_isotime_day(time):
+    isotime = to_local_isotime(time)
+    return isotime[:isotime.find(' ')]
 
 def to_unicode(value):
     """Converts the given value to unicode. Django does not do this
