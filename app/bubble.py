@@ -19,37 +19,10 @@ import datetime
 import logging
 import model
 from rendering import to_json, to_minimal_subject_jobject
-from utils import db, get_message, run, to_local_isotime, value_or_dash
+from utils import db, get_message, format, run, to_local_isotime, value_or_dash
 from utils import ErrorMessage, Handler, HIDDEN_ATTRIBUTE_NAMES
 
 from google.appengine.api import users
-
-def format(value, localize=False):
-    """Formats values in a way that is suitable to display in the bubble.
-    If 'localize' is true, the value is treated as a localizable message key or
-    list of message keys to be looked up in the 'attribute_value' namespace."""
-    if localize:
-        if isinstance(value, list):
-            value = [get_message('attribute_value', item) for item in value]
-        else:
-            value = get_message('attribute_value', value)
-    if isinstance(value, unicode):
-        return value.encode('utf-8')
-    if isinstance(value, str) and value != '':
-        return value.replace('\n', ' ')
-    if isinstance(value, list) and value != []:
-        return ', '.join(value).encode('utf-8')
-    if isinstance(value, datetime.datetime):
-        return to_local_isotime(value.replace(microsecond=0))
-    if isinstance(value, db.GeoPt):
-        latitude = u'%.4f\u00b0 %s' % (
-            abs(value.lat), value.lat >= 0 and 'N' or 'S')
-        longitude = u'%.4f\u00b0 %s' % (
-            abs(value.lon), value.lon >= 0 and 'E' or 'W')
-        return (latitude + ', ' + longitude).encode('utf-8')
-    if isinstance (value, bool):
-        return value and format(_('Yes')) or format(_('No'))
-    return value_or_dash(value)
 
 class ValueInfo:
     """Simple struct used by the django template to extract values"""
@@ -128,7 +101,8 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
         ValueInfoExtractor.__init__(
             self,
             ['title', 'location', 'available_beds', 'total_beds', 'healthc_id',
-             'pcode', 'address', 'services', 'operational_status'],
+             'pcode', 'address', 'services', 'operational_status',
+             'alert_status'],
             # TODO(kpy): This list is redundant; see the comment above
             # in ValueInfoExtractor.
             ['services', 'organization_type', 'category', 'construction',
@@ -139,10 +113,14 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
         (special, general, details) = ValueInfoExtractor.extract(
             self, subject, filter(lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
                                    attribute_names))
-        value_info = ValueInfoExtractor.get_value_info(self, subject,
+        op_status_info = ValueInfoExtractor.get_value_info(self, subject,
             'operational_status')
-        if value_info:
-            general.append(value_info)
+        alert_status_info = ValueInfoExtractor.get_value_info(self, subject,
+            'alert_status')
+        if op_status_info:
+            general.append(op_status_info)
+        if alert_status_info:
+            general.append(alert_status_info)
         return (special, general, details)
 
 VALUE_INFO_EXTRACTORS = {

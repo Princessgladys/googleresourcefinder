@@ -60,6 +60,7 @@ STR_FIELDS = [
     'address',
     'organization',
     'damage',
+    'alert_status',
     'comments'
 ]
 
@@ -85,7 +86,8 @@ class ExportTest(MediumTestCase):
         MediumTestCase.setUp(self)
         min_attrs = [u'title', u'pcode', u'healthc_id', u'available_beds',
                      u'total_beds', u'services', u'contact_name', u'phone',
-                     u'address', u'location']
+                     u'address', u'location', u'operational_status',
+                     u'alert_status']
         self.time = datetime.datetime(2010, 06, 01, 12, 30, 50)
         self.user = users.User('test@example.com')
         self.nickname = 'nickname_foo'
@@ -108,17 +110,17 @@ class ExportTest(MediumTestCase):
             set_attr(self.s, key, BOOL_FIELDS[key])
         for key in SELECT_FIELDS:
             set_attr(self.s, key, SELECT_FIELDS[key])
-        
+
         db.put(self.s)
         db.put(self.st)
-        
+
     def tearDown(self):
         db.delete(self.s)
         db.delete(self.st)
-    
+
     def test_format(self):
         time = datetime.datetime(2010, 6, 6, 15, 17, 3, 52581)
-        
+
         assert export.format(u'inf\xf6r') == 'inf\xc3\xb6r'
         assert export.format('foo\n!') == 'foo !'
         assert export.format(['foo_', '1']) == 'foo_, 1'
@@ -129,7 +131,7 @@ class ExportTest(MediumTestCase):
         assert export.format([]) == ''
         assert export.format({}) == {}
         assert export.format(0) == 0
-    
+
     def test_write_csv(self):
         golden_csv = open('app/testdata/golden_file.csv', 'r').read()
         buffer = StringIO.StringIO()
