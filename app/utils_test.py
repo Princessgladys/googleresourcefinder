@@ -36,7 +36,9 @@ import django.utils.translation
 
 from feeds.errors import ErrorMessage, Redirect
 from medium_test_case import MediumTestCase
-from model import Account, Message
+from model import Account, Message, Subject, SubjectType
+
+SAN_FRANCISCO = {'lat': 40.7142, 'lon': -74.0064}
 
 class HandlerTest(MediumTestCase):
     def setUp(self):
@@ -304,3 +306,41 @@ class UtilsTest(MediumTestCase):
         assert utils.value_or_dash(0) == 0
         assert utils.value_or_dash(None) == '\xe2\x80\x93'
         assert utils.value_or_dash([]) == '\xe2\x80\x93'
+
+    def test_format(self):
+        time = datetime.datetime(2010, 6, 2, 13, 21, 13, 97435)
+        pt = utils.db.GeoPt(SAN_FRANCISCO['lat'], SAN_FRANCISCO['lon'])
+        assert utils.format(u'123\u26CC') == '123\xe2\x9b\x8c'
+        assert utils.format('12\n3') == utils.format('12 3')
+        assert utils.format('123') == '123'
+        assert utils.format(['1', '2', '3']) == utils.format('1, 2, 3') \
+            == '1, 2, 3'
+        assert utils.format(time) == '2010-06-02 08:21:13 -05:00'
+        assert utils.format(pt) == '40.7142\xc2\xb0 N, 74.0064\xc2\xb0 W'
+        assert utils.format(True) == utils.format(_('Yes')) == _('Yes')
+        assert utils.format(False) == utils.format(_('No')) == _('No')
+        assert utils.format({'hey!' : 1}) == {'hey!' : 1}
+        assert utils.format(None) == u'\u2013'.encode('utf-8')
+        assert utils.format('') == u'\u2013'.encode('utf-8')
+        assert utils.format([]) == u'\u2013'.encode('utf-8')
+        assert utils.format({}) == u'\u2013'.encode('utf-8')
+        assert utils.format(13) == 13
+        assert utils.format(0) == 0
+        assert utils.format('name_1', True) == 'en_1'
+        assert utils.format(['name_1'], True == ['en_1'])
+
+    def test_get_last_updated_time(self):
+        cache.SUBJECT_TYPES.flush()
+        s = Subject(key_name='haiti:example.org/123', type='hospital')
+        s.set_attribute('title', 'title_foo', datetime.datetime(2010, 06, 01),
+                        users.User('test@example.com'),
+                        'nickname_foo', 'affiliation_foo', 'comment_foo')
+        s.set_attribute('attribute_value', 'fake_to_localize',
+                        datetime.datetime(2010, 07, 01),
+                        users.User('test@example.com'),
+                        'nickname_foo', 'affiliation_foo', 'comment_foo')
+        st = SubjectType(key_name='haiti:hospital',
+                         attribute_names=['title', 'attribute_value'])
+        db.put(st)
+        assert utils.get_last_updated_time(s) == datetime.datetime(2010, 07, 01)
+        db.delete(st)

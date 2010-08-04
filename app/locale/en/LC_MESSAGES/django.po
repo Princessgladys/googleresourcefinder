@@ -106,6 +106,11 @@ msgstr ""
 msgid "An error has occurred. Please try again later."
 msgstr ""
 
+#. Label; available beds
+#: templates/hospital_email.html:100 templates/hospital_email.html.py:199
+msgid "Available"
+msgstr ""
+
 #. Total number of unoccupied beds at a hospital.
 #: ../tools/setup.py:117
 msgid "Available beds"
@@ -122,7 +127,7 @@ msgid "Blood Bank"
 msgstr ""
 
 #. Save a copy of the data in CSV format
-#: export.py:140
+#: export.py:131
 msgid "CSV Export"
 msgstr ""
 
@@ -139,6 +144,11 @@ msgstr ""
 #. Button text to cancel and return to the home page
 #: templates/edit.html:164
 msgid "Cancel"
+msgstr ""
+
+#. Label; total beds
+#: templates/hospital_email.html.py:203 templates/hospital_email.html:104
+msgid "Capacity"
 msgstr ""
 
 #. Service provided by a health facility (use Title Case). Meaning: branch of medicine dealing with the heart
@@ -283,8 +293,8 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-#. Link to edit the data for a hospital record.
-#: templates/hospital_bubble.html:26
+#. Label for link to edit a subject record
+#: templates/hospital_email.html.py:182
 msgid "Edit this record"
 msgstr ""
 
@@ -324,8 +334,13 @@ msgid "Error saving facility information."
 msgstr ""
 
 #. Button to export data to comma-separated-value format.
-#: templates/map.html:184 export.py:153
+#: templates/map.html:184 export.py:144
 msgid "Export CSV"
+msgstr ""
+
+#. Label for facilities with changes
+#: templates/hospital_email.html:63
+msgid "Facilities with Changes"
 msgstr ""
 
 #. A place that provides a particular service
@@ -341,6 +356,11 @@ msgstr ""
 #. Type of organization: Faith-based organization
 #: ../tools/setup.py:167
 msgid "Faith-based"
+msgstr ""
+
+#. Label; field or attribute
+#: templates/hospital_email.html:119
+msgid "Field"
 msgstr ""
 
 #. Facility operational status: as functional as a field hospital
@@ -368,6 +388,11 @@ msgstr ""
 msgid "First select a hospital from the list on the left. Then Print will print a list of hospitals in order of distance from your selection."
 msgstr ""
 
+#. Label to tell users to check website for more information
+#: templates/hospital_email.html:228
+msgid "For more information on all subscribed facilities, please visit"
+msgstr ""
+
 #. Type of organization: For-profit organization
 #: ../tools/setup.py:169
 msgid "For-profit"
@@ -386,6 +411,11 @@ msgstr ""
 #. Proper name of an ID for a health facility defined by the  Pan-American Health Organization; no translation necessary.
 #: templates/hospital_bubble.html:56 static/locale.js:114 ../tools/setup.py:115
 msgid "HealthC ID"
+msgstr ""
+
+#. Greeting
+#: templates/hospital_email.html:35
+msgid "Hello"
 msgstr ""
 
 #. Link to go to a help page for the application
@@ -429,12 +459,12 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr ""
 
 #. Error message for request missing subject name.
-#: subscribe.py:62 settings.py:34
+#: subscribe.py:63 settings.py:34
 msgid "Invalid or missing account e-mail."
 msgstr ""
 
 #. Error message for request missing subject name.
-#: bubble.py:166 edit.py:434
+#: edit.py:435 bubble.py:139
 msgid "Invalid or missing subject name."
 msgstr ""
 
@@ -451,6 +481,11 @@ msgstr ""
 #. Label for a language selector
 #: templates/base.html:66
 msgid "Language:"
+msgstr ""
+
+#. Label for the last update time
+#: templates/hospital_email.html:90 templates/hospital_email.html.py:188
+msgid "Last Updated:"
 msgstr ""
 
 #. Label for a date-time when the data was last updated
@@ -563,8 +598,13 @@ msgstr ""
 msgid "Neurosurgery"
 msgstr ""
 
+#. Label for new value
+#: templates/hospital_email.html:124
+msgid "New Value"
+msgstr ""
+
 #. Form option for a false Boolean value
-#: edit.py:178 bubble.py:50 bubble_test.py:66
+#: utils_test.py:321 edit.py:178 utils.py:326
 msgid "No"
 msgstr ""
 
@@ -592,6 +632,11 @@ msgstr ""
 #. Service provided by a health facility (use Title Case). Meaning: Obstetrics deals with childbirth and care of the mother. Meaning: Gynecology deals with diseases and hygiene of women
 #: ../tools/setup.py:259
 msgid "Obstetrics and Gynecology"
+msgstr ""
+
+#. Label for old value
+#: templates/hospital_email.html:129
+msgid "Old Value"
 msgstr ""
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
@@ -660,7 +705,7 @@ msgid "Postoperative Care"
 msgstr ""
 
 #. old value for the attribute
-#: mail_alerts.py:126
+#: mail_alerts.py:255
 msgid "Previous value"
 msgstr ""
 
@@ -691,7 +736,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:517
+#: edit.py:518
 msgid "Record updated."
 msgstr ""
 
@@ -718,13 +763,13 @@ msgid "Request for becoming %(action)s was denied."
 msgstr ""
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35
+#: templates/subdomain_menu.html.py:35 templates/hospital_email.html:234
 msgid "Resource Finder"
 msgstr ""
 
-#. TODO: Add missing message description or meaning
-#: mail_alerts.py:266 subscribe.py:162 mail_alerts.py:301
-msgid "Resource Finder Updates"
+#. subject of e-mail -> Resource Finder Update
+#: mail_alerts.py:78
+msgid "Resource Finder %s Update"
 msgstr ""
 
 #. Button text to save data
@@ -743,7 +788,7 @@ msgid "Saving..."
 msgstr ""
 
 #. Label for a selector to export data to CSV
-#: export.py:144
+#: export.py:135
 msgid "Select subject type to export:"
 msgstr ""
 
@@ -760,6 +805,11 @@ msgstr ""
 #. Link to go to the settings page of the application
 #: templates/base.html:95
 msgid "Settings"
+msgstr ""
+
+#. Label for settings page
+#: templates/hospital_email.html.py:249 templates/hospital_email.html:50
+msgid "Settings page"
 msgstr ""
 
 #. Label for a control that filters a list of facilities
@@ -802,6 +852,16 @@ msgstr ""
 msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/terms\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
 msgstr ""
 
+#. Label to tell users how to update subscription setttings
+#: templates/hospital_email.html:243
+msgid "To change subscription settings, please visit the"
+msgstr ""
+
+#. Description of update e-mail
+#: templates/hospital_email.html:43
+msgid "To change the frequency of these emails, please visit the"
+msgstr ""
+
 #. Total number of beds at a hospital
 #: ../tools/setup.py:119
 msgid "Total beds"
@@ -820,6 +880,11 @@ msgstr ""
 #. Error message
 #: utils.py:141
 msgid "Unauthorized user."
+msgstr ""
+
+#. Label for unchanged and subscribed facilities
+#: templates/hospital_email.html:162
+msgid "Unchanged Subscribed Facilities"
 msgstr ""
 
 #. Type of organization: Organization associated with a university
@@ -853,8 +918,13 @@ msgid "Updated"
 msgstr ""
 
 #. who the attribute was updated by
-#: mail_alerts.py:129
+#: mail_alerts.py:258
 msgid "Updated by"
+msgstr ""
+
+#. Label for user
+#: templates/hospital_email.html:135
+msgid "User"
 msgstr ""
 
 #. Error message for a value that is not a number
@@ -870,6 +940,11 @@ msgstr ""
 #. Link to go to a page with past versions of the 'master' list
 #: templates/map.html:189
 msgid "View Master List archive"
+msgstr ""
+
+#. Label to view a full subject record
+#: templates/hospital_email.html:77 templates/hospital_email.html.py:175
+msgid "View full record"
 msgstr ""
 
 #. Label for weekly e-mail updates
@@ -888,7 +963,7 @@ msgid "X-Ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: edit.py:176 bubble_test.py:65 bubble.py:50
+#: edit.py:176 utils_test.py:320 utils.py:326
 msgid "Yes"
 msgstr ""
 
