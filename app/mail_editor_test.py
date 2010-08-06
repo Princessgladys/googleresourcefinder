@@ -23,43 +23,44 @@ from google.appengine.api import users
 import cache
 import export_test
 import mail_editor
+from feeds.xmlutils import Struct
 from medium_test_case import MediumTestCase
 from model import Account, Attribute, Subdomain, MinimalSubject, Subject
 from model import SubjectType
 from utils import db
 
-SAMPLE_EMAIL_WORKING = '''UPDATE title_foo (haiti 123)
+SAMPLE_EMAIL_WORKING = '''UPDATE title_foo (haiti:example.org/123)
 Available beds 18
-Total beds 222
-Email test@example.com
-Commune foo@bar!
-Can pick up patients yes'''
+Total beds: 222
+Email; test@example.com
+Commune= foo@bar!
+Can pick_up patients yes'''
 
 SAMPLE_EMAIL_AUTHENTICATION = '''nickname nickname_foo
 affiliation affiliation_foo
 
-UPDATE title_foo (haiti 123)
+UPDATE title_foo (haiti:example.org/123)
 Available beds 18
 Total beds 222
 Email test@example.com
 Commune foo@bar!
 Can pick up patients yes'''
 
-SAMPLE_EMAIL_BROKEN = '''UPDATE title_foo (haiti 123)
+SAMPLE_EMAIL_BROKEN = '''UPDATE title_foo (haiti:example.org/123)
 Available beds d
 Total beds 222
 Email test@example.com
 Commune foo@bar!
 Can pick up patients yes'''
 
-SAMPLE_EMAIL_QUOTED = '''>> UPDATE title_foo (haiti 123)
+SAMPLE_EMAIL_QUOTED = '''>> UPDATE title_foo (haiti:example.org/123)
 >> Available beds 18
 >> Total beds 222
 >> Email test@example.com
 >> Commune foo@bar!
 >> Can pick up patients yes'''
 
-SAMPLE_EMAIL_STOP = '''UPDATE title_foo (haiti 123)
+SAMPLE_EMAIL_STOP = '''UPDATE title_foo (haiti:example.org/123)
 Available beds 18
 Total beds 222
 Email test@example.com
@@ -67,20 +68,38 @@ Commune foo@bar!
 --- --- --- ---
 Can pick up patients yes'''
 
-SAMPLE_EMAIL_MIXED = '''UPDATE title_foo (haiti 123)
+SAMPLE_EMAIL_MIXED = '''UPDATE title_foo (haiti:example.org/123)
 Available beds 18
 Total beds 222
 Email test@example.com
 Commune foo@bar!
 Can pick up patients yes
 
->> UPDATE title_foo (haiti 123)
+>> UPDATE title_foo (haiti:example.org/123)
 >> Available beds d
 >> Total beds 222
 >> Email test@example.com
 >> Commune foo@bar!
 >> Can pick up patients yes'''
 
+SAMPLE_EMAIL_MULTIPLE = '''UPDATE title_foo (haiti:example.org/123)
+Available beds 18
+Total beds 222
+Email test@example.com
+Commune foo@bar!
+Can pick up patients yes
+
+UPDATE title_bar
+Available beds 20'''
+
+SAMPLE_EMAIL_AMBIGUOUS = '''UPDATE title_foobar
+Total beds 77'''
+
+SAMPLE_EMAIL_AMBIGUOUS_DETAIL = '''update title_foobar (haiti:example.org/789)
+Total beds 77
+
+update title_foobar (haiti:example.org/012)
+total beds 76'''
 
 class MailAlertsTest(MediumTestCase):
     def setUp(self):
@@ -95,7 +114,19 @@ class MailAlertsTest(MediumTestCase):
         self.subject = Subject(key_name='haiti:example.org/123',
                                type='hospital', author=self.user,
                                title__='title_foo', healthc_id__='123')
-        self.minimal_subject = MinimalSubject(self.subject, type='hospital')
+        self.subject2 = Subject(key_name='haiti:example.org/456',
+                                type='hospital', author=self.user,
+                                title__='title_bar', healthc_id__='456')
+        self.subject3 = Subject(key_name='haiti:example.org/789',
+                                type='hospital', author=self.user,
+                                title__='title_foobar', healthc_id__='789')
+        self.subject4 = Subject(key_name='haiti:example.org/012',
+                                type='hospital', author=self.user,
+                                title__='title_foobar', healthc_id__='012')
+        self.ms = MinimalSubject(self.subject, type='hospital')
+        self.ms2 = MinimalSubject(self.subject2, type='hospital')
+        self.ms3 = MinimalSubject(self.subject3, type='hospital')
+        self.ms4 = MinimalSubject(self.subject4, type='hospital')
         attribute_names = export_test.STR_FIELDS + \
                           export_test.INT_FIELDS + \
                           export_test.BOOL_FIELDS.keys() + \
@@ -103,8 +134,9 @@ class MailAlertsTest(MediumTestCase):
         self.subject_type = SubjectType(key_name='haiti:hospital',
                                         attribute_names=attribute_names)
         self.subdomain = Subdomain(key_name='haiti')
-        db.put([self.account, self.subject, self.subject_type,
-                self.subdomain, self.minimal_subject])
+        db.put([self.account, self.subject, self.subject2, self.subject3,
+                self.subject4, self.subject_type, self.subdomain,
+                self.ms, self.ms2, self.ms3, self.ms4])
 
         for field in export_test.STR_FIELDS:
             Attribute(key_name=field, type='str').put()
@@ -116,63 +148,11 @@ class MailAlertsTest(MediumTestCase):
             Attribute(key_name=field, type='choice').put()
 
     def tearDown(self):
-        db.delete([self.account, self.subject, self.subject_type,
-                   self.subdomain, self.minimal_subject])
+        db.delete([self.account, self.subject, self.subject2, self.subject3,
+                   self.subject4, self.subject_type, self.subdomain,
+                   self.ms, self.ms2, self.ms3, self.ms4])
         for attribute in Attribute.all():
             db.delete(attribute)
-
-    def test_get_updates(self):
-        """Confirm that get_updates() properly parses through a set of lines
-        from an email message pertaining to a subject."""
-        # test a simple, properly formatted email
-        working_updates_results = [('available_beds', 18), ('total_beds', 222),
-                                   ('email', 'test@example.com'),
-                                   ('commune', 'foo@bar!'),
-                                   ('can_pick_up_patients', True)]
-        update_lines = SAMPLE_EMAIL_WORKING.split('\n')[1:]
-        updates, errors, stop = mail_editor.get_updates(
-            update_lines, self.subject, self.subject_type, False, [])
-        assert updates == working_updates_results
-        assert errors == []
-        assert not stop
-
-        # test a simple email with one malformed update
-        update_lines = SAMPLE_EMAIL_BROKEN.split('\n')[1:]
-        updates, errors, stop = mail_editor.get_updates(
-            update_lines, self.subject, self.subject_type, False, [])
-        assert updates == [('total_beds', 222),
-                           ('email', 'test@example.com'),
-                           ('commune', 'foo@bar!'),
-                           ('can_pick_up_patients', True)]
-        assert errors == [('"d" is not a valid value for available_beds',
-                           'Available beds d')]
-        assert not stop
-
-        # test a simple correctly formed and quoted email
-        update_lines = SAMPLE_EMAIL_QUOTED.split('\n')[1:]
-        updates, errors, stop = mail_editor.get_updates(
-            update_lines, self.subject, self.subject_type, True, [])
-        assert updates == working_updates_results
-        assert not errors and not stop
-
-        # make sure that same email finds nothing when told it is not quoted
-        updates, errors, stop = mail_editor.get_updates(
-            update_lines, self.subject, self.subject_type, False, [])
-        assert not updates and not errors and not stop
-
-        # test a simple email with the stop delimeter in the middle
-        update_lines = SAMPLE_EMAIL_STOP.split('\n')[1:]
-        updates, errors, stop = mail_editor.get_updates(
-            update_lines, self.subject, self.subject_type, False, [])
-        assert updates == working_updates_results[:-1]
-        assert not errors and stop
-
-        # test an email with both quoted and non quoted regions
-        update_lines = SAMPLE_EMAIL_MIXED.split('\n')[1:]
-        updates, errors, stop = mail_editor.get_updates(
-            update_lines, self.subject, self.subject_type, False, [])
-        assert updates == working_updates_results
-        assert not errors and not stop
 
     def test_parse(self):
         """Confirm that the parse function properly translates string values
@@ -264,7 +244,9 @@ class MailAlertsTest(MediumTestCase):
             subject='Resource Finder Updates',
             html=SAMPLE_EMAIL_WORKING,
             date='Wed, 04 Aug 2010 13:07:18 -0400')
+        request = Struct(url='test/path', path='/path')
         mail_editor_ = mail_editor.MailEditor()
+        mail_editor_.request = request
 
         # check working update email
         mail_editor_.receive(message)
@@ -306,7 +288,7 @@ class MailAlertsTest(MediumTestCase):
         assert mail_editor_.need_authentication
         assert 'nickname' in body
         assert 'affiliation' in body
-        assert 'pending updates' in body
+        assert 'Pending updates' in body
         assert not Account.all().get()
 
         # send it an authentication email
@@ -318,13 +300,71 @@ class MailAlertsTest(MediumTestCase):
         assert not mail_editor_.need_authentication
         self.check_for_correct_update(body, self.sent_messages[5])
 
+        # do same with an already existing account sans nickname/affiliation
+        self.account.nickname = None
+        self.account.affiliation = None
+        db.put(self.account)
+        mail_editor_.receive(message)
+        body = self.sent_messages[6].textbody()
+        assert Account.all().get()
+        assert len(self.sent_messages) == 7
+        assert not mail_editor_.need_authentication
+        self.check_for_correct_update(body, self.sent_messages[6])
+
+        # check working email with stop delimeter
+        message.html = SAMPLE_EMAIL_STOP
+        mail_editor_.receive(message)
+        body = self.sent_messages[7].textbody()
+        assert len(self.sent_messages) == 8
+        assert not 'update title_foo' in body
+        assert 'title_foo' in body
+        assert 'Available beds' in body and '18' in body
+        assert 'Total beds' in body and '22' in body
+        assert 'Email' in body and 'test@example.com' in body
+        assert 'Commune' in body and 'foo@bar!' in body
+        assert 'Can pick up patients' not in body and 'yes' not in body
+
+        # check email with multiple subjects
+        message.html = SAMPLE_EMAIL_MULTIPLE
+        mail_editor_.receive(message)
+        body = self.sent_messages[8].textbody()
+        assert len(self.sent_messages) == 9
+        assert 'title_foo' in body and 'title_bar' in body
+        assert 'update title_foo' not in body
+        assert 'update title_bar' not in body
+        assert 'Available beds' in body and '18' in body and '20' in body
+
+        # check email with an ambiguous subject
+        message.html = SAMPLE_EMAIL_AMBIGUOUS
+        mail_editor_.receive(message)
+        body = self.sent_messages[9].textbody()
+        assert len(self.sent_messages) == 10
+        assert 'ERROR' in self.sent_messages[9].subject()
+        assert 'title_foobar' in body and 'ambiguous' in body
+        assert 'Try again with one of the following' in body
+        assert 'haiti:example.org/789' in body
+        assert 'haiti:example.org/012' in body
+        assert 'Total beds 77' in body
+        assert 'REFERENCE DOCUMENT' in body
+        assert 'REFERENCE DOCUMENT @' not in body
+
+        # check email with multiple same title'd facilities [and unique keys]
+        message.html = SAMPLE_EMAIL_AMBIGUOUS_DETAIL
+        mail_editor_.receive(message)
+        body = self.sent_messages[10].textbody()
+        assert len(self.sent_messages) == 11
+        assert 'ERROR' not in self.sent_messages[10].subject()
+        assert 'title_foobar' in body and '789' in body and '012' in body
+        assert 'Total beds' in body and '77' in body and '76' in body
+        assert 'REFERENCE DOCUMENT @' in body
+
     def test_mail_editor_process_email(self):
         """Confirms that process_email() returns a properly formatted structure
         of updates and errors, given the body of an email."""
         mail_editor_ = mail_editor.MailEditor()
 
         # check working email body
-        updates, errors = mail_editor_.process_email(SAMPLE_EMAIL_WORKING)
+        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_WORKING)
         assert updates[0][0].key().name() == 'haiti:example.org/123'
         # updates[first_update][subject_data][attribute_#]
         assert 'available_beds' in updates[0][1][0]
@@ -335,13 +375,13 @@ class MailAlertsTest(MediumTestCase):
         assert not errors
 
         # check broken email body
-        updates, errors = mail_editor_.process_email(SAMPLE_EMAIL_BROKEN)
+        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_BROKEN)
         assert updates[0][0].key().name() == 'haiti:example.org/123'
-        assert 'Available beds d' in errors[0][1][0][1]
+        assert 'Available beds d' in errors[0][1][0]['original_line']
         assert len(updates[0][1]) == 4
 
         # check quoted email body
-        updates, errors = mail_editor_.process_email(SAMPLE_EMAIL_QUOTED)
+        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_QUOTED)
         assert updates[0][0].key().name() == 'haiti:example.org/123'
         assert 'available_beds' in updates[0][1][0]
         assert 'total_beds' in updates[0][1][1]
@@ -351,7 +391,7 @@ class MailAlertsTest(MediumTestCase):
         assert not errors
 
         # check mixed email body
-        updates, errors = mail_editor_.process_email(SAMPLE_EMAIL_MIXED)
+        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_MIXED)
         assert updates[0][0].key().name() == 'haiti:example.org/123'
         assert 'available_beds' in updates[0][1][0]
         assert 'total_beds' in updates[0][1][1]
@@ -361,7 +401,7 @@ class MailAlertsTest(MediumTestCase):
         assert not errors
 
         # check stop delimeter'd body
-        updates, errors = mail_editor_.process_email(SAMPLE_EMAIL_STOP)
+        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_STOP)
         assert updates[0][0].key().name() == 'haiti:example.org/123'
         assert 'available_beds' in updates[0][1][0]
         assert 'total_beds' in updates[0][1][1]
@@ -373,7 +413,7 @@ class MailAlertsTest(MediumTestCase):
         """Confirm that update_subjects() properly updates the datastore."""
         mail_editor_ = mail_editor.MailEditor()
         mail_editor_.account = self.account
-        updates, errors = mail_editor_.process_email(SAMPLE_EMAIL_WORKING)
+        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_WORKING)
         mail_editor_.update_subjects(updates, datetime.datetime(2010, 8, 4))
 
         subject = Subject.get('haiti', 'example.org/123')
@@ -395,11 +435,13 @@ class MailAlertsTest(MediumTestCase):
             subject='Resource Finder Updates',
             html=SAMPLE_EMAIL_WORKING,
             date='Wed, 04 Aug 2010 13:07:18 -0400')
+        request = Struct(url='test/path', path='/path')
         mail_editor_ = mail_editor.MailEditor()
         mail_editor_.account = self.account
         mail_editor_.need_authentication = False
-        updates, errors = mail_editor_.process_email(SAMPLE_EMAIL_WORKING)
-        mail_editor_.send_email(message, updates, errors)
+        mail_editor_.request = request
+        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_WORKING)
+        mail_editor_.send_email(message, updates, errors, ambiguities)
 
         # updates, no errors
         assert len(self.sent_messages) == 1
@@ -408,12 +450,12 @@ class MailAlertsTest(MediumTestCase):
 
         # updates, errors
         message.html = SAMPLE_EMAIL_BROKEN
-        updates, errors = mail_editor_.process_email(SAMPLE_EMAIL_BROKEN)
-        mail_editor_.send_email(message, updates, errors)
+        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_BROKEN)
+        mail_editor_.send_email(message, updates, errors, ambiguities)
         assert len(self.sent_messages) == 2
         body = self.sent_messages[1].textbody()
         assert 'ERROR' in self.sent_messages[1].subject()
-        assert 'UPDATE' in body
+        assert 'update' in body
         assert 'REFERENCE DOCUMENT' in body
         assert 'REFERENCE DOCUMENT @' not in body
 
@@ -422,25 +464,25 @@ class MailAlertsTest(MediumTestCase):
         db.delete(self.account)
         # need authentication
         message.html = SAMPLE_EMAIL_WORKING
-        updates, errors = mail_editor_.process_email(SAMPLE_EMAIL_WORKING)
-        mail_editor_.send_email(message, updates, errors)
+        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_WORKING)
+        mail_editor_.send_email(message, updates, errors, ambiguities)
         assert len(self.sent_messages) == 3
         body = self.sent_messages[2].textbody()
         assert 'ERROR' not in self.sent_messages[2].subject()
         assert 'nickname' in body
         assert 'affiliation' in body
-        assert 'pending updates' in body
+        assert 'Pending updates' in body
 
     def check_for_correct_update(self, body, message):
         assert body.count('--- --- --- ---') == 2
-        assert 'title_foo (haiti 123)\n' in body
+        assert 'title_foo (haiti:example.org/123)\n' in body
         assert 'Email' in body and 'test@example.com' in body
         assert 'Commune' in body and 'foo@bar!' in body
         assert 'Available beds' in body and '18' in body
         assert 'Total beds' in body and '222' in body
         assert 'Can pick up patients' in body and 'Yes' in body
         assert 'http://resource-finder.appspot.com/help/email' in body
-        assert 'UPDATE' not in body
+        assert 'update title_foo' not in body
         assert 'ERROR' not in message.subject()
         assert self.email == message.to_list()[0]
         assert 'updates@resource-finder.appspotmail.com' == message.sender()
