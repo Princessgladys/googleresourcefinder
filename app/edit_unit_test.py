@@ -48,10 +48,10 @@ class EditTest(MediumTestCase):
                              'affiliation_foo', 'comment_foo')
         self.ms = MinimalSubject(self.s, type='hospital')
 
-        self.st = SubjectType(key_name='hospital',
-                               timestamp=datetime.datetime(2010, 06, 01),
-                               attribute_names=['title', 'pcode'],
-                               minimal_attribute_names=['title', 'total_beds'])
+        self.st = SubjectType(key_name='haiti:hospital',
+                              timestamp=datetime.datetime(2010, 06, 01),
+                              attribute_names=['title', 'pcode'],
+                              minimal_attribute_names=['title', 'total_beds'])
         self.report = Report(arrived=self.time, source='url_foo.bar',
                              author=self.user, observed=self.time)
         self.change_metadata = edit.ChangeMetadata(
@@ -389,7 +389,7 @@ class EditTest(MediumTestCase):
         unicode characters via post. The edit.update() calls will throw an
         error if the test fails."""
         # test non-unicode
-        key_name = self.s.key()
+        key_name = self.s.key().name()
         request_text = '/?subdomain=haiti' + \
                        '&title=title_foo&editable.title="title_bar"' + \
                        '&pcode=pcode_foo&editable.pcode="pcode_foo"' + \
