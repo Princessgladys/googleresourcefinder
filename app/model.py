@@ -63,6 +63,21 @@ def value_or_none(value):
         return value
     return None
 
+def get_name(name_or_entity):
+    """Gets an entity's key name, or returns a string unchanged."""
+    if isinstance(name_or_entity, db.Model):
+        return name_or_entity.key().name()
+    else:
+        return name_or_entity
+
+def get_type_name(name_or_entity):
+    """Gets a SubjectType's type name, or returns a string unchanged."""
+    if isinstance(name_or_entity, SubjectType):
+        return name_or_entity.type_name()
+    else:
+        return name_or_entity
+
+
 class Subject(db.Expando):
     """A thing whose attributes are tracked by this application.  Top-level
     entity, has no parent.  Key name: subdomain + ':' + subject name.  A
@@ -89,6 +104,20 @@ class Subject(db.Expando):
     #    attribute to "(unspecified)".
     # 3. All six fields are always written together at the same time, and are
     #    never removed.  (Hence either all are present or none are present.)
+
+    @staticmethod
+    def create(subdomain, subject_type_or_type_name, subject_name, author):
+        """Creates a Subject with a given subdomain, type, name, and author."""
+        return Subject(key_name='%s:%s' % (subdomain, subject_name),
+                       type=get_type_name(subject_type_or_type_name),
+                       author=author)
+
+    @staticmethod
+    def generate_name(host, subject_type_or_type_name):
+        """Makes a new unique subject_name for an original subject (originally
+        created in this repository, not cloned from an external repository)."""
+        id = UniqueId.get_id()
+        return '%s/%s.%d' % (host, get_type_name(subject_type_or_type_name), id)
 
     @staticmethod
     def get(subdomain, subject_name):
@@ -151,6 +180,7 @@ class Subject(db.Expando):
                 value_or_none(author_affiliation))
         setattr(self, '%s__comment' % name, value_or_none(comment))
 
+
 class MinimalSubject(db.Expando):
     """Minimal version of Subject that loads fast from the datastore and
     contains just the information needed to populate the initial list and map.
@@ -161,6 +191,11 @@ class MinimalSubject(db.Expando):
     # More properties for the current values of ONLY the most critically
     # important attributes of Subject (named by Attribute's key_name).
     # An attribute named foo will be stored as 'foo__' to match Subject.
+
+    @staticmethod
+    def create(subject):
+        return MinimalSubject(
+            subject, key_name=subject.key().name(), type=subject.type)
 
     @staticmethod
     def get_by_subject(subject):
@@ -191,6 +226,18 @@ class MinimalSubject(db.Expando):
         """Sets the value for the Attribute with the given key_name."""
         setattr(self, '%s__' % name, value_or_none(value))
 
+
+class UniqueId(db.Model):
+    """This entity is used just to generate unique numeric IDs."""
+    @staticmethod
+    def get_id():
+        """Gets a numeric ID that is guaranteed to be different from any ID
+        previously returned by this static method."""
+        unique_id = UniqueId()
+        unique_id.put()
+        return unique_id.key().id()
+
+
 class SubjectType(db.Model):
     """A type of Subject, e.g. hospital, warehouse, charity, camp.  Top-level
     entity, has no parent.  Key name: subdomain + ':' + type name.  A type name
@@ -209,6 +256,10 @@ class SubjectType(db.Model):
     def all_in_subdomain(subdomain):
         """Gets a query for all SubjectTypes with the given subdomain."""
         return filter_by_prefix(SubjectType.all(), subdomain + ':')
+
+    def type_name(self):
+        """Gets the type name (without the subdomain)."""
+        return self.key().name().split(':', 1)[1]
 
 
 class Attribute(db.Model):

@@ -19,6 +19,7 @@ from google.appengine.ext import db
 from google.appengine.ext import webapp
 import google.appengine.ext.webapp.template
 import google.appengine.ext.webapp.util
+import django
 
 import StringIO
 import access
@@ -102,8 +103,10 @@ def get_locale(lang=None):
     or converts the specified Django language code to a locale code."""
     return django.utils.translation.to_locale(lang or get_lang())
 
-def get_message(namespace, name, locale=''):
-    """Gets a translated message (in the current language)."""
+def get_message(namespace, name_or_entity, locale=''):
+    """Gets a translated message (in the current language) by the message name
+    or the key name of a given entity."""
+    name = model.get_name(name_or_entity)
     message = cache.MESSAGES.get((namespace, name))
     return message and getattr(message, locale or get_locale()) or name
 
@@ -121,6 +124,8 @@ class Handler(webapp.RequestHandler):
     auto_params = {
         'embed': validate_yes,
         'flush': validate_yes,
+        'add_new': validate_yes,
+        # TODO(kpy): Fetch the Subject and SubjectType here in utils.
         'subject_name': strip,  # without the subdomain (it would be redundant)
         'subject_type': strip,  # without the subdomain (it would be redundant)
         'lang': strip,  # a Django language code (e.g. 'en', 'fr-ca', 'pt-br')
