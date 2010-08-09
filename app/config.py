@@ -19,8 +19,8 @@
 LANGUAGES = [('en', 'English'),
              ('fr', u'Fran\u00e7ais'), # French
              ('ht', u'Krey\u00f2l'), # Kreyol
-             ('es-419', u'Espa\u00F1ol'), # Spanish (Latin American),
-             ('ur', u'\u0627\u0644\u0639\u0631\u0628\u064A')
+             ('es-419', u'Espa\u00F1ol'), # Spanish (Latin American)
+             ('ur', u'\u0627\u0644\u0639\u0631\u0628\u064A') # Urdu
             ]
 
 # A map from unavailable languages to the best available fallback languages.
