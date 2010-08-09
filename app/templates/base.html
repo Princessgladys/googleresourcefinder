@@ -17,7 +17,7 @@
 {% load i18n %}
 
 <!-- No doctype: need quirks mode to get scrollbars in IE. -->
-<html>
+<html dir="{{params.lang_bidi|yesno:"rtl,ltr"}}">
 <head>
   {% comment %}
   #i18n: Name of the application.
@@ -47,6 +47,25 @@
   {% else %}
     <script type="text/javascript" src="static/locale_{{params.lang}}.js"></script>
   {% endifequal %}
+  {% if params.lang_bidi %}
+  {% comment %}
+  # TODO(pfritzsche): Make keyboard hide when not selecting a text box.
+  {% endcomment %}
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+    // Load the Google Onscreen Keyboard API
+    google.load("elements", "1", {
+        packages: "keyboard"
+    });
+
+    function onLoad() {
+      var kbd = new google.elements.keyboard.Keyboard(
+        ["{{params.lang}}"]);
+    }
+
+    google.setOnLoadCallback(onLoad);
+  </script>
+  {% endif %}
   {% endblock rf-namespace %}
 
   {% block javascript-includes %}
