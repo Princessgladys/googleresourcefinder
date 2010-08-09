@@ -69,9 +69,8 @@ class Main(utils.Handler):
                     export_url=self.get_export_url(),
                     print_url=self.get_url('/?print=yes'),
                     bubble_url=self.get_url('/bubble'),
-                    edit_url=self.get_url('/edit',
-                                          subject_name=self.params.subject_name,
-                                          embed='yes'),
+                    edit_url_template=self.get_url('/edit', embed='yes')
+                        + '&subject_name=',
                     subdomain=self.subdomain)
 
     def get_export_url(self):
