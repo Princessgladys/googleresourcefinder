@@ -55,6 +55,7 @@ except:
 settings.LANGUAGE_CODE = 'en'
 settings.USE_I18N = True
 settings.LOCALE_PATHS = (os.path.join(ROOT, 'locale'),)
+settings.LANGUAGES_BIDI = ['ur']
 import django.utils.translation
 # We use lazy translation in this file because the locale isn't set until the
 # Handler is initialized.
@@ -236,6 +237,7 @@ class Handler(webapp.RequestHandler):
 
         # Activate the selected language.
         django.utils.translation.activate(lang)
+        self.params.lang_bidi = django.utils.translation.get_language_bidi()
         self.response.headers.add_header(
             'Set-Cookie', 'django_language=%s' % lang)
         self.response.headers.add_header('Content-Language', lang)

@@ -41,6 +41,10 @@
   <!--[if lt IE 8]>
     <link rel="stylesheet" href="static/map-ie.css">
   <![endif]-->
+  {% if params.lang_bidi %}
+    <link rel="stylesheet" href="static/map-rtl.css">
+  {% endif %}
+
   <link rel="stylesheet" type="text/css" media="all"
         href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css">
   <link rel="stylesheet" href="static/bubble.css">
