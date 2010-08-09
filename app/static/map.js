@@ -225,10 +225,12 @@ function set_children(element, children) {
   }
   for (var i = 0; i < children.length; i++) {
     var child = children[i];
-    if (!child.tagName) {
-      child = document.createTextNode('' + child);
+    if (child !== null) {
+      if (!child.tagName) {
+        child = document.createTextNode('' + child);
+      }
+      element.appendChild(child);
     }
-    element.appendChild(child);
   }
 }
 
@@ -277,7 +279,8 @@ function last(array, count) {
 }
 
 function is_array(thing) {
-  return (typeof thing === 'object') && (thing.constructor === Array);
+  return (thing !== null) && (typeof thing === 'object') &&
+      (thing.constructor === Array);
 }
 
 // ==== String utilities

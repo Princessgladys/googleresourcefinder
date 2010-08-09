@@ -89,8 +89,7 @@ def write_csv(out, subdomain, type_name):
             for column in columns:
                 row.append(format(column[1](subject)))
         else:
-            subdomain, subject_name = split_key_name(subject)
-            row = [subject_name]
+            row = [subject.name]
             for name in subject_type.attribute_names:
                 value = get_value(subject, name)
                 row.append(format(value))
@@ -136,9 +135,8 @@ class Export(Handler):
             self.write('<select name="subject_type">')
             for subject_type in SubjectType.all_in_subdomain(self.subdomain):
                 # TODO(shakusa) SubjectType should have translated messages
-                subdomain, type_name = split_key_name(subject_type)
                 self.write('<option value="%s">%s</option>' %
-                           (type_name, type_name))
+                           (subject_type.name, subject_type.name))
             self.write('<p><input type=submit value="%s">' %
                 #i18n: Button to export data to comma-separated-value format.
                 to_unicode(_('Export CSV')))

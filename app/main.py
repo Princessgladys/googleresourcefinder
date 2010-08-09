@@ -80,8 +80,7 @@ class Main(utils.Handler):
         types = cache.SUBJECT_TYPES[self.subdomain].values()
         if len(types) == 1:
             # Shortcut to bypass /export when we have only one subject type
-            subdomain, type_name = utils.split_key_name(types[0])
-            return self.get_url('/export', subject_type=type_name)
+            return self.get_url('/export', subject_type=types[0].name)
         else:
             # The /export page can handle rendering multiple subject types
             return self.get_url('/export')

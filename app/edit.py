@@ -426,14 +426,12 @@ class Edit(utils.Handler):
     def init(self):
         """Checks for logged-in user and sets up self.subject
         and self.subject_type based on the query params."""
-        # Need 'edit' permission to see or submit the edit form.
-        self.require_action_permitted('edit')
-
         # Regardless of permissions, the user has to be logged in so we
         # can record the author information with the edit.
         self.require_logged_in_user()
 
         if self.params.add_new:
+            # Need 'add' permission to see or submit the edit form.
             self.require_action_permitted('add')
             self.subject = None
             self.subject_type = cache.SUBJECT_TYPES[self.subdomain].get(
@@ -442,6 +440,8 @@ class Edit(utils.Handler):
                 #i18n: Error message for a missing subject type.
                 raise ErrorMessage(400, _('Invalid or missing subject type.'))
         else:
+            # Need 'edit' permission to see or submit the edit form.
+            self.require_action_permitted('edit')
             self.subject = model.Subject.get(
                 self.subdomain, self.params.subject_name)
             if not self.subject:

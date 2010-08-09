@@ -39,19 +39,20 @@ class EditTest(MediumTestCase):
         self.change_time = datetime.datetime(2010, 06, 16, 12, 30)
         self.email = 'test@example.com'
         self.user = users.User(self.email)
-        self.s = Subject(key_name='haiti:example.org/123', type='hospital')
-        self.s.set_attribute('title', 'title_foo', self.time,
-                             self.user, 'nickname_foo', 'affiliation_foo',
-                             'comment_foo')
-        self.s.set_attribute('pcode', 'pcode_foo',
-                             self.time, self.user, 'nickname_foo',
-                             'affiliation_foo', 'comment_foo')
-        self.ms = MinimalSubject(self.s, type='hospital')
+        self.s = Subject.create(
+            'haiti', 'hospital', 'example.org/123', self.user)
+        self.s.set_attribute(
+            'title', 'title_foo', self.time, self.user,
+            'nickname_foo', 'affiliation_foo', 'comment_foo')
+        self.s.set_attribute(
+            'pcode', 'pcode_foo', self.time, self.user,
+            'nickname_foo', 'affiliation_foo', 'comment_foo')
+        self.ms = MinimalSubject.create(self.s)
 
-        self.st = SubjectType(key_name='haiti:hospital',
-                              timestamp=datetime.datetime(2010, 06, 01),
-                              attribute_names=['title', 'pcode'],
-                              minimal_attribute_names=['title', 'total_beds'])
+        self.st = SubjectType.create('haiti', 'hospital')
+        self.st.attribute_names = ['title', 'pcode']
+        self.st.minimal_attribute_names = ['title', 'total_beds']
+
         self.report = Report(arrived=self.time, source='url_foo.bar',
                              author=self.user, observed=self.time)
         self.change_metadata = edit.ChangeMetadata(
@@ -62,13 +63,12 @@ class EditTest(MediumTestCase):
 
         db.put([self.s, self.ms, self.st])
 
-    def teatDown(self):
+    def tearDown(self):
         db.delete([self.s, self.ms, self.st])
 
     def test_str_attr_type_class(self):
         str_attr_type = ATTRIBUTE_TYPES['str']
-        str_attr = Attribute(key_name='organization_name', timestamp=self.time,
-                             type='str')
+        str_attr = Attribute(key_name='organization_name', type='str')
 
         # test make_input() function
         assert (str_attr_type.make_input('title', '') ==
@@ -107,8 +107,7 @@ class EditTest(MediumTestCase):
         assert not self.ms.get_value('organization_name')
 
     def test_text_attr_type_class(self):
-        text_attr = Attribute(key_name='text_attr', timestamp=self.time,
-                              type='text')
+        text_attr = Attribute(key_name='text_attr', type='text')
         text_attr_type = ATTRIBUTE_TYPES['text']
 
         # test make_input() function
@@ -133,8 +132,7 @@ class EditTest(MediumTestCase):
                 'text_attr', '', None, text_attr) == None)
 
     def test_contact_attr_type_class(self):
-        contact_attr = Attribute(key_name='contact_information',
-                                 timestamp=self.time, type='contact')
+        contact_attr = Attribute(key_name='contact_information', type='contact')
         contact_attr_type = ATTRIBUTE_TYPES['contact']
         contact = 'Phil Fritzsche|555-555-3867|%s' % self.user.email()
 
@@ -173,8 +171,7 @@ class EditTest(MediumTestCase):
 
     def test_date_attr_type_class(self):
         request = webapp.Request(webob.Request.blank('/').environ)
-        date_attr = Attribute(key_name='date_attr', timestamp=self.time,
-                              type='date')
+        date_attr = Attribute(key_name='date_attr', type='date')
         date_attr_type = ATTRIBUTE_TYPES['date']
         bad_date = '06-15-2010'
         date = '2010-06-15'
@@ -198,8 +195,7 @@ class EditTest(MediumTestCase):
 
     def test_int_attr_type_class(self):
         # test to_stored_value() function
-        int_attr = Attribute(key_name='total_beds', timestamp=self.time,
-                             type='int')
+        int_attr = Attribute(key_name='total_beds', type='int')
         int_attr_type = ATTRIBUTE_TYPES['int']
         assert int_attr_type.to_stored_value(None, 10, None, None) == 10
         assert int_attr_type.to_stored_value(None, 10.0, None, None) == 10
@@ -218,8 +214,7 @@ class EditTest(MediumTestCase):
 
     def test_float_attr_type_class(self):
         float_attr_type = ATTRIBUTE_TYPES['float']
-        float_attr = Attribute(key_name='ratio_foo', timestamp=self.time,
-                               type='float')
+        float_attr = Attribute(key_name='ratio_foo', type='float')
 
         # test make_input() function
         assert (float_attr_type.make_input('ratio_foo', 3.867, float_attr) ==
@@ -238,8 +233,7 @@ class EditTest(MediumTestCase):
     def test_bool_attr_type_class(self):
         name = 'can_pick_up_patients'
         bool_attr_type = ATTRIBUTE_TYPES['bool']
-        bool_attr = Attribute(key_name=name,
-                              timestamp=self.time, type='bool')
+        bool_attr = Attribute(key_name=name, type='bool')
 
         # test make_input() function
         input = bool_attr_type.make_input(name, True, bool_attr)
@@ -272,8 +266,8 @@ class EditTest(MediumTestCase):
 
     def test_choice_attr_type_class(self):
         choice_attr_type = ATTRIBUTE_TYPES['choice']
-        choice_attr = Attribute(key_name='category', timestamp=self.time,
-                                type='choice', values=['foo', 'bar'])
+        choice_attr = Attribute(
+            key_name='category', type='choice', values=['foo', 'bar'])
 
         # test make_input() function
         input = choice_attr_type.make_input('category', 'foo', choice_attr)
@@ -289,8 +283,7 @@ class EditTest(MediumTestCase):
         assert input.count('selected') == 1
 
         # test proper return when an invalid choice is supplied as the value
-        choice_attr = Attribute(key_name='category', timestamp=self.time,
-                                type='choice')
+        choice_attr = Attribute(key_name='category', type='choice')
         input = choice_attr_type.make_input('category', 'foo', choice_attr)
         assert 'foo' not in input
         assert input.count('value=""') == 1
@@ -299,8 +292,8 @@ class EditTest(MediumTestCase):
     def test_multi_attr_type_class(self):
         choices = ['foo', 'bar']
         multi_attr_type = ATTRIBUTE_TYPES['multi']
-        multi_attr = Attribute(key_name='services', timestamp=self.time,
-                               type='multi', values=choices)
+        multi_attr = Attribute(
+            key_name='services', type='multi', values=choices)
 
         # test make_input() function
         input = multi_attr_type.make_input('services', ['foo', 'bar'],
@@ -327,8 +320,7 @@ class EditTest(MediumTestCase):
 
     def test_geopt_attr_type_class(self):
         geopt_attr_type = ATTRIBUTE_TYPES['geopt']
-        geopt_attr = Attribute(key_name='location', timestamp=self.time,
-                               type='multi')
+        geopt_attr = Attribute(key_name='location', type='multi')
         location = Struct(lat=40.7142, lon=-74.0064)
 
         # test make_input() function
@@ -357,7 +349,7 @@ class EditTest(MediumTestCase):
                 geopt_attr) == None)
 
     def test_has_changed(self):
-        str_attr = Attribute(key_name='title', timestamp=self.time, type='str')
+        str_attr = Attribute(key_name='title', type='str')
 
         request = webapp.Request(webob.Request.blank(
                                  '/?title=title_bar&editable.title="title_foo"'
@@ -370,7 +362,7 @@ class EditTest(MediumTestCase):
         assert not edit.has_changed(self.s, request, str_attr)
 
     def test_has_comment_changed(self):
-        str_attr = Attribute(key_name='title', timestamp=self.time, type='str')
+        str_attr = Attribute(key_name='title', type='str')
 
         request = webapp.Request(webob.Request.blank(
                                  '/?title__comment=comment_bar&' +
@@ -388,23 +380,26 @@ class EditTest(MediumTestCase):
         """Confirms that update works properly even when sent unicode
         unicode characters via post. The edit.update() calls will throw an
         error if the test fails."""
-        # test non-unicode
-        key_name = self.s.key().name()
+        # Submit an edit with non-Unicode content.
         request_text = '/?subdomain=haiti' + \
                        '&title=title_foo&editable.title="title_bar"' + \
-                       '&pcode=pcode_foo&editable.pcode="pcode_foo"' + \
+                       '&pcode=pcode_foo&editable.pcode="pcode_bar"' + \
                        '&save=Save'
         request = webapp.Request(webob.Request.blank(request_text).environ)
         attributes = {
-            u'title': Attribute(key_name='title', type='str',
-                                edit_action='*:*'),
-            u'pcode': Attribute(key_name='pcode', type='str',
-                                edit_action='*:*')
+            u'title': Attribute(key_name='title', type='str'),
+            u'pcode': Attribute(key_name='pcode', type='str')
         }
-        edit.update(key_name, self.st, request, self.user, self.account,
+        edit.update(self.s.name, self.st, request, self.user, self.account,
                     attributes, self.subdomain, False)
 
-        # test unicode (url encoded to %C3%89 here)
+        # Check that the Subject and MinimalSubject were indeed updated.
+        subject = Subject.get('haiti', self.s.name)
+        minimal_subject = MinimalSubject.get_by_subject(subject)
+        assert subject.get_value('title') == 'title_foo'
+        assert minimal_subject.get_value('title') == 'title_foo'
+
+        # Submit an edit with Unicode content (UTF-8 encoded to \xc3\x89).
         request_text = '/?subdomain=haiti&' + \
                        'subject_name=paho.org%2FHealthC_ID%2F1129136&' + \
                        'title=Marriane+%C3%89&' + \
@@ -412,5 +407,42 @@ class EditTest(MediumTestCase):
                        '&save=Save&pcode=pcode_foo&' + \
                        'editable.pcode="pcode_foo"&pcode__comment='
         request = webapp.Request(webob.Request.blank(request_text).environ)
-        edit.update(key_name, self.st, request, self.user, self.account,
+        edit.update(self.s.name, self.st, request, self.user, self.account,
                     attributes, self.subdomain, False)
+
+        # Check that the Subject and MinimalSubject were indeed updated.
+        subject = Subject.get('haiti', self.s.name)
+        minimal_subject = MinimalSubject.get_by_subject(subject)
+        assert subject.get_value('title') == u'Marriane \xc9'
+        assert minimal_subject.get_value('title') == u'Marriane \xc9'
+
+    def test_create(self):
+        """Tests creation of a new Subject with update()."""
+        # Submit a form to create a new Subject.
+        subject_name = Subject.generate_name('example.com', 'hospital')
+        request_text = '/?subdomain=haiti' + \
+                       '&title=title_new&editable.title=null' + \
+                       '&pcode=pcode_new&editable.pcode=null' + \
+                       '&save=Save'
+        request = webapp.Request(webob.Request.blank(request_text).environ)
+        attributes = {
+            u'title': Attribute(key_name='title', type='str'),
+            u'pcode': Attribute(key_name='pcode', type='str')
+        }
+
+        names_before = [s.name for s in Subject.all_in_subdomain('haiti')]
+        edit.update(subject_name, self.st, request, self.user, self.account,
+                    attributes, self.subdomain, False)
+        names_after = [s.name for s in Subject.all_in_subdomain('haiti')]
+
+        # Check that exactly one new Subject was created.
+        assert len(names_after) == len(names_before) + 1
+        extra_names = list(set(names_after) - set(names_before))
+        assert len(extra_names) == 1
+        assert extra_names[0].startswith('example.com/')
+
+        # Check the fields of the new Subject and MinimalSubject.
+        subject = Subject.get('haiti', extra_names[0])
+        minimal_subject = MinimalSubject.get_by_subject(subject)
+        assert subject.get_value('title') == u'title_new'
+        assert minimal_subject.get_value('title') == u'title_new'
