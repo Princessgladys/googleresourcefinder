@@ -105,7 +105,8 @@ def setup_messages():
     value_message = lambda name, **kw: message('attribute_value', name, **kw)
 
     messages = [
-        #i18n: The 
+        #i18n: The name of the record type for health facilities, which will
+        #i18n: be used in headings such as "Add a new Hospital".
         subject_type_message('haiti:hospital', en='Hospital'),
 
         #i18n: Name of a facility
