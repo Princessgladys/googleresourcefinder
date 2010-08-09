@@ -5,11 +5,11 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: resourcefinder\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-05-27 00:07-0800\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2010-05-27 00:08-0800\n"
+"Last-Translator: Ka-Ping Yee <kpy@google.com>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,655 +19,655 @@ msgstr ""
 #: static/locale.js:29
 #, sh-format
 msgid "${DATE} at ${TIME}"
-msgstr "${DATE} a ${TIME}"
+msgstr "${DATE} پر ${TIME}"
 
 #. Time format (example 14:32 UTC-4)
 #: static/locale.js:166
 #, sh-format
 msgid "${HOURS}:${MINUTES} ${ZONE}"
-msgstr "${HOURS}: ${MINUTES} ${ZONE}"
+msgstr "${HOURS}:${MINUTES} ${ZONE}"
 
 #. A distance (example: 3.11 miles (5 km))
 #: static/locale.js:47
 #, sh-format
 msgid "${MILES} miles (${KM} km)"
-msgstr "${MILES} mil (${KM} kilomèt)"
+msgstr "${MILES} میل (${KM} کلومیٹر)"
 
 #. Local date format (example: Jan 21, 2010)
 #: static/locale.js:33
 #, sh-format
 msgid "${MONTH} ${DAY}, ${YEAR}"
-msgstr "${MONTH} ${DAY}, ${YEAR}"
+msgstr "${MONTH} ${DAY}، ${YEAR}"
 
 #. Number of facilities within range of a location. (example: 5 Facilities within 10 miles)
 #: static/locale.js:100
 #, sh-format
 msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
-msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
+msgstr "${NUM_FACILITIES} سہولیات ${RADIUS_MILES} میل کے اندر"
 
 #. Error message for lacking edit permissions
 #: edit.py:369
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
-msgstr "%(user)s pa gen pèmisyon edite %(a)s"
+msgstr "%(user)s کو %(a) میں ترمیم کرنے کی اجازت نہیں ہے"
 
 #. Form option to indicate that a value is not specified
 #: edit.py:199 edit.py:173 edit.py:214
 msgid "(unspecified)"
-msgstr "(pa espesifye)"
+msgstr "(غیر واضح)"
 
 #. Note that a health facility has been marked closed.
 #: templates/hospital_bubble.html:72
 msgid "<strong>Note:</strong> This facility has been marked closed."
-msgstr "<strong>Remak:</strong> etablisman sa a te make fèmen."
+msgstr "<strong>نوٹ:</strong> اس سہولت پر بند کا نشان لگا ہوا ہے۔"
 
 #. Accuracy of latitude, longitude coordinates
 #: ../tools/setup.py:139
 msgid "Accuracy"
-msgstr "Presizyon"
+msgstr "درستگی"
 
 #. Header for a street address
 #: templates/print.html:138 templates/hospital_bubble.html:152 ../tools/setup.py:135
 msgid "Address"
-msgstr "Adrès"
+msgstr "پتہ"
 
 #. Type of construction: sun-dried clay bricks
 #: ../tools/setup.py:204
 msgid "Adobe"
-msgstr "Adobe"
+msgstr "ایڈوب"
 
 #. Label for a required text box to enter organizational affiliation.
 #: templates/edit.html:98
 msgid "Affiliation (required)"
-msgstr "Afilyasyon (obligatwa)"
+msgstr "الحاق (مطلوب)"
 
 #. Note that a health facility is on alert.
 #: templates/hospital_bubble.html:80
 msgid "Alert"
-msgstr "Alèt"
+msgstr "انتباہ"
 
 #. Whether or not a facility is on alert status.
 #: ../tools/setup.py:153
 msgid "Alert status"
-msgstr "Alèt kondisyon"
+msgstr "انتباہ کی صورتحال"
 
 #. Label for every item in a list.
 #: static/locale.js:25
 msgid "All"
-msgstr "Tout"
+msgstr "سبھی"
 
 #. Alternate name of a facility
 #: ../tools/setup.py:109
 msgid "Alternate name"
-msgstr "Altène non"
+msgstr "متبادل نام"
 
 #. Eror message, shown when an error occurs.
 #: static/locale.js:59
 msgid "An error has occurred. Please try again later."
-msgstr "Gen yon erè ki te fèt. Tanpri, eseye ankò pi ta."
+msgstr "ایک غلطی واقع ہوگئی ہے۔ براہ کرم بعد میں دوبارہ آزمائیں۔"
 
 #. Label; available beds
 #: templates/hospital_email.html:100 templates/hospital_email.html.py:199
 msgid "Available"
-msgstr "Kabann disponib "
+msgstr "دستیاب"
 
 #. Total number of unoccupied beds at a hospital.
 #: ../tools/setup.py:117
 msgid "Available beds"
-msgstr "Kabann disponib "
+msgstr "دستیاب بستر"
 
 #. Heading for number of available beds and number of total beds in a hospital.
 #: templates/print.html:124
 msgid "Beds open / total"
-msgstr "Kabann disponib/total"
+msgstr "بستر کھلا / کل"
 
 #. Service provided by a health facility (use Title Case).
 #: ../tools/setup.py:273
 msgid "Blood Bank"
-msgstr "Bank san"
+msgstr "بلڈ بینک"
 
 #. Save a copy of the data in CSV format
 #: export.py:131
 msgid "CSV Export"
-msgstr "Ekspote CSV"
+msgstr "CSV برآمد"
 
 #. Service provided by a health facility (use Title Case).
 #: ../tools/setup.py:271
 msgid "CT Scan"
-msgstr "CT Eskanè"
+msgstr "CT اسکین"
 
 #. Whether or not a facility can send a vehicle to pick up patients
 #: ../tools/setup.py:160
 msgid "Can pick up patients"
-msgstr "Ka al chache malad"
+msgstr "مریضوں کو لاسکتا ہے"
 
 #. Button text to cancel and return to the home page
 #: templates/edit.html:164
 msgid "Cancel"
-msgstr "Anile"
+msgstr "منسوخ کریں"
 
 #. Label; total beds
 #: templates/hospital_email.html.py:203 templates/hospital_email.html:104
 msgid "Capacity"
-msgstr "Kapasite"
+msgstr "گنجائش"
 
 #. Service provided by a health facility (use Title Case). Meaning: branch of medicine dealing with the heart
 #: ../tools/setup.py:242
 msgid "Cardiology"
-msgstr "Kadyoloji"
+msgstr "کارڈیالوجی"
 
 #. Category of facility (hospital, clinic, field team, etc.)
 #: ../tools/setup.py:145
 msgid "Category"
-msgstr "Kategori"
+msgstr "زمرہ"
 
 #. Header for a record of a change to a facility detail
 #: templates/hospital_bubble.html:180
 msgid "Change"
-msgstr "Chanje"
+msgstr "تبدیل کریں"
 
 #. Header for the history of changes in data for a facility
 #: templates/hospital_bubble.html:142
 msgid "Change details"
-msgstr "Chanje done"
+msgstr "تبدیلی کی تفصیلات"
 
 #. Header a column of comment about why a change was made
 #: templates/hospital_bubble.html:188
 msgid "Change note"
-msgstr "Chanje"
+msgstr "تبدیلی کا نوٹ"
 
 #. Instructions for a menu of deployed instances of the application
 #: templates/subdomain_menu.html:40
 msgid "Choose a site:"
-msgstr "Chwazi yon sit:"
+msgstr "مقام منتخب کریں:"
 
 #. Category of health facility: Clinic
 #: ../tools/setup.py:184
 msgid "Clinic"
-msgstr "Klinik"
+msgstr "کلینک"
 
 #. Facility operational status: closed or in the process of closing
 #: ../tools/setup.py:219
 msgid "Closed or closing"
-msgstr "Fèmen oswa pwal fèmen vit"
+msgstr "بند ہے یا بند ہو رہا ہے"
 
 #. Label for a text field to enter a comment about a change.
 #: templates/edit.html:145
 msgid "Comment:"
-msgstr "Kòmantè:"
+msgstr "تبصرہ:"
 
 #. remarks
 #: ../tools/setup.py:155
 msgid "Comments"
-msgstr "Kòmantè"
+msgstr "تبصرے"
 
 #. Meaning: low-level administrative division
 #: ../tools/setup.py:133
 msgid "Commune"
-msgstr "Komin"
+msgstr "حلقہ"
 
 #. Type of organization: Local community organization
 #: ../tools/setup.py:165
 msgid "Community"
-msgstr "Kominote"
+msgstr "حلقہ"
 
 #. Materials making up a building
 #: ../tools/setup.py:147
 msgid "Construction"
-msgstr "Konstriksyon"
+msgstr "تعمیر"
 
 #. Name of a person to contact for more information.
 #: ../tools/setup.py:123
 msgid "Contact name"
-msgstr "Non pou kontak"
+msgstr "رابطہ کا نام"
 
 #. Country code to load data for
 #: templates/load.html:34
 msgid "Country:"
-msgstr "Peyi"
+msgstr "ملک:"
 
 #. Label for daily e-mail updates
 #: settings.py:57
 msgid "Daily"
-msgstr "Dyaliz"
+msgstr "یومیہ"
 
 #. Level of destruction
 #: ../tools/setup.py:149
 msgid "Damage"
-msgstr "Domaj"
+msgstr "نقصان"
 
 #. Header for date and time of a change record
 #: templates/hospital_bubble.html:192
 msgid "Date and time"
-msgstr "Jou  ak  lè"
+msgstr "تاریخ اور وقت"
 
 #. Label for change default frequency box
 #: templates/settings.html:98
 msgid "Default frequency:"
-msgstr "Frekans Estanda:"
+msgstr "ڈیفالٹ تعدد:"
 
 #. Meaning: administrative division
 #: ../tools/setup.py:129
 msgid "Department"
-msgstr "Depatman"
+msgstr "محکمہ"
 
 #. Service provided by a health facility (use Title Case). Meaning: Artificial replacement for lost kidney function.
 #: ../tools/setup.py:265
 msgid "Dialysis"
-msgstr "Dyaliz"
+msgstr "ڈائلیسس"
 
 #. Category of health facility: A dispensary where medicine and medical supplies are given out.
 #: ../tools/setup.py:187
 msgid "Dispensary"
-msgstr "Dispansè"
+msgstr "ڈسپنسری"
 
 #. Displaying markers on a map for the NUM_FACILITIES closest to a  location
 #: static/locale.js:43
 #, sh-format
 msgid "Displaying ${NUM_FACILITIES} closest facilities"
-msgstr "Ekspoze ${NUM_FACILITIES} etablisman ki pi pre"
+msgstr "${NUM_FACILITIES} قریب ترین سہولیات دکھا رہا ہے"
 
 #. Displaying markers on a map for facilities within RADIUS_MILES miles of a location
 #: static/locale.js:38
 #, sh-format
 msgid "Displaying facilities within ${RADIUS_MILES} miles"
-msgstr "Ekpoze etablisman nan ${RADIUS_MILES} mil"
+msgstr "${RADIUS_MILES} میل کے اندر کی سہولیات دکھا رہا ہے"
 
 #. Header for a distance from the current subject to another location
 #: templates/print.html:134
 msgid "Distance"
-msgstr "Distans"
+msgstr "دوری"
 
 #. Meaning: administrative division
 #: static/locale.js:51 ../tools/setup.py:131 templates/map.html:147
 msgid "District"
-msgstr "Distri"
+msgstr "ضلع"
 
 #. E-mail address
 #: edit.py:120 ../tools/setup.py:127
 msgid "E-mail"
-msgstr "Adrès elektronik:"
+msgstr "ای میل"
 
 #. Title for page to edit data about a subject
 #: templates/edit.html:55
 msgid "Edit"
-msgstr "Reekri"
+msgstr "ترمیم کریں"
 
 #. Label for link to edit a subject record
 #: templates/hospital_email.html.py:182
 msgid "Edit this record"
-msgstr "modifye enregistreman sa"
+msgstr "اس ریکارڈ میں ترمیم کریں"
 
 #. Header a column of user who made the edits
 #: templates/hospital_bubble.html:184
 msgid "Edited by"
-msgstr "Moun ki reekri a"
+msgstr "ترمیم کردہ بذریعہ"
 
 #. Settings page title
 #: templates/settings.html:71
 msgid "Email Subscription Settings"
-msgstr "Imel Abònman Anviwònman"
+msgstr "ای میل رکنیت کی ترتیبات"
 
 #. Label for e-mail type radio buttons
 #: templates/settings.html:79
 msgid "Email format:"
-msgstr "Adrès elektronik fòma:"
+msgstr "ای میل کی شکل:"
 
 #. Header for an error message.
 #: templates/error.html:28
 msgid "Error"
-msgstr "Erè"
+msgstr "غلطی"
 
 #. Error message for not loading edit form successfully
 #: static/locale.js:75
 msgid "Error loading edit form."
-msgstr "Erè transpòte reekri fòm."
+msgstr "ترمیمی فارم لوڈ کرنے میں غلطی۔"
 
 #. Error message for not loading facility information successfully
 #: static/locale.js:79
 msgid "Error loading facility information."
-msgstr "Erè transpòte etablisman enfòmasyon."
+msgstr "سہولت کی معلومات لوڈ کرنے میں غلطی۔"
 
 #. Error message for not saving facility information successfully
 #: static/locale.js:91
 msgid "Error saving facility information."
-msgstr "Erè anrejistreman etablisman enfòmasyon."
+msgstr "سہولت کی معلومات محفوظ کرنے میں غلطی۔"
 
 #. Button to export data to comma-separated-value format.
 #: templates/map.html:188 export.py:144
 msgid "Export CSV"
-msgstr "Ekspote CSV"
+msgstr "CSV برآمد کریں"
 
 #. Label for facilities with changes
 #: templates/hospital_email.html:63
 msgid "Facilities with Changes"
-msgstr "Fasilite ak Chanjman"
+msgstr "سہولیات مع تبدیلیاں"
 
 #. A place that provides a particular service
 #: templates/map.html:166 templates/print.html:129 templates/settings.html:120 static/locale.js:104
 msgid "Facility"
-msgstr "Etablisman"
+msgstr "سہولت"
 
 #. Header for details about a facility
 #: templates/hospital_bubble.html:137
 msgid "Facility details"
-msgstr "Enfòmasyon sou etablisman "
+msgstr "سہولت کی تفصیلات"
 
 #. Type of organization: Faith-based organization
 #: ../tools/setup.py:167
 msgid "Faith-based"
-msgstr "Baze sou konfyans"
+msgstr "عقیدے پر مبنی"
 
 #. Label; field or attribute
 #: templates/hospital_email.html:119
 msgid "Field"
-msgstr "Etabisman Miks"
+msgstr "فیلڈ"
 
 #. Facility operational status: as functional as a field hospital
 #: ../tools/setup.py:213
 msgid "Field hospital"
-msgstr "Terren lopital"
+msgstr "فیلڈ ہسپتال"
 
 #. Facility operational status: as functional as a field hospital next to a hospital
 #: ../tools/setup.py:216
 msgid "Field hospital co-located with hospital"
-msgstr "Terren lopital ki chita ka lopital"
+msgstr "ہسپتال کے ساتھ ہی واقع فیلڈ ہسپتال"
 
 #. Error message for required field.
 #: static/locale.js:63
 msgid "Field is required."
-msgstr "Domèn sa obligatwa."
+msgstr "فیلڈ مطلوب ہے۔"
 
 #. Header for a list of filters to restrict a list of data being viewed.
 #: templates/map.html:121
 msgid "Filters"
-msgstr "Filtè yo"
+msgstr "فلٹرز"
 
 #. Tooltip explaining how to enable print mode
 #: static/locale.js:137
 msgid "First select a hospital from the list on the left. Then Print will print a list of hospitals in order of distance from your selection."
-msgstr "Premyeman chwazi yon lopital ki nan bò goch la. Lè sa a enprimant la pral enprime yon lis lopital soti nan zòn ou ye a"
+msgstr "سب سے پہلے بائیں سمت کی فہرست سے ایک ہسپتال منتخب کریں۔ پھر پرنٹ آپ کے انتخاب سے دوری کے لحاط سے ہسپتالوں کی فہرست پرنٹ کرے گا۔"
 
 #. Label to tell users to check website for more information
 #: templates/hospital_email.html:228
 msgid "For more information on all subscribed facilities, please visit"
-msgstr "Pou plis enfòmasyon sou tout fasilite yo enskri, ale nan"
+msgstr "سبھی مطلوبہ سہولیات سے مزید معلومات کیلئے براہ کرم ملاحظہ کریں"
 
 #. Type of organization: For-profit organization
 #: ../tools/setup.py:169
 msgid "For-profit"
-msgstr "Pou pwofi"
+msgstr "منافع کیلئے"
 
 #. Header for general information about a subject
 #: templates/print.html:142
 msgid "General Info"
-msgstr "Enfòmasyon jeneral"
+msgstr "عمومی معلومات"
 
 #. Service provided by a health facility (use Title Case). Meaning: surgical specialty that focuses on abdominal organs
 #: ../tools/setup.py:225
 msgid "General Surgery"
-msgstr "Chiriji Jeneral"
+msgstr "عمومی جراحی"
 
 #. Proper name of an ID for a health facility defined by the  Pan-American Health Organization; no translation necessary.
 #: templates/hospital_bubble.html:56 static/locale.js:114 ../tools/setup.py:115
 msgid "HealthC ID"
-msgstr "ID HealthC"
+msgstr "HealthC ID"
 
 #. Greeting
 #: templates/hospital_email.html:35
 msgid "Hello"
-msgstr "Ed"
+msgstr "ہیلو"
 
 #. Link to go to a help page for the application
 #: templates/base.html:117
 msgid "Help"
-msgstr "Ed"
+msgstr "مدد"
 
 #. Link to return to the main page of the application
 #: templates/home_link.html:22
 msgid "Home"
-msgstr "Paj akèy"
+msgstr "ہوم"
 
 #. Category of health facility: Hospital.
 #: ../tools/setup.py:189
 msgid "Hospital"
-msgstr "Lopital"
+msgstr "ہسپتال"
 
 #. Explains how to correct incorrect information that has been printed.
 #: templates/print.html:166
 msgid "If any information is wrong or missing, please correct it on the web site:"
-msgstr "Si yon enfòmasyon ta manke ou byen ta mal ekri, ale sou sit entènèt la"
+msgstr "اگر کوئی معلومات غلط یا چھوٹی ہوئی ہے تو،براہ کرم ویب سائٹ پر اسے صحیح کریں:"
 
 #. Service provided by a health facility (use Title Case). Meaning: specializing in treating communicable diseases
 #: ../tools/setup.py:245
 msgid "Infectious Disease"
-msgstr "Maladi Enfektyez"
+msgstr "متعدی مرض"
 
 #. Label for instant e-mail updates
 #: settings.py:55
 msgid "Instant"
-msgstr "Imedyat"
+msgstr "فوری"
 
 #. Service provided by a health facility (use Title Case). Meaning: deals with diagnosis and (non-surgical) treatment of Meaning: diseases of the internal organs
 #: ../tools/setup.py:239
 msgid "Internal Medicine"
-msgstr "Medsin Entèn"
+msgstr "داخلی دوا"
 
 #. Error message for invalid date entry
 #: edit.py:142
 msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
-msgstr "Dat envalid : %(dat)r (bezwen ane-mwa-jou fòma)"
+msgstr "غلط تاریخ: %(date)r (سال-ماہ-دن کی شکل درکار ہے)"
 
 #. Error message for request missing subject name.
 #: subscribe.py:63 settings.py:34
 msgid "Invalid or missing account e-mail."
-msgstr "Envalid oubyen erè nan non etablisman an"
+msgstr "ای میل اکاؤنٹ غلط یا چھوٹا ہوا ہے۔"
 
 #. Error message for request missing subject name.
 #: bubble.py:140 edit.py:430
 msgid "Invalid or missing subject name."
-msgstr "Envalid oubyen erè nan non etablisman an"
+msgstr "مریض کا نام غلط یا چھوٹا ہوا ہے۔"
 
 #. Abbreviated months of the year.
 #: static/locale.js:123
 msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
-msgstr "Janvye, Fevriye, Mas, Avril, Me, Jen, jiyè, Out, septanm, Oktòb, Novanm, Desanm"
+msgstr "جنوری فروری مارچ اپریل مئی جون جولائی اگست ستمبر اکتوبر نومبر دسمبر"
 
 #. Service provided by a health facility (use Title Case).
 #: ../tools/setup.py:267
 msgid "Lab"
-msgstr "Laboratwa"
+msgstr "لیب"
 
 #. Label for a language selector
 #: templates/base.html:82
 msgid "Language:"
-msgstr "Lang:"
+msgstr "زبان:"
 
 #. Label for the last update time
 #: templates/hospital_email.html:90 templates/hospital_email.html.py:188
 msgid "Last Updated:"
-msgstr "Misajou"
+msgstr "آخری تجدید شدہ:"
 
 #. Label for a date-time when the data was last updated
 #: templates/hospital_bubble.html:65
 msgid "Last updated"
-msgstr "Misajou"
+msgstr "آخری تجدید"
 
 #. Label for text input
 #: edit.py:235
 msgid "Latitude"
-msgstr "Latitd"
+msgstr "عرض البلد"
 
 #. Error message for invalid latitude.
 #: static/locale.js:71
 msgid "Latitude must be a number."
-msgstr "Latitd dwe yon nimewo"
+msgstr "عرض البلد ایک عدد ہونا چاہیے۔"
 
 #. Error message for invalid latitude.
 #: static/locale.js:67
 msgid "Latitude must be between -90 and 90."
-msgstr "Latitd dwe ant -90 ak 90"
+msgstr "عرض البلد -90 اور 90 کے درمیان ہونا چاہیے۔"
 
 #. Button text to load data
 #: templates/load.html:57
 msgid "Load"
-msgstr "Telechaje"
+msgstr "لوڈ کریں"
 
 #. A program that can load data
 #: templates/load.html:27
 msgid "Loader:"
-msgstr "Program pou telechaje"
+msgstr "لوڈ کرنے والا:"
 
 #. Indicator that the application is loading.
 #: templates/base.html:145 static/locale.js:118
 msgid "Loading..."
-msgstr "Transpòte..."
+msgstr "لوڈ ہورہا ہے..."
 
 #. latitude, longitude location
 #: ../tools/setup.py:137
 msgid "Location"
-msgstr "Kote"
+msgstr "جائے وقوع"
 
 #. Geographic coordinates of a location on earth.
 #: templates/hospital_bubble.html:161
 msgid "Location:"
-msgstr "Kote"
+msgstr "جائے وقوع:"
 
 #. Label for text input
 #: edit.py:239
 msgid "Longitude"
-msgstr "Lonjitd"
+msgstr "طول البلد"
 
 #. Error message for invalid longitude.
 #: static/locale.js:87
 msgid "Longitude must be a number."
-msgstr "Lonjitd dwe yon nimewo"
+msgstr "طول البلد ایک عدد ہونا چاہیے۔"
 
 #. Error message for invalid longitude.
 #: static/locale.js:83
 msgid "Longitude must be between -180 and 180."
-msgstr "Lonjitd dwe ant -180 ak 180"
+msgstr "طول البلد -180 اور 180 کے درمیان ہونا چاہیے۔"
 
 #. Service provided by a health facility (use Title Case). Meaning: Care for cognitive and emotional well-being.
 #: ../tools/setup.py:262
 msgid "Mental Health"
-msgstr "Sante Mantal"
+msgstr "دماغی صحت"
 
 #. Type of organization: Organization associated with armed forces
 #: ../tools/setup.py:171
 msgid "Military"
-msgstr "Militè"
+msgstr "فوجی"
 
 #. Type of organization: Organization with mixed function
 #: ../tools/setup.py:173
 msgid "Mixed"
-msgstr "Etabisman Miks"
+msgstr "مخلوط"
 
 #. Category of health facility: A mobile clinic.
 #: ../tools/setup.py:191
 msgid "Mobile clinic"
-msgstr "Klinik mobil"
+msgstr "موبائل کلینک"
 
 #. Label for monthly e-mail updates
 #: settings.py:61
 msgid "Monthly"
-msgstr "Chak mwa"
+msgstr "ماہانہ"
 
 #. Service provided by a health facility (use Title Case). Meaning: Corpse removal
 #: ../tools/setup.py:276
 msgid "Mortuary Services"
-msgstr "Pomp Funèb"
+msgstr "مردہ خانہ کی خدمات"
 
 #. Type of organization: Non-governmental organization
 #: ../tools/setup.py:175
 msgid "NGO"
-msgstr "ONG"
+msgstr "NGO"
 
 #. a person's name
 #: ../tools/setup.py:107 edit.py:116
 msgid "Name"
-msgstr "Non"
+msgstr "نام"
 
 #. Label for a required text box to enter a person's name
 #: templates/edit.html:82
 msgid "Name (required)"
-msgstr "Non (obligatwa)"
+msgstr "نام (مطلوب)"
 
 #. service provided by a health facility (use Title Case). Meaning: surgery that involves the nervous system
 #: ../tools/setup.py:232
 msgid "Neurosurgery"
-msgstr "Nerochiriji"
+msgstr "نیوروسرجری"
 
 #. Label for new value
 #: templates/hospital_email.html:124
 msgid "New Value"
-msgstr "New Valè"
+msgstr "نئی قدر"
 
 #. Form option for a false Boolean value
 #: edit.py:177 utils.py:334 utils_test.py:321
 msgid "No"
-msgstr "Pa dakò"
+msgstr "نہیں"
 
 #. Indicates there is no availability information for this  hospital.
 #: templates/hospital_bubble.html:121
 msgid "No availability information"
-msgstr "Pa gen enfòmasyon ki koresponn"
+msgstr "فراہمی کی معلومات نہیں ہے"
 
 #. message saying no facilities are subscribed to
 #: templates/settings.html:134
 msgid "No facilities to display."
-msgstr "Pa gen fasilite yo afiche."
+msgstr "ڈسپلے کیلئے کوئی سہولیات نہیں ہیں۔"
 
 #. Error message
 #: grant_access.py:76
 #, python-format
 msgid "No pending request for %(account_action)s by %(user)s"
-msgstr "Pa gen demand an atant pou %(authorization_role)s de %(user)s"
+msgstr "%(account_action)s بذریعہ%صارف(صارفین) کیلئے زیر التواء درخواست نہیں ہے"
 
 #. Facility operational status: cannot perform surgeries
 #: ../tools/setup.py:211
 msgid "No surgical capacity"
-msgstr "Pa gen kapasite chiriji"
+msgstr "جراحتی گنجائش نہیں ہے"
 
 #. Service provided by a health facility (use Title Case). Meaning: Obstetrics deals with childbirth and care of the mother. Meaning: Gynecology deals with diseases and hygiene of women
 #: ../tools/setup.py:259
 msgid "Obstetrics and Gynecology"
-msgstr "Obstetrik ak Jinekoloji"
+msgstr "زچگی اور امراض نسواں"
 
 #. Label for old value
 #: templates/hospital_email.html:129
 msgid "Old Value"
-msgstr "Ansyen Valè"
+msgstr "پرانی قدر"
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
 #: static/locale.js:128
 msgid "Open/Total Beds"
-msgstr "Kabann disponib/total"
+msgstr "کھلا / کل بستر"
 
 #. Facility operational status: in working order
 #: ../tools/setup.py:209
 msgid "Operational"
-msgstr "Operasyon"
+msgstr "آپریشنل"
 
 #. Whether or not a facility is fully operational.
 #: ../tools/setup.py:151
 msgid "Operational status"
-msgstr "Operasyon kondisyon"
+msgstr "آپریشن کی صورتحال"
 
 #. Meaning: referring to the name of an organization
 #: ../tools/setup.py:141
 msgid "Organization name"
-msgstr "Non òganizasyon"
+msgstr "تنظیم کا نام"
 
 #. Type of organization (public, private, military, NGO, etc.)
 #: ../tools/setup.py:143
 msgid "Organization type"
-msgstr "Kalite òganizasyon"
+msgstr "تنظیم کی نوعیت"
 
 #. Service provided by a health facility (use Title Case). Meaning: treats diseases and injury to bones, muscles, joints and Meaning: tendons
 #: ../tools/setup.py:229
 msgid "Orthopedics"
-msgstr "Otopedik"
+msgstr "آرتھوپیڈکس"
 
 #. Proper name of an ID for a health facility defined by the  Haiti ministry of health (MSPP); no translation necessary.
 #: static/locale.js:109 ../tools/setup.py:112 templates/hospital_bubble.html:61
@@ -677,352 +677,352 @@ msgstr "PCode"
 #. the data being loaded
 #: templates/load.html:48
 msgid "Payload:"
-msgstr "Peyechajman"
+msgstr "پلے لوڈ:"
 
 #. Service provided by a health facility (use Title Case). Meaning: branch of medicine dealing with infants and children
 #: ../tools/setup.py:248
 msgid "Pediatrics"
-msgstr "Pedyatrik"
+msgstr "امراض اطفال"
 
 #. telephone number
 #: edit.py:118 ../tools/setup.py:125
 msgid "Phone"
-msgstr "Telefòn"
+msgstr "فون"
 
 #. Label for "plain text" radio button
 #: templates/settings.html:86
 msgid "Plain text"
-msgstr "Tèks"
+msgstr "سادہ متن"
 
 #. Indicates a user should call for availability of beds and services at a hospital.
 #: templates/hospital_bubble.html:115
 msgid "Please call for availability information."
-msgstr "Tanpri rele pou enfomasyon disponib"
+msgstr "فراہمی کی معلومات کیلئے براہ کرم کال کریں۔"
 
 #. Service provided by a health facility (use Title Case). care given after surgery until patient is discharged
 #: ../tools/setup.py:251
 msgid "Postoperative Care"
-msgstr "Swen Aprè Operasyon"
+msgstr "آپریشن کے بعد کی نگہداشت"
 
 #. old value for the attribute
 #: mail_alerts.py:255
 msgid "Previous value"
-msgstr "Anvan valè"
+msgstr "سابقہ قدر"
 
 #. Link to print the current view of the application
 #: templates/base.html:105
 msgid "Print"
-msgstr "Enprime"
+msgstr "پرنٹ کریں"
 
 #. Tooltip explaining a 'Print' link
 #: static/locale.js:142
 #, sh-format
 msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
-msgstr "Enprime yon list lopital nan lòd distans de ${FACILITY_NAME}"
+msgstr "${FACILITY_NAME} سے دوری کے لحاظ سے ہسپتالوں کی فہرست پرنٹ کریں"
 
 #. Link to privacy policy for the application
 #: templates/base.html:127
 msgid "Privacy"
-msgstr "Vi prive"
+msgstr "رازداری"
 
 #. Type of organization: Public (government) organization
 #: ../tools/setup.py:177
 msgid "Public"
-msgstr "Piblik"
+msgstr "عوام"
 
 #. Whether or not a facility can be accessed by a road.
 #: ../tools/setup.py:157
 msgid "Reachable by road"
-msgstr "Aksesib pa wout"
+msgstr "بذریعہ سڑک قابل رسائی"
 
 #. Record updated successfully.
 #: edit.py:513
 msgid "Record updated."
-msgstr "Done a jou"
+msgstr "ریکارڈ کی تجدید ہوگئی۔"
 
 #. Service provided by a health facility (use Title Case). Meaning: care given to improve and recover lost function after an illness or injury that has caused functional limitations
 #: ../tools/setup.py:255
 msgid "Rehabilitation"
-msgstr "Reyabilitasyon"
+msgstr "بحالی صحت"
 
 #. Type of construction: concrete with metal and/or mesh added to provide extra support against stresses
 #: ../tools/setup.py:197
 msgid "Reinforced concrete"
-msgstr "Ranfòse konkrè"
+msgstr "طاقتور کنکریٹ"
 
 #. Application for the given permission action approved
 #: grant_access.py:92
 #, python-format
 msgid "Request for becoming %(action)s was approved."
-msgstr "Rekèt pou %(role)s la aksepte"
+msgstr "%(action)s  بننے کی درخواست منظور ہوگئی تھی۔"
 
 #. Application for the given permission action denied
 #: grant_access.py:96
 #, python-format
 msgid "Request for becoming %(action)s was denied."
-msgstr "Rekèt pou %(role)s la refise"
+msgstr "%(action)s  بننے کی درخواست مسترد ہوگئی تھی۔"
 
 #. Name of the application.
 #: templates/subdomain_menu.html.py:35
 msgid "Resource Finder"
-msgstr "Chèche resous"
+msgstr "Resource Finder"
 
 #. subject of e-mail -> Resource Finder Update
 #: mail_alerts.py:78
 msgid "Resource Finder %s Update"
-msgstr "Chèche resous"
+msgstr "Resource Finder %s تازہ کاری کریں"
 
 #. Button text to save data
 #: templates/edit.html:160
 msgid "Save"
-msgstr "Anrejistre"
+msgstr "محفوظ کریں"
 
 #. Notice that a change has been saved.
 #: templates/settings.html:61
 msgid "Saved."
-msgstr "Anrejistre"
+msgstr "محفوظ ہوگیا۔"
 
 #. Message indicating saving hospital information
 #: static/locale.js:150
 msgid "Saving..."
-msgstr "Anrejistre..."
+msgstr "محفوظ ہو رہا ہے..."
 
 #. Label for a selector to export data to CSV
 #: export.py:135
 msgid "Select subject type to export:"
-msgstr "Idantite kalite etablisman ekspòtasyon"
+msgstr "برآمد کیلئے مریض کی نوعیت منتخب کریں:"
 
 #. work done by someone that benefits another
 #: ../tools/setup.py:121 static/locale.js:154
 msgid "Services"
-msgstr "Sèvis"
+msgstr "خدمات"
 
 #. label for changing subjects to default frequency
 #: templates/settings.html:167
 msgid "Set checked to default"
-msgstr "Mete Tcheke Estanda"
+msgstr "نشان زد کو ڈیفالٹ پر ترتیب دیں"
 
 #. Link to go to the settings page of the application
 #: templates/base.html:111
 msgid "Settings"
-msgstr "Anviwònman"
+msgstr "ترتیبات"
 
 #. Label for settings page
 #: templates/hospital_email.html.py:249 templates/hospital_email.html:50
 msgid "Settings page"
-msgstr "Anviwònman"
+msgstr "ترتیبات کا صفحہ"
 
 #. Label for a control that filters a list of facilities
 #: static/locale.js:158
 msgid "Show"
-msgstr "Montre"
+msgstr "دکھائیں"
 
 #. Link to sign into the app
 #: main.py:64
 msgid "Sign in"
-msgstr "Mete Anprent"
+msgstr "سائن ان کریں"
 
 #. Link to sign in to edit the data for a hospital record.
 #: templates/hospital_bubble.html:48
 msgid "Sign in to edit"
-msgstr "Tanpri siyen nan reekri"
+msgstr "ترمیم کیلئے سائن ان کریں"
 
 #. Link to sign out of the app
 #: settings.py:71 main.py:62
 msgid "Sign out"
-msgstr "Sòti"
+msgstr "سائن آؤٹ کریں"
 
 #. Label to subscribe to a subject
 #: templates/hospital_bubble.html:41 static/locale.js:162
 msgid "Subscribe to email updates"
-msgstr "Abònman imel mizajou"
+msgstr "ای میل تازہ کاریوں کی رکنیت حاصل کریں"
 
 #. Header for a list of provisions
 #: templates/map.html:101
 msgid "Supplies"
-msgstr "Prodwi"
+msgstr "ساز و سامان"
 
 #. Link to terms of service for the application
 #: templates/base.html:122
 msgid "Terms of Service"
-msgstr "Kondisyon yo pou itilizasyon"
+msgstr "خدمت کی شرائط"
 
 #. Instructions to enter a person's name and organizational affiliation.
 #: templates/edit.html:74
 msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/terms\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
-msgstr "Mesi paske ou ajoute enfòmasyon sou Chèche Resous. Pou kòmanse tanpri kreye yon kont epi di nou afilyasyon ou. Enfòmasyon sa a pral parèt a kote enfòmasyon ou ajoute oswa korije. Epitou wè <a target=\"_blank\" href=\"/TOS\">Kondisyon yo pou itilizasyon</a> ak <a target=\"_blank\" href=\"/privacy\">Pwoteksyon vi prive</a> (nan lang angle)."
+msgstr "Resource Finder پر مواد کا اضافہ کرنے کا شکریہ۔ شروعات کرنے کیلئے براہ کرم ایک صارف نام بنائیں اور ہمیں اپنا الحاق بتائیں۔ یہ معلومات آپ کے اضافہ کردہ یا ترمیم کردہ معلومات کے آگے ڈسپلے ہوگی۔ نیز <a target=\"_blank\" href=\"/terms\">خدمت کی شرائط</a> اور <a target=\"_blank\" href=\"/privacy\">رازداری کی پالیسی</a> بھی دیکھیں۔"
 
 #. Label to tell users how to update subscription setttings
 #: templates/hospital_email.html:243
 msgid "To change subscription settings, please visit the"
-msgstr "Pou chanje anviwònman abònman, tanpri ale nan"
+msgstr "رکنیت کی ترتیبات بدلنے کیلئے،براہ کرم ملاحظہ کریں"
 
 #. Description of update e-mail
 #: templates/hospital_email.html:43
 msgid "To change the frequency of these emails, please visit the"
-msgstr "Tanpri jwenn dènye enfòmasyon ou anba. Pou chanje frekans sa yo e may-yo, tanpri vizite ou"
+msgstr "ان ای میلز کا تعدد بدلنے کیلئے،براہ کرم ملاحظہ کریں"
 
 #. Total number of beds at a hospital
 #: ../tools/setup.py:119
 msgid "Total beds"
-msgstr "Kantite kaban-n"
+msgstr "کل بستر"
 
 #. Total number of facilities shown on the map.
 #: templates/print.html:71
 msgid "Total facilities"
-msgstr "Kantite disponib"
+msgstr "کل سہولیات"
 
 #. URL to load data from
 #: templates/load.html:41
 msgid "URL:"
-msgstr "Sit entenet"
+msgstr "URL:"
 
 #. Error message
 #: utils.py:142
 msgid "Unauthorized user."
-msgstr "San otorizasyon User"
+msgstr "غیر مجاز صارف۔"
 
 #. Label for unchanged and subscribed facilities
 #: templates/hospital_email.html:162
 msgid "Unchanged Subscribed Facilities"
-msgstr "Chanje Abòne Fasilite"
+msgstr "غیر متبدل رکنیت حاصل کردہ سہولیات"
 
 #. Type of organization: Organization associated with a university
 #: ../tools/setup.py:179
 msgid "University"
-msgstr "Inivesite"
+msgstr "یونیورسٹی"
 
 #. Type of construction: walls constructed of clay brick or concrete block
 #: ../tools/setup.py:200
 msgid "Unreinforced masonry"
-msgstr "Pa ranfòse konkrè"
+msgstr "غیر تقویت یافتہ معماری"
 
 #. Label to unsubscribe from a subject
 #: static/locale.js:170 templates/hospital_bubble.html:36
 msgid "Unsubscribe"
-msgstr "Koupe Abònman nan Tcheke"
+msgstr "رکنیت ختم کریں"
 
 #. label for unsubscribing from subjects
 #: templates/settings.html:174
 msgid "Unsubscribe from checked"
-msgstr "Koupe Abònman nan Tcheke"
+msgstr "نشان زد سے رکنیت ختم کریں"
 
 #. Message indicating the user is unsubscribed
 #: static/locale.js:174
 msgid "Unsubscribed."
-msgstr "Dezabone."
+msgstr "رکنیت ختم کریں۔"
 
 #. Label indicating a record was updated
 #: static/locale.js:178
 msgid "Updated"
-msgstr "Remete an fonksyon"
+msgstr "تجدید شدہ"
 
 #. who the attribute was updated by
 #: mail_alerts.py:258
 msgid "Updated by"
-msgstr "Remete an fonksyon"
+msgstr "تجدید شدہ بذریعہ"
 
 #. Label for user
 #: templates/hospital_email.html:135
 msgid "User"
-msgstr "Itilizatè"
+msgstr "صارف"
 
 #. Error message for a value that is not a number
 #: static/locale.js:95
 msgid "Value must be a number."
-msgstr "Valè dwe yon nimewo"
+msgstr "قدر لازمی طور پر عدد ہونی چاہیے۔"
 
 #. Service provided by a health facility (use Title Case). Meaning: surgical specialty that focuses on arteries and veins
 #: ../tools/setup.py:235
 msgid "Vascular Surgery"
-msgstr "Chiriji Vaskilè"
+msgstr "عروقی سرجری"
 
 #. Link to go to a page with past versions of the 'master' list
 #: templates/map.html:193
 msgid "View Master List archive"
-msgstr "Ekspoze achiv nan lis mastè"
+msgstr "Master List کا ذخیرہ دیکھیں"
 
 #. Label to view a full subject record
 #: templates/hospital_email.html:77 templates/hospital_email.html.py:175
 msgid "View full record"
-msgstr "Gade Tout Dosye"
+msgstr "پورا ریکارڈ دیکھیں"
 
 #. Label for weekly e-mail updates
 #: settings.py:59
 msgid "Weekly"
-msgstr "Chak semèn"
+msgstr "ہفتہ وار"
 
 #. Type of construction: timber jointed together with nails
 #: ../tools/setup.py:202
 msgid "Wood frame"
-msgstr "Wood ankadreman"
+msgstr "لکڑی کا سانچہ"
 
 #. Service provided by a health facility (use Title Case).
 #: ../tools/setup.py:269
 msgid "X-Ray"
-msgstr "Reyon X"
+msgstr "ایکسرے"
 
 #. Form option for a true Boolean value
 #: utils.py:334 edit.py:175 utils_test.py:320
 msgid "Yes"
-msgstr "Wi"
+msgstr "ہاں"
 
 #. Requested permission has been previously granted
 #: request_access.py:50
 #, python-format
 msgid "You already have \"%(action)s\" permission"
-msgstr "Wol ou a bon a %(role)s"
+msgstr "آپ کو پہلے سے ہی \"%(اقدام)اقدامات کی اجازت ہے"
 
 #. Saved message; e-mail subscription has been saved
 #: static/locale.js:55
 #, sh-format
 msgid "You will receive ${FREQUENCY} email updates for this facility. Use the ${START_LINK}Settings${END_LINK} page to change subscription settings."
-msgstr "Ou ap resevwa ${FREQUENCY} dènye imel pou etablisman sa a. Sèvi ak paj la ${START_LINK}Anviwònman${END_LINK} chanje anviwònman abònman."
+msgstr "آپ کو اس سہولت کیلئے ${FREQUENCY} ای میل تازہ کاریاں موصول ہوں گی۔ رکنیت کی ترتیبات بدلنے کیلئے ${START_LINK}ترتیبات${END_LINK} کا صفحہ استعمال کریں۔"
 
 #. Message indicating hospital information has been saved
 #: static/locale.js:146
 msgid "Your edit has been saved"
-msgstr "Nou anrejistre chanjman ou"
+msgstr "آپ کی ترمیم محفوظ ہوگئی ہے"
 
 #. Request for permission is awaiting approval
 #: request_access.py:61 request_access.py:55
 #, python-format
 msgid "Your request for \"%(action)s\" permission is now pending"
-msgstr "Demand ou pou %(role)s la deja enrejistre"
+msgstr "آپ کی درخواست \"%(اقدام)اقدامات کیلئے اب زیر التواء ہے"
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
 #: templates/print.html:81
 msgid "and with availability."
-msgstr "Avek anpil abilite"
+msgstr "اور فراہمی کے ساتھ۔"
 
 #. a user with no identity
 #: main.py:59
 msgid "anonymous"
-msgstr "anonim"
+msgstr "گمنام"
 
 #. Heading for number of available beds at a hospital
 #: templates/hospital_bubble.html:89
 msgid "availability"
-msgstr "Disponibilite"
+msgstr "فراہمی"
 
 #. Heading for number of total beds at a hospital
 #: templates/hospital_bubble.html:93
 msgid "capacity"
-msgstr "Kapasite"
+msgstr "گنجائش"
 
 #. Header for the number of facilities less than 10 miles from a location.
 #: templates/print.html:76
 msgid "no more than 10 miles away"
-msgstr "Pa depase 10 mil"
+msgstr "10 میل سے زیادہ دور نہیں"
 
 #. Very short abbreviation for a phone number, indended to disambiguate from a fax number.  (example: p 555-555-5555)
 #: static/locale.js:133
 #, sh-format
 msgid "p ${PHONE}"
-msgstr "t ${PHONE}"
+msgstr "صفحہ ${PHONE}"
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
 #: templates/hospital_bubble.html:98
 msgid "services"
-msgstr "sèvis"
+msgstr "خدمات"
 
