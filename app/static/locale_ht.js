@@ -44,6 +44,9 @@ locale = function() {
   //i18n: Meaning: administrative division
   messages.DISTRICT = "Distri";
 
+  //i18n: Notifies user how to add latitude and longitude values.
+  messages.EDIT_LATITUDE_LONGITUDE = "Ou kapab ajoute yon latitid ak lonjitd nan reekri f\u00f2m.";
+
   //i18n: Saved message; e-mail subscription has been saved
   messages.EMAIL_SUBSCRIPTION_SAVED = "Ou ap resevwa ${FREQUENCY} d\u00e8nye imel pou etablisman sa a. S\u00e8vi ak paj la ${START_LINK}Anviw\u00f2nman${END_LINK} chanje anviw\u00f2nman ab\u00f2nman.";
 
@@ -99,6 +102,9 @@ locale = function() {
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "Janvye, Fevriye, Mas, Avril, Me, Jen, jiy\u00e8, Out, septanm, Okt\u00f2b, Novanm, Desanm".split(' ');
 
+  //i18n: Notification for a facility with missing location information.
+  messages.NO_LOCATION_ENTERED = "Etablisman sa a pa toujou gen yon kote antre.";
+
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
   messages.OPEN_TOTAL_BEDS = "Kabann disponib/total";
@@ -124,6 +130,9 @@ locale = function() {
 
   //i18n: Label for a control that filters a list of facilities
   messages.SHOW = "Montre";
+
+  //i18n: Message explaining how to add a latitude and longitude to a facility.
+  messages.SIGN_IN_TO_EDIT_LOCATION = "Siyen nan w\u00e8 reekri f\u00f2m epi ajoute yon latitid ak lonjitd";
 
   //i18n: Label to subscribe from a subject
   messages.SUBSCRIBE_TO_UPDATES = "Ab\u00f2nman imel mizajou";

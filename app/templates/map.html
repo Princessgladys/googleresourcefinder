@@ -51,9 +51,11 @@
   <script type="text/javascript" src="static/bubble.js"></script>
   <script type="text/javascript" src="static/edit.js"></script>
   <script type="text/javascript">
+    var is_logged_in = {% if user %} true {% else %} false {% endif %};
     var print = {% if params.print %} true {% else %} false {% endif %};
     var print_url = '{{print_url}}';
     var bubble_url = '{{bubble_url}}';
+    var edit_url_template = '{{edit_url_template}}';
   </script>
   
   <!-- Google Maps API -->
@@ -205,7 +207,7 @@
         that is not yet signed in.
       {% endcomment %}
       
-      inplace_edit_start('{{edit_url|escape}}');
+      inplace_edit_start(make_edit_url('{{params.subject_name|escape}}'));
     {% endif %}
   });
 </script>
