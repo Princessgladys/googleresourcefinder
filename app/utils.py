@@ -110,10 +110,6 @@ def get_message(namespace, name_or_entity, locale=''):
     message = cache.MESSAGES.get((namespace, name))
     return message and getattr(message, locale or get_locale()) or name
 
-def split_key_name(entity):
-    """Splits the key_name of a Subject or SubjectType entity into the
-    subdomain and the subject name, or the subdomain and the type name."""
-    return entity.key().name().split(':', 1)
 
 class Struct:
     def __init__(self, **kwargs):
@@ -337,11 +333,9 @@ def format(value, localize=False):
         return value and format(_('Yes')) or format(_('No'))
     return value_or_dash(value)
 
-def get_last_updated_time(s):
-    subdomain, subject_name = split_key_name(s)
-    st = cache.SUBJECT_TYPES[subdomain][s.type]
-    return max(s.get_observed(name) for name in st.attribute_names if
-               s.get_observed(name))
+def get_last_updated_time(subject):
+    type = cache.SUBJECT_TYPES[subject.subdomain][subject.type]
+    return max(subject.get_observed(name) for name in type.attribute_names)
 
 def decompress(data):
     file = gzip.GzipFile(fileobj=StringIO.StringIO(data))
