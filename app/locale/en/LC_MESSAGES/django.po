@@ -242,7 +242,7 @@ msgid "Date and time"
 msgstr ""
 
 #. Label for change default frequency box
-#: templates/settings.html:95
+#: templates/settings.html:98
 msgid "Default frequency:"
 msgstr ""
 
@@ -279,7 +279,7 @@ msgid "Distance"
 msgstr ""
 
 #. Meaning: administrative division
-#: templates/map.html:143 ../tools/setup.py:131 static/locale.js:51
+#: static/locale.js:51 ../tools/setup.py:131 templates/map.html:147
 msgid "District"
 msgstr ""
 
@@ -304,12 +304,12 @@ msgid "Edited by"
 msgstr ""
 
 #. Settings page title
-#: templates/settings.html:68
+#: templates/settings.html:71
 msgid "Email Subscription Settings"
 msgstr ""
 
 #. Label for e-mail type radio buttons
-#: templates/settings.html:76
+#: templates/settings.html:79
 msgid "Email format:"
 msgstr ""
 
@@ -334,7 +334,7 @@ msgid "Error saving facility information."
 msgstr ""
 
 #. Button to export data to comma-separated-value format.
-#: templates/map.html:184 export.py:144
+#: templates/map.html:188 export.py:144
 msgid "Export CSV"
 msgstr ""
 
@@ -344,7 +344,7 @@ msgid "Facilities with Changes"
 msgstr ""
 
 #. A place that provides a particular service
-#: templates/settings.html:117 templates/print.html:129 static/locale.js:104 templates/map.html:162
+#: templates/map.html:166 templates/print.html:129 templates/settings.html:120 static/locale.js:104
 msgid "Facility"
 msgstr ""
 
@@ -379,7 +379,7 @@ msgid "Field is required."
 msgstr ""
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:117
+#: templates/map.html:121
 msgid "Filters"
 msgstr ""
 
@@ -419,7 +419,7 @@ msgid "Hello"
 msgstr ""
 
 #. Link to go to a help page for the application
-#: templates/base.html:101
+#: templates/base.html:120
 msgid "Help"
 msgstr ""
 
@@ -479,7 +479,7 @@ msgid "Lab"
 msgstr ""
 
 #. Label for a language selector
-#: templates/base.html:66
+#: templates/base.html:85
 msgid "Language:"
 msgstr ""
 
@@ -519,7 +519,7 @@ msgid "Loader:"
 msgstr ""
 
 #. Indicator that the application is loading.
-#: templates/base.html:129 static/locale.js:118
+#: templates/base.html:148 static/locale.js:118
 msgid "Loading..."
 msgstr ""
 
@@ -604,7 +604,7 @@ msgid "New Value"
 msgstr ""
 
 #. Form option for a false Boolean value
-#: edit.py:177 utils.py:332 utils_test.py:321
+#: edit.py:177 utils.py:334 utils_test.py:321
 msgid "No"
 msgstr ""
 
@@ -614,7 +614,7 @@ msgid "No availability information"
 msgstr ""
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:131
+#: templates/settings.html:134
 msgid "No facilities to display."
 msgstr ""
 
@@ -690,7 +690,7 @@ msgid "Phone"
 msgstr ""
 
 #. Label for "plain text" radio button
-#: templates/settings.html:83
+#: templates/settings.html:86
 msgid "Plain text"
 msgstr ""
 
@@ -710,7 +710,7 @@ msgid "Previous value"
 msgstr ""
 
 #. Link to print the current view of the application
-#: templates/base.html:89
+#: templates/base.html:108
 msgid "Print"
 msgstr ""
 
@@ -721,7 +721,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr ""
 
 #. Link to privacy policy for the application
-#: templates/base.html:111
+#: templates/base.html:130
 msgid "Privacy"
 msgstr ""
 
@@ -763,7 +763,7 @@ msgid "Request for becoming %(action)s was denied."
 msgstr ""
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35 templates/hospital_email.html:234
+#: templates/subdomain_menu.html.py:35
 msgid "Resource Finder"
 msgstr ""
 
@@ -778,7 +778,7 @@ msgid "Save"
 msgstr ""
 
 #. Notice that a change has been saved.
-#: templates/settings.html:58
+#: templates/settings.html:61
 msgid "Saved."
 msgstr ""
 
@@ -798,12 +798,12 @@ msgid "Services"
 msgstr ""
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:164
+#: templates/settings.html:167
 msgid "Set checked to default"
 msgstr ""
 
 #. Link to go to the settings page of the application
-#: templates/base.html:95
+#: templates/base.html:114
 msgid "Settings"
 msgstr ""
 
@@ -838,12 +838,12 @@ msgid "Subscribe to email updates"
 msgstr ""
 
 #. Header for a list of provisions
-#: templates/map.html:97
+#: templates/map.html:101
 msgid "Supplies"
 msgstr ""
 
 #. Link to terms of service for the application
-#: templates/base.html:106
+#: templates/base.html:125
 msgid "Terms of Service"
 msgstr ""
 
@@ -878,7 +878,7 @@ msgid "URL:"
 msgstr ""
 
 #. Error message
-#: utils.py:141
+#: utils.py:142
 msgid "Unauthorized user."
 msgstr ""
 
@@ -903,7 +903,7 @@ msgid "Unsubscribe"
 msgstr ""
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:171
+#: templates/settings.html:174
 msgid "Unsubscribe from checked"
 msgstr ""
 
@@ -938,7 +938,7 @@ msgid "Vascular Surgery"
 msgstr ""
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:189
+#: templates/map.html:193
 msgid "View Master List archive"
 msgstr ""
 
@@ -963,7 +963,7 @@ msgid "X-Ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: edit.py:175 utils.py:332 utils_test.py:320
+#: utils.py:334 edit.py:175 utils_test.py:320
 msgid "Yes"
 msgstr ""
 
