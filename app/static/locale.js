@@ -51,6 +51,10 @@ locale = function() {
   messages.DISTRICT =
       'District';
 
+  //i18n: Notifies user how to add latitude and longitude values.
+  messages.EDIT_LATITUDE_LONGITUDE =
+      'You can add a latitude and longitude in the edit form.';
+
   //i18n: Saved message; e-mail subscription has been saved
   messages.EMAIL_SUBSCRIPTION_SAVED =
       'You will receive ${FREQUENCY} email updates for this facility. Use the ${START_LINK}Settings${END_LINK} page to change subscription settings.';
@@ -123,6 +127,10 @@ locale = function() {
   messages.MONTH_ABBRS =
       'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
+  //i18n: Notification for a facility with missing location information.
+  messages.NO_LOCATION_ENTERED =
+      'This facility does not yet have a location entered.';
+
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
   messages.OPEN_TOTAL_BEDS =
@@ -157,6 +165,10 @@ locale = function() {
   //i18n: Label for a control that filters a list of facilities
   messages.SHOW =
       'Show';
+
+  //i18n: Message explaining how to add a latitude and longitude to a facility.
+  messages.SIGN_IN_TO_EDIT_LOCATION =
+      '${START_LINK}Sign in${END_LINK} to view the edit form and add a latitude and longitude.';
 
   //i18n: Label to subscribe from a subject
   messages.SUBSCRIBE_TO_UPDATES =
