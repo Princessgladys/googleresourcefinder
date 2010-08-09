@@ -70,7 +70,7 @@ msgstr "Precisión"
 #: templates/edit.html:53
 #, python-format
 msgid "Add a new %(type_name)s"
-msgstr ""
+msgstr "Añadir un nuevo %(type_name)s"
 
 #. Header for a street address
 #: templates/print.html:138 ../tools/setup.py:141 templates/hospital_bubble.html:152
@@ -248,7 +248,7 @@ msgid "Date and time"
 msgstr "Fecha y hora"
 
 #. Label for change default frequency box
-#: templates/settings.html:95
+#: templates/settings.html:98
 msgid "Default frequency:"
 msgstr "Predeterminada de Frecuencias:"
 
@@ -285,7 +285,7 @@ msgid "Distance"
 msgstr "Distancia"
 
 #. Meaning: administrative division
-#: templates/map.html:143 ../tools/setup.py:137 static/locale.js:51
+#: static/locale.js:51 templates/map.html:147 ../tools/setup.py:137
 msgid "District"
 msgstr "Distrito"
 
@@ -298,7 +298,7 @@ msgstr "Correo electrónico"
 #: templates/edit.html:58
 #, python-format
 msgid "Edit %(title)s"
-msgstr ""
+msgstr "Modificar %(title)s"
 
 #. Label for link to edit a subject record
 #: templates/hospital_email.html.py:182
@@ -311,12 +311,12 @@ msgid "Edited by"
 msgstr "Modificado por"
 
 #. Settings page title
-#: templates/settings.html:68
+#: templates/settings.html:71
 msgid "Email Subscription Settings"
 msgstr "Configuración de Correo Electrónico de Suscripción"
 
 #. Label for e-mail type radio buttons
-#: templates/settings.html:76
+#: templates/settings.html:79
 msgid "Email format:"
 msgstr "Correo electrónico"
 
@@ -341,7 +341,7 @@ msgid "Error saving facility information."
 msgstr "Error al guardar institución de información."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:142 templates/map.html:184
+#: export.py:142 templates/map.html:188
 msgid "Export CSV"
 msgstr "Exportar CSV"
 
@@ -351,7 +351,7 @@ msgid "Facilities with Changes"
 msgstr "Instalaciones con los Cambios"
 
 #. A place that provides a particular service
-#: templates/settings.html:117 templates/print.html:129 static/locale.js:104 templates/map.html:162
+#: templates/map.html:166 templates/print.html:129 templates/settings.html:120 static/locale.js:104
 msgid "Facility"
 msgstr "Institución"
 
@@ -386,7 +386,7 @@ msgid "Field is required."
 msgstr "Este campo es requerido."
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:117
+#: templates/map.html:121
 msgid "Filters"
 msgstr "Filtros"
 
@@ -426,7 +426,7 @@ msgid "Hello"
 msgstr "Ayuda"
 
 #. Link to go to a help page for the application
-#: templates/base.html:101
+#: templates/base.html:120
 msgid "Help"
 msgstr "Ayuda"
 
@@ -491,7 +491,7 @@ msgid "Lab"
 msgstr "Laboratorio"
 
 #. Label for a language selector
-#: templates/base.html:66
+#: templates/base.html:85
 msgid "Language:"
 msgstr "Idioma:"
 
@@ -531,7 +531,7 @@ msgid "Loader:"
 msgstr "Cargador:"
 
 #. Indicator that the application is loading.
-#: templates/base.html:129 static/locale.js:118
+#: templates/base.html:148 static/locale.js:118
 msgid "Loading..."
 msgstr "Cargando..."
 
@@ -616,7 +616,7 @@ msgid "New Value"
 msgstr "Nuevo valor"
 
 #. Form option for a false Boolean value
-#: edit.py:177 utils.py:332 utils_test.py:321
+#: edit.py:177 utils.py:334 utils_test.py:321
 msgid "No"
 msgstr "No"
 
@@ -626,7 +626,7 @@ msgid "No availability information"
 msgstr "No hay información de disponibilidad"
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:131
+#: templates/settings.html:134
 msgid "No facilities to display."
 msgstr "No hay instalaciones para mostrar."
 
@@ -702,7 +702,7 @@ msgid "Phone"
 msgstr "Teléfono"
 
 #. Label for "plain text" radio button
-#: templates/settings.html:83
+#: templates/settings.html:86
 msgid "Plain text"
 msgstr "Texto Sin Formato"
 
@@ -722,7 +722,7 @@ msgid "Previous value"
 msgstr "Valor anterior"
 
 #. Link to print the current view of the application
-#: templates/base.html:89
+#: templates/base.html:108
 msgid "Print"
 msgstr "Imprimir"
 
@@ -733,7 +733,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Imprime una lista de hospitales por orden de distancia desde ${FACILITY_NAME}"
 
 #. Link to privacy policy for the application
-#: templates/base.html:111
+#: templates/base.html:130
 msgid "Privacy"
 msgstr "Privacidad"
 
@@ -790,7 +790,7 @@ msgid "Save"
 msgstr "Guardar"
 
 #. Notice that a change has been saved.
-#: templates/settings.html:58
+#: templates/settings.html:61
 msgid "Saved."
 msgstr "Guardar"
 
@@ -810,12 +810,12 @@ msgid "Services"
 msgstr "Servicios"
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:164
+#: templates/settings.html:167
 msgid "Set checked to default"
 msgstr "Seleccionados para Establecer por Defecto"
 
 #. Link to go to the settings page of the application
-#: templates/base.html:95
+#: templates/base.html:114
 msgid "Settings"
 msgstr "Ajustes"
 
@@ -850,12 +850,12 @@ msgid "Subscribe to email updates"
 msgstr "Suscribirse a las Actualizaciones por Correo Electrónico"
 
 #. Header for a list of provisions
-#: templates/map.html:97
+#: templates/map.html:101
 msgid "Supplies"
 msgstr "Suministros"
 
 #. Link to terms of service for the application
-#: templates/base.html:106
+#: templates/base.html:125
 msgid "Terms of Service"
 msgstr "Condiciones del servicio"
 
@@ -890,7 +890,7 @@ msgid "URL:"
 msgstr "URL:"
 
 #. Error message
-#: utils.py:141
+#: utils.py:142
 msgid "Unauthorized user."
 msgstr "Sin autorización del usuario"
 
@@ -915,7 +915,7 @@ msgid "Unsubscribe"
 msgstr "Darse de Baja de Comprobarse"
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:171
+#: templates/settings.html:174
 msgid "Unsubscribe from checked"
 msgstr "Darse de Baja de Comprobarse"
 
@@ -950,7 +950,7 @@ msgid "Vascular Surgery"
 msgstr "Cirugía Vascular"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:189
+#: templates/map.html:193
 msgid "View Master List archive"
 msgstr "Ver archivo de la lista maestra"
 
@@ -975,7 +975,7 @@ msgid "X-Ray"
 msgstr "Rayos X"
 
 #. Form option for a true Boolean value
-#: edit.py:175 utils.py:332 utils_test.py:320
+#: utils.py:334 edit.py:175 utils_test.py:320
 msgid "Yes"
 msgstr "Sí"
 
