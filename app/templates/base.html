@@ -58,12 +58,12 @@
         packages: "keyboard"
     });
 
-    function onLoad() {
+    function kbd_on_load() {
       var kbd = new google.elements.keyboard.Keyboard(
         ["{{params.lang}}"]);
     }
 
-    google.setOnLoadCallback(onLoad);
+    google.setOnLoadCallback(kbd_on_load);
   </script>
   {% endif %}
   {% endblock rf-namespace %}
