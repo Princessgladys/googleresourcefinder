@@ -20,6 +20,9 @@
 {% block stylesheets %}
   <link rel="stylesheet" href="static/map.css">
   <link rel="stylesheet" href="static/settings.css">
+  {% if params.lang_bidi %}
+    <link rel="stylesheet" href="static/map-rtl.css">
+  {% endif %}
 {% endblock stylesheets %}
 
 {% comment %}
