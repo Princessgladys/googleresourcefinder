@@ -397,6 +397,41 @@ class EditTest(SeleniumTestCase):
         self.wait_until(self.is_visible, 'edit-data')
         self.assert_element('//input[@name="account_nickname"]')
 
+    def test_inplace_edit_no_location_facility(self):
+        self.delete_subject('haiti', 'example.org/123')
+        self.put_subject('haiti', 'example.org/123', title='title_foo')
+
+        self.open_path('/')
+        self.click_and_wait('link=Sign in')
+        self.login()
+
+        # Facility list click for a no-facility location opens the edit form
+        # directly
+        self.click('id=subject-1')
+        self.wait_until(self.is_visible, 'edit-data')
+        self.assert_element('//input[@name="account_nickname"]')
+
+    def test_no_location_facility_edit_signed_out(self):
+        """In-place edit starting from signed out with a no location subject:"""
+        self.delete_subject('haiti', 'example.org/123')
+        self.put_subject('haiti', 'example.org/123', title='title_foo')
+
+        self.open_path('/')
+
+        # Try to open a bubble, look for the sign in link
+        self.click('id=subject-1')
+        self.wait_for_element('id=status-sign-in')
+
+        # Click Sign in
+        self.click_and_wait('id=status-sign-in')
+
+        # Login in at the login screen
+        self.login()
+
+        # Wait for the edit form to appear
+        self.wait_until(self.is_visible, 'edit-data')
+        self.assert_element('//input[@name="account_nickname"]')
+
     def edit(self, login=False):
         """Goes to edit form for subject 1"""
         if login:
