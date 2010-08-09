@@ -481,9 +481,9 @@ class Edit(utils.Handler):
         subject_type_title = get_message('subject_type', self.subject_type)
         self.render('templates/edit.html',
             token=token, params=self.params, account=self.account,
-            # TODO(kpy): Without encode(), {% blocktrans %} fails.  Why?
-            subject_title=subject_title and subject_title.encode('utf-8'),
-            subject_type_title=subject_type_title.encode('utf-8'),
+            # TODO(kpy): Without to_utf8(), {% blocktrans %} fails.  Why?
+            subject_title=utils.to_utf8(subject_title),
+            subject_type_title=utils.to_utf8(subject_type_title),
             fields=fields, readonly_fields=readonly_fields,
             suggested_nickname=get_suggested_nickname(self.user),
             edit_url=self.get_url('/edit'),

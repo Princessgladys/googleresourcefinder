@@ -45,18 +45,17 @@ tr.field.text { vertical-align: top; }
 </head>
 <body>
 {% endif %}
-{% comment %}
-#i18n: Title for page to edit data about a subject
-{% endcomment %}
 <h1>
   {% if params.add_new %}
-    {% blocktrans with subject_type_title|escape as type_name %}
-      Add a new {{type_name}}
-    {% endblocktrans %}
+    {% comment %}
+    #i18n: Title for the form to add a new record
+    {% endcomment %}
+    {% blocktrans with subject_type_title|escape as type_name %}Add a new {{type_name}}{% endblocktrans %}
   {% else %}
-    {% blocktrans with subject_title|escape as title %}
-      Edit {{title}}
-    {% endblocktrans %}
+    {% comment %}
+    #i18n: Title for the form to edit an existing record
+    {% endcomment %}
+    {% blocktrans with subject_title|escape as title %}Edit {{title}}{% endblocktrans %}
   {% endif %}
 </h1>
 

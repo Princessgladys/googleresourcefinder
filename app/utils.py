@@ -19,7 +19,6 @@ from google.appengine.ext import db
 from google.appengine.ext import webapp
 import google.appengine.ext.webapp.template
 import google.appengine.ext.webapp.util
-import django
 
 import StringIO
 import access
