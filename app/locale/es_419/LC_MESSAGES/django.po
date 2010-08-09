@@ -66,6 +66,12 @@ msgstr "Nota: Esta institución se ha caracterizado cerrado."
 msgid "Accuracy"
 msgstr "Precisión"
 
+#. Title for the form to add a new record
+#: templates/edit.html:53
+#, python-format
+msgid "Add a new %(type_name)s"
+msgstr ""
+
 #. Header for a street address
 #: templates/print.html:138 templates/hospital_bubble.html:152 ../tools/setup.py:135
 msgid "Address"
@@ -290,8 +296,8 @@ msgstr "Correo electrónico"
 
 #. Title for page to edit data about a subject
 #: templates/edit.html:55
-msgid "Edit"
-msgstr "Modificar"
+msgid "Edit %(title)s"
+msgstr "Modificar %(title)s"
 
 #. Label for link to edit a subject record
 #: templates/hospital_email.html.py:182
@@ -466,6 +472,11 @@ msgstr "Nombre de la institución no válido o no especificado"
 #. Error message for request missing subject name.
 #: bubble.py:140 edit.py:430
 msgid "Invalid or missing subject name."
+msgstr "Nombre de la institución no válido o no especificado"
+
+#. Error message for a missing subject type.
+#: edit.py:441
+msgid "Invalid or missing subject type."
 msgstr "Nombre de la institución no válido o no especificado"
 
 #. Abbreviated months of the year.

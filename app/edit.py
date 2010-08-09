@@ -260,15 +260,17 @@ ATTRIBUTE_TYPES = {
 }
 
 def make_input(subject, attribute):
-    """Generates the HTML for an input field for the given attribute."""
+    """Generates the HTML for an input field for the given attribute.
+    'subject' can be None to set up an empty form for a new subject."""
     name = attribute.key().name()
     return ATTRIBUTE_TYPES[attribute.type].make_input(
-        name, subject.get_value(name), attribute)
+        name, subject and subject.get_value(name), attribute)
 
 def render_attribute_as_json(subject, attribute):
-    """Returns the value of this attribute as a JSON string"""
+    """Returns the value of this attribute as a JSON string.
+    'subject' can be None for a not-yet-created subject."""
     name = attribute.key().name()
-    return to_json(subject.get_value(name))
+    return to_json(subject and subject.get_value(name))
 
 def apply_change(subject, minimal_subject, report, subject_type,
                  request, attribute, change_metadata):
@@ -317,12 +319,12 @@ def get_source_url(request):
     parsed_url = urlparse.urlparse(source_url)
     return len(parsed_url) > 1 and '://'.join(parsed_url[:2]) or None
 
-def update(key, subject_type, request, user, account, attributes, subdomain,
-           transactional=True):
-    """Given a subject, subject type, and request information from the
-    edit page, this performs required updates to the subject's stored
-    information if changes have been made. Also triggers a taskqueue event to
-    run the mail alerts system for any new changes.
+def update(subject_name, subject_type, request, user, account, attributes,
+           subdomain, transactional=True):
+    """Given a subject name, subject type, and request information from the
+    edit page, this updates or creates the subject as requested (i.e. adds a
+    Report and updates or creates the Subject and MinimalSubject with the
+    latest values).  Also queues a task to send out any relevant mail alerts.
 
     Args:
         key: key_name of the potentially changed subject
@@ -335,9 +337,17 @@ def update(key, subject_type, request, user, account, attributes, subdomain,
         transactional: (optional) True if this function is being run in
             transaction
     """
-    subject = db.get(key)
-    minimal_subject = model.MinimalSubject.get_by_subject(subject)
+    subject = model.Subject.get(subdomain, subject_name)
+    if subject:
+        minimal_subject = model.MinimalSubject.get_by_subject(subject)
+    else:
+        # Create a new subject.
+        subject = model.Subject.create(
+            subdomain, subject_type, subject_name, user)
+        minimal_subject = model.MinimalSubject.create(subject)
     utcnow = datetime.datetime.utcnow().replace(microsecond=0)
+
+    # Add the new Report.
     report = model.Report(
         subject,
         arrived=utcnow,
@@ -351,6 +361,7 @@ def update(key, subject_type, request, user, account, attributes, subdomain,
     changed_attribute_information = []
     unchanged_attribute_values = {}
 
+    # Validate the changes and package them up for use by mail_alerts.py.
     for name in subject_type.attribute_names:
         attribute = attributes[name]
         # To change an attribute, it has to have been marked editable
@@ -368,8 +379,7 @@ def update(key, subject_type, request, user, account, attributes, subdomain,
                     #i18n: Error message for lacking edit permissions
                     '%(user)s does not have permission to edit %(a)s')
                     % {'user': user.email(),
-                       'a': get_message('attribute_name',
-                                        attribute.key().name())})
+                       'a': get_message('attribute_name', attribute)})
             has_changes = True
             change_info = {'attribute': name,
                            'old_value': subject.get_value(name)}
@@ -416,20 +426,29 @@ class Edit(utils.Handler):
     def init(self):
         """Checks for logged-in user and sets up self.subject
         and self.subject_type based on the query params."""
-        # Need 'edit' permission to see or submit the edit form.
-        self.require_action_permitted('edit')
-
         # Regardless of permissions, the user has to be logged in so we
         # can record the author information with the edit.
         self.require_logged_in_user()
 
-        self.subject = model.Subject.get(
-            self.subdomain, self.params.subject_name)
-        if not self.subject:
-            #i18n: Error message for request missing subject name.
-            raise ErrorMessage(404, _('Invalid or missing subject name.'))
-        self.subject_type = \
-            cache.SUBJECT_TYPES[self.subdomain][self.subject.type]
+        if self.params.add_new:
+            # Need 'add' permission to see or submit the edit form.
+            self.require_action_permitted('add')
+            self.subject = None
+            self.subject_type = cache.SUBJECT_TYPES[self.subdomain].get(
+                self.params.subject_type)
+            if not self.subject_type:
+                #i18n: Error message for a missing subject type.
+                raise ErrorMessage(400, _('Invalid or missing subject type.'))
+        else:
+            # Need 'edit' permission to see or submit the edit form.
+            self.require_action_permitted('edit')
+            self.subject = model.Subject.get(
+                self.subdomain, self.params.subject_name)
+            if not self.subject:
+                #i18n: Error message for request missing subject name.
+                raise ErrorMessage(404, _('Invalid or missing subject name.'))
+            self.subject_type = \
+                cache.SUBJECT_TYPES[self.subdomain][self.subject.type]
 
     def get(self):
         self.init()
@@ -440,9 +459,7 @@ class Edit(utils.Handler):
             if name in HIDDEN_ATTRIBUTE_NAMES:
                 continue
             attribute = cache.ATTRIBUTES[name]
-            comment = self.subject.get_comment(attribute.key().name())
-            if not comment:
-                comment = ''
+            comment = self.subject and self.subject.get_comment(name) or ''
             if can_edit(self.account, self.subdomain, attribute):
                 fields.append({
                     'name': name,
@@ -455,17 +472,21 @@ class Edit(utils.Handler):
             else:
                 readonly_fields.append({
                     'title': get_message('attribute_name', name),
-                    'value': self.subject.get_value(name)
+                    'value': self.subject and self.subject.get_value(name)
                 })
 
         token = sign(XSRF_KEY_NAME, self.user.user_id(), DAY_SECS)
 
+        subject_title = self.subject and self.subject.get_value('title')
+        subject_type_title = get_message('subject_type', self.subject_type)
         self.render('templates/edit.html',
-            token=token, subject_title=self.subject.get_value('title'),
+            token=token, params=self.params, account=self.account,
+            # TODO(kpy): Without to_utf8(), {% blocktrans %} fails.  Why?
+            subject_title=utils.to_utf8(subject_title),
+            subject_type_title=utils.to_utf8(subject_type_title),
             fields=fields, readonly_fields=readonly_fields,
-            account=self.account,
             suggested_nickname=get_suggested_nickname(self.user),
-            params=self.params, edit_url=self.get_url('/edit'),
+            edit_url=self.get_url('/edit'),
             logout_url=users.create_logout_url('/'),
             subdomain=self.subdomain)
 
@@ -505,7 +526,12 @@ class Edit(utils.Handler):
         # being modified, so fetch the attributes and default account here
         attributes = cache.ATTRIBUTES.load()
         cache.DEFAULT_ACCOUNT.load()
-        db.run_in_transaction(update, self.subject.key(), self.subject_type,
+        if self.subject:
+            subject_name = model.get_name(self.subject)
+        else:
+            subject_name = model.Subject.generate_name(
+                self.request.headers['Host'], self.subject_type)
+        db.run_in_transaction(update, subject_name, self.subject_type,
                               self.request, self.user, self.account,
                               attributes, self.subdomain)
         if self.params.embed:

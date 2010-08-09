@@ -66,6 +66,12 @@ msgstr ""
 msgid "Accuracy"
 msgstr ""
 
+#. Title for the form to add a new record
+#: templates/edit.html:53
+#, python-format
+msgid "Add a new %(type_name)s"
+msgstr ""
+
 #. Header for a street address
 #: templates/print.html:138 templates/hospital_bubble.html:152 ../tools/setup.py:135
 msgid "Address"
@@ -288,9 +294,10 @@ msgstr ""
 msgid "E-mail"
 msgstr ""
 
-#. Title for page to edit data about a subject
-#: templates/edit.html:55
-msgid "Edit"
+#. Title for the form to edit an existing record
+#: templates/edit.html:58
+#, python-format
+msgid "Edit %(title)s"
 msgstr ""
 
 #. Label for link to edit a subject record
@@ -466,6 +473,11 @@ msgstr ""
 #. Error message for request missing subject name.
 #: bubble.py:140 edit.py:430
 msgid "Invalid or missing subject name."
+msgstr ""
+
+#. Error message for a missing subject type.
+#: edit.py:441
+msgid "Invalid or missing subject type."
 msgstr ""
 
 #. Abbreviated months of the year.

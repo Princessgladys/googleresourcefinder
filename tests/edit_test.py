@@ -1,4 +1,4 @@
-from model import Account, db
+from model import Account, Subject, db
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import scrape
@@ -39,6 +39,9 @@ STR_FIELDS = [
     'comments',
 ]
 
+EDIT_PATH = '/edit?subdomain=haiti&subject_name=example.org/123'
+ADD_PATH = '/edit?subdomain=haiti&add_new=yes&subject_type=hospital'
+
 
 class EditTest(SeleniumTestCase):
     def setUp(self):
@@ -46,12 +49,13 @@ class EditTest(SeleniumTestCase):
         self.put_subject(
             'haiti', 'example.org/123',
             title='title_foo', location=db.GeoPt(51.5, 0))
-        self.put_account(actions=['*:view', '*:edit'])  # allow edits
+        self.put_account(actions=['*:view', '*:edit', '*:add'])  # allow edits
         self.set_default_permissions(actions=['*:view']) # allow view by default
         self.s = scrape.Session()
 
     def tearDown(self):
-        self.delete_subject('haiti', 'example.org/123')
+        for subject in Subject.all_in_subdomain('haiti'):
+            self.delete_subject('haiti', subject.name)
         self.delete_account()
         self.delete_default_account()
         SeleniumTestCase.tearDown(self)
@@ -72,8 +76,8 @@ class EditTest(SeleniumTestCase):
             self.click('//input[@name="save"]')
             self.wait_for_load()
             # Check that we got back to the main map
-            assert (self.get_location() == self.config.base_url
-                    + '/?subdomain=haiti')
+            assert (self.get_location() ==
+                    self.config.base_url + '/?subdomain=haiti')
 
         def edit(self):
             self.open_edit_page()
@@ -92,11 +96,60 @@ class EditTest(SeleniumTestCase):
         # assert feed.first('atom:feed')
         # assert feed.first('atom:feed').first('atom:entry')
 
+    def test_edit_permissions(self):
+        """Ensure that the edit page can't be used without edit permission."""
+        self.login('/edit')
+
+        self.delete_account()
+        self.put_account(actions=['*:view'])  # view only
+        assert self.get_status_code(EDIT_PATH) == 403
+        assert self.get_status_code(ADD_PATH) == 403
+
+        self.delete_account()
+        self.put_account(actions=['*:edit'])  # edit but not add
+        assert self.get_status_code(EDIT_PATH) == 200
+        assert self.get_status_code(ADD_PATH) == 403
+
+        self.delete_account()
+        self.put_account(actions=['*:add'])  # add but not edit
+        assert self.get_status_code(EDIT_PATH) == 403
+        assert self.get_status_code(ADD_PATH) == 200
+
+        self.delete_account()
+        self.put_account(actions=['*:edit', '*:add'])  # both add and edit
+        assert self.get_status_code(EDIT_PATH) == 200
+        assert self.get_status_code(ADD_PATH) == 200
+
+    def test_add_page(self):
+        """Confirms that a new subject can be created on the stand-alone
+        edit page, and its values appear pre-filled when the form is
+        subsequently loaded to edit the newly created subject."""
+        names_before = [s.name for s in Subject.all_in_subdomain('haiti')]
+
+        def login(self):
+            self.login(ADD_PATH)
+            self.assert_text(Regex('Add a new.*'), '//h1')
+
+        def save(self):
+            self.click('//input[@name="save"]')
+            self.wait_for_load()
+
+        def edit(self):
+            # Look for the newly created subject.
+            names_after = [s.name for s in Subject.all_in_subdomain('haiti')]
+            extra_names = list(set(names_after) - set(names_before))
+            assert len(extra_names) == 1
+
+            # Open it in the edit page to confirm that its values are set.
+            self.open_path(
+                '/edit?subdomain=haiti&subject_name=%s' % extra_names[0])
+
+        self.run_edit(login, save, edit)
+
     def test_inplace_edit(self):
         """In-place edit: Confirms that all the fields in the in-place edit
         form save the entered values, and these values appear pre-filled when
         the form is loaded."""
-
         def login(self):
             self.edit(login=True)
 
@@ -368,11 +421,11 @@ class EditTest(SeleniumTestCase):
         self.wait_for_element('link=Change details')
 
     def open_edit_page(self):
-        self.open_path('/edit?subdomain=haiti&subject_name=example.org/123')
+        self.open_path(EDIT_PATH)
         self.assert_text(Regex('Edit.*'), '//h1')
 
     def login_to_edit_page(self):
-        self.login('/edit?subdomain=haiti&subject_name=example.org/123')
+        self.login(EDIT_PATH)
         self.assert_text(Regex('Edit.*'), '//h1')
 
     def fill_fields(self, text_fields, checkbox_fields, select_fields):

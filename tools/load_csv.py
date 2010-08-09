@@ -282,13 +282,10 @@ def load_csv(
             continue
         observed = observed or default_observed
 
-        subject = Subject(key_name='%s:%s' % (subdomain, subject_name),
-                          type=subject_type_name, author=author)
+        subject = Subject.create(subdomain, subject_type, subject_name, author)
         subjects.append(subject)
         Subject.author.validate(author)
-
-        minimal_subject = MinimalSubject(
-            subject, key_name=subject.key().name(), type=subject_type_name)
+        minimal_subject = MinimalSubject.create(subject)
         minimal_subjects.append(minimal_subject)
 
         # Create a report for this row. ValueInfos that have a different

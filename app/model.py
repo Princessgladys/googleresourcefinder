@@ -63,12 +63,49 @@ def value_or_none(value):
         return value
     return None
 
-class Subject(db.Expando):
+def get_name(name_or_entity):
+    """If given an entity, returns its name (without subdomain); if given a
+    string, returns the string itself."""
+    if isinstance(name_or_entity, (Subject, SubjectType)):
+        return name_or_entity.name
+    elif isinstance(name_or_entity, db.Model):
+        return name_or_entity.key().name()
+    else:
+        return name_or_entity
+
+
+class SubdomainMixin:
+    """A mix-in class providing common methods for entities whose key names
+    begin with a subdomain and a colon."""
+    @classmethod
+    def get(cls, subdomain, name):
+        """Gets an entity by its subdomain and name.  This method overrides
+        the default get() method, which takes a db.Key."""
+        return cls.get_by_key_name(subdomain + ':' + name)
+
+    @classmethod
+    def all_in_subdomain(cls, subdomain):
+        """Gets a query for all entities with the given subdomain."""
+        root_kind = getattr(cls, 'ROOT_KIND', None)
+        return filter_by_prefix(cls.all(), subdomain + ':', root_kind)
+
+    def get_subdomain(self):
+        """Gets the entity's subdomain."""
+        return self.key().name().split(':', 1)[0]
+    subdomain = property(get_subdomain)
+
+    def get_name(self):
+        """Gets the entity's name (without the subdomain)."""
+        return self.key().name().split(':', 1)[1]
+    name = property(get_name)
+
+
+class Subject(SubdomainMixin, db.Expando):
     """A thing whose attributes are tracked by this application.  Top-level
-    entity, has no parent.  Key name: subdomain + ':' + subject name.  A
-    subject name is a globally unique ID.  In the 'haiti' subdomain, Subjects
-    are health facilities with a government or internationally established
-    health facility ID."""
+    entity, has no parent.  Key name: subdomain + ':' + subject name.
+    A subject name is a globally unique ID that starts with a domain name and
+    a slash.  In the 'haiti' subdomain, Subjects are health facilities with a
+    government or internationally established health facility ID."""
     timestamp = db.DateTimeProperty(auto_now_add=True)  # creation time
     type = db.StringProperty(required=True)  # key_name of a SubjectType,
                                              # without the subdomain prefix
@@ -91,14 +128,17 @@ class Subject(db.Expando):
     #    never removed.  (Hence either all are present or none are present.)
 
     @staticmethod
-    def get(subdomain, subject_name):
-        """Gets a Subject entity by its subdomain and unique name."""
-        return Subject.get_by_key_name(subdomain + ':' + subject_name)
+    def create(subdomain, subject_type_or_type_name, subject_name, author):
+        """Creates a Subject with a given subdomain, type, name, and author."""
+        return Subject(key_name='%s:%s' % (subdomain, subject_name),
+                       type=get_name(subject_type_or_type_name), author=author)
 
     @staticmethod
-    def all_in_subdomain(subdomain):
-        """Gets a query for all Subject entities with the given subdomain."""
-        return filter_by_prefix(Subject.all(), subdomain + ':')
+    def generate_name(host, subject_type_or_type_name):
+        """Makes a new unique subject_name for an original subject (originally
+        created in this repository, not cloned from an external repository)."""
+        id = UniqueId.create_id()
+        return '%s/%s.%d' % (host, get_name(subject_type_or_type_name), id)
 
     @staticmethod
     def get_stored_name(attribute_name):
@@ -151,7 +191,8 @@ class Subject(db.Expando):
                 value_or_none(author_affiliation))
         setattr(self, '%s__comment' % name, value_or_none(comment))
 
-class MinimalSubject(db.Expando):
+
+class MinimalSubject(SubdomainMixin, db.Expando):
     """Minimal version of Subject that loads fast from the datastore and
     contains just the information needed to populate the initial list and map.
     Parent: Subject.  Key name: same as its parent Subject.  Wouldn't be
@@ -162,16 +203,17 @@ class MinimalSubject(db.Expando):
     # important attributes of Subject (named by Attribute's key_name).
     # An attribute named foo will be stored as 'foo__' to match Subject.
 
+    ROOT_KIND = 'Subject'  # filter_by_prefix uses this to filter keys properly
+
+    @staticmethod
+    def create(subject):
+        return MinimalSubject(
+            subject, key_name=subject.key().name(), type=subject.type)
+
     @staticmethod
     def get_by_subject(subject):
         """Gets the MinimalSubject entity for the given Subject."""
         return MinimalSubject.all().ancestor(subject).get()
-
-    @staticmethod
-    def all_in_subdomain(subdomain):
-        """Gets a query for all MinimalSubjects with the given subdomain."""
-        return filter_by_prefix(
-            MinimalSubject.all(), subdomain + ':', 'Subject')
 
     @staticmethod
     def get_stored_name(attribute_name):
@@ -191,7 +233,19 @@ class MinimalSubject(db.Expando):
         """Sets the value for the Attribute with the given key_name."""
         setattr(self, '%s__' % name, value_or_none(value))
 
-class SubjectType(db.Model):
+
+class UniqueId(db.Model):
+    """This entity is used just to generate unique numeric IDs."""
+    @staticmethod
+    def create_id():
+        """Gets a numeric ID that is guaranteed to be different from any ID
+        previously returned by this static method."""
+        unique_id = UniqueId()
+        unique_id.put()
+        return unique_id.key().id()
+
+
+class SubjectType(SubdomainMixin, db.Model):
     """A type of Subject, e.g. hospital, warehouse, charity, camp.  Top-level
     entity, has no parent.  Key name: subdomain + ':' + type name.  A type name
     is an identifier used as the value of Subject.type."""
@@ -201,14 +255,8 @@ class SubjectType(db.Model):
         # Attribute entities whose values should be copied into MinimalSubject
 
     @staticmethod
-    def get(subdomain, subject_type_name):
-        """Gets a SubjectType entity by its subdomain and name."""
-        return SubjectType.get_by_key_name(subdomain + ':' + subject_type_name)
-
-    @staticmethod
-    def all_in_subdomain(subdomain):
-        """Gets a query for all SubjectTypes with the given subdomain."""
-        return filter_by_prefix(SubjectType.all(), subdomain + ':')
+    def create(subdomain, subject_type_name):
+        return SubjectType(key_name=subdomain + ':' + subject_type_name)
 
 
 class Attribute(db.Model):
