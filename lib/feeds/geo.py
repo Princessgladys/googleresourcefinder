@@ -35,3 +35,28 @@ def distance(start, finish):
     start_rad = (start['lat']*pi/180, start['lon']*pi/180)
     finish_rad = (finish['lat']*pi/180, finish['lon']*pi/180)
     return central_angle(start_rad, finish_rad)*EARTH_RADIUS
+
+def point_inside_polygon(point, poly):
+    """Returns true if the given point is inside the given polygon.
+    point is given as an {'lat':y, 'lon':x} object in degrees
+    poly is given as a list of (longitude, latitude) tuples.
+
+    TODO(shakusa): poly should probably be expressed in a less-confusing way"""
+    lat = point['lat']
+    lon = point['lon']
+    n = len(poly)
+    inside = False
+
+    p1_lon, p1_lat = poly[0]
+    for i in range(n+1):
+        p2_lon, p2_lat = poly[i % n]
+        if lat > min(p1_lat, p2_lat):
+            if lat <= max(p1_lat, p2_lat):
+                if lon <= max(p1_lon, p2_lon):
+                    if p1_lat != p2_lat:
+                        lon_inters = (lat - p1_lat) * (p2_lon - p1_lon) / (p2_lat - p1_lat) + p1_lon
+                    if p1_lon == p2_lon or lon <= lon_inters:
+                        inside = not inside
+        p1_lon, p1_lat = p2_lon, p2_lat
+
+    return inside
