@@ -35,7 +35,7 @@ from model import *
 # Make some useful functions available.
 
 from setup import *
-from load_csv import *
+from load import *
 
 # Make some useful environment variables available.
 
