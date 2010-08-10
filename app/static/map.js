@@ -372,6 +372,19 @@ function initialize_map() {
     // override default styles to render all cluster sizes with our custom icon
     styles: [cluster_style, cluster_style, cluster_style, cluster_style]
   });
+
+  // Create add subject button
+  var add_subject_div = $$('div', {class: 'map-control'});
+  var add_subject_ui = $$('div', {class: 'map-control-ui'});
+  var icon_url = make_icon(null, STATUS_UNKNOWN, false);
+  var icon = $$('img', {src: icon_url});
+  var add_subject_text = $$(
+      'div', {class: 'map-control-text'}, 'Add' + ' ');
+  add_subject_div.appendChild(add_subject_ui);
+  add_subject_ui.appendChild(add_subject_text);
+  add_subject_text.appendChild(icon);
+  google.maps.event.addDomListener(add_subject_ui, 'click', function() { add_facility(); });
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(add_subject_div);
 }
 
 // Reduce the opacity of the map layer to make markers stand out.
