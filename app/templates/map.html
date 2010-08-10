@@ -205,8 +205,10 @@
         through the sign-in form. Need to check if the user exists to prevent
         strange behavior when copy/pasting a link with embed=yes to a browser
         that is not yet signed in.
-      {% endcomment %}
-      
+
+        TODO(shakusa) Proper escaping of params.subject_name. |escape won't
+        work if params.subject_name has an ampersand
+      {% endcomment %}     
       inplace_edit_start(make_edit_url('{{params.subject_name|escape}}'));
     {% endif %}
   });

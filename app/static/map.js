@@ -1576,16 +1576,16 @@ function inplace_edit_save(edit_url) {
       type: 'POST',
       data: $j('#edit').serialize(),
       error: function(request, textStatus, errorThrown) {
-	log(textStatus + ', ' + errorThrown);
-	alert(locale.ERROR_SAVING_FACILITY_INFORMATION());
-	show_status(null, null, true);
+        log(textStatus + ', ' + errorThrown);
+        alert(locale.ERROR_SAVING_FACILITY_INFORMATION());
+        show_status(null, null, true);
       },
       success: function(data) {
-	$('data').style.display = '';
-	$('edit-data').style.display = 'none';
+        $('data').style.display = '';
+        $('edit-data').style.display = 'none';
         remove_edit_bar();
-	select_subject(selected_subject_i);
-	show_status(locale.SAVED(), 5000);
+        select_subject(selected_subject_i);
+        show_status(locale.SAVED(), 5000);
         _gaq.push(['_trackEvent', 'edit', 'save', selected_subject.name]);
       }
     });
