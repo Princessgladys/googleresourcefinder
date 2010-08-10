@@ -72,6 +72,8 @@ class Main(utils.Handler):
                     edit_url=self.get_url('/edit',
                                           subject_name=self.params.subject_name,
                                           embed='yes'),
+                    add_new_url=self.get_url('/edit', embed='yes',
+                                             add_new='yes'),
                     subdomain=self.subdomain)
 
     def get_export_url(self):
