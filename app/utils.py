@@ -336,7 +336,8 @@ def format(value, localize=False):
 
 def get_last_updated_time(subject):
     type = cache.SUBJECT_TYPES[subject.subdomain][subject.type]
-    return max(subject.get_observed(name) for name in type.attribute_names)
+    return max(subject.get_observed(name) for name in type.attribute_names
+               if subject.get_observed(name) is not None)
 
 def decompress(data):
     file = gzip.GzipFile(fileobj=StringIO.StringIO(data))
