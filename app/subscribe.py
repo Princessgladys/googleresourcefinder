@@ -31,7 +31,7 @@ import config
 import utils
 from bubble import format
 from feeds.xmlutils import Struct
-from mail_alerts import FORMAT_EMAIL, fetch_updates, format_email_subject
+from mail_alerts import EMAIL_FORMATTERS, fetch_updates, format_email_subject
 from mail_alerts import send_email, update_account_alert_time
 from model import PendingAlert, Subject, Subscription
 from utils import _, db, Handler, run
@@ -159,7 +159,8 @@ class Subscribe(Handler):
                     changed_subjects={subject_name: (
                         subject.get_value('title'), values)}
                 )
-                email_formatter = FORMAT_EMAIL[subject.type](self.account)
+                email_formatter = EMAIL_FORMATTERS[
+                    self.subdomain][subject.type](self.account)
                 body = email_formatter.format_body(email_data)
                 email_subject = format_email_subject(self.subdomain,
                                                      old_frequency)
