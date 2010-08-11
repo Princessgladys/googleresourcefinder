@@ -100,8 +100,10 @@ td.subject-count.selected { color: #fff; }
 #edit_bar { position: absolute; left: 0; bottom: 0; padding: 4px;
             background: #eee; width: 377px; }
 .map-control { padding: 5px; }
-.map-control-ui { background: #fff; border: 2px solid #000; cursor: 'pointer'; text-align: 'center'; }
-.map-control-text { font-family: 'arial, sans-serif'; font-size: 12px; padding: 4px; }
+.map-control-ui { background: #fff; border: 2px solid #000; cursor: pointer; text-align: center; }
+.map-control-text { font-family: 'arial, sans-serif'; font-size: 13px; font-weight: bold;
+                    padding: 4px 4px 0px 4px; vertical-align: middle; }
+img.map-control-marker { padding: 0px 0px 4px 4px; vertical-align: middle; }
 
 /* Map info windows */
 .subject-info h1 { font-size: 13px; }

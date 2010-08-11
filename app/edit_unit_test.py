@@ -391,7 +391,7 @@ class EditTest(MediumTestCase):
             u'pcode': Attribute(key_name='pcode', type='str')
         }
         edit.update(self.s.name, self.st, request, self.user, self.account,
-                    attributes, self.subdomain, False)
+                    attributes, self.subdomain, False, False)
 
         # Check that the Subject and MinimalSubject were indeed updated.
         subject = Subject.get('haiti', self.s.name)
@@ -408,7 +408,7 @@ class EditTest(MediumTestCase):
                        'editable.pcode="pcode_foo"&pcode__comment='
         request = webapp.Request(webob.Request.blank(request_text).environ)
         edit.update(self.s.name, self.st, request, self.user, self.account,
-                    attributes, self.subdomain, False)
+                    attributes, self.subdomain, False, False)
 
         # Check that the Subject and MinimalSubject were indeed updated.
         subject = Subject.get('haiti', self.s.name)
@@ -432,7 +432,7 @@ class EditTest(MediumTestCase):
 
         names_before = [s.name for s in Subject.all_in_subdomain('haiti')]
         edit.update(subject_name, self.st, request, self.user, self.account,
-                    attributes, self.subdomain, False)
+                    attributes, self.subdomain, False, False)
         names_after = [s.name for s in Subject.all_in_subdomain('haiti')]
 
         # Check that exactly one new Subject was created.

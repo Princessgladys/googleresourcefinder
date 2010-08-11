@@ -21,9 +21,21 @@
 locale = function() {
   var messages = {};
 
+  //i18n: Label to add a facility
+  messages.ADD =
+      'Add';
+
   //i18n: Label for every item in a list.
   messages.ALL =
       'All';
+
+  //i18n: Label for a cancel link
+  messages.CANCEL =
+      'Cancel';
+
+  //i18n: Message explaining how to place a new subject on the map
+  messages.CLICK_TO_ADD_SUBJECT =
+      'Click a location on the map to place the marker for a new facility.';
 
   //i18n: Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME =
@@ -126,6 +138,10 @@ locale = function() {
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS =
       'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+
+  //i18n: Label for a new subject
+  messages.NEW_SUBJECT =
+      'New facility';
 
   //i18n: Notification for a facility with missing location information.
   messages.NO_LOCATION_ENTERED =

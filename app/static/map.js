@@ -337,6 +337,9 @@ function make_icon(title, status, detail, opt_icon, opt_icon_size,
 
 // ==== Maps API
 
+var new_subject_marker = null;
+var new_subject_button = null;
+
 // Construct and set up the Map and InfoWindow objecs.
 function initialize_map() {
   if (map) return;
@@ -374,17 +377,61 @@ function initialize_map() {
   });
 
   // Create add subject button
-  var add_subject_div = $$('div', {class: 'map-control'});
-  var add_subject_ui = $$('div', {class: 'map-control-ui'});
-  var icon_url = make_icon(null, STATUS_UNKNOWN, false);
-  var icon = $$('img', {src: icon_url});
-  var add_subject_text = $$(
-      'div', {class: 'map-control-text'}, 'Add' + ' ');
-  add_subject_div.appendChild(add_subject_ui);
-  add_subject_ui.appendChild(add_subject_text);
-  add_subject_text.appendChild(icon);
-  google.maps.event.addDomListener(add_subject_ui, 'click', function() { add_facility(); });
-  map.controls[google.maps.ControlPosition.TOP_LEFT].push(add_subject_div);
+  new_subject_button = $$('div', {class: 'map-control'});
+  var new_subject_ui = $$('div', {class: 'map-control-ui'});
+  var new_subject_text = $$(
+      'div', {class: 'map-control-text'}, locale.ADD() + ' ');
+  var icon = $$('img', {
+    src: make_icon(null, STATUS_UNKNOWN, false),
+    class: 'map-control-marker'
+  });
+  new_subject_button.appendChild(new_subject_ui);
+  new_subject_ui.appendChild(new_subject_text);
+  new_subject_text.appendChild(icon);
+  google.maps.event.addDomListener(new_subject_ui, 'click', function() {
+    show_new_subject_button(false);
+    show_status(locale.CLICK_TO_ADD_SUBJECT() +
+                ' <a href="#" onclick="cancel_add_subject();"> ' +
+                locale.CANCEL() + '</a>.');
+    google.maps.event.addListenerOnce(map, 'click', function(event) {
+      show_status(null);
+      place_new_subject_marker(event.latLng);
+      inplace_edit_start(make_add_new_subject_url());
+    });
+  });
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(new_subject_button);
+}
+
+function show_new_subject_button(show) {
+  new_subject_button.style.visibility = show ? '' : 'hidden';
+}
+
+function cancel_add_subject() {
+  show_status(null);
+  show_new_subject_button(true);
+  google.maps.event.clearListeners(map, 'click');
+  if (new_subject_marker) {
+    new_subject_marker.setVisible(false);
+    new_subject_marker = null;
+  }
+}
+
+function place_new_subject_marker(latlng) {
+  new_subject_marker = new google.maps.Marker({
+    position: latlng,
+    map: map,
+    icon: make_icon(null, 1, null, null, null, '066'),
+    title: locale.NEW_SUBJECT(),
+    draggable: true
+  });
+  google.maps.event.addListener(new_subject_marker, 'dragend', function() {
+    update_lat_lng(new_subject_marker.getPosition());
+  });
+}
+
+function update_lat_lng(latlng) {
+  document.getElementsByName('location.lat')[0].value = latlng.lat();
+  document.getElementsByName('location.lon')[0].value = latlng.lng();
 }
 
 // Reduce the opacity of the map layer to make markers stand out.
@@ -1528,6 +1575,15 @@ function make_edit_url(subject_name) {
   return edit_url_template + subject_name;
 }
 
+function make_add_new_subject_url(opt_subject_type) {
+  var subject_type = opt_subject_type || '';
+  // TODO(pfritzsche): prompt user for a decision on which subject type to use
+  if (!subject_type && subject_types.length >= 2) {
+    subject_type = subject_types[1].name;
+  }
+  return edit_url_template + '&add_new=yes&subject_type=' + subject_type;
+}
+
 /**
  * Handler to start inplace editing in the left-hand panel.
  * @param {String} edit_url - URL to load the edit form via AJAX
@@ -1542,9 +1598,16 @@ function inplace_edit_start(edit_url) {
   // InfoWindow so that it resizes correctly.
   log('Editing in place:', edit_url);
 
+  data = {}
+  if (new_subject_marker) {
+    data.lat = new_subject_marker.position.lat();
+    data.lon = new_subject_marker.position.lng();
+  }
+
   show_loading(true);
   $j.ajax({
     url: edit_url,
+    data: data,
     type: 'GET',
     error: function(request, textStatus, errorThrown) {
       log(textStatus + ', ' + errorThrown);
@@ -1592,8 +1655,14 @@ function inplace_edit_save(edit_url) {
         log(textStatus + ', ' + errorThrown);
         alert(locale.ERROR_SAVING_FACILITY_INFORMATION());
         show_status(null, null, true);
+        if (new_subject_marker) {
+          cancel_add_subject();
+        }
       },
       success: function(data) {
+        if (new_subject_marker) {
+            window.location = 'http://' + window.location.host + data;
+        }
         $('data').style.display = '';
         $('edit-data').style.display = 'none';
         remove_edit_bar();
@@ -1616,7 +1685,12 @@ function inplace_edit_cancel() {
   $('edit-data').style.display = 'none';
   remove_edit_bar();
   show_status(null, null, true);
-  _gaq.push(['_trackEvent', 'edit', 'cancel', selected_subject.name]);
+  if (new_subject_marker) {
+    cancel_add_subject();
+    _gaq.push(['_trackEvent', 'edit', 'cancel', 'new_subject']);
+  } else {
+    _gaq.push(['_trackEvent', 'edit', 'cancel', selected_subject.name]);
+  }
 }
 
 function remove_edit_bar() {

@@ -21,8 +21,17 @@
 locale = function() {
   var messages = {};
 
+  //i18n: Label to add a facility
+  messages.ADD = "\u0627\u0636\u0627\u0641\u06c1 \u06a9\u0631\u06cc";
+
   //i18n: Label for every item in a list.
   messages.ALL = "\u0633\u0628\u06be\u06cc";
+
+  //i18n: Label for a cancel link
+  messages.CANCEL = "\u0645\u0646\u0633\u0648\u062e \u06a9\u0631\u06cc\u06ba";
+
+  //i18n: Message explaining how to place a new subject on the map
+  messages.CLICK_TO_ADD_SUBJECT = "\u067e\u0631 \u06a9\u0644\u06a9 \u06a9\u0631\u06cc\u06ba \u0646\u0642\u0634\u06d2 \u067e\u0631 \u0627\u06cc\u06a9 \u062c\u06af\u06c1 \u0627\u06cc\u06a9 \u0646\u0626\u06cc \u0633\u06c1\u0648\u0644\u062a \u06a9\u06d2 \u0644\u0626\u06d2 \u0645\u0627\u0631\u06a9\u0631 \u062c\u06af\u06c1";
 
   //i18n: Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME = "${DATE} \u067e\u0631 ${TIME}";
@@ -101,6 +110,9 @@ locale = function() {
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "\u062c\u0646\u0648\u0631\u06cc \u0641\u0631\u0648\u0631\u06cc \u0645\u0627\u0631\u0686 \u0627\u067e\u0631\u06cc\u0644 \u0645\u0626\u06cc \u062c\u0648\u0646 \u062c\u0648\u0644\u0627\u0626\u06cc \u0627\u06af\u0633\u062a \u0633\u062a\u0645\u0628\u0631 \u0627\u06a9\u062a\u0648\u0628\u0631 \u0646\u0648\u0645\u0628\u0631 \u062f\u0633\u0645\u0628\u0631".split(' ');
+
+  //i18n: Label for a new subject
+  messages.NEW_SUBJECT = "\u0646\u0626\u06cc \u0633\u06c1\u0648\u0644";
 
   //i18n: Notification for a facility with missing location information.
   messages.NO_LOCATION_ENTERED = "This facility does not yet have a location entered.";

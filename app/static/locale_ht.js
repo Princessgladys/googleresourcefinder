@@ -21,8 +21,17 @@
 locale = function() {
   var messages = {};
 
+  //i18n: Label to add a facility
+  messages.ADD = "Ajoute";
+
   //i18n: Label for every item in a list.
   messages.ALL = "Tout";
+
+  //i18n: Label for a cancel link
+  messages.CANCEL = "Anile";
+
+  //i18n: Message explaining how to place a new subject on the map
+  messages.CLICK_TO_ADD_SUBJECT = "Klike sou yon kote sou kat la nan plas Mak\u00e8 a pou yon nouvo plant.";
 
   //i18n: Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME = "${DATE} a ${TIME}";
@@ -101,6 +110,9 @@ locale = function() {
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "Janvye, Fevriye, Mas, Avril, Me, Jen, jiy\u00e8, Out, septanm, Okt\u00f2b, Novanm, Desanm".split(' ');
+
+  //i18n: Label for a new subject
+  messages.NEW_SUBJECT = "Nouvo etablisman";
 
   //i18n: Notification for a facility with missing location information.
   messages.NO_LOCATION_ENTERED = "Etablisman sa a pa toujou gen yon kote antre.";

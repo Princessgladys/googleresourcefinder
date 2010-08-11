@@ -320,7 +320,7 @@ def get_source_url(request):
     return len(parsed_url) > 1 and '://'.join(parsed_url[:2]) or None
 
 def update(subject_name, subject_type, request, user, account, attributes,
-           subdomain, transactional=True):
+           subdomain, new=False, transactional=True):
     """Given a subject name, subject type, and request information from the
     edit page, this updates or creates the subject as requested (i.e. adds a
     Report and updates or creates the Subject and MinimalSubject with the
@@ -373,7 +373,7 @@ def update(subject_name, subject_type, request, user, account, attributes,
             subject, request, attribute)
         if (is_editable(request, attribute) and
             (value_changed or comment_changed)):
-            if not can_edit(account, subdomain, attribute):
+            if not new and not can_edit(account, subdomain, attribute):
                 raise ErrorMessage(
                     403, _(
                     #i18n: Error message for lacking edit permissions
@@ -433,7 +433,13 @@ class Edit(utils.Handler):
         if self.params.add_new:
             # Need 'add' permission to see or submit the edit form.
             self.require_action_permitted('add')
-            self.subject = None
+            lat = self.request.get('lat')
+            lon = self.request.get('lon')
+            if lat or lon:
+                self.subject = model.Subject(
+                    type=' ', location__=db.GeoPt(lat, lon))
+            else:
+                self.subject = None
             self.subject_type = cache.SUBJECT_TYPES[self.subdomain].get(
                 self.params.subject_type)
             if not self.subject_type:
@@ -460,7 +466,8 @@ class Edit(utils.Handler):
                 continue
             attribute = cache.ATTRIBUTES[name]
             comment = self.subject and self.subject.get_comment(name) or ''
-            if can_edit(self.account, self.subdomain, attribute):
+            if (can_edit(self.account, self.subdomain, attribute) or
+                self.params.add_new):
                 fields.append({
                     'name': name,
                     'title': get_message('attribute_name', name),
@@ -492,7 +499,6 @@ class Edit(utils.Handler):
 
     def post(self):
         self.init()
-
         if self.request.get('cancel'):
             raise Redirect(self.get_url('/'))
 
@@ -533,14 +539,17 @@ class Edit(utils.Handler):
                 self.request.headers['Host'], self.subject_type)
         db.run_in_transaction(update, subject_name, self.subject_type,
                               self.request, self.user, self.account,
-                              attributes, self.subdomain)
-        if self.params.embed:
+                              attributes, self.subdomain,
+                              new=bool(self.params.add_new))
+        if not self.params.add_new and self.params.embed:
             #i18n: Record updated successfully.
             self.write(_('Record updated.'))
             # Fire off a task to asynchronously refresh the JSON cache
             # and reduce the latency of the next page load.
             taskqueue.add(url='/refresh_json_cache?lang=%s&subdomain=%s'
                           % (self.params.lang, self.subdomain), method='GET')
+        elif self.params.add_new:
+            self.write(self.get_url('/?subject_name=%s' % subject_name))
         else:
             raise Redirect(self.get_url('/'))
 
