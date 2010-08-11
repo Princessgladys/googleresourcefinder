@@ -13,19 +13,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 {% endcomment %}
-
-{% extends "hospital_bubble.html" %}
-{% load i18n %}
-
-{% block ids %}
-  {% comment %}
-  #i18n: Proper name of an ID for a health facility defined by the 
-  #i18n: Pan-American Health Organization; no translation necessary.
-  {% endcomment %}
-  {% trans "HealthC ID" %}: {{special.healthc_id.value|escape}} &#xb7;
-  {% comment %}
-  #i18n: Proper name of an ID for a health facility defined by the 
-  #i18n: Haiti ministry of health (MSPP); no translation necessary.
-  {% endcomment %}
-  {% trans "PCode" %}: {{special.pcode.value|escape}}<br>
-{% endblock ids %}

@@ -98,7 +98,7 @@ class EditTest(SeleniumTestCase):
 
     def test_edit_permissions(self):
         """Ensure that the edit page can't be used without edit permission."""
-        self.login('/edit')
+        self.login('/edit?subdomain=haiti')
 
         self.delete_account()
         self.put_account(actions=['*:view'])  # view only
@@ -270,7 +270,7 @@ class EditTest(SeleniumTestCase):
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
     def test_edit_comments(self):
-        """Tests comments and bubble reload during in-place edit."""
+        """Tests comments and bubble reload during separate-page edit."""
         def login(self):
             self.login_to_edit_page()
 
@@ -290,6 +290,7 @@ class EditTest(SeleniumTestCase):
         def save(self):
             self.click('//input[@name="save"]')
             self.wait_until(self.is_visible, 'data')
+            self.wait_for_element('link=Change details')
 
         def edit(self):
             self.edit()
@@ -381,7 +382,7 @@ class EditTest(SeleniumTestCase):
 
     def test_inplace_edit_signed_out(self):
         """In-place edit starting from signed out:"""
-        self.open_path('/')
+        self.open_path('/?subdomain=haiti')
 
         # Open a bubble
         self.click('id=subject-1')
@@ -400,7 +401,7 @@ class EditTest(SeleniumTestCase):
     def edit(self, login=False):
         """Goes to edit form for subject 1"""
         if login:
-            self.open_path('/')
+            self.open_path('/?subdomain=haiti')
             self.click_and_wait('link=Sign in')
             self.login()
         self.click('id=subject-1')

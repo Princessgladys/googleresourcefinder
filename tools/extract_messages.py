@@ -182,7 +182,7 @@ def parse_django_po(po_filename):
             current_msg.description = ''
         if not current_msg.meaning:
             current_msg.meaning = ''
-        message_to_ref[current_msg] = refs
+        message_to_ref[current_msg] = set(refs)
 
     return (header, message_to_ref)
 

@@ -100,9 +100,9 @@ def setup_subject_types():
                          'available_beds', 'total_beds', 'services',
                          'contact_name', 'phone', 'email', 'department',
                          'district', 'commune', 'address', 'location',
-                         'accuracy', 'location', 'organization',
-                         'organization_type', 'category', 'construction',
-                         'damage', 'operational_status', 'alert_status',
+                         'accuracy', 'organization', 'organization_type',
+                         'category', 'construction', 'damage',
+                         'operational_status', 'alert_status',
                          'comments', 'reachable_by_road',
                          'can_pick_up_patients', 'region_id', 'district_id',
                          'commune_id', 'commune_code', 'sante_id'],
@@ -135,7 +135,7 @@ def setup_subject_types():
 def setup_messages():
     """Sets up messages, pulling translations from the django .po files."""
     def message(namespace, name, **kw):
-        return Message(namespace=namespace, name=name, **kw)
+        return Message(ns=namespace, name=name, **kw)
     subject_type_message = \
         lambda name, **kw: message('subject_type', name, **kw)
     name_message = lambda name, **kw: message('attribute_name', name, **kw)

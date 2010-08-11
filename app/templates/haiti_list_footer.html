@@ -14,18 +14,15 @@
 # limitations under the License.
 {% endcomment %}
 
-{% extends "hospital_bubble.html" %}
 {% load i18n %}
 
-{% block ids %}
-  {% comment %}
-  #i18n: Proper name of an ID for a health facility defined by the 
-  #i18n: Pan-American Health Organization; no translation necessary.
-  {% endcomment %}
-  {% trans "HealthC ID" %}: {{special.healthc_id.value|escape}} &#xb7;
-  {% comment %}
-  #i18n: Proper name of an ID for a health facility defined by the 
-  #i18n: Haiti ministry of health (MSPP); no translation necessary.
-  {% endcomment %}
-  {% trans "PCode" %}: {{special.pcode.value|escape}}<br>
-{% endblock ids %}
+{% comment %}
+Snippet of html that follows the 'Export CSV' link at the bottom left of the app
+for subdomain haiti
+{% endcomment %}
+
+<span class="sep">|</span>
+{% comment %}
+#i18n: Link to go to a page with past versions of the 'master' list
+{% endcomment %}
+<a target="_blank" href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files" onclick="_gaq.push(['_trackEvent', 'outbound', 'masterlist', this.href])">{% trans "View Master List archive" %}</a>

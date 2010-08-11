@@ -166,7 +166,7 @@ def render_json(subdomain, center=None, radius=None):
     # Get all the messages for the current language.
     message_jobjects = {}
     for message in cache.MESSAGES.values():
-        namespace = message_jobjects.setdefault(message.namespace, {})
+        namespace = message_jobjects.setdefault(message.ns, {})
         namespace[message.name] = getattr(message, locale)
 
     json = compress_json(to_json({

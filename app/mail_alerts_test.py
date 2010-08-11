@@ -26,7 +26,7 @@ import cache
 import mail_alerts
 import utils
 from feeds.xmlutils import Struct
-from mail_alerts import FORMAT_EMAIL, get_timedelta, fetch_updates
+from mail_alerts import EMAIL_FORMATTERS, get_timedelta, fetch_updates
 from mail_alerts import update_account_alert_time
 from medium_test_case import MediumTestCase
 from model import Account, PendingAlert, Subdomain, Subject, SubjectType
@@ -185,7 +185,8 @@ class MailAlertsTest(MediumTestCase):
         values = fetch_updates(self.pa, self.subject)
         data = Struct(changed_subjects={self.subject.key().name(): (
             self.subject.get_value('title'), values)})
-        email_formatter = FORMAT_EMAIL[self.subject.type](self.account)
+        email_formatter = EMAIL_FORMATTERS[
+            self.subdomain.key().name()][self.subject.type](self.account)
         body = email_formatter.format_body(data)
 
         # formatting may change but the title, attribute names, new/old values,
@@ -204,7 +205,8 @@ class MailAlertsTest(MediumTestCase):
             time=utils.to_local_isotime(datetime.datetime.now(), clear_ms=True),
             nickname='nickname_bar', subdomain='haiti', domain='localhost')
         self.account.email_format = 'html'
-        email_formatter = FORMAT_EMAIL[self.subject.type](self.account)
+        email_formatter = EMAIL_FORMATTERS[
+            self.subdomain.key().name()][self.subject.type](self.account)
         body = email_formatter.format_body(data)
 
         # ditto above comment in test_format_plain_body
