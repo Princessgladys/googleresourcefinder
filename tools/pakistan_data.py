@@ -63,49 +63,79 @@ PAKISTAN_FLOOD_POLYGON = [(71.441345, 34.696461),
                           (71.441345, 34.696461)]
 
 # See http://en.wikipedia.org/wiki/Administrative_units_of_Pakistan
-PAKISTAN_ADMIN_AREAS = ['Balochistan', 'Khyber Pakhtunkhwa',
-                        'North West Frontier', 'Punjab', 'Sindh',
-                        'Islamabad Capital Territory',
-                        'Federally Administered Tribal Areas',
-                        'Azad Jammu and Kashmir', 'Gilgit-Baltistan']
+PAKISTAN_ADMIN_AREAS = [
+    'Balochistan', 'Khyber Pakhtunkhwa', 'North West Frontier', 'Punjab',
+    'Sindh', 'Islamabad Capital Territory',
+    'Federally Administered Tribal Areas', 'Azad Jammu and Kashmir',
+    'Gilgit-Baltistan']
 
 # See http://en.wikipedia.org/wiki/Districts_of_Pakistan
-PAKISTAN_DISTRICTS = [ 'Islamabad', 'Attock', 'Bahawalnagar', 'Bahawalpur',
-                       'Bhakkar', 'Chakwal', 'Chiniot', 'Dera Ghazi Khan',
-                       'Faisalabad', 'Gujranwala', 'Gujrat', 'Hafizabad',
-                       'Jhang', 'Jhelum', 'Kasur', 'Khanewal', 'Khushab',
-                       'Lahore', 'Layyah', 'Lodhran', 'Mandi Bahauddin',
-                       'Mianwali', 'Multan', 'Muzaffargarh', 'Narowal',
-                       'Nankana Sahib', 'Okara', 'Pakpattan',
-                       'Rahim Yar Khan', 'Rajanpur', 'Rawalpindi',
-                       'Sahiwal', 'Sargodha', 'Sheikhupura', 'Sialkot',
-                       'Toba Tek Singh', 'Vehari', 'Badin', 'Dadu',
-                       'Ghotki', 'Hyderabad', 'Jacobabad', 'Jamshoro',
-                       'Karachi', 'Kashmore', 'Khairpur', 'Larkana',
-                       'Matiari', 'Mirpurkhas', 'Naushahro Firoz',
-                       'Nawabshah', 'Qamber and Shahdad Kot', 'Sanghar',
-                       'Shikarpur', 'Sukkur', 'Tando Allahyar',
-                       'Tando Muhammad Khan', 'Tharparkar', 'Thatta',
-                       'Umerkot', 'Abbottabad', 'Bannu', 'Batagram',
-                       'Buner', 'Charsadda', 'Chitral', 'Dera Ismail Khan',
-                       'Hangu', 'Haripur', 'Karak', 'Kohat', 'Kohistan',
-                       'Lakki Marwat', 'Lower Dir', 'Malakand', 'Mansehra',
-                       'Mardan', 'Nowshera', 'Peshawar', 'Shangla', 'Swabi',
-                       'Swat', 'Tank', 'Upper Dir', 'Ghanche', 'Skardu',
-                       'Astore', 'Diamer', 'Ghizer', 'Gilgit',
-                       'Hunza-Nagar District', 'Awaran', 'Barkhan', 'Bolan',
-                       'Chagai[7]', 'Dera Bugti', 'Gwadar', 'Harnai',
-                       'Jafarabad', 'Jhal Magsi', 'Kalat', 'Kech (Turbat)',
-                       'Kharan', 'Khuzdar', 'Kohlu', 'Lasbela', 'Loralai',
-                       'Mastung', 'Musakhel', 'Naseerabad', 'Nushki',
-                       'Panjgur', 'Pishin', 'Qilla Abdullah',
-                       'Qilla Saifullah', 'Quetta', 'Sherani', 'Sibi',
-                       'Washuk', 'Zhob', 'Ziarat', 'Bajaur', 'Khyber',
-                       'Kurram', 'Mohmand', 'North Waziristan', 'Orakzai',
-                       'South Waziristan', 'Bhimber', 'Kotli', 'Mirpur',
-                       'Bagh', 'Poonch', 'Sudhnati', 'Muzaffarabad', 'Neelum' ]
+PAKISTAN_DISTRICTS = [
+    # Islamabad Capital Territory
+    'Islamabad',
+    # Punjab
+    'Attock', 'Bahawalnagar', 'Bahawalpur', 'Bhakkar', 'Chakwal',
+    'Chiniot', 'Dera Ghazi Khan', 'Faisalabad', 'Gujranwala', 'Gujrat',
+    'Hafizabad', 'Jhang', 'Jhelum', 'Kasur', 'Khanewal', 'Khushab', 'Lahore',
+    'Layyah', 'Lodhran', 'Mandi Bahauddin', 'Mianwali', 'Multan',
+    'Muzaffargarh', 'Narowal', 'Nankana Sahib', 'Okara', 'Pakpattan',
+    'Rahim Yar Khan', 'Rajanpur', 'Rawalpindi', 'Sahiwal', 'Sargodha',
+    'Sheikhupura', 'Sialkot', 'Toba Tek Singh', 'Vehari',
+    # Sindh
+    'Badin', 'Dadu', 'Ghotki', 'Hyderabad', 'Jacobabad', 'Jamshoro',
+    'Karachi', 'Kashmore', 'Khairpur', 'Larkana', 'Matiari', 'Mirpurkhas',
+    'Naushahro Firoz', 'Nawabshah', 'Qamber and Shahdad Kot', 'Sanghar',
+    'Shikarpur', 'Sukkur', 'Tando Allahyar', 'Tando Muhammad Khan',
+    'Tharparkar', 'Thatta', 'Umerkot',
+    # Khyber Pakhtunkhwa
+    'Abbottabad', 'Bannu', 'Batagram', 'Buner', 'Charsadda', 'Chitral',
+    'Dera Ismail Khan', 'Hangu', 'Haripur', 'Karak', 'Kohat', 'Kohistan',
+    'Lakki Marwat', 'Lower Dir', 'Malakand', 'Mansehra', 'Mardan', 'Nowshera',
+    'Peshawar', 'Shangla', 'Swabi', 'Swat', 'Tank', 'Upper Dir',
+    # Gilgit-Baltistan
+    'Ghanche', 'Skardu', 'Astore', 'Diamer', 'Ghizer', 'Gilgit',
+    'Hunza-Nagar District',
+    # Balochistan
+    'Awaran', 'Barkhan', 'Bolan', 'Chagai', 'Dera Bugti', 'Gwadar', 'Harnai',
+    'Jafarabad', 'Jhal Magsi', 'Kalat', 'Kech', 'Turbat', 'Kharan', 'Khuzdar',
+    'Kohlu', 'Lasbela', 'Loralai', 'Mastung', 'Musakhel', 'Naseerabad',
+    'Nushki', 'Panjgur', 'Pishin', 'Qilla Abdullah', 'Qilla Saifullah',
+    'Quetta', 'Sherani', 'Sibi', 'Washuk', 'Zhob', 'Ziarat',
+    # Federally Administered Tribal Areas
+    'Bajaur', 'Khyber', 'Kurram', 'Mohmand', 'North Waziristan', 'Orakzai',
+    'South Waziristan',
+    # Azad Kashmir
+    'Bhimber', 'Kotli', 'Mirpur', 'Bagh', 'Poonch', 'Sudhnati', 'Muzaffarabad',
+    'Neelum']
 
-# Districts that have facilities both inside and outside FLOOD_POLYGON
-PAKISTAN_FLOOD_BORDER_DISTRICTS = ['Toba Tek Singh', 'Abbottabad', 'Jamshoro',
-                                   'Jhelum', 'Sargodha', 'Rawalpindi',
-                                   'Bahawalpur', 'Jhang', 'Vehari', 'Khanewal']
+# Based on a survey by jencorris, who did a Google News search for each
+# district name looking for flooding articles
+PAKISTAN_FLOOD_DISTRICTS = [
+    # Islamabad Capital Territory
+    'Islamabad',
+    # Punjab
+    'Bahawalpur', 'Bhakkar', 'Chakwal', 'Chiniot', 'Dera Ghazi Khan', 'Jhang',
+    'Jhelum', 'Khanewal', 'Khushab', 'Layyah', 'Lodhran', 'Mianwali', 'Multan',
+    'Muzaffargarh', 'Rahim Yar Khan', 'Rajanpur', 'Rawalpindi', 'Sahiwal',
+    'Sialkot', 'Toba Tek Singh', 'Vehari',
+    #Sindh
+    'Dadu', 'Ghotki', 'Hyderabad', 'Jacobabad', 'Jamshoro', 'Kashmore',
+    'Khairpur', 'Larkana', 'Matiari', 'Naushahro Firoz', 'Nawabshah',
+    'Qamber and Shahdad Kot', 'Shikarpur', 'Sukkur', 'Tando Allahyar',
+    'Tando Muhammad Khan', 'Thatta',
+    # Khyber Pakhtunkhwa
+    'Abbottabad', 'Bannu', 'Batagram', 'Buner', 'Charsadda', 'Chitral',
+    'Dera Ismail Khan', 'Hangu', 'Haripur', 'Karak', 'Kohat', 'Kohistan',
+    'Lakki Marwat', 'Lower Dir', 'Malakand', 'Mansehra', 'Mardan Swat',
+    'Nowshera', 'Peshawar', 'Shangla', 'Swabi', 'Swat', 'Tank', 'Upper Dir',
+    # Gilgit-Baltistan
+    'Ghanche', 'Skardu', 'Astore', 'Diamer', 'Ghizer', 'Gilgit',
+    'Hunza-Nagar District',
+    # Balochistan
+    'Barkhan', 'Bolan', 'Dera Bugti', 'Harnai', 'Jafarabad', 'Jhal Magsi',
+    'Kohlu', 'Loralai', 'Musakhel', 'Naseerabad', 'Qilla Saifullah', 'Sibi',
+    'Zhob', 'Ziarat',
+    # Federally Administered Tribal Areas
+    'Kurram', 'Mohmand',
+    # Azad Kashmir
+    'Bhimber', 'Bagh', 'Muzaffarabad', 'Neelum', 'Haveli', 'Hattian']
