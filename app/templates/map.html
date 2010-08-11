@@ -185,12 +185,8 @@
     {% comment %}
     #i18n: Button to export data to comma-separated-values format.
     {% endcomment %}
-    <a target="_blank" href="{{export_url}}" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export CSV" %}</a> <span class="sep">|</span>
-
-    {% comment %}
-    #i18n: Link to go to a page with past versions of the 'master' list
-    {% endcomment %}
-    <a target="_blank" href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files" onclick="_gaq.push(['_trackEvent', 'outbound', 'masterlist', this.href])">{% trans "View Master List archive" %}</a>
+    <a target="_blank" href="{{export_url}}" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export CSV" %}</a>
+    {% include subdomain_list_footer %}
   </div>
 </div>
 {% endblock freshness %}

@@ -349,7 +349,9 @@ class Account(db.Model):
 class Message(db.Expando):
     """Internationalized strings for value identifiers.  Top-level entity,
     has no parent."""
-    namespace = db.StringProperty(required=True, choices=[
+    # Formerly namespace, renamed to work around bug in GAE 1.3.5 (b/2811890);
+    # Can change back after 1.3.6, which contains the fix
+    ns = db.StringProperty(required=True, choices=[
       'english',  # name is an English string
       'attribute_name',  # name is an Attribute's key_name
       'attribute_value', # name is a value name in a choice or multi attribute
@@ -366,7 +368,7 @@ class Dump(db.Model):
     base = db.SelfReference()  # if present, this dump is a clone of base
     source = db.StringProperty()  # URL identifying the source
     data = db.BlobProperty()  # received raw data
-    
+
 class Subscription(db.Model):
     """A subscription by a user to receive notification when details for a
     facility change. Top-level entity, has no parent.

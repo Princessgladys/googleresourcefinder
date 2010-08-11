@@ -163,10 +163,10 @@ def send_email(locale, sender, to, subject, body, format):
     message.sender = sender
     message.to = to
     message.subject = subject
-    if format == 'plain':
-        message.body = body
-    elif format == 'html':
+    if format == 'html':
         message.html = body
+    else:
+        message.body = body
 
     message.send()
 

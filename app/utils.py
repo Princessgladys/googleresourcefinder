@@ -204,7 +204,9 @@ class Handler(webapp.RequestHandler):
             self.params.url_no_lang += '?'
 
         # Provide the list of available languages.
-        self.params.languages = config.LANGUAGES
+        self.params.languages = (lang for lang in config.LANGUAGES
+                                 if lang[0] in config.LANGS_BY_SUBDOMAIN[
+                                     self.subdomain])
 
         # Provide the Google Analytics account ID.
         self.params.analytics_id = get_secret('analytics_id')

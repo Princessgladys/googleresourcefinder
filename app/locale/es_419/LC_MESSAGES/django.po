@@ -62,7 +62,7 @@ msgid "<strong>Note:</strong> This facility has been marked closed."
 msgstr "Nota: Esta institución se ha caracterizado cerrado."
 
 #. Accuracy of latitude, longitude coordinates
-#: ../tools/setup.py:145
+#: ../tools/setup.py:194
 msgid "Accuracy"
 msgstr "Precisión"
 
@@ -73,12 +73,12 @@ msgid "Add a new %(type_name)s"
 msgstr "Añadir un nuevo %(type_name)s"
 
 #. Header for a street address
-#: templates/print.html:138 ../tools/setup.py:141 templates/hospital_bubble.html:152
+#: templates/print.html:138 ../tools/setup.py:190 templates/hospital_bubble.html:152
 msgid "Address"
 msgstr "Dirección"
 
 #. Type of construction: sun-dried clay bricks
-#: ../tools/setup.py:210
+#: ../tools/setup.py:263
 msgid "Adobe"
 msgstr "Adobe"
 
@@ -93,7 +93,7 @@ msgid "Alert"
 msgstr "Alerta"
 
 #. Whether or not a facility is on alert status.
-#: ../tools/setup.py:159
+#: ../tools/setup.py:210
 msgid "Alert status"
 msgstr "Estado de Alerta"
 
@@ -102,8 +102,13 @@ msgstr "Estado de Alerta"
 msgid "All"
 msgstr "Todos"
 
+#. Proper name of an alternate ID for a health facility
+#: templates/hospital_bubble.html:60 ../tools/setup.py:162
+msgid "Alternate ID"
+msgstr "Otro nombre"
+
 #. Alternate name of a facility
-#: ../tools/setup.py:115
+#: ../tools/setup.py:152
 msgid "Alternate name"
 msgstr "Otro nombre"
 
@@ -118,7 +123,7 @@ msgid "Available"
 msgstr "Camas disponibles"
 
 #. Total number of unoccupied beds at a hospital.
-#: ../tools/setup.py:123
+#: ../tools/setup.py:164
 msgid "Available beds"
 msgstr "Camas disponibles"
 
@@ -128,22 +133,22 @@ msgid "Beds open / total"
 msgstr "Camas libres/totales"
 
 #. Service provided by a health facility (use Title Case).
-#: ../tools/setup.py:279
+#: ../tools/setup.py:332
 msgid "Blood Bank"
 msgstr "Banco de Sangre"
 
 #. Save a copy of the data in CSV format
-#: export.py:130
+#: export.py:164
 msgid "CSV Export"
 msgstr "Exportar CSV"
 
 #. Service provided by a health facility (use Title Case).
-#: ../tools/setup.py:277
+#: ../tools/setup.py:330
 msgid "CT Scan"
 msgstr "Tomografía Computada"
 
 #. Whether or not a facility can send a vehicle to pick up patients
-#: ../tools/setup.py:166
+#: ../tools/setup.py:217
 msgid "Can pick up patients"
 msgstr "Puedes buscar pacientes"
 
@@ -158,12 +163,12 @@ msgid "Capacity"
 msgstr "capacidad"
 
 #. Service provided by a health facility (use Title Case). Meaning: branch of medicine dealing with the heart
-#: ../tools/setup.py:248
+#: ../tools/setup.py:301
 msgid "Cardiology"
 msgstr "Cardiología"
 
 #. Category of facility (hospital, clinic, field team, etc.)
-#: ../tools/setup.py:151
+#: ../tools/setup.py:202
 msgid "Category"
 msgstr "Categoría"
 
@@ -187,13 +192,18 @@ msgstr "Nota"
 msgid "Choose a site:"
 msgstr "Selecciona uno de los sitios:"
 
+#. Meaning: City or town portion of an address
+#: ../tools/setup.py:188
+msgid "City/Town/Village"
+msgstr "Ciudad/Pueblo"
+
 #. Category of health facility: Clinic
-#: ../tools/setup.py:190
+#: ../tools/setup.py:241
 msgid "Clinic"
 msgstr "Clínica"
 
 #. Facility operational status: closed or in the process of closing
-#: ../tools/setup.py:225
+#: ../tools/setup.py:278
 msgid "Closed or closing"
 msgstr "Cerrados o de cierre"
 
@@ -203,27 +213,27 @@ msgid "Comment:"
 msgstr "Comentarios:"
 
 #. remarks
-#: ../tools/setup.py:161
+#: ../tools/setup.py:212
 msgid "Comments"
 msgstr "Comentarios"
 
 #. Meaning: low-level administrative division
-#: ../tools/setup.py:139
+#: ../tools/setup.py:182
 msgid "Commune"
 msgstr "Comuna"
 
 #. Type of organization: Local community organization
-#: ../tools/setup.py:171
+#: ../tools/setup.py:222
 msgid "Community"
 msgstr "Comunidad"
 
 #. Materials making up a building
-#: ../tools/setup.py:153
+#: ../tools/setup.py:204
 msgid "Construction"
 msgstr "Construcción"
 
 #. Name of a person to contact for more information.
-#: ../tools/setup.py:129
+#: ../tools/setup.py:170
 msgid "Contact name"
 msgstr "Nombre de contacto"
 
@@ -238,7 +248,7 @@ msgid "Daily"
 msgstr "Diálisis"
 
 #. Level of destruction
-#: ../tools/setup.py:155
+#: ../tools/setup.py:206
 msgid "Damage"
 msgstr "Daño"
 
@@ -253,17 +263,17 @@ msgid "Default frequency:"
 msgstr "Predeterminada de Frecuencias:"
 
 #. Meaning: administrative division
-#: ../tools/setup.py:135
+#: ../tools/setup.py:178
 msgid "Department"
 msgstr "Departamento"
 
 #. Service provided by a health facility (use Title Case). Meaning: Artificial replacement for lost kidney function.
-#: ../tools/setup.py:271
+#: ../tools/setup.py:324
 msgid "Dialysis"
 msgstr "Diálisis"
 
 #. Category of health facility: A dispensary where medicine and medical supplies are given out.
-#: ../tools/setup.py:193
+#: ../tools/setup.py:244
 msgid "Dispensary"
 msgstr "Dispensario"
 
@@ -285,12 +295,17 @@ msgid "Distance"
 msgstr "Distancia"
 
 #. Meaning: administrative division
-#: static/locale.js:51 templates/map.html:147 ../tools/setup.py:137
+#: static/locale.js:51 templates/map.html:147 ../tools/setup.py:180
 msgid "District"
 msgstr "Distrito"
 
+#. Meaning: Second-level administrative subdivision of a country
+#: ../tools/setup.py:186
+msgid "District/County"
+msgstr "Distrito/Condado"
+
 #. E-mail address
-#: ../tools/setup.py:133 edit.py:120
+#: ../tools/setup.py:176 edit.py:120
 msgid "E-mail"
 msgstr "Correo electrónico"
 
@@ -341,7 +356,7 @@ msgid "Error saving facility information."
 msgstr "Error al guardar institución de información."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:142 templates/map.html:188
+#: export.py:176 templates/map.html:188
 msgid "Export CSV"
 msgstr "Exportar CSV"
 
@@ -361,9 +376,14 @@ msgid "Facility details"
 msgstr "Detalles de la institución"
 
 #. Type of organization: Faith-based organization
-#: ../tools/setup.py:173
+#: ../tools/setup.py:224
 msgid "Faith-based"
 msgstr "Basada en la fe"
+
+#. fax number
+#: ../tools/setup.py:174
+msgid "Fax"
+msgstr "Fax"
 
 #. Label; field or attribute
 #: templates/hospital_email.html:119
@@ -371,12 +391,12 @@ msgid "Field"
 msgstr "Variada"
 
 #. Facility operational status: as functional as a field hospital
-#: ../tools/setup.py:219
+#: ../tools/setup.py:272
 msgid "Field hospital"
 msgstr "Hospital de campo"
 
 #. Facility operational status: as functional as a field hospital next to a hospital
-#: ../tools/setup.py:222
+#: ../tools/setup.py:275
 msgid "Field hospital co-located with hospital"
 msgstr "Hospital de campo al lado de un hospital"
 
@@ -401,7 +421,7 @@ msgid "For more information on all subscribed facilities, please visit"
 msgstr "Para más información sobre todas las instalaciones, visite"
 
 #. Type of organization: For-profit organization
-#: ../tools/setup.py:175
+#: ../tools/setup.py:226
 msgid "For-profit"
 msgstr "Con fines de lucro"
 
@@ -411,12 +431,17 @@ msgid "General Info"
 msgstr "Información general"
 
 #. Service provided by a health facility (use Title Case). Meaning: surgical specialty that focuses on abdominal organs
-#: ../tools/setup.py:231
+#: ../tools/setup.py:284
 msgid "General Surgery"
 msgstr "Cirugía General"
 
+#. Link to this subject in Google Maps
+#: ../tools/setup.py:196
+msgid "Google Maps Link"
+msgstr "Enlace Google Maps"
+
 #. Proper name of an ID for a health facility defined by the  Pan-American Health Organization; no translation necessary.
-#: ../tools/setup.py:121 templates/hospital_bubble.html:56 static/locale.js:114
+#: templates/haiti_hospital_bubble.html:25 static/locale.js:114 ../tools/setup.py:158
 msgid "HealthC ID"
 msgstr "ID HealthC"
 
@@ -436,9 +461,14 @@ msgid "Home"
 msgstr "Página principal"
 
 #. Category of health facility: Hospital.
-#: ../tools/setup.py:195
+#: ../tools/setup.py:246
 msgid "Hospital"
 msgstr "Hospital"
+
+#. Proper name of an ID for a health facility
+#: templates/hospital_bubble.html:56 ../tools/setup.py:160
+msgid "ID"
+msgstr "Identificación"
 
 #. Explains how to correct incorrect information that has been printed.
 #: templates/print.html:166
@@ -446,7 +476,7 @@ msgid "If any information is wrong or missing, please correct it on the web site
 msgstr "Si la información es incorrecta o no está especificada, modificala en el sitio web:"
 
 #. Service provided by a health facility (use Title Case). Meaning: specializing in treating communicable diseases
-#: ../tools/setup.py:251
+#: ../tools/setup.py:304
 msgid "Infectious Disease"
 msgstr "Enfermedades Infecciosas"
 
@@ -456,7 +486,7 @@ msgid "Instant"
 msgstr "Inmediato"
 
 #. Service provided by a health facility (use Title Case). Meaning: deals with diagnosis and (non-surgical) treatment of Meaning: diseases of the internal organs
-#: ../tools/setup.py:245
+#: ../tools/setup.py:298
 msgid "Internal Medicine"
 msgstr "Medicina Interna"
 
@@ -471,7 +501,7 @@ msgid "Invalid or missing account e-mail."
 msgstr "Nombre de la institución no válido o no especificado"
 
 #. Error message for request missing subject name.
-#: bubble.py:140 edit.py:449
+#: edit.py:449 bubble.py:172
 msgid "Invalid or missing subject name."
 msgstr "Nombre de la institución no válido o no especificado"
 
@@ -486,8 +516,13 @@ msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
 msgstr "Ene feb mar abr may jun jul ago sept oct nov dic"
 
 #. Service provided by a health facility (use Title Case).
-#: ../tools/setup.py:273
+#: ../tools/setup.py:326
 msgid "Lab"
+msgstr "Laboratorio"
+
+#. Category of health facility: A laboratory
+#: ../tools/setup.py:250
+msgid "Laboratory"
 msgstr "Laboratorio"
 
 #. Label for a language selector
@@ -536,7 +571,7 @@ msgid "Loading..."
 msgstr "Cargando..."
 
 #. latitude, longitude location
-#: ../tools/setup.py:143
+#: ../tools/setup.py:192
 msgid "Location"
 msgstr "Ubicación"
 
@@ -561,22 +596,22 @@ msgid "Longitude must be between -180 and 180."
 msgstr "La longitud debe estar entre -180 y 180"
 
 #. Service provided by a health facility (use Title Case). Meaning: Care for cognitive and emotional well-being.
-#: ../tools/setup.py:268
+#: ../tools/setup.py:321
 msgid "Mental Health"
 msgstr "Salud Mental"
 
 #. Type of organization: Organization associated with armed forces
-#: ../tools/setup.py:177
+#: ../tools/setup.py:228
 msgid "Military"
 msgstr "Militar"
 
 #. Type of organization: Organization with mixed function
-#: ../tools/setup.py:179
+#: ../tools/setup.py:230
 msgid "Mixed"
 msgstr "Variada"
 
 #. Category of health facility: A mobile clinic.
-#: ../tools/setup.py:197
+#: ../tools/setup.py:248
 msgid "Mobile clinic"
 msgstr "Clínica móvil"
 
@@ -586,17 +621,17 @@ msgid "Monthly"
 msgstr "Mensual"
 
 #. Service provided by a health facility (use Title Case). Meaning: Corpse removal
-#: ../tools/setup.py:282
+#: ../tools/setup.py:335
 msgid "Mortuary Services"
 msgstr "Servicio de Pompas Fúnebres"
 
 #. Type of organization: Non-governmental organization
-#: ../tools/setup.py:181
+#: ../tools/setup.py:232
 msgid "NGO"
 msgstr "ONG"
 
 #. a person's name
-#: ../tools/setup.py:113 edit.py:116
+#: ../tools/setup.py:150 edit.py:116
 msgid "Name"
 msgstr "Nombre"
 
@@ -606,7 +641,7 @@ msgid "Name (required)"
 msgstr "Nombre (requerido)"
 
 #. service provided by a health facility (use Title Case). Meaning: surgery that involves the nervous system
-#: ../tools/setup.py:238
+#: ../tools/setup.py:291
 msgid "Neurosurgery"
 msgstr "Neurocirugía"
 
@@ -616,7 +651,7 @@ msgid "New Value"
 msgstr "Nuevo valor"
 
 #. Form option for a false Boolean value
-#: edit.py:177 utils.py:334 utils_test.py:321
+#: utils.py:336 edit.py:177 utils_test.py:321
 msgid "No"
 msgstr "No"
 
@@ -637,12 +672,12 @@ msgid "No pending request for %(account_action)s by %(user)s"
 msgstr "No hay solicitud pendiente %(authorization_role)s para%(user)s "
 
 #. Facility operational status: cannot perform surgeries
-#: ../tools/setup.py:217
+#: ../tools/setup.py:270
 msgid "No surgical capacity"
 msgstr "No hay capacidad quirúrgica"
 
 #. Service provided by a health facility (use Title Case). Meaning: Obstetrics deals with childbirth and care of the mother. Meaning: Gynecology deals with diseases and hygiene of women
-#: ../tools/setup.py:265
+#: ../tools/setup.py:318
 msgid "Obstetrics and Gynecology"
 msgstr "Obstetricia y Ginecología"
 
@@ -657,32 +692,32 @@ msgid "Open/Total Beds"
 msgstr "Camas libres/totales"
 
 #. Facility operational status: in working order
-#: ../tools/setup.py:215
+#: ../tools/setup.py:268
 msgid "Operational"
 msgstr "Operacional"
 
 #. Whether or not a facility is fully operational.
-#: ../tools/setup.py:157
+#: ../tools/setup.py:208
 msgid "Operational status"
 msgstr "Estado operativo"
 
 #. Meaning: referring to the name of an organization
-#: ../tools/setup.py:147
+#: ../tools/setup.py:198
 msgid "Organization name"
 msgstr "Nombre de la organización"
 
 #. Type of organization (public, private, military, NGO, etc.)
-#: ../tools/setup.py:149
+#: ../tools/setup.py:200
 msgid "Organization type"
 msgstr "Tipo de organización"
 
 #. Service provided by a health facility (use Title Case). Meaning: treats diseases and injury to bones, muscles, joints and Meaning: tendons
-#: ../tools/setup.py:235
+#: ../tools/setup.py:288
 msgid "Orthopedics"
 msgstr "Ortopedia"
 
 #. Proper name of an ID for a health facility defined by the  Haiti ministry of health (MSPP); no translation necessary.
-#: ../tools/setup.py:118 static/locale.js:109 templates/hospital_bubble.html:61
+#: static/locale.js:109 ../tools/setup.py:155 templates/haiti_hospital_bubble.html:30
 msgid "PCode"
 msgstr "PCode"
 
@@ -692,12 +727,12 @@ msgid "Payload:"
 msgstr "Carga:"
 
 #. Service provided by a health facility (use Title Case). Meaning: branch of medicine dealing with infants and children
-#: ../tools/setup.py:254
+#: ../tools/setup.py:307
 msgid "Pediatrics"
 msgstr "Pediatría"
 
 #. telephone number
-#: edit.py:118 ../tools/setup.py:131
+#: edit.py:118 ../tools/setup.py:172
 msgid "Phone"
 msgstr "Teléfono"
 
@@ -712,7 +747,7 @@ msgid "Please call for availability information."
 msgstr "Llama para informarte acerca de la disponibilidad"
 
 #. Service provided by a health facility (use Title Case). care given after surgery until patient is discharged
-#: ../tools/setup.py:257
+#: ../tools/setup.py:310
 msgid "Postoperative Care"
 msgstr "Cuidados Posoperatorios"
 
@@ -738,12 +773,12 @@ msgid "Privacy"
 msgstr "Privacidad"
 
 #. Type of organization: Public (government) organization
-#: ../tools/setup.py:183
+#: ../tools/setup.py:234
 msgid "Public"
 msgstr "Público"
 
 #. Whether or not a facility can be accessed by a road.
-#: ../tools/setup.py:163
+#: ../tools/setup.py:214
 msgid "Reachable by road"
 msgstr "Acceso a través de carretera"
 
@@ -753,12 +788,12 @@ msgid "Record updated."
 msgstr "Registro actualizado."
 
 #. Service provided by a health facility (use Title Case). Meaning: care given to improve and recover lost function after an illness or injury that has caused functional limitations
-#: ../tools/setup.py:261
+#: ../tools/setup.py:314
 msgid "Rehabilitation"
 msgstr "Rehabilitación"
 
 #. Type of construction: concrete with metal and/or mesh added to provide extra support against stresses
-#: ../tools/setup.py:203
+#: ../tools/setup.py:256
 msgid "Reinforced concrete"
 msgstr "De hormigón armado"
 
@@ -800,12 +835,12 @@ msgid "Saving..."
 msgstr "Guardando..."
 
 #. Label for a selector to export data to CSV
-#: export.py:134
+#: export.py:168
 msgid "Select subject type to export:"
 msgstr "Seleccionar el tipo de institución de la exportación:"
 
 #. work done by someone that benefits another
-#: static/locale.js:154 ../tools/setup.py:127
+#: ../tools/setup.py:168 static/locale.js:154
 msgid "Services"
 msgstr "Servicios"
 
@@ -830,7 +865,7 @@ msgid "Show"
 msgstr "Mostrar"
 
 #. Link to sign into the app
-#: main.py:64
+#: main.py:65
 msgid "Sign in"
 msgstr "Acceder"
 
@@ -840,9 +875,14 @@ msgid "Sign in to edit"
 msgstr "Accede para modificar tus datos"
 
 #. Link to sign out of the app
-#: settings.py:71 main.py:62
+#: settings.py:71 main.py:63
 msgid "Sign out"
 msgstr "Cerrar sesión"
+
+#. Meaning: Top-level administrative subdivision of a country
+#: ../tools/setup.py:184
+msgid "State/Province/Territory"
+msgstr "Estado/Provincia/Territorio"
 
 #. Label to subscribe to a subject
 #: templates/hospital_bubble.html:41 static/locale.js:162
@@ -875,7 +915,7 @@ msgid "To change the frequency of these emails, please visit the"
 msgstr "Por favor, encontrar actualizaciones de abajo. Para cambiar la frecuencia de estos mensajes de correo electrónico, por favor visite su"
 
 #. Total number of beds at a hospital
-#: ../tools/setup.py:125
+#: ../tools/setup.py:166
 msgid "Total beds"
 msgstr "Cantidad total de camas"
 
@@ -900,12 +940,12 @@ msgid "Unchanged Subscribed Facilities"
 msgstr "Las Instalaciones Suscrito Sin Cambios"
 
 #. Type of organization: Organization associated with a university
-#: ../tools/setup.py:185
+#: ../tools/setup.py:236
 msgid "University"
 msgstr "Universidad"
 
 #. Type of construction: walls constructed of clay brick or concrete block
-#: ../tools/setup.py:206
+#: ../tools/setup.py:259
 msgid "Unreinforced masonry"
 msgstr "Mampostería no reforzada"
 
@@ -945,12 +985,12 @@ msgid "Value must be a number."
 msgstr "El valor debe ser un número"
 
 #. Service provided by a health facility (use Title Case). Meaning: surgical specialty that focuses on arteries and veins
-#: ../tools/setup.py:241
+#: ../tools/setup.py:294
 msgid "Vascular Surgery"
 msgstr "Cirugía Vascular"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:193
+#: templates/haiti_list_footer.html:28
 msgid "View Master List archive"
 msgstr "Ver archivo de la lista maestra"
 
@@ -965,17 +1005,17 @@ msgid "Weekly"
 msgstr "Semanal"
 
 #. Type of construction: timber jointed together with nails
-#: ../tools/setup.py:208
+#: ../tools/setup.py:261
 msgid "Wood frame"
 msgstr "Marco de madera"
 
 #. Service provided by a health facility (use Title Case).
-#: ../tools/setup.py:275
+#: ../tools/setup.py:328
 msgid "X-Ray"
 msgstr "Rayos X"
 
 #. Form option for a true Boolean value
-#: utils.py:334 edit.py:175 utils_test.py:320
+#: utils.py:336 edit.py:175 utils_test.py:320
 msgid "Yes"
 msgstr "Sí"
 
@@ -1008,7 +1048,7 @@ msgid "and with availability."
 msgstr "y con disponibilidad."
 
 #. a user with no identity
-#: main.py:59
+#: main.py:60
 msgid "anonymous"
 msgstr "anónimo"
 

@@ -39,24 +39,28 @@ def distance(start, finish):
 def point_inside_polygon(point, poly):
     """Returns true if the given point is inside the given polygon.
     point is given as an {'lat':y, 'lon':x} object in degrees
-    poly is given as a list of (longitude, latitude) tuples.
-
+    poly is given as a list of (longitude, latitude) tuples. The last vertex
+    is assumed to be the same as the first vertex.
     TODO(shakusa): poly should probably be expressed in a less-confusing way"""
     lat = point['lat']
     lon = point['lon']
     n = len(poly)
     inside = False
 
-    p1_lon, p1_lat = poly[0]
-    for i in range(n+1):
-        p2_lon, p2_lat = poly[i % n]
-        if lat > min(p1_lat, p2_lat):
-            if lat <= max(p1_lat, p2_lat):
-                if lon <= max(p1_lon, p2_lon):
-                    if p1_lat != p2_lat:
-                        lon_inters = (lat - p1_lat) * (p2_lon - p1_lon) / (p2_lat - p1_lat) + p1_lon
-                    if p1_lon == p2_lon or lon <= lon_inters:
-                        inside = not inside
-        p1_lon, p1_lat = p2_lon, p2_lat
-
+    # Count the parity of intersections of a horizontal eastward ray starting
+    # at (lon, lat). If even, point is outside, odd, point is inside
+    lon1, lat1 = poly[0]
+    for i in range(n + 1):
+        lon2, lat2 = poly[i % n]
+        # if our ray falls within the vertical coords of the edge
+        if min(lat1, lat2) < lat <= max(lat1, lat2):
+            # if our (eastward) ray starts before the edge and the edge is not
+            # horizontal
+            if lon <= max(lon1, lon2) and lat1 != lat2:
+                lon_inters = lon1 + (lat - lat1) * (lon2 - lon1) / (lat2 - lat1)
+                # if the intersection is beyond the start of the ray,
+                # we've crossed it
+                if lon <= lon_inters:
+                    inside = not inside
+        lon1, lat1 = lon2, lat2
     return inside
