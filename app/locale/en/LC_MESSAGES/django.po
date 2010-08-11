@@ -16,37 +16,37 @@ msgstr ""
 "Language: \n"
 
 #. Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
-#: static/locale.js:29
+#: static/locale.js:41
 #, sh-format
 msgid "${DATE} at ${TIME}"
 msgstr ""
 
 #. Time format (example 14:32 UTC-4)
-#: static/locale.js:178
+#: static/locale.js:194
 #, sh-format
 msgid "${HOURS}:${MINUTES} ${ZONE}"
 msgstr ""
 
 #. A distance (example: 3.11 miles (5 km))
-#: static/locale.js:47
+#: static/locale.js:59
 #, sh-format
 msgid "${MILES} miles (${KM} km)"
 msgstr ""
 
 #. Local date format (example: Jan 21, 2010)
-#: static/locale.js:33
+#: static/locale.js:45
 #, sh-format
 msgid "${MONTH} ${DAY}, ${YEAR}"
 msgstr ""
 
 #. Number of facilities within range of a location. (example: 5 Facilities within 10 miles)
-#: static/locale.js:104
+#: static/locale.js:116
 #, sh-format
 msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Message explaining how to add a latitude and longitude to a facility.
-#: static/locale.js:170
+#: static/locale.js:186
 #, sh-format
 msgid "${START_LINK}Sign in${END_LINK} to view the edit form and add a latitude and longitude."
 msgstr ""
@@ -70,6 +70,11 @@ msgstr ""
 #. Accuracy of latitude, longitude coordinates
 #: ../tools/setup.py:145
 msgid "Accuracy"
+msgstr ""
+
+#. Label to add a facility
+#: static/locale.js:25
+msgid "Add"
 msgstr ""
 
 #. Title for the form to add a new record
@@ -104,7 +109,7 @@ msgid "Alert status"
 msgstr ""
 
 #. Label for every item in a list.
-#: static/locale.js:25
+#: static/locale.js:29
 msgid "All"
 msgstr ""
 
@@ -114,7 +119,7 @@ msgid "Alternate name"
 msgstr ""
 
 #. Eror message, shown when an error occurs.
-#: static/locale.js:63
+#: static/locale.js:75
 msgid "An error has occurred. Please try again later."
 msgstr ""
 
@@ -154,7 +159,7 @@ msgid "Can pick up patients"
 msgstr ""
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:174
+#: templates/edit.html:174 static/locale.js:33
 msgid "Cancel"
 msgstr ""
 
@@ -191,6 +196,11 @@ msgstr ""
 #. Instructions for a menu of deployed instances of the application
 #: templates/subdomain_menu.html:40
 msgid "Choose a site:"
+msgstr ""
+
+#. Message explaining how to place a new subject on the map
+#: static/locale.js:37
+msgid "Click a location on the map to place the marker for a new facility."
 msgstr ""
 
 #. Category of health facility: Clinic
@@ -274,13 +284,13 @@ msgid "Dispensary"
 msgstr ""
 
 #. Displaying markers on a map for the NUM_FACILITIES closest to a  location
-#: static/locale.js:43
+#: static/locale.js:55
 #, sh-format
 msgid "Displaying ${NUM_FACILITIES} closest facilities"
 msgstr ""
 
 #. Displaying markers on a map for facilities within RADIUS_MILES miles of a location
-#: static/locale.js:38
+#: static/locale.js:50
 #, sh-format
 msgid "Displaying facilities within ${RADIUS_MILES} miles"
 msgstr ""
@@ -291,7 +301,7 @@ msgid "Distance"
 msgstr ""
 
 #. Meaning: administrative division
-#: static/locale.js:51 templates/map.html:149 ../tools/setup.py:137
+#: templates/map.html:149 ../tools/setup.py:137 static/locale.js:63
 msgid "District"
 msgstr ""
 
@@ -332,17 +342,17 @@ msgid "Error"
 msgstr ""
 
 #. Error message for not loading edit form successfully
-#: static/locale.js:79
+#: static/locale.js:91
 msgid "Error loading edit form."
 msgstr ""
 
 #. Error message for not loading facility information successfully
-#: static/locale.js:83
+#: static/locale.js:95
 msgid "Error loading facility information."
 msgstr ""
 
 #. Error message for not saving facility information successfully
-#: static/locale.js:95
+#: static/locale.js:107
 msgid "Error saving facility information."
 msgstr ""
 
@@ -357,7 +367,7 @@ msgid "Facilities with Changes"
 msgstr ""
 
 #. A place that provides a particular service
-#: static/locale.js:108 templates/print.html:129 templates/map.html:168 templates/settings.html:120
+#: templates/print.html:129 static/locale.js:120 templates/map.html:168 templates/settings.html:120
 msgid "Facility"
 msgstr ""
 
@@ -387,7 +397,7 @@ msgid "Field hospital co-located with hospital"
 msgstr ""
 
 #. Error message for required field.
-#: static/locale.js:67
+#: static/locale.js:79
 msgid "Field is required."
 msgstr ""
 
@@ -397,7 +407,7 @@ msgid "Filters"
 msgstr ""
 
 #. Tooltip explaining how to enable print mode
-#: static/locale.js:145
+#: static/locale.js:161
 msgid "First select a hospital from the list on the left. Then Print will print a list of hospitals in order of distance from your selection."
 msgstr ""
 
@@ -422,7 +432,7 @@ msgid "General Surgery"
 msgstr ""
 
 #. Proper name of an ID for a health facility defined by the  Pan-American Health Organization; no translation necessary.
-#: ../tools/setup.py:121 templates/hospital_bubble.html:56 static/locale.js:118
+#: ../tools/setup.py:121 static/locale.js:130 templates/hospital_bubble.html:56
 msgid "HealthC ID"
 msgstr ""
 
@@ -477,17 +487,17 @@ msgid "Invalid or missing account e-mail."
 msgstr ""
 
 #. Error message for request missing subject name.
-#: bubble.py:140 edit.py:449
+#: edit.py:455 bubble.py:140
 msgid "Invalid or missing subject name."
 msgstr ""
 
 #. Error message for a missing subject type.
-#: edit.py:441
+#: edit.py:447
 msgid "Invalid or missing subject type."
 msgstr ""
 
 #. Abbreviated months of the year.
-#: static/locale.js:127
+#: static/locale.js:139
 msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
 msgstr ""
 
@@ -517,12 +527,12 @@ msgid "Latitude"
 msgstr ""
 
 #. Error message for invalid latitude.
-#: static/locale.js:75
+#: static/locale.js:87
 msgid "Latitude must be a number."
 msgstr ""
 
 #. Error message for invalid latitude.
-#: static/locale.js:71
+#: static/locale.js:83
 msgid "Latitude must be between -90 and 90."
 msgstr ""
 
@@ -537,7 +547,7 @@ msgid "Loader:"
 msgstr ""
 
 #. Indicator that the application is loading.
-#: static/locale.js:122 templates/base.html:148
+#: static/locale.js:134 templates/base.html:148
 msgid "Loading..."
 msgstr ""
 
@@ -557,12 +567,12 @@ msgid "Longitude"
 msgstr ""
 
 #. Error message for invalid longitude.
-#: static/locale.js:91
+#: static/locale.js:103
 msgid "Longitude must be a number."
 msgstr ""
 
 #. Error message for invalid longitude.
-#: static/locale.js:87
+#: static/locale.js:99
 msgid "Longitude must be between -180 and 180."
 msgstr ""
 
@@ -621,6 +631,11 @@ msgstr ""
 msgid "New Value"
 msgstr ""
 
+#. Label for a new subject
+#: static/locale.js:143
+msgid "New facility"
+msgstr ""
+
 #. Form option for a false Boolean value
 #: edit.py:177 utils.py:334 utils_test.py:321
 msgid "No"
@@ -658,7 +673,7 @@ msgid "Old Value"
 msgstr ""
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
-#: static/locale.js:136
+#: static/locale.js:152
 msgid "Open/Total Beds"
 msgstr ""
 
@@ -688,7 +703,7 @@ msgid "Orthopedics"
 msgstr ""
 
 #. Proper name of an ID for a health facility defined by the  Haiti ministry of health (MSPP); no translation necessary.
-#: ../tools/setup.py:118 templates/hospital_bubble.html:61 static/locale.js:113
+#: ../tools/setup.py:118 templates/hospital_bubble.html:61 static/locale.js:125
 msgid "PCode"
 msgstr ""
 
@@ -733,7 +748,7 @@ msgid "Print"
 msgstr ""
 
 #. Tooltip explaining a 'Print' link
-#: static/locale.js:150
+#: static/locale.js:166
 #, sh-format
 msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr ""
@@ -754,7 +769,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:539
+#: edit.py:547
 msgid "Record updated."
 msgstr ""
 
@@ -801,7 +816,7 @@ msgid "Saved."
 msgstr ""
 
 #. Message indicating saving hospital information
-#: static/locale.js:158
+#: static/locale.js:174
 msgid "Saving..."
 msgstr ""
 
@@ -811,7 +826,7 @@ msgid "Select subject type to export:"
 msgstr ""
 
 #. work done by someone that benefits another
-#: static/locale.js:162 ../tools/setup.py:127
+#: static/locale.js:178 ../tools/setup.py:127
 msgid "Services"
 msgstr ""
 
@@ -831,7 +846,7 @@ msgid "Settings page"
 msgstr ""
 
 #. Label for a control that filters a list of facilities
-#: static/locale.js:166
+#: static/locale.js:182
 msgid "Show"
 msgstr ""
 
@@ -851,7 +866,7 @@ msgid "Sign out"
 msgstr ""
 
 #. Label to subscribe to a subject
-#: static/locale.js:174 templates/hospital_bubble.html:41
+#: templates/hospital_bubble.html:41 static/locale.js:190
 msgid "Subscribe to email updates"
 msgstr ""
 
@@ -871,7 +886,7 @@ msgid "Thanks for adding content to Resource Finder. To get started please creat
 msgstr ""
 
 #. Notification for a facility with missing location information.
-#: static/locale.js:131
+#: static/locale.js:147
 msgid "This facility does not yet have a location entered."
 msgstr ""
 
@@ -921,7 +936,7 @@ msgid "Unreinforced masonry"
 msgstr ""
 
 #. Label to unsubscribe from a subject
-#: static/locale.js:182 templates/hospital_bubble.html:36
+#: templates/hospital_bubble.html:36 static/locale.js:198
 msgid "Unsubscribe"
 msgstr ""
 
@@ -931,12 +946,12 @@ msgid "Unsubscribe from checked"
 msgstr ""
 
 #. Message indicating the user is unsubscribed
-#: static/locale.js:186
+#: static/locale.js:202
 msgid "Unsubscribed."
 msgstr ""
 
 #. Label indicating a record was updated
-#: static/locale.js:190
+#: static/locale.js:206
 msgid "Updated"
 msgstr ""
 
@@ -951,7 +966,7 @@ msgid "User"
 msgstr ""
 
 #. Error message for a value that is not a number
-#: static/locale.js:99
+#: static/locale.js:111
 msgid "Value must be a number."
 msgstr ""
 
@@ -997,18 +1012,18 @@ msgid "You already have \"%(action)s\" permission"
 msgstr ""
 
 #. Notifies user how to add latitude and longitude values.
-#: static/locale.js:55
+#: static/locale.js:67
 msgid "You can add a latitude and longitude in the edit form."
 msgstr ""
 
 #. Saved message; e-mail subscription has been saved
-#: static/locale.js:59
+#: static/locale.js:71
 #, sh-format
 msgid "You will receive ${FREQUENCY} email updates for this facility. Use the ${START_LINK}Settings${END_LINK} page to change subscription settings."
 msgstr ""
 
 #. Message indicating hospital information has been saved
-#: static/locale.js:154
+#: static/locale.js:170
 msgid "Your edit has been saved"
 msgstr ""
 
@@ -1044,7 +1059,7 @@ msgid "no more than 10 miles away"
 msgstr ""
 
 #. Very short abbreviation for a phone number, indended to disambiguate from a fax number.  (example: p 555-555-5555)
-#: static/locale.js:141
+#: static/locale.js:157
 #, sh-format
 msgid "p ${PHONE}"
 msgstr ""

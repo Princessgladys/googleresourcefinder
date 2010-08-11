@@ -21,8 +21,17 @@
 locale = function() {
   var messages = {};
 
+  //i18n: Label to add a facility
+  messages.ADD = "A\u00f1adir";
+
   //i18n: Label for every item in a list.
   messages.ALL = "Todos";
+
+  //i18n: Label for a cancel link
+  messages.CANCEL = "Cancelar";
+
+  //i18n: Message explaining how to place a new subject on the map
+  messages.CLICK_TO_ADD_SUBJECT = "Haga clic en una ubicaci\u00f3n en el mapa para colocar el marcador de una nueva instalaci\u00f3n.";
 
   //i18n: Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME = "${DATE} a las ${TIME}";
@@ -101,6 +110,9 @@ locale = function() {
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "Ene feb mar abr may jun jul ago sept oct nov dic".split(' ');
+
+  //i18n: Label for a new subject
+  messages.NEW_SUBJECT = "Nueva planta";
 
   //i18n: Notification for a facility with missing location information.
   messages.NO_LOCATION_ENTERED = "Esta instituci\u00f3n no dispone a\u00fan de un lugar entr\u00f3.";

@@ -21,8 +21,17 @@
 locale = function() {
   var messages = {};
 
+  //i18n: Label to add a facility
+  messages.ADD = "Ajouter";
+
   //i18n: Label for every item in a list.
   messages.ALL = "Tous";
+
+  //i18n: Label for a cancel link
+  messages.CANCEL = "Annuler";
+
+  //i18n: Message explaining how to place a new subject on the map
+  messages.CLICK_TO_ADD_SUBJECT = "Cliquez sur un emplacement sur la carte pour placer le marqueur d'une nouvelle installation.";
 
   //i18n: Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME = "${DATE} \u00e0 ${TIME}";
@@ -101,6 +110,9 @@ locale = function() {
   // Month indices run from 0 to 11 (Jan to Dec)
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "janv. f\u00e9vr. mars avr. mai juin juil. ao\u00fbt sept. oct. nov. d\u00e9c.".split(' ');
+
+  //i18n: Label for a new subject
+  messages.NEW_SUBJECT = "Une nouvelle installation";
 
   //i18n: Notification for a facility with missing location information.
   messages.NO_LOCATION_ENTERED = "Cette \u00e9tablissement ne dispose pas encore d'un emplacement est entr\u00e9";

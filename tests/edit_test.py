@@ -144,7 +144,7 @@ class EditTest(SeleniumTestCase):
             self.open_path(
                 '/edit?subdomain=haiti&subject_name=%s' % extra_names[0])
 
-        self.run_edit(login, save, edit)
+        self.run_edit(login, save, edit, True)
 
     def test_inplace_edit(self):
         """In-place edit: Confirms that all the fields in the in-place edit
@@ -162,7 +162,7 @@ class EditTest(SeleniumTestCase):
 
         self.run_edit(login, save, edit)
 
-    def run_edit(self, login_func, save_func, edit_func):
+    def run_edit(self, login_func, save_func, edit_func, add_new=False):
         """Runs the edit flow, for use in both inplace and separate page
         editing."""
 
@@ -206,7 +206,10 @@ class EditTest(SeleniumTestCase):
 
         # Check that the facility list is updated
         regex = Regex('.*1 / 2.*General Surgery.*')
-        self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
+        if add_new:
+            self.wait_for_load()
+        else:
+            self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
 
         edit_func(self)
 
@@ -242,7 +245,10 @@ class EditTest(SeleniumTestCase):
         # Check that the facility list is updated to reflect the emptying
         # Note the en-dash \u2013 implies "no value"
         regex = Regex(u'.*\u2013 / \u2013')
-        self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
+        if add_new:
+            self.wait_for_load()
+        else:
+            self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
 
         edit_func(self)
 
@@ -260,7 +266,10 @@ class EditTest(SeleniumTestCase):
 
         # Check that the facility list is updated to show the zeros
         regex = Regex('.*0 / 0')
-        self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
+        if add_new:
+            self.wait_for_load()
+        else:
+            self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
 
         edit_func(self)
 
@@ -449,7 +458,8 @@ class EditTest(SeleniumTestCase):
         self.wait_for_load()
 
         # Check that we got back to the main map
-        assert self.get_location() == self.config.base_url + '/?subdomain=haiti'
+        assert self.config.base_url in self.get_location()
+        assert 'subdomain=haiti' in self.get_location()
 
         # Test bubble change history comments
         self.click('id=subject-1')
