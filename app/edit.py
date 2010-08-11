@@ -434,12 +434,15 @@ class Edit(utils.Handler):
         if self.params.add_new:
             # Need 'add' permission to see or submit the edit form.
             self.require_action_permitted('add')
-            # Create a dummy subject
-            self.subject = model.Subject.create(
-                self.subdomain, 'foo', None, None)
+            # Initialize self.subject to nothing
+            self.subject = None
             lat = self.request.get('lat')
             lon = self.request.get('lon')
             if lat and lon:
+                # Create a dummy subject if we have attributes to work with.
+                # Will only happy on GET to populate the edit form.
+                self.subject = model.Subject.create(
+                    self.subdomain, 'foo', None, None)
                 self.subject.set_attribute('location', db.GeoPt(lat, lon), None,
                                            None, None, None, None)
             self.subject_type = cache.SUBJECT_TYPES[self.subdomain].get(
