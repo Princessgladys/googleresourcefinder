@@ -141,7 +141,7 @@ tr.field.text { vertical-align: top; }
           <div id="{{field.name}}_errorbox" class="errorbox-good">
             {{field.input}}
             <input type="hidden" name="editable.{{field.name}}"
-                   value="{{field.json|escape}}"/>
+                   value="{{field.previous|escape}}"/>
             <div id="{{field.name}}_errormsg" class="hidden"></div>
           </div>
       {% if not params.embed %}
