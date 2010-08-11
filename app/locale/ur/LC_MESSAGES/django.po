@@ -248,7 +248,7 @@ msgid "Date and time"
 msgstr "تاریخ اور وقت"
 
 #. Label for change default frequency box
-#: templates/settings.html:98
+#: templates/settings.html:105
 msgid "Default frequency:"
 msgstr "ڈیفالٹ تعدد:"
 
@@ -285,7 +285,7 @@ msgid "Distance"
 msgstr "دوری"
 
 #. Meaning: administrative division
-#: static/locale.js:51 templates/map.html:147 ../tools/setup.py:137
+#: static/locale.js:51 ../tools/setup.py:137 templates/map.html:157
 msgid "District"
 msgstr "ضلع"
 
@@ -311,12 +311,12 @@ msgid "Edited by"
 msgstr "ترمیم کردہ بذریعہ"
 
 #. Settings page title
-#: templates/settings.html:71
+#: templates/settings.html:78
 msgid "Email Subscription Settings"
 msgstr "ای میل رکنیت کی ترتیبات"
 
 #. Label for e-mail type radio buttons
-#: templates/settings.html:79
+#: templates/settings.html:86
 msgid "Email format:"
 msgstr "ای میل کی شکل:"
 
@@ -341,7 +341,7 @@ msgid "Error saving facility information."
 msgstr "سہولت کی معلومات محفوظ کرنے میں غلطی۔"
 
 #. Button to export data to comma-separated-value format.
-#: export.py:142 templates/map.html:188
+#: export.py:142 templates/map.html:199
 msgid "Export CSV"
 msgstr "CSV برآمد کریں"
 
@@ -351,7 +351,7 @@ msgid "Facilities with Changes"
 msgstr "سہولیات مع تبدیلیاں"
 
 #. A place that provides a particular service
-#: templates/map.html:166 templates/print.html:129 templates/settings.html:120 static/locale.js:104
+#: templates/settings.html:127 templates/print.html:129 templates/map.html:176 static/locale.js:104
 msgid "Facility"
 msgstr "سہولت"
 
@@ -386,7 +386,7 @@ msgid "Field is required."
 msgstr "فیلڈ مطلوب ہے۔"
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:121
+#: templates/map.html:131
 msgid "Filters"
 msgstr "فلٹرز"
 
@@ -425,8 +425,8 @@ msgstr "HealthC ID"
 msgid "Hello"
 msgstr "ہیلو"
 
-#. Link to go to a help page for the application
-#: templates/base.html:120
+#. TODO: Add missing message description or meaning
+#: templates/base.html:122
 msgid "Help"
 msgstr "مدد"
 
@@ -490,11 +490,6 @@ msgstr "جنوری فروری مارچ اپریل مئی جون جولائی ا�
 msgid "Lab"
 msgstr "لیب"
 
-#. Label for a language selector
-#: templates/base.html:85
-msgid "Language:"
-msgstr "زبان:"
-
 #. Label for the last update time
 #: templates/hospital_email.html:90 templates/hospital_email.html.py:188
 msgid "Last Updated:"
@@ -520,6 +515,11 @@ msgstr "عرض البلد ایک عدد ہونا چاہیے۔"
 msgid "Latitude must be between -90 and 90."
 msgstr "عرض البلد -90 اور 90 کے درمیان ہونا چاہیے۔"
 
+#. TODO: Add missing message description or meaning
+#: templates/base.html:103
+msgid "Legal"
+msgstr ""
+
 #. Button text to load data
 #: templates/load.html:57
 msgid "Load"
@@ -531,7 +531,7 @@ msgid "Loader:"
 msgstr "لوڈ کرنے والا:"
 
 #. Indicator that the application is loading.
-#: templates/base.html:148 static/locale.js:118
+#: static/locale.js:118 templates/base.html:169
 msgid "Loading..."
 msgstr "لوڈ ہورہا ہے..."
 
@@ -616,7 +616,7 @@ msgid "New Value"
 msgstr "نئی قدر"
 
 #. Form option for a false Boolean value
-#: edit.py:177 utils.py:334 utils_test.py:321
+#: edit.py:177 utils_test.py:321 utils.py:337
 msgid "No"
 msgstr "نہیں"
 
@@ -626,7 +626,7 @@ msgid "No availability information"
 msgstr "فراہمی کی معلومات نہیں ہے"
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:134
+#: templates/settings.html:141
 msgid "No facilities to display."
 msgstr "ڈسپلے کیلئے کوئی سہولیات نہیں ہیں۔"
 
@@ -702,7 +702,7 @@ msgid "Phone"
 msgstr "فون"
 
 #. Label for "plain text" radio button
-#: templates/settings.html:86
+#: templates/settings.html:93
 msgid "Plain text"
 msgstr "سادہ متن"
 
@@ -721,11 +721,6 @@ msgstr "آپریشن کے بعد کی نگہداشت"
 msgid "Previous value"
 msgstr "سابقہ قدر"
 
-#. Link to print the current view of the application
-#: templates/base.html:108
-msgid "Print"
-msgstr "پرنٹ کریں"
-
 #. Tooltip explaining a 'Print' link
 #: static/locale.js:142
 #, sh-format
@@ -733,7 +728,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "${FACILITY_NAME} سے دوری کے لحاظ سے ہسپتالوں کی فہرست پرنٹ کریں"
 
 #. Link to privacy policy for the application
-#: templates/base.html:130
+#: templates/base.html:116
 msgid "Privacy"
 msgstr "رازداری"
 
@@ -790,7 +785,7 @@ msgid "Save"
 msgstr "محفوظ کریں"
 
 #. Notice that a change has been saved.
-#: templates/settings.html:61
+#: templates/settings.html:68
 msgid "Saved."
 msgstr "محفوظ ہوگیا۔"
 
@@ -810,12 +805,12 @@ msgid "Services"
 msgstr "خدمات"
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:167
+#: templates/settings.html:174
 msgid "Set checked to default"
 msgstr "نشان زد کو ڈیفالٹ پر ترتیب دیں"
 
 #. Link to go to the settings page of the application
-#: templates/base.html:114
+#: templates/base.html:134
 msgid "Settings"
 msgstr "ترتیبات"
 
@@ -850,12 +845,12 @@ msgid "Subscribe to email updates"
 msgstr "ای میل تازہ کاریوں کی رکنیت حاصل کریں"
 
 #. Header for a list of provisions
-#: templates/map.html:101
+#: templates/map.html:111
 msgid "Supplies"
 msgstr "ساز و سامان"
 
 #. Link to terms of service for the application
-#: templates/base.html:125
+#: templates/base.html:109
 msgid "Terms of Service"
 msgstr "خدمت کی شرائط"
 
@@ -890,7 +885,7 @@ msgid "URL:"
 msgstr "URL:"
 
 #. Error message
-#: utils.py:142
+#: utils.py:143
 msgid "Unauthorized user."
 msgstr "غیر مجاز صارف۔"
 
@@ -915,7 +910,7 @@ msgid "Unsubscribe"
 msgstr "رکنیت ختم کریں"
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:174
+#: templates/settings.html:181
 msgid "Unsubscribe from checked"
 msgstr "نشان زد سے رکنیت ختم کریں"
 
@@ -950,7 +945,7 @@ msgid "Vascular Surgery"
 msgstr "عروقی سرجری"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:193
+#: templates/map.html:206
 msgid "View Master List archive"
 msgstr "Master List کا ذخیرہ دیکھیں"
 
@@ -975,7 +970,7 @@ msgid "X-Ray"
 msgstr "ایکسرے"
 
 #. Form option for a true Boolean value
-#: utils.py:334 edit.py:175 utils_test.py:320
+#: utils.py:337 edit.py:175 utils_test.py:320
 msgid "Yes"
 msgstr "ہاں"
 

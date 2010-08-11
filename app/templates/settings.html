@@ -23,6 +23,13 @@
   {% if params.lang_bidi %}
     <link rel="stylesheet" href="static/map-rtl.css">
   {% endif %}
+  {% if params.iframe %}
+    <link rel="stylesheet" href="static/map-iframe.css">
+    {% if params.lang_bidi %}
+      <link rel="stylesheet" href="static/map-iframe-rtl.css">
+    {% endif %}
+  {% endif %}
+
 {% endblock stylesheets %}
 
 {% comment %}

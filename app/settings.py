@@ -74,6 +74,7 @@ class Settings(Handler):
                     locale=self.account.locale,
                     subjects=subjects,
                     user_email_format=self.account.email_format,
+                    user=self.user,
                     subdomain=self.subdomain)
 
 if __name__ == '__main__':
