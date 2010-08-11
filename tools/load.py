@@ -310,7 +310,7 @@ def convert_pakistan_record(index, record):
 
     if not (point_inside_polygon(
         {'lat': latitude, 'lon': longitude}, PAKISTAN_FLOOD_POLYGON) or
-        record.get('sub_admin_area', '') in PAKISTAN_FLOOD_BORDER_DISTRICTS):
+        record.get('sub_admin_area', '') in PAKISTAN_FLOOD_DISTRICTS):
         return None, None, None
 
     return subject_name, observed, {
