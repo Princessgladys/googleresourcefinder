@@ -470,7 +470,8 @@ class Edit(utils.Handler):
             comment = self.subject and self.subject.get_comment(name) or ''
             if can_edit(self.account, self.subdomain, attribute,
                         self.params.add_new):
-                if self.params.add_new and self.subject.get_value(name):
+                value = self.subject.get_value(name)
+                if self.params.add_new and (value or value == 0):
                     previous_value = ''
                 else:
                     previous_value = render_attribute_as_json(
