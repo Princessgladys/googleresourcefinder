@@ -433,13 +433,13 @@ function place_new_subject_marker(latlng) {
 }
 
 function update_lat_lng(latlng) {
-  lat_elem = document.getElementsByName('location.lat')[0];
-  if (lat_elem) {
-    lat_elem.value = latlng.lat();
+  lat_elems = document.getElementsByName('location.lat');
+  if (lat_elems.length > 0) {
+    lat_elems[0].value = latlng.lat();
   }
-  lng_elem = document.getElementsByName('location.lon')[0];
-  if (lng_elem) {
-    lng_elem.value = latlng.lng();
+  lng_elems = document.getElementsByName('location.lon');
+  if (lng_elems.length > 0) {
+    lng_elems[0].value = latlng.lng();
   }
 }
 

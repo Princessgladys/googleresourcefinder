@@ -52,7 +52,7 @@ msgid "${START_LINK}Sign in${END_LINK} to view the edit form and add a latitude 
 msgstr "Accede para ver el editar formulario y agregar una latitud y longitud."
 
 #. Error message for lacking edit permissions
-#: edit.py:383
+#: edit.py:381
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s no tiene permiso para editar %(a)s"
@@ -487,12 +487,12 @@ msgid "Invalid or missing account e-mail."
 msgstr "Nombre de la institución no válido o no especificado"
 
 #. Error message for request missing subject name.
-#: bubble.py:140 edit.py:459
+#: edit.py:457 bubble.py:140
 msgid "Invalid or missing subject name."
 msgstr "Nombre de la institución no válido o no especificado"
 
 #. Error message for a missing subject type.
-#: edit.py:451
+#: edit.py:449
 msgid "Invalid or missing subject type."
 msgstr "Nombre de la institución no válido o no especificado"
 
@@ -769,7 +769,7 @@ msgid "Reachable by road"
 msgstr "Acceso a través de carretera"
 
 #. Record updated successfully.
-#: edit.py:550
+#: edit.py:553
 msgid "Record updated."
 msgstr "Registro actualizado."
 

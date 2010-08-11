@@ -281,7 +281,7 @@ def apply_change(subject, minimal_subject, report, subject_type,
                                 subject_type, request, attribute,
                                 change_metadata)
 
-def has_changed(subject, request, attribute, new=False):
+def has_changed(subject, request, attribute):
     """Returns True if the request has an input for the given attribute
     and that attribute has changed from the previous value in the subject."""
     name = attribute.key().name()
@@ -289,8 +289,6 @@ def has_changed(subject, request, attribute, new=False):
         name, request.get(name, None), request, attribute)
     current = to_json(value)
     previous = request.get('editable.%s' % name, None)
-    if new and name == 'location':
-        return True
     return previous != current
 
 def has_comment_changed(subject, request, attribute):
@@ -371,7 +369,7 @@ def update(subject_name, subject_type, request, user, account, attributes,
         # at the time the page was rendered, the new value has to be
         # different than the one in the subject at the time the page
         # rendered, and the user has to have permission to edit it now.
-        value_changed = has_changed(subject, request, attribute, new)
+        value_changed = has_changed(subject, request, attribute)
         comment_changed = has_comment_changed(
             subject, request, attribute)
         if (is_editable(request, attribute) and
@@ -472,12 +470,17 @@ class Edit(utils.Handler):
             comment = self.subject and self.subject.get_comment(name) or ''
             if can_edit(self.account, self.subdomain, attribute,
                         self.params.add_new):
+                if self.params.add_new and self.subject.get_value(name):
+                    previous_value = ''
+                else:
+                    previous_value = render_attribute_as_json(
+                        self.subject, attribute)
                 fields.append({
                     'name': name,
                     'title': get_message('attribute_name', name),
                     'type': attribute.type,
                     'input': make_input(self.subject, attribute),
-                    'json': render_attribute_as_json(self.subject, attribute),
+                    'previous': previous_value,
                     'comment': '',
                 })
             else:
