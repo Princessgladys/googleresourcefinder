@@ -397,7 +397,9 @@ function initialize_map() {
       show_status(null);
       place_new_subject_marker(event.latLng);
       inplace_edit_start(make_add_new_subject_url());
+      _gaq.push(['_trackEvent', 'add', 'drop', 'new_subject']);
     });
+    _gaq.push(['_trackEvent', 'add', 'start', 'new_subject']);
   });
   map.controls[google.maps.ControlPosition.TOP_LEFT].push(new_subject_button);
 }
@@ -414,13 +416,14 @@ function cancel_add_subject() {
     new_subject_marker.setVisible(false);
     new_subject_marker = null;
   }
+  _gaq.push(['_trackEvent', 'add', 'cancel', 'new_subject']);
 }
 
 function place_new_subject_marker(latlng) {
   new_subject_marker = new google.maps.Marker({
     position: latlng,
     map: map,
-    icon: make_icon(null, 1, null, null, null, '066'),
+    icon: make_icon(null, 1, null, null, null, 'f60'),
     title: locale.NEW_SUBJECT(),
     draggable: true
   });
@@ -430,8 +433,14 @@ function place_new_subject_marker(latlng) {
 }
 
 function update_lat_lng(latlng) {
-  document.getElementsByName('location.lat')[0].value = latlng.lat();
-  document.getElementsByName('location.lon')[0].value = latlng.lng();
+  lat_elem = document.getElementsByName('location.lat')[0];
+  if (lat_elem) {
+    lat_elem.value = latlng.lat();
+  }
+  lng_elem = document.getElementsByName('location.lon')[0];
+  if (lng_elem) {
+    lng_elem.value = latlng.lng();
+  }
 }
 
 // Reduce the opacity of the map layer to make markers stand out.
@@ -1575,6 +1584,11 @@ function make_edit_url(subject_name) {
   return edit_url_template + subject_name;
 }
 
+/**
+ * Creates URL to an inplace edit form for a new subject
+ * @param {String} optional - the subject type for the new subject
+ * @return {String} the edit URL for the new subject
+ */
 function make_add_new_subject_url(opt_subject_type) {
   var subject_type = opt_subject_type || '';
   // TODO(pfritzsche): prompt user for a decision on which subject type to use
@@ -1661,6 +1675,9 @@ function inplace_edit_save(edit_url) {
       },
       success: function(data) {
         if (new_subject_marker) {
+            // If the save was for a new subject, edit.py will write query
+            // parameters necessary to redirect to the home page and select the
+            // newly created subject to the response.
             window.location = 'http://' + window.location.host + data;
         }
         $('data').style.display = '';

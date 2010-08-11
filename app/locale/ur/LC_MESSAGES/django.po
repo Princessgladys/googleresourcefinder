@@ -52,7 +52,7 @@ msgid "${START_LINK}Sign in${END_LINK} to view the edit form and add a latitude 
 msgstr ""
 
 #. Error message for lacking edit permissions
-#: edit.py:380
+#: edit.py:383
 #, python-format
 msgid "%(user)s does not have permission to edit %(a)s"
 msgstr "%(user)s کو %(a) میں ترمیم کرنے کی اجازت نہیں ہے"
@@ -487,12 +487,12 @@ msgid "Invalid or missing account e-mail."
 msgstr "ای میل اکاؤنٹ غلط یا چھوٹا ہوا ہے۔"
 
 #. Error message for request missing subject name.
-#: edit.py:455 bubble.py:140
+#: bubble.py:140 edit.py:459
 msgid "Invalid or missing subject name."
 msgstr "مریض کا نام غلط یا چھوٹا ہوا ہے۔"
 
 #. Error message for a missing subject type.
-#: edit.py:447
+#: edit.py:451
 msgid "Invalid or missing subject type."
 msgstr "مریض کا نام غلط یا چھوٹا ہوا ہے۔"
 
@@ -769,7 +769,7 @@ msgid "Reachable by road"
 msgstr "بذریعہ سڑک قابل رسائی"
 
 #. Record updated successfully.
-#: edit.py:547
+#: edit.py:550
 msgid "Record updated."
 msgstr "ریکارڈ کی تجدید ہوگئی۔"
 

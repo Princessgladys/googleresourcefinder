@@ -281,7 +281,7 @@ def apply_change(subject, minimal_subject, report, subject_type,
                                 subject_type, request, attribute,
                                 change_metadata)
 
-def has_changed(subject, request, attribute):
+def has_changed(subject, request, attribute, new=False):
     """Returns True if the request has an input for the given attribute
     and that attribute has changed from the previous value in the subject."""
     name = attribute.key().name()
@@ -289,6 +289,8 @@ def has_changed(subject, request, attribute):
         name, request.get(name, None), request, attribute)
     current = to_json(value)
     previous = request.get('editable.%s' % name, None)
+    if new and name == 'location':
+        return True
     return previous != current
 
 def has_comment_changed(subject, request, attribute):
@@ -305,9 +307,9 @@ def is_editable(request, attribute):
     at the time the edit page was rendered."""
     return 'editable.%s' % attribute.key().name() in request.arguments()
 
-def can_edit(account, subdomain, attribute):
+def can_edit(account, subdomain, attribute, new=False):
     """Returns True if the user can edit the given attribute."""
-    return not attribute.edit_action or check_action_permitted(
+    return new or not attribute.edit_action or check_action_permitted(
         account, subdomain, attribute.edit_action)
 
 def get_suggested_nickname(user):
@@ -334,6 +336,7 @@ def update(subject_name, subject_type, request, user, account, attributes,
         account: current user's account
         attributes: a list of attributes for this subject
         subdomain: the current subdomain
+        new: (optional) True if this update is for a new subject
         transactional: (optional) True if this function is being run in
             transaction
     """
@@ -368,12 +371,12 @@ def update(subject_name, subject_type, request, user, account, attributes,
         # at the time the page was rendered, the new value has to be
         # different than the one in the subject at the time the page
         # rendered, and the user has to have permission to edit it now.
-        value_changed = has_changed(subject, request, attribute)
+        value_changed = has_changed(subject, request, attribute, new)
         comment_changed = has_comment_changed(
             subject, request, attribute)
         if (is_editable(request, attribute) and
             (value_changed or comment_changed)):
-            if not new and not can_edit(account, subdomain, attribute):
+            if not can_edit(account, subdomain, attribute, new):
                 raise ErrorMessage(
                     403, _(
                     #i18n: Error message for lacking edit permissions
@@ -433,13 +436,14 @@ class Edit(utils.Handler):
         if self.params.add_new:
             # Need 'add' permission to see or submit the edit form.
             self.require_action_permitted('add')
+            # Create a dummy subject
+            self.subject = model.Subject.create(
+                self.subdomain, 'foo', None, None)
             lat = self.request.get('lat')
             lon = self.request.get('lon')
-            if lat or lon:
-                self.subject = model.Subject(
-                    type=' ', location__=db.GeoPt(lat, lon))
-            else:
-                self.subject = None
+            if lat and lon:
+                self.subject.set_attribute('location', db.GeoPt(lat, lon), None,
+                                           None, None, None, None)
             self.subject_type = cache.SUBJECT_TYPES[self.subdomain].get(
                 self.params.subject_type)
             if not self.subject_type:
@@ -466,8 +470,8 @@ class Edit(utils.Handler):
                 continue
             attribute = cache.ATTRIBUTES[name]
             comment = self.subject and self.subject.get_comment(name) or ''
-            if (can_edit(self.account, self.subdomain, attribute) or
-                self.params.add_new):
+            if can_edit(self.account, self.subdomain, attribute,
+                        self.params.add_new):
                 fields.append({
                     'name': name,
                     'title': get_message('attribute_name', name),
@@ -549,6 +553,8 @@ class Edit(utils.Handler):
             taskqueue.add(url='/refresh_json_cache?lang=%s&subdomain=%s'
                           % (self.params.lang, self.subdomain), method='GET')
         elif self.params.add_new:
+            # Send edit.js the new subject's name so it can auto select it
+            # on page refresh.
             self.write(self.get_url('/?subject_name=%s' % subject_name))
         else:
             raise Redirect(self.get_url('/'))
