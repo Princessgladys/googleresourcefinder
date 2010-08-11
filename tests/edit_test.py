@@ -146,6 +146,30 @@ class EditTest(SeleniumTestCase):
 
         self.run_edit(login, save, edit, True)
 
+    def test_inplace_add(self):
+        """In-place edit/add: Confirms that all the fields in the in-place edit
+        form save the entered values, and these values appear pre-filled when
+        the form is loaded."""
+        names_before = [s.name for s in Subject.all_in_subdomain('haiti')]
+
+        def login(self):
+            self.edit(ADD_PATH)
+
+        def save(self):
+            self.click('//input[@name="save"]')
+            self.wait_until(self.is_visible, 'data')
+
+        def edit(self):
+            # Look for the newly created subject
+            names_after = [s.name for s in Subject.all_in_subdomain('haiti')]
+            extra_names = list(set(names_after) - set(names_before))
+            assert len(extra_names) == 1
+
+            # Open it in the edit page to confirm that its values are set.
+            self.open_path(
+                '/edit?subdomain=haiti&embed=yes&subject_name=%s' %
+                extra_names[0])
+
     def test_inplace_edit(self):
         """In-place edit: Confirms that all the fields in the in-place edit
         form save the entered values, and these values appear pre-filled when
@@ -186,6 +210,9 @@ class EditTest(SeleniumTestCase):
 
         # Fill in the form
         text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
+        if add_new:
+            text_fields['title'] = 'title_foo'
+            text_fields['alt_title'] = 'alt_title_foo'
         text_fields['account_nickname'] = 'Test'
         text_fields['account_affiliation'] = 'Test'
         text_fields['available_beds'] = '   1'
@@ -221,6 +248,9 @@ class EditTest(SeleniumTestCase):
 
         # Check that the new values were saved, and are pre-filled in the form
         # except for comments which should remain empty.
+        if add_new:
+            del text_fields['title']
+            del text_fields['alt_title']
         text_fields['available_beds'] = '1'  # whitespace should be gone
         text_fields['total_beds'] = '2'  # whitespace should be gone
         text_fields['location.lat'] = '18.537207'  # whitespace should be gone
