@@ -23,6 +23,7 @@ from utils import *
 def setup_subdomains():
     """Sets up the subdomain record."""
     Subdomain(key_name='haiti').put()
+    Subdomain(key_name='pakistan').put()
 
 
 def setup_subject_types():
@@ -31,15 +32,13 @@ def setup_subject_types():
         return Attribute(
             key_name=name, type=type, edit_action=edit_action, values=values)
 
-    # NB: Attributes are kept in a specific order defined by zeiger
-    # Be careful when changing them, as you will change the order
-    # of appearance in the map info window. Also, order here should
-    # be kept roughly in sync with CSV column order defined in app/export.py
     attributes = [
         attr('str', 'title', edit_action='advanced_edit'),
         attr('str', 'alt_title', edit_action='advanced_edit'),
         attr('int', 'healthc_id', edit_action='advanced_edit'),
         attr('int', 'pcode', edit_action='advanced_edit'),
+        attr('str', 'id', edit_action='advanced_edit'),
+        attr('str', 'alt_id', edit_action='advanced_edit'),
         attr('int', 'available_beds'),
         attr('int', 'total_beds'),
         attr('multi', 'services',
@@ -51,19 +50,25 @@ def setup_subject_types():
               'MORTUARY_SERVICES']),
         attr('str', 'contact_name'),
         attr('str', 'phone'),
+        attr('str', 'fax'),
         attr('str', 'email'),
         attr('str', 'department'),
         attr('str', 'district'),
         attr('str', 'commune'),
+        attr('str', 'administrative_area'),
+        attr('str', 'sub_administrative_area'),
+        attr('str', 'locality'),
         attr('str', 'address'),
         attr('geopt', 'location'),
         attr('str', 'accuracy'),
+        attr('str', 'maps_link'),
         attr('str', 'organization'),
         attr('choice', 'organization_type',
              ['PUBLIC', 'FOR_PROFIT', 'UNIVERSITY', 'COMMUNITY',
               'NGO', 'FAITH_BASED', 'MILITARY', 'MIXED']),
         attr('choice', 'category',
-             ['HOSPITAL', 'CLINIC', 'MOBILE_CLINIC', 'DISPENSARY']),
+             ['HOSPITAL', 'CLINIC', 'MOBILE_CLINIC', 'DISPENSARY',
+              'LABORATORY']),
         attr('choice', 'construction',
              ['REINFORCED_CONCRETE', 'UNREINFORCED_MASONRY', 'WOOD_FRAME',
               'ADOBE']),
@@ -84,21 +89,53 @@ def setup_subject_types():
 
     db.put(attributes)
 
-    hospital = SubjectType(
+    # NB: attribute_names are kept in a specific order defined by zeiger
+    # Be careful when changing them, as you will change the order
+    # of appearance in the map info window. Also, order here should
+    # be kept roughly in sync with CSV column order defined in app/export.py
+
+    ht_hospital = SubjectType(
         key_name='haiti:hospital',
-        attribute_names=[a.key().name() for a in attributes],
+        attribute_names=['title', 'alt_title', 'healthc_id', 'pcode',
+                         'available_beds', 'total_beds', 'services',
+                         'contact_name', 'phone', 'email', 'department',
+                         'district', 'commune', 'address', 'location',
+                         'accuracy', 'organization', 'organization_type',
+                         'category', 'construction', 'damage',
+                         'operational_status', 'alert_status',
+                         'comments', 'reachable_by_road',
+                         'can_pick_up_patients', 'region_id', 'district_id',
+                         'commune_id', 'commune_code', 'sante_id'],
         minimal_attribute_names=['title', 'pcode', 'healthc_id',
                                  'available_beds', 'total_beds', 'services',
                                  'contact_name', 'phone', 'address',
                                  'location', 'operational_status',
                                  'alert_status'])
-    db.put(hospital)
+    db.put(ht_hospital)
+
+    pk_hospital = SubjectType(
+        key_name='pakistan:hospital',
+        attribute_names=['title', 'alt_title', 'id', 'alt_id', 'available_beds',
+                         'total_beds', 'services', 'contact_name',
+                         'phone', 'fax', 'email', 'administrative_area',
+                         'sub_administrative_area', 'locality', 'address',
+                         'location', 'maps_link', 'organization',
+                         'organization_type', 'category', 'construction',
+                         'damage', 'operational_status', 'alert_status',
+                         'comments', 'reachable_by_road',
+                         'can_pick_up_patients'],
+        minimal_attribute_names=['title', 'id', 'alt_id', 'available_beds',
+                                 'total_beds', 'services', 'contact_name',
+                                 'phone', 'address', 'location',
+                                 'operational_status', 'alert_status'])
+    db.put(pk_hospital)
+
 
 
 def setup_messages():
     """Sets up messages, pulling translations from the django .po files."""
     def message(namespace, name, **kw):
-        return Message(namespace=namespace, name=name, **kw)
+        return Message(ns=namespace, name=name, **kw)
     subject_type_message = \
         lambda name, **kw: message('subject_type', name, **kw)
     name_message = lambda name, **kw: message('attribute_name', name, **kw)
@@ -119,6 +156,10 @@ def setup_messages():
         #i18n: Proper name of an ID for a health facility defined by the 
         #i18n: Pan-American Health Organization; no translation necessary.
         name_message('healthc_id', en='HealthC ID'),
+        #i18n: Proper name of an ID for a health facility
+        name_message('id', en='ID'),
+        #i18n: Proper name of an alternate ID for a health facility
+        name_message('alt_id', en='Alternate ID'),
         #i18n: Total number of unoccupied beds at a hospital.
         name_message('available_beds', en='Available beds'),
         #i18n: Total number of beds at a hospital
@@ -129,6 +170,8 @@ def setup_messages():
         name_message('contact_name', en='Contact name'),
         #i18n: telephone number
         name_message('phone', en='Phone'),
+        #i18n: fax number
+        name_message('fax', en='Fax'),
         #i18n: E-mail address
         name_message('email', en='E-mail'),
         #i18n: Meaning: administrative division
@@ -137,12 +180,20 @@ def setup_messages():
         name_message('district', en='District'),
         #i18n: Meaning: low-level administrative division
         name_message('commune', en='Commune'),
+        #i18n: Meaning: Top-level administrative subdivision of a country
+        name_message('administrative_area', en='State/Province/Territory'),
+        #i18n: Meaning: Second-level administrative subdivision of a country
+        name_message('sub_administrative_area', en='District/County'),
+        #i18n: Meaning: City or town portion of an address
+        name_message('locality', en='City/Town/Village'),
         #i18n: street address
         name_message('address', en='Address'),
         #i18n: latitude, longitude location
         name_message('location', en='Location'),
         #i18n: Accuracy of latitude, longitude coordinates
         name_message('accuracy', en='Accuracy'),
+        #i18n: Link to this subject in Google Maps
+        name_message('maps_link', en='Google Maps Link'),
         #i18n: Meaning: referring to the name of an organization
         name_message('organization', en='Organization name'),
         #i18n: Type of organization (public, private, military, NGO, etc.)
@@ -195,6 +246,8 @@ def setup_messages():
         value_message('HOSPITAL', en='Hospital'),
         #i18n: Category of health facility: A mobile clinic.
         value_message('MOBILE_CLINIC', en='Mobile clinic',),
+        #i18n: Category of health facility: A laboratory
+        value_message('LABORATORY', en='Laboratory',),
 
         # construction
 
@@ -389,6 +442,6 @@ def add_account(email='test@example.com', description=None,
             default_frequency=default_frequency,
             email_format=email_format).put()
 
-def set_default_permissions(actions):
+def set_default_permissions(actions=['*:view', '*:edit']):
     """Sets the list of default permissions, granted to all users."""
     Account(key_name='default', actions=actions).put()

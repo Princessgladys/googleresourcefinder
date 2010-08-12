@@ -112,7 +112,7 @@ locale = function() {
   messages.MONTH_ABBRS = "Ene feb mar abr may jun jul ago sept oct nov dic".split(' ');
 
   //i18n: Label for a new subject
-  messages.NEW_SUBJECT = "Nueva planta";
+  messages.NEW_SUBJECT = "Nueva instituci\u00f3n";
 
   //i18n: Notification for a facility with missing location information.
   messages.NO_LOCATION_ENTERED = "Esta instituci\u00f3n no dispone a\u00fan de un lugar entr\u00f3.";
