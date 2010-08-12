@@ -188,6 +188,7 @@ class Bubble(Handler):
         login_url = users.create_login_url(
             self.get_url('/', subject_name=self.params.subject_name,
                          embed='yes'))
+        settings_url = self.get_url('/settings')
         frequency = self.account and self.account.default_frequency or 'instant'
 
         html = self.render_to_string(
@@ -195,6 +196,7 @@ class Bubble(Handler):
             user=self.user,
             login_url=login_url,
             edit_url=edit_url,
+            settings_url=settings_url,
             subdomain=self.subdomain,
             subscribed=subscribed,
             frequency=frequency,

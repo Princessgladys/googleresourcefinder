@@ -27,7 +27,7 @@
       <span class="sep">|</span>
       <a onclick="subscribe_on_off(this,
         {% if subscribed %}true{% else %}false{% endif %}, '{{subdomain}}',
-        '{{subject_name|escape}}', '{{frequency}}');"
+        '{{subject_name|escape}}', '{{frequency}}', '{{settings_url}}');"
         href="#">
         {% if subscribed %}
           {% comment %}

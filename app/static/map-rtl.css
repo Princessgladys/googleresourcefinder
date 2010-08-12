@@ -23,7 +23,7 @@ th { text-align: right; }
 .header .user { left: 0px; right: auto; }
 .header .lang { right: 400px; left: auto; }
 .header .title { right: 0px; left: auto; }
-.loading { right: 48%; }
+.loading { right: 48%; left: auto; }
 
 /* Data area */
 #data { right: 0px; left: auto; }
@@ -41,7 +41,16 @@ tr#division-0 td.division-title { padding-right: 4px; }
 #map, .hshadow, .vshadow { right: 400px; left: 0px; }
 .vshadow { left: 0; right: auto; }
 #freshness { right: 0; left: auto; }
-#edit_bar { right: 0; left: auto; }
+#edit-bar { width: 392px; right: 0; left: auto; }
 
 /* Map info windows */
 .subject-info .text { margin-right: 2em; }
+
+/* iFrame overrides */
+
+/* Header line */
+.iframe .header .lang { right: 300px; }
+
+/* Map area */
+.iframe #map, .iframe .hshadow, .iframe .vshadow { right: 300px; left: 0px; }
+.iframe #edit-bar { width: 277px; right: 15px; }

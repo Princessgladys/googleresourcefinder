@@ -118,6 +118,7 @@ class Struct:
 
 class Handler(webapp.RequestHandler):
     auto_params = {
+        'iframe': validate_yes,
         'embed': validate_yes,
         'flush': validate_yes,
         'add_new': validate_yes,
@@ -260,6 +261,8 @@ class Handler(webapp.RequestHandler):
         preserving the current 'subdomain' parameter if there is one."""
         if self.request.get('subdomain'):
             params['subdomain'] = self.request.get('subdomain')
+        if self.params.iframe:
+            params['iframe'] = 'yes'
         if params:
             path += ('?' in path and '&' or '?') + urlencode(params)
         return path
