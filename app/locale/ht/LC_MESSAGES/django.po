@@ -311,7 +311,7 @@ msgid "Distance"
 msgstr "Distans"
 
 #. Meaning: administrative division
-#: templates/map.html:151 static/locale.js:63 ../tools/setup.py:180
+#: templates/map.html:153 static/locale.js:63 ../tools/setup.py:180
 msgid "District"
 msgstr "Distri"
 
@@ -372,7 +372,7 @@ msgid "Error saving facility information."
 msgstr "Erè anrejistreman etablisman enfòmasyon."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:176 templates/map.html:192
+#: export.py:176 templates/map.html:194
 msgid "Export CSV"
 msgstr "Ekspote CSV"
 
@@ -382,7 +382,7 @@ msgid "Facilities with Changes"
 msgstr "Etablisman ak Chanjman"
 
 #. A place that provides a particular service
-#: static/locale.js:120 templates/print.html:129 templates/map.html:170 templates/settings.html:120
+#: templates/map.html:172 templates/print.html:129 static/locale.js:120 templates/settings.html:120
 msgid "Facility"
 msgstr "Etablisman"
 
@@ -422,7 +422,7 @@ msgid "Field is required."
 msgstr "Domèn sa obligatwa."
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:125
+#: templates/map.html:127
 msgid "Filters"
 msgstr "Filtè yo"
 
@@ -881,7 +881,7 @@ msgid "Show"
 msgstr "Montre"
 
 #. Link to sign into the app
-#: main.py:65
+#: main.py:69
 msgid "Sign in"
 msgstr "Mete Anprent"
 
@@ -891,7 +891,7 @@ msgid "Sign in to edit"
 msgstr "Tanpri siyen nan reekri"
 
 #. Link to sign out of the app
-#: settings.py:71 main.py:63
+#: main.py:67 settings.py:71
 msgid "Sign out"
 msgstr "Sòti"
 
@@ -906,7 +906,7 @@ msgid "Subscribe to email updates"
 msgstr "Abònman imel mizajou"
 
 #. Header for a list of provisions
-#: templates/map.html:105
+#: templates/map.html:107
 msgid "Supplies"
 msgstr "Prodwi"
 
@@ -1074,7 +1074,7 @@ msgid "and with availability."
 msgstr "Avek anpil abilite"
 
 #. a user with no identity
-#: main.py:60
+#: main.py:64
 msgid "anonymous"
 msgstr "anonim"
 
