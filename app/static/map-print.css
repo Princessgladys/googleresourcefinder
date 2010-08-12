@@ -1,0 +1,52 @@
+/*
+# Copyright 2009-2010 by Ka-Ping Yee
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+*/
+/* Common */
+#map, #freshness, #update-instructions { padding: 4px; }
+#freshness, #update-instructions { font-size: 13px; }
+
+/* Hide while printing */
+@media print {
+  .header .user, .gmnoprint { display:none }
+}
+
+/* Map area */
+#map { position: relative; width: 1024px; height: 768px; left: 0; top: 0; }
+.hshadow, .vshadow { display: none; }
+#freshness { position: relative; left: 0; bottom: 0; padding: 2px 4px; }
+
+/* Print summary */
+.print-header { position: relative; width: 1024px; _width: 95% /* IE6 hack */;
+                padding: 25px 2px 8px; }
+.print-summary { margin-top: 24px; }
+.print-summary th, .print-summary td { font-size: 16px; padding: 0 20px; 
+                                       text-align: center; font-weight: bold }
+.print-summary td { font-size: 48px; }
+.print-title, .print-time { font-size: 16px }
+.print-subtitle, .print-date { font-size: 26px; font-weight: bold }
+
+/* Data area */
+#data { position: static; width: 1024px; _width: 95% /* IE6 hack */;
+        margin-top: 24px }
+
+.print-datetime { text-align: right }
+#subject-list { background-color: #fff; border-left: 8px solid #0a0; }
+#subject-list td, #subject-list th { border-right: 1px solid #eee; }
+.subject-even { background-color: #f8f8f8 }
+.subject-odd { background-color: #f0f0f0 }
+.beds-open, .beds-total { font-size: 24px; font-weight: bold;
+                                            text-align: center}
+.beds-open { color: #888 }
+.subject-title { vertical-align: top; font-weight: bold; }
