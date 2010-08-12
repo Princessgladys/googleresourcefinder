@@ -47,8 +47,12 @@ class Main(utils.Handler):
             center = {'lat': self.params.lat, 'lon': self.params.lon}
         home_url = self.get_url('/')
         settings_url = self.get_url('/settings')
+        login_add_url = users.create_login_url(
+            self.get_url('/', add_new='yes'))
         login_url = users.create_login_url(home_url)
         logout_url = users.create_logout_url(home_url)
+        show_add_button = access.check_action_permitted(
+            self.account, self.subdomain, 'add')
         if self.params.__dict__.get('print'):
             template = 'templates/print.html'
         else:
@@ -67,11 +71,13 @@ class Main(utils.Handler):
                         self.subdomain, center, self.params.rad),
                     home_url=home_url,
                     settings_url=settings_url,
+                    login_add_url=login_add_url,
                     export_url=self.get_export_url(),
                     print_url=self.get_url('/?print=yes'),
                     bubble_url=self.get_url('/bubble'),
                     edit_url_template=self.get_url('/edit', embed='yes')
                         + '&subject_name=',
+                    show_add_button=show_add_button,
                     subdomain=self.subdomain,
                     subdomain_list_footer=config.SUBDOMAIN_LIST_FOOTERS[
                         self.subdomain])
