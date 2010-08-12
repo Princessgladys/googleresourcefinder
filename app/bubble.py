@@ -130,7 +130,7 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
         ValueInfoExtractor.__init__(
             self,
             ['title', 'location', 'available_beds', 'total_beds', 'id',
-             'alt_id', 'address', 'services', 'operational_status',
+             'alt_id', 'address', 'maps_link', 'services', 'operational_status',
              'alert_status'],
             # TODO(kpy): This list is redundant; see the comment above
             # in ValueInfoExtractor.
