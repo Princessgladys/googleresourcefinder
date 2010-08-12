@@ -176,7 +176,8 @@ class Bubble(Handler):
         json = to_minimal_subject_jobject(self.subdomain, subject)
 
         self.response.headers['Content-Type'] = "application/json"
-        self.write(to_json({'html': html, 'json': json}))
+        self.write(to_json(
+            {'html': html, 'json': json, 'login_url': login_url}))
 
 if __name__ == '__main__':
     run([('/bubble', Bubble)], debug=True)

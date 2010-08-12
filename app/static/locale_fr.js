@@ -21,8 +21,17 @@
 locale = function() {
   var messages = {};
 
+  //i18n: Label to add a facility
+  messages.ADD = "Ajouter";
+
   //i18n: Label for every item in a list.
   messages.ALL = "Tous";
+
+  //i18n: Label for a cancel link
+  messages.CANCEL = "Annuler";
+
+  //i18n: Message explaining how to place a new subject on the map
+  messages.CLICK_TO_ADD_SUBJECT = "Cliquez sur un emplacement sur la carte pour placer le marqueur d'une nouvelle installation.";
 
   //i18n: Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME = "${DATE} \u00e0 ${TIME}";
@@ -43,6 +52,9 @@ locale = function() {
 
   //i18n: Meaning: administrative division
   messages.DISTRICT = "District";
+
+  //i18n: Notifies user how to add latitude and longitude values.
+  messages.EDIT_LATITUDE_LONGITUDE = "Vous pouvez ajouter une latitude et la longitude dans le formulaire de modification.";
 
   //i18n: Saved message; e-mail subscription has been saved
   messages.EMAIL_SUBSCRIPTION_SAVED = "Vous recevrez par courriel des mises \u00e0 jour ${FREQUENCY} pour cette installation. Utilisez la page des ${START_LINK}Param\u00e8tres${END_LINK} pour modifier les param\u00e8tres d'abonnement.";
@@ -99,6 +111,12 @@ locale = function() {
   //i18n: Abbreviated months of the year.
   messages.MONTH_ABBRS = "janv. f\u00e9vr. mars avr. mai juin juil. ao\u00fbt sept. oct. nov. d\u00e9c.".split(' ');
 
+  //i18n: Label for a new subject
+  messages.NEW_SUBJECT = "Une nouvelle installation";
+
+  //i18n: Notification for a facility with missing location information.
+  messages.NO_LOCATION_ENTERED = "Cette \u00e9tablissement ne dispose pas encore d'un emplacement est entr\u00e9";
+
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
   messages.OPEN_TOTAL_BEDS = "Lits libres/total";
@@ -124,6 +142,9 @@ locale = function() {
 
   //i18n: Label for a control that filters a list of facilities
   messages.SHOW = "Montrer";
+
+  //i18n: Message explaining how to add a latitude and longitude to a facility.
+  messages.SIGN_IN_TO_EDIT_LOCATION = "${START_LINK}Connectez-vous${END_LINK} pour afficher le formulaire de modification et d'ajouter une latitude et la longitude";
 
   //i18n: Label to subscribe from a subject
   messages.SUBSCRIBE_TO_UPDATES = "Abonnez-vous aux mises \u00e0 jour par courriel";
