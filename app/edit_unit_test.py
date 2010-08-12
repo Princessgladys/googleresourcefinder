@@ -433,9 +433,9 @@ class EditTest(MediumTestCase):
 
         # Make sure it breaks, as the user does not have permission
         names_before = [s.name for s in Subject.all_in_subdomain('haiti')]
-        self.assertRaises(Exception, edit.update, subject_name, self.st, request,
-                           self.user, self.account, attributes, self.subdomain,
-                           False, False)
+        self.assertRaises(Exception, edit.update, subject_name, self.st
+                          request, self.user, self.account, attributes,
+                          self.subdomain, False, False)
 
         # Grant user permission to add subjects and try again
         self.account.actions.append('*:add')
