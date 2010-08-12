@@ -766,6 +766,11 @@ msgstr "Texte"
 msgid "Please call for availability information."
 msgstr "Merci d'appeler pour connaître les disponibilités."
 
+#. Button to go to main page of resource finder sans iframe
+#: templates/map.html:200
+msgid "Pop out"
+msgstr "Fenêtre externe"
+
 #. Service provided by a health facility (use Title Case). care given after surgery until patient is discharged
 #: ../tools/setup.py:310
 msgid "Postoperative Care"

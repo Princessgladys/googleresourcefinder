@@ -767,6 +767,11 @@ msgstr "سادہ متن"
 msgid "Please call for availability information."
 msgstr "فراہمی کی معلومات کیلئے براہ کرم کال کریں۔"
 
+#. Button to go to main page of resource finder sans iframe
+#: templates/map.html:200
+msgid "Pop out"
+msgstr "باہر نکالیں"
+
 #. Service provided by a health facility (use Title Case). care given after surgery until patient is discharged
 #: ../tools/setup.py:310
 msgid "Postoperative Care"

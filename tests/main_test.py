@@ -113,6 +113,13 @@ class MainTestCase(SeleniumTestCase):
         assert self.is_visible('link=Export CSV')
         assert self.is_visible('link=View Master List archive')
 
+        # Check pop out button not here
+        assert not self.is_text_present('Pop out')
+
+        # Re-open page with iframe param set to yes and check again
+        self.open_path('/?subdomain=haiti&iframe=yes')
+        assert self.is_text_present('Pop out')
+
     def test_closed_facilities(self):
         """Confirms that closed facilities appear grey in the facility list
         and have a warning message in their info bubble."""

@@ -190,6 +190,15 @@
     #i18n: Button to export data to comma-separated-values format.
     {% endcomment %}
     <a target="_blank" href="{{export_url}}" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export CSV" %}</a>
+    {% if params.iframe %}
+      <span class="sep">|</span>
+      <a id="pop-out" target="_blank" href="{{disable_iframe_url}}"
+        onclick="_gaq.push(['_trackEvent', 'main', 'open', 'from_embed']);">
+      {% comment %}
+      #i18n: Button to go to main page of resource finder sans iframe
+      {% endcomment %}
+      {% trans "Pop out" %}</a>
+    {% endif %}
     {% include subdomain_list_footer %}
   </div>
 </div>
