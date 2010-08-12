@@ -14,12 +14,10 @@
 
 from google.appengine.api import users
 
-import codecs
 import csv
 import datetime
 import logging
 import re
-from cStringIO import StringIO
 
 import kml
 import setup
@@ -261,6 +259,7 @@ def convert_pakistan_record(index, record):
 
     title = record['title'].strip()
 
+    # TODO(shakusa) Try to get mapmaker IDs to use here
     subject_name = 'pakistan.resource-finder.appspot.com/hospital.%d' % index
     try:
         latitude = float(record['location'][1])
@@ -276,17 +275,15 @@ def convert_pakistan_record(index, record):
     CDATA_PATTERN = re.compile(r'<b>(.*):</b> <i>(.*)</i>.*')
     for line in record.get('comment', '').strip().split('\n'):
         line = line.strip()
-        if not line:
-            continue
         match = CDATA_PATTERN.match(line)
         if match:
             key = match.group(1)
             value = match.group(2)
-            if 'TYPE' == key:
+            if key == 'TYPE':
                 type = value
-            elif 'LANGNAME' == key:
+            elif key == 'LANGNAME':
                 record['alt_title'] = value
-            elif 'ADDRESS' == key:
+            elif key == 'ADDRESS':
                 record['address'] = value
             elif value in PAKISTAN_ADMIN_AREAS:
                 if value == 'North West Frontier':
@@ -306,7 +303,7 @@ def convert_pakistan_record(index, record):
     elif 'laborator' in title_lower or 'labs ' in title_lower:
         record['category'] = 'LABORATORY'
     elif 'dispensary' in title_lower:
-        record['dispensary'] = 'DISPENSARY'
+        record['category'] = 'DISPENSARY'
 
     if not (point_inside_polygon(
         {'lat': latitude, 'lon': longitude}, PAKISTAN_FLOOD_POLYGON) or
@@ -329,10 +326,10 @@ def load(
     filename, record_reader, record_converter, subdomain, subject_type_name,
     source_url, default_observed, author, author_nickname, author_affiliation,
     limit=None):
-    """Loads a CSV file of records into the datastore.
+    """Loads a file of records into the datastore.
 
     Args:
-      filename: name of the csv file to load
+      filename: name of the file to load
       record_reader: function that takes a file and returns a record iterator
       record_converter: function that takes a parsed record and returns a
           (subject_name, observed, values) triple, where observed is a datetime
@@ -361,8 +358,7 @@ def load(
 
     subject_type = SubjectType.get(subdomain, subject_type_name)
     count = 0
-    str = codecs.open(filename, 'r', 'utf-8').read()
-    for record in record_reader(StringIO(str.encode('utf-8'))):
+    for record in record_reader(open(filename)):
         if limit and count >= limit:
             break
         count += 1
