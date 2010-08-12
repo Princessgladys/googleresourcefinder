@@ -248,7 +248,7 @@ msgid "Date and time"
 msgstr "Jou  ak  lè"
 
 #. Label for change default frequency box
-#: templates/settings.html:105
+#: templates/settings.html:98
 msgid "Default frequency:"
 msgstr "Frekans Estanda:"
 
@@ -285,7 +285,7 @@ msgid "Distance"
 msgstr "Distans"
 
 #. Meaning: administrative division
-#: static/locale.js:51 ../tools/setup.py:137 templates/map.html:157
+#: static/locale.js:51 templates/map.html:148 ../tools/setup.py:137
 msgid "District"
 msgstr "Distri"
 
@@ -311,12 +311,12 @@ msgid "Edited by"
 msgstr "Moun ki reekri a"
 
 #. Settings page title
-#: templates/settings.html:78
+#: templates/settings.html:71
 msgid "Email Subscription Settings"
 msgstr "Imel Abònman Anviwònman"
 
 #. Label for e-mail type radio buttons
-#: templates/settings.html:86
+#: templates/settings.html:79
 msgid "Email format:"
 msgstr "Adrès elektronik fòma:"
 
@@ -341,7 +341,7 @@ msgid "Error saving facility information."
 msgstr "Erè anrejistreman etablisman enfòmasyon."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:142 templates/map.html:199
+#: export.py:142 templates/map.html:189
 msgid "Export CSV"
 msgstr "Ekspote CSV"
 
@@ -351,7 +351,7 @@ msgid "Facilities with Changes"
 msgstr "Fasilite ak Chanjman"
 
 #. A place that provides a particular service
-#: templates/settings.html:127 templates/print.html:129 templates/map.html:176 static/locale.js:104
+#: templates/print.html:129 templates/map.html:167 static/locale.js:104 templates/settings.html:120
 msgid "Facility"
 msgstr "Etablisman"
 
@@ -386,7 +386,7 @@ msgid "Field is required."
 msgstr "Domèn sa obligatwa."
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:131
+#: templates/map.html:122
 msgid "Filters"
 msgstr "Filtè yo"
 
@@ -518,7 +518,7 @@ msgstr "Latitd dwe ant -90 ak 90"
 #. TODO: Add missing message description or meaning
 #: templates/base.html:103
 msgid "Legal"
-msgstr ""
+msgstr "Legal"
 
 #. Button text to load data
 #: templates/load.html:57
@@ -626,7 +626,7 @@ msgid "No availability information"
 msgstr "Pa gen enfòmasyon ki koresponn"
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:141
+#: templates/settings.html:134
 msgid "No facilities to display."
 msgstr "Pa gen fasilite yo afiche."
 
@@ -702,7 +702,7 @@ msgid "Phone"
 msgstr "Telefòn"
 
 #. Label for "plain text" radio button
-#: templates/settings.html:93
+#: templates/settings.html:86
 msgid "Plain text"
 msgstr "Tèks"
 
@@ -785,7 +785,7 @@ msgid "Save"
 msgstr "Anrejistre"
 
 #. Notice that a change has been saved.
-#: templates/settings.html:68
+#: templates/settings.html:61
 msgid "Saved."
 msgstr "Anrejistre"
 
@@ -805,7 +805,7 @@ msgid "Services"
 msgstr "Sèvis"
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:174
+#: templates/settings.html:167
 msgid "Set checked to default"
 msgstr "Mete Tcheke Estanda"
 
@@ -845,7 +845,7 @@ msgid "Subscribe to email updates"
 msgstr "Abònman imel mizajou"
 
 #. Header for a list of provisions
-#: templates/map.html:111
+#: templates/map.html:102
 msgid "Supplies"
 msgstr "Prodwi"
 
@@ -910,7 +910,7 @@ msgid "Unsubscribe"
 msgstr "Koupe Abònman nan Tcheke"
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:181
+#: templates/settings.html:174
 msgid "Unsubscribe from checked"
 msgstr "Koupe Abònman nan Tcheke"
 
@@ -945,7 +945,7 @@ msgid "Vascular Surgery"
 msgstr "Chiriji Vaskilè"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:206
+#: templates/map.html:194
 msgid "View Master List archive"
 msgstr "Ekspoze achiv nan lis mastè"
 

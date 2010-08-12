@@ -116,3 +116,19 @@ td.subject-count.selected { color: #fff; }
 
 tr.disabled td { color: #aaa; }
 tr.on-alert td { color: #a00; }
+
+/* iFrame overrides */
+
+/* Header line */
+.iframe .header .lang { left: 300px; }
+.iframe .header .title { width: 292px; }
+.iframe .header .wrench { height: 15px; width: 14px; vertical-align: text-bottom; }
+
+/* Data area */
+.iframe #data { width: 300px; }
+.iframe #edit-data { width: 300px; }
+
+/* Map area */
+.iframe #map, .iframe .hshadow, .iframe .vshadow { left: 300px; }
+.iframe #freshness { width: 292px; }
+.iframe #edit_bar { width: 277px; }
