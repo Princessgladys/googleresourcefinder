@@ -31,7 +31,7 @@ locale = function() {
   messages.CANCEL = "Anile";
 
   //i18n: Message explaining how to place a new subject on the map
-  messages.CLICK_TO_ADD_SUBJECT = "Klike sou yon kote sou kat la nan plas Mak\u00e8 a pou yon nouvo plant.";
+  messages.CLICK_TO_ADD_SUBJECT = "Klike sou yon kote sou kat la nan plas Mak\u00e8 a pou yon nouvo etablisman.";
 
   //i18n: Date at a given time (example: Jan 21, 2010 at 14:32 UTC-4)
   messages.DATE_AT_TIME = "${DATE} a ${TIME}";

@@ -13,13 +13,14 @@
 # limitations under the License.
 
 from google.appengine.api import users
-from utils import _
+
 import access
 import cache
+import config
 import model
 import rendering
 import utils
-
+from utils import _
 
 class Main(utils.Handler):
     def get(self):
@@ -71,7 +72,9 @@ class Main(utils.Handler):
                     bubble_url=self.get_url('/bubble'),
                     edit_url_template=self.get_url('/edit', embed='yes')
                         + '&subject_name=',
-                    subdomain=self.subdomain)
+                    subdomain=self.subdomain,
+                    subdomain_list_footer=config.SUBDOMAIN_LIST_FOOTERS[
+                        self.subdomain])
 
     def get_export_url(self):
         """If only one subject type, return the direct download link URL,

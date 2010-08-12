@@ -222,7 +222,7 @@ class MailUpdateSystemTest(MediumTestCase):
         subject_changes = [{'subject_name': subject_name, 'old_frequency':
                             'instant', 'new_frequency': 'daily'}]
         json_pickle_changes = simplejson.dumps(subject_changes)
-        handler = self.simulate_request('/subscribe?' +
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
                                         'action=change_subscriptions&' +
                                         'subject_changes=%s' %
                                         json_pickle_changes)
@@ -239,7 +239,7 @@ class MailUpdateSystemTest(MediumTestCase):
         subject_changes = [{'subject_name': subject_name, 'old_frequency':
                             'daily', 'new_frequency': 'weekly'}]
         json_pickle_changes = simplejson.dumps(subject_changes)
-        handler = self.simulate_request('/subscribe?' +
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
                                         'action=change_subscriptions&' +
                                         'subject_changes=%s' %
                                         json_pickle_changes)
@@ -259,7 +259,7 @@ class MailUpdateSystemTest(MediumTestCase):
         subject_changes = [{'subject_name': subject_name, 'old_frequency':
                             'weekly', 'new_frequency': 'instant'}]
         json_pickle_changes = simplejson.dumps(subject_changes)
-        handler = self.simulate_request('/subscribe?' +
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
                                         'action=change_subscriptions&' +
                                         'subject_changes=%s' %
                                         json_pickle_changes)
