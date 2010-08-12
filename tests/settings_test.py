@@ -64,8 +64,8 @@ class SettingsTest(SeleniumTestCase):
         header."""
         self.login_to_settings_page()
         self.assert_text(Regex('Resource Finder.*'), '//title')
+        self.assert_text(Regex('Legal.*'), '//li[@id="legal"]')
         self.assert_text(self.email, '//div[@class="user"]//strong')
-        self.assert_text(Regex('.*Home.*'), '//div[@class="user"]')
         self.assert_no_text(Regex('.*Settings.*'), '//div[@class="user"]')
         self.assert_no_text(Regex('.*Print.*'), '//div[@class="user"]')
 

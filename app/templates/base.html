@@ -75,7 +75,7 @@
   {% include "analytics.html" %}
 </head>
 
-<body>
+<body {% if params.iframe %}class="iframe"{% endif %}>
 <div id="viewport"></div>
 <div class="header">
   {% block language-select %}

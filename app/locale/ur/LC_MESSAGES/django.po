@@ -248,7 +248,7 @@ msgid "Date and time"
 msgstr "تاریخ اور وقت"
 
 #. Label for change default frequency box
-#: templates/settings.html:105
+#: templates/settings.html:98
 msgid "Default frequency:"
 msgstr "ڈیفالٹ تعدد:"
 
@@ -285,7 +285,7 @@ msgid "Distance"
 msgstr "دوری"
 
 #. Meaning: administrative division
-#: static/locale.js:51 ../tools/setup.py:137 templates/map.html:157
+#: static/locale.js:51 templates/map.html:148 ../tools/setup.py:137
 msgid "District"
 msgstr "ضلع"
 
@@ -311,12 +311,12 @@ msgid "Edited by"
 msgstr "ترمیم کردہ بذریعہ"
 
 #. Settings page title
-#: templates/settings.html:78
+#: templates/settings.html:71
 msgid "Email Subscription Settings"
 msgstr "ای میل رکنیت کی ترتیبات"
 
 #. Label for e-mail type radio buttons
-#: templates/settings.html:86
+#: templates/settings.html:79
 msgid "Email format:"
 msgstr "ای میل کی شکل:"
 
@@ -341,7 +341,7 @@ msgid "Error saving facility information."
 msgstr "سہولت کی معلومات محفوظ کرنے میں غلطی۔"
 
 #. Button to export data to comma-separated-value format.
-#: export.py:142 templates/map.html:199
+#: export.py:142 templates/map.html:189
 msgid "Export CSV"
 msgstr "CSV برآمد کریں"
 
@@ -351,7 +351,7 @@ msgid "Facilities with Changes"
 msgstr "سہولیات مع تبدیلیاں"
 
 #. A place that provides a particular service
-#: templates/settings.html:127 templates/print.html:129 templates/map.html:176 static/locale.js:104
+#: templates/print.html:129 templates/map.html:167 static/locale.js:104 templates/settings.html:120
 msgid "Facility"
 msgstr "سہولت"
 
@@ -386,7 +386,7 @@ msgid "Field is required."
 msgstr "فیلڈ مطلوب ہے۔"
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:131
+#: templates/map.html:122
 msgid "Filters"
 msgstr "فلٹرز"
 
@@ -518,7 +518,7 @@ msgstr "عرض البلد -90 اور 90 کے درمیان ہونا چاہیے۔"
 #. TODO: Add missing message description or meaning
 #: templates/base.html:103
 msgid "Legal"
-msgstr ""
+msgstr "قانون"
 
 #. Button text to load data
 #: templates/load.html:57
@@ -626,7 +626,7 @@ msgid "No availability information"
 msgstr "فراہمی کی معلومات نہیں ہے"
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:141
+#: templates/settings.html:134
 msgid "No facilities to display."
 msgstr "ڈسپلے کیلئے کوئی سہولیات نہیں ہیں۔"
 
@@ -702,7 +702,7 @@ msgid "Phone"
 msgstr "فون"
 
 #. Label for "plain text" radio button
-#: templates/settings.html:93
+#: templates/settings.html:86
 msgid "Plain text"
 msgstr "سادہ متن"
 
@@ -785,7 +785,7 @@ msgid "Save"
 msgstr "محفوظ کریں"
 
 #. Notice that a change has been saved.
-#: templates/settings.html:68
+#: templates/settings.html:61
 msgid "Saved."
 msgstr "محفوظ ہوگیا۔"
 
@@ -805,7 +805,7 @@ msgid "Services"
 msgstr "خدمات"
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:174
+#: templates/settings.html:167
 msgid "Set checked to default"
 msgstr "نشان زد کو ڈیفالٹ پر ترتیب دیں"
 
@@ -845,7 +845,7 @@ msgid "Subscribe to email updates"
 msgstr "ای میل تازہ کاریوں کی رکنیت حاصل کریں"
 
 #. Header for a list of provisions
-#: templates/map.html:111
+#: templates/map.html:102
 msgid "Supplies"
 msgstr "ساز و سامان"
 
@@ -910,7 +910,7 @@ msgid "Unsubscribe"
 msgstr "رکنیت ختم کریں"
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:181
+#: templates/settings.html:174
 msgid "Unsubscribe from checked"
 msgstr "نشان زد سے رکنیت ختم کریں"
 
@@ -945,7 +945,7 @@ msgid "Vascular Surgery"
 msgstr "عروقی سرجری"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:206
+#: templates/map.html:194
 msgid "View Master List archive"
 msgstr "Master List کا ذخیرہ دیکھیں"
 

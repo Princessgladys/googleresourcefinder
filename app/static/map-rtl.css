@@ -45,3 +45,11 @@ tr#division-0 td.division-title { padding-right: 4px; }
 
 /* Map info windows */
 .subject-info .text { margin-right: 2em; }
+
+/* iFrame overrides */
+
+/* Header line */
+.iframe .header .lang { right: 300px; }
+
+/* Map area */
+.iframe #map, .iframe .hshadow, .iframe .vshadow { right: 300px; left: 0px; }

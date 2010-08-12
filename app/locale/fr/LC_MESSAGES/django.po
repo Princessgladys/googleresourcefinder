@@ -247,7 +247,7 @@ msgid "Date and time"
 msgstr "Date et heure"
 
 #. Label for change default frequency box
-#: templates/settings.html:105
+#: templates/settings.html:98
 msgid "Default frequency:"
 msgstr "Fréquence par Défaut:"
 
@@ -284,7 +284,7 @@ msgid "Distance"
 msgstr "Distance"
 
 #. Meaning: administrative division
-#: static/locale.js:51 ../tools/setup.py:137 templates/map.html:157
+#: static/locale.js:51 templates/map.html:148 ../tools/setup.py:137
 msgid "District"
 msgstr "District"
 
@@ -310,12 +310,12 @@ msgid "Edited by"
 msgstr "Modifié par"
 
 #. Settings page title
-#: templates/settings.html:78
+#: templates/settings.html:71
 msgid "Email Subscription Settings"
 msgstr "Paramètres d'Abonnement par Courriel"
 
 #. Label for e-mail type radio buttons
-#: templates/settings.html:86
+#: templates/settings.html:79
 msgid "Email format:"
 msgstr "Format E-mail:"
 
@@ -340,7 +340,7 @@ msgid "Error saving facility information."
 msgstr "Erreur lors du enregistrement des informations de installation."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:142 templates/map.html:199
+#: export.py:142 templates/map.html:189
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
@@ -350,7 +350,7 @@ msgid "Facilities with Changes"
 msgstr "Installations avec des Changements"
 
 #. A place that provides a particular service
-#: templates/settings.html:127 templates/print.html:129 templates/map.html:176 static/locale.js:104
+#: templates/print.html:129 templates/map.html:167 static/locale.js:104 templates/settings.html:120
 msgid "Facility"
 msgstr "Établissement"
 
@@ -385,7 +385,7 @@ msgid "Field is required."
 msgstr "Ce champ est obligatoire."
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:131
+#: templates/map.html:122
 msgid "Filters"
 msgstr "Filtres"
 
@@ -517,7 +517,7 @@ msgstr "Latitude doit être comprise entre -90 et 90"
 #. TODO: Add missing message description or meaning
 #: templates/base.html:103
 msgid "Legal"
-msgstr ""
+msgstr "Juridique"
 
 #. Button text to load data
 #: templates/load.html:57
@@ -625,7 +625,7 @@ msgid "No availability information"
 msgstr "Aucune information concernant les disponibilités"
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:141
+#: templates/settings.html:134
 msgid "No facilities to display."
 msgstr "Aucune installation à afficher."
 
@@ -701,7 +701,7 @@ msgid "Phone"
 msgstr "Téléphone"
 
 #. Label for "plain text" radio button
-#: templates/settings.html:93
+#: templates/settings.html:86
 msgid "Plain text"
 msgstr "Texte"
 
@@ -784,7 +784,7 @@ msgid "Save"
 msgstr "Enregistrer"
 
 #. Notice that a change has been saved.
-#: templates/settings.html:68
+#: templates/settings.html:61
 msgid "Saved."
 msgstr "Enregistrer"
 
@@ -804,7 +804,7 @@ msgid "Services"
 msgstr "Services"
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:174
+#: templates/settings.html:167
 msgid "Set checked to default"
 msgstr "Ensemble Contrôlé par Défaut"
 
@@ -844,7 +844,7 @@ msgid "Subscribe to email updates"
 msgstr "Abonnez-vous aux mises à jour par courriel"
 
 #. Header for a list of provisions
-#: templates/map.html:111
+#: templates/map.html:102
 msgid "Supplies"
 msgstr "Matériel"
 
@@ -909,7 +909,7 @@ msgid "Unsubscribe"
 msgstr "Vous Désabonner de Vérifier"
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:181
+#: templates/settings.html:174
 msgid "Unsubscribe from checked"
 msgstr "Vous Désabonner de Vérifier"
 
@@ -944,7 +944,7 @@ msgid "Vascular Surgery"
 msgstr "Chirurgie Vasculaire"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:206
+#: templates/map.html:194
 msgid "View Master List archive"
 msgstr "Accéder aux archives (en anglais)"
 
