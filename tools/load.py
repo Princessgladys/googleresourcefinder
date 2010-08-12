@@ -277,6 +277,9 @@ def convert_pakistan_record(index, record):
             key = match.group(1)
             value = match.group(2)
             if key == 'ID':
+                # ID is given as a pair of colon-separated hex strings
+                # It is more common externally to see a pair of
+                # colon-separated base-10 strings, so convert to that
                 id_parts = value.split(':')
                 value = ':'.join(str(int(part, 16)) for part in id_parts)
                 record['id'] = value
