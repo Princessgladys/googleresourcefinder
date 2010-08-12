@@ -94,8 +94,8 @@ class ValueInfoExtractor:
                 subject.get_comment(attribute_name),
                 observed)
 
-class HospitalValueInfoExtractor(ValueInfoExtractor):
-    template_name = 'templates/hospital_bubble.html'
+class HaitiHospitalValueInfoExtractor(ValueInfoExtractor):
+    template_name = 'templates/haiti_hospital_bubble.html'
 
     def __init__(self):
         ValueInfoExtractor.__init__(
@@ -123,8 +123,40 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
             general.append(alert_status_info)
         return (special, general, details)
 
+class HospitalValueInfoExtractor(ValueInfoExtractor):
+    template_name = 'templates/hospital_bubble.html'
+
+    def __init__(self):
+        ValueInfoExtractor.__init__(
+            self,
+            ['title', 'location', 'available_beds', 'total_beds', 'id',
+             'alt_id', 'address', 'services', 'operational_status',
+             'alert_status'],
+            # TODO(kpy): This list is redundant; see the comment above
+            # in ValueInfoExtractor.
+            ['services', 'organization_type', 'category', 'construction',
+             'operational_status']
+        )
+
+    def extract(self, subject, attribute_names):
+        (special, general, details) = ValueInfoExtractor.extract(
+            self, subject, filter(lambda n: n not in HIDDEN_ATTRIBUTE_NAMES,
+                                   attribute_names))
+        op_status_info = ValueInfoExtractor.get_value_info(self, subject,
+            'operational_status')
+        alert_status_info = ValueInfoExtractor.get_value_info(self, subject,
+            'alert_status')
+        if op_status_info:
+            general.append(op_status_info)
+        if alert_status_info:
+            general.append(alert_status_info)
+        return (special, general, details)
+
 VALUE_INFO_EXTRACTORS = {
     'haiti': {
+        'hospital': HaitiHospitalValueInfoExtractor(),
+    },
+    'pakistan': {
         'hospital': HospitalValueInfoExtractor(),
     }
 }
@@ -156,6 +188,7 @@ class Bubble(Handler):
         login_url = users.create_login_url(
             self.get_url('/', subject_name=self.params.subject_name,
                          embed='yes'))
+        settings_url = self.get_url('/settings')
         frequency = self.account and self.account.default_frequency or 'instant'
 
         html = self.render_to_string(
@@ -163,6 +196,7 @@ class Bubble(Handler):
             user=self.user,
             login_url=login_url,
             edit_url=edit_url,
+            settings_url=settings_url,
             subdomain=self.subdomain,
             subscribed=subscribed,
             frequency=frequency,

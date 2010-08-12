@@ -118,6 +118,7 @@ class Struct:
 
 class Handler(webapp.RequestHandler):
     auto_params = {
+        'iframe': validate_yes,
         'embed': validate_yes,
         'flush': validate_yes,
         'add_new': validate_yes,
@@ -204,7 +205,9 @@ class Handler(webapp.RequestHandler):
             self.params.url_no_lang += '?'
 
         # Provide the list of available languages.
-        self.params.languages = config.LANGUAGES
+        self.params.languages = (lang for lang in config.LANGUAGES
+                                 if lang[0] in config.LANGS_BY_SUBDOMAIN[
+                                     self.subdomain])
 
         # Provide the Google Analytics account ID.
         self.params.analytics_id = get_secret('analytics_id')
@@ -258,6 +261,8 @@ class Handler(webapp.RequestHandler):
         preserving the current 'subdomain' parameter if there is one."""
         if self.request.get('subdomain'):
             params['subdomain'] = self.request.get('subdomain')
+        if self.params.iframe:
+            params['iframe'] = 'yes'
         if params:
             path += ('?' in path and '&' or '?') + urlencode(params)
         return path
@@ -336,7 +341,8 @@ def format(value, localize=False):
 
 def get_last_updated_time(subject):
     type = cache.SUBJECT_TYPES[subject.subdomain][subject.type]
-    return max(subject.get_observed(name) for name in type.attribute_names)
+    return max(subject.get_observed(name) for name in type.attribute_names
+               if subject.get_observed(name) is not None)
 
 def decompress(data):
     file = gzip.GzipFile(fileobj=StringIO.StringIO(data))
