@@ -119,7 +119,7 @@ locale = function() {
 
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
-  messages.OPEN_TOTAL_BEDS = "\u06a9\u06be\u0644\u0627 / \u06a9\u0644 \u0628\u0633\u062a\u0631";
+  messages.OPEN_TOTAL_BEDS = "\u062f\u0633\u062a\u06cc\u0627\u0628 / \u06a9\u0644 \u0628\u0633\u062a\u0631";
 
   //i18n: Very short abbreviation for a phone number, indended to disambiguate
   //i18n: from a fax number.  (example: p 555-555-5555)
@@ -138,7 +138,7 @@ locale = function() {
   messages.SAVING = "\u0645\u062d\u0641\u0648\u0638 \u06c1\u0648 \u0631\u06c1\u0627 \u06c1\u06d2...";
 
   //i18n: work done by someone that benefits another
-  messages.SERVICES = "\u062e\u062f\u0645\u0627\u062a";
+  messages.SERVICES = "\u0637\u0628\u06cc \u0633\u06be\u0648\u0644\u06cc\u0627\u062a";
 
   //i18n: Label for a control that filters a list of facilities
   messages.SHOW = "\u062f\u06a9\u06be\u0627\u0626\u06cc\u06ba";
