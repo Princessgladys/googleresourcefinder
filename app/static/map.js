@@ -424,6 +424,7 @@ function cancel_add_subject() {
 
 function place_new_subject_marker(latlon) {
   new_subject_marker = new google.maps.Marker({
+    'class': 'new-subject-marker',
     position: latlon,
     map: map,
     icon: make_icon(null, 1, null, null, null, 'f60'),

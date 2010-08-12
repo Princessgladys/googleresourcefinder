@@ -71,12 +71,12 @@ class MainTestCase(SeleniumTestCase):
 
         # After login, editing should be allowed.
         self.login(
-            '/edit?subdomain=haiti&subject_name=example.org/1000&flush-yse')
+            '/edit?subdomain=haiti&subject_name=example.org/1000&flush-yes')
         self.assert_text(Regex('Edit.*'), '//h1')
 
     def test_elements_present(self):
         """Confirms that listbox and maps with elements are present and
-        interaction between a list and a map works."""    
+        interaction between a list and a map works."""
         self.login('/?subdomain=haiti')
         
         # Should have automatically redirected to subdomain 'haiti'.
@@ -112,6 +112,23 @@ class MainTestCase(SeleniumTestCase):
         assert self.is_visible('link=Help')
         assert self.is_visible('link=Export CSV')
         assert self.is_visible('link=View Master List archive')
+
+        # Check the add facility button
+        assert not self.is_element_present('//div[@class="map-control-ui"]')
+
+        # Remove permissions from account and add to default. Make sure button
+        # is still there.
+        self.set_default_permissions(['*:view', '*:add'])
+        self.open_path('/?subdomain=haiti&flush=yes')
+        self.wait_for_element('//div[@class="map-control-ui"]')
+
+        # Add permissions to account and remove from default permissions,
+        # then make sure add facility button loads
+        self.set_default_permissions(['*:view'])
+        self.delete_account()
+        self.put_account(actions=['*:view', '*:add'])
+        self.open_path('/?subdomain=haiti&flush=yes')
+        self.wait_for_element('//div[@class="map-control-ui"]')
 
     def test_closed_facilities(self):
         """Confirms that closed facilities appear grey in the facility list
