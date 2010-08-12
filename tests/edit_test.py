@@ -475,7 +475,7 @@ class EditTest(SeleniumTestCase):
 
     def test_add_facility_signed_out(self):
         """In-place add facility form starting from signed out."""
-        add_button = '//div[@class="map-control-ui"]'
+        add_button = '//div[@class="new-subject-map-control-ui"]'
         self.set_default_permissions(['*:view', '*:add'])
 
         self.open_path('/?subdomain=haiti')
@@ -491,6 +491,7 @@ class EditTest(SeleniumTestCase):
 
         # Wait for the instructional status message
         self.wait_until(self.is_visible, 'loading')
+        self.wait_for_element('map')
         self.is_text_present('Click a location')
 
     def edit(self, login=False):
