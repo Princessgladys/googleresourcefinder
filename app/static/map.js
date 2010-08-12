@@ -377,13 +377,13 @@ function initialize_map() {
   });
 
   // Create add subject button
-  new_subject_button = $$('div', {class: 'map-control'});
-  var new_subject_ui = $$('div', {class: 'map-control-ui'});
+  new_subject_button = $$('div', {'class': 'map-control'});
+  var new_subject_ui = $$('div', {'class': 'map-control-ui'});
   var new_subject_text = $$(
-      'div', {class: 'map-control-text'}, locale.ADD() + ' ');
+      'div', {'class': 'map-control-text'}, locale.ADD() + ' ');
   var icon = $$('img', {
     src: make_icon(null, STATUS_UNKNOWN, false),
-    class: 'map-control-marker'
+    'class': 'map-control-marker'
   });
   new_subject_button.appendChild(new_subject_ui);
   new_subject_ui.appendChild(new_subject_text);
@@ -419,20 +419,20 @@ function cancel_add_subject() {
   _gaq.push(['_trackEvent', 'add', 'cancel', 'new_subject']);
 }
 
-function place_new_subject_marker(latlng) {
+function place_new_subject_marker(latlon) {
   new_subject_marker = new google.maps.Marker({
-    position: latlng,
+    position: latlon,
     map: map,
     icon: make_icon(null, 1, null, null, null, 'f60'),
     title: locale.NEW_SUBJECT(),
     draggable: true
   });
   google.maps.event.addListener(new_subject_marker, 'dragend', function() {
-    update_lat_lng(new_subject_marker.getPosition());
+    update_lat_lon(new_subject_marker.getPosition());
   });
 }
 
-function update_lat_lng(latlng) {
+function update_lat_lon(latlng) {
   lat_elems = document.getElementsByName('location.lat');
   if (lat_elems.length > 0) {
     lat_elems[0].value = latlng.lat();
@@ -1317,7 +1317,8 @@ function select_subject(subject_i) {
     },
     success: function(result){
       subjects[subject_i].values = result.json.values;
-      var new_location = subjects[subject_i].values[attributes_by_name.location];
+      var new_location = subjects[subject_i].values[
+          attributes_by_name.location];
       if (!had_location && new_location) {
         add_marker(subject_i);
       } else if (had_location && !new_location) {
@@ -1612,7 +1613,7 @@ function inplace_edit_start(edit_url) {
   // InfoWindow so that it resizes correctly.
   log('Editing in place:', edit_url);
 
-  data = {}
+  var data = {};
   if (new_subject_marker) {
     data.lat = new_subject_marker.position.lat();
     data.lon = new_subject_marker.position.lng();
