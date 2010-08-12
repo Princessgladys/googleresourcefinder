@@ -15,13 +15,20 @@
 
 # Application-wide configuration settings.
 
+# List of language codes supported for each subdomain
+LANGS_BY_SUBDOMAIN = {'haiti': ('en', 'fr', 'ht', 'es-419'),
+                      'pakistan': ('en', 'ur')}
+
+SUBDOMAIN_LIST_FOOTERS = {'haiti': 'haiti_list_footer.html',
+                          'pakistan': 'blank.html'}
+
 # List of languages that appear in the language menu, as (code, name) pairs.
-LANGUAGES = [('en', 'English'),
+LANGUAGES = (('en', 'English'),
              ('fr', u'Fran\u00e7ais'), # French
              ('ht', u'Krey\u00f2l'), # Kreyol
              ('es-419', u'Espa\u00F1ol'), # Spanish (Latin American)
              ('ur', u'\u0627\u0644\u0639\u0631\u0628\u064A') # Urdu
-            ]
+            )
 
 # A map from unavailable languages to the best available fallback languages.
 LANG_FALLBACKS = {'es': 'es-419'}

@@ -34,9 +34,9 @@ class MediumTestCase(unittest.TestCase):
     appengine services."""
     def setUp(self):
         apiproxy_stub_map.apiproxy = apiproxy_stub_map.APIProxyStubMap()
-        stub = datastore_file_stub.DatastoreFileStub(APP_ID,'/dev/null',
-                                                     '/dev/null')
-        apiproxy_stub_map.apiproxy.RegisterStub('datastore_v3', stub)
+
+        apiproxy_stub_map.apiproxy.RegisterStub(
+            'datastore', datastore_file_stub.DatastoreFileStub(APP_ID, None))
 
         apiproxy_stub_map.apiproxy.RegisterStub(
             'memcache', memcache_stub.MemcacheServiceStub())
