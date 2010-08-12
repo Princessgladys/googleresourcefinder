@@ -59,7 +59,8 @@ class EditTest(MediumTestCase):
             observed=self.change_time,
             author='author_bar', author_nickname='nickname_bar',
             author_affiliation='affiliation_bar')
-        self.account = Account(email=self.email, actions=['*:view', '*:edit'], locale='en')
+        self.account = Account(
+            email=self.email, actions=['*:view', '*:edit'], locale='en')
 
         db.put([self.s, self.ms, self.st])
 
