@@ -440,8 +440,8 @@ msgstr "ID HealthC"
 msgid "Hello"
 msgstr "Aide"
 
-#. TODO: Add missing message description or meaning
-#: templates/base.html:125
+#. Link to go to a help page for the application
+#: templates/base.html:128
 msgid "Help"
 msgstr "Aide"
 
@@ -546,7 +546,7 @@ msgid "Loader:"
 msgstr "Outil de chargement :"
 
 #. Indicator that the application is loading.
-#: templates/base.html:172 static/locale.js:134
+#: static/locale.js:134 templates/base.html:175
 msgid "Loading..."
 msgstr "Chargement..."
 
@@ -830,7 +830,7 @@ msgid "Set checked to default"
 msgstr "Ensemble Contrôlé par Défaut"
 
 #. Link to go to the settings page of the application
-#: templates/base.html:137
+#: templates/base.html:140
 msgid "Settings"
 msgstr "Paramètres"
 

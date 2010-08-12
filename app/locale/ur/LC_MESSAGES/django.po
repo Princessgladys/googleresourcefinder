@@ -441,8 +441,8 @@ msgstr "HealthC ID"
 msgid "Hello"
 msgstr "ہیلو"
 
-#. TODO: Add missing message description or meaning
-#: templates/base.html:125
+#. Link to go to a help page for the application
+#: templates/base.html:128
 msgid "Help"
 msgstr "مدد"
 
@@ -547,7 +547,7 @@ msgid "Loader:"
 msgstr "لوڈ کرنے والا:"
 
 #. Indicator that the application is loading.
-#: templates/base.html:172 static/locale.js:134
+#: static/locale.js:134 templates/base.html:175
 msgid "Loading..."
 msgstr "لوڈ ہورہا ہے..."
 
@@ -831,7 +831,7 @@ msgid "Set checked to default"
 msgstr "نشان زد کو ڈیفالٹ پر ترتیب دیں"
 
 #. Link to go to the settings page of the application
-#: templates/base.html:137
+#: templates/base.html:140
 msgid "Settings"
 msgstr "ترتیبات"
 

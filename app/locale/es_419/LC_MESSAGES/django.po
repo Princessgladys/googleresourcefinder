@@ -364,7 +364,7 @@ msgstr "Exportar CSV"
 #. Label for facilities with changes
 #: templates/hospital_email.html:63
 msgid "Facilities with Changes"
-msgstr "Instalaciones con los Cambios"
+msgstr "Instituciónes con los Cambios"
 
 #. A place that provides a particular service
 #: templates/print.html:129 static/locale.js:120 templates/map.html:169 templates/settings.html:120
@@ -441,8 +441,8 @@ msgstr "ID HealthC"
 msgid "Hello"
 msgstr "Ayuda"
 
-#. TODO: Add missing message description or meaning
-#: templates/base.html:125
+#. Link to go to a help page for the application
+#: templates/base.html:128
 msgid "Help"
 msgstr "Ayuda"
 
@@ -547,7 +547,7 @@ msgid "Loader:"
 msgstr "Cargador:"
 
 #. Indicator that the application is loading.
-#: templates/base.html:172 static/locale.js:134
+#: static/locale.js:134 templates/base.html:175
 msgid "Loading..."
 msgstr "Cargando..."
 
@@ -831,7 +831,7 @@ msgid "Set checked to default"
 msgstr "Seleccionados para Establecer por Defecto"
 
 #. Link to go to the settings page of the application
-#: templates/base.html:137
+#: templates/base.html:140
 msgid "Settings"
 msgstr "Ajustes"
 
