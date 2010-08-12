@@ -311,7 +311,7 @@ msgid "Distance"
 msgstr ""
 
 #. Meaning: administrative division
-#: templates/map.html:151 static/locale.js:63 ../tools/setup.py:180
+#: templates/map.html:153 static/locale.js:63 ../tools/setup.py:180
 msgid "District"
 msgstr ""
 
@@ -372,7 +372,7 @@ msgid "Error saving facility information."
 msgstr ""
 
 #. Button to export data to comma-separated-value format.
-#: export.py:176 templates/map.html:192
+#: export.py:176 templates/map.html:194
 msgid "Export CSV"
 msgstr ""
 
@@ -382,7 +382,7 @@ msgid "Facilities with Changes"
 msgstr ""
 
 #. A place that provides a particular service
-#: static/locale.js:120 templates/print.html:129 templates/map.html:170 templates/settings.html:120
+#: templates/map.html:172 templates/print.html:129 static/locale.js:120 templates/settings.html:120
 msgid "Facility"
 msgstr ""
 
@@ -422,7 +422,7 @@ msgid "Field is required."
 msgstr ""
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:125
+#: templates/map.html:127
 msgid "Filters"
 msgstr ""
 
@@ -881,7 +881,7 @@ msgid "Show"
 msgstr ""
 
 #. Link to sign into the app
-#: main.py:65
+#: main.py:69
 msgid "Sign in"
 msgstr ""
 
@@ -891,7 +891,7 @@ msgid "Sign in to edit"
 msgstr ""
 
 #. Link to sign out of the app
-#: settings.py:71 main.py:63
+#: main.py:67 settings.py:71
 msgid "Sign out"
 msgstr ""
 
@@ -906,7 +906,7 @@ msgid "Subscribe to email updates"
 msgstr ""
 
 #. Header for a list of provisions
-#: templates/map.html:105
+#: templates/map.html:107
 msgid "Supplies"
 msgstr ""
 
@@ -1079,7 +1079,7 @@ msgid "and with availability."
 msgstr ""
 
 #. a user with no identity
-#: main.py:60
+#: main.py:64
 msgid "anonymous"
 msgstr ""
 
