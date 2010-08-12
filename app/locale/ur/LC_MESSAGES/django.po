@@ -311,7 +311,7 @@ msgid "Distance"
 msgstr "دوری"
 
 #. Meaning: administrative division
-#: templates/map.html:149 static/locale.js:63 ../tools/setup.py:180
+#: templates/map.html:151 static/locale.js:63 ../tools/setup.py:180
 msgid "District"
 msgstr "ضلع"
 
@@ -372,7 +372,7 @@ msgid "Error saving facility information."
 msgstr "سہولت کی معلومات محفوظ کرنے میں غلطی۔"
 
 #. Button to export data to comma-separated-value format.
-#: export.py:176 templates/map.html:190
+#: export.py:176 templates/map.html:192
 msgid "Export CSV"
 msgstr "CSV برآمد کریں"
 
@@ -382,7 +382,7 @@ msgid "Facilities with Changes"
 msgstr "سہولیات مع تبدیلیاں"
 
 #. A place that provides a particular service
-#: templates/print.html:129 static/locale.js:120 templates/map.html:168 templates/settings.html:120
+#: static/locale.js:120 templates/print.html:129 templates/map.html:170 templates/settings.html:120
 msgid "Facility"
 msgstr "سہولت"
 
@@ -422,7 +422,7 @@ msgid "Field is required."
 msgstr "فیلڈ مطلوب ہے۔"
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:123
+#: templates/map.html:125
 msgid "Filters"
 msgstr "فلٹرز"
 
@@ -467,7 +467,7 @@ msgid "Hello"
 msgstr "ہیلو"
 
 #. Link to go to a help page for the application
-#: templates/base.html:120
+#: templates/base.html:129
 msgid "Help"
 msgstr "مدد"
 
@@ -541,11 +541,6 @@ msgstr "لیب"
 msgid "Laboratory"
 msgstr "لیبوریٹر"
 
-#. Label for a language selector
-#: templates/base.html:85
-msgid "Language:"
-msgstr "زبان:"
-
 #. Label for the last update time
 #: templates/hospital_email.html:90 templates/hospital_email.html.py:188
 msgid "Last Updated:"
@@ -571,6 +566,11 @@ msgstr "عرض البلد ایک عدد ہونا چاہیے۔"
 msgid "Latitude must be between -90 and 90."
 msgstr "عرض البلد -90 اور 90 کے درمیان ہونا چاہیے۔"
 
+#. Category for terms of service and privacy pages
+#: templates/base.html:107
+msgid "Legal"
+msgstr "قانون"
+
 #. Button text to load data
 #: templates/load.html:57
 msgid "Load"
@@ -582,7 +582,7 @@ msgid "Loader:"
 msgstr "لوڈ کرنے والا:"
 
 #. Indicator that the application is loading.
-#: static/locale.js:134 templates/base.html:148
+#: static/locale.js:134 templates/base.html:176
 msgid "Loading..."
 msgstr "لوڈ ہورہا ہے..."
 
@@ -672,7 +672,7 @@ msgid "New facility"
 msgstr "نئی سہول"
 
 #. Form option for a false Boolean value
-#: utils.py:336 edit.py:177 utils_test.py:321
+#: edit.py:177 utils_test.py:321 utils.py:339
 msgid "No"
 msgstr "نہیں"
 
@@ -777,11 +777,6 @@ msgstr "آپریشن کے بعد کی نگہداشت"
 msgid "Previous value"
 msgstr "سابقہ قدر"
 
-#. Link to print the current view of the application
-#: templates/base.html:108
-msgid "Print"
-msgstr "پرنٹ کریں"
-
 #. Tooltip explaining a 'Print' link
 #: static/locale.js:166
 #, sh-format
@@ -789,7 +784,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "${FACILITY_NAME} سے دوری کے لحاظ سے ہسپتالوں کی فہرست پرنٹ کریں"
 
 #. Link to privacy policy for the application
-#: templates/base.html:130
+#: templates/base.html:120
 msgid "Privacy"
 msgstr "رازداری"
 
@@ -871,7 +866,7 @@ msgid "Set checked to default"
 msgstr "نشان زد کو ڈیفالٹ پر ترتیب دیں"
 
 #. Link to go to the settings page of the application
-#: templates/base.html:114
+#: templates/base.html:141
 msgid "Settings"
 msgstr "ترتیبات"
 
@@ -911,12 +906,12 @@ msgid "Subscribe to email updates"
 msgstr "ای میل تازہ کاریوں کی رکنیت حاصل کریں"
 
 #. Header for a list of provisions
-#: templates/map.html:103
+#: templates/map.html:105
 msgid "Supplies"
 msgstr "ساز و سامان"
 
 #. Link to terms of service for the application
-#: templates/base.html:125
+#: templates/base.html:113
 msgid "Terms of Service"
 msgstr "خدمت کی شرائط"
 
@@ -956,7 +951,7 @@ msgid "URL:"
 msgstr "URL:"
 
 #. Error message
-#: utils.py:142
+#: utils.py:143
 msgid "Unauthorized user."
 msgstr "غیر مجاز صارف۔"
 
@@ -1041,7 +1036,7 @@ msgid "X-Ray"
 msgstr "ایکسرے"
 
 #. Form option for a true Boolean value
-#: utils.py:336 edit.py:175 utils_test.py:320
+#: utils_test.py:320 edit.py:175 utils.py:339
 msgid "Yes"
 msgstr "ہاں"
 

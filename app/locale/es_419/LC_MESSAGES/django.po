@@ -311,7 +311,7 @@ msgid "Distance"
 msgstr "Distancia"
 
 #. Meaning: administrative division
-#: templates/map.html:149 static/locale.js:63 ../tools/setup.py:180
+#: templates/map.html:151 static/locale.js:63 ../tools/setup.py:180
 msgid "District"
 msgstr "Distrito"
 
@@ -372,7 +372,7 @@ msgid "Error saving facility information."
 msgstr "Error al guardar institución de información."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:176 templates/map.html:190
+#: export.py:176 templates/map.html:192
 msgid "Export CSV"
 msgstr "Exportar CSV"
 
@@ -382,7 +382,7 @@ msgid "Facilities with Changes"
 msgstr "Instituciónes con los Cambios"
 
 #. A place that provides a particular service
-#: templates/print.html:129 static/locale.js:120 templates/map.html:168 templates/settings.html:120
+#: static/locale.js:120 templates/print.html:129 templates/map.html:170 templates/settings.html:120
 msgid "Facility"
 msgstr "Institución"
 
@@ -422,7 +422,7 @@ msgid "Field is required."
 msgstr "Este campo es requerido."
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:123
+#: templates/map.html:125
 msgid "Filters"
 msgstr "Filtros"
 
@@ -467,7 +467,7 @@ msgid "Hello"
 msgstr "Ayuda"
 
 #. Link to go to a help page for the application
-#: templates/base.html:120
+#: templates/base.html:129
 msgid "Help"
 msgstr "Ayuda"
 
@@ -541,11 +541,6 @@ msgstr "Laboratorio"
 msgid "Laboratory"
 msgstr "Laboratorio"
 
-#. Label for a language selector
-#: templates/base.html:85
-msgid "Language:"
-msgstr "Idioma:"
-
 #. Label for the last update time
 #: templates/hospital_email.html:90 templates/hospital_email.html.py:188
 msgid "Last Updated:"
@@ -571,6 +566,11 @@ msgstr "La latitud debe ser un número"
 msgid "Latitude must be between -90 and 90."
 msgstr "La latitud debe estar entre -90 y 90"
 
+#. Category for terms of service and privacy pages
+#: templates/base.html:107
+msgid "Legal"
+msgstr "Legal"
+
 #. Button text to load data
 #: templates/load.html:57
 msgid "Load"
@@ -582,7 +582,7 @@ msgid "Loader:"
 msgstr "Cargador:"
 
 #. Indicator that the application is loading.
-#: static/locale.js:134 templates/base.html:148
+#: static/locale.js:134 templates/base.html:176
 msgid "Loading..."
 msgstr "Cargando..."
 
@@ -672,7 +672,7 @@ msgid "New facility"
 msgstr "Nueva institución"
 
 #. Form option for a false Boolean value
-#: utils.py:336 edit.py:177 utils_test.py:321
+#: edit.py:177 utils_test.py:321 utils.py:339
 msgid "No"
 msgstr "No"
 
@@ -777,11 +777,6 @@ msgstr "Cuidados Posoperatorios"
 msgid "Previous value"
 msgstr "Valor anterior"
 
-#. Link to print the current view of the application
-#: templates/base.html:108
-msgid "Print"
-msgstr "Imprimir"
-
 #. Tooltip explaining a 'Print' link
 #: static/locale.js:166
 #, sh-format
@@ -789,7 +784,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Imprime una lista de hospitales por orden de distancia desde ${FACILITY_NAME}"
 
 #. Link to privacy policy for the application
-#: templates/base.html:130
+#: templates/base.html:120
 msgid "Privacy"
 msgstr "Privacidad"
 
@@ -871,7 +866,7 @@ msgid "Set checked to default"
 msgstr "Seleccionados para Establecer por Defecto"
 
 #. Link to go to the settings page of the application
-#: templates/base.html:114
+#: templates/base.html:141
 msgid "Settings"
 msgstr "Ajustes"
 
@@ -911,12 +906,12 @@ msgid "Subscribe to email updates"
 msgstr "Suscribirse a las Actualizaciones por Correo Electrónico"
 
 #. Header for a list of provisions
-#: templates/map.html:103
+#: templates/map.html:105
 msgid "Supplies"
 msgstr "Suministros"
 
 #. Link to terms of service for the application
-#: templates/base.html:125
+#: templates/base.html:113
 msgid "Terms of Service"
 msgstr "Condiciones del servicio"
 
@@ -956,7 +951,7 @@ msgid "URL:"
 msgstr "URL:"
 
 #. Error message
-#: utils.py:142
+#: utils.py:143
 msgid "Unauthorized user."
 msgstr "Sin autorización del usuario"
 
@@ -1041,7 +1036,7 @@ msgid "X-Ray"
 msgstr "Rayos X"
 
 #. Form option for a true Boolean value
-#: utils.py:336 edit.py:175 utils_test.py:320
+#: utils_test.py:320 edit.py:175 utils.py:339
 msgid "Yes"
 msgstr "Sí"
 
