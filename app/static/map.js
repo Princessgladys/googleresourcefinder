@@ -1392,7 +1392,12 @@ function update_status(message) {
     if (status.clientWidth / browser_width > 0.7) {
       status.style.width = Math.round(0.7 * browser_width) + "px";
     }
-    status.style.left = (browser_width / 2) - (status.clientWidth / 2);
+    var new_location = (browser_width / 2) - (status.clientWidth / 2);
+    if (rtl) {
+      status.style.right = new_location;
+    } else {
+      status.style.left = new_location;
+    }
   } else {
     status.style.display = 'none';
   }
@@ -1631,7 +1636,7 @@ function inplace_edit_start(edit_url) {
       var windowHeight = get_window_size()[1];
       var editTop = get_element_top(edit_data);
       edit_data.style.height = (windowHeight - editTop) + 'px';
-      var edit_bar = $('edit_bar');
+      var edit_bar = $('edit-bar');
       if (edit_bar) {
         document.body.appendChild(edit_bar);
       }
@@ -1706,7 +1711,7 @@ function inplace_edit_cancel() {
 }
 
 function remove_edit_bar() {
-  var edit_bar = $('edit_bar');
+  var edit_bar = $('edit-bar');
   if (edit_bar) {
     document.body.removeChild(edit_bar);
   }

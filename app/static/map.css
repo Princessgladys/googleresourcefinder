@@ -104,7 +104,7 @@ td.subject-count.selected { color: #fff; }
 .vs3 { height: 4px; opacity: 0.03; filter:alpha(opacity=3); }
 #freshness { position: absolute; left: 0; bottom: 0; padding: 4px;
              font-size: 13px; background: #eee; width: 392px; }
-#edit_bar { position: absolute; left: 0; bottom: 0; padding: 4px;
+#edit-bar { position: absolute; left: 0; bottom: 0; padding: 4px;
             background: #eee; width: 377px; }
 .map-control { margin: 5px 1px; border: 1px solid #000; }
 .map-control-ui { background: #fff; border: 1px solid #ccc; cursor: pointer; text-align: center; }
@@ -136,4 +136,4 @@ tr.on-alert td { color: #a00; }
 /* Map area */
 .iframe #map, .iframe .hshadow, .iframe .vshadow { left: 300px; }
 .iframe #freshness { width: 292px; }
-.iframe #edit_bar { width: 277px; }
+.iframe #edit-bar { width: 277px; }
