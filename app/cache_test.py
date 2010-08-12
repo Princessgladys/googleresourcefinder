@@ -68,7 +68,7 @@ class CacheTest(MediumTestCase):
     def setUp(self):
         MediumTestCase.setUp(self)
         for i in range(0, 10):
-            Message(namespace='english', name='name_%d' % i).put()
+            Message(ns='english', name='name_%d' % i).put()
 
         self.messages = list(m for m in Message.all(keys_only=True))
         cache.MESSAGES.flush()

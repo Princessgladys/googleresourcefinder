@@ -893,9 +893,12 @@ function update_print_subject_list() {
             KM: format_number(dist_meters / METERS_PER_KM, 2)});
       }
       var title = subject.values[attributes_by_name.title];
-      var subject_title = title + ' - '
-        + locale.HEALTHC_ID() + ': ' + render(healthc_id)
-        + ' - ' + locale.PCODE() + ': ' + render(pcode);
+      var subject_title = title;
+      if (healthc_id || pcode) {
+        subject_title += ' - '
+          + locale.HEALTHC_ID() + ': ' + render(healthc_id)
+          + ' - ' + locale.PCODE() + ': ' + render(pcode);
+      }
       cells.push($$('td', {'class': 'subject-beds-open'}, render(open_beds)));
       cells.push($$('td', {'class': 'subject-beds-total'},render(total_beds)));
       cells.push($$('td', {'class': 'subject-title'}, render(subject_title)));

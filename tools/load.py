@@ -13,18 +13,27 @@
 # limitations under the License.
 
 from google.appengine.api import users
-from model import *
+
 import csv
 import datetime
 import logging
 import re
+
+import kml
 import setup
+from feeds.geo import point_inside_polygon
+from model import *
+from pakistan_data import *
 
 SHORELAND_URL = 'http://shoreland.com/'
 SHORELAND_EMAIL = 'haitiaid@shoreland.com'
 SHORELAND_NICKNAME = 'Shoreland Editor'
 SHORELAND_AFFILIATION = 'Shoreland Inc.'
 
+PAKISTAN_URL = 'http://www.google.com/mapmaker/'
+PAKISTAN_EMAIL = 'resource-finder-discussion@googlegroups.com'
+PAKISTAN_NICKNAME = 'Google MapMaker'
+PAKISTAN_AFFILIATION = 'Google Inc.'
 
 def strip_or_none(value):
     """Converts strings to their stripped values or None, while preserving
@@ -53,8 +62,11 @@ class ValueInfo:
             comment = comment and '%s; %s' % (source, comment) or source
         return comment
 
+    def __repr__(self):
+      return 'ValueInfo(%r, observed=%r, comment=%r)' % (
+          self.value, self.observed, self.comment)
 
-def convert_paho_record(record):
+def convert_paho_record(index, record):
     """Converts a dictionary of values from one row of a PAHO CSV file
     into a dictionary of ValueInfo objects for our datastore."""
 
@@ -114,7 +126,7 @@ def convert_paho_record(record):
         'sante_id': ValueInfo(record['SanteID'])
     }
 
-def convert_shoreland_record(record):
+def convert_shoreland_record(index, record):
     """Converts a dictionary of values from one row of a Shoreland CSV file
     into a dictionary of ValueInfo objects for our datastore."""
     title = record['facility_name'].strip()
@@ -236,18 +248,94 @@ def convert_shoreland_record(record):
         'sante_id': ValueInfo(record.get('sante_id'))
     }
 
-def load_csv(
-    filename, record_converter, subdomain, subject_type_name, source_url,
-    default_observed, author, author_nickname, author_affiliation, limit=None):
-    """Loads a CSV file of records into the datastore.
+def convert_pakistan_record(index, record):
+    """Converts a dictionary of values from one placemark of a Mapmaker-
+    exported KML file into a dictionary of ValueInfo objects for our
+    datastore."""
+    if not record.get('title', '').strip():
+        # TODO(shakusa) Fix this. We should be importing all facilities.
+        logging.warn('Skipping %r: No title' % record)
+        return None, None, None
+
+    title = record['title'].strip()
+
+    # TODO(shakusa) Try to get mapmaker IDs to use here
+    subject_name = 'pakistan.resource-finder.appspot.com/hospital.%d' % index
+    try:
+        latitude = float(record['location'][1])
+        longitude = float(record['location'][0])
+        location = db.GeoPt(latitude, longitude)
+    except (KeyError, ValueError):
+        logging.warn('No location for %r: %r' % (title, record.get('location')))
+        location = None
+    observed = None
+
+    type = ''
+    comments = []
+    CDATA_PATTERN = re.compile(r'<b>(.*):</b> <i>(.*)</i>.*')
+    for line in record.get('comment', '').strip().split('\n'):
+        line = line.strip()
+        match = CDATA_PATTERN.match(line)
+        if match:
+            key = match.group(1)
+            value = match.group(2)
+            if key == 'TYPE':
+                type = value
+            elif key == 'LANGNAME':
+                record['alt_title'] = value
+            elif key == 'ADDRESS':
+                record['address'] = value
+            elif value in PAKISTAN_ADMIN_AREAS:
+                if value == 'North West Frontier':
+                    # Officially renamed;
+                    # See http://en.wikipedia.org/wiki/Khyber-Pakhtunkhwa
+                    value = 'Khyber Pakhtunkhwa'
+                record['admin_area'] = value
+            elif value in PAKISTAN_DISTRICTS:
+                record['sub_admin_area'] = value
+            comments.append('%s: %s' % (key, value))
+
+    title_lower = title.lower()
+    if type == 'TYPE_HOSPITAL' or 'hospital' in title_lower:
+        record['category'] = 'HOSPITAL'
+    elif 'clinic' in title_lower:
+        record['category'] = 'CLINIC'
+    elif 'laborator' in title_lower or 'labs ' in title_lower:
+        record['category'] = 'LABORATORY'
+    elif 'dispensary' in title_lower:
+        record['category'] = 'DISPENSARY'
+
+    if not (point_inside_polygon(
+        {'lat': latitude, 'lon': longitude}, PAKISTAN_FLOOD_POLYGON) or
+        record.get('sub_admin_area', '') in PAKISTAN_FLOOD_DISTRICTS):
+        return None, None, None
+
+    return subject_name, observed, {
+        'title': ValueInfo(title),
+        'alt_title': ValueInfo(record.get('alt_title', '')),
+        'address': ValueInfo(record.get('address', '')),
+        'administrative_area': ValueInfo(record.get('admin_area', '')),
+        'sub_administrative_area': ValueInfo(record.get('sub_admin_area', '')),
+        'locality': ValueInfo(record.get('locality', '')),
+        'location': ValueInfo(location),
+        'category': ValueInfo(record.get('category', '')),
+        'comments': ValueInfo(db.Text('\n'.join(comments))),
+    }
+
+def load(
+    filename, record_reader, record_converter, subdomain, subject_type_name,
+    source_url, default_observed, author, author_nickname, author_affiliation,
+    limit=None):
+    """Loads a file of records into the datastore.
 
     Args:
-      filename: name of the csv file to load
-      subdomain: name of the subdomain to load subjects into
-      subject_type_name: name of the subject type for these subjects
-      record_converter: function that takes a CSV row and returns a
+      filename: name of the file to load
+      record_reader: function that takes a file and returns a record iterator
+      record_converter: function that takes a parsed record and returns a
           (subject_name, observed, values) triple, where observed is a datetime
           and values is a dictionary of attribute names to ValueInfo objects
+      subdomain: name of the subdomain to load subjects into
+      subject_type_name: name of the subject type for these subjects
       source_url: where filename was downloaded, stored in Report.source
       default_observed: datetime.datetime when data was observed to be valid,
           for records that do not have their own observed timestamp
@@ -270,14 +358,16 @@ def load_csv(
 
     subject_type = SubjectType.get(subdomain, subject_type_name)
     count = 0
-    for record in csv.DictReader(open(filename)):
+    for record in record_reader(open(filename)):
         if limit and count >= limit:
             break
         count += 1
 
         for key in record:
-            record[key] = (record[key] or '').decode('utf-8')
-        subject_name, observed, value_infos = record_converter(record)
+            if record[key] is None or type(record[key]) is str:
+                record[key] = (record[key] or '').decode('utf-8')
+        subject_name, observed, value_infos = record_converter(
+            len(subjects) + 1, record)
         if not subject_name:  # if converter returned None, skip this record
             continue
         observed = observed or default_observed
@@ -367,12 +457,22 @@ def load_shoreland(filename, observed):
     if isinstance(observed, basestring):
         observed = parse_datetime(observed)
     user = users.User(SHORELAND_EMAIL)
-    load_csv(filename, convert_shoreland_record, 'haiti', 'hospital',
-             SHORELAND_URL, observed, user,
-             SHORELAND_NICKNAME, SHORELAND_AFFILIATION)
+    load(filename, csv.DictReader, convert_shoreland_record, 'haiti',
+         'hospital', SHORELAND_URL, observed, user, SHORELAND_NICKNAME,
+         SHORELAND_AFFILIATION)
 
 def wipe_and_load_shoreland(filename, observed):
     """Wipes the entire datastore and then loads a Shoreland CSV file."""
     open(filename)  # Ensure the file is readable before wiping the datastore.
     setup.wipe_datastore()
     load_shoreland(filename, observed)
+
+def load_pakistan_kml(filename, observed):
+    """Loads a Pakistan MapMaker KML file w/ defaults for the URL and author."""
+    setup.setup_datastore()
+    if isinstance(observed, basestring):
+        observed = parse_datetime(observed)
+    user = users.User(PAKISTAN_EMAIL)
+    load(filename, kml.parse_file, convert_pakistan_record, 'pakistan',
+         'hospital', PAKISTAN_URL, observed, user, PAKISTAN_NICKNAME,
+         PAKISTAN_AFFILIATION)
