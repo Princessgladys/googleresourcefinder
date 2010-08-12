@@ -260,7 +260,8 @@ def convert_pakistan_record(index, record):
     title = record['title'].strip()
 
     # TODO(shakusa) Try to get mapmaker IDs to use here
-    subject_name = 'pakistan.resource-finder.appspot.com/hospital.%d' % index
+    subject_name = Subject.generate_name('pakistan.resource-finder.appspot.com',
+                                         'hospital')
     try:
         latitude = float(record['location'][1])
         longitude = float(record['location'][0])
