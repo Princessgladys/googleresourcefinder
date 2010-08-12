@@ -99,6 +99,11 @@ td.subject-count.selected { color: #fff; }
              font-size: 13px; background: #eee; width: 392px; }
 #edit_bar { position: absolute; left: 0; bottom: 0; padding: 4px;
             background: #eee; width: 377px; }
+.map-control { margin: 5px 1px; border: 1px solid #000; }
+.map-control-ui { background: #fff; border: 1px solid #ccc; cursor: pointer; text-align: center; }
+.map-control-text { font-family: 'arial','sans-serif'; font-size: 13px; font-weight: bold;
+                    padding: 0px 2px 0px 2px; vertical-align: middle; }
+img.map-control-marker { padding: 0px 0px 0px 2px; vertical-align: text-bottom; }
 
 /* Map info windows */
 .subject-info h1 { font-size: 13px; }

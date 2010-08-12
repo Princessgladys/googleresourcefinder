@@ -59,7 +59,8 @@ class EditTest(MediumTestCase):
             observed=self.change_time,
             author='author_bar', author_nickname='nickname_bar',
             author_affiliation='affiliation_bar')
-        self.account = Account(email=self.email, actions=['*:*'], locale='en')
+        self.account = Account(
+            email=self.email, actions=['*:view', '*:edit'], locale='en')
 
         db.put([self.s, self.ms, self.st])
 
@@ -391,7 +392,7 @@ class EditTest(MediumTestCase):
             u'pcode': Attribute(key_name='pcode', type='str')
         }
         edit.update(self.s.name, self.st, request, self.user, self.account,
-                    attributes, self.subdomain, False)
+                    attributes, self.subdomain, False, False)
 
         # Check that the Subject and MinimalSubject were indeed updated.
         subject = Subject.get('haiti', self.s.name)
@@ -408,7 +409,7 @@ class EditTest(MediumTestCase):
                        'editable.pcode="pcode_foo"&pcode__comment='
         request = webapp.Request(webob.Request.blank(request_text).environ)
         edit.update(self.s.name, self.st, request, self.user, self.account,
-                    attributes, self.subdomain, False)
+                    attributes, self.subdomain, False, False)
 
         # Check that the Subject and MinimalSubject were indeed updated.
         subject = Subject.get('haiti', self.s.name)
@@ -426,16 +427,24 @@ class EditTest(MediumTestCase):
                        '&save=Save'
         request = webapp.Request(webob.Request.blank(request_text).environ)
         attributes = {
-            u'title': Attribute(key_name='title', type='str'),
+            u'title': Attribute(key_name='title', type='str',
+                                edit_action='advanced_edit'),
             u'pcode': Attribute(key_name='pcode', type='str')
         }
 
+        # Make sure it breaks, as the user does not have permission
         names_before = [s.name for s in Subject.all_in_subdomain('haiti')]
+        self.assertRaises(Exception, edit.update, subject_name, self.st,
+                          request, self.user, self.account, attributes,
+                          self.subdomain, False, False)
+
+        # Grant user permission to add subjects and try again
+        self.account.actions.append('*:add')
         edit.update(subject_name, self.st, request, self.user, self.account,
-                    attributes, self.subdomain, False)
+                    attributes, self.subdomain, True, False)
         names_after = [s.name for s in Subject.all_in_subdomain('haiti')]
 
-        # Check that exactly one new Subject was created.
+        # Check that exactly one new Subject was created
         assert len(names_after) == len(names_before) + 1
         extra_names = list(set(names_after) - set(names_before))
         assert len(extra_names) == 1
