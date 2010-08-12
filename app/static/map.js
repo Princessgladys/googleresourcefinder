@@ -372,13 +372,13 @@ function initialize_map() {
 
   if (show_add_button) {
     // Create add subject button
-    new_subject_button = $$('div', {'class': 'map-control'});
-    var new_subject_ui = $$('div', {'class': 'map-control-ui'});
+    new_subject_button = $$('div', {'class': 'new-subject-map-control'});
+    var new_subject_ui = $$('div', {'class': 'new-subject-map-control-ui'});
     var new_subject_text = $$(
-        'div', {'class': 'map-control-text'}, locale.ADD() + ' ');
+        'div', {'class': 'new-subject-map-control-text'}, locale.ADD() + ' ');
     var icon = $$('img', {
       src: make_icon(null, STATUS_UNKNOWN, false),
-      'class': 'map-control-marker'
+      'class': 'new-subject-map-control-marker'
     });
     new_subject_button.appendChild(new_subject_ui);
     new_subject_ui.appendChild(new_subject_text);
