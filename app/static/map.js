@@ -180,12 +180,6 @@ function log() {
 }
 
 // ==== DOM utilities
-var $j = jQuery;
-
-// Get an element by its id.
-function $(id) {
-  return document.getElementById(id);
-}
 
 // Special-case attribute handling.  For each ('k', 'v') pair, attribute k is
 // set by assigning to element.v rather than element.setAttribute('k', ...).

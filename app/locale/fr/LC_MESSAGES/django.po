@@ -300,7 +300,7 @@ msgid "Distance"
 msgstr "Distance"
 
 #. Meaning: administrative division
-#: templates/map.html:149 ../tools/setup.py:137 static/locale.js:63
+#: templates/map.html:150 ../tools/setup.py:137 static/locale.js:63
 msgid "District"
 msgstr "District"
 
@@ -356,7 +356,7 @@ msgid "Error saving facility information."
 msgstr "Erreur lors du enregistrement des informations de installation."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:142 templates/map.html:190
+#: export.py:142 templates/map.html:191
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
@@ -366,7 +366,7 @@ msgid "Facilities with Changes"
 msgstr "Installations avec des Changements"
 
 #. A place that provides a particular service
-#: templates/print.html:129 static/locale.js:120 templates/map.html:168 templates/settings.html:120
+#: templates/print.html:129 static/locale.js:120 templates/map.html:169 templates/settings.html:120
 msgid "Facility"
 msgstr "Établissement"
 
@@ -401,7 +401,7 @@ msgid "Field is required."
 msgstr "Ce champ est obligatoire."
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:123
+#: templates/map.html:124
 msgid "Filters"
 msgstr "Filtres"
 
@@ -440,8 +440,8 @@ msgstr "ID HealthC"
 msgid "Hello"
 msgstr "Aide"
 
-#. Link to go to a help page for the application
-#: templates/base.html:120
+#. TODO: Add missing message description or meaning
+#: templates/base.html:125
 msgid "Help"
 msgstr "Aide"
 
@@ -505,11 +505,6 @@ msgstr "janv. févr. mars avr. mai juin juil. août sept. oct. nov. déc."
 msgid "Lab"
 msgstr "Laboratoire"
 
-#. Label for a language selector
-#: templates/base.html:85
-msgid "Language:"
-msgstr "Langue :"
-
 #. Label for the last update time
 #: templates/hospital_email.html:90 templates/hospital_email.html.py:188
 msgid "Last Updated:"
@@ -535,6 +530,11 @@ msgstr "Latitude doit être un nombre"
 msgid "Latitude must be between -90 and 90."
 msgstr "Latitude doit être comprise entre -90 et 90"
 
+#. Category for terms of service and privacy pages
+#: templates/base.html:106
+msgid "Legal"
+msgstr "Juridique"
+
 #. Button text to load data
 #: templates/load.html:57
 msgid "Load"
@@ -546,7 +546,7 @@ msgid "Loader:"
 msgstr "Outil de chargement :"
 
 #. Indicator that the application is loading.
-#: static/locale.js:134 templates/base.html:148
+#: templates/base.html:172 static/locale.js:134
 msgid "Loading..."
 msgstr "Chargement..."
 
@@ -636,7 +636,7 @@ msgid "New facility"
 msgstr "Une nouvelle installation"
 
 #. Form option for a false Boolean value
-#: edit.py:177 utils.py:334 utils_test.py:321
+#: edit.py:177 utils_test.py:321 utils.py:337
 msgid "No"
 msgstr "Non"
 
@@ -741,11 +741,6 @@ msgstr "Soins Postopératoires"
 msgid "Previous value"
 msgstr "Valeur précédente"
 
-#. Link to print the current view of the application
-#: templates/base.html:108
-msgid "Print"
-msgstr "Imprimer"
-
 #. Tooltip explaining a 'Print' link
 #: static/locale.js:166
 #, sh-format
@@ -753,7 +748,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "Imprimer une liste d'hôpitaux triés selon la distance qui les sépare de ${FACILITY_NAME}"
 
 #. Link to privacy policy for the application
-#: templates/base.html:130
+#: templates/base.html:119
 msgid "Privacy"
 msgstr "Confidentialité"
 
@@ -835,7 +830,7 @@ msgid "Set checked to default"
 msgstr "Ensemble Contrôlé par Défaut"
 
 #. Link to go to the settings page of the application
-#: templates/base.html:114
+#: templates/base.html:137
 msgid "Settings"
 msgstr "Paramètres"
 
@@ -870,12 +865,12 @@ msgid "Subscribe to email updates"
 msgstr "Abonnez-vous aux mises à jour par courriel"
 
 #. Header for a list of provisions
-#: templates/map.html:103
+#: templates/map.html:104
 msgid "Supplies"
 msgstr "Matériel"
 
 #. Link to terms of service for the application
-#: templates/base.html:125
+#: templates/base.html:112
 msgid "Terms of Service"
 msgstr "Conditions d'utilisation"
 
@@ -915,7 +910,7 @@ msgid "URL:"
 msgstr "URL :"
 
 #. Error message
-#: utils.py:142
+#: utils.py:143
 msgid "Unauthorized user."
 msgstr "utilisateur non autorisé"
 
@@ -975,7 +970,7 @@ msgid "Vascular Surgery"
 msgstr "Chirurgie Vasculaire"
 
 #. Link to go to a page with past versions of the 'master' list
-#: templates/map.html:195
+#: templates/map.html:196
 msgid "View Master List archive"
 msgstr "Accéder aux archives (en anglais)"
 
@@ -1000,7 +995,7 @@ msgid "X-Ray"
 msgstr "Radiographie"
 
 #. Form option for a true Boolean value
-#: utils.py:334 edit.py:175 utils_test.py:320
+#: utils.py:337 edit.py:175 utils_test.py:320
 msgid "Yes"
 msgstr "Oui"
 

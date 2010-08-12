@@ -180,6 +180,7 @@ class EditTest(SeleniumTestCase):
         def save(self):
             self.click('//input[@name="save"]')
             self.wait_until(self.is_visible, 'data')
+            self.wait_for_element('link=Change details')
 
         def edit(self):
             self.edit()
@@ -329,6 +330,7 @@ class EditTest(SeleniumTestCase):
         def save(self):
             self.click('//input[@name="save"]')
             self.wait_until(self.is_visible, 'data')
+            self.wait_for_element('link=Change details')
 
         def edit(self):
             self.edit()

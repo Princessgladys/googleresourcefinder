@@ -44,7 +44,7 @@ class PrintTest(SeleniumTestCase):
         """Confirms that the print page renders correctly."""
         # Print link should be initially disabled
         self.login('/?subdomain=haiti')
-        self.click('link=Print')
+        self.click('id=print-link')
         assert self.get_alert().startswith('First select a hospital')
 
         # After a subject is selected, the Print link should work

@@ -25,8 +25,7 @@ th { text-align: left; }
 
 /* Header line */
 .header { font-size: 13px; }
-.header .user { position: absolute; right: 0px; top: 0px; padding: 4px 8px; 
-                z-index: 1 }
+.header .user { position: absolute; right: 0px; top: 0px; z-index: 1 }
 .header .lang { position: absolute; left: 400px; top: 0px; padding: 2px 8px;
                 z-index: 2 }
 .header .title { position: absolute: left: 0px; top: 0px; padding: 4px;
@@ -35,6 +34,14 @@ th { text-align: left; }
 .loading { position: absolute; left:48%; top: 0px; padding: 3px; z-index: 5;
            background-color:#FFF1A8; font-size: 13px; font-weight: bold; 
            text-align: center; }
+ul.user-bar { list-style: none; background: #fff; padding: 7px 10px 5px 0px; margin: 0px; float: left; }
+ul.user-bar li { float: left; padding: 0px 2px; margin: 0px; position: relative; }
+ul.user-bar li a { padding: 0px; display: block; float: left; }
+ul.user-bar li ul.menu { list-style: none; position: absolute; left: -5px; top: 20px; z-index: 1001;
+                         margin: 0px; padding: 5px; display: none; float: left; width: 125px; 
+                         background: #fff; }
+ul.user-bar li ul.menu li { margin: 0px; padding: 2px 0px; clear: both; z-index: 1001; width: 100%; }
+ul.user-bar li ul.menu li:hover { background-color: #E5ECF9; } 
 
 /* Data area */
 #data { position: absolute; left: 0px; width: 400px; top: 30px; bottom: 0; }
@@ -114,3 +121,19 @@ img.map-control-marker { padding: 0px 0px 0px 2px; vertical-align: text-bottom; 
 
 tr.disabled td { color: #aaa; }
 tr.on-alert td { color: #a00; }
+
+/* iFrame overrides */
+
+/* Header line */
+.iframe .header .lang { left: 300px; }
+.iframe .header .title { width: 292px; }
+.iframe .header .wrench { height: 15px; width: 14px; vertical-align: text-bottom; }
+
+/* Data area */
+.iframe #data { width: 300px; }
+.iframe #edit-data { width: 300px; }
+
+/* Map area */
+.iframe #map, .iframe .hshadow, .iframe .vshadow { left: 300px; }
+.iframe #freshness { width: 292px; }
+.iframe #edit_bar { width: 277px; }

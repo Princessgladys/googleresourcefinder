@@ -42,6 +42,7 @@
     rf = {};
   </script>
   <script type="text/javascript" src="static/templates.js"></script>
+  <script type="text/javascript" src="static/base.js"></script>
   {% ifequal 'en' params.lang %}
     <script type="text/javascript" src="static/locale.js"></script>
   {% else %}
@@ -74,15 +75,11 @@
   {% include "analytics.html" %}
 </head>
 
-<body>
+<body {% if params.iframe %}class="iframe"{% endif %}>
 <div id="viewport"></div>
 <div class="header">
   {% block language-select %}
   <div class="lang">
-    {% comment %}
-    #i18n: Label for a language selector
-    {% endcomment %}
-    {% trans "Language:" %}
     <select id="lang-select"
       onChange="window.location = this.options[this.selectedIndex].value;">
     {% for lang in params.languages %}
@@ -93,44 +90,71 @@
   </div>
   {% endblock language-select %}
   <div class="user">
-    <strong>{{authorization}}</strong> <span class="sep">|</span>
-    {% comment %}
-    # Link to home page is default to off. Override by including home_link.html
-    {% endcomment %}
-    {% block home-link %}
-    {% endblock home-link %}
-
+  <ul class="user-bar">
     {% block print-link %}
-      <a id="print-link" href="#"
-         {% comment %}
-         #i18n: Link to print the current view of the application
-         {% endcomment %}
-         class="print-link-disabled">{% trans "Print" %}</a> <span class="sep">|</span>
+      <li>
+        <a id="print-link" href="#" class="print-link-disabled">
+          <img style="vertical-align: text-bottom;" src="../static/print.png"></a>
+        <span class="sep">|</span>
+      </li>
     {% endblock print-link %}
-    {% block settings-link %}
+    <li id="legal">
+      <a href="#" style="text-decoration: none;">
       {% comment %}
-      #i18n: Link to go to the settings page of the application
+      #i18n: Category for terms of service and privacy pages
       {% endcomment %}
-      <a href="{{settings_url}}">{% trans "Settings" %}</a> <span
-        class="sep">|</span>
-    {% endblock settings-link %}
-    {% comment %}
-    #i18n: Link to go to a help page for the application
-    {% endcomment %}
-    <a target="_blank" href="/help" id="help-link">{% trans "Help" %}</a>
-    <span class="sep">|</span>
-    {% comment %}
-    #i18n: Link to terms of service for the application
-    {% endcomment %}
-    <a target="_blank" href="/terms">{% trans "Terms of Service" %}</a>
-    <span class="sep">|</span>
-    {% comment %}
-    #i18n: Link to privacy policy for the application
-    {% endcomment %}
-    <a target="_blank" href="/privacy">{% trans "Privacy" %}</a>
-    <span class="sep">|</span>
-    <a href="{{loginout_url}}">{{loginout_text}}</a>
-  </div>
+      <u>{% trans "Legal" %}</u> &#x25be;</a>
+      <ul id="legal-sub" class="menu">
+        <li>
+          {% comment %}
+          #i18n: Link to terms of service for the application
+          {% endcomment %}
+          <a target="_blank" href="/terms">{% trans "Terms of Service" %}
+            </a>
+            </li><br/>
+        <li>
+          {% comment %}
+          #i18n: Link to privacy policy for the application
+          {% endcomment %}
+          <a target="_blank" href="/privacy">{% trans "Privacy" %}</a>
+        </li>
+      </ul>
+    </li>
+    <li><span class="sep">|</span></li>
+    <li><a target="_blank" href="/help" id="help-link">
+      {% trans "Help" %}</a></li>
+    <li><span class="sep">|</span></li>
+    {% if user %}
+      <li id="user">
+        <a href="#" style="text-decoration: none;">
+          <strong><u>{{authorization}}</u></strong> &#x25be;</a>
+        <ul id="user-sub" class="menu">
+          <li>
+            {% block settings-link %}
+            {% comment %}
+            #i18n: Link to go to the settings page of the application
+            {% endcomment %}
+            <a href="{{settings_url}}">{% trans "Settings" %}</a><br/>
+            </li><br/>
+          <li>
+            {% endblock settings-link %}
+            {% comment %}
+            #i18n: Link to go to a help page for the application
+            {% endcomment %}
+            <a href="{{loginout_url}}">{{loginout_text}}</a>
+          </li>
+        </ul>
+      </li>
+    {% else %}
+      <li><a href="{{loginout_url}}">{{loginout_text}}</a></li>
+    {% endif %}
+  </ul>
+</div>
+
+
+<div id="menu" style="display: none;">
+
+</div>
 
   {% block title %}
   <div class="title">
