@@ -288,6 +288,13 @@ function init_edit(embed, edit_url, opt_parent) {
     $('edit').onsubmit = function() {
       return false;
     };
+    $('edit').onkeypress = function(e) {
+      var event = e || window.event;
+      if (event.keyCode == 13 &&
+          e.target.nodeName.toLowerCase() != 'textarea') {
+        $('save').onclick();          
+      }
+    };
   } else {
     $('save').onclick = save;
     $('cancel').onclick = cancel;
