@@ -467,7 +467,7 @@ msgid "Hello"
 msgstr ""
 
 #. Link to go to a help page for the application
-#: templates/base.html:129
+#: templates/base.html:131
 msgid "Help"
 msgstr ""
 
@@ -567,7 +567,7 @@ msgid "Latitude must be between -90 and 90."
 msgstr ""
 
 #. Category for terms of service and privacy pages
-#: templates/base.html:107
+#: templates/base.html:109
 msgid "Legal"
 msgstr ""
 
@@ -582,7 +582,7 @@ msgid "Loader:"
 msgstr ""
 
 #. Indicator that the application is loading.
-#: static/locale.js:134 templates/base.html:176
+#: templates/base.html:178 static/locale.js:134
 msgid "Loading..."
 msgstr ""
 
@@ -789,7 +789,7 @@ msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr ""
 
 #. Link to privacy policy for the application
-#: templates/base.html:120
+#: templates/base.html:122
 msgid "Privacy"
 msgstr ""
 
@@ -871,7 +871,7 @@ msgid "Set checked to default"
 msgstr ""
 
 #. Link to go to the settings page of the application
-#: templates/base.html:141
+#: templates/base.html:143
 msgid "Settings"
 msgstr ""
 
@@ -916,7 +916,7 @@ msgid "Supplies"
 msgstr ""
 
 #. Link to terms of service for the application
-#: templates/base.html:113
+#: templates/base.html:115
 msgid "Terms of Service"
 msgstr ""
 
