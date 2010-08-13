@@ -351,6 +351,16 @@ msgstr "Imel Abònman Anviwònman"
 msgid "Email format:"
 msgstr "Adrès elektronik fòma:"
 
+#. Button to a "how to embed" page
+#: templates/map.html:210
+msgid "Embed"
+msgstr "Embed"
+
+#. Button to a "how to embed" page
+#: templates/map.html:210
+msgid "Embed on your site"
+msgstr "Embed sou sit ou"
+
 #. Header for an error message.
 #: templates/error.html:28
 msgid "Error"

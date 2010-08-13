@@ -351,6 +351,16 @@ msgstr "Configuración de Correo Electrónico de Suscripción"
 msgid "Email format:"
 msgstr "Correo electrónico"
 
+#. Button to a "how to embed" page
+#: templates/map.html:210
+msgid "Embed"
+msgstr "Integrar"
+
+#. Button to a "how to embed" page
+#: templates/map.html:210
+msgid "Embed on your site"
+msgstr "Integrar en su sitio"
+
 #. Header for an error message.
 #: templates/error.html:28
 msgid "Error"

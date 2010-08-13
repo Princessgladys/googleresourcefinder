@@ -201,7 +201,14 @@
       {% endcomment %}
       {% trans "Pop out" %}</a>
     {% endif %}
-    {% include subdomain_list_footer %}
+    <span class="sep">|</span>
+    <a id="embed-rf" target="_blank" href="{{embed_url}}"
+      onclick="_gaq.push(['_trackEvent', 'main', 'open', 'how_to_embed']);">
+      {% comment %}
+      #i18n: Button to a "how to embed" page
+      {% endcomment %}
+      {% if params.iframe %}{% trans "Embed" %}{% else %}{% trans "Embed on your site" %}{% endif %}</a>
+  {% include subdomain_list_footer %}
   </div>
 </div>
 {% endblock freshness %}
