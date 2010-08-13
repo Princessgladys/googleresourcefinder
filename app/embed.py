@@ -19,7 +19,7 @@ class Embed(utils.Handler):
     def get(self):
         host = 'http://%s' % self.request.headers['Host']
         if not self.subdomain:
-            raise Redirect(host)
+            raise Redirect('/')
         locale = utils.get_locale()
         embed_url = '%s/embed?subdomain=%s' % (host, self.subdomain)
         self.render('locale/%s/embed.html' % locale,
