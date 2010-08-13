@@ -256,12 +256,12 @@ class Handler(webapp.RequestHandler):
                 return 'http://%s.%s/' % (subdomain, '.'.join(levels[-3:]))
         return 'http://%s/?subdomain=%s' % (host, subdomain)
 
-    def get_url(self, path, disable_iframe=False, **params):
+    def get_url(self, path, **params):
         """Constructs a relative URL for a given path and query parameters,
         preserving the current 'subdomain' parameter if there is one."""
         if self.request.get('subdomain'):
             params['subdomain'] = self.request.get('subdomain')
-        if self.params.iframe and not disable_iframe:
+        if self.params.iframe and params.get('iframe') != 'no':
             params['iframe'] = 'yes'
         if params:
             path += ('?' in path and '&' or '?') + urlencode(params)
