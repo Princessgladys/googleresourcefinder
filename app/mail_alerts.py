@@ -149,10 +149,10 @@ def send_email(locale, sender, to, subject, body, format):
     message.sender = sender
     message.to = to
     message.subject = subject
-    if format == 'plain':
-        message.body = body
-    elif format == 'html':
+    if format == 'html':
         message.html = body
+    else:
+        message.body = body
 
     message.send()
 
@@ -326,8 +326,13 @@ class HospitalEmailFormatter(EmailFormatter):
         return template.render(path, template_values)
 
 
-FORMAT_EMAIL = {
-    'hospital': HospitalEmailFormatter
+EMAIL_FORMATTERS = {
+    'haiti': {
+        'hospital': HospitalEmailFormatter
+    },
+    'pakistan': {
+        'hospital': HospitalEmailFormatter
+    }
 }
 
 class MailAlerts(utils.Handler):
@@ -414,7 +419,8 @@ class MailAlerts(utils.Handler):
                         subject.get_value('title'),
                         deepcopy(self.changed_request_data))}
                 )
-                email_formatter = FORMAT_EMAIL[subject.type](account)
+                email_formatter = EMAIL_FORMATTERS[
+                    subdomain][subject.type](account)
                 body = email_formatter.format_body(email_data)
                 email_subject = format_email_subject(subdomain,
                                                      subscription.frequency)
@@ -461,7 +467,8 @@ class MailAlerts(utils.Handler):
                 changed_subjects=changed_subjects,
                 unchanged_subjects=unchanged_subjects
             )
-            email_formatter = FORMAT_EMAIL[subject.type](account)
+            email_formatter = EMAIL_FORMATTERS[
+                subdomain][subject.type](account)
             body = email_formatter.format_body(email_data)
             email_subject = format_email_subject(subdomain, frequency)
             send_email(account.locale, self.appspot_email,

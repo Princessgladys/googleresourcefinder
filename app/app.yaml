@@ -41,6 +41,9 @@ handlers:
 - url: /grant_access
   script: grant_access.py
 
+- url: /embed
+  script: embed.py
+
 - url: /export
   script: export.py
 

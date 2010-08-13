@@ -41,6 +41,10 @@
   <!--[if lt IE 8]>
     <link rel="stylesheet" href="static/map-ie.css">
   <![endif]-->
+  {% if params.lang_bidi %}
+    <link rel="stylesheet" href="static/map-rtl.css">
+  {% endif %}
+
   <link rel="stylesheet" type="text/css" media="all"
         href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css">
   <link rel="stylesheet" href="static/bubble.css">
@@ -51,11 +55,16 @@
   <script type="text/javascript" src="static/bubble.js"></script>
   <script type="text/javascript" src="static/edit.js"></script>
   <script type="text/javascript">
+    var is_logged_in = {% if user %} true {% else %} false {% endif %};
     var print = {% if params.print %} true {% else %} false {% endif %};
+    var login_add_url = '{{login_add_url}}';
     var print_url = '{{print_url}}';
     var bubble_url = '{{bubble_url}}';
+    var edit_url_template = '{{edit_url_template}}';
+    var rtl = {% if params.lang_bidi %} true {% else %} false {% endif %};
+    var show_add_button = {% if show_add_button %} true {% else %} false {% endif %};
   </script>
-  
+
   <!-- Google Maps API -->
   <script type="text/javascript"
       src="http://maps.google.com/maps/api/js?sensor=false&language={{params.maps_lang}}">
@@ -63,6 +72,7 @@
   <script type="text/javascript"
       src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer_compiled.js">
   </script>
+
 {% endblock javascript-includes %}
 
 {% comment %}
@@ -181,12 +191,17 @@
     {% comment %}
     #i18n: Button to export data to comma-separated-values format.
     {% endcomment %}
-    <a target="_blank" href="{{export_url}}" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export CSV" %}</a> <span class="sep">|</span>
-
-    {% comment %}
-    #i18n: Link to go to a page with past versions of the 'master' list
-    {% endcomment %}
-    <a target="_blank" href="http://sites.google.com/a/netspective.org/haiti-health-facilities/files" onclick="_gaq.push(['_trackEvent', 'outbound', 'masterlist', this.href])">{% trans "View Master List archive" %}</a>
+    <a target="_blank" href="{{export_url}}" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export CSV" %}</a>
+    {% if params.iframe %}
+      <span class="sep">|</span>
+      <a id="pop-out" target="_blank" href="{{disable_iframe_url}}"
+        onclick="_gaq.push(['_trackEvent', 'main', 'open', 'from_embed']);">
+      {% comment %}
+      #i18n: Button to go to main page of resource finder sans iframe
+      {% endcomment %}
+      {% trans "Pop out" %}</a>
+    {% endif %}
+    {% include subdomain_list_footer %}
   </div>
 </div>
 {% endblock freshness %}
@@ -203,9 +218,18 @@
         through the sign-in form. Need to check if the user exists to prevent
         strange behavior when copy/pasting a link with embed=yes to a browser
         that is not yet signed in.
+
+        TODO(shakusa) Proper escaping of params.subject_name. |escape won't
+        work if params.subject_name has an ampersand
+      {% endcomment %}     
+      inplace_edit_start(make_edit_url('{{params.subject_name|escape}}'));
+    {% endif %}
+    {% if params.add_new and user %}
+      {% comment %}
+        Similarly, we get here if redirected from the 'Add +' button on the map
+        through the sign-in form.
       {% endcomment %}
-      
-      inplace_edit_start('{{edit_url|escape}}');
+      init_add_new_subject();
     {% endif %}
   });
 </script>

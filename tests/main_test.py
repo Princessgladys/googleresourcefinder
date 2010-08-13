@@ -36,6 +36,10 @@ class MainTestCase(SeleniumTestCase):
             'haiti', 'example.org/1002',
             title='title_foo3', location=db.GeoPt(49.5, 2),
             alert_status='alert_status_foo')
+        self.put_subject(
+            'pakistan', 'example.org/1003',
+            title='title_foo4', location=db.GeoPt(48.6, 3),
+            alert_status='alert_status_foo')
         self.bubble_xpath = "//div[@class='bubble']/span/span[@class='title']"
 
     def tearDown(self):
@@ -44,18 +48,19 @@ class MainTestCase(SeleniumTestCase):
         self.delete_subject('haiti', 'example.org/1000')
         self.delete_subject('haiti', 'example.org/1001')
         self.delete_subject('haiti', 'example.org/1002')
+        self.delete_subject('pakistan', 'example.org/1003')
         SeleniumTestCase.tearDown(self)
 
     def test_default_permissions(self):
         """Confirms that when the default account has 'view' permission,
         login is not required."""
         # No default permission; should redirect to login page.
-        self.open_path('/')
+        self.open_path('/?subdomain=haiti')
         self.wait_for_element(self.config.login_form)
 
         # 'view' permission provided by default; should go straight to map.
         self.set_default_permissions(['*:view'])
-        self.open_path('/?flush=yes')
+        self.open_path('/?subdomain=haiti&flush=yes')
         self.wait_for_element('map')
 
         # Even with 'edit' granted by default, editing should still need login.
@@ -66,13 +71,13 @@ class MainTestCase(SeleniumTestCase):
 
         # After login, editing should be allowed.
         self.login(
-            '/edit?subdomain=haiti&subject_name=example.org/1000&flush-yse')
+            '/edit?subdomain=haiti&subject_name=example.org/1000&flush=yes')
         self.assert_text(Regex('Edit.*'), '//h1')
 
     def test_elements_present(self):
         """Confirms that listbox and maps with elements are present and
-        interaction between a list and a map works."""    
-        self.login('/')
+        interaction between a list and a map works."""
+        self.login('/?subdomain=haiti')
         
         # Should have automatically redirected to subdomain 'haiti'.
         assert 'subdomain=haiti' in self.get_location()
@@ -102,6 +107,36 @@ class MainTestCase(SeleniumTestCase):
         self.click(subject_xpath)
         self.wait_for_element(self.bubble_xpath)
         self.assert_text(subject_title, self.bubble_xpath)
+
+        # Check a few links
+        assert self.is_visible('link=Help')
+        assert self.is_visible('link=Export CSV')
+        assert self.is_visible('link=View Master List archive')
+
+        # Check pop out button not here
+        assert not self.is_text_present('Pop out')
+
+        # Re-open page with iframe param set to yes and check again
+        self.open_path('/?subdomain=haiti&iframe=yes')
+        assert self.is_text_present('Pop out')
+
+        # Check the add facility button
+        map_control = '//div[@class="new-subject-map-control-ui"]'
+        assert not self.is_element_present(map_control)
+
+        # Remove permissions from account and add to default. Make sure button
+        # is still there.
+        self.set_default_permissions(['*:view', '*:add'])
+        self.open_path('/?subdomain=haiti&flush=yes')
+        self.wait_for_element(map_control)
+
+        # Add permissions to account and remove from default permissions,
+        # then make sure add facility button loads
+        self.set_default_permissions(['*:view'])
+        self.delete_account()
+        self.put_account(actions=['*:view', '*:add'])
+        self.open_path('/?subdomain=haiti&flush=yes')
+        self.wait_for_element(map_control)
 
     def test_closed_facilities(self):
         """Confirms that closed facilities appear grey in the facility list
@@ -182,6 +217,18 @@ class MainTestCase(SeleniumTestCase):
         self.wait_for_element(self.bubble_xpath)
         assert not self.is_text_present('Alert: alert_status_bar')
 
+
+    def test_choose_subdomain_page(self):
+      """Confirms choose subdomain page works as expected"""
+      self.open_path('/')
+      self.wait_for_element('link=haiti')
+      assert self.is_visible('link=haiti')
+      assert self.is_visible('link=pakistan')
+      self.click('link=pakistan')
+      self.wait_for_element(self.config.login_form)
+      self.login()
+      self.wait_for_element('subject-1')
+      self.assert_no_element('link=View Master List archive')
 
     def login_and_check_first_facility(self):
         """Helper function. Logs into the haiti subdomain, waits for the list to

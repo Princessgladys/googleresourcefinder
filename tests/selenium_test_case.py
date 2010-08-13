@@ -173,6 +173,18 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         waits for the page to load."""
         self.open(self.config.base_url + path) 
 
+    def get_status_code(self, path):
+        """Navigates to a given path and returns the HTTP status code."""
+        # Sadly, Selenium always raises a generic Exception -- we have to
+        # parse the text of the error message to get the status code.
+        try:
+            self.open_path(path)
+        except Exception, e:
+            match = re.match(r'.*Response_Code = (\d+)', str(e))
+            if match:
+                return int(match.group(1))
+        return 200
+
     def wait_for_load(self):
         """Waits for a page to load, timing out after 30 seconds."""
         self.wait_for_page_to_load(str(self.config.timeout * 1000))

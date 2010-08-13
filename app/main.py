@@ -13,13 +13,14 @@
 # limitations under the License.
 
 from google.appengine.api import users
-from utils import _
+
 import access
 import cache
+import config
 import model
 import rendering
 import utils
-
+from utils import _
 
 class Main(utils.Handler):
     def get(self):
@@ -46,8 +47,12 @@ class Main(utils.Handler):
             center = {'lat': self.params.lat, 'lon': self.params.lon}
         home_url = self.get_url('/')
         settings_url = self.get_url('/settings')
+        login_add_url = users.create_login_url(
+            self.get_url('/', add_new='yes'))
         login_url = users.create_login_url(home_url)
         logout_url = users.create_logout_url(home_url)
+        show_add_button = access.check_action_permitted(
+            self.account, self.subdomain, 'add')
         if self.params.__dict__.get('print'):
             template = 'templates/print.html'
         else:
@@ -66,13 +71,17 @@ class Main(utils.Handler):
                         self.subdomain, center, self.params.rad),
                     home_url=home_url,
                     settings_url=settings_url,
+                    login_add_url=login_add_url,
                     export_url=self.get_export_url(),
                     print_url=self.get_url('/?print=yes'),
                     bubble_url=self.get_url('/bubble'),
-                    edit_url=self.get_url('/edit',
-                                          subject_name=self.params.subject_name,
-                                          embed='yes'),
-                    subdomain=self.subdomain)
+                    disable_iframe_url=self.get_url('/', iframe='no'),
+                    edit_url_template=self.get_url('/edit', embed='yes')
+                        + '&subject_name=',
+                    show_add_button=show_add_button,
+                    subdomain=self.subdomain,
+                    subdomain_list_footer=config.SUBDOMAIN_LIST_FOOTERS[
+                        self.subdomain])
 
     def get_export_url(self):
         """If only one subject type, return the direct download link URL,
@@ -80,8 +89,7 @@ class Main(utils.Handler):
         types = cache.SUBJECT_TYPES[self.subdomain].values()
         if len(types) == 1:
             # Shortcut to bypass /export when we have only one subject type
-            subdomain, type_name = utils.split_key_name(types[0])
-            return self.get_url('/export', subject_type=type_name)
+            return self.get_url('/export', subject_type=types[0].name)
         else:
             # The /export page can handle rendering multiple subject types
             return self.get_url('/export')

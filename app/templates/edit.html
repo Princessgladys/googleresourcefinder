@@ -45,21 +45,31 @@ tr.field.text { vertical-align: top; }
 </head>
 <body>
 {% endif %}
-{% comment %}
-# NB: This probably should use blocktrans and include subject_name as a param
-# to the message but that causes a UnicodeDecodeError when there is unicode
-# on the page, presumably because Django is defaulting to ascii encoding for
-# some reason.
-#i18n: Title for page to edit data about a subject
-{% endcomment %}
-<h1>{% trans "Edit" %} {{subject_title|escape}}</h1>
+<h1>
+  {% if params.add_new %}
+    {% comment %}
+    #i18n: Title for the form to add a new record
+    {% endcomment %}
+    {% blocktrans with subject_type_title|escape as type_name %}Add a new {{type_name}}{% endblocktrans %}
+  {% else %}
+    {% comment %}
+    #i18n: Title for the form to edit an existing record
+    {% endcomment %}
+    {% blocktrans with subject_title|escape as title %}Edit {{title}}{% endblocktrans %}
+  {% endif %}
+</h1>
 
 <form method="post" id="edit" action="{{edit_url|escape}}">
-  <input type="hidden" name="token" value="{{token}}"/>
-  <input type="hidden" name="embed" value="{{params.embed|escape}}"/>
-  <input type="hidden" name="cc" value="{{params.cc|escape}}"/>
+  <input type="hidden" name="token" value="{{token}}">
+  <input type="hidden" name="embed" value="{{params.embed|escape}}">
+  <input type="hidden" name="cc" value="{{params.cc|escape}}">
   <input type="hidden" name="subject_name"
-      value="{{params.subject_name|escape}}"/>
+      value="{{params.subject_name|escape}}">
+  <input type="hidden" name="subject_type"
+      value="{{params.subject_type|escape}}">
+  {% if params.add_new %}
+    <input type="hidden" name="add_new" value="yes">
+  {% endif %}
   <table>
     {% if not account.nickname %}
       <tr class="account">
@@ -131,7 +141,7 @@ tr.field.text { vertical-align: top; }
           <div id="{{field.name}}_errorbox" class="errorbox-good">
             {{field.input}}
             <input type="hidden" name="editable.{{field.name}}"
-                   value="{{field.json|escape}}"/>
+                   value="{{field.previous|escape}}"/>
             <div id="{{field.name}}_errormsg" class="hidden"></div>
           </div>
       {% if not params.embed %}
@@ -153,7 +163,7 @@ tr.field.text { vertical-align: top; }
       <td>
       </td>
       <td class="field">
-        <div id="{% if params.embed %}edit_bar{% endif %}">
+        <div id="{% if params.embed %}edit-bar{% endif %}">
           {% comment %}
           #i18n: Button text to save data
           {% endcomment %}

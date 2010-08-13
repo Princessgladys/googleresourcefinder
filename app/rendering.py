@@ -20,7 +20,7 @@ import sys
 from feeds.geo import distance
 from model import Attribute, Subject, SubjectType, Message, MinimalSubject
 from utils import Date, DateTime, HIDDEN_ATTRIBUTE_NAMES
-from utils import db, get_locale, split_key_name
+from utils import db, get_locale
 
 def make_jobjects(entities, transformer, *args):
     """Run a sequence of entities through a transformer function that produces
@@ -45,8 +45,7 @@ def attribute_transformer(index, attribute):
 
 def subject_type_transformer(index, subject_type, attribute_is):
     """Construct the JSON object for a SubjectType."""
-    subdomain, type_name = split_key_name(subject_type)
-    return {'name': type_name,
+    return {'name': subject_type.name,
             'attribute_is': [attribute_is[name]
                              for name in subject_type.minimal_attribute_names
                              if name not in HIDDEN_ATTRIBUTE_NAMES]}
@@ -54,22 +53,21 @@ def subject_type_transformer(index, subject_type, attribute_is):
 def minimal_subject_transformer(index, minimal_subject, attributes,
                                 subject_types, subject_type_is, center, radius):
     """Construct the JSON object for a MinimalSubject."""
-    # Gather all the attributes
-    values = [None]
+    subdomain, type = minimal_subject.subdomain, minimal_subject.type
 
-    subject_type = subject_types[minimal_subject.type]
+    # Gather all the attributes
+    values = [None]  # attributes are indexed starting from 1
     for attribute in attributes:
         name = attribute.key().name()
-        if name in subject_type.minimal_attribute_names:
+        if name in subject_types[type].minimal_attribute_names:
             values.append(minimal_subject.get_value(name))
         else:
             values.append(None)
 
     # Pack the results into an object suitable for JSON serialization.
-    subdomain, subject_name = split_key_name(minimal_subject)
     subject_jobject = {
-        'name': subject_name,
-        'type': subject_type_is[subdomain + ':' + minimal_subject.type],
+        'name': minimal_subject.name,
+        'type': subject_type_is[subdomain + ':' + type],
         'values': values,
     }
     if minimal_subject.has_value('location'):
@@ -168,7 +166,7 @@ def render_json(subdomain, center=None, radius=None):
     # Get all the messages for the current language.
     message_jobjects = {}
     for message in cache.MESSAGES.values():
-        namespace = message_jobjects.setdefault(message.namespace, {})
+        namespace = message_jobjects.setdefault(message.ns, {})
         namespace[message.name] = getattr(message, locale)
 
     json = compress_json(to_json({

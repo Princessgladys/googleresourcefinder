@@ -45,6 +45,12 @@ msgstr "${MONTH} ${DAY}, ${YEAR}"
 msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Instituciones dentro de${RADIUS_MILES} millas"
 
+#. Message explaining how to add a latitude and longitude to a facility.
+#: static/locale.js:186
+#, sh-format
+msgid "${START_LINK}Sign in${END_LINK} to view the edit form and add a latitude and longitude."
+msgstr "Accede para ver el editar formulario y agregar una latitud y longitud."
+
 #. Error message for lacking edit permissions
 #: edit.py:364
 #, python-format
@@ -65,6 +71,17 @@ msgstr "Nota: Esta institución se ha caracterizado cerrado."
 #: ../tools/setup.py:139
 msgid "Accuracy"
 msgstr "Precisión"
+
+#. Label to add a facility
+#: static/locale.js:25
+msgid "Add"
+msgstr "Añadir"
+
+#. Title for the form to add a new record
+#: templates/edit.html:53
+#, python-format
+msgid "Add a new %(type_name)s"
+msgstr "Añadir un nuevo %(type_name)s"
 
 #. Header for a street address
 #: templates/print.html:138 templates/hospital_bubble.html:152 ../tools/setup.py:135
@@ -95,6 +112,11 @@ msgstr "Estado de Alerta"
 #: static/locale.js:25
 msgid "All"
 msgstr "Todos"
+
+#. Proper name of an alternate ID for a health facility
+#: templates/hospital_bubble.html:60 ../tools/setup.py:162
+msgid "Alternate ID"
+msgstr "Otro nombre"
 
 #. Alternate name of a facility
 #: ../tools/setup.py:109
@@ -180,6 +202,16 @@ msgstr "Nota"
 #: templates/subdomain_menu.html:40
 msgid "Choose a site:"
 msgstr "Selecciona uno de los sitios:"
+
+#. Meaning: City or town portion of an address
+#: ../tools/setup.py:188
+msgid "City / Town / Village"
+msgstr "Ciudad / Pueblo"
+
+#. Message explaining how to place a new subject on the map
+#: static/locale.js:37
+msgid "Click a location on the map to place the marker for a new facility."
+msgstr "Haga clic en una ubicación en el mapa para colocar el marcador de una nueva instalación."
 
 #. Category of health facility: Clinic
 #: ../tools/setup.py:184
@@ -283,15 +315,21 @@ msgstr "Distancia"
 msgid "District"
 msgstr "Distrito"
 
+#. Meaning: Second-level administrative subdivision of a country
+#: ../tools/setup.py:186
+msgid "District/County"
+msgstr "Distrito/Condado"
+
 #. E-mail address
 #: edit.py:120 ../tools/setup.py:127
 msgid "E-mail"
 msgstr "Correo electrónico"
 
-#. Title for page to edit data about a subject
-#: templates/edit.html:55
-msgid "Edit"
-msgstr "Modificar"
+#. Title for the form to edit an existing record
+#: templates/edit.html:58
+#, python-format
+msgid "Edit %(title)s"
+msgstr "Modificar %(title)s"
 
 #. Label for link to edit a subject record
 #: templates/hospital_email.html.py:182
@@ -358,6 +396,11 @@ msgstr "Detalles de la institución"
 msgid "Faith-based"
 msgstr "Basada en la fe"
 
+#. fax number
+#: ../tools/setup.py:174
+msgid "Fax"
+msgstr "Fax"
+
 #. Label; field or attribute
 #: templates/hospital_email.html:119
 msgid "Field"
@@ -408,6 +451,11 @@ msgstr "Información general"
 msgid "General Surgery"
 msgstr "Cirugía General"
 
+#. Link to this subject in Google Maps
+#: ../tools/setup.py:196
+msgid "Google Maps Link"
+msgstr "Enlace Google Maps"
+
 #. Proper name of an ID for a health facility defined by the  Pan-American Health Organization; no translation necessary.
 #: templates/hospital_bubble.html:56 static/locale.js:114 ../tools/setup.py:115
 msgid "HealthC ID"
@@ -432,6 +480,11 @@ msgstr "Página principal"
 #: ../tools/setup.py:189
 msgid "Hospital"
 msgstr "Hospital"
+
+#. Proper name of an ID for a health facility
+#: templates/hospital_bubble.html:56 ../tools/setup.py:160
+msgid "ID"
+msgstr "Identificación"
 
 #. Explains how to correct incorrect information that has been printed.
 #: templates/print.html:166
@@ -466,6 +519,11 @@ msgstr "Nombre de la institución no válido o no especificado"
 #. Error message for request missing subject name.
 #: edit.py:425 bubble.py:140
 msgid "Invalid or missing subject name."
+msgstr "Nombre de la institución no válido o no especificado"
+
+#. Error message for a missing subject type.
+#: edit.py:449
+msgid "Invalid or missing subject type."
 msgstr "Nombre de la institución no válido o no especificado"
 
 #. Abbreviated months of the year.
@@ -507,6 +565,11 @@ msgstr "La latitud debe ser un número"
 #: static/locale.js:67
 msgid "Latitude must be between -90 and 90."
 msgstr "La latitud debe estar entre -90 y 90"
+
+#. Category for terms of service and privacy pages
+#: templates/base.html:109
+msgid "Legal"
+msgstr "Legal"
 
 #. Button text to load data
 #: templates/load.html:57
@@ -603,6 +666,11 @@ msgstr "Neurocirugía"
 msgid "New Value"
 msgstr "Nuevo valor"
 
+#. Label for a new subject
+#: static/locale.js:143
+msgid "New facility"
+msgstr "Nueva institución"
+
 #. Form option for a false Boolean value
 #: edit.py:177 utils.py:333 utils_test.py:321
 msgid "No"
@@ -698,6 +766,11 @@ msgstr "Texto Sin Formato"
 #: templates/hospital_bubble.html:115
 msgid "Please call for availability information."
 msgstr "Llama para informarte acerca de la disponibilidad"
+
+#. Button to go to main page of resource finder sans iframe
+#: templates/map.html:202
+msgid "Pop out"
+msgstr "Ventana externa"
 
 #. Service provided by a health facility (use Title Case). care given after surgery until patient is discharged
 #: ../tools/setup.py:251
@@ -832,6 +905,11 @@ msgstr "Accede para modificar tus datos"
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
+#. Meaning: Top-level administrative subdivision of a country
+#: ../tools/setup.py:184
+msgid "State / Province / Territory"
+msgstr "Estado / Provincia / Territorio"
+
 #. Label to subscribe to a subject
 #: templates/hospital_bubble.html:41 static/locale.js:162
 msgid "Subscribe to email updates"
@@ -851,6 +929,11 @@ msgstr "Condiciones del servicio"
 #: templates/edit.html:74
 msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/terms\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
 msgstr "Gracias por añadir contenido al Localizador de recursos. Para empezar por favor crea un nombre de usuario y dinos cual es tu afiliación. Esta información se mostrará junto a la información que has añadido o editado. También vea las <a target=\"_blank\" href=\"/TOS\">Condiciones de servicio </a> y <a target=\"_blank\" href=\"/privacy\">Política de privacidad</a> (en Inglés)."
+
+#. Notification for a facility with missing location information.
+#: static/locale.js:147
+msgid "This facility does not yet have a location entered."
+msgstr "Esta institución no dispone aún de un lugar entró."
 
 #. Label to tell users how to update subscription setttings
 #: templates/hospital_email.html:243
@@ -947,6 +1030,11 @@ msgstr "Ver archivo de la lista maestra"
 msgid "View full record"
 msgstr "Ver Ficha Completa"
 
+#. View in Google Mapmaker
+#: templates/hospital_bubble.html:66
+msgid "View in Google MapMaker"
+msgstr "Ver en Google MapMaker"
+
 #. Label for weekly e-mail updates
 #: settings.py:59
 msgid "Weekly"
@@ -972,6 +1060,11 @@ msgstr "Sí"
 #, python-format
 msgid "You already have \"%(action)s\" permission"
 msgstr "Ya eres %(role)s "
+
+#. Notifies user how to add latitude and longitude values.
+#: static/locale.js:67
+msgid "You can add a latitude and longitude in the edit form."
+msgstr "Puede agregar una latitud y longitud en el editar formulario."
 
 #. Saved message; e-mail subscription has been saved
 #: static/locale.js:55

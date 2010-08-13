@@ -180,12 +180,6 @@ function log() {
 }
 
 // ==== DOM utilities
-var $j = jQuery;
-
-// Get an element by its id.
-function $(id) {
-  return document.getElementById(id);
-}
 
 // Special-case attribute handling.  For each ('k', 'v') pair, attribute k is
 // set by assigning to element.v rather than element.setAttribute('k', ...).
@@ -225,10 +219,12 @@ function set_children(element, children) {
   }
   for (var i = 0; i < children.length; i++) {
     var child = children[i];
-    if (!child.tagName) {
-      child = document.createTextNode('' + child);
+    if (child !== null) {
+      if (!child.tagName) {
+        child = document.createTextNode('' + child);
+      }
+      element.appendChild(child);
     }
-    element.appendChild(child);
   }
 }
 
@@ -277,7 +273,8 @@ function last(array, count) {
 }
 
 function is_array(thing) {
-  return (typeof thing === 'object') && (thing.constructor === Array);
+  return (thing !== null) && (typeof thing === 'object') &&
+      (thing.constructor === Array);
 }
 
 // ==== String utilities
@@ -334,6 +331,9 @@ function make_icon(title, status, detail, opt_icon, opt_icon_size,
 
 // ==== Maps API
 
+var new_subject_marker = null;
+var new_subject_button = null;
+
 // Construct and set up the Map and InfoWindow objecs.
 function initialize_map() {
   if (map) return;
@@ -369,6 +369,82 @@ function initialize_map() {
     // override default styles to render all cluster sizes with our custom icon
     styles: [cluster_style, cluster_style, cluster_style, cluster_style]
   });
+
+  if (show_add_button) {
+    // Create add subject button
+    new_subject_button = $$('div', {'class': 'new-subject-map-control'});
+    var new_subject_ui = $$('div', {'class': 'new-subject-map-control-ui'});
+    var new_subject_text = $$(
+        'div', {'class': 'new-subject-map-control-text'}, locale.ADD() + ' ');
+    var icon = $$('img', {
+      src: make_icon(null, STATUS_UNKNOWN, false),
+      'class': 'new-subject-map-control-marker'
+    });
+    new_subject_button.appendChild(new_subject_ui);
+    new_subject_ui.appendChild(new_subject_text);
+    new_subject_text.appendChild(icon);
+    google.maps.event.addDomListener(
+        new_subject_ui, 'click', init_add_new_subject);
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(new_subject_button);
+  }
+}
+
+function init_add_new_subject() {
+  if (!is_logged_in) {
+    window.location = login_add_url;
+  }
+  show_new_subject_button(false);
+  show_status(locale.CLICK_TO_ADD_SUBJECT() +
+              ' <a href="#" onclick="cancel_add_subject();"> ' +
+              locale.CANCEL() + '</a>.');
+  google.maps.event.addListenerOnce(map, 'click', function(event) {
+    show_status(null);
+    place_new_subject_marker(event.latLng);
+    inplace_edit_start(make_add_new_subject_url());
+    _gaq.push(['_trackEvent', 'add', 'drop', 'new_subject']);
+  });
+  _gaq.push(['_trackEvent', 'add', 'start', 'new_subject']);
+}
+
+
+function show_new_subject_button(show) {
+  new_subject_button.style.visibility = show ? '' : 'hidden';
+}
+
+function cancel_add_subject() {
+  show_status(null);
+  show_new_subject_button(true);
+  google.maps.event.clearListeners(map, 'click');
+  if (new_subject_marker) {
+    new_subject_marker.setVisible(false);
+    new_subject_marker = null;
+  }
+  _gaq.push(['_trackEvent', 'add', 'cancel', 'new_subject']);
+}
+
+function place_new_subject_marker(latlon) {
+  new_subject_marker = new google.maps.Marker({
+    'class': 'new-subject-marker',
+    position: latlon,
+    map: map,
+    icon: make_icon(null, 1, null, null, null, 'f60'),
+    title: locale.NEW_SUBJECT(),
+    draggable: true
+  });
+  google.maps.event.addListener(new_subject_marker, 'dragend', function() {
+    update_lat_lon(new_subject_marker.getPosition());
+  });
+}
+
+function update_lat_lon(latlng) {
+  lat_elems = document.getElementsByName('location.lat');
+  if (lat_elems.length > 0) {
+    lat_elems[0].value = latlng.lat();
+  }
+  lng_elems = document.getElementsByName('location.lon');
+  if (lng_elems.length > 0) {
+    lng_elems[0].value = latlng.lng();
+  }
 }
 
 // Reduce the opacity of the map layer to make markers stand out.
@@ -448,30 +524,56 @@ function convert_markers_for_print() {
 // Construct and set up the map markers for the subjects.
 function initialize_markers() {
   for (var su = 1; su < subjects.length; su++) {
-    var subject = subjects[su];
-    var location = subject.values[attributes_by_name.location];
-    if (!location) {
-      markers[su] = null;
-      continue;
-    }
-    var title = subject.values[attributes_by_name.title];
-    markers[su] = new google.maps.Marker({
-      position: new google.maps.LatLng(location.lat, location.lon),
-      icon: make_icon(title, STATUS_UNKNOWN, false),
-      title: title
-    });
-    if (!print) {
-      google.maps.event.addListener(markers[su], 'click', subject_selector(su));
-    }
-    if (!print || su <= MAX_MARKERS_TO_PRINT) {
-      subject.visible = true;
-    }
+    add_marker(su, true);
   }
 
   var to_add = print ? markers.slice(1, MAX_MARKERS_TO_PRINT + 1)
       : markers.slice(1);
   marker_clusterer.addMarkers(to_add);
   log("init markers done");
+}
+
+/**
+ * Adds a marker for the subject at the given index.
+ * @param {Number} subject_i index into the subject array for the subject
+ * @param {Boolean} opt_bulk if false (default), add the marker to
+ * marker_clusterer
+ */
+function add_marker(subject_i, opt_bulk) {
+  var subject = subjects[subject_i];
+  var location = subject.values[attributes_by_name.location];
+  if (!location) {
+    markers[subject_i] = null;
+    return;
+  }
+  var title = subject.values[attributes_by_name.title];
+  markers[subject_i] = new google.maps.Marker({
+    position: new google.maps.LatLng(location.lat, location.lon),
+    icon: make_icon(title, STATUS_UNKNOWN, false),
+    title: title
+  });
+  if (!print) {
+    google.maps.event.addListener(
+      markers[subject_i], 'click', subject_selector(subject_i));
+  }
+  if (!print || subject_i <= MAX_MARKERS_TO_PRINT) {
+    subject.visible = true;
+  }
+  if (!opt_bulk) {
+    marker_clusterer.addMarker(markers[subject_i]);
+  }
+}
+
+/**
+ * Removes a marker for the subject at the given index.
+ * @param {Number} subject_i index into the subject array for the subject
+ */
+function remove_marker(subject_i) {
+  var marker = markers[subject_i];
+  if (marker) {
+    marker_clusterer.removeMarker(marker);
+  }
+  markers[subject_i] = null;
 }
 
 // ==== Display construction routines
@@ -636,34 +738,61 @@ function update_map_bounds(division_i) {
 
 // Update the subject map icons based on their status and the zoom level.
 function update_subject_icons() {
-  var detail = map.getZoom() > 10;
   var markers_to_keep = [];
   for (var su = 1; su < subjects.length; su++) {
-    if (markers[su]) {
-      var subject = subjects[su];
-      var st = subject_status_is[su];
-      var title = subject.values[attributes_by_name.title];
-      var icon_url = make_icon(title, st, detail);
-      if (is_subject_closed(subject)) {
-        icon_url = make_icon(title, st, detail, null, null, '444');
-      } else if (is_subject_on_alert(subject)) {
-        icon_url = make_icon(title, st, detail, null, null, 'a00');
-      }
-      subject.visible = false;
-      if (st == STATUS_GOOD) {
-        markers[su].setIcon(icon_url);
-        markers[su].setZIndex(STATUS_ZINDEXES[st]);
-        markers_to_keep.push(markers[su]);
-        if (!print || su <= MAX_MARKERS_TO_PRINT) {
-          subject.visible = true;
-        }
-      }
+    var marker = update_subject_icon(su, true);
+    if (marker) {
+      markers_to_keep.push(marker);
     }
   }
   marker_clusterer.clearMarkers();
   var to_add = print ? markers_to_keep.slice(0, MAX_MARKERS_TO_PRINT)
       : markers_to_keep;
   marker_clusterer.addMarkers(to_add);
+}
+
+/**
+ * Updates a map icon for a subject based on status and zoom level.
+ * @param {Number} subject_i index into the subject array for the subject
+ * @param {Boolean} opt_bulk if false (default), remove the marker from
+ * marker_clusterer if necessary
+ */
+function update_subject_icon(subject_i, opt_bulk) {
+  var marker = markers[subject_i];
+  if (marker) {
+    var subject = subjects[subject_i];
+    subject.visible = false;
+
+    var st = subject_status_is[subject_i];
+    if (st != STATUS_GOOD) {
+      if (!opt_bulk) {
+        marker_clusterer.removeMarker(marker);
+      }
+      return null;
+    }
+
+    var title = subject.values[attributes_by_name.title];
+    var detail = map.getZoom() > 10;
+    var icon_url = make_icon(title, st, detail);
+    if (is_subject_closed(subject)) {
+      icon_url = make_icon(title, st, detail, null, null, '444');
+    } else if (is_subject_on_alert(subject)) {
+      icon_url = make_icon(title, st, detail, null, null, 'a00');
+    }
+    marker.setIcon(icon_url);
+    marker.setZIndex(STATUS_ZINDEXES[st]);
+    var loc = subjects[subject_i].values[attributes_by_name.location];
+    if (loc) {
+      var new_loc = new google.maps.LatLng(loc.lat, loc.lon);
+      if (!new_loc.equals(marker.getPosition())) {
+        marker.setPosition(new_loc);
+      }
+    }
+    if (!print || subject_i <= MAX_MARKERS_TO_PRINT) {
+      subject.visible = true;
+    }
+  }
+  return marker;
 }
 
 // Fill in the subject legend.
@@ -697,12 +826,6 @@ function update_subject_list() {
     var su = selected_division.subject_is[i];
     var subject = subjects[su];
     var subject_type = subject_types[subject.type];
-    if (!markers[su]) {
-      // TODO(kpy): For now, subjects without locations are hidden
-      // from the list.  Once we have a way to show the detail window for
-      // subjects without locations, we can include them in the list.
-      continue;
-    }
     if (selected_status_i === 0 ||
         subject_status_is[su] === selected_status_i) {
       var row = $$('tr', {
@@ -780,9 +903,12 @@ function update_print_subject_list() {
             KM: format_number(dist_meters / METERS_PER_KM, 2)});
       }
       var title = subject.values[attributes_by_name.title];
-      var subject_title = title + ' - '
-        + locale.HEALTHC_ID() + ': ' + render(healthc_id)
-        + ' - ' + locale.PCODE() + ': ' + render(pcode);
+      var subject_title = title;
+      if (healthc_id || pcode) {
+        subject_title += ' - '
+          + locale.HEALTHC_ID() + ': ' + render(healthc_id)
+          + ' - ' + locale.PCODE() + ': ' + render(pcode);
+      }
       cells.push($$('td', {'class': 'subject-beds-open'}, render(open_beds)));
       cells.push($$('td', {'class': 'subject-beds-total'},render(total_beds)));
       cells.push($$('td', {'class': 'subject-title'}, render(subject_title)));
@@ -1146,6 +1272,11 @@ function select_division_and_status(division_i, status_i) {
   update_subject_list();
 }
 
+/**
+ * Select the subject with the given index, opens the map info window, and
+ * optionally opens the in-place edit form.
+ * @param {Integer} subject_i index of the subject in the subjects array
+ */
 function select_subject(subject_i) {
   // Update the selection.
   selected_subject_i = subject_i;
@@ -1162,49 +1293,79 @@ function select_subject(subject_i) {
     }
   }
 
+  info.close();
+
   if (subject_i <= 0) {
     // No selection.
-    info.close();
     return;
   }
 
-  // Pop up the InfoWindow on the selected clinic, if it has a location.
-  info.close();
+  // If the selected subject has no location, the map info window is not shown;
+  // instead, the in-page edit form is opened. Edit requires a logged-in user;
+  // if the user is not logged in, fetch the server-signed login URL from the
+  // bubble and redirect.
+  var had_location = selected_subject.values[attributes_by_name.location];
+  var force_edit = !had_location && is_logged_in;
+  var force_login = !had_location && !is_logged_in;
 
-  if (markers[selected_subject_i]) {
-    show_loading(true);
-    var url = bubble_url + (bubble_url.indexOf('?') >= 0 ? '&' : '?') +
-        'subject_name=' + selected_subject.name;
-    _gaq.push(['_trackEvent', 'bubble', 'open', selected_subject.name]);
-    $j.ajax({
-      url: url,
-      type: 'GET',
-      timeout: 10000,
-      error: function(request, text_status, error_thrown){
-        log(text_status + ', ' + error_thrown);
-        alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
-        show_loading(false);
-      },
-      success: function(result){
+  // Pop up the InfoWindow on the selected clinic, if it has a location.
+  show_loading(true);
+  var url = bubble_url + (bubble_url.indexOf('?') >= 0 ? '&' : '?') +
+      'subject_name=' + selected_subject.name;
+  _gaq.push(['_trackEvent', 'bubble', 'open', selected_subject.name]);
+  $j.ajax({
+    url: url,
+    type: 'GET',
+    timeout: 10000,
+    error: function(request, text_status, error_thrown){
+      log(text_status + ', ' + error_thrown);
+      alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
+      show_loading(false);
+    },
+    success: function(result){
+      subjects[subject_i].values = result.json.values;
+      var new_location = subjects[subject_i].values[
+          attributes_by_name.location];
+      if (!had_location && new_location) {
+        add_marker(subject_i);
+      } else if (had_location && !new_location) {
+        remove_marker(subject_i);
+      }
+      update_subject_row(subject_i);
+      update_subject_icon(subject_i);
+
+      if (markers[selected_subject_i]) {
         info.setContent(result.html);
-        info.open(map, markers[selected_subject_i]);
+        info.open(map, markers[subject_i]);
         // Sets up the tabs and should be called after the DOM is created.
         $j('#bubble-tabs').tabs({
           select: function(event, ui) {
             _gaq.push(['_trackEvent', 'bubble', 'click ' + ui.panel.id,
-                       selected_subject.name]);
+                selected_subject.name]);
           }
         });
-
-        subjects[subject_i].values = result.json.values;
-        update_subject_row(subject_i);
-
-        show_loading(false);
+        // Enable the Print link (which requires a center location).
+        enable_print_link();
+      } else {
+        var status = locale.NO_LOCATION_ENTERED() + ' ';
+        if (force_login) {
+          status += locale.SIGN_IN_TO_EDIT_LOCATION(
+              {START_LINK: '<a id="status-sign-in" href="'
+                   + result.login_url + '">',
+               END_LINK: '</a>'});
+        } else {
+          status += locale.EDIT_LATITUDE_LONGITUDE();
+        }
+        show_status(status, 60000);
       }
-    });
 
-    // Enable the Print link (which requires a center location).
-    enable_print_link();
+      show_loading(false);
+    }
+  });
+
+  // If forcing edit, turn on the edit form
+  if (force_edit) {
+    inplace_edit_start(make_edit_url(selected_subject.name));
   }
 }
 
@@ -1219,6 +1380,7 @@ function show_status(message, opt_duration, opt_override) {
   }
 
   clearTimeout(status_timer);
+  status_timer = null;
   update_status(message);
 
   if (opt_duration) {
@@ -1243,7 +1405,12 @@ function update_status(message) {
     if (status.clientWidth / browser_width > 0.7) {
       status.style.width = Math.round(0.7 * browser_width) + "px";
     }
-    status.style.left = (browser_width / 2) - (status.clientWidth / 2);
+    var new_location = (browser_width / 2) - (status.clientWidth / 2);
+    if (rtl) {
+      status.style.right = new_location;
+    } else {
+      status.style.left = new_location;
+    }
   } else {
     status.style.display = 'none';
   }
@@ -1422,17 +1589,52 @@ function update_subject_row(subject_i, opt_glow) {
 // ==== In-place editing
 
 /**
+ * Creates URL to inplace edit the given subject name
+ * @param {String} subject_name subject.name of the subject to edit
+ * @return {String} the edit URL for the subject
+ */
+function make_edit_url(subject_name) {
+  return edit_url_template + subject_name;
+}
+
+/**
+ * Creates URL to an inplace edit form for a new subject
+ * @param {String} optional - the subject type for the new subject
+ * @return {String} the edit URL for the new subject
+ */
+function make_add_new_subject_url(opt_subject_type) {
+  var subject_type = opt_subject_type || '';
+  // TODO(pfritzsche): prompt user for a decision on which subject type to use
+  if (!subject_type && subject_types.length >= 2) {
+    subject_type = subject_types[1].name;
+  }
+  return edit_url_template + '&add_new=yes&subject_type=' + subject_type;
+}
+
+/**
  * Handler to start inplace editing in the left-hand panel.
  * @param {String} edit_url - URL to load the edit form via AJAX
  */
 function inplace_edit_start(edit_url) {
+  if ($('edit-data').style.display == '') {
+    // already editing
+    return false;
+  }
+
   // Use AJAX to load the form in the InfoWindow, then reopen the
   // InfoWindow so that it resizes correctly.
   log('Editing in place:', edit_url);
 
+  var data = {};
+  if (new_subject_marker) {
+    data.lat = new_subject_marker.position.lat();
+    data.lon = new_subject_marker.position.lng();
+  }
+
   show_loading(true);
   $j.ajax({
     url: edit_url,
+    data: data,
     type: 'GET',
     error: function(request, textStatus, errorThrown) {
       log(textStatus + ', ' + errorThrown);
@@ -1447,7 +1649,7 @@ function inplace_edit_start(edit_url) {
       var windowHeight = get_window_size()[1];
       var editTop = get_element_top(edit_data);
       edit_data.style.height = (windowHeight - editTop) + 'px';
-      var edit_bar = $('edit_bar');
+      var edit_bar = $('edit-bar');
       if (edit_bar) {
         document.body.appendChild(edit_bar);
       }
@@ -1477,16 +1679,25 @@ function inplace_edit_save(edit_url) {
       type: 'POST',
       data: $j('#edit').serialize(),
       error: function(request, textStatus, errorThrown) {
-	log(textStatus + ', ' + errorThrown);
-	alert(locale.ERROR_SAVING_FACILITY_INFORMATION());
-	show_status(null);
+        log(textStatus + ', ' + errorThrown);
+        alert(locale.ERROR_SAVING_FACILITY_INFORMATION());
+        show_status(null, null, true);
+        if (new_subject_marker) {
+          cancel_add_subject();
+        }
       },
       success: function(data) {
-	$('data').style.display = '';
-	$('edit-data').style.display = 'none';
+        if (new_subject_marker) {
+            // If the save was for a new subject, edit.py will write query
+            // parameters necessary to redirect to the home page and select the
+            // newly created subject to the response.
+            window.location = 'http://' + window.location.host + data;
+        }
+        $('data').style.display = '';
+        $('edit-data').style.display = 'none';
         remove_edit_bar();
-	select_subject(selected_subject_i);
-	show_status(locale.SAVED(), 5000);
+        select_subject(selected_subject_i);
+        show_status(locale.SAVED(), 5000);
         _gaq.push(['_trackEvent', 'edit', 'save', selected_subject.name]);
       }
     });
@@ -1503,11 +1714,17 @@ function inplace_edit_cancel() {
   $('data').style.display = '';
   $('edit-data').style.display = 'none';
   remove_edit_bar();
-  _gaq.push(['_trackEvent', 'edit', 'cancel', selected_subject.name]);
+  show_status(null, null, true);
+  if (new_subject_marker) {
+    cancel_add_subject();
+    _gaq.push(['_trackEvent', 'edit', 'cancel', 'new_subject']);
+  } else {
+    _gaq.push(['_trackEvent', 'edit', 'cancel', selected_subject.name]);
+  }
 }
 
 function remove_edit_bar() {
-  var edit_bar = $('edit_bar');
+  var edit_bar = $('edit-bar');
   if (edit_bar) {
     document.body.removeChild(edit_bar);
   }

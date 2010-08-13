@@ -290,7 +290,8 @@ function init_edit(embed, edit_url, opt_parent) {
     };
     $('edit').onkeypress = function(e) {
       var event = e || window.event;
-      if (event.keyCode == 13) {
+      if (event.keyCode == 13 &&
+          e.target.nodeName.toLowerCase() != 'textarea') {
         $('save').onclick();          
       }
     };

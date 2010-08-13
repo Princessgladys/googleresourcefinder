@@ -14,7 +14,7 @@
  * @param {string} frequency the frequency to set the subscription to
  */
 function subscribe_on_off(element, subscribed, subdomain, subject_name,
-      frequency) {
+      frequency, settings_url) {
   var post_data = {
     action: subscribed ? "unsubscribe" : "subscribe",
     subdomain: subdomain,
@@ -33,8 +33,8 @@ function subscribe_on_off(element, subscribed, subdomain, subject_name,
         subscribe_on_off(element, !subscribed, subdomain, subject_name,
             frequency);
       };
-      show_status(get_subscription_message(subscribed, subdomain, frequency),
-                  5000, true);
+      show_status(get_subscription_message(
+          subscribed, subdomain, frequency, settings_url), 5000, true);
     },
     error: function(xhr, text_status, error) {
       log(text_status + ', ' + error);
@@ -51,12 +51,13 @@ function subscribe_on_off(element, subscribed, subdomain, subject_name,
  * @param {string} frequency the frequency to set the subscription to
  * @return {string} the message to display
  */
-function get_subscription_message(subscribed, subdomain, frequency) {
+function get_subscription_message(subscribed, subdomain, frequency,
+    settings_url) {
   var message = '';
   if (!subscribed) {
     message = locale.EMAIL_SUBSCRIPTION_SAVED({
       FREQUENCY: frequency,
-      START_LINK: '<a href="/settings?subdomain=' + subdomain +'">',
+      START_LINK: '<a href="' + settings_url +'">',
       END_LINK: '</a>'
     });
   } else {

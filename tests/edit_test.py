@@ -1,4 +1,4 @@
-from model import Account, db
+from model import Account, Subject, db
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import scrape
@@ -39,6 +39,9 @@ STR_FIELDS = [
     'comments',
 ]
 
+EDIT_PATH = '/edit?subdomain=haiti&subject_name=example.org/123'
+ADD_PATH = '/edit?subdomain=haiti&add_new=yes&subject_type=hospital'
+
 
 class EditTest(SeleniumTestCase):
     def setUp(self):
@@ -46,12 +49,13 @@ class EditTest(SeleniumTestCase):
         self.put_subject(
             'haiti', 'example.org/123',
             title='title_foo', location=db.GeoPt(51.5, 0))
-        self.put_account(actions=['*:view', '*:edit'])  # allow edits
+        self.put_account(actions=['*:view', '*:edit', '*:add'])  # allow edits
         self.set_default_permissions(actions=['*:view']) # allow view by default
         self.s = scrape.Session()
 
     def tearDown(self):
-        self.delete_subject('haiti', 'example.org/123')
+        for subject in Subject.all_in_subdomain('haiti'):
+            self.delete_subject('haiti', subject.name)
         self.delete_account()
         self.delete_default_account()
         SeleniumTestCase.tearDown(self)
@@ -72,8 +76,8 @@ class EditTest(SeleniumTestCase):
             self.click('//input[@name="save"]')
             self.wait_for_load()
             # Check that we got back to the main map
-            assert (self.get_location() == self.config.base_url
-                    + '/?subdomain=haiti')
+            assert (self.get_location() ==
+                    self.config.base_url + '/?subdomain=haiti')
 
         def edit(self):
             self.open_edit_page()
@@ -92,24 +96,98 @@ class EditTest(SeleniumTestCase):
         # assert feed.first('atom:feed')
         # assert feed.first('atom:feed').first('atom:entry')
 
-    def test_inplace_edit(self):
-        """In-place edit: Confirms that all the fields in the in-place edit
-        form save the entered values, and these values appear pre-filled when
-        the form is loaded."""
+    def test_edit_permissions(self):
+        """Ensure that the edit page can't be used without edit permission."""
+        self.login('/edit?subdomain=haiti')
+
+        self.delete_account()
+        self.put_account(actions=['*:view'])  # view only
+        assert self.get_status_code(EDIT_PATH) == 403
+        assert self.get_status_code(ADD_PATH) == 403
+
+        self.delete_account()
+        self.put_account(actions=['*:edit'])  # edit but not add
+        assert self.get_status_code(EDIT_PATH) == 200
+        assert self.get_status_code(ADD_PATH) == 403
+
+        self.delete_account()
+        self.put_account(actions=['*:add'])  # add but not edit
+        assert self.get_status_code(EDIT_PATH) == 403
+        assert self.get_status_code(ADD_PATH) == 200
+
+        self.delete_account()
+        self.put_account(actions=['*:edit', '*:add'])  # both add and edit
+        assert self.get_status_code(EDIT_PATH) == 200
+        assert self.get_status_code(ADD_PATH) == 200
+
+    def test_add_page(self):
+        """Confirms that a new subject can be created on the stand-alone
+        edit page, and its values appear pre-filled when the form is
+        subsequently loaded to edit the newly created subject."""
+        names_before = [s.name for s in Subject.all_in_subdomain('haiti')]
 
         def login(self):
-            self.edit(login=True)
+            self.login(ADD_PATH)
+            self.assert_text(Regex('Add a new.*'), '//h1')
+
+        def save(self):
+            self.click('//input[@name="save"]')
+            self.wait_for_load()
+
+        def edit(self):
+            # Look for the newly created subject.
+            names_after = [s.name for s in Subject.all_in_subdomain('haiti')]
+            extra_names = list(set(names_after) - set(names_before))
+            assert len(extra_names) == 1
+
+            # Open it in the edit page to confirm that its values are set.
+            self.open_path(
+                '/edit?subdomain=haiti&subject_name=%s' % extra_names[0])
+
+        self.run_edit(login, save, edit, True)
+
+    def test_inplace_add(self):
+        """In-place edit/add: Confirms that all the fields in the in-place edit
+        form save the entered values, and these values appear pre-filled when
+        the form is loaded."""
+        names_before = [s.name for s in Subject.all_in_subdomain('haiti')]
+
+        def login(self):
+            self.edit(ADD_PATH)
 
         def save(self):
             self.click('//input[@name="save"]')
             self.wait_until(self.is_visible, 'data')
 
         def edit(self):
+            # Look for the newly created subject
+            names_after = [s.name for s in Subject.all_in_subdomain('haiti')]
+            extra_names = list(set(names_after) - set(names_before))
+            assert len(extra_names) == 1
+
+            # Open it in the edit page to confirm that its values are set.
+            self.open_path(
+                '/edit?subdomain=haiti&embed=yes&subject_name=%s' %
+                extra_names[0])
+
+    def test_inplace_edit(self):
+        """In-place edit: Confirms that all the fields in the in-place edit
+        form save the entered values, and these values appear pre-filled when
+        the form is loaded."""
+        def login(self):
+            self.edit(login=True)
+
+        def save(self):
+            self.click('//input[@name="save"]')
+            self.wait_until(self.is_visible, 'data')
+            self.wait_for_element('link=Change details')
+
+        def edit(self):
             self.edit()
 
         self.run_edit(login, save, edit)
 
-    def run_edit(self, login_func, save_func, edit_func):
+    def run_edit(self, login_func, save_func, edit_func, add_new=False):
         """Runs the edit flow, for use in both inplace and separate page
         editing."""
 
@@ -133,6 +211,9 @@ class EditTest(SeleniumTestCase):
 
         # Fill in the form
         text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
+        if add_new:
+            text_fields['title'] = 'title_foo'
+            text_fields['alt_title'] = 'alt_title_foo'
         text_fields['account_nickname'] = 'Test'
         text_fields['account_affiliation'] = 'Test'
         text_fields['available_beds'] = '   1'
@@ -153,7 +234,10 @@ class EditTest(SeleniumTestCase):
 
         # Check that the facility list is updated
         regex = Regex('.*1 / 2.*General Surgery.*')
-        self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
+        if add_new:
+            self.wait_for_load()
+        else:
+            self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
 
         edit_func(self)
 
@@ -165,6 +249,9 @@ class EditTest(SeleniumTestCase):
 
         # Check that the new values were saved, and are pre-filled in the form
         # except for comments which should remain empty.
+        if add_new:
+            del text_fields['title']
+            del text_fields['alt_title']
         text_fields['available_beds'] = '1'  # whitespace should be gone
         text_fields['total_beds'] = '2'  # whitespace should be gone
         text_fields['location.lat'] = '18.537207'  # whitespace should be gone
@@ -189,7 +276,10 @@ class EditTest(SeleniumTestCase):
         # Check that the facility list is updated to reflect the emptying
         # Note the en-dash \u2013 implies "no value"
         regex = Regex(u'.*\u2013 / \u2013')
-        self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
+        if add_new:
+            self.wait_for_load()
+        else:
+            self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
 
         edit_func(self)
 
@@ -207,7 +297,10 @@ class EditTest(SeleniumTestCase):
 
         # Check that the facility list is updated to show the zeros
         regex = Regex('.*0 / 0')
-        self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
+        if add_new:
+            self.wait_for_load()
+        else:
+            self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
 
         edit_func(self)
 
@@ -217,7 +310,7 @@ class EditTest(SeleniumTestCase):
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
     def test_edit_comments(self):
-        """Tests comments and bubble reload during in-place edit."""
+        """Tests comments and bubble reload during separate-page edit."""
         def login(self):
             self.login_to_edit_page()
 
@@ -237,6 +330,7 @@ class EditTest(SeleniumTestCase):
         def save(self):
             self.click('//input[@name="save"]')
             self.wait_until(self.is_visible, 'data')
+            self.wait_for_element('link=Change details')
 
         def edit(self):
             self.edit()
@@ -328,7 +422,7 @@ class EditTest(SeleniumTestCase):
 
     def test_inplace_edit_signed_out(self):
         """In-place edit starting from signed out:"""
-        self.open_path('/')
+        self.open_path('/?subdomain=haiti')
 
         # Open a bubble
         self.click('id=subject-1')
@@ -344,10 +438,66 @@ class EditTest(SeleniumTestCase):
         self.wait_until(self.is_visible, 'edit-data')
         self.assert_element('//input[@name="account_nickname"]')
 
+    def test_inplace_edit_no_location_facility(self):
+        self.delete_subject('haiti', 'example.org/123')
+        self.put_subject('haiti', 'example.org/123', title='title_foo')
+
+        self.open_path('/?subdomain=haiti')
+        self.click_and_wait('link=Sign in')
+        self.login()
+
+        # Facility list click for a no-facility location opens the edit form
+        # directly
+        self.click('id=subject-1')
+        self.wait_until(self.is_visible, 'edit-data')
+        self.assert_element('//input[@name="account_nickname"]')
+
+    def test_no_location_facility_edit_signed_out(self):
+        """In-place edit starting from signed out with a no location subject:"""
+        self.delete_subject('haiti', 'example.org/123')
+        self.put_subject('haiti', 'example.org/123', title='title_foo')
+
+        self.open_path('/?subdomain=haiti')
+
+        # Try to open a bubble, look for the sign in link
+        self.click('id=subject-1')
+        self.wait_for_element('id=status-sign-in')
+
+        # Click Sign in
+        self.click_and_wait('id=status-sign-in')
+
+        # Login in at the login screen
+        self.login()
+
+        # Wait for the edit form to appear
+        self.wait_until(self.is_visible, 'edit-data')
+        self.assert_element('//input[@name="account_nickname"]')
+
+    def test_add_facility_signed_out(self):
+        """In-place add facility form starting from signed out."""
+        add_button = '//div[@class="new-subject-map-control-ui"]'
+        self.set_default_permissions(['*:view', '*:add'])
+
+        self.open_path('/?subdomain=haiti')
+
+        # Make sure add subject button is present
+        self.wait_for_element(add_button)
+
+        # Click and get redirected to the login screen
+        self.click_and_wait(add_button)
+
+        # Login at the login screen
+        self.login()
+
+        # Wait for the instructional status message
+        self.wait_until(self.is_visible, 'loading')
+        self.wait_for_element('map')
+        self.is_text_present('Click a location')
+
     def edit(self, login=False):
         """Goes to edit form for subject 1"""
         if login:
-            self.open_path('/')
+            self.open_path('/?subdomain=haiti')
             self.click_and_wait('link=Sign in')
             self.login()
         self.click('id=subject-1')
@@ -361,18 +511,19 @@ class EditTest(SeleniumTestCase):
         self.wait_for_load()
 
         # Check that we got back to the main map
-        assert self.get_location() == self.config.base_url + '/?subdomain=haiti'
+        assert self.config.base_url in self.get_location()
+        assert 'subdomain=haiti' in self.get_location()
 
         # Test bubble change history comments
         self.click('id=subject-1')
         self.wait_for_element('link=Change details')
 
     def open_edit_page(self):
-        self.open_path('/edit?subdomain=haiti&subject_name=example.org/123')
+        self.open_path(EDIT_PATH)
         self.assert_text(Regex('Edit.*'), '//h1')
 
     def login_to_edit_page(self):
-        self.login('/edit?subdomain=haiti&subject_name=example.org/123')
+        self.login(EDIT_PATH)
         self.assert_text(Regex('Edit.*'), '//h1')
 
     def fill_fields(self, text_fields, checkbox_fields, select_fields):

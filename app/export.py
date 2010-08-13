@@ -62,6 +62,40 @@ COLUMNS_BY_SUBJECT_TYPE = {
         ('entry_last_updated', lambda f: get_last_updated_time(f)),
         ('alert_status', lambda f: f.get_value('alert_status'))
     ],
+    ('pakistan', 'hospital'): [
+        ('name', lambda f: f.get_value('title')),
+        ('alt_name', lambda f: f.get_value('alt_title')),
+        ('id', lambda f: f.get_value('id')),
+        ('alt_id', lambda f: f.get_value('alt_id')),
+        ('available_beds', lambda f: f.get_value('available_beds')),
+        ('total_beds', lambda f: f.get_value('total_beds')),
+        ('services', lambda f: f.get_value('services')),
+        ('contact_name', lambda f: f.get_value('contact_name')),
+        ('contact_phone', lambda f: f.get_value('phone')),
+        ('contact_fax', lambda f: f.get_value('fax')),
+        ('contact_email', lambda f: f.get_value('email')),
+        ('administrative_area', lambda f: f.get_value('administrative_area')),
+        ('sub_administrative_area', lambda f: f.get_value(
+            'sub_administrative_area')),
+        ('locality', lambda f: f.get_value('locality')),
+        ('address', lambda f: f.get_value('address')),
+        ('latitude', lambda f: (f.get_value('location') and
+                                f.get_value('location').lat)),
+        ('longitude', lambda f: (f.get_value('location') and
+                                 f.get_value('location').lon)),
+        ('maps_link', lambda f: f.get_value('maps_link')),
+        ('organization', lambda f: f.get_value('organization')),
+        ('organization_type', lambda f: f.get_value('organization_type')),
+        ('category', lambda f: f.get_value('category')),
+        ('construction', lambda f: f.get_value('construction')),
+        ('damage', lambda f: f.get_value('damage')),
+        ('operational_status', lambda f: f.get_value('operational_status')),
+        ('comments', lambda f: f.get_value('comments')),
+        ('reachable_by_road', lambda f: f.get_value('reachable_by_road')),
+        ('can_pick_up_patients', lambda f: f.get_value('can_pick_up_patients')),
+        ('entry_last_updated', lambda f: get_last_updated_time(f)),
+        ('alert_status', lambda f: f.get_value('alert_status'))
+    ],
 }
 
 def short_date(date):
@@ -89,8 +123,7 @@ def write_csv(out, subdomain, type_name):
             for column in columns:
                 row.append(format(column[1](subject)))
         else:
-            subdomain, subject_name = split_key_name(subject)
-            row = [subject_name]
+            row = [subject.name]
             for name in subject_type.attribute_names:
                 value = get_value(subject, name)
                 row.append(format(value))
@@ -136,9 +169,8 @@ class Export(Handler):
             self.write('<select name="subject_type">')
             for subject_type in SubjectType.all_in_subdomain(self.subdomain):
                 # TODO(shakusa) SubjectType should have translated messages
-                subdomain, type_name = split_key_name(subject_type)
                 self.write('<option value="%s">%s</option>' %
-                           (type_name, type_name))
+                           (subject_type.name, subject_type.name))
             self.write('<p><input type=submit value="%s">' %
                 #i18n: Button to export data to comma-separated-value format.
                 to_unicode(_('Export CSV')))

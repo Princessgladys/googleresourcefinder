@@ -15,16 +15,24 @@
 
 # Application-wide configuration settings.
 
+# List of language codes supported for each subdomain
+LANGS_BY_SUBDOMAIN = {'haiti': ('en', 'fr', 'ht', 'es-419'),
+                      'pakistan': ('en', 'ur')}
+
+SUBDOMAIN_LIST_FOOTERS = {'haiti': 'haiti_list_footer.html',
+                          'pakistan': 'blank.html'}
+
 # List of languages that appear in the language menu, as (code, name) pairs.
-LANGUAGES = [('en', 'English'),
+LANGUAGES = (('en', 'English'),
              ('fr', u'Fran\u00e7ais'), # French
              ('ht', u'Krey\u00f2l'), # Kreyol
              ('es-419', u'Espa\u00F1ol'), # Spanish (Latin American)
-            ]
+             ('ur', u'\u0627\u0631\u062F') # Urdu
+            )
 
 # A map from unavailable languages to the best available fallback languages.
 LANG_FALLBACKS = {'es': 'es-419'}
 
 # Google Maps is not available in all languages.  This maps from unavailable
 # languages to the best available fallback language.
-MAPS_LANG_FALLBACKS = {'ht': 'fr'}
+MAPS_LANG_FALLBACKS = {'ht': 'fr', 'ur': 'en'}

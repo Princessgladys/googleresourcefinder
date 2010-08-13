@@ -45,6 +45,12 @@ msgstr "${MONTH} ${DAY}, ${YEAR}"
 msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} Etablisman nan ${RADIUS_MILES} mil"
 
+#. Message explaining how to add a latitude and longitude to a facility.
+#: static/locale.js:186
+#, sh-format
+msgid "${START_LINK}Sign in${END_LINK} to view the edit form and add a latitude and longitude."
+msgstr "Siyen nan wè reekri fòm epi ajoute yon latitid ak lonjitd"
+
 #. Error message for lacking edit permissions
 #: edit.py:364
 #, python-format
@@ -65,6 +71,17 @@ msgstr "<strong>Remak:</strong> etablisman sa a te make fèmen."
 #: ../tools/setup.py:139
 msgid "Accuracy"
 msgstr "Presizyon"
+
+#. Label to add a facility
+#: static/locale.js:25
+msgid "Add"
+msgstr "Ajoute"
+
+#. Title for the form to add a new record
+#: templates/edit.html:53
+#, python-format
+msgid "Add a new %(type_name)s"
+msgstr "Ajoute yon %(type_name)s new"
 
 #. Header for a street address
 #: templates/print.html:138 templates/hospital_bubble.html:152 ../tools/setup.py:135
@@ -95,6 +112,11 @@ msgstr "Alèt kondisyon"
 #: static/locale.js:25
 msgid "All"
 msgstr "Tout"
+
+#. Proper name of an alternate ID for a health facility
+#: templates/hospital_bubble.html:60 ../tools/setup.py:162
+msgid "Alternate ID"
+msgstr "Altène non"
 
 #. Alternate name of a facility
 #: ../tools/setup.py:109
@@ -180,6 +202,16 @@ msgstr "Chanje"
 #: templates/subdomain_menu.html:40
 msgid "Choose a site:"
 msgstr "Chwazi yon sit:"
+
+#. Meaning: City or town portion of an address
+#: ../tools/setup.py:188
+msgid "City / Town / Village"
+msgstr "Vil / Village"
+
+#. Message explaining how to place a new subject on the map
+#: static/locale.js:37
+msgid "Click a location on the map to place the marker for a new facility."
+msgstr "Klike sou yon kote sou kat la nan plas Makè a pou yon nouvo etablisman."
 
 #. Category of health facility: Clinic
 #: ../tools/setup.py:184
@@ -283,15 +315,21 @@ msgstr "Distans"
 msgid "District"
 msgstr "Distri"
 
+#. Meaning: Second-level administrative subdivision of a country
+#: ../tools/setup.py:186
+msgid "District/County"
+msgstr "Distri/Konte"
+
 #. E-mail address
 #: edit.py:120 ../tools/setup.py:127
 msgid "E-mail"
 msgstr "Adrès elektronik:"
 
-#. Title for page to edit data about a subject
-#: templates/edit.html:55
-msgid "Edit"
-msgstr "Reekri"
+#. Title for the form to edit an existing record
+#: templates/edit.html:58
+#, python-format
+msgid "Edit %(title)s"
+msgstr "Reekri %(title)s"
 
 #. Label for link to edit a subject record
 #: templates/hospital_email.html.py:182
@@ -358,6 +396,11 @@ msgstr "Enfòmasyon sou etablisman "
 msgid "Faith-based"
 msgstr "Baze sou konfyans"
 
+#. fax number
+#: ../tools/setup.py:174
+msgid "Fax"
+msgstr "Faks"
+
 #. Label; field or attribute
 #: templates/hospital_email.html:119
 msgid "Field"
@@ -408,6 +451,11 @@ msgstr "Enfòmasyon jeneral"
 msgid "General Surgery"
 msgstr "Chiriji Jeneral"
 
+#. Link to this subject in Google Maps
+#: ../tools/setup.py:196
+msgid "Google Maps Link"
+msgstr "URL Google Maps"
+
 #. Proper name of an ID for a health facility defined by the  Pan-American Health Organization; no translation necessary.
 #: templates/hospital_bubble.html:56 static/locale.js:114 ../tools/setup.py:115
 msgid "HealthC ID"
@@ -432,6 +480,11 @@ msgstr "Paj akèy"
 #: ../tools/setup.py:189
 msgid "Hospital"
 msgstr "Lopital"
+
+#. Proper name of an ID for a health facility
+#: templates/hospital_bubble.html:56 ../tools/setup.py:160
+msgid "ID"
+msgstr "ID"
 
 #. Explains how to correct incorrect information that has been printed.
 #: templates/print.html:166
@@ -468,6 +521,11 @@ msgstr "Envalid oubyen erè nan non etablisman an"
 msgid "Invalid or missing subject name."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
+#. Error message for a missing subject type.
+#: edit.py:449
+msgid "Invalid or missing subject type."
+msgstr "Envalid oubyen erè nan non etablisman an"
+
 #. Abbreviated months of the year.
 #: static/locale.js:123
 msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
@@ -478,10 +536,10 @@ msgstr "Janvye, Fevriye, Mas, Avril, Me, Jen, jiyè, Out, septanm, Oktòb, Novan
 msgid "Lab"
 msgstr "Laboratwa"
 
-#. Label for a language selector
-#: templates/base.html:66
-msgid "Language:"
-msgstr "Lang:"
+#. Category of health facility: A laboratory
+#: ../tools/setup.py:250
+msgid "Laboratory"
+msgstr "Laboratwa"
 
 #. Label for the last update time
 #: templates/hospital_email.html:90 templates/hospital_email.html.py:188
@@ -507,6 +565,11 @@ msgstr "Latitd dwe yon nimewo"
 #: static/locale.js:67
 msgid "Latitude must be between -90 and 90."
 msgstr "Latitd dwe ant -90 ak 90"
+
+#. Category for terms of service and privacy pages
+#: templates/base.html:109
+msgid "Legal"
+msgstr "Legal"
 
 #. Button text to load data
 #: templates/load.html:57
@@ -603,6 +666,11 @@ msgstr "Nerochiriji"
 msgid "New Value"
 msgstr "New Valè"
 
+#. Label for a new subject
+#: static/locale.js:143
+msgid "New facility"
+msgstr "Nouvo etablisman"
+
 #. Form option for a false Boolean value
 #: edit.py:177 utils.py:333 utils_test.py:321
 msgid "No"
@@ -698,6 +766,11 @@ msgstr "Tèks"
 #: templates/hospital_bubble.html:115
 msgid "Please call for availability information."
 msgstr "Tanpri rele pou enfomasyon disponib"
+
+#. Button to go to main page of resource finder sans iframe
+#: templates/map.html:202
+msgid "Pop out"
+msgstr "Pòp deyò"
 
 #. Service provided by a health facility (use Title Case). care given after surgery until patient is discharged
 #: ../tools/setup.py:251
@@ -832,6 +905,11 @@ msgstr "Tanpri siyen nan reekri"
 msgid "Sign out"
 msgstr "Sòti"
 
+#. Meaning: Top-level administrative subdivision of a country
+#: ../tools/setup.py:184
+msgid "State / Province / Territory"
+msgstr "Éta / Provens / Teritwa"
+
 #. Label to subscribe to a subject
 #: templates/hospital_bubble.html:41 static/locale.js:162
 msgid "Subscribe to email updates"
@@ -851,6 +929,11 @@ msgstr "Kondisyon yo pou itilizasyon"
 #: templates/edit.html:74
 msgid "Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target=\"_blank\" href=\"/terms\">Terms of Service</a> and <a target=\"_blank\" href=\"/privacy\">Privacy Policy</a>."
 msgstr "Mesi paske ou ajoute enfòmasyon sou Chèche Resous. Pou kòmanse tanpri kreye yon kont epi di nou afilyasyon ou. Enfòmasyon sa a pral parèt a kote enfòmasyon ou ajoute oswa korije. Epitou wè <a target=\"_blank\" href=\"/TOS\">Kondisyon yo pou itilizasyon</a> ak <a target=\"_blank\" href=\"/privacy\">Pwoteksyon vi prive</a> (nan lang angle)."
+
+#. Notification for a facility with missing location information.
+#: static/locale.js:147
+msgid "This facility does not yet have a location entered."
+msgstr "Etablisman sa a pa toujou gen yon kote antre."
 
 #. Label to tell users how to update subscription setttings
 #: templates/hospital_email.html:243
@@ -947,6 +1030,11 @@ msgstr "Ekspoze achiv nan lis mastè"
 msgid "View full record"
 msgstr "Gade Tout Dosye"
 
+#. View in Google Mapmaker
+#: templates/hospital_bubble.html:66
+msgid "View in Google MapMaker"
+msgstr "Gade nan Google MapMaker"
+
 #. Label for weekly e-mail updates
 #: settings.py:59
 msgid "Weekly"
@@ -972,6 +1060,11 @@ msgstr "Wi"
 #, python-format
 msgid "You already have \"%(action)s\" permission"
 msgstr "Wol ou a bon a %(role)s"
+
+#. Notifies user how to add latitude and longitude values.
+#: static/locale.js:67
+msgid "You can add a latitude and longitude in the edit form."
+msgstr "Ou kapab ajoute yon latitid ak lonjitd nan reekri fòm."
 
 #. Saved message; e-mail subscription has been saved
 #: static/locale.js:55
