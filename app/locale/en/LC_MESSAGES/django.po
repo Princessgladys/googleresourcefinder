@@ -63,7 +63,7 @@ msgid "(unspecified)"
 msgstr ""
 
 #. Note that a health facility has been marked closed.
-#: templates/hospital_bubble.html:72
+#: templates/hospital_bubble.html:80
 msgid "<strong>Note:</strong> This facility has been marked closed."
 msgstr ""
 
@@ -84,7 +84,7 @@ msgid "Add a new %(type_name)s"
 msgstr ""
 
 #. Header for a street address
-#: templates/print.html:138 ../tools/setup.py:190 templates/hospital_bubble.html:152
+#: templates/print.html:138 ../tools/setup.py:190 templates/hospital_bubble.html:160
 msgid "Address"
 msgstr ""
 
@@ -99,7 +99,7 @@ msgid "Affiliation (required)"
 msgstr ""
 
 #. Note that a health facility is on alert.
-#: templates/hospital_bubble.html:80
+#: templates/hospital_bubble.html:88
 msgid "Alert"
 msgstr ""
 
@@ -184,17 +184,17 @@ msgid "Category"
 msgstr ""
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:180
+#: templates/hospital_bubble.html:188
 msgid "Change"
 msgstr ""
 
 #. Header for the history of changes in data for a facility
-#: templates/hospital_bubble.html:142
+#: templates/hospital_bubble.html:150
 msgid "Change details"
 msgstr ""
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:188
+#: templates/hospital_bubble.html:196
 msgid "Change note"
 msgstr ""
 
@@ -205,7 +205,7 @@ msgstr ""
 
 #. Meaning: City or town portion of an address
 #: ../tools/setup.py:188
-msgid "City/Town/Village"
+msgid "City / Town / Village"
 msgstr ""
 
 #. Message explaining how to place a new subject on the map
@@ -269,7 +269,7 @@ msgid "Damage"
 msgstr ""
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:192
+#: templates/hospital_bubble.html:200
 msgid "Date and time"
 msgstr ""
 
@@ -337,7 +337,7 @@ msgid "Edit this record"
 msgstr ""
 
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:184
+#: templates/hospital_bubble.html:192
 msgid "Edited by"
 msgstr ""
 
@@ -387,7 +387,7 @@ msgid "Facility"
 msgstr ""
 
 #. Header for details about a facility
-#: templates/hospital_bubble.html:137
+#: templates/hospital_bubble.html:145
 msgid "Facility details"
 msgstr ""
 
@@ -547,7 +547,7 @@ msgid "Last Updated:"
 msgstr ""
 
 #. Label for a date-time when the data was last updated
-#: templates/hospital_bubble.html:65
+#: templates/hospital_bubble.html:73
 msgid "Last updated"
 msgstr ""
 
@@ -592,7 +592,7 @@ msgid "Location"
 msgstr ""
 
 #. Geographic coordinates of a location on earth.
-#: templates/hospital_bubble.html:161
+#: templates/hospital_bubble.html:169
 msgid "Location:"
 msgstr ""
 
@@ -677,7 +677,7 @@ msgid "No"
 msgstr ""
 
 #. Indicates there is no availability information for this  hospital.
-#: templates/hospital_bubble.html:121
+#: templates/hospital_bubble.html:129
 msgid "No availability information"
 msgstr ""
 
@@ -763,7 +763,7 @@ msgid "Plain text"
 msgstr ""
 
 #. Indicates a user should call for availability of beds and services at a hospital.
-#: templates/hospital_bubble.html:115
+#: templates/hospital_bubble.html:123
 msgid "Please call for availability information."
 msgstr ""
 
@@ -897,7 +897,7 @@ msgstr ""
 
 #. Meaning: Top-level administrative subdivision of a country
 #: ../tools/setup.py:184
-msgid "State/Province/Territory"
+msgid "State / Province / Territory"
 msgstr ""
 
 #. Label to subscribe to a subject
@@ -1020,6 +1020,11 @@ msgstr ""
 msgid "View full record"
 msgstr ""
 
+#. View in Google Mapmaker
+#: templates/hospital_bubble.html:66
+msgid "View in Google MapMaker"
+msgstr ""
+
 #. Label for weekly e-mail updates
 #: settings.py:59
 msgid "Weekly"
@@ -1079,12 +1084,12 @@ msgid "anonymous"
 msgstr ""
 
 #. Heading for number of available beds at a hospital
-#: templates/hospital_bubble.html:89
+#: templates/hospital_bubble.html:97
 msgid "availability"
 msgstr ""
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:93
+#: templates/hospital_bubble.html:101
 msgid "capacity"
 msgstr ""
 
@@ -1100,7 +1105,7 @@ msgid "p ${PHONE}"
 msgstr ""
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:98
+#: templates/hospital_bubble.html:106
 msgid "services"
 msgstr ""
 

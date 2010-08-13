@@ -57,7 +57,15 @@
       {% comment %}
       #i18n: Proper name of an alternate ID for a health facility
       {% endcomment %}
-      {% trans "Alternate ID" %}: {{special.alt_id.value|escape}}<br>
+      {% trans "Alternate ID" %}: {{special.alt_id.value|escape}}
+      {% if special.maps_link.raw %}
+        <a target="_blank" href="{{special.maps_link.value|escape}}">
+        {% comment %}
+        #i18n: View in Google Mapmaker
+        {% endcomment %}
+        {% trans "View in Google MapMaker" %}</a>
+      {% endif %}
+      <br>
     {% endblock ids %}
     {% comment %}
     #i18n: Label for a date-time when the data was last updated
