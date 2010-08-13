@@ -62,7 +62,7 @@ msgid "(unspecified)"
 msgstr "(non spécifié)"
 
 #. Note that a health facility has been marked closed.
-#: templates/hospital_bubble.html:80
+#: templates/hospital_bubble.html:85
 msgid "<strong>Note:</strong> This facility has been marked closed."
 msgstr "<strong>Note:</strong> Cet établissement a été marquée fermée."
 
@@ -83,7 +83,7 @@ msgid "Add a new %(type_name)s"
 msgstr "Ajouter un nouvel %(type_name)s"
 
 #. Header for a street address
-#: templates/print.html:138 ../tools/setup.py:190 templates/hospital_bubble.html:160
+#: templates/print.html:138 ../tools/setup.py:190 templates/hospital_bubble.html:165
 msgid "Address"
 msgstr "Adresse"
 
@@ -98,7 +98,7 @@ msgid "Affiliation (required)"
 msgstr "Affiliation (obligatoire)"
 
 #. Note that a health facility is on alert.
-#: templates/hospital_bubble.html:88
+#: templates/hospital_bubble.html:93
 msgid "Alert"
 msgstr "Alerte"
 
@@ -113,7 +113,7 @@ msgid "All"
 msgstr "Tous"
 
 #. Proper name of an alternate ID for a health facility
-#: templates/hospital_bubble.html:60 ../tools/setup.py:162
+#: templates/hospital_bubble.html:65 ../tools/setup.py:162
 msgid "Alternate ID"
 msgstr "Autre nom"
 
@@ -183,17 +183,17 @@ msgid "Category"
 msgstr "Catégorie"
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:189
+#: templates/hospital_bubble.html:194
 msgid "Change"
 msgstr "Modification"
 
 #. Header for the history of changes in data for a facility
-#: templates/hospital_bubble.html:150
+#: templates/hospital_bubble.html:155
 msgid "Change details"
 msgstr "Détails des modifications"
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:197
+#: templates/hospital_bubble.html:202
 msgid "Change note"
 msgstr "Modification"
 
@@ -268,7 +268,7 @@ msgid "Damage"
 msgstr "Degats"
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:201
+#: templates/hospital_bubble.html:206
 msgid "Date and time"
 msgstr "Date et heure"
 
@@ -336,7 +336,7 @@ msgid "Edit this record"
 msgstr "Modifier cet enregistrement"
 
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:193
+#: templates/hospital_bubble.html:198
 msgid "Edited by"
 msgstr "Modifié par"
 
@@ -386,7 +386,7 @@ msgid "Facility"
 msgstr "Établissement"
 
 #. Header for details about a facility
-#: templates/hospital_bubble.html:145
+#: templates/hospital_bubble.html:150
 msgid "Facility details"
 msgstr "Infos sur l'établissement"
 
@@ -481,7 +481,7 @@ msgid "Hospital"
 msgstr "Hôpital"
 
 #. Proper name of an ID for a health facility
-#: templates/hospital_bubble.html:56 ../tools/setup.py:160
+#: templates/hospital_bubble.html:61 ../tools/setup.py:160
 msgid "ID"
 msgstr "ID"
 
@@ -516,7 +516,7 @@ msgid "Invalid or missing account e-mail."
 msgstr "Nom d'établissement incorrect ou manquant"
 
 #. Error message for request missing subject name.
-#: edit.py:457 bubble.py:172
+#: edit.py:457 bubble.py:173
 msgid "Invalid or missing subject name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -546,7 +546,7 @@ msgid "Last Updated:"
 msgstr "Mise à jour :"
 
 #. Label for a date-time when the data was last updated
-#: templates/hospital_bubble.html:73
+#: templates/hospital_bubble.html:78
 msgid "Last updated"
 msgstr "Mise à jour :"
 
@@ -591,7 +591,7 @@ msgid "Location"
 msgstr "Emplacement"
 
 #. Geographic coordinates of a location on earth.
-#: templates/hospital_bubble.html:169
+#: templates/hospital_bubble.html:174
 msgid "Location:"
 msgstr "Emplacement"
 
@@ -676,7 +676,7 @@ msgid "No"
 msgstr "Non"
 
 #. Indicates there is no availability information for this  hospital.
-#: templates/hospital_bubble.html:129
+#: templates/hospital_bubble.html:134
 msgid "No availability information"
 msgstr "Aucune information concernant les disponibilités"
 
@@ -762,7 +762,7 @@ msgid "Plain text"
 msgstr "Texte"
 
 #. Indicates a user should call for availability of beds and services at a hospital.
-#: templates/hospital_bubble.html:123
+#: templates/hospital_bubble.html:128
 msgid "Please call for availability information."
 msgstr "Merci d'appeler pour connaître les disponibilités."
 
@@ -890,7 +890,7 @@ msgid "Sign in"
 msgstr "Connexion"
 
 #. Link to sign in to edit the data for a hospital record.
-#: templates/hospital_bubble.html:48
+#: templates/hospital_bubble.html:53
 msgid "Sign in to edit"
 msgstr "Connectez-vous pour apporter des modifications."
 
@@ -1025,7 +1025,7 @@ msgid "View full record"
 msgstr "Enregistrer la Vue"
 
 #. View in Google Mapmaker
-#: templates/hospital_bubble.html:66
+#: templates/hospital_bubble.html:71
 msgid "View in Google MapMaker"
 msgstr "Afficher dans Google MapMaker"
 
@@ -1088,12 +1088,12 @@ msgid "anonymous"
 msgstr "anonyme"
 
 #. Heading for number of available beds at a hospital
-#: templates/hospital_bubble.html:97
+#: templates/hospital_bubble.html:102
 msgid "availability"
 msgstr "disponibilités"
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:101
+#: templates/hospital_bubble.html:106
 msgid "capacity"
 msgstr "capacité"
 
@@ -1109,7 +1109,7 @@ msgid "p ${PHONE}"
 msgstr "t ${PHONE}"
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:106
+#: templates/hospital_bubble.html:111
 msgid "services"
 msgstr "services"
 

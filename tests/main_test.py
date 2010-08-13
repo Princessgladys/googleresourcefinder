@@ -1,6 +1,7 @@
 from model import db
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
+import model
 
 # services listed in the drop down box on top of the list
 SERVICES = ['All',
@@ -45,7 +46,8 @@ class MainTestCase(SeleniumTestCase):
     def tearDown(self):
         self.delete_account()
         self.delete_default_account()
-        self.delete_subject('haiti', 'example.org/1000')
+        if model.Subject.get('haiti', 'example.org/1000'):
+            self.delete_subject('haiti', 'example.org/1000')
         self.delete_subject('haiti', 'example.org/1001')
         self.delete_subject('haiti', 'example.org/1002')
         self.delete_subject('pakistan', 'example.org/1003')
@@ -245,3 +247,29 @@ class MainTestCase(SeleniumTestCase):
         self.wait_for_element(self.bubble_xpath)
         assert not self.is_text_present(
             'Note: This facility has been marked closed')
+
+    def test_admin_delete(self):
+        # Login to main page
+        self.set_default_permissions(['*:view'])
+        self.delete_account()
+        self.open_path('/?subdomain=haiti')
+        self.wait_for_element('//tr[@id="subject-1"]')
+
+        # Open facility bubble. Default permissions do not contain purge. Make
+        # sure the delete link is not present in the bubble.
+        self.click('id=subject-1')
+        self.wait_for_element(self.bubble_xpath)
+        assert not self.is_text_present('Delete Permanently')
+
+        # Login with account, that does not have permissions. Link should still
+        # not be present in the bubble.
+        self.put_account(actions=['*:purge'])
+        self.click_and_wait('link=Sign in')
+        self.login()
+        self.click('id=subject-1')
+        self.wait_for_element(self.bubble_xpath)
+        assert self.is_text_present('Delete Permanently')
+
+        # Click delete button. Make sure facility is actually gone.
+        self.click('id=admin-delete')
+        assert len(model.Subject.all().fetch(4)) == 3
