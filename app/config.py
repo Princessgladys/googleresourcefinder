@@ -27,7 +27,7 @@ LANGUAGES = (('en', 'English'),
              ('fr', u'Fran\u00e7ais'), # French
              ('ht', u'Krey\u00f2l'), # Kreyol
              ('es-419', u'Espa\u00F1ol'), # Spanish (Latin American)
-             ('ur', u'\u0627\u0631\u062F') # Urdu
+             ('ur', u'\u0627\u0631\u062F\u0648') # Urdu
             )
 
 # A map from unavailable languages to the best available fallback languages.
