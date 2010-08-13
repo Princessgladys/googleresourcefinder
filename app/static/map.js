@@ -370,33 +370,42 @@ function initialize_map() {
     styles: [cluster_style, cluster_style, cluster_style, cluster_style]
   });
 
-  // Create add subject button
-  new_subject_button = $$('div', {'class': 'map-control'});
-  var new_subject_ui = $$('div', {'class': 'map-control-ui'});
-  var new_subject_text = $$(
-      'div', {'class': 'map-control-text'}, locale.ADD() + ' ');
-  var icon = $$('img', {
-    src: make_icon(null, STATUS_UNKNOWN, false),
-    'class': 'map-control-marker'
-  });
-  new_subject_button.appendChild(new_subject_ui);
-  new_subject_ui.appendChild(new_subject_text);
-  new_subject_text.appendChild(icon);
-  google.maps.event.addDomListener(new_subject_ui, 'click', function() {
-    show_new_subject_button(false);
-    show_status(locale.CLICK_TO_ADD_SUBJECT() +
-                ' <a href="#" onclick="cancel_add_subject();"> ' +
-                locale.CANCEL() + '</a>.');
-    google.maps.event.addListenerOnce(map, 'click', function(event) {
-      show_status(null);
-      place_new_subject_marker(event.latLng);
-      inplace_edit_start(make_add_new_subject_url());
-      _gaq.push(['_trackEvent', 'add', 'drop', 'new_subject']);
+  if (show_add_button) {
+    // Create add subject button
+    new_subject_button = $$('div', {'class': 'new-subject-map-control'});
+    var new_subject_ui = $$('div', {'class': 'new-subject-map-control-ui'});
+    var new_subject_text = $$(
+        'div', {'class': 'new-subject-map-control-text'}, locale.ADD() + ' ');
+    var icon = $$('img', {
+      src: make_icon(null, STATUS_UNKNOWN, false),
+      'class': 'new-subject-map-control-marker'
     });
-    _gaq.push(['_trackEvent', 'add', 'start', 'new_subject']);
-  });
-  map.controls[google.maps.ControlPosition.TOP_LEFT].push(new_subject_button);
+    new_subject_button.appendChild(new_subject_ui);
+    new_subject_ui.appendChild(new_subject_text);
+    new_subject_text.appendChild(icon);
+    google.maps.event.addDomListener(
+        new_subject_ui, 'click', init_add_new_subject);
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(new_subject_button);
+  }
 }
+
+function init_add_new_subject() {
+  if (!is_logged_in) {
+    window.location = login_add_url;
+  }
+  show_new_subject_button(false);
+  show_status(locale.CLICK_TO_ADD_SUBJECT() +
+              ' <a href="#" onclick="cancel_add_subject();"> ' +
+              locale.CANCEL() + '</a>.');
+  google.maps.event.addListenerOnce(map, 'click', function(event) {
+    show_status(null);
+    place_new_subject_marker(event.latLng);
+    inplace_edit_start(make_add_new_subject_url());
+    _gaq.push(['_trackEvent', 'add', 'drop', 'new_subject']);
+  });
+  _gaq.push(['_trackEvent', 'add', 'start', 'new_subject']);
+}
+
 
 function show_new_subject_button(show) {
   new_subject_button.style.visibility = show ? '' : 'hidden';
@@ -415,6 +424,7 @@ function cancel_add_subject() {
 
 function place_new_subject_marker(latlon) {
   new_subject_marker = new google.maps.Marker({
+    'class': 'new-subject-marker',
     position: latlon,
     map: map,
     icon: make_icon(null, 1, null, null, null, 'f60'),
@@ -1319,7 +1329,7 @@ function select_subject(subject_i) {
       if (!had_location && new_location) {
         add_marker(subject_i);
       } else if (had_location && !new_location) {
-         remove_marker(subject_i);
+        remove_marker(subject_i);
       }
       update_subject_row(subject_i);
       update_subject_icon(subject_i);
