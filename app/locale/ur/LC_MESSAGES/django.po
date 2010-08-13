@@ -681,6 +681,11 @@ msgstr "نئی قدر"
 msgid "New facility"
 msgstr "نئی سہول"
 
+#. Button to go to main page of resource finder sans iframe
+#: templates/map.html:202
+msgid "New window"
+msgstr "باہر نکالیں"
+
 #. Form option for a false Boolean value
 #: edit.py:177 utils_test.py:321 utils.py:339
 msgid "No"
@@ -776,11 +781,6 @@ msgstr "سادہ متن"
 #: templates/hospital_bubble.html:123
 msgid "Please call for availability information."
 msgstr "فراہمی کی معلومات کیلئے براہ کرم کال کریں۔"
-
-#. Button to go to main page of resource finder sans iframe
-#: templates/map.html:202
-msgid "Pop out"
-msgstr "باہر نکالیں"
 
 #. Service provided by a health facility (use Title Case). care given after surgery until patient is discharged
 #: ../tools/setup.py:310

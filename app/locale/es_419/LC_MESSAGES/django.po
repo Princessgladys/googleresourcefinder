@@ -681,6 +681,11 @@ msgstr "Nuevo valor"
 msgid "New facility"
 msgstr "Nueva institución"
 
+#. Button to go to main page of resource finder sans iframe
+#: templates/map.html:202
+msgid "New window"
+msgstr "Ventana externa"
+
 #. Form option for a false Boolean value
 #: edit.py:177 utils_test.py:321 utils.py:339
 msgid "No"
@@ -776,11 +781,6 @@ msgstr "Texto Sin Formato"
 #: templates/hospital_bubble.html:123
 msgid "Please call for availability information."
 msgstr "Llama para informarte acerca de la disponibilidad"
-
-#. Button to go to main page of resource finder sans iframe
-#: templates/map.html:202
-msgid "Pop out"
-msgstr "Ventana externa"
 
 #. Service provided by a health facility (use Title Case). care given after surgery until patient is discharged
 #: ../tools/setup.py:310
