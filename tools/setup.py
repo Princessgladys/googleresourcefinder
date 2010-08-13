@@ -181,11 +181,11 @@ def setup_messages():
         #i18n: Meaning: low-level administrative division
         name_message('commune', en='Commune'),
         #i18n: Meaning: Top-level administrative subdivision of a country
-        name_message('administrative_area', en='State/Province/Territory'),
+        name_message('administrative_area', en='State / Province / Territory'),
         #i18n: Meaning: Second-level administrative subdivision of a country
         name_message('sub_administrative_area', en='District/County'),
         #i18n: Meaning: City or town portion of an address
-        name_message('locality', en='City/Town/Village'),
+        name_message('locality', en='City / Town / Village'),
         #i18n: street address
         name_message('address', en='Address'),
         #i18n: latitude, longitude location

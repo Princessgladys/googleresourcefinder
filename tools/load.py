@@ -253,15 +253,11 @@ def convert_pakistan_record(index, record):
     exported KML file into a dictionary of ValueInfo objects for our
     datastore."""
     if not record.get('title', '').strip():
-        # TODO(shakusa) Fix this. We should be importing all facilities.
         logging.warn('Skipping %r: No title' % record)
         return None, None, None
 
     title = record['title'].strip()
 
-    # TODO(shakusa) Try to get mapmaker IDs to use here
-    subject_name = Subject.generate_name('pakistan.resource-finder.appspot.com',
-                                         'hospital')
     try:
         latitude = float(record['location'][1])
         longitude = float(record['location'][0])
@@ -280,6 +276,13 @@ def convert_pakistan_record(index, record):
         if match:
             key = match.group(1)
             value = match.group(2)
+            if key == 'ID':
+                # ID is given as a pair of colon-separated hex strings
+                # It is more common externally to see a pair of
+                # colon-separated base-10 strings, so convert to that
+                id_parts = value.split(':')
+                value = ':'.join(str(int(part, 16)) for part in id_parts)
+                record['id'] = value
             if key == 'TYPE':
                 type = value
             elif key == 'LANGNAME':
@@ -296,6 +299,19 @@ def convert_pakistan_record(index, record):
                 record['sub_admin_area'] = value
             comments.append('%s: %s' % (key, value))
 
+    if not record.get('id'):
+        logging.warn('Skipping %r: No ID' % record)
+        return None, None, None
+
+    if not (point_inside_polygon(
+        {'lat': latitude, 'lon': longitude}, PAKISTAN_FLOOD_POLYGON) or
+        record.get('sub_admin_area', '') in PAKISTAN_FLOOD_DISTRICTS):
+        return None, None, None
+
+    subject_name = 'mapmaker.google.com/fid/' + record['id']
+
+    record['maps_link'] = 'http://www.google.com/mapmaker?q=' + record['id']
+
     title_lower = title.lower()
     if type == 'TYPE_HOSPITAL' or 'hospital' in title_lower:
         record['category'] = 'HOSPITAL'
@@ -306,12 +322,8 @@ def convert_pakistan_record(index, record):
     elif 'dispensary' in title_lower:
         record['category'] = 'DISPENSARY'
 
-    if not (point_inside_polygon(
-        {'lat': latitude, 'lon': longitude}, PAKISTAN_FLOOD_POLYGON) or
-        record.get('sub_admin_area', '') in PAKISTAN_FLOOD_DISTRICTS):
-        return None, None, None
-
     return subject_name, observed, {
+        'id': ValueInfo(record['id']),
         'title': ValueInfo(title),
         'alt_title': ValueInfo(record.get('alt_title', '')),
         'address': ValueInfo(record.get('address', '')),
@@ -319,6 +331,7 @@ def convert_pakistan_record(index, record):
         'sub_administrative_area': ValueInfo(record.get('sub_admin_area', '')),
         'locality': ValueInfo(record.get('locality', '')),
         'location': ValueInfo(location),
+        'maps_link': ValueInfo(record['maps_link']),
         'category': ValueInfo(record.get('category', '')),
         'comments': ValueInfo(db.Text('\n'.join(comments))),
     }

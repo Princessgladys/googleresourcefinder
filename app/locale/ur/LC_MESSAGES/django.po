@@ -63,7 +63,7 @@ msgid "(unspecified)"
 msgstr "(غیر واضح)"
 
 #. Note that a health facility has been marked closed.
-#: templates/hospital_bubble.html:72
+#: templates/hospital_bubble.html:80
 msgid "<strong>Note:</strong> This facility has been marked closed."
 msgstr "<strong>نوٹ:</strong> اس سہولت پر بند کا نشان لگا ہوا ہے۔"
 
@@ -84,7 +84,7 @@ msgid "Add a new %(type_name)s"
 msgstr "ایک نئی %(type_name)s شامل کری"
 
 #. Header for a street address
-#: templates/print.html:138 ../tools/setup.py:190 templates/hospital_bubble.html:152
+#: templates/print.html:138 ../tools/setup.py:190 templates/hospital_bubble.html:160
 msgid "Address"
 msgstr "پتہ"
 
@@ -99,7 +99,7 @@ msgid "Affiliation (required)"
 msgstr "الحاق (مطلوب)"
 
 #. Note that a health facility is on alert.
-#: templates/hospital_bubble.html:80
+#: templates/hospital_bubble.html:88
 msgid "Alert"
 msgstr "انتباہ"
 
@@ -184,17 +184,17 @@ msgid "Category"
 msgstr "زمرہ"
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:180
+#: templates/hospital_bubble.html:189
 msgid "Change"
 msgstr "تبدیل کریں"
 
 #. Header for the history of changes in data for a facility
-#: templates/hospital_bubble.html:142
+#: templates/hospital_bubble.html:150
 msgid "Change details"
 msgstr "تبدیلی کی تفصیلات"
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:188
+#: templates/hospital_bubble.html:197
 msgid "Change note"
 msgstr "تبدیلی کا نوٹ"
 
@@ -205,8 +205,8 @@ msgstr "مقام منتخب کریں:"
 
 #. Meaning: City or town portion of an address
 #: ../tools/setup.py:188
-msgid "City/Town/Village"
-msgstr "شہر/ٹاؤ/گرا"
+msgid "City / Town / Village"
+msgstr "شہر / ٹاؤ / گرا"
 
 #. Message explaining how to place a new subject on the map
 #: static/locale.js:37
@@ -269,7 +269,7 @@ msgid "Damage"
 msgstr "نقصان"
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:192
+#: templates/hospital_bubble.html:201
 msgid "Date and time"
 msgstr "تاریخ اور وقت"
 
@@ -311,7 +311,7 @@ msgid "Distance"
 msgstr "دوری"
 
 #. Meaning: administrative division
-#: templates/map.html:151 static/locale.js:63 ../tools/setup.py:180
+#: templates/map.html:153 static/locale.js:63 ../tools/setup.py:180
 msgid "District"
 msgstr "ضلع"
 
@@ -337,7 +337,7 @@ msgid "Edit this record"
 msgstr "اس ریکارڈ میں ترمیم کریں"
 
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:184
+#: templates/hospital_bubble.html:193
 msgid "Edited by"
 msgstr "ترمیم کردہ بذریعہ"
 
@@ -372,7 +372,7 @@ msgid "Error saving facility information."
 msgstr "سہولت کی معلومات محفوظ کرنے میں غلطی۔"
 
 #. Button to export data to comma-separated-value format.
-#: export.py:176 templates/map.html:192
+#: export.py:176 templates/map.html:194
 msgid "Export CSV"
 msgstr "CSV برآمد کریں"
 
@@ -382,12 +382,12 @@ msgid "Facilities with Changes"
 msgstr "سہولیات مع تبدیلیاں"
 
 #. A place that provides a particular service
-#: static/locale.js:120 templates/print.html:129 templates/map.html:170 templates/settings.html:120
+#: templates/map.html:172 templates/print.html:129 static/locale.js:120 templates/settings.html:120
 msgid "Facility"
 msgstr "سہولت"
 
 #. Header for details about a facility
-#: templates/hospital_bubble.html:137
+#: templates/hospital_bubble.html:145
 msgid "Facility details"
 msgstr "سہولت کی تفصیلات"
 
@@ -422,7 +422,7 @@ msgid "Field is required."
 msgstr "فیلڈ مطلوب ہے۔"
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:125
+#: templates/map.html:127
 msgid "Filters"
 msgstr "فلٹرز"
 
@@ -547,7 +547,7 @@ msgid "Last Updated:"
 msgstr "آخری تجدید شدہ:"
 
 #. Label for a date-time when the data was last updated
-#: templates/hospital_bubble.html:65
+#: templates/hospital_bubble.html:73
 msgid "Last updated"
 msgstr "آخری تجدید"
 
@@ -569,7 +569,7 @@ msgstr "عرض البلد -90 اور 90 کے درمیان ہونا چاہیے۔"
 #. Category for terms of service and privacy pages
 #: templates/base.html:107
 msgid "Legal"
-msgstr "قانون"
+msgstr "قانونی"
 
 #. Button text to load data
 #: templates/load.html:57
@@ -592,7 +592,7 @@ msgid "Location"
 msgstr "جائے وقوع"
 
 #. Geographic coordinates of a location on earth.
-#: templates/hospital_bubble.html:161
+#: templates/hospital_bubble.html:169
 msgid "Location:"
 msgstr "جائے وقوع:"
 
@@ -677,7 +677,7 @@ msgid "No"
 msgstr "نہیں"
 
 #. Indicates there is no availability information for this  hospital.
-#: templates/hospital_bubble.html:121
+#: templates/hospital_bubble.html:129
 msgid "No availability information"
 msgstr "فراہمی کی معلومات نہیں ہے"
 
@@ -710,7 +710,7 @@ msgstr "پرانی قدر"
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
 #: static/locale.js:152
 msgid "Open/Total Beds"
-msgstr "کھلا / کل بستر"
+msgstr "دستیاب / کل بستر"
 
 #. Facility operational status: in working order
 #: ../tools/setup.py:268
@@ -763,12 +763,12 @@ msgid "Plain text"
 msgstr "سادہ متن"
 
 #. Indicates a user should call for availability of beds and services at a hospital.
-#: templates/hospital_bubble.html:115
+#: templates/hospital_bubble.html:123
 msgid "Please call for availability information."
 msgstr "فراہمی کی معلومات کیلئے براہ کرم کال کریں۔"
 
 #. Button to go to main page of resource finder sans iframe
-#: templates/map.html:200
+#: templates/map.html:202
 msgid "Pop out"
 msgstr "باہر نکالیں"
 
@@ -833,7 +833,7 @@ msgstr "%(action)s  بننے کی درخواست مسترد ہوگئی تھی۔"
 #. Name of the application.
 #: templates/subdomain_menu.html.py:35
 msgid "Resource Finder"
-msgstr "ریسورس تلا"
+msgstr "ذرائع کی تلاش"
 
 #. subject of e-mail -> Resource Finder Update
 #: mail_alerts.py:78
@@ -863,7 +863,7 @@ msgstr "برآمد کیلئے مریض کی نوعیت منتخب کریں:"
 #. work done by someone that benefits another
 #: static/locale.js:178 ../tools/setup.py:168
 msgid "Services"
-msgstr "خدمات"
+msgstr "طبی سھولیات"
 
 #. label for changing subjects to default frequency
 #: templates/settings.html:167
@@ -873,12 +873,12 @@ msgstr "نشان زد کو ڈیفالٹ پر ترتیب دیں"
 #. Link to go to the settings page of the application
 #: templates/base.html:141
 msgid "Settings"
-msgstr "ترتیبات"
+msgstr "تراتیب"
 
 #. Label for settings page
 #: templates/hospital_email.html.py:249 templates/hospital_email.html:50
 msgid "Settings page"
-msgstr "ترتیبات کا صفحہ"
+msgstr "تراتیب کا صفحہ"
 
 #. Label for a control that filters a list of facilities
 #: static/locale.js:182
@@ -886,7 +886,7 @@ msgid "Show"
 msgstr "دکھائیں"
 
 #. Link to sign into the app
-#: main.py:65
+#: main.py:69
 msgid "Sign in"
 msgstr "سائن ان کریں"
 
@@ -896,14 +896,14 @@ msgid "Sign in to edit"
 msgstr "ترمیم کیلئے سائن ان کریں"
 
 #. Link to sign out of the app
-#: settings.py:71 main.py:63
+#: main.py:67 settings.py:71
 msgid "Sign out"
 msgstr "سائن آؤٹ کریں"
 
 #. Meaning: Top-level administrative subdivision of a country
 #: ../tools/setup.py:184
-msgid "State/Province/Territory"
-msgstr "ریاست/صوب/علاق"
+msgid "State / Province / Territory"
+msgstr "ریاست / صوب / علاق"
 
 #. Label to subscribe to a subject
 #: templates/hospital_bubble.html:41 static/locale.js:190
@@ -911,14 +911,14 @@ msgid "Subscribe to email updates"
 msgstr "ای میل تازہ کاریوں کی رکنیت حاصل کریں"
 
 #. Header for a list of provisions
-#: templates/map.html:105
+#: templates/map.html:107
 msgid "Supplies"
 msgstr "ساز و سامان"
 
 #. Link to terms of service for the application
 #: templates/base.html:113
 msgid "Terms of Service"
-msgstr "خدمت کی شرائط"
+msgstr "استعمال کی شرائط"
 
 #. Instructions to enter a person's name and organizational affiliation.
 #: templates/edit.html:84
@@ -1025,6 +1025,11 @@ msgstr "Master List کا ذخیرہ دیکھیں"
 msgid "View full record"
 msgstr "پورا ریکارڈ دیکھیں"
 
+#. View in Google Mapmaker
+#: templates/hospital_bubble.html:66
+msgid "View in Google MapMaker"
+msgstr "Google MapMaker میں دیکھی"
+
 #. Label for weekly e-mail updates
 #: settings.py:59
 msgid "Weekly"
@@ -1079,17 +1084,17 @@ msgid "and with availability."
 msgstr "اور فراہمی کے ساتھ۔"
 
 #. a user with no identity
-#: main.py:60
+#: main.py:64
 msgid "anonymous"
 msgstr "گمنام"
 
 #. Heading for number of available beds at a hospital
-#: templates/hospital_bubble.html:89
+#: templates/hospital_bubble.html:97
 msgid "availability"
 msgstr "فراہمی"
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:93
+#: templates/hospital_bubble.html:101
 msgid "capacity"
 msgstr "گنجائش"
 
@@ -1105,7 +1110,7 @@ msgid "p ${PHONE}"
 msgstr "صفحہ ${PHONE}"
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:98
+#: templates/hospital_bubble.html:106
 msgid "services"
 msgstr "خدمات"
 

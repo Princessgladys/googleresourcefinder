@@ -57,10 +57,12 @@
   <script type="text/javascript">
     var is_logged_in = {% if user %} true {% else %} false {% endif %};
     var print = {% if params.print %} true {% else %} false {% endif %};
+    var login_add_url = '{{login_add_url}}';
     var print_url = '{{print_url}}';
     var bubble_url = '{{bubble_url}}';
     var edit_url_template = '{{edit_url_template}}';
     var rtl = {% if params.lang_bidi %} true {% else %} false {% endif %};
+    var show_add_button = {% if show_add_button %} true {% else %} false {% endif %};
   </script>
 
   <!-- Google Maps API -->
@@ -221,6 +223,13 @@
         work if params.subject_name has an ampersand
       {% endcomment %}     
       inplace_edit_start(make_edit_url('{{params.subject_name|escape}}'));
+    {% endif %}
+    {% if params.add_new and user %}
+      {% comment %}
+        Similarly, we get here if redirected from the 'Add +' button on the map
+        through the sign-in form.
+      {% endcomment %}
+      init_add_new_subject();
     {% endif %}
   });
 </script>
