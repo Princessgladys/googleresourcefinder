@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN">
+<html dir="rtl">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="keywords" content="pakistan, flood, resource, finder, hospitals,
+    medicine, medical, supplies, crisis, disaster, pakistani, pakistan
+    floods">
+  <meta http-equiv="content-language" content="en">
+
+  <title>Google Resource Finder</title>
+
+  <style type="text/css"><!--
+    body { font-family: arial, sans-serif; font-size: 13px; margin: auto;
+      width: 800px; max-width: 1000px; padding: 15px; }
+
+    div.languages { float: left; }
+    div.languages .selected { font-weight: bold; }
+    div.embed pre { margin-left: 2em; padding: 0.5em; background: #eee;
+      border: 1px solid #ddd; }
+
+    .footer { margin: auto; text-align: center; }
+    .logo-footer { margin: 1em 0; text-align: center; }
+
+    h1 { margin-top: 0.5em; font-size: 18px; }
+  --></style>
+</head>
+
+<body>
+  <div class="languages">
+    {% for lang in params.languages %}
+      {% ifequal lang.0 params.lang %}<span class="selected">{{lang.1}}</span>
+      {% else %}<a href="{{embed_url}}&lang={{lang.0}}">{{lang.1}}</a>
+      {% endifequal %}{% if not forloop.last %} | {% endif %}
+    {% endfor %}
+  </div>
+
+  <h1><a href="{{home_url}}">ذرائع کی تلاش</a></h1>
+
+  <div class="embed">
+    <h2>application کو embed کرنے کا طریقہ</h2>
+    <p>اس ٹول کو اپنی سائٹ پر ڈالنےکے لئےدرج ذیل کوڈ کو copy & paste کریں:</p>
+
+    <pre dir="ltr">
+      &lt;iframe
+      &nbsp;&nbsp;src='{{home_url}}' id='iframe'
+      &nbsp;&nbsp;width="740px" height="400" frameborder=0 style="border: dashed 2px #77c"&gt;
+      &lt;/iframe&gt;</pre>
+
+    <p>اس gadget کو <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2.0 license</a>لائسنس کے تحت مہییا کیا گیا ہے.</p>
+
+    <a href="{{home_url}}"> « واپس ابتدائی صفحے کی طرف</a>
+
+    <div class="footer links">
+      <a href="{{base_url}}/terms" target="_blank">استعمال کی شرائط</a>
+    </div>
+
+    <div class="logo-footer">
+      <img src="../../static/powered-by-google-120x30.gif">
+    </div>
+  </body>
+</html>
