@@ -107,7 +107,6 @@ handlers:
 
 - url: /mail_alerts
   script: mail_alerts.py
-  login: admin
 
 - url: /refresh_json_cache
   script: refresh_json_cache.py
@@ -115,4 +114,9 @@ handlers:
 
 - url: /subscribe
   script: subscribe.py
-  login: admin
+
+# Incoming mail handlers.
+
+- url: /_ah/mail/updates@resource-finder.appspotmail.com
+  script: mail_editor.py
+
