@@ -184,7 +184,7 @@ msgid "Category"
 msgstr "Kategori"
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:188
+#: templates/hospital_bubble.html:189
 msgid "Change"
 msgstr "Chanje"
 
@@ -194,7 +194,7 @@ msgid "Change details"
 msgstr "Chanje done"
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:196
+#: templates/hospital_bubble.html:197
 msgid "Change note"
 msgstr "Chanje"
 
@@ -269,7 +269,7 @@ msgid "Damage"
 msgstr "Domaj"
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:200
+#: templates/hospital_bubble.html:201
 msgid "Date and time"
 msgstr "Jou  ak  lè"
 
@@ -337,7 +337,7 @@ msgid "Edit this record"
 msgstr "modifye enregistreman sa"
 
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:192
+#: templates/hospital_bubble.html:193
 msgid "Edited by"
 msgstr "Moun ki reekri a"
 
