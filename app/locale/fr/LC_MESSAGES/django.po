@@ -183,7 +183,7 @@ msgid "Category"
 msgstr "Catégorie"
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:188
+#: templates/hospital_bubble.html:189
 msgid "Change"
 msgstr "Modification"
 
@@ -193,7 +193,7 @@ msgid "Change details"
 msgstr "Détails des modifications"
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:196
+#: templates/hospital_bubble.html:197
 msgid "Change note"
 msgstr "Modification"
 
@@ -268,7 +268,7 @@ msgid "Damage"
 msgstr "Degats"
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:200
+#: templates/hospital_bubble.html:201
 msgid "Date and time"
 msgstr "Date et heure"
 
@@ -336,7 +336,7 @@ msgid "Edit this record"
 msgstr "Modifier cet enregistrement"
 
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:192
+#: templates/hospital_bubble.html:193
 msgid "Edited by"
 msgstr "Modifié par"
 

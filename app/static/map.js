@@ -400,7 +400,7 @@ function init_add_new_subject() {
   google.maps.event.addListenerOnce(map, 'click', function(event) {
     show_status(null);
     place_new_subject_marker(event.latLng);
-    inplace_edit_start(make_add_new_subject_url());
+    inplace_edit_start(make_add_new_subject_url(), true);
     _gaq.push(['_trackEvent', 'add', 'drop', 'new_subject']);
   });
   _gaq.push(['_trackEvent', 'add', 'start', 'new_subject']);
@@ -408,10 +408,12 @@ function init_add_new_subject() {
 
 
 function show_new_subject_button(show) {
-  new_subject_button.style.visibility = show ? '' : 'hidden';
+  if (new_subject_button) {
+    new_subject_button.style.display = show ? '' : 'none';
+  }
 }
 
-function cancel_add_subject() {
+function cancel_add_subject(opt_no_track) {
   show_status(null);
   show_new_subject_button(true);
   google.maps.event.clearListeners(map, 'click');
@@ -419,7 +421,9 @@ function cancel_add_subject() {
     new_subject_marker.setVisible(false);
     new_subject_marker = null;
   }
-  _gaq.push(['_trackEvent', 'add', 'cancel', 'new_subject']);
+  if (!opt_no_track) {
+    _gaq.push(['_trackEvent', 'add', 'cancel', 'new_subject']);
+  }
 }
 
 function place_new_subject_marker(latlon) {
@@ -1309,6 +1313,7 @@ function select_subject(subject_i) {
   var force_login = !had_location && !is_logged_in;
 
   // Pop up the InfoWindow on the selected clinic, if it has a location.
+  cancel_add_subject(true);
   show_loading(true);
   var url = bubble_url + (bubble_url.indexOf('?') >= 0 ? '&' : '?') +
       'subject_name=' + selected_subject.name;
@@ -1615,7 +1620,7 @@ function make_add_new_subject_url(opt_subject_type) {
  * Handler to start inplace editing in the left-hand panel.
  * @param {String} edit_url - URL to load the edit form via AJAX
  */
-function inplace_edit_start(edit_url) {
+function inplace_edit_start(edit_url, opt_for_add_new) {
   if ($('edit-data').style.display == '') {
     // already editing
     return false;
@@ -1631,6 +1636,10 @@ function inplace_edit_start(edit_url) {
     data.lon = new_subject_marker.position.lng();
   }
 
+  if (!opt_for_add_new) {
+    cancel_add_subject(true);
+  }
+  show_new_subject_button(false);
   show_loading(true);
   $j.ajax({
     url: edit_url,
@@ -1640,6 +1649,7 @@ function inplace_edit_start(edit_url) {
       log(textStatus + ', ' + errorThrown);
       alert(locale.ERROR_LOADING_EDIT_FORM());
       show_loading(false);
+      show_new_subject_button(true);
     },
     success: function(data) {
       var edit_data = $('edit-data');
@@ -1682,9 +1692,7 @@ function inplace_edit_save(edit_url) {
         log(textStatus + ', ' + errorThrown);
         alert(locale.ERROR_SAVING_FACILITY_INFORMATION());
         show_status(null, null, true);
-        if (new_subject_marker) {
-          cancel_add_subject();
-        }
+        cancel_add_subject();
       },
       success: function(data) {
         if (new_subject_marker) {
@@ -1698,6 +1706,7 @@ function inplace_edit_save(edit_url) {
         remove_edit_bar();
         select_subject(selected_subject_i);
         show_status(locale.SAVED(), 5000);
+        show_new_subject_button(true);
         _gaq.push(['_trackEvent', 'edit', 'save', selected_subject.name]);
       }
     });
@@ -1715,8 +1724,8 @@ function inplace_edit_cancel() {
   $('edit-data').style.display = 'none';
   remove_edit_bar();
   show_status(null, null, true);
+  cancel_add_subject();
   if (new_subject_marker) {
-    cancel_add_subject();
     _gaq.push(['_trackEvent', 'edit', 'cancel', 'new_subject']);
   } else {
     _gaq.push(['_trackEvent', 'edit', 'cancel', selected_subject.name]);
