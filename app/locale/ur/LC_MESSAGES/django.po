@@ -351,6 +351,16 @@ msgstr "ای میل رکنیت کی ترتیبات"
 msgid "Email format:"
 msgstr "ای میل کی شکل:"
 
+#. Button to a "how to embed" page
+#: templates/map.html:210
+msgid "Embed"
+msgstr "Embed"
+
+#. Button to a "how to embed" page
+#: templates/map.html:210
+msgid "Embed on your site"
+msgstr "اس ٹول کواپنی ساءٹ میں embed کریں"
+
 #. Header for an error message.
 #: templates/error.html:28
 msgid "Error"

@@ -351,6 +351,16 @@ msgstr ""
 msgid "Email format:"
 msgstr ""
 
+#. Button to a "how to embed" page
+#: templates/map.html:210
+msgid "Embed"
+msgstr ""
+
+#. Button to a "how to embed" page
+#: templates/map.html:210
+msgid "Embed on your site"
+msgstr ""
+
 #. Header for an error message.
 #: templates/error.html:28
 msgid "Error"

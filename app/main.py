@@ -75,6 +75,7 @@ class Main(utils.Handler):
                     export_url=self.get_export_url(),
                     print_url=self.get_url('/?print=yes'),
                     bubble_url=self.get_url('/bubble'),
+                    embed_url=self.get_url('/embed'),
                     disable_iframe_url=self.get_url('/', iframe='no'),
                     edit_url_template=self.get_url('/edit', embed='yes')
                         + '&subject_name=',
