@@ -62,7 +62,7 @@ def setup_subject_types():
         attr('str', 'address'),
         attr('geopt', 'location'),
         attr('str', 'accuracy'),
-        attr('str', 'maps_link'),
+        attr('str', 'maps_link', edit_action='advanced_edit'),
         attr('str', 'organization'),
         attr('choice', 'organization_type',
              ['PUBLIC', 'FOR_PROFIT', 'UNIVERSITY', 'COMMUNITY',
