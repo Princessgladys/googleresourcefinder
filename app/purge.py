@@ -23,8 +23,8 @@ import model
 import utils
 from utils import db
 
-class Admin(utils.Handler):
-    """Handler for /admin. Used to carry out administrative tasks.
+class Purge(utils.Handler):
+    """Handler for /purge. Used to carry out administrative tasks.
 
     Attributes:
         action: the specific action to be taken by the class
@@ -43,9 +43,7 @@ class Admin(utils.Handler):
     def post(self):
         """Responds to HTTP POST requests. Reacts based on self.action."""
         self.init()
-
-        if self.action == 'purge':
-            self.purge_subject()
+        self.purge_subject()
 
     def purge_subject(self):
         """Using the supplied subdomain and subject name from the user, removes
@@ -58,8 +56,7 @@ class Admin(utils.Handler):
         def work():
             subject = model.Subject.get(subdomain, subject_name)
             if subject:
-                minimal_subject = model.MinimalSubject.get_by_subject(subject)
-                db.delete([subject, minimal_subject])
+                model.Subject.delete_complete(subject)
                 logging.info('admin.py: %s deleted subject with name %s' %
                              (self.account.email, subject_name))
                 cache.MINIMAL_SUBJECTS[subdomain].flush()
@@ -69,4 +66,4 @@ class Admin(utils.Handler):
             db.run_in_transaction(work)
 
 if __name__ == '__main__':
-    utils.run([('/admin', Admin)], debug=True)
+    utils.run([('/purge', Purge)], debug=True)
