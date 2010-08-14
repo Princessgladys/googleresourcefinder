@@ -189,7 +189,7 @@
   <span id="freshness-text"></span>
   <div>
     {% comment %}
-    #i18n: Button to export data to comma-separated-values format.
+    #i18n: Link text to export data to comma-separated-values format.
     {% endcomment %}
     <a target="_blank" href="{{export_url}}" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export CSV" %}</a>
     {% if params.iframe %}
@@ -197,7 +197,7 @@
       <a id="pop-out" target="_blank" href="{{disable_iframe_url}}"
         onclick="_gaq.push(['_trackEvent', 'main', 'open', 'from_embed']);">
       {% comment %}
-      #i18n: Button to go to main page of resource finder sans iframe
+      #i18n: Link text to go to main page of resource finder sans iframe
       {% endcomment %}
       {% trans "New window" %}</a>
     {% endif %}
@@ -205,7 +205,7 @@
     <a id="embed-rf" target="_blank" href="{{embed_url}}"
       onclick="_gaq.push(['_trackEvent', 'main', 'open', 'how_to_embed']);">
       {% comment %}
-      #i18n: Button to a "how to embed" page
+      #i18n: Link text to a "how to embed" page
       {% endcomment %}
       {% if params.iframe %}{% trans "Embed" %}{% else %}{% trans "Embed on your site" %}{% endif %}</a>
   {% include subdomain_list_footer %}

@@ -350,12 +350,12 @@ msgstr "Paramètres d'Abonnement par Courriel"
 msgid "Email format:"
 msgstr "Format E-mail:"
 
-#. Button to a "how to embed" page
+#. Link text to a "how to embed" page
 #: templates/map.html:210
 msgid "Embed"
 msgstr "Intégrer"
 
-#. Button to a "how to embed" page
+#. Link text to a "how to embed" page
 #: templates/map.html:210
 msgid "Embed on your site"
 msgstr "Intégrer sur votre site"
@@ -680,7 +680,7 @@ msgstr "Nouvelle Valeur"
 msgid "New facility"
 msgstr "Une nouvelle installation"
 
-#. Button to go to main page of resource finder sans iframe
+#. Link text to go to main page of resource finder sans iframe
 #: templates/map.html:202
 msgid "New window"
 msgstr "Fenêtre externe"

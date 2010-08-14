@@ -45,7 +45,7 @@ class Main(utils.Handler):
         center = None
         if self.params.lat is not None and self.params.lon is not None:
             center = {'lat': self.params.lat, 'lon': self.params.lon}
-        home_url = self.get_url('/')
+        home_url = self.get_url('/?lang=%s' % self.params.lang)
         settings_url = self.get_url('/settings')
         login_add_url = users.create_login_url(
             self.get_url('/', add_new='yes'))
