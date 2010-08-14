@@ -191,7 +191,7 @@ class Bubble(Handler):
                          embed='yes'))
         settings_url = self.get_url('/settings')
         frequency = self.account and self.account.default_frequency or 'instant'
-        admin = access.check_action_permitted(
+        purge_permitted = access.check_action_permitted(
             self.account, self.subdomain, 'purge')
 
         html = self.render_to_string(
@@ -208,7 +208,7 @@ class Bubble(Handler):
             special=special,
             general=general,
             details=details,
-            admin=admin)
+            purge_permitted=purge_permitted)
         json = to_minimal_subject_jobject(self.subdomain, subject)
 
         self.response.headers['Content-Type'] = "application/json"

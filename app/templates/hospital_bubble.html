@@ -41,9 +41,9 @@
           {% trans "Subscribe to email updates" %}
         {% endif %}
       </a>
-      {% if admin %}
+      {% if purge_permitted %}
         <span class="sep">|</span>
-        <a id='admin-delete' style="color: #f00;" href="#" onclick="purge_subject('{{subdomain}}',
+        <a id='purge-delete' style="color: #f00;" href="#" onclick="purge_subject('{{subdomain}}',
           '{{subject_name|escape}}');"><b>Delete Permanently (ADMIN ONLY)</b></a>
       {% endif %}
     {% else %}

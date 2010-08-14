@@ -248,7 +248,7 @@ class MainTestCase(SeleniumTestCase):
         assert not self.is_text_present(
             'Note: This facility has been marked closed')
 
-    def test_admin_delete(self):
+    def test_purge_delete(self):
         # Login to main page
         self.set_default_permissions(['*:view'])
         self.delete_account()
@@ -271,5 +271,5 @@ class MainTestCase(SeleniumTestCase):
         assert self.is_text_present('Delete Permanently')
 
         # Click delete button. Make sure facility is actually gone.
-        self.click('id=admin-delete')
+        self.click('id=purge-delete')
         assert len(model.Subject.all().fetch(4)) == 3
