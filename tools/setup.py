@@ -50,6 +50,7 @@ def setup_subject_types():
               'MORTUARY_SERVICES']),
         attr('str', 'contact_name'),
         attr('str', 'phone'),
+        attr('str', 'mobile'),
         attr('str', 'fax'),
         attr('str', 'email'),
         attr('str', 'department'),
@@ -117,12 +118,12 @@ def setup_subject_types():
         key_name='pakistan:hospital',
         attribute_names=['title', 'alt_title', 'id', 'alt_id', 'available_beds',
                          'total_beds', 'services', 'contact_name',
-                         'phone', 'fax', 'email', 'administrative_area',
-                         'sub_administrative_area', 'locality', 'address',
-                         'location', 'maps_link', 'organization',
-                         'organization_type', 'category', 'construction',
-                         'damage', 'operational_status', 'alert_status',
-                         'comments', 'reachable_by_road',
+                         'phone', 'mobile', 'fax', 'email',
+                         'administrative_area', 'sub_administrative_area',
+                         'locality', 'address', 'location', 'maps_link',
+                         'organization', 'organization_type', 'category',
+                         'construction', 'damage', 'operational_status',
+                         'alert_status', 'comments', 'reachable_by_road',
                          'can_pick_up_patients'],
         minimal_attribute_names=['title', 'id', 'alt_id', 'available_beds',
                                  'total_beds', 'services', 'contact_name',
@@ -170,6 +171,8 @@ def setup_messages():
         name_message('contact_name', en='Contact name'),
         #i18n: telephone number
         name_message('phone', en='Phone'),
+        #i18n: mobile phone number
+        name_message('mobile', en='Mobile'),
         #i18n: fax number
         name_message('fax', en='Fax'),
         #i18n: E-mail address
