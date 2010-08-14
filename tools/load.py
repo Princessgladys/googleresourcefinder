@@ -68,7 +68,7 @@ class ValueInfo:
       return 'ValueInfo(%r, observed=%r, comment=%r)' % (
           self.value, self.observed, self.comment)
 
-def convert_paho_record(index, record):
+def convert_paho_record(record):
     """Converts a dictionary of values from one row of a PAHO CSV file
     into a dictionary of ValueInfo objects for our datastore."""
 
@@ -128,7 +128,7 @@ def convert_paho_record(index, record):
         'sante_id': ValueInfo(record['SanteID'])
     }
 
-def convert_shoreland_record(index, record):
+def convert_shoreland_record(record):
     """Converts a dictionary of values from one row of a Shoreland CSV file
     into a dictionary of ValueInfo objects for our datastore."""
     title = record['facility_name'].strip()
@@ -250,7 +250,7 @@ def convert_shoreland_record(index, record):
         'sante_id': ValueInfo(record.get('sante_id'))
     }
 
-def convert_pakistan_record(index, record):
+def convert_pakistan_record(record):
     """Converts a dictionary of values from one placemark of a Mapmaker-
     exported KML file into a dictionary of ValueInfo objects for our
     datastore."""
@@ -264,7 +264,6 @@ def convert_pakistan_record(index, record):
         line = line.strip()
         match = CDATA_PATTERN.match(line)
         if match:
-            add_to_comment = True
             key = match.group(1)
             value = match.group(2)
             if key == 'ID':
@@ -277,34 +276,24 @@ def convert_pakistan_record(index, record):
                 record['id'] = int_id_parts[1]
                 record['maps_link'] = ('http://www.google.com/mapmaker?q=' +
                                        ':'.join(int_id_parts))
-                add_to_comment = False
             if key == 'NAME1':
                 title = value
-                add_to_comment = False
             if key == 'TYPE' or key == 'ETYPE':
                 type = value
             elif key == 'LANGNAME':
                 record['alt_title'] = value
             elif key == 'PHONE':
                 record['phone'] = value
-                add_to_comment = False
             elif key == 'MOBILE':
                 record['mobile'] = value
-                add_to_comment = False
             elif key == 'FAX':
                 record['fax'] = value
-                add_to_comment = False
             elif key == 'EMAIL':
                 record['email'] = value
-                add_to_comment = False
             elif key == 'ADDRESS':
                 record['address'] = value
-                add_to_comment = False
             elif key == 'DESCRIPTIO':
                 description = value
-                add_to_comment = False
-            elif key in ['LANG1', 'CENTERTYPE', 'CNTRYCODE']:
-                add_to_comment = False
             elif value in PAKISTAN_ADMIN_AREAS:
                 if value == 'North West Frontier':
                     # Officially renamed;
@@ -313,7 +302,9 @@ def convert_pakistan_record(index, record):
                 record['admin_area'] = value
             elif value in PAKISTAN_DISTRICTS:
                 record['sub_admin_area'] = value
-            if add_to_comment:
+            if key not in ['ADDRESS', 'CENTERTYPE', 'CNTRYCODE', 'DESCRIPTIO',
+                           'EMAIL', 'FAX', 'ID', 'LANG1', 'LANGNAME', 'MOBILE',
+                           'NAME1', 'PHONE']:
                 comments.append('%s: %s' % (key, value))
 
     if not record.get('id'):
@@ -423,8 +414,7 @@ def load(
         for key in record:
             if record[key] is None or type(record[key]) is str:
                 record[key] = (record[key] or '').decode('utf-8')
-        subject_name, observed, value_infos = record_converter(
-            len(subjects) + 1, record)
+        subject_name, observed, value_infos = record_converter(record)
         if not subject_name:  # if converter returned None, skip this record
             continue
         observed = observed or default_observed
