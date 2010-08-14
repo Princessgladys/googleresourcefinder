@@ -407,12 +407,12 @@ msgid "Field"
 msgstr ""
 
 #. Facility operational status: as functional as a field hospital
-#: ../tools/setup.py:272
+#: ../tools/setup.py:275
 msgid "Field hospital"
 msgstr ""
 
 #. Facility operational status: as functional as a field hospital next to a hospital
-#: ../tools/setup.py:275
+#: ../tools/setup.py:278
 msgid "Field hospital co-located with hospital"
 msgstr ""
 
@@ -624,6 +624,11 @@ msgstr ""
 #. Type of organization: Organization with mixed function
 #: ../tools/setup.py:230
 msgid "Mixed"
+msgstr ""
+
+#. mobile phone number
+#: ../tools/setup.py:175
+msgid "Mobile"
 msgstr ""
 
 #. Category of health facility: A mobile clinic.

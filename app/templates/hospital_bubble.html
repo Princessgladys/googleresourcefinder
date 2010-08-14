@@ -55,14 +55,18 @@
   </span>
   <h2>
     {% block ids %}
-      {% comment %}
-      #i18n: Proper name of an ID for a health facility
-      {% endcomment %}
-      {% trans "ID" %}: {{special.id.value|escape}} &#xb7;
-      {% comment %}
-      #i18n: Proper name of an alternate ID for a health facility
-      {% endcomment %}
-      {% trans "Alternate ID" %}: {{special.alt_id.value|escape}}
+      {% if special.id.raw %}
+        {% comment %}
+        #i18n: Proper name of an ID for a health facility
+        {% endcomment %}
+        {% trans "ID" %}: {{special.id.value|escape}} &#xb7;
+      {% endif %}
+      {% if special.alt_id.raw %}
+        {% comment %}
+        #i18n: Proper name of an alternate ID for a health facility
+        {% endcomment %}
+        {% trans "Alternate ID" %}: {{special.alt_id.value|escape}}
+      {% endif %}
       {% if special.maps_link.raw %}
         <a target="_blank" href="{{special.maps_link.value|escape}}">
         {% comment %}
