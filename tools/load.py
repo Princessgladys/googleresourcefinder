@@ -269,11 +269,14 @@ def convert_pakistan_record(index, record):
             value = match.group(2)
             if key == 'ID':
                 # ID is given as a pair of colon-separated hex strings
-                # It is more common externally to see a pair of
-                # colon-separated base-10 strings, so convert to that
+                # Only the second part is stable. It is more common externally
+                # to see base-10 ids, so convert. Finally, the mapmaker URL
+                # needs both parts.
                 id_parts = value.split(':')
-                value = ':'.join(str(int(part, 16)) for part in id_parts)
-                record['id'] = value
+                int_id_parts = list(str(int(part, 16)) for part in id_parts)
+                record['id'] = int_id_parts[1]
+                record['maps_link'] = ('http://www.google.com/mapmaker?q=' +
+                                       ':'.join(int_id_parts))
                 add_to_comment = False
             if key == 'NAME1':
                 title = value
@@ -340,8 +343,6 @@ def convert_pakistan_record(index, record):
         comments.insert(0, description)
 
     subject_name = 'mapmaker.google.com/fid/' + record['id']
-
-    record['maps_link'] = 'http://www.google.com/mapmaker?q=' + record['id']
 
     title_lower = title.lower()
     if type == 'TYPE_HOSPITAL' or 'hospital' in title_lower:
@@ -558,7 +559,7 @@ def fix_batool():
     out the mapmaker data.
     TODO(shakusa) Delete this method when we're done with it."""
     subject_type = SubjectType.get('pakistan', 'hospital')
-    key_name = 'pakistan:mapmaker.google.com/fid/4518024830261538435:4414990288838998487'
+    key_name = 'pakistan:mapmaker.google.com/fid/4414990288838998487'
     observed = parse_datetime('2010-08-13 19:58:25')
     source = 'http://pakistan.resource-finder.appspot.com'
     author = users.User('mustafasaboor@gmail.com')
