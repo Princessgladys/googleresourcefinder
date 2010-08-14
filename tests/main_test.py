@@ -114,11 +114,11 @@ class MainTestCase(SeleniumTestCase):
         assert self.is_visible('link=View Master List archive')
 
         # Check pop out button not here
-        assert not self.is_text_present('Pop out')
+        assert not self.is_text_present('New window')
 
         # Re-open page with iframe param set to yes and check again
         self.open_path('/?subdomain=haiti&iframe=yes')
-        assert self.is_text_present('Pop out')
+        assert self.is_text_present('New window')
 
         # Check the add facility button
         map_control = '//div[@class="new-subject-map-control-ui"]'
@@ -245,3 +245,18 @@ class MainTestCase(SeleniumTestCase):
         self.wait_for_element(self.bubble_xpath)
         assert not self.is_text_present(
             'Note: This facility has been marked closed')
+
+    def test_embed_link(self):
+        # Login and wait for page to load
+        self.open_path('/?subdomain=haiti')
+        self.wait_for_element('subject-3')
+
+        # Make sure that embed link is present
+        assert self.is_text_present('Embed on your site')
+        self.click_and_wait_for_new_window('embed-rf')
+
+        # Verify that this looks like the embed window
+        params = self.get_location().split('/')[-1]
+        location = params.split('?')[0]
+        assert location == 'embed'
+        assert self.is_text_present('Embedding the Application')

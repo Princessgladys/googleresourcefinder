@@ -351,12 +351,12 @@ msgstr "ای میل رکنیت کی ترتیبات"
 msgid "Email format:"
 msgstr "ای میل کی شکل:"
 
-#. Button to a "how to embed" page
+#. Link text to a "how to embed" page
 #: templates/map.html:210
 msgid "Embed"
 msgstr "Embed"
 
-#. Button to a "how to embed" page
+#. Link text to a "how to embed" page
 #: templates/map.html:210
 msgid "Embed on your site"
 msgstr "اس ٹول کواپنی ساءٹ میں embed کریں"
@@ -681,7 +681,7 @@ msgstr "نئی قدر"
 msgid "New facility"
 msgstr "نئی سہول"
 
-#. Button to go to main page of resource finder sans iframe
+#. Link text to go to main page of resource finder sans iframe
 #: templates/map.html:202
 msgid "New window"
 msgstr "باہر نکالیں"
