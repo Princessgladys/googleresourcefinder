@@ -18,6 +18,8 @@ import csv
 import datetime
 import logging
 import re
+import zipfile
+from StringIO import StringIO
 
 import kml
 import setup
@@ -66,7 +68,7 @@ class ValueInfo:
       return 'ValueInfo(%r, observed=%r, comment=%r)' % (
           self.value, self.observed, self.comment)
 
-def convert_paho_record(index, record):
+def convert_paho_record(record):
     """Converts a dictionary of values from one row of a PAHO CSV file
     into a dictionary of ValueInfo objects for our datastore."""
 
@@ -126,7 +128,7 @@ def convert_paho_record(index, record):
         'sante_id': ValueInfo(record['SanteID'])
     }
 
-def convert_shoreland_record(index, record):
+def convert_shoreland_record(record):
     """Converts a dictionary of values from one row of a Shoreland CSV file
     into a dictionary of ValueInfo objects for our datastore."""
     title = record['facility_name'].strip()
@@ -248,26 +250,14 @@ def convert_shoreland_record(index, record):
         'sante_id': ValueInfo(record.get('sante_id'))
     }
 
-def convert_pakistan_record(index, record):
+def convert_pakistan_record(record):
     """Converts a dictionary of values from one placemark of a Mapmaker-
     exported KML file into a dictionary of ValueInfo objects for our
     datastore."""
-    if not record.get('title', '').strip():
-        logging.warn('Skipping %r: No title' % record)
-        return None, None, None
 
-    title = record['title'].strip()
-
-    try:
-        latitude = float(record['location'][1])
-        longitude = float(record['location'][0])
-        location = db.GeoPt(latitude, longitude)
-    except (KeyError, ValueError):
-        logging.warn('No location for %r: %r' % (title, record.get('location')))
-        location = None
-    observed = None
-
+    title = ''
     type = ''
+    description = ''
     comments = []
     CDATA_PATTERN = re.compile(r'<b>(.*):</b> <i>(.*)</i>.*')
     for line in record.get('comment', '').strip().split('\n'):
@@ -278,17 +268,32 @@ def convert_pakistan_record(index, record):
             value = match.group(2)
             if key == 'ID':
                 # ID is given as a pair of colon-separated hex strings
-                # It is more common externally to see a pair of
-                # colon-separated base-10 strings, so convert to that
+                # Only the second part is stable. It is more common externally
+                # to see base-10 ids, so convert. Finally, the mapmaker URL
+                # needs both parts.
                 id_parts = value.split(':')
-                value = ':'.join(str(int(part, 16)) for part in id_parts)
-                record['id'] = value
-            if key == 'TYPE':
+                int_id_parts = list(str(int(part, 16)) for part in id_parts)
+                record['id'] = int_id_parts[1]
+                record['maps_link'] = ('http://www.google.com/mapmaker?q=' +
+                                       ':'.join(int_id_parts))
+            if key == 'NAME1':
+                title = value
+            if key == 'TYPE' or key == 'ETYPE':
                 type = value
             elif key == 'LANGNAME':
                 record['alt_title'] = value
+            elif key == 'PHONE':
+                record['phone'] = value
+            elif key == 'MOBILE':
+                record['mobile'] = value
+            elif key == 'FAX':
+                record['fax'] = value
+            elif key == 'EMAIL':
+                record['email'] = value
             elif key == 'ADDRESS':
                 record['address'] = value
+            elif key == 'DESCRIPTIO':
+                description = value
             elif value in PAKISTAN_ADMIN_AREAS:
                 if value == 'North West Frontier':
                     # Officially renamed;
@@ -297,20 +302,38 @@ def convert_pakistan_record(index, record):
                 record['admin_area'] = value
             elif value in PAKISTAN_DISTRICTS:
                 record['sub_admin_area'] = value
-            comments.append('%s: %s' % (key, value))
+            if key not in ['ADDRESS', 'CENTERTYPE', 'CNTRYCODE', 'DESCRIPTIO',
+                           'EMAIL', 'FAX', 'ID', 'LANG1', 'LANGNAME', 'MOBILE',
+                           'NAME1', 'PHONE']:
+                comments.append('%s: %s' % (key, value))
 
     if not record.get('id'):
-        logging.warn('Skipping %r: No ID' % record)
+        logging.warn('SKIPPING, NO ID: %r' % record)
         return None, None, None
+
+    try:
+        latitude = float(record['location'][1])
+        longitude = float(record['location'][0])
+        location = db.GeoPt(latitude, longitude)
+    except (KeyError, ValueError):
+        logging.warn('No location for %r' % record)
+        location = None
 
     if not (point_inside_polygon(
         {'lat': latitude, 'lon': longitude}, PAKISTAN_FLOOD_POLYGON) or
         record.get('sub_admin_area', '') in PAKISTAN_FLOOD_DISTRICTS):
         return None, None, None
 
-    subject_name = 'mapmaker.google.com/fid/' + record['id']
+    title = title or record.get('title', '').strip()
+    if not title:
+        logging.warn('SKIPPING, NO TITLE: %r' % record)
+        return None, None, None
 
-    record['maps_link'] = 'http://www.google.com/mapmaker?q=' + record['id']
+    if description:
+        # Make sure it's the first comment
+        comments.insert(0, description)
+
+    subject_name = 'mapmaker.google.com/fid/' + record['id']
 
     title_lower = title.lower()
     if type == 'TYPE_HOSPITAL' or 'hospital' in title_lower:
@@ -322,6 +345,7 @@ def convert_pakistan_record(index, record):
     elif 'dispensary' in title_lower:
         record['category'] = 'DISPENSARY'
 
+    observed = None
     return subject_name, observed, {
         'id': ValueInfo(record['id']),
         'title': ValueInfo(title),
@@ -332,6 +356,10 @@ def convert_pakistan_record(index, record):
         'locality': ValueInfo(record.get('locality', '')),
         'location': ValueInfo(location),
         'maps_link': ValueInfo(record['maps_link']),
+        'phone': ValueInfo(record.get('phone', '')),
+        'mobile': ValueInfo(record.get('mobile', '')),
+        'fax': ValueInfo(record.get('fax', '')),
+        'email': ValueInfo(record.get('email', '')),
         'category': ValueInfo(record.get('category', '')),
         'comments': ValueInfo(db.Text('\n'.join(comments))),
     }
@@ -370,9 +398,15 @@ def load(
     # Store the raw file contents in a Dump.
     Dump(source=source_url, data=open(filename, 'rb').read()).put()
 
+    if filename.endswith('zip'):
+        archive = zipfile.ZipFile(filename, 'r')
+        file = StringIO(archive.read(archive.namelist()[0]))
+    else:
+        file = open(filename)
+
     subject_type = SubjectType.get(subdomain, subject_type_name)
     count = 0
-    for record in record_reader(open(filename)):
+    for record in record_reader(file):
         if limit and count >= limit:
             break
         count += 1
@@ -380,8 +414,7 @@ def load(
         for key in record:
             if record[key] is None or type(record[key]) is str:
                 record[key] = (record[key] or '').decode('utf-8')
-        subject_name, observed, value_infos = record_converter(
-            len(subjects) + 1, record)
+        subject_name, observed, value_infos = record_converter(record)
         if not subject_name:  # if converter returned None, skip this record
             continue
         observed = observed or default_observed
@@ -490,3 +523,76 @@ def load_pakistan_kml(filename, observed):
     load(filename, kml.parse_file, convert_pakistan_record, 'pakistan',
          'hospital', PAKISTAN_URL, observed, user, PAKISTAN_NICKNAME,
          PAKISTAN_AFFILIATION)
+
+def delete_pakistan_kml():
+    """Deletes Reports, MinimalSubjects, and Subjects created by
+    load_pakistan_kml()."""
+    prefix = 'pakistan:mapmaker'
+    subjects = filter_by_prefix(Subject.all(keys_only=True), prefix)
+    minimal_subjects = filter_by_prefix(MinimalSubject.all(keys_only=True),
+                                        prefix, 'Subject')
+    reports = Report.all(keys_only=True).filter('source =', PAKISTAN_URL)
+    queries = {'Report': reports,
+               'Subject': subjects,
+               'MinimalSubject': minimal_subjects}
+
+    for kind, query in queries.items():
+        keys = query.fetch(200)
+        while keys:
+            logging.info('%s: deleting %d...' % (kind, len(keys)))
+            db.delete(keys)
+            keys = query.fetch(200)
+
+
+def fix_batool():
+    """HACK to fix up an entry that was edited via the UI before we switched
+    out the mapmaker data.
+    TODO(shakusa) Delete this method when we're done with it."""
+    subject_type = SubjectType.get('pakistan', 'hospital')
+    key_name = 'pakistan:mapmaker.google.com/fid/4414990288838998487'
+    observed = parse_datetime('2010-08-13 19:58:25')
+    source = 'http://pakistan.resource-finder.appspot.com'
+    author = users.User('mustafasaboor@gmail.com')
+    author_nickname = 'Mustafa Saboor'
+    author_affiliation = 'Owner'
+
+    subject=Subject.get_by_key_name(key_name)
+    minimal_subject = MinimalSubject.get_by_subject(subject)
+    report = Report(
+        subject,
+        arrived=observed,
+        source=source,
+        author=author,
+        observed=observed)
+
+    value_infos = {
+        'total_beds': ValueInfo(22),
+        'services': ValueInfo(['GENERAL_SURGERY', 'ORTHOPEDICS',
+                               'INTERNAL_MEDICINE', 'INFECTIOUS_DISEASE',
+                               'PEDIATRICS', 'POSTOPERATIVE_CARE',
+                               'OBSTETRICS_GYNECOLOGY', 'LAB', 'X_RAY',
+                               'BLOOD_BANK']),
+        'contact_name': ValueInfo('Reception'),
+        'phone': ValueInfo('03212437003'),
+        'email': ValueInfo('mustafasaboor@gmail.com'),
+        'locality': ValueInfo('Gulistan-e-Iqbal'),
+        'organization': ValueInfo('BGH'),
+        'construction': ValueInfo('REINFORCED_CONCRETE'),
+        'operational_status': ValueInfo('OPERATIONAL'),
+        'reachable_by_road': ValueInfo(True),
+        'can_pick_up_patients': ValueInfo(False),
+    }
+
+    for (name, info) in value_infos.items():
+        if not info.value and info.value != 0:
+            continue
+
+        subject.set_attribute(name, info.value, observed, author,
+                              author_nickname, author_affiliation,
+                              info.comment)
+        report.set_attribute(name, info.value, info.comment)
+        if name in subject_type.minimal_attribute_names:
+            minimal_subject.set_attribute(name, info.value)
+    subject.put()
+    minimal_subject.put()
+    report.put()

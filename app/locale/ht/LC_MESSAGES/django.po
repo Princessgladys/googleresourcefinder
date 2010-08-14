@@ -626,6 +626,11 @@ msgstr "Militè"
 msgid "Mixed"
 msgstr "Etabisman Miks"
 
+#. mobile phone number
+#: ../tools/setup.py:175
+msgid "Mobile"
+msgstr "Mobil"
+
 #. Category of health facility: A mobile clinic.
 #: ../tools/setup.py:248
 msgid "Mobile clinic"
