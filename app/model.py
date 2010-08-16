@@ -144,6 +144,12 @@ class Subject(SubdomainMixin, db.Expando):
     def get_stored_name(attribute_name):
         return '%s__' % attribute_name
 
+    @classmethod
+    def delete_complete(cls, subject): 
+        if subject:
+            minimal_subject = MinimalSubject.get_by_subject(subject)
+            db.delete([subject, minimal_subject])
+
     def has_value(self, attribute_name):
         """Returns the value of the Attribute with the given key_name,
            or default if it does not exist."""
