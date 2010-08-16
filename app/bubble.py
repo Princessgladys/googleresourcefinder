@@ -14,6 +14,7 @@
 
 """Handler for dynamically loading a bubble with attributes from a subject."""
 
+import access
 import cache
 import datetime
 import logging
@@ -190,6 +191,8 @@ class Bubble(Handler):
                          embed='yes'))
         settings_url = self.get_url('/settings')
         frequency = self.account and self.account.default_frequency or 'instant'
+        purge_permitted = access.check_action_permitted(
+            self.account, self.subdomain, 'purge')
 
         html = self.render_to_string(
             value_info_extractor.template_name,
@@ -204,7 +207,8 @@ class Bubble(Handler):
             last_updated=max(detail.date for detail in details),
             special=special,
             general=general,
-            details=details)
+            details=details,
+            purge_permitted=purge_permitted)
         json = to_minimal_subject_jobject(self.subdomain, subject)
 
         self.response.headers['Content-Type'] = "application/json"

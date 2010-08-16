@@ -42,7 +42,7 @@ from google.appengine.ext.webapp.mail_handlers import InboundMailHandler
 import cache
 import model
 import utils
-from utils import db, format, order_and_format_updates, split_key_name
+from utils import db, format, order_and_format_updates
 
 STOP_DELIMITER = '--- --- --- ---'
 
@@ -59,7 +59,8 @@ def update_subject(subject, observed, account, source_url, values, comments={},
 
     # SubjectType and Attribute entities are in separate entity groups from
     # the Subject, so we have to obtain them outside of the transaction.
-    subdomain, subject_name = split_key_name(subject)
+    subdomain = subject.get_subdomain()
+    subject_name = subject.get_name()
     subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
     minimal_attribute_names = subject_type.minimal_attribute_names
     editable_attributes = []
@@ -288,7 +289,7 @@ class MailEditor(InboundMailHandler):
                         ambiguity = len(subjects) != 1
                     else:
                         continue
-                subdomain = split_key_name(subject)[0]
+                subdomain = subject.get_subdomain()
                 subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
                 unsupported = UNSUPPORTED_ATTRIBUTES[subdomain][subject.type]
                 stop = False
@@ -375,7 +376,7 @@ class MailEditor(InboundMailHandler):
         formatted_updates = []
         for update in updates:
             subject, update_data = update
-            subdomain = split_key_name(subject)[0]
+            subdomain = subject.get_subdomain()
             subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
             formatted_updates.append({
                 'subject_title': subject.get_value('title'),
