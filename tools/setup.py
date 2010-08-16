@@ -436,7 +436,7 @@ def add_account(email='test@example.com', description=None,
                 nickname=None, affiliation=None,
                 actions=['*:view', '*:edit'], locale='en',
                 default_frequency='instant',
-                email_format='html'):
+                email_format='plain'):
     """Adds an Account entity to the datastore."""
     Account(email=email, description=description or email,
             nickname=nickname or email.split('@')[0],

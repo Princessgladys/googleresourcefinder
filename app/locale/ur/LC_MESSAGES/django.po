@@ -692,7 +692,7 @@ msgid "New window"
 msgstr "باہر نکالیں"
 
 #. Form option for a false Boolean value
-#: edit.py:177 utils_test.py:321 utils.py:339
+#: edit.py:177 utils_test.py:321 utils.py:340
 msgid "No"
 msgstr "نہیں"
 
@@ -793,7 +793,7 @@ msgid "Postoperative Care"
 msgstr "آپریشن کے بعد کی نگہداشت"
 
 #. old value for the attribute
-#: mail_alerts.py:255
+#: mail_alerts.py:242
 msgid "Previous value"
 msgstr "سابق قدر"
 
@@ -846,12 +846,12 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "%(action)s  بننے کی درخواست مسترد ہوگئی تھی۔"
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35
+#: templates/subdomain_menu.html.py:35 templates/hospital_email.html:234
 msgid "Resource Finder"
 msgstr "ذرائع کی تلاش"
 
 #. subject of e-mail -> Resource Finder Update
-#: mail_alerts.py:78
+#: mail_alerts.py:76
 msgid "Resource Finder %s Update"
 msgstr "ریسورس تلاش %s کی خبر"
 
@@ -971,7 +971,7 @@ msgid "URL:"
 msgstr "URL:"
 
 #. Error message
-#: utils.py:143
+#: utils.py:144
 msgid "Unauthorized user."
 msgstr "غیر مجاز صارف۔"
 
@@ -1011,7 +1011,7 @@ msgid "Updated"
 msgstr "تجدید شدہ"
 
 #. who the attribute was updated by
-#: mail_alerts.py:258
+#: mail_alerts.py:245
 msgid "Updated by"
 msgstr "ترمیم کنندہ"
 
@@ -1061,7 +1061,7 @@ msgid "X-Ray"
 msgstr "ایکسرے"
 
 #. Form option for a true Boolean value
-#: utils_test.py:320 edit.py:175 utils.py:339
+#: utils_test.py:320 edit.py:175 utils.py:340
 msgid "Yes"
 msgstr "ہاں"
 

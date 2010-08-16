@@ -120,3 +120,8 @@ handlers:
   script: refresh_json_cache.py
   login: admin
 
+# Incoming mail handlers.
+
+- url: /_ah/mail/updates@resource-finder.appspotmail.com
+  script: mail_editor.py
+

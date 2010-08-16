@@ -692,7 +692,7 @@ msgid "New window"
 msgstr "Ventana externa"
 
 #. Form option for a false Boolean value
-#: edit.py:177 utils_test.py:321 utils.py:339
+#: edit.py:177 utils_test.py:321 utils.py:340
 msgid "No"
 msgstr "No"
 
@@ -793,7 +793,7 @@ msgid "Postoperative Care"
 msgstr "Cuidados Posoperatorios"
 
 #. old value for the attribute
-#: mail_alerts.py:255
+#: mail_alerts.py:242
 msgid "Previous value"
 msgstr "Valor anterior"
 
@@ -846,12 +846,12 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "La solicitud para ser %(role)s se denegó."
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35
+#: templates/subdomain_menu.html.py:35 templates/hospital_email.html:234
 msgid "Resource Finder"
 msgstr "Localizador de recursos"
 
 #. subject of e-mail -> Resource Finder Update
-#: mail_alerts.py:78
+#: mail_alerts.py:76
 msgid "Resource Finder %s Update"
 msgstr "Localizador de recursos"
 
@@ -971,7 +971,7 @@ msgid "URL:"
 msgstr "URL:"
 
 #. Error message
-#: utils.py:143
+#: utils.py:144
 msgid "Unauthorized user."
 msgstr "Sin autorización del usuario"
 
@@ -1011,7 +1011,7 @@ msgid "Updated"
 msgstr "Actualizado"
 
 #. who the attribute was updated by
-#: mail_alerts.py:258
+#: mail_alerts.py:245
 msgid "Updated by"
 msgstr "Actualizado"
 
@@ -1061,7 +1061,7 @@ msgid "X-Ray"
 msgstr "Rayos X"
 
 #. Form option for a true Boolean value
-#: utils_test.py:320 edit.py:175 utils.py:339
+#: utils_test.py:320 edit.py:175 utils.py:340
 msgid "Yes"
 msgstr "Sí"
 
