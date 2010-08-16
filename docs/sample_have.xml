@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<have:HospitalStatus
+    xmlns:gml="http://opengis.net/gml"
+    xmlns:have="urn:oasis:names:tc:emergency:EDXL:HAVE:1.0"
+    xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3">
+  <have:Hospital>
+    <have:OrganizationInformation>
+      <xnl:OrganisationName>
+        <xnl:NameElement>Foo Hospital</xnl:NameElement>
+      </xnl:OrganisationName>
+    </have:OrganizationInformation>
+    <have:OrganizationGeoLocation>
+      <gml:Point>
+        <gml:pos>45.256 -71.92</gml:pos>
+      </gml:Point>
+    </have:OrganizationGeoLocation>
+    <have:LastUpdateTime>2010-03-12T12:12:12Z</have:LastUpdateTime>
+  </have:Hospital>
+</have:HospitalStatus>
