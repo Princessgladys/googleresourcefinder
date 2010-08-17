@@ -208,10 +208,10 @@ class EmailFormatter:
         self.locale = account.locale
 
     def format_body(self, data):
-        if self.email_format == 'plain':
-            return self.format_plain_body(data)
-        else:
+        if self.email_format == 'html':
             return self.format_html_body(data)
+        else:
+            return self.format_plain_body(data)
 
     def format_plain_body(self, data):
         """Forms the plain text body for an e-mail. Expects the data to be input
@@ -228,12 +228,11 @@ class EmailFormatter:
         for subject_name in data.changed_subjects:
             (subject_title, updates) = data.changed_subjects[subject_name]
             subject = Subject.get_by_key_name(subject_name)
-            subdomain = subject_name.split(':')[0]
+            subdomain = subject.get_subdomain()
             subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
             updates = order_and_format_updates(updates, subject_type,
                                                self.locale, format_update)
-            body += 'UPDATE %s (%s %s)\n\n' % (subject_title, subdomain,
-                                             subject.get_value('healthc_id'))
+            body += 'UPDATE %s (%s)\n\n' % (subject_title, subject.key().name())
             for update in updates:
                 body += '%s %s\n-- %s: %s. %s: %s\n' % (
                     update['attribute'],

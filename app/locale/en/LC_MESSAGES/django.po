@@ -793,7 +793,7 @@ msgid "Postoperative Care"
 msgstr ""
 
 #. old value for the attribute
-#: mail_alerts.py:242
+#: mail_alerts.py:241
 msgid "Previous value"
 msgstr ""
 
@@ -1011,7 +1011,7 @@ msgid "Updated"
 msgstr ""
 
 #. who the attribute was updated by
-#: mail_alerts.py:245
+#: mail_alerts.py:244
 msgid "Updated by"
 msgstr ""
 
