@@ -214,20 +214,8 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         """Clicks a link that is supposed to open a new window, waits for the
         new window to load, and switches to the new window for subsequent
         Selenium commands."""
-        # Selenium can't detect new windows opened via target="_blank".  Our
-        # workaround for testing is to open a window before clicking the link
-        # and change the link to target our prepared window.
-        self.window_count = getattr(self, 'window_count', 0) + 1
-        window_id = 'window_%d' % self.window_count  # a new unique window ID
-        self.open_window('about:blank', window_id)
-
-        # Open the link in the new window.
-        self.run_script(
-            'document.getElementById(%r).target=%r' % (link_id, window_id))
-        self.click('id=' + link_id)
-
-        # Wait for the new window to finish loading.
-        self.select_window(window_id)
+        self.click('id=%s' % link_id)
+        self.select_window('_blank')
         self.wait_for_load()
 
     def is_not_visible(self, locator):
