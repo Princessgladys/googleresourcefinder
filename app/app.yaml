@@ -79,7 +79,7 @@ handlers:
 - url: /privacy
   script: privacy.py
 
-- url: /help
+- url: /help.*
   script: help.py
 
 - url: /embed
@@ -119,4 +119,9 @@ handlers:
 - url: /refresh_json_cache
   script: refresh_json_cache.py
   login: admin
+
+# Incoming mail handlers.
+
+- url: /_ah/mail/updates@resource-finder.appspotmail.com
+  script: mail_editor.py
 

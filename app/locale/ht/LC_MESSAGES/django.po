@@ -692,7 +692,7 @@ msgid "New window"
 msgstr "Deyò fenèt"
 
 #. Form option for a false Boolean value
-#: edit.py:177 utils_test.py:321 utils.py:339
+#: edit.py:177 utils_test.py:321 utils.py:340
 msgid "No"
 msgstr "Pa dakò"
 
@@ -793,7 +793,7 @@ msgid "Postoperative Care"
 msgstr "Swen Aprè Operasyon"
 
 #. old value for the attribute
-#: mail_alerts.py:255
+#: mail_alerts.py:241
 msgid "Previous value"
 msgstr "Anvan valè"
 
@@ -846,12 +846,12 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "Rekèt pou %(role)s la refise"
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35
+#: templates/subdomain_menu.html.py:35 templates/hospital_email.html:234
 msgid "Resource Finder"
 msgstr "Chèche resous"
 
 #. subject of e-mail -> Resource Finder Update
-#: mail_alerts.py:78
+#: mail_alerts.py:76
 msgid "Resource Finder %s Update"
 msgstr "Chèche resous"
 
@@ -971,7 +971,7 @@ msgid "URL:"
 msgstr "Sit entenet"
 
 #. Error message
-#: utils.py:143
+#: utils.py:144
 msgid "Unauthorized user."
 msgstr "San otorizasyon User"
 
@@ -1011,7 +1011,7 @@ msgid "Updated"
 msgstr "Remete an fonksyon"
 
 #. who the attribute was updated by
-#: mail_alerts.py:258
+#: mail_alerts.py:244
 msgid "Updated by"
 msgstr "Remete an fonksyon"
 
@@ -1061,7 +1061,7 @@ msgid "X-Ray"
 msgstr "Reyon X"
 
 #. Form option for a true Boolean value
-#: utils_test.py:320 edit.py:175 utils.py:339
+#: utils_test.py:320 edit.py:175 utils.py:340
 msgid "Yes"
 msgstr "Wi"
 
