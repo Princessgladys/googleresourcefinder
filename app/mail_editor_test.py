@@ -212,6 +212,7 @@ class MailAlertsTest(MediumTestCase):
             body=SAMPLE_EMAIL_WORKING)
 
         mail_editor_ = mail_editor.MailEditor()
+        mail_editor_.email = 'test@example.com'
         assert mail_editor_.authenticate(message)
 
         db.delete(self.account)
@@ -224,14 +225,15 @@ class MailAlertsTest(MediumTestCase):
             sender=self.account.email,
             to='updates@resource-finder.appspotmail.com',
             subject='Resource Finder Updates',
-            html=SAMPLE_EMAIL_AUTHENTICATION)
+            body=SAMPLE_EMAIL_AUTHENTICATION)
         mail_editor_ = mail_editor.MailEditor()
+        mail_editor_.email = 'test@example.com'
         mail_editor_.account = None # is_authentication is always run after
                                     # authenticate, so it will always have
                                     # an account, though it may be None
         assert mail_editor_.is_authentication(message)
 
-        message.html=SAMPLE_EMAIL_WORKING
+        message.body=SAMPLE_EMAIL_WORKING
         assert not mail_editor_.is_authentication(message)
 
     def test_mail_editor_receive(self):
@@ -242,9 +244,11 @@ class MailAlertsTest(MediumTestCase):
             sender=self.account.email,
             to='updates@resource-finder.appspotmail.com',
             subject='Resource Finder Updates',
-            html=SAMPLE_EMAIL_WORKING,
+            body=SAMPLE_EMAIL_WORKING,
             date='Wed, 04 Aug 2010 13:07:18 -0400')
-        request = Struct(url='test/path', path='/path')
+        request = Struct(url='test/path', path='/path',
+                         headers={'Host': 'localhost:8080'},
+                         domain='localhost:8080')
         mail_editor_ = mail_editor.MailEditor()
         mail_editor_.request = request
 
@@ -255,7 +259,7 @@ class MailAlertsTest(MediumTestCase):
         self.check_for_correct_update(body, self.sent_messages[0])
 
         # check broken email
-        message.html = SAMPLE_EMAIL_BROKEN
+        message.body = SAMPLE_EMAIL_BROKEN
         mail_editor_.receive(message)
         body = self.sent_messages[1].textbody()
         assert len(self.sent_messages) == 2
@@ -266,14 +270,14 @@ class MailAlertsTest(MediumTestCase):
         assert 'REFERENCE DOCUMENT @' not in body
 
         # check working quoted email
-        message.html = SAMPLE_EMAIL_QUOTED
+        message.body = SAMPLE_EMAIL_QUOTED
         mail_editor_.receive(message)
         body = self.sent_messages[2].textbody()
         assert len(self.sent_messages) == 3
         self.check_for_correct_update(body, self.sent_messages[2])
 
         # check working mixed email. should ignore the error in the quoted area
-        message.html = SAMPLE_EMAIL_MIXED
+        message.body = SAMPLE_EMAIL_MIXED
         mail_editor_.receive(message)
         body = self.sent_messages[3].textbody()
         assert len(self.sent_messages) == 4
@@ -281,7 +285,7 @@ class MailAlertsTest(MediumTestCase):
 
         db.delete(self.account)
         # check working but not authenticated email
-        message.html = SAMPLE_EMAIL_WORKING
+        message.body = SAMPLE_EMAIL_WORKING
         mail_editor_.receive(message)
         body = self.sent_messages[4].textbody()
         assert len(self.sent_messages) == 5
@@ -292,7 +296,7 @@ class MailAlertsTest(MediumTestCase):
         assert not Account.all().get()
 
         # send it an authentication email
-        message.html = SAMPLE_EMAIL_AUTHENTICATION
+        message.body = SAMPLE_EMAIL_AUTHENTICATION
         mail_editor_.receive(message)
         body = self.sent_messages[5].textbody()
         assert Account.all().get()
@@ -312,7 +316,7 @@ class MailAlertsTest(MediumTestCase):
         self.check_for_correct_update(body, self.sent_messages[6])
 
         # check working email with stop delimeter
-        message.html = SAMPLE_EMAIL_STOP
+        message.body = SAMPLE_EMAIL_STOP
         mail_editor_.receive(message)
         body = self.sent_messages[7].textbody()
         assert len(self.sent_messages) == 8
@@ -325,7 +329,7 @@ class MailAlertsTest(MediumTestCase):
         assert 'Can pick up patients' not in body and 'yes' not in body
 
         # check email with multiple subjects
-        message.html = SAMPLE_EMAIL_MULTIPLE
+        message.body = SAMPLE_EMAIL_MULTIPLE
         mail_editor_.receive(message)
         body = self.sent_messages[8].textbody()
         assert len(self.sent_messages) == 9
@@ -335,7 +339,7 @@ class MailAlertsTest(MediumTestCase):
         assert 'Available beds' in body and '18' in body and '20' in body
 
         # check email with an ambiguous subject
-        message.html = SAMPLE_EMAIL_AMBIGUOUS
+        message.body = SAMPLE_EMAIL_AMBIGUOUS
         mail_editor_.receive(message)
         body = self.sent_messages[9].textbody()
         assert len(self.sent_messages) == 10
@@ -349,7 +353,7 @@ class MailAlertsTest(MediumTestCase):
         assert 'REFERENCE DOCUMENT @' not in body
 
         # check email with multiple same title'd facilities [and unique keys]
-        message.html = SAMPLE_EMAIL_AMBIGUOUS_DETAIL
+        message.body = SAMPLE_EMAIL_AMBIGUOUS_DETAIL
         mail_editor_.receive(message)
         body = self.sent_messages[10].textbody()
         assert len(self.sent_messages) == 11
@@ -364,7 +368,8 @@ class MailAlertsTest(MediumTestCase):
         mail_editor_ = mail_editor.MailEditor()
 
         # check working email body
-        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_WORKING)
+        updates, errors, ambiguities = mail_editor_.process_email(
+            SAMPLE_EMAIL_WORKING)
         assert updates[0][0].key().name() == 'haiti:example.org/123'
         # updates[first_update][subject_data][attribute_#]
         assert 'available_beds' in updates[0][1][0]
@@ -375,13 +380,15 @@ class MailAlertsTest(MediumTestCase):
         assert not errors
 
         # check broken email body
-        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_BROKEN)
+        updates, errors, ambiguities = mail_editor_.process_email(
+            SAMPLE_EMAIL_BROKEN)
         assert updates[0][0].key().name() == 'haiti:example.org/123'
         assert 'Available beds d' in errors[0][1][0]['original_line']
         assert len(updates[0][1]) == 4
 
         # check quoted email body
-        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_QUOTED)
+        updates, errors, ambiguities = mail_editor_.process_email(
+            SAMPLE_EMAIL_QUOTED)
         assert updates[0][0].key().name() == 'haiti:example.org/123'
         assert 'available_beds' in updates[0][1][0]
         assert 'total_beds' in updates[0][1][1]
@@ -391,7 +398,8 @@ class MailAlertsTest(MediumTestCase):
         assert not errors
 
         # check mixed email body
-        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_MIXED)
+        updates, errors, ambiguities = mail_editor_.process_email(
+            SAMPLE_EMAIL_MIXED)
         assert updates[0][0].key().name() == 'haiti:example.org/123'
         assert 'available_beds' in updates[0][1][0]
         assert 'total_beds' in updates[0][1][1]
@@ -401,7 +409,8 @@ class MailAlertsTest(MediumTestCase):
         assert not errors
 
         # check stop delimeter'd body
-        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_STOP)
+        updates, errors, ambiguities = mail_editor_.process_email(
+            SAMPLE_EMAIL_STOP)
         assert updates[0][0].key().name() == 'haiti:example.org/123'
         assert 'available_beds' in updates[0][1][0]
         assert 'total_beds' in updates[0][1][1]
@@ -413,7 +422,8 @@ class MailAlertsTest(MediumTestCase):
         """Confirm that update_subjects() properly updates the datastore."""
         mail_editor_ = mail_editor.MailEditor()
         mail_editor_.account = self.account
-        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_WORKING)
+        updates, errors, ambiguities = mail_editor_.process_email(
+            SAMPLE_EMAIL_WORKING)
         mail_editor_.update_subjects(updates, datetime.datetime(2010, 8, 4))
 
         subject = Subject.get('haiti', 'example.org/123')
@@ -433,14 +443,17 @@ class MailAlertsTest(MediumTestCase):
             sender=self.account.email,
             to='updates@resource-finder.appspotmail.com',
             subject='Resource Finder Updates',
-            html=SAMPLE_EMAIL_WORKING,
+            body=SAMPLE_EMAIL_WORKING,
             date='Wed, 04 Aug 2010 13:07:18 -0400')
         request = Struct(url='test/path', path='/path')
         mail_editor_ = mail_editor.MailEditor()
         mail_editor_.account = self.account
         mail_editor_.need_authentication = False
         mail_editor_.request = request
-        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_WORKING)
+        mail_editor_.domain = 'localhost:8080'
+        mail_editor_.email = 'test@example.com'
+        updates, errors, ambiguities = mail_editor_.process_email(
+            SAMPLE_EMAIL_WORKING)
         mail_editor_.send_email(message, updates, errors, ambiguities)
 
         # updates, no errors
@@ -449,8 +462,9 @@ class MailAlertsTest(MediumTestCase):
         self.check_for_correct_update(body, self.sent_messages[0])
 
         # updates, errors
-        message.html = SAMPLE_EMAIL_BROKEN
-        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_BROKEN)
+        message.body = SAMPLE_EMAIL_BROKEN
+        updates, errors, ambiguities = mail_editor_.process_email(
+            SAMPLE_EMAIL_BROKEN)
         mail_editor_.send_email(message, updates, errors, ambiguities)
         assert len(self.sent_messages) == 2
         body = self.sent_messages[1].textbody()
@@ -463,8 +477,9 @@ class MailAlertsTest(MediumTestCase):
         mail_editor_.need_authentication = True
         db.delete(self.account)
         # need authentication
-        message.html = SAMPLE_EMAIL_WORKING
-        updates, errors, ambiguities = mail_editor_.process_email(SAMPLE_EMAIL_WORKING)
+        message.body = SAMPLE_EMAIL_WORKING
+        updates, errors, ambiguities = mail_editor_.process_email(
+            SAMPLE_EMAIL_WORKING)
         mail_editor_.send_email(message, updates, errors, ambiguities)
         assert len(self.sent_messages) == 3
         body = self.sent_messages[2].textbody()
@@ -481,7 +496,7 @@ class MailAlertsTest(MediumTestCase):
         assert 'Available beds' in body and '18' in body
         assert 'Total beds' in body and '222' in body
         assert 'Can pick up patients' in body and 'Yes' in body
-        assert 'http://resource-finder.appspot.com/help/email' in body
+        assert '/help/email' in body
         assert 'update title_foo' not in body
         assert 'ERROR' not in message.subject()
         assert self.email == message.to_list()[0]

@@ -165,6 +165,10 @@ UNSUPPORTED_ATTRIBUTES = {
     'haiti': {
         'hospital': ['services', 'organization_type', 'category',
                      'construction', 'operational_status']
+    },
+    'pakistan': {
+        'hospital': ['services', 'organization_type', 'category',
+                     'construction', 'operational_status']
     }
 }
 
@@ -185,13 +189,17 @@ class MailEditor(InboundMailHandler):
         update_subjects: updates the datastore with all valid updates
         send_email: sends a response/confirmation email to the user
     """
+    def init(self, message):
+        self.domain = self.request.headers['Host']
+        email_regex = r'(.+\s+)*(<)*(?P<email>\w+(?:.+\w+)*@\w+(?:\.\w+)+)(>)*'
+        self.email = re.match(email_regex, message.sender).group('email')
 
     def authenticate(self, message):
         """Checks to see if the email is from a user with an existing account.
         Account must have both a nickname and affiliation to be considered valid
         for submission to the datastore. Returns True if the account exists."""
         self.account = model.Account.all().filter(
-            'email =', message.sender).get()
+            'email =', self.email).get()
         return (self.account and self.account.nickname and
                 self.account.affiliation)
 
@@ -202,20 +210,19 @@ class MailEditor(InboundMailHandler):
         False if no such information is found."""
         def regex(s, text):
             exp = '^%s\s+(?P<%s>.+)' % (s, s)
-            return re.search(exp, text, flags=re.UNICODE | re.I | re.MULTILINE)
+            match = re.search(exp, text, flags=re.UNICODE | re.I | re.MULTILINE)
+            return match and match.group(s) or None
         if self.account and self.account.nickname and self.account.affiliation:
             return
-        for content_type, body in message.bodies():
+        for content_type, body in message.bodies('text/plain'):
             body = body.decode()
-            nickname_match = regex('nickname', body)
-            affiliation_match = regex('affiliation', body)
-            if nickname_match and affiliation_match:
-                nickname = nickname_match.group('nickname')
-                affiliation = affiliation_match.group('affiliation')
+            nickname = regex('nickname', body)
+            affiliation = regex('affiliation', body)
+            if nickname and affiliation:
                 self.account = self.account or model.Account(
-                    key_name=message.sender, email=message.sender,
-                    description=message.sender, locale='en',
-                    default_frequency='instant', email_format='plain')
+                    email=self.email, description=message.sender,
+                    locale='en', default_frequency='instant',
+                    email_format='plain')
                 self.account.nickname = nickname
                 self.account.affiliation = affiliation
                 db.put(self.account)
@@ -230,10 +237,10 @@ class MailEditor(InboundMailHandler):
         authorized to submit, then a response email is sent detailing any
         new information and/or problems.
         """
-        self.need_authentication = False
-        if not (self.authenticate(message) or self.is_authentication(message)):
-            self.need_authentication = True
-        for content_type, body in message.bodies():
+        self.init(message)
+        self.need_authentication = not (self.authenticate(message) or
+                                        self.is_authentication(message))
+        for content_type, body in message.bodies('text/plain'):
             updates, errors, ambiguities = self.process_email(body.decode())
             if updates or errors or ambiguities:
                 date_format = '%a, %d %b %Y %H:%M:%S'
@@ -241,7 +248,7 @@ class MailEditor(InboundMailHandler):
                 if updates and not self.need_authentication:
                     self.update_subjects(updates, observed)
                 logging.info('mail_editor.py: update received from %s' %
-                             message.sender)
+                             self.email)
                 self.send_email(message, updates, errors, ambiguities)
             else:
                 self.send_email(message, [], [], [])
@@ -254,11 +261,11 @@ class MailEditor(InboundMailHandler):
         an unquoted section of the email, it then looks for updates in the
         quoted sections of the email.
         """
-        updates_all = []
-        errors_all = []
-        ambiguous_all = []
+        updates_all = [] # list of tuples (subject, updates for the subject)
+        errors_all = [] # list of tuples (error message, line in question)
+        ambiguous_all = [] # list of tuples (potential subjects, given updates)
         stop = False
-        grep_base = r'UPDATE)\s+(?P<title>[\w/]+(?:[ \t]+\w+)*)' + \
+        grep_base = r'UPDATE)\s+(?P<title>\w+(?:[ \t]+.\+)*?)' + \
                     r'([ \t]+?\((?P<subject_name>\w+:.+)\))*$'
         flags = re.UNICODE | re.MULTILINE | re.I
         match = re.finditer(r'(?<=^%s' % grep_base, body, flags=flags)
@@ -266,16 +273,9 @@ class MailEditor(InboundMailHandler):
         # work happens here
         def process(match, quoted=False):
             for subject_match in match:
-                ambiguity = False
-                updates = []
                 errors = []
-                start = subject_match.end()
-                quotes = '' if not quoted else subject_match.group('quotes')
-                end = body.lower().find('%supdate'.lower() % quotes, start + 1)
-                if end == -1:
-                    update_lines = body[start:].split('\n')
-                else:
-                    update_lines = body[start:end].split('\n')
+                updates = []
+                ambiguity = False
                 subject_name = subject_match.group('subject_name')
                 if subject_name:
                     subject = model.Subject.get_by_key_name(subject_name)
@@ -289,6 +289,16 @@ class MailEditor(InboundMailHandler):
                         ambiguity = len(subjects) != 1
                     else:
                         continue
+                start = subject_match.end()
+                quotes = '' if not quoted else subject_match.group('quotes')
+                end = body.lower().find(
+                    '%supdate'.lower() % quotes, start + 1)
+                update_block = body[start:] if end == -1 else body[start:end]
+                update_lines = [
+                    line for line in update_block.split('\n') if line]
+                if ambiguity:
+                    ambiguous_all.append((subjects, update_lines))
+                    continue
                 subdomain = subject.get_subdomain()
                 subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
                 unsupported = UNSUPPORTED_ATTRIBUTES[subdomain][subject.type]
@@ -297,9 +307,6 @@ class MailEditor(InboundMailHandler):
                     if STOP_DELIMITER in update:
                         stop = True
                         break
-                    if ambiguity and update:
-                        updates.append(update)
-                        continue
                     update_split = [word for word in update.split() if
                                     re.match('.*\w+.*', word, flags=re.UNICODE)]
                     for i in range(5, 0, -1):
@@ -309,10 +316,10 @@ class MailEditor(InboundMailHandler):
                         # potential attribute name that fits this description.
                         if len(update_split) <= i: # update must have >=1 words
                             continue         # present after the attribute name
-                        name = re.match(
+                        name_match = re.match(
                             '\w+', '_'.join(update_split[:i]).lower())
-                        if name:
-                            name = name.group(0)
+                        if name_match:
+                            name = name_match.group(0)
                         if name in subject_type.attribute_names:
                             if name not in unsupported:
                                 try:
@@ -333,18 +340,15 @@ class MailEditor(InboundMailHandler):
                             # want to set the "commune" attribute to the value
                             # "code" must escape code with "'s.
                             break
-
                 if updates and not ambiguity:
                     updates_all.append((subject, updates))
                 if errors:
                     errors_all.append((subject, errors))
-                if ambiguity:
-                    ambiguous_all.append((subjects, updates))
                 if stop:
                     return
 
         process(match)
-        if not (updates_all or errors_all or stop):
+        if not (updates_all or errors_all or ambiguous_all or stop):
             quoted_match = re.finditer(r'(?P<quotes>\W)(%s' % grep_base,
                                        body, flags=flags)
             process(quoted_match, quoted=True)
@@ -415,19 +419,16 @@ class MailEditor(InboundMailHandler):
             'errors': formatted_errors,
             'ambiguities': formatted_ambiguities,
             'authenticate': self.need_authentication,
-            'url': self.request.url[:self.request.url.find(self.request.path)]
+            'url': self.domain
         }
         path = os.path.join(os.path.dirname(__file__),
             'locale/%s/hospital_update_response_email.txt' % locale)
         body = template.render(path, template_values)
-        subject_base = 'Resource Finder Updates'
-        subject = 'ERROR - %s' % subject_base if errors or ambiguities \
-            else subject_base
+        subject = 'ERROR - %s' % original_message.subject \
+            if errors or ambiguities else original_message.subject
         message = mail.EmailMessage(
             sender='updates@resource-finder.appspotmail.com',
-            to=original_message.sender,
-            subject=subject,
-            body=body)
+            to=self.email, subject=subject, body=body)
         message.send()
 
 

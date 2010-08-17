@@ -271,7 +271,7 @@ class MailUpdateSystemTest(MediumTestCase):
             assert not PendingAlert.get(freq, self.email, subject_name)
         assert len(sent_emails) == 1
         print sent_emails[0].body
-        assert 'UPDATE title_foo (haiti 123)' in sent_emails[0].body
+        assert 'UPDATE title_foo (haiti:example.org/123)' in sent_emails[0].body
         db.delete([s, st])
 
     def test_change_default_frequency(self):

@@ -793,7 +793,7 @@ msgid "Postoperative Care"
 msgstr "آپریشن کے بعد کی نگہداشت"
 
 #. old value for the attribute
-#: mail_alerts.py:242
+#: mail_alerts.py:241
 msgid "Previous value"
 msgstr "سابق قدر"
 
@@ -1011,7 +1011,7 @@ msgid "Updated"
 msgstr "تجدید شدہ"
 
 #. who the attribute was updated by
-#: mail_alerts.py:245
+#: mail_alerts.py:244
 msgid "Updated by"
 msgstr "ترمیم کنندہ"
 

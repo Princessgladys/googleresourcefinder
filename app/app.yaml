@@ -79,7 +79,7 @@ handlers:
 - url: /privacy
   script: privacy.py
 
-- url: /help
+- url: /help.*
   script: help.py
 
 - url: /embed
