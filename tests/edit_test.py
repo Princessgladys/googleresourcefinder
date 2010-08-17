@@ -133,6 +133,8 @@ class EditTest(SeleniumTestCase):
         def save(self):
             self.click('//input[@name="save"]')
             self.wait_for_load()
+            self.wait_for_load()
+            self.wait_until(self.is_visible, 'data')
 
         def edit(self):
             # Look for the newly created subject.
@@ -143,20 +145,40 @@ class EditTest(SeleniumTestCase):
             # Open it in the edit page to confirm that its values are set.
             self.open_path(
                 '/edit?subdomain=haiti&subject_name=%s' % extra_names[0])
+            self.wait_for_load()
 
-        self.run_edit(login, save, edit, True)
+        self.run_edit(login, save, edit, True, subject_id='subject-2')
 
     def test_inplace_add(self):
-        """In-place edit/add: Confirms that all the fields in the in-place edit
+        """In-place add/edit: Confirms that all the fields in the in-place edit
         form save the entered values, and these values appear pre-filled when
         the form is loaded."""
+        self.set_default_permissions(['*:add'])
         names_before = [s.name for s in Subject.all_in_subdomain('haiti')]
+        subject_id = 'subject-2'
+        saved = []
 
         def login(self):
-            self.edit(ADD_PATH)
+            self.login('/?subdomain=haiti')
+            # Click the add button
+            add_button = '//div[@class="new-subject-map-control-ui"]'
+            self.wait_for_element(add_button)
+            self.click(add_button)
+
+            # Wait for the add instructions
+            self.wait_until(self.is_visible, 'loading')
+            self.is_text_present('Click a location')
+
+            # Click the map to place the marker and wait for the edit page
+            self.run_script('google.maps.event.trigger(' +
+                            'map, "click", { latLng: map.getCenter() })')
+            self.wait_until(self.is_visible, 'edit-data')
 
         def save(self):
             self.click('//input[@name="save"]')
+            if not saved:
+                saved.append('saved')
+                self.wait_for_load()
             self.wait_until(self.is_visible, 'data')
 
         def edit(self):
@@ -164,11 +186,9 @@ class EditTest(SeleniumTestCase):
             names_after = [s.name for s in Subject.all_in_subdomain('haiti')]
             extra_names = list(set(names_after) - set(names_before))
             assert len(extra_names) == 1
+            self.edit(login=False, subject_id=subject_id)
 
-            # Open it in the edit page to confirm that its values are set.
-            self.open_path(
-                '/edit?subdomain=haiti&embed=yes&subject_name=%s' %
-                extra_names[0])
+        self.run_edit(login, save, edit, True, subject_id=subject_id)
 
     def test_inplace_edit(self):
         """In-place edit: Confirms that all the fields in the in-place edit
@@ -187,7 +207,8 @@ class EditTest(SeleniumTestCase):
 
         self.run_edit(login, save, edit)
 
-    def run_edit(self, login_func, save_func, edit_func, add_new=False):
+    def run_edit(self, login_func, save_func, edit_func, add_new=False,
+                 subject_id='subject-1'):
         """Runs the edit flow, for use in both inplace and separate page
         editing."""
 
@@ -197,7 +218,7 @@ class EditTest(SeleniumTestCase):
         self.assert_element('//input[@name="account_nickname"]')
         self.assert_element('//input[@name="account_affiliation"]')
 
-        # Test javascript error checking
+        # test javascript error checking
         text_fields = {}
         text_fields['account_nickname'] = '   '
         text_fields['account_affiliation'] = '\t'
@@ -234,10 +255,7 @@ class EditTest(SeleniumTestCase):
 
         # Check that the facility list is updated
         regex = Regex('.*1 / 2.*General Surgery.*')
-        if add_new:
-            self.wait_for_load()
-        else:
-            self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
+        self.wait_until(lambda: regex.match(self.get_text('id=' + subject_id)))
 
         edit_func(self)
 
@@ -276,10 +294,7 @@ class EditTest(SeleniumTestCase):
         # Check that the facility list is updated to reflect the emptying
         # Note the en-dash \u2013 implies "no value"
         regex = Regex(u'.*\u2013 / \u2013')
-        if add_new:
-            self.wait_for_load()
-        else:
-            self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
+        self.wait_until(lambda: regex.match(self.get_text('id=' + subject_id)))
 
         edit_func(self)
 
@@ -291,16 +306,11 @@ class EditTest(SeleniumTestCase):
         self.type('//input[@name="total_beds"]', '0  ')
 
         # Submit the form
-        self.click('//input[@name="save"]')
-
         save_func(self)
 
         # Check that the facility list is updated to show the zeros
         regex = Regex('.*0 / 0')
-        if add_new:
-            self.wait_for_load()
-        else:
-            self.wait_until(lambda: regex.match(self.get_text('id=subject-1')))
+        self.wait_until(lambda: regex.match(self.get_text('id=' + subject_id)))
 
         edit_func(self)
 
@@ -422,6 +432,7 @@ class EditTest(SeleniumTestCase):
 
     def test_inplace_edit_signed_out(self):
         """In-place edit starting from signed out:"""
+        self.set_default_permissions(['*:view', '*:add'])
         self.open_path('/?subdomain=haiti')
 
         # Open a bubble
@@ -437,6 +448,8 @@ class EditTest(SeleniumTestCase):
         # Wait for the edit form to appear
         self.wait_until(self.is_visible, 'edit-data')
         self.assert_element('//input[@name="account_nickname"]')
+        # Add button should not be visible
+        assert not self.is_visible('//div[@class="new-subject-map-control-ui"]')
 
     def test_inplace_edit_no_location_facility(self):
         self.delete_subject('haiti', 'example.org/123')
@@ -493,14 +506,39 @@ class EditTest(SeleniumTestCase):
         self.wait_until(self.is_visible, 'loading')
         self.wait_for_element('map')
         self.is_text_present('Click a location')
+        # Make sure add button is not visible
+        assert not self.is_visible(add_button)
 
-    def edit(self, login=False):
+        # Zoom does not cancel add
+        self.run_script('map.setZoom(map.getZoom() + 1)')
+        assert not self.is_visible(add_button)
+
+        # Cancel link cancels add
+        self.click('id=cancel_add_link')
+        assert self.is_visible(add_button)
+
+        # Click a link cancels add
+        self.click(add_button)
+        assert not self.is_visible(add_button)
+        self.click('id=subject-1')
+        assert self.is_visible(add_button)
+
+        # Place marker, then cancel edit
+        self.click(add_button)
+        self.run_script('google.maps.event.trigger(' +
+                        'map, "click", { latLng: map.getCenter() })')
+        self.wait_until(self.is_visible, 'edit-data')
+        self.click('//input[@name="cancel"]')
+        assert self.is_visible(add_button)
+
+    def edit(self, login=False, subject_id='subject-1'):
         """Goes to edit form for subject 1"""
         if login:
             self.open_path('/?subdomain=haiti')
             self.click_and_wait('link=Sign in')
             self.login()
-        self.click('id=subject-1')
+        self.wait_for_element('id=' + subject_id)
+        self.click('id=' + subject_id)
         self.wait_for_element('link=Edit this record')
         self.click('link=Edit this record')
         self.wait_until(self.is_visible, 'edit-data')

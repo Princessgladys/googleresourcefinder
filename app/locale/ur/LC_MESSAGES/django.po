@@ -22,7 +22,7 @@ msgid "${DATE} at ${TIME}"
 msgstr "${DATE} پر ${TIME}"
 
 #. Time format (example 14:32 UTC-4)
-#: static/locale.js:194
+#: static/locale.js:202
 #, sh-format
 msgid "${HOURS}:${MINUTES} ${ZONE}"
 msgstr "${HOURS}:${MINUTES} ${ZONE}"
@@ -46,7 +46,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr "${NUM_FACILITIES} سہولیات ${RADIUS_MILES} میل کے اندر"
 
 #. Message explaining how to add a latitude and longitude to a facility.
-#: static/locale.js:186
+#: static/locale.js:194
 #, sh-format
 msgid "${START_LINK}Sign in${END_LINK} to view the edit form and add a latitude and longitude."
 msgstr "ترمیمی فارم دیکھنے کے لیے ${START_LINK}سائن ان${END_LINK} اور مقامات کا اضافہ کریں ."
@@ -311,7 +311,7 @@ msgid "Distance"
 msgstr "دوری"
 
 #. Meaning: administrative division
-#: templates/map.html:153 ../tools/setup.py:183 static/locale.js:63
+#: ../tools/setup.py:183 static/locale.js:63
 msgid "District"
 msgstr "ضلع"
 
@@ -372,7 +372,7 @@ msgid "Error saving facility information."
 msgstr "سہولت کی معلومات محفوظ کرنے میں غلطی۔"
 
 #. Button to export data to comma-separated-value format.
-#: export.py:176 templates/map.html:194
+#: export.py:176 templates/map.html:149
 msgid "Export CSV"
 msgstr "CSV برآمد کریں"
 
@@ -382,7 +382,7 @@ msgid "Facilities with Changes"
 msgstr "سہولیات مع تبدیلیاں"
 
 #. A place that provides a particular service
-#: templates/map.html:172 templates/print.html:129 static/locale.js:120 templates/settings.html:120
+#: templates/print.html:129 static/locale.js:120 templates/settings.html:120 templates/map.html:127
 msgid "Facility"
 msgstr "سہولت"
 
@@ -422,12 +422,12 @@ msgid "Field is required."
 msgstr "فیلڈ مطلوب ہے۔"
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:127
+#: templates/map.html:108
 msgid "Filters"
 msgstr "فلٹرز"
 
 #. Tooltip explaining how to enable print mode
-#: static/locale.js:161
+#: static/locale.js:169
 msgid "First select a hospital from the list on the left. Then Print will print a list of hospitals in order of distance from your selection."
 msgstr "سب سے پہلے بائیں سمت کی فہرست سے ایک ہسپتال منتخب کریں۔ پھر 'پرنٹ' آپ کے انتخاب سے دوری کے لحاط سے ہسپتالوں کی فہرست پرنٹ کرے گا۔"
 
@@ -527,7 +527,7 @@ msgid "Invalid or missing subject type."
 msgstr "مریض کی نوعیت غلط ہے یا چھوٹ گئی ہے۔"
 
 #. Abbreviated months of the year.
-#: static/locale.js:139
+#: static/locale.js:143
 msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
 msgstr "جنوری فروری مارچ اپریل مئی جون جولائی اگست ستمبر اکتوبر نومبر دسمبر"
 
@@ -582,7 +582,7 @@ msgid "Loader:"
 msgstr "لوڈ کرنے والا:"
 
 #. Indicator that the application is loading.
-#: templates/base.html:178 static/locale.js:134
+#: static/locale.js:138 templates/base.html:178
 msgid "Loading..."
 msgstr "لوڈ ہورہا ہے..."
 
@@ -672,7 +672,7 @@ msgid "New Value"
 msgstr "نئی قدر"
 
 #. Label for a new subject
-#: static/locale.js:143
+#: static/locale.js:147
 msgid "New facility"
 msgstr "نئی سہولت"
 
@@ -690,6 +690,11 @@ msgstr "فراہمی کی معلومات نہیں ہیں "
 #: templates/settings.html:134
 msgid "No facilities to display."
 msgstr "دکھانے کیلئے کوئی سہولیات نہیں ہیں۔"
+
+#. Error message when there are no facilities to view on the map.
+#: static/locale.js:155
+msgid "No matching facilities. Try zooming out or choosing a different filter."
+msgstr "کوئی سہولت انتخاب کے لیے موزوں نہیں. نقشے کو zoom out کریں یا انتخاب تبدیل کریں."
 
 #. Error message
 #: grant_access.py:76
@@ -713,7 +718,7 @@ msgid "Old Value"
 msgstr "پرانی قدر"
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
-#: static/locale.js:152
+#: static/locale.js:160
 msgid "Open/Total Beds"
 msgstr "کھلا / کل بستر"
 
@@ -773,7 +778,7 @@ msgid "Please call for availability information."
 msgstr "فراہمی کی معلومات کیلئے براہ کرم کال کریں۔"
 
 #. Button to go to main page of resource finder sans iframe
-#: templates/map.html:202
+#: templates/map.html:157
 msgid "Pop out"
 msgstr "باہر نکالیں"
 
@@ -788,7 +793,7 @@ msgid "Previous value"
 msgstr "سابق قدر"
 
 #. Tooltip explaining a 'Print' link
-#: static/locale.js:166
+#: static/locale.js:174
 #, sh-format
 msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr "${FACILITY_NAME} سے دوری کے لحاظ سے ہسپتالوں کی فہرست پرنٹ کریں"
@@ -856,7 +861,7 @@ msgid "Saved."
 msgstr "محفوظ ہوگیا۔"
 
 #. Message indicating saving hospital information
-#: static/locale.js:174
+#: static/locale.js:182
 msgid "Saving..."
 msgstr "محفوظ ہو رہا ہے..."
 
@@ -866,7 +871,7 @@ msgid "Select subject type to export:"
 msgstr "برآمد کیلئے مریض کی نوعیت منتخب کریں:"
 
 #. work done by someone that benefits another
-#: static/locale.js:178 ../tools/setup.py:169
+#: ../tools/setup.py:169 static/locale.js:186
 msgid "Services"
 msgstr "خدمات"
 
@@ -886,7 +891,7 @@ msgid "Settings page"
 msgstr "ترتیبات کا صفحہ"
 
 #. Label for a control that filters a list of facilities
-#: static/locale.js:182
+#: static/locale.js:190
 msgid "Show"
 msgstr "دکھائیں"
 
@@ -911,14 +916,9 @@ msgid "State / Province / Territory"
 msgstr "ریاست/صوبہ/علاق"
 
 #. Label to subscribe to a subject
-#: templates/hospital_bubble.html:41 static/locale.js:190
+#: templates/hospital_bubble.html:41 static/locale.js:198
 msgid "Subscribe to email updates"
 msgstr "ای میل تازہ کاریوں کی رکنیت حاصل کریں"
-
-#. Header for a list of provisions
-#: templates/map.html:107
-msgid "Supplies"
-msgstr "ساز و سامان"
 
 #. Link to terms of service for the application
 #: templates/base.html:115
@@ -931,7 +931,7 @@ msgid "Thanks for adding content to Resource Finder. To get started please creat
 msgstr "ریسورس تلاش پر معلومات کا اضافہ کرنے کا شکریہ۔ شروعات کرنے کیلئے براہ کرم ایک صارف کا نام بنائیں اور ہمیں اپنا الحاق بتائیں۔ یہ معلومات آپ کے اضافہ کردہ یا ترمیم کردہ معلومات کے آگے دکھائی جاۓ گی۔ نیز <a target=\"_blank\" href=\"/terms\">استعمال کی شرائط</a> اور <a target=\"_blank\" href=\"/privacy\">رازداری کی پالیسی</a> بھی دیکھیں۔"
 
 #. Notification for a facility with missing location information.
-#: static/locale.js:147
+#: static/locale.js:151
 msgid "This facility does not yet have a location entered."
 msgstr "اس سہولت کا جایے مقام ابھی تک نہیں بتایا گیا ہے"
 
@@ -981,7 +981,7 @@ msgid "Unreinforced masonry"
 msgstr "غیر تقویت یافتہ معماری"
 
 #. Label to unsubscribe from a subject
-#: templates/hospital_bubble.html:36 static/locale.js:198
+#: static/locale.js:206 templates/hospital_bubble.html:36
 msgid "Unsubscribe"
 msgstr "رکنیت ختم کریں"
 
@@ -991,12 +991,12 @@ msgid "Unsubscribe from checked"
 msgstr "نشان زد سے رکنیت ختم کریں"
 
 #. Message indicating the user is unsubscribed
-#: static/locale.js:202
+#: static/locale.js:210
 msgid "Unsubscribed."
 msgstr "رکنیت ختم کریں۔"
 
 #. Label indicating a record was updated
-#: static/locale.js:206
+#: static/locale.js:214
 msgid "Updated"
 msgstr "تجدید شدہ"
 
@@ -1073,7 +1073,7 @@ msgid "You will receive ${FREQUENCY} email updates for this facility. Use the ${
 msgstr "آپ کو اس سہولت کیلئے ${FREQUENCY} ای میل تازہ کاریاں موصول ہوں گی۔ رکنیت کی ترتیبات بدلنے کیلئے ${START_LINK}ترتیبات${END_LINK} کا صفحہ استعمال کریں۔"
 
 #. Message indicating hospital information has been saved
-#: static/locale.js:170
+#: static/locale.js:178
 msgid "Your edit has been saved"
 msgstr "آپ کی ترمیم محفوظ ہوگئی ہے"
 
@@ -1103,13 +1103,18 @@ msgstr "فراہمی"
 msgid "capacity"
 msgstr "گنجائش"
 
+#. Label for a filter that restricts results to the current map viewport
+#: static/locale.js:134
+msgid "in map view"
+msgstr "نقشے  میں ظاہر"
+
 #. Header for the number of facilities less than 10 miles from a location.
 #: templates/print.html:76
 msgid "no more than 10 miles away"
 msgstr "10 میل سے زیادہ دور نہیں"
 
 #. Very short abbreviation for a phone number, indended to disambiguate from a fax number.  (example: p 555-555-5555)
-#: static/locale.js:157
+#: static/locale.js:165
 #, sh-format
 msgid "p ${PHONE}"
 msgstr "صفحہ ${PHONE}"

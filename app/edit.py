@@ -556,7 +556,7 @@ class Edit(utils.Handler):
             # and reduce the latency of the next page load.
             taskqueue.add(url='/refresh_json_cache?lang=%s&subdomain=%s'
                           % (self.params.lang, self.subdomain), method='GET')
-        elif self.params.add_new:
+        elif self.params.add_new and self.params.embed:
             # Send edit.js the new subject's name so it can auto select it
             # on page refresh.
             self.write(self.get_url('/?subject_name=%s' % subject_name))
