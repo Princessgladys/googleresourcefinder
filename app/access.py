@@ -34,7 +34,8 @@ from model import Account
 #     'add': add new subjects
 #     'remove': remove subjects from the UI (not delete them entirely)
 #     'grant': grant access to other users
-ACTIONS = ['view', 'add', 'remove', 'edit', 'advanced_edit', 'grant']
+#     'purge': permanently delete subjects
+ACTIONS = ['view', 'add', 'remove', 'edit', 'advanced_edit', 'grant', 'purge']
 
 def check_token(token):
     return Account.all().filter('token =', token).get()

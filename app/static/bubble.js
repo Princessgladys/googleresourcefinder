@@ -66,3 +66,33 @@ function get_subscription_message(subscribed, subdomain, frequency,
   return message;
 }
 
+/**
+ * Sends an AJAX request to /purge to purge the specified facility from the
+ * database.
+ * @param {string} subdomain the current subdomain
+ * @param {string} subject_name the key name of the subject to be purged
+ */
+function purge_subject(subdomain, subject_name) {
+  var confirmation_text = 'This will PERMANENTLY REMOVE this facility from ' +
+      'the database. Are you sure you want to continue?';
+  if (confirm(confirmation_text)) {
+    var post_data = {
+      subdomain: subdomain,
+      subject_name: subject_name
+    };
+
+    $j.ajax({
+      type: "POST",
+      url: "/purge",
+      data: post_data,
+      success: function(response) {
+        window.location.reload();
+      },
+      error: function(xhr, text_status, error) {
+        log(text_status + ', ' + error);
+        alert(locale.ERROR());
+      }
+    });
+  }
+}
+

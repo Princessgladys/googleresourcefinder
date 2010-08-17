@@ -41,9 +41,6 @@ handlers:
 - url: /grant_access
   script: grant_access.py
 
-- url: /embed
-  script: embed.py
-
 - url: /export
   script: export.py
 
@@ -85,6 +82,9 @@ handlers:
 - url: /help
   script: help.py
 
+- url: /embed
+  script: embed.py
+
 # Public machine endpoints.
 
 - url: /mail_alerts
@@ -92,6 +92,9 @@ handlers:
 
 - url: /subscribe
   script: subscribe.py
+
+- url: /purge
+  script: purge.py
 
 # Human administrative endpoints.
 
