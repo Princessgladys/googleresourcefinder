@@ -823,7 +823,7 @@ msgid "Reachable by road"
 msgstr "Accessible en voiture"
 
 #. Record updated successfully.
-#: edit.py:554
+#: edit.py:563
 msgid "Record updated."
 msgstr "Enregistrement mis à jour"
 

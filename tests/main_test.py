@@ -288,7 +288,7 @@ class MainTestCase(SeleniumTestCase):
 
     def test_embed_link(self):
         # Login and wait for page to load
-        self.open_path('/?subdomain=haiti')
+        self.login('/?subdomain=haiti')
         self.wait_for_element('subject-3')
 
         # Make sure that embed link is present
