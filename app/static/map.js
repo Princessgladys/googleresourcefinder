@@ -114,7 +114,6 @@ var summary_columns = [
 
 var selected_filter_attribute_i = 0;
 var selected_filter_value = null;
-var selected_status_i = -1;
 var selected_subject_i = -1;
 var selected_subject = null;
 
@@ -657,7 +656,6 @@ function update_map_bounds() {
   var bounds = new google.maps.LatLngBounds();
   for (var i = 0; i < subject_is.length; i++) {
     var subject_i = subject_is[i];
-    var subject = subjects[subject_i];
     var marker = markers[subject_i];
     var subject_status = subject_status_is[subject_i];
     if (marker && subject_status == STATUS_GOOD) {
@@ -682,7 +680,6 @@ function update_viewport_filter() {
 
 // Update the subject list immediately based on the current viewport
 function update_viewport_filter_now() {
-  log("update");
   update_subject_status_is();
   update_subject_icon_images();
   update_subject_list(); 
@@ -776,10 +773,8 @@ function update_subject_list() {
   for (var i = 0; i < subject_is.length; i++) {
     var su = subject_is[i];
     var subject = subjects[su];
-    var subject_type = subject_types[subject.type];
     var row = $('subject-' + su);
-    if (selected_status_i === 0 ||
-        subject_status_is[su] === selected_status_i) {
+    if (subject_status_is[su] === STATUS_GOOD) {
       row.style.display = '';
       row.style.className = get_subject_row_css_class(su, subject);
       visible_subjects++;
@@ -805,8 +800,7 @@ function populate_subject_list() {
     var su = subject_is[i];
     var subject = subjects[su];
     var subject_type = subject_types[subject.type];
-    if (selected_status_i === 0 ||
-        subject_status_is[su] === selected_status_i) {
+    if (subject_status_is[su] === STATUS_GOOD) {
       var row = $$('tr', {
         id: 'subject-' + su,
         'class': get_subject_row_css_class(su, subject),
@@ -857,8 +851,7 @@ function populate_print_subject_list() {
     var su = subject_is[i];
     var subject = subjects[su];
     var subject_type = subject_types[subject.type];
-    if (selected_status_i === 0 ||
-        subject_status_is[su] === selected_status_i) {
+    if (subject_status_is[su] === STATUS_GOOD) {
       var row = $$('tr', {
         id: 'subject-' + su,
         'class': 'subject-' + (i % 2 == 0 ? 'even' : 'odd')
@@ -1315,7 +1308,6 @@ function load_data(data, selected_subject_name) {
   subjects = data.subjects;
   messages = data.messages;
   total_subject_count = data.total_subject_count;
-  selected_status_i = STATUS_GOOD;
 
   attributes_by_name = {};
   for (var a = 1; a < attributes.length; a++) {
