@@ -15,6 +15,7 @@
 """Tests for mail_alerts.py."""
 
 import datetime
+import re
 
 import django.utils.translation
 from google.appengine.api import mail
@@ -29,7 +30,7 @@ from model import Account, Attribute, Subdomain, MinimalSubject, Subject
 from model import SubjectType
 from utils import db
 
-SAMPLE_EMAIL_WORKING = '''UPDATE title_foo (haiti:example.org/123)
+SAMPLE_EMAIL_WORKING = '''UPDATE title_foo (example.org/123)
 Available beds 18
 Total beds: 222
 Email; test@example.com
@@ -39,28 +40,28 @@ Can pick_up patients yes'''
 SAMPLE_EMAIL_AUTHENTICATION = '''nickname nickname_foo
 affiliation affiliation_foo
 
-UPDATE title_foo (haiti:example.org/123)
+UPDATE title_foo (example.org/123)
 Available beds 18
 Total beds 222
 Email test@example.com
 Commune foo@bar!
 Can pick up patients yes'''
 
-SAMPLE_EMAIL_BROKEN = '''UPDATE title_foo (haiti:example.org/123)
+SAMPLE_EMAIL_BROKEN = '''UPDATE title_foo (example.org/123)
 Available beds d
 Total beds 222
 Email test@example.com
 Commune foo@bar!
 Can pick up patients yes'''
 
-SAMPLE_EMAIL_QUOTED = '''>> UPDATE title_foo (haiti:example.org/123)
+SAMPLE_EMAIL_QUOTED = '''>> UPDATE title_foo (example.org/123)
 >> Available beds 18
 >> Total beds 222
 >> Email test@example.com
 >> Commune foo@bar!
 >> Can pick up patients yes'''
 
-SAMPLE_EMAIL_STOP = '''UPDATE title_foo (haiti:example.org/123)
+SAMPLE_EMAIL_STOP = '''UPDATE title_foo (example.org/123)
 Available beds 18
 Total beds 222
 Email test@example.com
@@ -68,21 +69,21 @@ Commune foo@bar!
 --- --- --- ---
 Can pick up patients yes'''
 
-SAMPLE_EMAIL_MIXED = '''UPDATE title_foo (haiti:example.org/123)
+SAMPLE_EMAIL_MIXED = '''UPDATE title_foo (example.org/123)
 Available beds 18
 Total beds 222
 Email test@example.com
 Commune foo@bar!
 Can pick up patients yes
 
->> UPDATE title_foo (haiti:example.org/123)
+>> UPDATE title_foo (example.org/123)
 >> Available beds d
 >> Total beds 222
 >> Email test@example.com
 >> Commune foo@bar!
 >> Can pick up patients yes'''
 
-SAMPLE_EMAIL_MULTIPLE = '''UPDATE title_foo (haiti:example.org/123)
+SAMPLE_EMAIL_MULTIPLE = '''UPDATE title_foo (example.org/123)
 Available beds 18
 Total beds 222
 Email test@example.com
@@ -95,13 +96,13 @@ Available beds 20'''
 SAMPLE_EMAIL_AMBIGUOUS = '''UPDATE title_foobar
 Total beds 77'''
 
-SAMPLE_EMAIL_AMBIGUOUS_DETAIL = '''update title_foobar (haiti:example.org/789)
+SAMPLE_EMAIL_AMBIGUOUS_DETAIL = '''update title_foobar (example.org/789)
 Total beds 77
 
-update title_foobar (haiti:example.org/012)
+update title_foobar (example.org/012)
 total beds 76'''
 
-class MailAlertsTest(MediumTestCase):
+class MailEditorTest(MediumTestCase):
     def setUp(self):
         MediumTestCase.setUp(self)
         django.utils.translation.activate('en')
@@ -207,7 +208,7 @@ class MailAlertsTest(MediumTestCase):
         """Confirms that authenticate() identifies existing users."""
         message = mail_editor.mail.EmailMessage(
             sender=self.account.email,
-            to='updates@resource-finder.appspotmail.com',
+            to='haiti-updates@resource-finder.appspotmail.com',
             subject='Resource Finder Updates',
             body=SAMPLE_EMAIL_WORKING)
 
@@ -223,7 +224,7 @@ class MailAlertsTest(MediumTestCase):
         authentication information for the user."""
         message = mail_editor.mail.EmailMessage(
             sender=self.account.email,
-            to='updates@resource-finder.appspotmail.com',
+            to='haiti-updates@resource-finder.appspotmail.com',
             subject='Resource Finder Updates',
             body=SAMPLE_EMAIL_AUTHENTICATION)
         mail_editor_ = mail_editor.MailEditor()
@@ -242,7 +243,7 @@ class MailAlertsTest(MediumTestCase):
         self.sent_messages = []
         message = mail.InboundEmailMessage(
             sender=self.account.email,
-            to='updates@resource-finder.appspotmail.com',
+            to='haiti-updates@resource-finder.appspotmail.com',
             subject='Resource Finder Updates',
             body=SAMPLE_EMAIL_WORKING,
             date='Wed, 04 Aug 2010 13:07:18 -0400')
@@ -266,8 +267,7 @@ class MailAlertsTest(MediumTestCase):
         assert 'ERROR' in self.sent_messages[1].subject()
         assert '"d" is not a valid value for available_beds' in body
         assert body.count('--- --- --- ---') == 2
-        assert 'REFERENCE DOCUMENT' in body
-        assert 'REFERENCE DOCUMENT @' not in body
+        assert 'REFERENCE DOCUMENT @' in body
 
         # check working quoted email
         message.body = SAMPLE_EMAIL_QUOTED
@@ -346,11 +346,10 @@ class MailAlertsTest(MediumTestCase):
         assert 'ERROR' in self.sent_messages[9].subject()
         assert 'title_foobar' in body and 'ambiguous' in body
         assert 'Try again with one of the following' in body
-        assert 'haiti:example.org/789' in body
-        assert 'haiti:example.org/012' in body
+        assert 'example.org/789' in body
+        assert 'example.org/012' in body
         assert 'Total beds 77' in body
-        assert 'REFERENCE DOCUMENT' in body
-        assert 'REFERENCE DOCUMENT @' not in body
+        assert 'REFERENCE DOCUMENT @' in body
 
         # check email with multiple same title'd facilities [and unique keys]
         message.body = SAMPLE_EMAIL_AMBIGUOUS_DETAIL
@@ -366,6 +365,10 @@ class MailAlertsTest(MediumTestCase):
         """Confirms that process_email() returns a properly formatted structure
         of updates and errors, given the body of an email."""
         mail_editor_ = mail_editor.MailEditor()
+        mail_editor_.request = Struct(headers={'Host': 'localhost:8080'})
+        mail_editor_.init(message=Struct(
+            sender='test@example.com',
+            to='haiti-updates@resource-finder.appspotmail.com'))
 
         # check working email body
         updates, errors, ambiguities = mail_editor_.process_email(
@@ -422,6 +425,10 @@ class MailAlertsTest(MediumTestCase):
         """Confirm that update_subjects() properly updates the datastore."""
         mail_editor_ = mail_editor.MailEditor()
         mail_editor_.account = self.account
+        mail_editor_.request = Struct(headers={'Host': 'localhost:8080'})
+        mail_editor_.init(message=Struct(
+            sender='test@example.com',
+            to='haiti-updates@resource-finder.appspotmail.com'))
         updates, errors, ambiguities = mail_editor_.process_email(
             SAMPLE_EMAIL_WORKING)
         mail_editor_.update_subjects(updates, datetime.datetime(2010, 8, 4))
@@ -441,17 +448,19 @@ class MailAlertsTest(MediumTestCase):
 
         message = mail.InboundEmailMessage(
             sender=self.account.email,
-            to='updates@resource-finder.appspotmail.com',
+            to='haiti-updates@resource-finder.appspotmail.com',
             subject='Resource Finder Updates',
             body=SAMPLE_EMAIL_WORKING,
             date='Wed, 04 Aug 2010 13:07:18 -0400')
-        request = Struct(url='test/path', path='/path')
+        request = Struct(url='test/path', path='/path',
+                         headers={'Host': 'localhost:8080'})
         mail_editor_ = mail_editor.MailEditor()
         mail_editor_.account = self.account
         mail_editor_.need_authentication = False
         mail_editor_.request = request
-        mail_editor_.domain = 'localhost:8080'
-        mail_editor_.email = 'test@example.com'
+        mail_editor_.init(message=Struct(
+            sender='test@example.com',
+            to='haiti-updates@resource-finder.appspotmail.com'))
         updates, errors, ambiguities = mail_editor_.process_email(
             SAMPLE_EMAIL_WORKING)
         mail_editor_.send_email(message, updates, errors, ambiguities)
@@ -470,8 +479,7 @@ class MailAlertsTest(MediumTestCase):
         body = self.sent_messages[1].textbody()
         assert 'ERROR' in self.sent_messages[1].subject()
         assert 'update' in body
-        assert 'REFERENCE DOCUMENT' in body
-        assert 'REFERENCE DOCUMENT @' not in body
+        assert 'REFERENCE DOCUMENT @' in body
 
         mail_editor_.account = None
         mail_editor_.need_authentication = True
@@ -488,9 +496,127 @@ class MailAlertsTest(MediumTestCase):
         assert 'affiliation' in body
         assert 'Pending updates' in body
 
+    def test_match_nickname_affiliation(self):
+        s = 'nickname'
+        assert mail_editor.match_nickname_affiliation(
+            s, '%s John Smith' % s) == 'John Smith'
+        assert (mail_editor.match_nickname_affiliation(s, '%s %s' % (s, s)) ==
+                'nickname')
+        assert not mail_editor.match_nickname_affiliation(s, 'nickname')
+        assert not mail_editor.match_nickname_affiliation(s, '')
+        assert not mail_editor.match_nickname_affiliation('', 'nickname')
+        assert not mail_editor.match_nickname_affiliation('', '')
+
+    def test_match_email(self):
+        assert mail_editor.match_email('test@example.com') == 'test@example.com'
+        assert (mail_editor.match_email(u't\u00e9st@example.com') ==
+                u't\u00e9st@example.com')
+        assert (mail_editor.match_email(' test@example.com  ') ==
+                'test@example.com')
+        assert not mail_editor.match_email('test@')
+        assert not mail_editor.match_email('.com')
+        assert not mail_editor.match_email('test@examplecom')
+        assert not mail_editor.match_email('test')
+        assert not mail_editor.match_email('')
+
+    def test_update_line_regexes(self):
+        mail_editor_ = mail_editor.MailEditor()
+        mail_editor_.request = Struct(headers={'Host': 'localhost:8080'})
+        mail_editor_.init(message=Struct(
+            sender='test@example.com',
+            to='haiti-updates@resource-finder.appspotmail.com'))
+
+        line_title_key = 'update Title Foo (example.org/123)'
+        line_key = 'update (example.org/123)'
+        line_title = 'update Title Foo'
+        line_extra_chars_key_title = 'update Title_foo (ICU) ' + \
+                                     '(example.org/123)'
+        line_extra_chars_title = 'update Title-foo (ICU)'
+        line_extra_chars_title_snafu = 'update Title_foo (I:CU)'
+        line_unicode_title_key = u'upDAte Titl\u00e9Foo (example.org/123)'
+        line_unicode_title = u'update Titl\u00e9Foo'
+        line_unicode_key = u'update (\u00e9xample.org/123)'
+
+        def match(regex, line):
+            return re.match(regex, line, flags=mail_editor_.update_line_flags)
+
+        def check_regex_with_key(regex, prefix=''):
+            m = match(regex, prefix + line_title_key).groupdict()
+            assert m['title'].strip() == 'Title Foo'
+            assert m['subject_name'] == 'example.org/123'
+
+            m = match(regex, prefix + line_key).groupdict()
+            assert m['subject_name'] == 'example.org/123'
+            assert not m['title']
+
+            m = match(regex, prefix + line_extra_chars_key_title).groupdict()
+            assert m['title'].strip() == 'Title_foo (ICU)'
+            assert m['subject_name'] == 'example.org/123'
+
+            m = match(regex, prefix + line_unicode_title_key).groupdict()
+            assert m['title'].strip() == u'Titl\u00e9Foo'
+            assert m['subject_name'] == 'example.org/123'
+
+            m = match(regex, prefix + line_unicode_key).groupdict()
+            assert not m['title']
+            assert m['subject_name'] == u'\u00e9xample.org/123'
+
+            # Lines with only title should break. Next regex will cover that case.
+            assert not match(regex, prefix + line_title)
+            assert not match(regex, prefix + line_extra_chars_title)
+            assert not match(regex, prefix + line_extra_chars_title_snafu)
+            assert not match(regex, prefix + line_unicode_title)
+
+        def check_regex_without_key(regex, prefix=''):
+            m = match(regex, prefix + line_title_key).groupdict()
+            assert m['title'].strip() == 'Title Foo (example.org/123)'
+
+            m = match(regex, prefix + line_key).groupdict()
+            assert m['title'].strip() == '(example.org/123)'
+
+            m = match(regex, prefix + line_title).groupdict()
+            assert m['title'].strip() == 'Title Foo'
+
+            m = match(regex, prefix + line_extra_chars_key_title).groupdict()
+            assert m['title'].strip() == 'Title_foo (ICU) (example.org/123)'
+
+            m = match(regex, prefix + line_extra_chars_title).groupdict()
+            assert m['title'].strip() == 'Title-foo (ICU)'
+
+            m = match(regex, prefix + line_extra_chars_title_snafu).groupdict()
+            assert m['title'].strip() == 'Title_foo (I:CU)'
+
+            m = match(regex, prefix + line_unicode_title_key).groupdict()
+            assert m['title'].strip() == u'Titl\u00e9Foo (example.org/123)'
+
+            m = match(regex, prefix + line_unicode_title).groupdict()
+            assert m['title'].strip() == u'Titl\u00e9Foo'
+
+            m = match(regex, prefix + line_unicode_key).groupdict()
+            assert m['title'].strip() == u'(\u00e9xample.org/123)'
+
+        # test unquoted base with key
+        regex = mail_editor_.update_line_regexes[0][0]
+        check_regex_with_key(regex)
+
+        # test unquoted base without key. this set will not process subject
+        # names-- that should be handled by the previous regex. this one should
+        # only trigger if there is no subject name in an update line
+        regex = mail_editor_.update_line_regexes[0][1]
+        check_regex_without_key(regex)
+
+        # test quoted base with key. this will only fire once both unquoted
+        # regexes have fired and found nothing.
+        regex = mail_editor_.update_line_regexes[1][0]
+        check_regex_with_key(regex, '>> ')
+
+        # test quoted base without key. this will fire after everything else
+        regex = mail_editor_.update_line_regexes[1][1]
+        check_regex_without_key(regex, '>> ')
+
     def check_for_correct_update(self, body, message):
         assert body.count('--- --- --- ---') == 2
-        assert 'title_foo (haiti:example.org/123)\n' in body
+        assert 'title_foo (example.org/123)\n' in body
         assert 'Email' in body and 'test@example.com' in body
         assert 'Commune' in body and 'foo@bar!' in body
         assert 'Available beds' in body and '18' in body
@@ -500,4 +626,4 @@ class MailAlertsTest(MediumTestCase):
         assert 'update title_foo' not in body
         assert 'ERROR' not in message.subject()
         assert self.email == message.to_list()[0]
-        assert 'updates@resource-finder.appspotmail.com' == message.sender()
+        assert 'haiti-updates@resource-finder.appspotmail.com' == message.sender()

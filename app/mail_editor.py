@@ -44,6 +44,8 @@ import model
 import utils
 from utils import db, format, order_and_format_updates
 
+# If this is found in a line of the email, the system will immediately stop
+# parsing and ignore the remainder of the email.
 STOP_DELIMITER = '--- --- --- ---'
 
 # TODO(pfritzsche): taken from Ping's new CL (with some changes);
@@ -161,6 +163,7 @@ def parse(attribute_name, update, index):
         return bool(update[index].lower() in ['y', 'yes', 'true'])
 
 
+# TODO(pfritzsche): Add support for all attributes.
 UNSUPPORTED_ATTRIBUTES = {
     'haiti': {
         'hospital': ['services', 'organization_type', 'category',
@@ -171,6 +174,26 @@ UNSUPPORTED_ATTRIBUTES = {
                      'construction', 'operational_status']
     }
 }
+
+
+def match_nickname_affiliation(s, text):
+    """For the supplied string s, try to find a match in text containing
+    the string s, followed by whitespace and then extra text. The extra text
+    will be accessible by the group name s.
+    """
+    if not s:
+        return
+    exp = r'^%s\s+(?P<%s>.+)' % (s, s)
+    match = re.search(exp, text, flags=re.UNICODE | re.I | re.MULTILINE)
+    return match and match.group(s) or None
+
+
+def match_email(text):
+    """Given a string, tries to find a regex match for an email."""
+    email_regex = r'(.+\s+)*(<)*\s*(?P<email>\w+(?:.+\w+)*@\w+(?:\.\w+)+)(>)*'
+    match = re.match(email_regex, text)
+    if match:
+        return match.group('email')
 
 
 class MailEditor(InboundMailHandler):
@@ -191,8 +214,28 @@ class MailEditor(InboundMailHandler):
     """
     def init(self, message):
         self.domain = self.request.headers['Host']
-        email_regex = r'(.+\s+)*(<)*(?P<email>\w+(?:.+\w+)*@\w+(?:\.\w+)+)(>)*'
-        self.email = re.match(email_regex, message.sender).group('email')
+        # Pulls out the email address from any string
+        self.email = match_email(message.sender)
+
+        # Initialize regexes for finding subjects to update from the email
+        unquoted_base = '^' # beginning of a regex for an unquoted line
+        quoted_base = '^(?P<quotes>\W+)' # beginning for a quoted line
+        regex_wo_key = r'update\s+(?P<title>.*)' # match a line with no key
+        regex_w_key = r'%s\s*\((?P<subject_name>.+/.+)\)' % regex_wo_key
+        # ^ match a line that contains a key and possibly the subject's title
+        self.update_line_flags = re.UNICODE | re.MULTILINE | re.I
+        self.update_line_regexes = []
+        for base in [unquoted_base, quoted_base]:
+            self.update_line_regexes.append([
+                base + regex_w_key,
+                base + regex_wo_key
+            ])
+
+        self.subdomain = message.to[:message.to.find('-')]
+
+    def validate_subdomain(self):
+        """Checks to make sure the user-supplied subdomain is legitimate."""
+        return model.Subdomain.get_by_key_name(self.subdomain)
 
     def authenticate(self, message):
         """Checks to see if the email is from a user with an existing account.
@@ -208,16 +251,13 @@ class MailEditor(InboundMailHandler):
         entry into the database. If both are found, creates a new account for
         the user and inserts it into the datastore then returns True. Returns
         False if no such information is found."""
-        def regex(s, text):
-            exp = '^%s\s+(?P<%s>.+)' % (s, s)
-            match = re.search(exp, text, flags=re.UNICODE | re.I | re.MULTILINE)
-            return match and match.group(s) or None
         if self.account and self.account.nickname and self.account.affiliation:
             return
+        # TODO(pfritzsche): Add HTML support.
         for content_type, body in message.bodies('text/plain'):
             body = body.decode()
-            nickname = regex('nickname', body)
-            affiliation = regex('affiliation', body)
+            nickname = match_nickname_affiliation('nickname', body)
+            affiliation = match_nickname_affiliation('affiliation', body)
             if nickname and affiliation:
                 self.account = self.account or model.Account(
                     email=self.email, description=message.sender,
@@ -240,6 +280,11 @@ class MailEditor(InboundMailHandler):
         self.init(message)
         self.need_authentication = not (self.authenticate(message) or
                                         self.is_authentication(message))
+        if not self.validate_subdomain():
+            # TODO(pfritzsche): Add better handling of invalid subdomain
+            self.send_email(message, [], [], [], no_subdomain=True)
+            return
+        # TODO(pfritzsche): Add HTML support.
         for content_type, body in message.bodies('text/plain'):
             updates, errors, ambiguities = self.process_email(body.decode())
             if updates or errors or ambiguities:
@@ -265,10 +310,6 @@ class MailEditor(InboundMailHandler):
         errors_all = [] # list of tuples (error message, line in question)
         ambiguous_all = [] # list of tuples (potential subjects, given updates)
         stop = False
-        grep_base = r'UPDATE)\s+(?P<title>\w+(?:[ \t]+.\+)*?)' + \
-                    r'([ \t]+?\((?P<subject_name>\w+:.+)\))*$'
-        flags = re.UNICODE | re.MULTILINE | re.I
-        match = re.finditer(r'(?<=^%s' % grep_base, body, flags=flags)
 
         # work happens here
         def process(match, quoted=False):
@@ -276,21 +317,23 @@ class MailEditor(InboundMailHandler):
                 errors = []
                 updates = []
                 ambiguity = False
-                subject_name = subject_match.group('subject_name')
-                if subject_name:
-                    subject = model.Subject.get_by_key_name(subject_name)
+                if 'subject_name' in subject_match.groupdict():
+                    subject_name = subject_match.group('subject_name')
+                    subject = model.Subject.get(self.subdomain, subject_name)
                     if not subject:
                         continue
                 else:
                     subjects = model.Subject.all().filter('title__ =',
-                        subject_match.group('title')).fetch(5)
+                        subject_match.group('title').strip()).fetch(3)
                     if subjects:
                         subject = subjects[0]
+                        # If there is more than one match for this title, it is
+                        # marked ambiguous. We don't know which the user wanted.
                         ambiguity = len(subjects) != 1
                     else:
                         continue
                 start = subject_match.end()
-                quotes = '' if not quoted else subject_match.group('quotes')
+                quotes = quoted and subject_match.group('quotes') or ''
                 end = body.lower().find(
                     '%supdate'.lower() % quotes, start + 1)
                 update_block = body[start:] if end == -1 else body[start:end]
@@ -299,9 +342,9 @@ class MailEditor(InboundMailHandler):
                 if ambiguity:
                     ambiguous_all.append((subjects, update_lines))
                     continue
-                subdomain = subject.get_subdomain()
-                subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
-                unsupported = UNSUPPORTED_ATTRIBUTES[subdomain][subject.type]
+                subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
+                unsupported = \
+                    UNSUPPORTED_ATTRIBUTES[self.subdomain][subject.type]
                 stop = False
                 for update in update_lines:
                     if STOP_DELIMITER in update:
@@ -309,7 +352,7 @@ class MailEditor(InboundMailHandler):
                         break
                     update_split = [word for word in update.split() if
                                     re.match('.*\w+.*', word, flags=re.UNICODE)]
-                    for i in range(5, 0, -1):
+                    for i in range(len(update_split), 0, -1):
                         # Automate the generation of potential atribute names
                         # from the line; hospital attribute names are between 1
                         # and 4 words long. This checks each line for any
@@ -326,15 +369,22 @@ class MailEditor(InboundMailHandler):
                                     value = parse(name, update_split, i)
                                     updates.append((name, value))
                                 except ValueError, error:
-                                    msg = ('"%s" is not a valid value for %s' %
-                                           (' '.join(update_split[i:]), name))
+                                    data = {
+                                        'value': ' '.join(update_split[i:]),
+                                        'attribute': name
+                                    }
+                                    #i18n: Error message for an invalid value
+                                    msg = _('"%(value)s" is not a valid value' +
+                                            ' for %(attribute)s' % data)
                                     errors.append({
                                         'error_message': msg,
                                         'original_line': update
                                     })
                             else:
                                 errors.append(
-                                    ('Unsupported attribute', update))
+                                    #i18n: Error message for an unsupported
+                                    #i18n: attribute
+                                    (_('Unsupported attribute'), update))
                             # Break to remove the situation where substrings of
                             # a name may also be counted; i.e. users who really
                             # want to set the "commune" attribute to the value
@@ -347,11 +397,12 @@ class MailEditor(InboundMailHandler):
                 if stop:
                     return
 
-        process(match)
-        if not (updates_all or errors_all or ambiguous_all or stop):
-            quoted_match = re.finditer(r'(?P<quotes>\W)(%s' % grep_base,
-                                       body, flags=flags)
-            process(quoted_match, quoted=True)
+        for base in self.update_line_regexes:
+            for regex in base:
+                match = re.finditer(regex, body, flags=self.update_line_flags)
+                process(match)
+            if (updates_all or errors_all or ambiguous_all or stop):
+                break
         return updates_all, errors_all, ambiguous_all
 
     def update_subjects(self, updates, observed, comment=''):
@@ -363,7 +414,8 @@ class MailEditor(InboundMailHandler):
             update_subject(subject, observed, self.account, source, values,
                            arrived=observed)
 
-    def send_email(self, original_message, updates, errors, ambiguities):
+    def send_email(self, original_message, updates, errors, ambiguities,
+                   no_subdomain=False):
         """Sends a response email to the user if necessary.
 
         If the user is not yet authorized to post, includes information on how
@@ -380,11 +432,10 @@ class MailEditor(InboundMailHandler):
         formatted_updates = []
         for update in updates:
             subject, update_data = update
-            subdomain = subject.get_subdomain()
-            subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
+            subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
             formatted_updates.append({
                 'subject_title': subject.get_value('title'),
-                'subject_name': subject.key().name(),
+                'subject_name': subject.get_name(),
                 'changed_attributes': order_and_format_updates(
                     update_data, subject_type, locale, format_changes, 0)
             })
@@ -394,7 +445,7 @@ class MailEditor(InboundMailHandler):
             subject, error_data = error
             formatted_errors.append({
                 'subject_title': subject.get_value('title'),
-                'subject_name': subject.key().name(),
+                'subject_name': subject.get_name(),
                 'data': error_data
             })
 
@@ -404,7 +455,7 @@ class MailEditor(InboundMailHandler):
             for i in range(len(subjects)):
                 subject_data = {
                     'title': subjects[i].get_value('title'),
-                    'name': subjects[i].key().name()
+                    'name': subjects[i].get_name()
                 }
                 subjects[i] = subject_data
             formatted_ambiguities.append({
@@ -419,10 +470,12 @@ class MailEditor(InboundMailHandler):
             'errors': formatted_errors,
             'ambiguities': formatted_ambiguities,
             'authenticate': self.need_authentication,
-            'url': self.domain
+            'url': self.domain,
+            'help_file': no_subdomain and 'subdomain_email_update_help.txt' or \
+                '%s_email_update_help.txt' % self.subdomain
         }
         path = os.path.join(os.path.dirname(__file__),
-            'locale/%s/hospital_update_response_email.txt' % locale)
+            'locale/%s/update_response_email.txt' % locale)
         body = template.render(path, template_values)
         subject = 'ERROR - %s' % original_message.subject \
             if errors or ambiguities else original_message.subject
@@ -439,6 +492,7 @@ def format_changes(update, locale):
         'attribute': attribute.replace('_', ' ').capitalize(),
         'value': format(value)
     }
+
 
 if __name__ == '__main__':
     utils.run([MailEditor.mapping()], debug=True)

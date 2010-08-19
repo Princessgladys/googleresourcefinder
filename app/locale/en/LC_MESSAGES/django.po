@@ -1005,6 +1005,11 @@ msgstr ""
 msgid "Unsubscribed."
 msgstr ""
 
+#. Error message for an unsupported attribute
+#: mail_editor.py:387
+msgid "Unsupported attribute"
+msgstr ""
+
 #. Label indicating a record was updated
 #: static/locale.js:206
 msgid "Updated"
@@ -1091,6 +1096,12 @@ msgstr ""
 #: request_access.py:61 request_access.py:55
 #, python-format
 msgid "Your request for \"%(action)s\" permission is now pending"
+msgstr ""
+
+#. Error message for an invalid value
+#: mail_editor.py:377
+#, python-format
+msgid "\"%(value)s\" is not a valid value"
 msgstr ""
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense

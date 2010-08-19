@@ -1004,6 +1004,11 @@ msgstr "Vous Désabonner de Vérifier"
 msgid "Unsubscribed."
 msgstr "Désabonné."
 
+#. Error message for an unsupported attribute
+#: mail_editor.py:387
+msgid "Unsupported attribute"
+msgstr ""
+
 #. Label indicating a record was updated
 #: static/locale.js:206
 msgid "Updated"
@@ -1091,6 +1096,12 @@ msgstr "Vos modifications ont été enregistrées"
 #, python-format
 msgid "Your request for \"%(action)s\" permission is now pending"
 msgstr "Votre demande pour devenir %(role)s  est déjà enregistrée."
+
+#. Error message for an invalid value
+#: mail_editor.py:377
+#, python-format
+msgid "\"%(value)s\" is not a valid value"
+msgstr ""
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
 #: templates/print.html:81
