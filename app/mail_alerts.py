@@ -232,7 +232,7 @@ class EmailFormatter:
             subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
             updates = order_and_format_updates(updates, subject_type,
                                                self.locale, format_update)
-            body += 'UPDATE %s (%s)\n\n' % (subject_title, subject.key().name())
+            body += 'UPDATE %s (%s)\n\n' % (subject_title, subject.get_name())
             for update in updates:
                 body += '%s %s\n-- %s: %s. %s: %s\n' % (
                     update['attribute'],

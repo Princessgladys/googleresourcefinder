@@ -122,6 +122,6 @@ handlers:
 
 # Incoming mail handlers.
 
-- url: /_ah/mail/updates@resource-finder.appspotmail.com
+- url: /_ah/mail/(.+)-updates@resource-finder.appspotmail.com
   script: mail_editor.py
 

@@ -1,6 +1,6 @@
 Hello {{nickname}},
 {% if authenticate %}
-Thanks for adding content to Resource Finder. To complete your changes, please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited on the website. Also see the Terms of Service and Privacy policy at {{url}}/terms and {{url}}/privacy .
+To make edits in Resource Finder, please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited on the website. Also see the Terms of Service and Privacy policy at {{url}}/terms and {{url}}/privacy .
 
 ***NOTE: You may create your username by replying to this email.***
 
@@ -10,8 +10,12 @@ nickname John Smith
 affiliation Smith Inc.
 
 Be sure to also include your pending updates below in the body of your response email.
-{% endif %}{% if ambiguities %}
-The following updates were ambiguous.
+{% endif %}{% if not updates and not errors and not ambiguities %}
+***No valid updates were received.***
+--- --- --- ---
+REFERENCE DOCUMENT @ {{url}}/help/email
+
+{% include "base_email_update_help.txt" %}{% endif %}{% if ambiguities %}The following updates were ambiguous.
 
 {% for ambiguity in ambiguities %}update {{ambiguity.subject_title}}
 -- Try again with one of the following:{% for subject in ambiguity.subjects %}
@@ -34,13 +38,9 @@ We recently received the following updates from you. They were inserted into the
 {% for update in updates %}
 {{update.subject_title}} ({{update.subject_name}})
 {% for change in update.changed_attributes %}{{change.attribute}} {{change.value}}
-{% endfor %}{% endfor %}{% endif %}{% endif %}{% if not errors and not ambiguities and updates %}
+{% endfor %}{% endfor %}{% endif %}{% endif %}{% if errors or ambiguities or updates %}
 --- --- --- ---
 REFERENCE DOCUMENT @ {{url}}/help/email{% endif %}{% if errors or ambiguities %}
---- --- --- ---
-{% include "hospital_email_update_help.txt" %}
-{% endif %}{% if not updates and not errors and not ambiguities %}
-No valid updates received.
---- --- --- ---
-{% include "hospital_email_update_help.txt" %}
+
+{% include "base_email_update_help.txt" %}
 {% endif %}
