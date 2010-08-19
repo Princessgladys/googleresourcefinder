@@ -480,7 +480,7 @@ class MailEditor(InboundMailHandler):
         subject = 'ERROR - %s' % original_message.subject \
             if errors or ambiguities else original_message.subject
         message = mail.EmailMessage(
-            sender='updates@resource-finder.appspotmail.com',
+            sender=self.subdomain + '-updates@resource-finder.appspotmail.com',
             to=self.email, subject=subject, body=body)
         message.send()
 
