@@ -443,7 +443,7 @@ class MailAlerts(utils.Handler):
             unchanged_subjects = []
             changed_subjects = {}
             for subscription in Subscription.all().filter('user_email =',
-                                                          account.email):
+                account.email).filter('frequency =', frequency):
                 subject = Subject.get_by_key_name(subscription.subject_name)
                 pa = PendingAlert.get(frequency, account.email,
                                       subscription.subject_name)
