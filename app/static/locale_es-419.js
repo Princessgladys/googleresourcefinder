@@ -104,6 +104,9 @@ locale = function() {
   //i18n: Pan-American Health Organization; no translation necessary.
   messages.HEALTHC_ID = "ID HealthC";
 
+  //i18n: Label for a filter that restricts results to the current map viewport
+  messages.IN_MAP_VIEW = "en vista de mapa";
+
   //i18n: Message indicating loading hospital information
   messages.LOADING = "Cargando...";
 
@@ -116,6 +119,9 @@ locale = function() {
 
   //i18n: Notification for a facility with missing location information.
   messages.NO_LOCATION_ENTERED = "Esta instituci\u00f3n no dispone a\u00fan de un lugar entr\u00f3.";
+
+  //i18n: Error message when there are no facilities to view on the map.
+  messages.NO_MATCHING_FACILITIES = "No hay instituci\u00f3nes se pongan en venta. Trate de alejar el zoom o la elecci\u00f3n de un filtro diferente.";
 
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
