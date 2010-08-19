@@ -22,7 +22,7 @@ msgid "${DATE} at ${TIME}"
 msgstr ""
 
 #. Time format (example 14:32 UTC-4)
-#: static/locale.js:194
+#: static/locale.js:202
 #, sh-format
 msgid "${HOURS}:${MINUTES} ${ZONE}"
 msgstr ""
@@ -46,7 +46,7 @@ msgid "${NUM_FACILITIES} Facilities within ${RADIUS_MILES} miles"
 msgstr ""
 
 #. Message explaining how to add a latitude and longitude to a facility.
-#: static/locale.js:186
+#: static/locale.js:194
 #, sh-format
 msgid "${START_LINK}Sign in${END_LINK} to view the edit form and add a latitude and longitude."
 msgstr ""
@@ -311,7 +311,7 @@ msgid "Distance"
 msgstr ""
 
 #. Meaning: administrative division
-#: templates/map.html:153 ../tools/setup.py:183 static/locale.js:63
+#: ../tools/setup.py:183 static/locale.js:63
 msgid "District"
 msgstr ""
 
@@ -352,12 +352,12 @@ msgid "Email format:"
 msgstr ""
 
 #. Link text to a "how to embed" page
-#: templates/map.html:210
+#: templates/map.html:165
 msgid "Embed"
 msgstr ""
 
 #. Link text to a "how to embed" page
-#: templates/map.html:210
+#: templates/map.html:165
 msgid "Embed on your site"
 msgstr ""
 
@@ -382,7 +382,7 @@ msgid "Error saving facility information."
 msgstr ""
 
 #. Button to export data to comma-separated-value format.
-#: export.py:176 templates/map.html:194
+#: export.py:176 templates/map.html:149
 msgid "Export CSV"
 msgstr ""
 
@@ -392,7 +392,7 @@ msgid "Facilities with Changes"
 msgstr ""
 
 #. A place that provides a particular service
-#: templates/map.html:172 templates/print.html:129 static/locale.js:120 templates/settings.html:120
+#: templates/print.html:129 static/locale.js:120 templates/settings.html:120 templates/map.html:127
 msgid "Facility"
 msgstr ""
 
@@ -432,12 +432,12 @@ msgid "Field is required."
 msgstr ""
 
 #. Header for a list of filters to restrict a list of data being viewed.
-#: templates/map.html:127
+#: templates/map.html:108
 msgid "Filters"
 msgstr ""
 
 #. Tooltip explaining how to enable print mode
-#: static/locale.js:161
+#: static/locale.js:169
 msgid "First select a hospital from the list on the left. Then Print will print a list of hospitals in order of distance from your selection."
 msgstr ""
 
@@ -537,7 +537,7 @@ msgid "Invalid or missing subject type."
 msgstr ""
 
 #. Abbreviated months of the year.
-#: static/locale.js:139
+#: static/locale.js:143
 msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
 msgstr ""
 
@@ -592,7 +592,7 @@ msgid "Loader:"
 msgstr ""
 
 #. Indicator that the application is loading.
-#: templates/base.html:178 static/locale.js:134
+#: static/locale.js:138 templates/base.html:178
 msgid "Loading..."
 msgstr ""
 
@@ -682,12 +682,12 @@ msgid "New Value"
 msgstr ""
 
 #. Label for a new subject
-#: static/locale.js:143
+#: static/locale.js:147
 msgid "New facility"
 msgstr ""
 
 #. Link text to go to main page of resource finder sans iframe
-#: templates/map.html:202
+#: templates/map.html:157
 msgid "New window"
 msgstr ""
 
@@ -704,6 +704,11 @@ msgstr ""
 #. message saying no facilities are subscribed to
 #: templates/settings.html:134
 msgid "No facilities to display."
+msgstr ""
+
+#. Error message when there are no facilities to view on the map.
+#: static/locale.js:155
+msgid "No matching facilities. Try zooming out or choosing a different filter."
 msgstr ""
 
 #. Error message
@@ -728,7 +733,7 @@ msgid "Old Value"
 msgstr ""
 
 #. Header showing the number of available beds out of the number of total beds that are available in a hospital
-#: static/locale.js:152
+#: static/locale.js:160
 msgid "Open/Total Beds"
 msgstr ""
 
@@ -798,7 +803,7 @@ msgid "Previous value"
 msgstr ""
 
 #. Tooltip explaining a 'Print' link
-#: static/locale.js:166
+#: static/locale.js:174
 #, sh-format
 msgid "Print a list of hospitals in order of distance from ${FACILITY_NAME}"
 msgstr ""
@@ -819,7 +824,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:554
+#: edit.py:563
 msgid "Record updated."
 msgstr ""
 
@@ -866,7 +871,7 @@ msgid "Saved."
 msgstr ""
 
 #. Message indicating saving hospital information
-#: static/locale.js:174
+#: static/locale.js:182
 msgid "Saving..."
 msgstr ""
 
@@ -876,7 +881,7 @@ msgid "Select subject type to export:"
 msgstr ""
 
 #. work done by someone that benefits another
-#: static/locale.js:178 ../tools/setup.py:169
+#: ../tools/setup.py:169 static/locale.js:186
 msgid "Services"
 msgstr ""
 
@@ -896,7 +901,7 @@ msgid "Settings page"
 msgstr ""
 
 #. Label for a control that filters a list of facilities
-#: static/locale.js:182
+#: static/locale.js:190
 msgid "Show"
 msgstr ""
 
@@ -921,13 +926,8 @@ msgid "State / Province / Territory"
 msgstr ""
 
 #. Label to subscribe to a subject
-#: templates/hospital_bubble.html:41 static/locale.js:190
+#: templates/hospital_bubble.html:41 static/locale.js:198
 msgid "Subscribe to email updates"
-msgstr ""
-
-#. Header for a list of provisions
-#: templates/map.html:107
-msgid "Supplies"
 msgstr ""
 
 #. Link to terms of service for the application
@@ -941,7 +941,7 @@ msgid "Thanks for adding content to Resource Finder. To get started please creat
 msgstr ""
 
 #. Notification for a facility with missing location information.
-#: static/locale.js:147
+#: static/locale.js:151
 msgid "This facility does not yet have a location entered."
 msgstr ""
 
@@ -991,7 +991,7 @@ msgid "Unreinforced masonry"
 msgstr ""
 
 #. Label to unsubscribe from a subject
-#: templates/hospital_bubble.html:36 static/locale.js:198
+#: static/locale.js:206 templates/hospital_bubble.html:36
 msgid "Unsubscribe"
 msgstr ""
 
@@ -1001,12 +1001,12 @@ msgid "Unsubscribe from checked"
 msgstr ""
 
 #. Message indicating the user is unsubscribed
-#: static/locale.js:202
+#: static/locale.js:210
 msgid "Unsubscribed."
 msgstr ""
 
 #. Label indicating a record was updated
-#: static/locale.js:206
+#: static/locale.js:214
 msgid "Updated"
 msgstr ""
 
@@ -1083,7 +1083,7 @@ msgid "You will receive ${FREQUENCY} email updates for this facility. Use the ${
 msgstr ""
 
 #. Message indicating hospital information has been saved
-#: static/locale.js:170
+#: static/locale.js:178
 msgid "Your edit has been saved"
 msgstr ""
 
@@ -1113,13 +1113,18 @@ msgstr ""
 msgid "capacity"
 msgstr ""
 
+#. Label for a filter that restricts results to the current map viewport
+#: static/locale.js:134
+msgid "in map view"
+msgstr ""
+
 #. Header for the number of facilities less than 10 miles from a location.
 #: templates/print.html:76
 msgid "no more than 10 miles away"
 msgstr ""
 
 #. Very short abbreviation for a phone number, indended to disambiguate from a fax number.  (example: p 555-555-5555)
-#: static/locale.js:157
+#: static/locale.js:165
 #, sh-format
 msgid "p ${PHONE}"
 msgstr ""
