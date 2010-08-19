@@ -375,7 +375,7 @@ class MailEditor(InboundMailHandler):
                                     }
                                     #i18n: Error message for an invalid value
                                     msg = _('"%(value)s" is not a valid value' +
-                                            ' for %(attribute)s' % data)
+                                            ' for %(attribute)s') % data
                                     errors.append({
                                         'error_message': msg,
                                         'original_line': update
