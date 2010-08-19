@@ -4,7 +4,7 @@ Each facility must start with a line in the following format:
 
 update General Hospital
 
-Here, "example.org/123" is the unique key of "General Hospital". The key of the facility "example.org/123" is not strictly required if the title is supplied. Each line that follows must start with the name of an attribute, followed by a space, and then the new value for that attribute. A complete list of attribute names is included below. For example, to update the number of total and available beds for a facility, type:
+Here, General Hospital is the title of the facility to be updated. Each line that follows the initial update line must start with the name of an attribute, followed by a space, and then the new value for that attribute. A complete list of attribute names is included below. For example, to update the number of total and available beds for a facility, type:
 
 update General Hospital
 Total beds 500
