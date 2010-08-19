@@ -681,7 +681,7 @@ function update_viewport_filter() {
 // Update the subject list immediately based on the current viewport
 function update_viewport_filter_now() {
   update_subject_status_is();
-  update_subject_icon_images();
+  update_visible_subject_icon_images();
   update_subject_list(); 
 }
 
@@ -700,9 +700,9 @@ function update_subject_icons() {
   marker_clusterer.addMarkers(to_add);
 }
 
-// Update the subject map icon images only; Does not update location or
-// visibility of the icon like update_subject_icons.
-function update_subject_icon_images() {
+// Updates the subject map icon images for visible subjects.
+// Does not update location or visibility of the icon like update_subject_icons.
+function update_visible_subject_icon_images() {
   for (var su = 1; su < subjects.length; su++) {
     var st = subject_status_is[su];
     if (st == STATUS_GOOD) {
@@ -713,17 +713,24 @@ function update_subject_icon_images() {
 
 /**
  * Updates a map icon for a subject based on status and zoom level.
- * @param {Number} subject_i index into the subject array for the subject
- * @param {Boolean} opt_bulk if false (default), remove the marker from
- * marker_clusterer if necessary
+ * Unlike update_subject_icon_image, this method also updates location,
+ * z-index, and potentially removes the icon from the marker clusterer based
+ * on its status.
+ *  @param {Number} subject_i index into the subject array for the subject
+ * @param {Boolean} opt_no_remove if false (default), remove the marker from
+ * marker_clusterer if the subject status indicates it should not be rendered
+ * @return {google.maps.Marker|null} the updated marker or null if the subject
+ * status indicates the marker should not be rendered
  */
-function update_subject_icon(subject_i, opt_bulk) {
+function update_subject_icon(subject_i, opt_no_remove) {
   var marker = markers[subject_i];
   if (marker) {
     var subject = subjects[subject_i];
     var st = subject_status_is[subject_i];
+    // Out-of-bounds icons are filtered correctly by the marker clusterer,
+    // don't need to remove them here.
     if (st != STATUS_GOOD && st != STATUS_OUT_OF_BOUNDS) {
-      if (!opt_bulk) {
+      if (!opt_no_remove) {
         marker_clusterer.removeMarker(marker);
       }
       return null;
@@ -743,6 +750,7 @@ function update_subject_icon(subject_i, opt_bulk) {
 
 /**
  * Updates a map icon image for a subject based on status and zoom level.
+ * Does not update location of visibility of the icon like update_subject_icon.
  * @param {Number} subject_i index into the subject array for the subject
  */
 function update_subject_icon_image(subject_i) {
@@ -936,8 +944,16 @@ function align_header_with_table(thead, tbody) {
 // Determine the status of each subject according to the user's filters.
 function update_subject_status_is() {
   var bounds = map.getBounds();
+  if (bounds && marker_clusterer.getProjection()
+      && marker_clusterer.getExtendedBounds) {
+    // Use the slightly larger bounds considered by the marker clusterer
+    // this means that markers just slightly offscreen still appear in the
+    // facility list.
+    bounds = marker_clusterer.getExtendedBounds(bounds);    
+  }
   var viewport_filter = $('viewport-filter');
   var viewport_filter_on = viewport_filter && viewport_filter.checked;
+  var good_count = 0;
   for (var su = 1; su < subjects.length; su++) {
     var subject = subjects[su];
     if (selected_filter_attribute_i <= 0) {
@@ -959,6 +975,13 @@ function update_subject_status_is() {
       // If filtering by viewport, disqualify STATUS_GOOD subjects if they
       // fall outside the viewport
       subject_status_is[su] = STATUS_OUT_OF_BOUNDS;
+    }
+    if (print && subject_status_is[su] == STATUS_GOOD
+        && good_count >= MAX_MARKERS_TO_PRINT) {
+      subject_status_is[su] = STATUS_BAD;
+    }
+    if (subject_status_is[su] == STATUS_GOOD) {
+      good_count++;
     }
   }
 }
@@ -1101,7 +1124,7 @@ function handle_viewport_filter_toggle() {
   var viewport_filter_on = $('viewport-filter').checked;
   _gaq.push(['_trackEvent', 'subject_list', 'viewport_filter',
              viewport_filter_on ? 'on' : 'off']);
-  update_viewport_filter();
+  update_viewport_filter_now();
 }
 
 function hover_activator(id) {
