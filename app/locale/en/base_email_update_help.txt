@@ -15,7 +15,7 @@ An update email for two facilities might look like the following:
 update General Hospital
 Total beds 37
 Available beds 10
-Contact name John Smith
+Email test@example.com
 
 update Public Hospital
 Reachable by road yes

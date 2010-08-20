@@ -9,11 +9,12 @@ To do so, please add the words nickname and affiliation to the first line two li
 nickname John Smith
 affiliation Smith Inc.
 
-Be sure to also include your pending updates below in the body of your response email.
+Be sure to also include any updates in the body of your response email.
 {% endif %}{% if not updates %}
 ***No valid updates were received.***{% if not errors and not ambiguities and not unrecognized %}
+
 --- --- --- ---
-REFERENCE DOCUMENT @ {{url}}/help/email
+REFERENCE DOCUMENT
 
 {% include "base_email_update_help.txt" %}{% endif %}{% endif %}
 {% if ambiguities %}
@@ -22,8 +23,7 @@ The following updates were ambiguous.
 {% for ambiguity in ambiguities %}update {{ambiguity.subject_title}}
 -- Multiple facilities were found with the same title.
 -- Try again with one of the following:{% for subject in ambiguity.subjects %}
--- {{subject.title}} ({{subject.name}}){% endfor %}
-{% for update in ambiguity.updates %}{{update}}
+-- {{subject.title}} ({{subject.name}}){% endfor %}{% for update in ambiguity.updates %}{{update}}
 {% endfor %}{% endfor %}{% endif %}{% if unrecognized %}
 The following facility titles could not be recognized.
 
@@ -48,7 +48,9 @@ We recently received the following updates from you. They were inserted into the
 {% for change in update.changed_attributes %}{{change.attribute}} {{change.value}}
 {% endfor %}{% endfor %}{% endif %}{% endif %}{% if errors or ambiguities or updates or unrecognized %}
 --- --- --- ---
-REFERENCE DOCUMENT @ {{url}}/help/email{% endif %}{% if unrecognized or errors or ambiguities %}
+REFERENCE DOCUMENT{% endif %}{% if unrecognized or errors or ambiguities %}
 
 {% include "base_email_update_help.txt" %}
 {% endif %}
+
+For further help, visit {{url}}/help/email.

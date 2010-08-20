@@ -177,18 +177,6 @@ UNSUPPORTED_ATTRIBUTES = {
 }
 
 
-def match_nickname_affiliation(s, text):
-    """For the supplied string s, try to find a match in text containing
-    the string s, followed by whitespace and then extra text. The extra text
-    will be accessible by the group name s.
-    """
-    if not s:
-        return
-    exp = r'^%s\s+(?P<%s>.+)' % (s, s)
-    match = re.search(exp, text, flags=re.UNICODE | re.I | re.MULTILINE)
-    return match and match.group(s) or None
-
-
 def match_email(text):
     """Given a string, tries to find a regex match for an email."""
     email_regex = r'(.+\s+)*(<)*\s*(?P<email>\w+(?:.+\w+)*@\w+(?:\.\w+)+)(>)*'
@@ -214,7 +202,7 @@ class MailEditor(InboundMailHandler):
         send_email: sends a response/confirmation email to the user
     """
     def init(self, message):
-        self.domain = self.request.headers['Host']
+        self.domain = 'http://%s' % self.request.headers['Host']
         # Pulls out the email address from any string
         self.email = match_email(message.sender)
         self.account = model.Account.all().filter('email =', self.email).get()
@@ -250,8 +238,8 @@ class MailEditor(InboundMailHandler):
         # TODO(pfritzsche): Add HTML support.
         for content_type, body in message.bodies('text/plain'):
             body = body.decode()
-            nickname = match_nickname_affiliation('nickname', body)
-            affiliation = match_nickname_affiliation('affiliation', body)
+            nickname, affiliation = self.match_nickname_affiliation(
+                body.split('update')[0])
             if nickname and affiliation:
                 self.account = self.account or model.Account(
                     email=self.email, description=message.sender,
@@ -299,6 +287,22 @@ class MailEditor(InboundMailHandler):
             else:
                 self.send_email(message, {})
             break # to only pay attention to the first body found
+
+    def match_nickname_affiliation(self, text):
+        """For the supplied string s, try to find a match in text containing
+        the string s, followed by whitespace and then extra text. The extra text
+        will be accessible by the group name s.
+        """
+        def check_for_example(s, example):
+            exp = r'%s\s+(?P<%s>.+)' % (s, s)
+            matches = re.finditer(exp, text, flags=self.update_line_flags)
+            for match in matches:
+                if match.group(s) == example:
+                    continue
+                return match.group(s).strip()
+        nickname = check_for_example('nickname', 'John Smith')
+        affiliation = check_for_example('affiliation', 'Smith Inc.')
+        return (nickname, affiliation)
 
     def extract_subject_from_update_line(self, match):
         """Given a re.match for an update line, returns the corresponding

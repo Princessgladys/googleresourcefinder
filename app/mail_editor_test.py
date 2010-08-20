@@ -513,6 +513,12 @@ class MailEditorTest(MediumTestCase):
                 u't\u00e9st@example.com')
         assert (mail_editor.match_email(' test@example.com  ') ==
                 'test@example.com')
+        assert (match_editor.match_email('"First Last" ' +
+                '<first.last@example.com.pk>') == 'first.last@example.com.pk')
+        assert (match_editor.match_email('12_3%4-56@123-456.org') ==
+                12_3%4-56@123-456.org)
+        assert (match_editor.match_email('<me+pakistan@example.biz>') ==
+                'me+pakistan@example.biz')
         assert not mail_editor.match_email('test@')
         assert not mail_editor.match_email('.com')
         assert not mail_editor.match_email('test@examplecom')
@@ -561,7 +567,8 @@ class MailEditorTest(MediumTestCase):
             assert not m['title']
             assert m['subject_name'] == u'\u00e9xample.org/123'
 
-            # Lines with only title should break. Next regex will cover that case.
+            # Lines with only title should break. The other regex will cover
+            # that particular case.
             assert not match(regex, prefix + line_title)
             assert not match(regex, prefix + line_extra_chars_title)
             assert not match(regex, prefix + line_extra_chars_title_snafu)
@@ -626,4 +633,5 @@ class MailEditorTest(MediumTestCase):
         assert 'update title_foo' not in body
         assert 'ERROR' not in message.subject()
         assert self.email == message.to_list()[0]
-        assert 'haiti-updates@resource-finder.appspotmail.com' == message.sender()
+        assert ('haiti-updates@resource-finder.appspotmail.com' ==
+                message.sender())
