@@ -1,0 +1,23 @@
+To update a facility via email, you can either draft a new email or reply to an update you received with changed information.
+
+Each facility must start with a line in the following format:
+
+update General Hospital
+
+Here, General Hospital is the title of the facility to be updated. Each line that follows the initial update line must start with the name of an attribute, followed by a space, and then the new value for that attribute. A complete list of attribute names is included below. For example, to update the number of total and available beds for a facility, type:
+
+update General Hospital
+Total beds 500
+Available beds 79
+
+An update email for two facilities might look like the following:
+
+update General Hospital
+Total beds 37
+Available beds 10
+Contact name John Smith
+
+update Public Hospital
+Reachable by road yes
+
+{% include help_file %}

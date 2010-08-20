@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Resource Finder</title>
+<style>
+  body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
+  h1 { font-size: 16px }
+  ol { margin:0 0 1em 2em; *margin:0 0 1em 2.3em }
+  p { margin:0 0 1em }
+  li { margin:0 0 .5em }
+  .footer { margin:3em 0 0; text-align:center; color: #666; }
+  .q { font-weight: bold }
+  .maincontent { width:760px; margin: 15px; }
+  pre { margin-left: 2em; padding: 0.5em; background: #eee;
+    border: 1px solid #ddd; }
+</style>
+</head>
+<body class="maincontent">
+  <h1>Updating Facilities by Email</h1>
+
+  <p>To update a hospital via email, you can either draft a new email or reply
+  to an update you received with changed information.
+
+  <p>Each hospital must start with a line in the following format:
+
+  <pre>update General Hospital</pre>
+
+  <p>Here, "haiti:example.org/123" is the unique key of "General Hospital". The key of the hospital "haiti:example.org/123" is not strictly required if the title is supplied.
+  
+  <p>Each line that follows must start with the name of an attribute, followed by a space, and then the new value for that attribute. A complete list of attribute names is included below. For example, to update the number of total and available beds for a hospital, type:
+
+  <pre>update General Hospital (haiti:example.org/123)
+Total beds 500
+Available beds 79</pre>
+
+  <p>An update email for two facilities might look like the following:
+
+  <pre>update General Hospital
+Total beds 37
+Available beds 10
+Contact name John Smith
+
+update Public Hospital
+Reachable by road yes</pre>
+
+  <h1>Supported Attributes</h1>
+
+  <table>
+    <tr>
+      <td colspan="2">
+        <b>Text attribute values can contain any letter, number, or
+          punctuation:</b>
+      </td>
+    </tr>
+    <tr>
+      <td>Contact name</td>
+      <td>The primary contact of the hospital</td>
+    </tr>
+    <tr>
+      <td>Phone</td>
+      <td>The primary phone number of the hospital</td>
+    </tr>
+    <tr>
+      <td>Email</td>
+      <td>The primary email contact of the hospital</td>
+    </tr>
+    <tr>
+      <td>Department</td>
+      <td>The hospital's department name</td>
+    </tr>
+    <tr>
+      <td>District</td>
+      <td>The hospital's district name</td>
+    </tr>
+    <tr>
+      <td>Commune</td>
+      <td>The hospital's commune name</td>
+    </tr>
+    <tr>
+      <td>Address</td>
+      <td>The hospital's address</td>
+    </tr>
+    <tr>
+      <td>Organization</td>
+      <td>The hospital's organization name</td>
+    </tr>
+    <tr>
+      <td>Damage</td>
+      <td>Description of any damage done to the hospital</td>
+    </tr>
+    <tr>
+      <td>Alert status</td>
+      <td>Any significant alert information for the hospital</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <b><br/>Number attribute values must be whole numbers:</b>
+      </td>
+    </tr>
+    <tr>
+      <td>Available beds</td>
+      <td>The number of available beds at the hospital</td>
+    </tr>
+    <tr>
+      <td>Total beds</td>
+      <td>The total number of beds at the hospital</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <b><br/>Yes/No attribute values must be either "yes" or "no":</b>
+      </td>
+    </tr>
+    <tr>
+      <td>Reachable by road</td>
+      <td>Whether or not the hospital is reachable by road</td>
+    </tr>
+    <tr>
+      <td>Can pick up patients</td>
+      <td>Whether or not the hospital can pick up patients</td>
+    </tr>
+  </table>
+{% comment %}
+# TODO(pfritzsche): add information on list attributes, i.e. services
+{% endcomment %}
+{% include "footer.html" %}

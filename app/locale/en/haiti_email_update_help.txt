@@ -1,0 +1,22 @@
+Text attribute values can contain any letter, number, or punctuation:
+    Contact name: The primary contact of the hospital
+    Phone: The primary phone number of the hospital
+    Email: The primary email contact of the hospital
+    Department: The hospital's department name
+    District: The hospital's district name
+    Commune: The hospital's commune name
+    Address: The hospital's address
+    Organization: The hospital's organization name
+    Damage: Description of any damage done to the hospital
+    Alert status: Any significant alert information for the hospital
+
+Number attribute values must be whole numbers:
+    Available beds: The number of available beds at the hospital
+    Total beds: The total number of beds at the hospital
+
+Yes/No attribute values must be either "yes" or "no":
+    Reachable by road: Whether or not the hospital is reachable by road
+    Can pick up patients: Whether or not the hospital can pick up patients
+{% comment %}
+# TODO(pfritzsche): add information on list attributes, i.e. services
+{% endcomment %}
