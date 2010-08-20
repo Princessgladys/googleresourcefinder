@@ -25,10 +25,16 @@
 
 // ==== Constants
 
-var STATUS_GOOD = 1;
-var STATUS_BAD = 2;
-var STATUS_OUT_OF_BOUNDS = 3;
-var STATUS_UNKNOWN = 4;
+
+// Subject statuses.  Subjects are assigned the largest numeric status
+// that applies. So if a subject is excluded by both a viewport-filter and an
+// ordinary filter, it's status is STATUS_EXCLUDED_BY_FILTER.
+
+var STATUS_VISIBLE = 1; // Subject is visible
+var STATUS_EXCLUDED_BY_VIEWPORT = 2; // Viewport-filter is enabled and subject
+                                     // falls outside of MarkerClusterer bounds
+var STATUS_EXCLUDED_BY_FILTER = 3; // Filter is enabled and subject is excluded
+var STATUS_UNKNOWN = 4; // Status is unknown, thus will not show on the map
 var MAX_STATUS = 4;
 
 var STATUS_ICON_COLORS = [null, '080', 'a00', '444', '444'];
@@ -505,10 +511,10 @@ function initialize_markers() {
 /**
  * Adds a marker for the subject at the given index.
  * @param {Number} subject_i index into the subject array for the subject
- * @param {Boolean} opt_bulk if false (default), add the marker to
+ * @param {Boolean} opt_ignore_clusterer if true, do not add the marker to
  * marker_clusterer
  */
-function add_marker(subject_i, opt_bulk) {
+function add_marker(subject_i, opt_ignore_clusterer) {
   var subject = subjects[subject_i];
   var location = subject.values[attributes_by_name.location];
   if (!location) {
@@ -525,7 +531,7 @@ function add_marker(subject_i, opt_bulk) {
     google.maps.event.addListener(
       markers[subject_i], 'click', subject_selector(subject_i));
   }
-  if (!opt_bulk) {
+  if (!opt_ignore_clusterer) {
     marker_clusterer.addMarker(markers[subject_i]);
   }
 }
@@ -658,7 +664,7 @@ function update_map_bounds() {
     var subject_i = subject_is[i];
     var marker = markers[subject_i];
     var subject_status = subject_status_is[subject_i];
-    if (marker && subject_status == STATUS_GOOD) {
+    if (marker && subject_status == STATUS_VISIBLE) {
       bounds.extend(marker.getPosition());
     }
   }
@@ -681,7 +687,7 @@ function update_viewport_filter() {
 // Update the subject list immediately based on the current viewport
 function update_viewport_filter_now() {
   update_subject_status_is();
-  update_visible_subject_icon_images();
+  update_visible_subject_icons();
   update_subject_list(); 
 }
 
@@ -689,9 +695,12 @@ function update_viewport_filter_now() {
 function update_subject_icons() {
   var markers_to_keep = [];
   for (var su = 1; su < subjects.length; su++) {
-    var marker = update_subject_icon(su, true);
-    if (marker) {
-      markers_to_keep.push(marker);
+    var st = subject_status_is[su];
+    if (st == STATUS_VISIBLE || st == STATUS_EXCLUDED_BY_VIEWPORT) {
+      // Viewport-excluded icons are filtered correctly by the marker clusterer,
+      // keep them here.
+      update_subject_icon(su);
+      markers_to_keep.push(markers[su]);
     }
   }
   marker_clusterer.clearMarkers();
@@ -700,60 +709,25 @@ function update_subject_icons() {
   marker_clusterer.addMarkers(to_add);
 }
 
-// Updates the subject map icon images for visible subjects.
-// Does not update location or visibility of the icon like update_subject_icons.
-function update_visible_subject_icon_images() {
+/**
+ * Updates the subject map icons for visible subjects only. This is a
+ * performance optimization over update_subject_icons(). It does not add or
+ * remove icons from the map.
+ */
+function update_visible_subject_icons() {
   for (var su = 1; su < subjects.length; su++) {
     var st = subject_status_is[su];
-    if (st == STATUS_GOOD) {
-      update_subject_icon_image(su);
+    if (st == STATUS_VISIBLE) {
+      update_subject_icon(su);
     }
   }
 }
 
 /**
  * Updates a map icon for a subject based on status and zoom level.
- * Unlike update_subject_icon_image, this method also updates location,
- * z-index, and potentially removes the icon from the marker clusterer based
- * on its status.
- *  @param {Number} subject_i index into the subject array for the subject
- * @param {Boolean} opt_no_remove if false (default), remove the marker from
- * marker_clusterer if the subject status indicates it should not be rendered
- * @return {google.maps.Marker|null} the updated marker or null if the subject
- * status indicates the marker should not be rendered
- */
-function update_subject_icon(subject_i, opt_no_remove) {
-  var marker = markers[subject_i];
-  if (marker) {
-    var subject = subjects[subject_i];
-    var st = subject_status_is[subject_i];
-    // Out-of-bounds icons are filtered correctly by the marker clusterer,
-    // don't need to remove them here.
-    if (st != STATUS_GOOD && st != STATUS_OUT_OF_BOUNDS) {
-      if (!opt_no_remove) {
-        marker_clusterer.removeMarker(marker);
-      }
-      return null;
-    }
-    update_subject_icon_image(subject_i);
-    marker.setZIndex(STATUS_ZINDEXES[st]);
-    var loc = subjects[subject_i].values[attributes_by_name.location];
-    if (loc) {
-      var new_loc = new google.maps.LatLng(loc.lat, loc.lon);
-      if (!new_loc.equals(marker.getPosition())) {
-        marker.setPosition(new_loc);
-      }
-    }
-  }
-  return marker;
-}
-
-/**
- * Updates a map icon image for a subject based on status and zoom level.
- * Does not update location of visibility of the icon like update_subject_icon.
  * @param {Number} subject_i index into the subject array for the subject
  */
-function update_subject_icon_image(subject_i) {
+function update_subject_icon(subject_i) {
   var marker = markers[subject_i];
   if (marker) {
     var subject = subjects[subject_i];
@@ -769,6 +743,7 @@ function update_subject_icon_image(subject_i) {
       icon_url = make_icon(title, st, detail);
     }
     marker.setIcon(icon_url);
+    marker.setZIndex(STATUS_ZINDEXES[st]);
   }
 }
 
@@ -782,7 +757,7 @@ function update_subject_list() {
     var su = subject_is[i];
     var subject = subjects[su];
     var row = $('subject-' + su);
-    if (subject_status_is[su] === STATUS_GOOD) {
+    if (subject_status_is[su] === STATUS_VISIBLE) {
       row.style.display = '';
       row.style.className = get_subject_row_css_class(su, subject);
       visible_subjects++;
@@ -808,7 +783,7 @@ function populate_subject_list() {
     var su = subject_is[i];
     var subject = subjects[su];
     var subject_type = subject_types[subject.type];
-    if (subject_status_is[su] === STATUS_GOOD) {
+    if (subject_status_is[su] === STATUS_VISIBLE) {
       var row = $$('tr', {
         id: 'subject-' + su,
         'class': get_subject_row_css_class(su, subject),
@@ -859,7 +834,7 @@ function populate_print_subject_list() {
     var su = subject_is[i];
     var subject = subjects[su];
     var subject_type = subject_types[subject.type];
-    if (subject_status_is[su] === STATUS_GOOD) {
+    if (subject_status_is[su] === STATUS_VISIBLE) {
       var row = $$('tr', {
         id: 'subject-' + su,
         'class': 'subject-' + (i % 2 == 0 ? 'even' : 'odd')
@@ -957,30 +932,30 @@ function update_subject_status_is() {
   for (var su = 1; su < subjects.length; su++) {
     var subject = subjects[su];
     if (selected_filter_attribute_i <= 0) {
-      subject_status_is[su] = STATUS_GOOD;
+      subject_status_is[su] = STATUS_VISIBLE;
     } else if (!subject) {
       subject_status_is[su] = STATUS_UNKNOWN;
     } else {
-      subject_status_is[su] = STATUS_BAD;
+      subject_status_is[su] = STATUS_EXCLUDED_BY_FILTER;
       var a = selected_filter_attribute_i;
       if (attributes[a].type === 'multi') {
         if (contains(subject.values[a] || [], selected_filter_value)) {
-          subject_status_is[su] = STATUS_GOOD;
+          subject_status_is[su] = STATUS_VISIBLE;
         }
       }
     }
     if (viewport_filter_on && bounds && markers[su]
-        && subject_status_is[su] == STATUS_GOOD
+        && subject_status_is[su] == STATUS_VISIBLE
         && !bounds.contains(markers[su].getPosition())) {
-      // If filtering by viewport, disqualify STATUS_GOOD subjects if they
+      // If filtering by viewport, disqualify STATUS_VISIBLE subjects if they
       // fall outside the viewport
-      subject_status_is[su] = STATUS_OUT_OF_BOUNDS;
+      subject_status_is[su] = STATUS_EXCLUDED_BY_VIEWPORT;
     }
-    if (print && subject_status_is[su] == STATUS_GOOD
+    if (print && subject_status_is[su] == STATUS_VISIBLE
         && good_count >= MAX_MARKERS_TO_PRINT) {
-      subject_status_is[su] = STATUS_BAD;
+      subject_status_is[su] = STATUS_EXCLUDED_BY_FILTER;
     }
-    if (subject_status_is[su] == STATUS_GOOD) {
+    if (subject_status_is[su] == STATUS_VISIBLE) {
       good_count++;
     }
   }
@@ -1226,11 +1201,16 @@ function select_subject(subject_i) {
         add_marker(subject_i);
       } else if (had_location && !new_location) {
         remove_marker(subject_i);
+      } else if (had_location && new_location) {
+        markers[subject_i].setPosition(new google.maps.LatLng(
+          new_location.lat, new_location.lon));
       }
+
+      update_subject_status_is();
       update_subject_row(subject_i);
       update_subject_icon(subject_i);
 
-      if (markers[selected_subject_i]) {
+      if (markers[subject_i]) {
         info.setContent(result.html);
         info.open(map, markers[subject_i]);
         // Sets up the tabs and should be called after the DOM is created.
