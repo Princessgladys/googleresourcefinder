@@ -21,7 +21,7 @@ received update.
 
     parse(): parses a list of unicode strings into datastore-friendly objects
     MailEditor: incoming mail handler-- responds to incoming emails addressed to
-        updates@resource-finder@appspotmail.com
+        <subdomain>-updates@resource-finder@appspotmail.com
     format_changes(): helper function to format attribute value tuples
 """
 
@@ -32,7 +32,7 @@ import logging
 import os
 import re
 import string
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from google.appengine.api import mail
 from google.appengine.api.labs import taskqueue
@@ -42,7 +42,8 @@ from google.appengine.ext.webapp.mail_handlers import InboundMailHandler
 import cache
 import model
 import utils
-from utils import db, format, order_and_format_updates
+from feeds.xmlutils import Struct
+from utils import db, format, get_message, order_and_format_updates
 
 # If this is found in a line of the email, the system will immediately stop
 # parsing and ignore the remainder of the email.
@@ -198,15 +199,15 @@ def match_email(text):
 
 class MailEditor(InboundMailHandler):
     """Primary handler for inbound emails targeting
-    updates@resource-finder.appspotmail.com.
+    <subdomain>-updates@resource-finder.appspotmail.com.
 
     Args:
         account: the account of the user the email is from
 
     Methods:
-        authenticate: checks to see if the email is from a valid account
-        is_authentication: checks to see if the email includes
-            authenticating text
+        have_profile_info: checks to see if the email is from a valid account
+        check_and_store_profile_info: checks to see if the email includes
+            profile information for the user
         receive: override function- triggered when an email is received
         process_email: searches the text of an email for updates and errors
         update_subjects: updates the datastore with all valid updates
@@ -216,43 +217,36 @@ class MailEditor(InboundMailHandler):
         self.domain = self.request.headers['Host']
         # Pulls out the email address from any string
         self.email = match_email(message.sender)
+        self.account = model.Account.all().filter('email =', self.email).get()
+        # "To" field of email messages should be in the form
+        # "<subdomain>-updates@resouce-finder.appspotmail.com".
+        self.subdomain = message.to.split('-')[0]
 
-        # Initialize regexes for finding subjects to update from the email
-        unquoted_base = '^' # beginning of a regex for an unquoted line
-        quoted_base = '^(?P<quotes>\W+)' # beginning for a quoted line
-        regex_wo_key = r'update\s+(?P<title>.*)' # match a line with no key
-        regex_w_key = r'%s\s*\((?P<subject_name>.+/.+)\)' % regex_wo_key
-        # ^ match a line that contains a key and possibly the subject's title
+        regex_base = r'update\s+(?P<subject>.*)'
         self.update_line_flags = re.UNICODE | re.MULTILINE | re.I
-        self.update_line_regexes = []
-        for base in [unquoted_base, quoted_base]:
-            self.update_line_regexes.append([
-                base + regex_w_key,
-                base + regex_wo_key
-            ])
-
-        self.subdomain = message.to[:message.to.find('-')]
+        self.update_line_regexes = {
+            'unquoted': '^%s' % regex_base,
+            'quoted': '^(?P<quotes>\W+)%s' % regex_base,
+            'key': '.*\((?P<subject_name>.+/.+)\)\s*$'
+        }
 
     def validate_subdomain(self):
         """Checks to make sure the user-supplied subdomain is legitimate."""
         return model.Subdomain.get_by_key_name(self.subdomain)
 
-    def authenticate(self, message):
-        """Checks to see if the email is from a user with an existing account.
-        Account must have both a nickname and affiliation to be considered valid
-        for submission to the datastore. Returns True if the account exists."""
-        self.account = model.Account.all().filter(
-            'email =', self.email).get()
-        return (self.account and self.account.nickname and
-                self.account.affiliation)
+    def have_profile_info(self):
+        """Checks to see if there is an account for the user's email and if it
+        has a nickname and affiliation associated with it."""
+        return self.account and self.account.nickname and \
+            self.account.affiliation
 
-    def is_authentication(self, message):
+    def check_and_store_profile_info(self, message):
         """Checks to see if the email contains a nickname and affiliation for
         entry into the database. If both are found, creates a new account for
         the user and inserts it into the datastore then returns True. Returns
         False if no such information is found."""
-        if self.account and self.account.nickname and self.account.affiliation:
-            return
+        if self.have_profile_info():
+            return True
         # TODO(pfritzsche): Add HTML support.
         for content_type, body in message.bodies('text/plain'):
             body = body.decode()
@@ -278,26 +272,61 @@ class MailEditor(InboundMailHandler):
         new information and/or problems.
         """
         self.init(message)
-        self.need_authentication = not (self.authenticate(message) or
-                                        self.is_authentication(message))
+        self.need_profile_info = not (self.have_profile_info() or
+            self.check_and_store_profile_info(message))
         if not self.validate_subdomain():
             # TODO(pfritzsche): Add better handling of invalid subdomain
-            self.send_email(message, [], [], [], no_subdomain=True)
+            self.send_email(message, {}, no_subdomain=True)
             return
         # TODO(pfritzsche): Add HTML support.
         for content_type, body in message.bodies('text/plain'):
-            updates, errors, ambiguities = self.process_email(body.decode())
-            if updates or errors or ambiguities:
+            data = self.process_email(body.decode())
+            if (data.unrecognized_subject_stanzas or data.ambiguous_stanzas or
+                data.update_stanzas or data.error_stanzas):
+                # Email date arrives in the same form as the following example:
+                # Thu, 19 Aug 2010 17:29:23 -0400.
                 date_format = '%a, %d %b %Y %H:%M:%S'
-                observed = datetime.strptime(message.date[:-6], date_format)
-                if updates and not self.need_authentication:
-                    self.update_subjects(updates, observed)
+                # Chop off the last 6 characters because %z UTC offset parsing
+                # is not supported on all systems. Then manually parse it
+                # because Python is silly [@http://bugs.python.org/issue6641]
+                observed = (datetime.strptime(message.date[:-6], date_format) -
+                            parse_utc_offset(message.date[-5:]))
+                if data.update_stanzas and not self.need_profile_info:
+                    self.update_subjects(data.update_stanzas, observed)
                 logging.info('mail_editor.py: update received from %s' %
                              self.email)
-                self.send_email(message, updates, errors, ambiguities)
+                self.send_email(message, data)
             else:
-                self.send_email(message, [], [], [])
+                self.send_email(message, {})
             break # to only pay attention to the first body found
+
+    def extract_subject_from_update_line(self, match):
+        """Given a re.match for an update line, returns the corresponding
+        subject if one exists."""
+        subject_line = match.group('subject')
+        key_match = re.match(self.update_line_regexes['key'], subject_line,
+                             flags=self.update_line_flags)
+        if key_match:
+            subject_name = key_match.group('subject_name')
+            subject = model.Subject.get(self.subdomain, subject_name)
+            return subject
+        else:
+            subjects = model.Subject.all_in_subdomain(self.subdomain).filter(
+                'title__ =', subject_line.strip()).fetch(3)
+            if len(subjects) == 1:
+                return subjects[0]
+            return subjects
+
+    def extract_update_lines(self, match, body):
+        """Given a re.match, the body of the email, and whether or not we are
+        concerned with the quoted section of the body, returns the section
+        corresponding to the match's updates."""
+        start = match.end()
+        quotes = 'group' in match.groupdict() and match.group('quotes') or ''
+        end = body.lower().find('%supdate'.lower() % quotes, start + 1)
+        update_block = body[start:] if end == -1 else body[start:end]
+        return [line for line in update_block.split('\n') if
+                line.startswith(quotes)]
 
     def process_email(self, body):
         """Given the body of an email, locates updates from the user.
@@ -306,46 +335,42 @@ class MailEditor(InboundMailHandler):
         an unquoted section of the email, it then looks for updates in the
         quoted sections of the email.
         """
-        updates_all = [] # list of tuples (subject, updates for the subject)
-        errors_all = [] # list of tuples (error message, line in question)
-        ambiguous_all = [] # list of tuples (potential subjects, given updates)
+        data = Struct(
+            # list of tuples (subject, updates for the subject)
+            update_stanzas=[],
+            # list of tuples (subject, error'd lines)
+            error_stanzas=[],
+            # list of tuples (potential subjects, updates)
+            ambiguous_stanzas=[],
+            # list of tuples (subject title, updates)
+            unrecognized_subject_stanzas=[]
+        )
         stop = False
 
-        # work happens here
-        def process(match, quoted=False):
-            for subject_match in match:
+        # Handles the work of the function. For each potential subject match
+        # found, locates any updates or errors, and picks out unrecognized data.
+        def process(matches):
+            for subject_match in matches:
                 errors = []
                 updates = []
-                ambiguity = False
-                if 'subject_name' in subject_match.groupdict():
-                    subject_name = subject_match.group('subject_name')
-                    subject = model.Subject.get(self.subdomain, subject_name)
-                    if not subject:
-                        continue
-                else:
-                    subjects = model.Subject.all().filter('title__ =',
-                        subject_match.group('title').strip()).fetch(3)
-                    if subjects:
-                        subject = subjects[0]
-                        # If there is more than one match for this title, it is
-                        # marked ambiguous. We don't know which the user wanted.
-                        ambiguity = len(subjects) != 1
+                stop = False
+                is_ambiguous = False
+                subject = None
+                subject_s = self.extract_subject_from_update_line(subject_match)
+                update_lines = self.extract_update_lines(subject_match, body)
+                if subject_s:
+                    if isinstance(subject_s, list):
+                        data.ambiguous_stanzas.append((subject_s, update_lines))
                     else:
-                        continue
-                start = subject_match.end()
-                quotes = quoted and subject_match.group('quotes') or ''
-                end = body.lower().find(
-                    '%supdate'.lower() % quotes, start + 1)
-                update_block = body[start:] if end == -1 else body[start:end]
-                update_lines = [
-                    line for line in update_block.split('\n') if line]
-                if ambiguity:
-                    ambiguous_all.append((subjects, update_lines))
+                        subject = subject_s
+                else:
+                    data.unrecognized_subject_stanzas.append(
+                        (subject_match.group('subject'), update_lines))
+                if not subject:
                     continue
                 subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
                 unsupported = \
                     UNSUPPORTED_ATTRIBUTES[self.subdomain][subject.type]
-                stop = False
                 for update in update_lines:
                     if STOP_DELIMITER in update:
                         stop = True
@@ -354,8 +379,7 @@ class MailEditor(InboundMailHandler):
                                     re.match('.*\w+.*', word, flags=re.UNICODE)]
                     for i in range(len(update_split), 0, -1):
                         # Automate the generation of potential atribute names
-                        # from the line; hospital attribute names are between 1
-                        # and 4 words long. This checks each line for any
+                        # from the line. This checks each line for any
                         # potential attribute name that fits this description.
                         if len(update_split) <= i: # update must have >=1 words
                             continue         # present after the attribute name
@@ -369,13 +393,13 @@ class MailEditor(InboundMailHandler):
                                     value = parse(name, update_split, i)
                                     updates.append((name, value))
                                 except ValueError, error:
-                                    data = {
+                                    values = {
                                         'value': ' '.join(update_split[i:]),
                                         'attribute': name
                                     }
                                     #i18n: Error message for an invalid value
                                     msg = _('"%(value)s" is not a valid value' +
-                                            ' for %(attribute)s') % data
+                                            ' for "%(attribute)s"') % values
                                     errors.append({
                                         'error_message': msg,
                                         'original_line': update
@@ -390,20 +414,21 @@ class MailEditor(InboundMailHandler):
                             # want to set the "commune" attribute to the value
                             # "code" must escape code with "'s.
                             break
-                if updates and not ambiguity:
-                    updates_all.append((subject, updates))
+                if updates:
+                    data.update_stanzas.append((subject, updates))
                 if errors:
-                    errors_all.append((subject, errors))
+                    data.error_stanzas.append((subject, errors))
                 if stop:
                     return
 
-        for base in self.update_line_regexes:
-            for regex in base:
-                match = re.finditer(regex, body, flags=self.update_line_flags)
-                process(match)
-            if (updates_all or errors_all or ambiguous_all or stop):
+        for key in ['unquoted', 'quoted']:
+            matches = re.finditer(self.update_line_regexes[key], body,
+                                  flags=self.update_line_flags)
+            process(matches)
+            if (data.ambiguous_stanzas or data.unrecognized_subject_stanzas or
+                data.update_stanzas or data.error_stanzas or stop):
                 break
-        return updates_all, errors_all, ambiguous_all
+        return data
 
     def update_subjects(self, updates, observed, comment=''):
         """Goes through the supplied list of updates. Adds to the datastore."""
@@ -414,13 +439,13 @@ class MailEditor(InboundMailHandler):
             update_subject(subject, observed, self.account, source, values,
                            arrived=observed)
 
-    def send_email(self, original_message, updates, errors, ambiguities,
-                   no_subdomain=False):
+    def send_email(self, original_message, data, no_subdomain=False):
         """Sends a response email to the user if necessary.
 
-        If the user is not yet authorized to post, includes information on how
-        to authorize themself. Also includes a list of all accepted updates and
-        a list of any errors found in the update text that was submitted.
+        If the user has not yet provided a nickname and affiliation to the
+        system, the email includes information on how to do so. It also
+        includes a list of all accepted updates and a list of any errors found
+        in the update text that was submitted.
         """
         if self.account:
             locale = self.account.locale or 'en'
@@ -430,46 +455,56 @@ class MailEditor(InboundMailHandler):
             nickname = original_message.sender
 
         formatted_updates = []
-        for update in updates:
-            subject, update_data = update
-            subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
-            formatted_updates.append({
-                'subject_title': subject.get_value('title'),
-                'subject_name': subject.get_name(),
-                'changed_attributes': order_and_format_updates(
-                    update_data, subject_type, locale, format_changes, 0)
-            })
-
         formatted_errors = []
-        for error in errors:
-            subject, error_data = error
-            formatted_errors.append({
-                'subject_title': subject.get_value('title'),
-                'subject_name': subject.get_name(),
-                'data': error_data
-            })
-
         formatted_ambiguities = []
-        for ambiguity in ambiguities:
-            subjects, update_data = ambiguity
-            for i in range(len(subjects)):
-                subject_data = {
-                    'title': subjects[i].get_value('title'),
-                    'name': subjects[i].get_name()
-                }
-                subjects[i] = subject_data
-            formatted_ambiguities.append({
-                'subject_title': subjects[0]['title'],
-                'subjects': subjects,
-                'updates': update_data
-            })
+        formatted_unrecognized_subjects = []
+        if data:
+            for update in data.update_stanzas:
+                subject, update_data = update
+                subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
+                formatted_updates.append({
+                    'subject_title': subject.get_value('title'),
+                    'subject_name': subject.get_name(),
+                    'changed_attributes': order_and_format_updates(
+                        update_data, subject_type, locale, format_changes, 0)
+                })
+
+            for error in data.error_stanzas:
+                subject, error_data = error
+                formatted_errors.append({
+                    'subject_title': subject.get_value('title'),
+                    'subject_name': subject.get_name(),
+                    'data': error_data
+                })
+
+            for ambiguity in data.ambiguous_stanzas:
+                subjects, update_data = ambiguity
+                subjects_formatted = []
+                for i in range(len(subjects)):
+                    subjects_formatted.append({
+                        'title': subjects[i].get_value('title'),
+                        'name': subjects[i].get_name()
+                    })
+                formatted_ambiguities.append({
+                    'subject_title': subjects_formatted[0]['title'],
+                    'subjects': subjects_formatted,
+                    'updates': update_data
+                })
+
+            for stanza in data.unrecognized_subject_stanzas:
+                subject_title, update_data = stanza
+                formatted_unrecognized_subjects.append({
+                    'subject_title': subject_title,
+                    'updates': update_data
+                })
 
         template_values = {
             'nickname': nickname,
             'updates': formatted_updates,
             'errors': formatted_errors,
             'ambiguities': formatted_ambiguities,
-            'authenticate': self.need_authentication,
+            'unrecognized': formatted_unrecognized_subjects,
+            'need_profile_info': self.need_profile_info,
             'url': self.domain,
             'help_file': no_subdomain and 'subdomain_email_update_help.txt' or \
                 '%s_email_update_help.txt' % self.subdomain
@@ -477,8 +512,11 @@ class MailEditor(InboundMailHandler):
         path = os.path.join(os.path.dirname(__file__),
             'locale/%s/update_response_email.txt' % locale)
         body = template.render(path, template_values)
-        subject = 'ERROR - %s' % original_message.subject \
-            if errors or ambiguities else original_message.subject
+        if (formatted_errors or formatted_ambiguities or
+            formatted_unrecognized_subjects):
+            subject = 'ERROR - %s' % original_message.subject
+        else:
+            subject = original_message.subject
         message = mail.EmailMessage(
             sender=self.subdomain + '-updates@resource-finder.appspotmail.com',
             to=self.email, subject=subject, body=body)
@@ -492,6 +530,16 @@ def format_changes(update, locale):
         'attribute': attribute.replace('_', ' ').capitalize(),
         'value': format(value)
     }
+
+
+def parse_utc_offset(text):
+    if not re.match('^[+-][0-2][0-9][0-6][0-9]$', text):
+        return timedelta()
+    offset = timedelta(hours=int(text[:2]), minutes=int(text[2:]))
+    if text[0] == '+':
+        return offset
+    else:
+        return -offset
 
 
 if __name__ == '__main__':
