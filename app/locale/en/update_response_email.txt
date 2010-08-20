@@ -1,5 +1,5 @@
 Hello {{nickname}},
-{% if authenticate %}
+{% if need_profile_info %}
 To make edits in Resource Finder, please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited on the website. Also see the Terms of Service and Privacy policy at {{url}}/terms and {{url}}/privacy .
 
 ***NOTE: You may create your username by replying to this email.***
@@ -10,17 +10,25 @@ nickname John Smith
 affiliation Smith Inc.
 
 Be sure to also include your pending updates below in the body of your response email.
-{% endif %}{% if not updates and not errors and not ambiguities %}
-***No valid updates were received.***
+{% endif %}{% if not updates %}
+***No valid updates were received.***{% if not errors and not ambiguities and not unrecognized %}
 --- --- --- ---
 REFERENCE DOCUMENT @ {{url}}/help/email
 
-{% include "base_email_update_help.txt" %}{% endif %}{% if ambiguities %}The following updates were ambiguous.
+{% include "base_email_update_help.txt" %}{% endif %}{% endif %}
+{% if ambiguities %}
+The following updates were ambiguous.
 
 {% for ambiguity in ambiguities %}update {{ambiguity.subject_title}}
+-- Multiple facilities were found with the same title.
 -- Try again with one of the following:{% for subject in ambiguity.subjects %}
 -- {{subject.title}} ({{subject.name}}){% endfor %}
 {% for update in ambiguity.updates %}{{update}}
+{% endfor %}{% endfor %}{% endif %}{% if unrecognized %}
+The following facility titles could not be recognized.
+
+{% for subject in unrecognized %}update {{subject.subject_title}}
+{% for update in subject.updates %}{{update}}
 {% endfor %}{% endfor %}{% endif %}{% if errors %}
 The following updates contained errors. To fix the errors, you can either draft a new email or reply to this email and correct the values in-line.
 
@@ -28,7 +36,7 @@ The following updates contained errors. To fix the errors, you can either draft 
 {% for data in error.data %}{{data.original_line}}
 -- {{data.error_message}}
 {% endfor %}{% endfor %}
-{% endif %}{% if authenticate and updates %}Pending updates:
+{% endif %}{% if need_profile_info and updates %}Pending updates:
 
 {% for update in updates %}update {{update.subject_title}} ({{update.subject_name}})
 {% for change in update.changed_attributes %}{{change.attribute}} {{change.value}}
@@ -38,9 +46,9 @@ We recently received the following updates from you. They were inserted into the
 {% for update in updates %}
 {{update.subject_title}} ({{update.subject_name}})
 {% for change in update.changed_attributes %}{{change.attribute}} {{change.value}}
-{% endfor %}{% endfor %}{% endif %}{% endif %}{% if errors or ambiguities or updates %}
+{% endfor %}{% endfor %}{% endif %}{% endif %}{% if errors or ambiguities or updates or unrecognized %}
 --- --- --- ---
-REFERENCE DOCUMENT @ {{url}}/help/email{% endif %}{% if errors or ambiguities %}
+REFERENCE DOCUMENT @ {{url}}/help/email{% endif %}{% if unrecognized or errors or ambiguities %}
 
 {% include "base_email_update_help.txt" %}
 {% endif %}
