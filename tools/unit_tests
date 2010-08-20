@@ -1,0 +1,13 @@
+#!/bin/bash
+
+pushd "$(dirname $0)" >/dev/null && source common.sh && popd >/dev/null
+set_up_symlinks
+update_hgignore
+
+echo
+echo "--- Running unit tests"
+if [ -n "$1" ]; then
+  nosetests -d "$@"
+else
+  nosetests -d $APP_DIR
+fi
