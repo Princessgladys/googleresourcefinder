@@ -21,7 +21,8 @@ class Embed(utils.Handler):
         if not self.subdomain:
             raise Redirect('/')
         locale = utils.get_locale()
-        embed_url = '%s/embed?subdomain=%s' % (host, self.subdomain)
+        embed_url = '%s%s' % (host, self.get_url(
+            '/embed', iframe='yes', subdomain=self.subdomain, lang=locale))
         self.render('locale/%s/embed.html' % locale,
                     params=self.params,
                     base_url=host,
