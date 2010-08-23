@@ -1,6 +1,6 @@
 To update a facility via email, you can either draft a new email or reply to an update you received with changed information.
 
-Each facility must start with a line in the following format:
+Each update must start with a line in the following format:
 
 update General Hospital
 
