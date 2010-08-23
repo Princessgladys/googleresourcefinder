@@ -25,24 +25,24 @@
 
 // ==== Constants
 
-var STATUS_GOOD = 1;
-var STATUS_BAD = 2;
-var STATUS_UNKNOWN = 3;
-var MAX_STATUS = 3;
 
-var STATUS_ICON_COLORS = [null, '080', 'a00', '444'];
-var STATUS_TEXT_COLORS = [null, '040', 'a00', '444'];
-var STATUS_ZINDEXES = [null, 3, 2, 1];
-var STATUS_LABEL_TEMPLATES = [
-  null,
-  'One or more ${ALL_SUPPLIES}',
-  'No ${ANY_SUPPLY}',
-  'Data missing for ${ANY_SUPPLY}'
-];
+// Subject statuses.  Subjects are assigned the largest numeric status
+// that applies. So if a subject is excluded by both a viewport-filter and an
+// ordinary filter, it's status is STATUS_EXCLUDED_BY_FILTER.
 
+var STATUS_VISIBLE = 1; // Subject is visible
+var STATUS_EXCLUDED_BY_VIEWPORT = 2; // Viewport-filter is enabled and subject
+                                     // falls outside of MarkerClusterer bounds
+var STATUS_EXCLUDED_BY_FILTER = 3; // Filter is enabled and subject is excluded
+var STATUS_UNKNOWN = 4; // Status is unknown, thus will not show on the map
+var MAX_STATUS = 4;
+
+var STATUS_ICON_COLORS = [null, '080', 'a00', '444', '444'];
+var STATUS_TEXT_COLORS = [null, '040', 'a00', '444', '444'];
+var STATUS_ZINDEXES = [null, 4, 3, 2, 1];
 // Temporary tweak for Health 2.0 demo (icons are always green).
-STATUS_ICON_COLORS = [null, '080', '080', '080'];
-STATUS_TEXT_COLORS = [null, '040', '040', '040'];
+STATUS_ICON_COLORS = [null, '080', '080', '080', '080'];
+STATUS_TEXT_COLORS = [null, '040', '040', '040', '040'];
 
 // In print view, limit the number of markers being printed on the map at once
 // both for display and performance concerns.
@@ -67,11 +67,15 @@ var attributes = [null];
 var attributes_by_name = {};  // {attribute_name: attribute_i}
 var subject_types = [null];
 var subjects = [null];
-var divisions = [null];
+var subject_is = [];
 var messages = {};  // {namespace: {name: message}
+var total_subject_count = 0;
 
 // Timer for temporary status messages
 var status_timer;
+
+// Timer for updating the subject list on pan or zoom
+var viewport_filter_update_timer;
 
 // ==== Columns shown in the subject table
 
@@ -112,46 +116,14 @@ var summary_columns = [
 
 // ==== Filtering controls
 
-var supply_sets = [
-  null, {
-    description_all: 'doctors',
-    description_any: 'doctors',
-    abbreviation: 'Doctors',
-    supplies: [5]
-  }, {
-    description_all: 'patients',
-    description_any: 'patients',
-    abbreviation: 'Patients',
-    supplies: [6]
-  }, {
-    description_all: 'beds',
-    description_any: 'beds',
-    abbreviation: 'Beds',
-    supplies: [7]
-  }, {
-    description_all: 'capacity',
-    description_any: 'capacity',
-    abbreviation: 'Capacity',
-    supplies: [8]
-  }
-];
-
-var DEFAULT_SUPPLY_SET_I = 1;
-
 // ==== Selection state
 
-var selected_supply_set_i = -1;
-var selected_supply_set = null;
 var selected_filter_attribute_i = 0;
 var selected_filter_value = null;
-var selected_status_i = -1;
-var selected_division_i = -1;
-var selected_division = null;
 var selected_subject_i = -1;
 var selected_subject = null;
 
 var subject_status_is = [];  // status of each subject for selected supplies
-var bounds_match_selected_division = false;  // to skip redundant redraws
 
 // ==== Live API objects
 
@@ -395,8 +367,8 @@ function init_add_new_subject() {
   }
   show_new_subject_button(false);
   show_status(locale.CLICK_TO_ADD_SUBJECT() +
-              ' <a href="#" onclick="cancel_add_subject();"> ' +
-              locale.CANCEL() + '</a>.');
+      ' <a href="#" id="cancel_add_link" onclick="cancel_add_subject();"> ' +
+      locale.CANCEL() + '</a>.');
   google.maps.event.addListenerOnce(map, 'click', function(event) {
     show_status(null);
     place_new_subject_marker(event.latLng);
@@ -500,8 +472,7 @@ function convert_markers_for_print() {
         // Convert background images to foreground images
         var src = overlay.style ? overlay.style.backgroundImage.toString() : '';
         if (src.indexOf('url') != -1) {
-          // Remove the surrounding 'url()'
-          src = src.substring(4, src.length - 1);
+          src = src.replace(/^url\((.*)\)$/, '$1').replace(/^"(.*)"$/, '$1');
           overlay.style.backgroundImage = '';
           var img = document.createElement('img');
           overlay.appendChild(img);
@@ -540,10 +511,10 @@ function initialize_markers() {
 /**
  * Adds a marker for the subject at the given index.
  * @param {Number} subject_i index into the subject array for the subject
- * @param {Boolean} opt_bulk if false (default), add the marker to
+ * @param {Boolean} opt_ignore_clusterer if true, do not add the marker to
  * marker_clusterer
  */
-function add_marker(subject_i, opt_bulk) {
+function add_marker(subject_i, opt_ignore_clusterer) {
   var subject = subjects[subject_i];
   var location = subject.values[attributes_by_name.location];
   if (!location) {
@@ -560,10 +531,7 @@ function add_marker(subject_i, opt_bulk) {
     google.maps.event.addListener(
       markers[subject_i], 'click', subject_selector(subject_i));
   }
-  if (!print || subject_i <= MAX_MARKERS_TO_PRINT) {
-    subject.visible = true;
-  }
-  if (!opt_bulk) {
+  if (!opt_ignore_clusterer) {
     marker_clusterer.addMarker(markers[subject_i]);
   }
 }
@@ -581,27 +549,6 @@ function remove_marker(subject_i) {
 }
 
 // ==== Display construction routines
-
-// Set up the supply selector (currently unused).
-function initialize_supply_selector() {
-  var tbody = $('supply-tbody');
-  if (!tbody) {
-    return;
-  }
-  var tr = $$('tr');
-  var cells = [];
-  for (var ss = 1; ss < supply_sets.length; ss++) {
-    cells.push($$('td', {
-      id: 'supply-set-' + ss,
-      'class': 'supply-set',
-      onclick: supply_set_selector(ss),
-      onmouseover: hover_activator('supply-set-' + ss),
-      onmouseout: hover_deactivator('supply-set-' + ss)
-    }, supply_sets[ss].abbreviation));
-  }
-  set_children(tbody, tr);
-  set_children(tr, cells);
-}
 
 // Create option elements for all the allowed values for an attribute.
 function add_filter_options(options, attribute_i) {
@@ -634,25 +581,15 @@ function initialize_filters() {
   options.push($$('option', {value: '0 '}, locale.ALL()));
   add_filter_options(options, attributes_by_name.services);
   set_children(selector, options);
-  set_children(tr, [$$('td', {}, [locale.SHOW() + ':', selector])]);
+  var viewport_filter_check = $$('input', {
+    type: 'checkbox',
+    id: 'viewport-filter',
+    onclick: handle_viewport_filter_toggle
+  });
+  var label = $$('label', {'for': 'viewport-filter'}, [locale.IN_MAP_VIEW()]);
+  set_children(tr, [$$('td', {},
+      [locale.SHOW() + ':', selector, viewport_filter_check, label])]);
   set_children(tbody, tr);
-}
-
-// Add the header to the division list.
-function initialize_division_header() {
-  var thead = $('division-thead');
-  if (!thead) {
-    return;
-  }
-  var tr = $$('tr');
-  var cells = [$$('th', {}, locale.DISTRICT())];
-  for (var st = 1; st <= MAX_STATUS; st++) {
-    cells.push($$('th', {'class': 'subject-count'},
-        $$('img', {src: make_icon('', st, false)})));
-  }
-  cells.push($$('th', {'class': 'subject-count'}, 'All'));
-  set_children(thead, tr);
-  set_children(tr, cells);
 }
 
 // Add the header to the subject list.
@@ -720,33 +657,50 @@ function initialize_print_headers() {
 
 // ==== Display update routines
 
-// Set the map bounds to fit all subjects in the given division.
-function update_map_bounds(division_i) {
-  if (bounds_match_selected_division && division_i === selected_division_i) {
-    // The map hasn't been moved since it was last fit to this division.
-    return;
-  }
-
-  var subject_is = divisions[division_i].subject_is;
+// Set the map bounds to fit all subjects
+function update_map_bounds() {
   var bounds = new google.maps.LatLngBounds();
   for (var i = 0; i < subject_is.length; i++) {
-    var subject = subjects[subject_is[i]];
-    var location = subject.values[attributes_by_name.location];
-    if (location && subject.visible) {
-      bounds.extend(new google.maps.LatLng(location.lat, location.lon));
+    var subject_i = subject_is[i];
+    var marker = markers[subject_i];
+    var subject_status = subject_status_is[subject_i];
+    if (marker && subject_status == STATUS_VISIBLE) {
+      bounds.extend(marker.getPosition());
     }
   }
   map.fitBounds(bounds);
-  bounds_match_selected_division = true;
+}
+
+// Update the subject list based on the current viewport
+function update_viewport_filter() {
+  if (viewport_filter_update_timer) {
+    // Use a timer to avoid being overloaded with pans/zooms in quick succession
+    clearTimeout(viewport_filter_update_timer);
+    viewport_filter_update_timer = setTimeout(update_viewport_filter_now, 250);
+  } else {
+    // first time, must update immediately to avoid confusing maps init
+    update_viewport_filter_now();
+    viewport_filter_update_timer = 1;
+  }
+}
+
+// Update the subject list immediately based on the current viewport
+function update_viewport_filter_now() {
+  update_subject_status_is();
+  update_visible_subject_icons();
+  update_subject_list(); 
 }
 
 // Update the subject map icons based on their status and the zoom level.
 function update_subject_icons() {
   var markers_to_keep = [];
   for (var su = 1; su < subjects.length; su++) {
-    var marker = update_subject_icon(su, true);
-    if (marker) {
-      markers_to_keep.push(marker);
+    var st = subject_status_is[su];
+    if (st == STATUS_VISIBLE || st == STATUS_EXCLUDED_BY_VIEWPORT) {
+      // Viewport-excluded icons are filtered correctly by the marker clusterer,
+      // keep them here.
+      update_subject_icon(su);
+      markers_to_keep.push(markers[su]);
     }
   }
   marker_clusterer.clearMarkers();
@@ -756,88 +710,83 @@ function update_subject_icons() {
 }
 
 /**
+ * Updates the subject map icons for visible subjects only. This is a
+ * performance optimization over update_subject_icons(). It does not add or
+ * remove icons from the map.
+ */
+function update_visible_subject_icons() {
+  for (var su = 1; su < subjects.length; su++) {
+    var st = subject_status_is[su];
+    if (st == STATUS_VISIBLE) {
+      update_subject_icon(su);
+    }
+  }
+}
+
+/**
  * Updates a map icon for a subject based on status and zoom level.
  * @param {Number} subject_i index into the subject array for the subject
- * @param {Boolean} opt_bulk if false (default), remove the marker from
- * marker_clusterer if necessary
  */
-function update_subject_icon(subject_i, opt_bulk) {
+function update_subject_icon(subject_i) {
   var marker = markers[subject_i];
   if (marker) {
     var subject = subjects[subject_i];
-    subject.visible = false;
-
     var st = subject_status_is[subject_i];
-    if (st != STATUS_GOOD) {
-      if (!opt_bulk) {
-        marker_clusterer.removeMarker(marker);
-      }
-      return null;
-    }
-
     var title = subject.values[attributes_by_name.title];
     var detail = map.getZoom() > 10;
-    var icon_url = make_icon(title, st, detail);
+    var icon_url;
     if (is_subject_closed(subject)) {
       icon_url = make_icon(title, st, detail, null, null, '444');
     } else if (is_subject_on_alert(subject)) {
       icon_url = make_icon(title, st, detail, null, null, 'a00');
+    } else {
+      icon_url = make_icon(title, st, detail);
     }
     marker.setIcon(icon_url);
     marker.setZIndex(STATUS_ZINDEXES[st]);
-    var loc = subjects[subject_i].values[attributes_by_name.location];
-    if (loc) {
-      var new_loc = new google.maps.LatLng(loc.lat, loc.lon);
-      if (!new_loc.equals(marker.getPosition())) {
-        marker.setPosition(new_loc);
-      }
-    }
-    if (!print || subject_i <= MAX_MARKERS_TO_PRINT) {
-      subject.visible = true;
-    }
   }
-  return marker;
 }
 
-// Fill in the subject legend.
-function update_subject_legend() {
-  if (!$('legend-tbody')) {
-    return;
-  }
-  var rows = [];
-  var stock = 'one dose';
-  for (var st = 1; st <= MAX_STATUS; st++) {
-    rows.push($$('tr', {'class': 'legend-row'}, [
-      $$('th', {'class': 'legend-icon'},
-        $$('img', {src: make_icon('', st, false)})),
-      $$('td', {'class': 'legend-label status-' + st},
-        render(STATUS_LABEL_TEMPLATES[st], {
-          ALL_SUPPLIES: selected_supply_set.description_all,
-          ANY_SUPPLY: selected_supply_set.description_any
-        }))
-    ]));
-  }
-  set_children($('legend-tbody'), rows);
-}
-
-// Repopulate the subject list based on the selected division and status.
+// Shows/hides subjects in the subject list based on the selected status.
 function update_subject_list() {
   if (!$('subject-tbody')) {
     return;
   }
-  var rows = [];
-  for (var i = 0; i < selected_division.subject_is.length; i++) {
-    var su = selected_division.subject_is[i];
+  var visible_subjects = 0;
+  for (var i = 0; i < subject_is.length; i++) {
+    var su = subject_is[i];
+    var subject = subjects[su];
+    var row = $('subject-' + su);
+    if (subject_status_is[su] === STATUS_VISIBLE) {
+      row.style.display = '';
+      row.style.className = get_subject_row_css_class(su, subject);
+      visible_subjects++;
+    } else {
+      row.style.display = 'none';
+    }
+  }
+  $('subject-message').style.display = (visible_subjects == 0) ? '' : 'none';
+  update_subject_list_size();
+}
+
+// Populates the subject list.
+function populate_subject_list() {
+  if (!$('subject-tbody')) {
+    return;
+  }
+  var subject_message = $$('tr', { id: 'subject-message' });
+  subject_message.style.display = 'none';
+  set_children(subject_message, [$$('td', {'colspan': summary_columns.length},
+      locale.NO_MATCHING_FACILITIES())]);
+  var rows = [subject_message];
+  for (var i = 0; i < subject_is.length; i++) {
+    var su = subject_is[i];
     var subject = subjects[su];
     var subject_type = subject_types[subject.type];
-    if (selected_status_i === 0 ||
-        subject_status_is[su] === selected_status_i) {
+    if (subject_status_is[su] === STATUS_VISIBLE) {
       var row = $$('tr', {
         id: 'subject-' + su,
-        'class': 'subject' +
-            maybe_disabled(is_subject_closed(subject)) +
-            maybe_on_alert(is_subject_on_alert(subject)) +
-            maybe_selected(su === selected_subject_i),
+        'class': get_subject_row_css_class(su, subject),
         onclick: subject_selector(su),
         onmouseover: hover_activator('subject-' + su),
         onmouseout: hover_deactivator('subject-' + su)
@@ -862,18 +811,30 @@ function update_subject_list() {
   update_subject_list_size();
 }
 
+/**
+ * Returns the CSS class for the given subject
+ * @param {Number} subject_i index into the subject array for the subject
+ * @param {Number} subject the subject
+ * @return {String} the CSS class
+ */
+function get_subject_row_css_class(subject_i, subject) {
+  return 'subject' +
+    maybe_disabled(is_subject_closed(subject)) +
+    maybe_on_alert(is_subject_on_alert(subject)) +
+    maybe_selected(subject_i === selected_subject_i);
+}
+
 // Populate the subject list for print view.
-function update_print_subject_list() {
+function populate_print_subject_list() {
   if (!$('subject-print-tbody')) {
     return;
   }
   var rows = [];
-  for (var i = 0; i < selected_division.subject_is.length; i++) {
-    var su = selected_division.subject_is[i];
+  for (var i = 0; i < subject_is.length; i++) {
+    var su = subject_is[i];
     var subject = subjects[su];
     var subject_type = subject_types[subject.type];
-    if (selected_status_i === 0 ||
-        subject_status_is[su] === selected_status_i) {
+    if (subject_status_is[su] === STATUS_VISIBLE) {
       var row = $$('tr', {
         id: 'subject-' + su,
         'class': 'subject-' + (i % 2 == 0 ? 'even' : 'odd')
@@ -957,69 +918,47 @@ function align_header_with_table(thead, tbody) {
 
 // Determine the status of each subject according to the user's filters.
 function update_subject_status_is() {
+  var bounds = map.getBounds();
+  if (bounds && marker_clusterer.getProjection()
+      && marker_clusterer.getExtendedBounds) {
+    // Use the slightly larger bounds considered by the marker clusterer
+    // this means that markers just slightly offscreen still appear in the
+    // facility list.
+    bounds = marker_clusterer.getExtendedBounds(bounds);    
+  }
+  var viewport_filter = $('viewport-filter');
+  var viewport_filter_on = viewport_filter && viewport_filter.checked;
+  var good_count = 0;
   for (var su = 1; su < subjects.length; su++) {
     var subject = subjects[su];
     if (selected_filter_attribute_i <= 0) {
-      subject_status_is[su] = STATUS_GOOD;
+      subject_status_is[su] = STATUS_VISIBLE;
     } else if (!subject) {
       subject_status_is[su] = STATUS_UNKNOWN;
     } else {
-      subject_status_is[su] = STATUS_BAD;
+      subject_status_is[su] = STATUS_EXCLUDED_BY_FILTER;
       var a = selected_filter_attribute_i;
       if (attributes[a].type === 'multi') {
         if (contains(subject.values[a] || [], selected_filter_value)) {
-          subject_status_is[su] = STATUS_GOOD;
+          subject_status_is[su] = STATUS_VISIBLE;
         }
-      } else if (report.values[a] === selected_filter_value) {
-        subject_status_is[su] = STATUS_GOOD;
       }
     }
-  }
-}
-
-// Update the contents of the division list based on subject statuses. 
-function update_division_list() {
-  if (!$('division-tbody')) {
-    return;
-  }
-  var rows = [];
-  for (var d = 0; d < divisions.length; d++) {
-    var division = divisions[d];
-    var row = $$('tr', {
-      id: 'division-' + d,
-      'class': 'division'
-    });
-    var cells = [$$('td', {
-      'class': 'division-title',
-      onclick: division_and_status_selector(d, 0),
-      onmouseover: hover_activator('division-' + d),
-      onmouseout: hover_deactivator('division-' + d)
-    }, division.title)];
-    for (var st = 1; st <= MAX_STATUS; st++) {
-      var subject_is = filter(division.subject_is,
-        function (subject_i) { return subject_status_is[subject_i] === st; });
-      cells.push($$('td', {
-        'id': 'division-' + d + '-status-' + st,
-        'class': 'subject-count status-' + st + maybe_selected(
-            d === selected_division_i && st === selected_status_i),
-        onclick: division_and_status_selector(d, st),
-        onmouseover: hover_activator('division-' + d + '-status-' + st),
-        onmouseout: hover_deactivator('division-' + d + '-status-' + st)
-      }, subject_is.length));
+    if (viewport_filter_on && bounds && markers[su]
+        && subject_status_is[su] == STATUS_VISIBLE
+        && !bounds.contains(markers[su].getPosition())) {
+      // If filtering by viewport, disqualify STATUS_VISIBLE subjects if they
+      // fall outside the viewport
+      subject_status_is[su] = STATUS_EXCLUDED_BY_VIEWPORT;
     }
-    cells.push($$('td', {
-      'id': 'division-' + d + '-status-0',
-      'class': 'subject-count status-0' + maybe_selected(
-          d === selected_division_i && 0 === selected_status_i),
-      onclick: division_and_status_selector(d, 0),
-      onmouseover: hover_activator('division-' + d + '-status-0'),
-      onmouseout: hover_deactivator('division-' + d + '-status-0')
-    }, division.subject_is.length));
-    set_children(row, cells);
-    rows.push(row);
+    if (print && subject_status_is[su] == STATUS_VISIBLE
+        && good_count >= MAX_MARKERS_TO_PRINT) {
+      subject_status_is[su] = STATUS_EXCLUDED_BY_FILTER;
+    }
+    if (subject_status_is[su] == STATUS_VISIBLE) {
+      good_count++;
+    }
   }
-
-  set_children($('division-tbody'), rows);
 }
 
 // Update the data freshness indicator.
@@ -1144,17 +1083,23 @@ function initialize_handlers() {
 
 function handle_window_resize() {
   if (!print) {
-    align_header_with_table($('division-thead'), $('division-tbody'));
     update_subject_list_size();
   }
 }
 
 function handle_zoom_changed() {
-  update_subject_icons(); // amount of detail in icons depends on zoom level
+  update_viewport_filter();
 }
 
 function handle_bounds_changed() {
-  bounds_match_selected_division = false;
+  update_viewport_filter();
+}
+
+function handle_viewport_filter_toggle() {
+  var viewport_filter_on = $('viewport-filter').checked;
+  _gaq.push(['_trackEvent', 'subject_list', 'viewport_filter',
+             viewport_filter_on ? 'on' : 'off']);
+  update_viewport_filter_now();
 }
 
 function hover_activator(id) {
@@ -1171,24 +1116,13 @@ function hover_deactivator(id) {
   };
 }
 
-function supply_set_selector(supply_set_i) {
-  return function () {
-    select_supply_set(supply_set_i);
-  };
-}
-
-function division_and_status_selector(division_i, status_i) {
-  return function () {
-    select_division_and_status(division_i, status_i);
-  };
-}
-
 function subject_selector(subject_i) {
   return function () {
     if ($('edit-data').style.display != 'none') {
       // Cancel inplace-edit if a new marker is selected
       inplace_edit_cancel();
     }
+    cancel_add_subject(true);
     select_subject(subject_i);
   };
 }
@@ -1205,74 +1139,7 @@ function select_filter(attribute_i, value) {
   // Update the subject icons to reflect their status.
   update_subject_icons();
 
-  // Update the subject counts in the division list.
-  update_division_list();
-
-  if (selected_division !== null) {
-    // Filter the list of subjects by the selected supply set.
-    update_subject_list();
-  }
-}
-
-function select_supply_set(supply_set_i) {
-  if (supply_set_i === selected_supply_set_i) {
-    return;
-  }
-
-  // Update the selection.
-  selected_supply_set_i = supply_set_i;
-  selected_supply_set = supply_sets[supply_set_i];
-
-  // Update the selection highlight.
-  if($('supply-tbody')) {
-    for (var ss = 1; ss < supply_sets.length; ss++) {
-      $('supply-set-' + ss).className = 'supply-set' +
-          maybe_selected(ss === supply_set_i);
-    }
-  }
-
-  // Update the subject icon legend.
-  update_subject_legend();
-
-  // Update the status of each subject.
-  update_subject_status_is();
-
-  // Update the subject icons to reflect their status.
-  update_subject_icons();
-
-  // Update the subject counts in the division list.
-  update_division_list();
-
-  if (selected_division !== null) {
-    // Filter the list of subjects by the selected supply set.
-    update_subject_list();
-  }
-}
-
-function select_division_and_status(division_i, status_i) {
-  update_map_bounds(division_i);
-
-  if (division_i === selected_division_i && status_i === selected_status_i) {
-    return;
-  }
-
-  // Update the selection.
-  selected_division_i = division_i;
-  selected_division = divisions[division_i];
-  selected_status_i = status_i;
-  
-  // Update the selection highlight.
-  if ($('division-thead')) {
-    for (var d = 0; d < divisions.length; d++) {
-      for (var st = 0; st <= MAX_STATUS; st++) {
-        $('division-' + d + '-status-' + st).className =
-            'subject-count status-' + st +
-            maybe_selected(d === division_i && st === status_i);
-      }
-    }    
-  }
-
-  // Filter the list of subjects by the selected division and status.
+  // Filter the list of subjects.
   update_subject_list();
 }
 
@@ -1313,7 +1180,6 @@ function select_subject(subject_i) {
   var force_login = !had_location && !is_logged_in;
 
   // Pop up the InfoWindow on the selected clinic, if it has a location.
-  cancel_add_subject(true);
   show_loading(true);
   var url = bubble_url + (bubble_url.indexOf('?') >= 0 ? '&' : '?') +
       'subject_name=' + selected_subject.name;
@@ -1335,11 +1201,16 @@ function select_subject(subject_i) {
         add_marker(subject_i);
       } else if (had_location && !new_location) {
         remove_marker(subject_i);
+      } else if (had_location && new_location) {
+        markers[subject_i].setPosition(new google.maps.LatLng(
+          new_location.lat, new_location.lon));
       }
+
+      update_subject_status_is();
       update_subject_row(subject_i);
       update_subject_icon(subject_i);
 
-      if (markers[selected_subject_i]) {
+      if (markers[subject_i]) {
         info.setContent(result.html);
         info.open(map, markers[subject_i]);
         // Sets up the tabs and should be called after the DOM is created.
@@ -1452,26 +1323,20 @@ function load_data(data, selected_subject_name) {
     }
   }
 
-  var subject_is = [];
+  subject_is = [];
   for (var i = 1; i < subjects.length; i++) {
     subject_is.push(i);
     if (selected_subject_name == subjects[i].name) {
       selected_subject_i = i;
     }
   }
-  divisions = [{
-    title: 'All divisions',
-    subject_is: subject_is
-  }];
 
   if (!print) {
     // The print link is not shown in print view, no need to disable it
     disable_print_link();
-    // The supply selector, filters, division header and subject
-    // header all do not appear in print view; don't bother initializing them.
-    initialize_supply_selector();
+    // The filters and subject header do not appear in print view;
+    // don't bother initializing them.
     initialize_filters();
-    initialize_division_header();
     initialize_subject_header();    
   }
 
@@ -1482,8 +1347,11 @@ function load_data(data, selected_subject_name) {
     update_freshness(data.timestamp);
   }
 
-  select_supply_set(DEFAULT_SUPPLY_SET_I);
-  select_division_and_status(0, STATUS_GOOD);
+  update_subject_status_is();
+  update_subject_icons();
+  update_map_bounds();
+  populate_subject_list();
+
   if (selected_subject_i != -1) {
     // Selecting the subject causes an info window to open on the map. The map
     // is not fully initialized until after load finishes, so delay this.
@@ -1494,7 +1362,7 @@ function load_data(data, selected_subject_name) {
 
   if (print) {
     initialize_print_headers();
-    update_print_subject_list();
+    populate_print_subject_list();
   } else {
     handle_window_resize();
   }
@@ -1619,6 +1487,7 @@ function make_add_new_subject_url(opt_subject_type) {
 /**
  * Handler to start inplace editing in the left-hand panel.
  * @param {String} edit_url - URL to load the edit form via AJAX
+ * @param {Boolean} opt_for_add_new - True if editing a new subject
  */
 function inplace_edit_start(edit_url, opt_for_add_new) {
   if ($('edit-data').style.display == '') {

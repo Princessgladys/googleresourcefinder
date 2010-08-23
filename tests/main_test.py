@@ -219,18 +219,56 @@ class MainTestCase(SeleniumTestCase):
         self.wait_for_element(self.bubble_xpath)
         assert not self.is_text_present('Alert: alert_status_bar')
 
-
     def test_choose_subdomain_page(self):
-      """Confirms choose subdomain page works as expected"""
-      self.open_path('/')
-      self.wait_for_element('link=haiti')
-      assert self.is_visible('link=haiti')
-      assert self.is_visible('link=pakistan')
-      self.click('link=pakistan')
-      self.wait_for_element(self.config.login_form)
-      self.login()
-      self.wait_for_element('subject-1')
-      self.assert_no_element('link=View Master List archive')
+        """Confirms choose subdomain page works as expected"""
+        self.open_path('/')
+        self.wait_for_element('link=haiti')
+        assert self.is_visible('link=haiti')
+        assert self.is_visible('link=pakistan')
+        self.click('link=pakistan')
+        self.wait_for_element(self.config.login_form)
+        self.login()
+        self.wait_for_element('subject-1')
+        self.assert_no_element('link=View Master List archive')
+
+    def test_viewport_filter(self):
+      """Confirms the 'in map view' checkbox correctly filters by viewport"""
+      self.login('/?subdomain=haiti')
+
+      # Start with 3 subjects visible in the subject list
+      assert self.is_visible('subject-1')
+      assert self.is_visible('subject-2')
+      assert self.is_visible('subject-3')
+
+      # Click 'in map view', no change
+      self.click('id=viewport-filter')
+      self.wait_until(self.is_visible, 'subject-1')
+      assert self.is_visible('subject-2')
+      assert self.is_visible('subject-3')
+
+      # Zoom into the second subject, subjects 1 and 3 disappear from the list
+      self.run_script('map.setZoom(map.getZoom() + 5)')
+      self.wait_until(self.is_not_visible, 'subject-1')
+      assert self.is_visible('subject-2')
+      assert self.is_not_visible('subject-3')
+
+      # Pan to the first subject, subjects 2 and 3 disappear from the list
+      self.run_script('map.panTo(new google.maps.LatLng(51.5, 0))')
+      self.wait_until(self.is_visible, 'subject-1')
+      assert self.is_not_visible('subject-2')
+      assert self.is_not_visible('subject-3')
+
+      # Turn off 'in map view', all subjects visible again in the list
+      self.click('id=viewport-filter')
+      self.wait_until(self.is_visible, 'subject-2')
+      assert self.is_visible('subject-1')
+      assert self.is_visible('subject-3')
+
+      # Turn on 'in map view' again, only subject 1 is visible in the list
+      self.click('id=viewport-filter')
+      self.wait_until(self.is_not_visible, 'subject-2')
+      assert self.is_visible('subject-1')
+      assert self.is_not_visible('subject-3')
 
     def login_and_check_first_facility(self):
         """Helper function. Logs into the haiti subdomain, waits for the list to
@@ -250,7 +288,7 @@ class MainTestCase(SeleniumTestCase):
 
     def test_embed_link(self):
         # Login and wait for page to load
-        self.open_path('/?subdomain=haiti')
+        self.login('/?subdomain=haiti')
         self.wait_for_element('subject-3')
 
         # Make sure that embed link is present

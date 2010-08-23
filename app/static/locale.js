@@ -130,6 +130,10 @@ locale = function() {
   messages.HEALTHC_ID =
       'HealthC ID';
 
+  //i18n: Label for a filter that restricts results to the current map viewport
+  messages.IN_MAP_VIEW =
+      'in map view';
+
   //i18n: Message indicating loading hospital information
   messages.LOADING =
     'Loading...';
@@ -146,6 +150,10 @@ locale = function() {
   //i18n: Notification for a facility with missing location information.
   messages.NO_LOCATION_ENTERED =
       'This facility does not yet have a location entered.';
+
+  //i18n: Error message when there are no facilities to view on the map.
+  messages.NO_MATCHING_FACILITIES =
+      'No matching facilities. Try zooming out or choosing a different filter.';
 
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
