@@ -359,7 +359,7 @@ def setup_messages():
         db.delete(batch)
 
 def setup_mail_alerts():
-    cron.Job(url='/mail_alerts', method='POST',
+    cron.Job(key_name='mail_alerts_digest', url='/mail_alerts', method='POST',
              description='Digest updates for mail alerts').put()
 
 def setup_js_messages():
