@@ -30,7 +30,7 @@
 // that applies. So if a subject is excluded by both a viewport-filter and an
 // ordinary filter, it's status is STATUS_EXCLUDED_BY_FILTER.
 
-var STATUS_VISIBLE = 1; // Subject is visible
+var STATUS_VISIBLE = 1; // Subject is visible in subject list
 var STATUS_EXCLUDED_BY_VIEWPORT = 2; // Viewport-filter is enabled and subject
                                      // falls outside of MarkerClusterer bounds
 var STATUS_EXCLUDED_BY_FILTER = 3; // Filter is enabled and subject is excluded
@@ -691,14 +691,17 @@ function update_viewport_filter_now() {
   update_subject_list(); 
 }
 
-// Update the subject map icons based on their status and the zoom level.
+// Update the subject map icons based on their status and the zoom level,
+// removing from the marker clusterer markers that have 
+// STATUS_EXCLUDED_BY_FILTER or STATUS_UNKNOWN
 function update_subject_icons() {
   var markers_to_keep = [];
   for (var su = 1; su < subjects.length; su++) {
     var st = subject_status_is[su];
     if (st == STATUS_VISIBLE || st == STATUS_EXCLUDED_BY_VIEWPORT) {
-      // Viewport-excluded icons are filtered correctly by the marker clusterer,
-      // keep them here.
+      // We must include EXCULDED_BY_VIEWPORT markers here because we want
+      // the out-of-bounds markers to scroll smoothly into view when the user
+      // pans.
       update_subject_icon(su);
       markers_to_keep.push(markers[su]);
     }
@@ -747,7 +750,8 @@ function update_subject_icon(subject_i) {
   }
 }
 
-// Shows/hides subjects in the subject list based on the selected status.
+// Shows/hides subjects in the subject list based on the whether they meet
+// the user filter and viewport filter.
 function update_subject_list() {
   if (!$('subject-tbody')) {
     return;
@@ -783,29 +787,28 @@ function populate_subject_list() {
     var su = subject_is[i];
     var subject = subjects[su];
     var subject_type = subject_types[subject.type];
-    if (subject_status_is[su] === STATUS_VISIBLE) {
-      var row = $$('tr', {
-        id: 'subject-' + su,
-        'class': get_subject_row_css_class(su, subject),
-        onclick: subject_selector(su),
-        onmouseover: hover_activator('subject-' + su),
-        onmouseout: hover_deactivator('subject-' + su)
-      });
-      var title = subject.values[attributes_by_name.title];
-      var cells = [$$('td', {'class': 'subject-title'}, title)];
-      if (subject) {
-        for (var c = 1; c < summary_columns.length; c++) {
-          var value = summary_columns[c].get_value(subject.values);
-          cells.push($$('td', {'class': 'value column_' + c}, value));
-        }
-      } else {
-        for (var c = 1; c < summary_columns.length; c++) {
-          cells.push($$('td'));
-        }
+    var row = $$('tr', {
+      id: 'subject-' + su,
+      'class': get_subject_row_css_class(su, subject),
+      onclick: subject_selector(su),
+      onmouseover: hover_activator('subject-' + su),
+      onmouseout: hover_deactivator('subject-' + su)
+    });
+    row.style.display = subject_status_is[su] === STATUS_VISIBLE ? '' : 'none';
+    var title = subject.values[attributes_by_name.title];
+    var cells = [$$('td', {'class': 'subject-title'}, title)];
+    if (subject) {
+      for (var c = 1; c < summary_columns.length; c++) {
+        var value = summary_columns[c].get_value(subject.values);
+        cells.push($$('td', {'class': 'value column_' + c}, value));
       }
-      set_children(row, cells);
-      rows.push(row);
+    } else {
+      for (var c = 1; c < summary_columns.length; c++) {
+        cells.push($$('td'));
+      }
     }
+    set_children(row, cells);
+    rows.push(row);
   }
   set_children($('subject-tbody'), rows);
   update_subject_list_size();
@@ -921,14 +924,16 @@ function update_subject_status_is() {
   var bounds = map.getBounds();
   if (bounds && marker_clusterer.getProjection()
       && marker_clusterer.getExtendedBounds) {
-    // Use the slightly larger bounds considered by the marker clusterer
-    // this means that markers just slightly offscreen still appear in the
-    // facility list.
+    // For use in viewport filtering, use the slightly larger bounds
+    // considered by the marker clusterer. The reason for this is to show in 
+    // the facility list all facilities that have a visible marker on the map,
+    // including those that belong to any visible cluster. This means that
+    // markers just slightly off-screen will still appear in the facility list. 
     bounds = marker_clusterer.getExtendedBounds(bounds);    
   }
   var viewport_filter = $('viewport-filter');
   var viewport_filter_on = viewport_filter && viewport_filter.checked;
-  var good_count = 0;
+  var visible_count = 0;
   for (var su = 1; su < subjects.length; su++) {
     var subject = subjects[su];
     if (selected_filter_attribute_i <= 0) {
@@ -952,11 +957,11 @@ function update_subject_status_is() {
       subject_status_is[su] = STATUS_EXCLUDED_BY_VIEWPORT;
     }
     if (print && subject_status_is[su] == STATUS_VISIBLE
-        && good_count >= MAX_MARKERS_TO_PRINT) {
+        && visible_count >= MAX_MARKERS_TO_PRINT) {
       subject_status_is[su] = STATUS_EXCLUDED_BY_FILTER;
     }
     if (subject_status_is[su] == STATUS_VISIBLE) {
-      good_count++;
+      visible_count++;
     }
   }
 }
@@ -1175,9 +1180,9 @@ function select_subject(subject_i) {
   // instead, the in-page edit form is opened. Edit requires a logged-in user;
   // if the user is not logged in, fetch the server-signed login URL from the
   // bubble and redirect.
-  var had_location = selected_subject.values[attributes_by_name.location];
-  var force_edit = !had_location && is_logged_in;
-  var force_login = !had_location && !is_logged_in;
+  var old_location = selected_subject.values[attributes_by_name.location];
+  var force_edit = !old_location && is_logged_in;
+  var force_login = !old_location && !is_logged_in;
 
   // Pop up the InfoWindow on the selected clinic, if it has a location.
   show_loading(true);
@@ -1197,11 +1202,11 @@ function select_subject(subject_i) {
       subjects[subject_i].values = result.json.values;
       var new_location = subjects[subject_i].values[
           attributes_by_name.location];
-      if (!had_location && new_location) {
+      if (!old_location && new_location) {
         add_marker(subject_i);
-      } else if (had_location && !new_location) {
+      } else if (old_location && !new_location) {
         remove_marker(subject_i);
-      } else if (had_location && new_location) {
+      } else if (old_location && new_location) {
         markers[subject_i].setPosition(new google.maps.LatLng(
           new_location.lat, new_location.lon));
       }
