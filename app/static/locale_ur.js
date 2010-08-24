@@ -104,6 +104,9 @@ locale = function() {
   //i18n: Pan-American Health Organization; no translation necessary.
   messages.HEALTHC_ID = "HealthC ID";
 
+  //i18n: Label for a filter that restricts results to the current map viewport
+  messages.IN_MAP_VIEW = "\u0646\u0642\u0634\u06d2  \u0645\u06cc\u06ba \u0638\u0627\u06c1\u0631";
+
   //i18n: Message indicating loading hospital information
   messages.LOADING = "\u0644\u0648\u0688 \u06c1\u0648\u0631\u06c1\u0627 \u06c1\u06d2...";
 
@@ -116,6 +119,9 @@ locale = function() {
 
   //i18n: Notification for a facility with missing location information.
   messages.NO_LOCATION_ENTERED = "\u0627\u0633 \u0633\u06c1\u0648\u0644\u062a \u06a9\u0627 \u062c\u0627\u06cc\u06d2 \u0645\u0642\u0627\u0645 \u0627\u0628\u06be\u06cc \u062a\u06a9 \u0646\u06c1\u06cc\u06ba \u0628\u062a\u0627\u06cc\u0627 \u06af\u06cc\u0627 \u06c1\u06d2";
+
+  //i18n: Error message when there are no facilities to view on the map.
+  messages.NO_MATCHING_FACILITIES = "\u06a9\u0648\u0626\u06cc \u0633\u06c1\u0648\u0644\u062a \u0627\u0646\u062a\u062e\u0627\u0628 \u06a9\u06d2 \u0644\u06cc\u06d2 \u0645\u0648\u0632\u0648\u06ba \u0646\u06c1\u06cc\u06ba. \u0646\u0642\u0634\u06d2 \u06a9\u0648 zoom out \u06a9\u0631\u06cc\u06ba \u06cc\u0627 \u0627\u0646\u062a\u062e\u0627\u0628 \u062a\u0628\u062f\u06cc\u0644 \u06a9\u0631\u06cc\u06ba.";
 
   //i18n: Header showing the number of available beds out of the number of
   //i18n: total beds that are available in a hospital
