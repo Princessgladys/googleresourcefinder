@@ -234,7 +234,7 @@ class EmailFormatter:
                                                self.locale, format_update)
             body += 'UPDATE %s (%s)\n\n' % (subject_title, subject.get_name())
             for update in updates:
-                body += '%s %s\n-- %s: %s. %s: %s\n' % (
+              body += '%s: %s\n-- %s: %s. %s: %s\n' % (
                     update['attribute'],
                     utils.to_unicode(format(update['new_value'], True)),
                     #i18n: old value for the attribute

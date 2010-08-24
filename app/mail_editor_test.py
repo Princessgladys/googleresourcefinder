@@ -98,7 +98,7 @@ Available beds 20'''
 SAMPLE_EMAIL_AMBIGUOUS = '''UPDATE title_foobar
 Total beds 77'''
 
-SAMPLE_EMAIL_AMBIGUOUS_DETAIL = '''update title_foobar (example.org/789)
+SAMPLE_EMAIL_AMBIGUOUS_WITH_KEYS = '''update title_foobar (example.org/789)
 Total beds 77
 
 update title_foobar (example.org/012)
@@ -363,7 +363,7 @@ class MailEditorTest(MediumTestCase):
         assert 'REFERENCE DOCUMENT' in body
 
         # check email with multiple same title'd facilities [and unique keys]
-        message.body = SAMPLE_EMAIL_AMBIGUOUS_DETAIL
+        message.body = SAMPLE_EMAIL_AMBIGUOUS_WITH_KEYS
         mail_editor_.receive(message)
         body = self.sent_messages[10].textbody()
         assert len(self.sent_messages) == 11
