@@ -81,7 +81,9 @@ class MailUpdateSystemTest(MediumTestCase):
         self.locale = 'en'
         self.account = Account(email=self.email, actions=['*:*'],
                                default_frequency=self.default_frequency,
-                               locale=self.locale, email_format='plain')
+                               locale=self.locale, email_format='plain',
+                               next_daily_alert=datetime.datetime(2000, 1, 1),
+                               next_weekly_alert=datetime.datetime(2000, 1, 1))
         db.put(self.account)
 
     def tearDown(self):
@@ -280,6 +282,26 @@ class MailUpdateSystemTest(MediumTestCase):
                                         'frequency=monthly')
         handler.post()
         assert Account.all().get().default_frequency == 'monthly'
+
+    def test_check_and_max_next_alert_times(self):
+        subscribe_ = subscribe.Subscribe()
+        Subscription(key_name='haiti:example.org/123:test@example.com',
+                     user_email='test@example.com',
+                     subject_name='haiti:example.org/123',
+                     frequency='daily').put()
+        subscribe_.account = self.account
+        subscribe_.email = self.email
+
+        # user has daily subscriptions; next alert time should remain the same
+        subscribe_.check_and_max_next_alert_times('daily')
+        a = Account.all().get()
+        assert a.next_daily_alert == datetime.datetime(2000, 1, 1)
+
+        # user has no weekly subscriptions; next alert time should max out
+        subscribe_.check_and_max_next_alert_times('weekly')
+        a = Account.all().get()
+        assert a.next_weekly_alert == datetime.datetime(datetime.MAXYEAR, 1, 1)
+
 
     def simulate_request(self, path):
         request = webapp.Request(webob.Request.blank(path).environ)
