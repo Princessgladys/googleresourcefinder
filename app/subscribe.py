@@ -97,9 +97,10 @@ class Subscribe(Handler):
         Subscription(key_name=key_name, frequency=frequency,
                      subject_name=self.subject_name,
                      user_email=self.email).put()
-        update_account_alert_time(self.account, frequency, initial=True)
+        if frequency != 'instant':
+            update_account_alert_time(self.account, frequency, initial=True)
         db.put(self.account)
-    
+ 
     def unsubscribe(self):
         """Unsubscribes the current user from a particular subject."""
         subscription = Subscription.get(self.subject_name, self.email)
@@ -109,6 +110,7 @@ class Subscribe(Handler):
             if alert:
                 db.delete(alert)
             db.delete(subscription)
+            self.check_and_max_next_alert_times(subscription.frequency)
 
     def unsubscribe_multiple(self):
         """Unsubscribes the current user from a specified list of subjects."""
@@ -121,6 +123,7 @@ class Subscribe(Handler):
                 if alert:
                     db.delete(alert)
                 db.delete(subscription)
+                self.check_and_max_next_alert_times(subscription.frequency)
 
     def change_locale(self):
         """Changes the current user's locale."""
@@ -183,6 +186,7 @@ class Subscribe(Handler):
                                         getattr(old_alert, old_values[i]))
                 db.put(alert)
             db.delete(old_alert)
+            self.check_and_max_next_alert_times(old_frequency)
 
     def change_subscriptions(self):
         """Change's the current user's subscription to a list of subjects."""
@@ -199,6 +203,17 @@ class Subscribe(Handler):
             self.error(400) # bad request
         self.account.default_frequency = frequency
         db.put(self.account)
+
+    def check_and_max_next_alert_times(self, frequency):
+        """If a user is no longer subscribed to %frequency% digest updates, sets
+        the next alert time to a high value to avoid being called in
+        /mail_alerts."""
+        if not Subscription.all().filter('user_email =', self.email).filter(
+            'frequency =', frequency).get():
+            setattr(self.account, 'next_%s_alert' % frequency,
+                     datetime.datetime(datetime.MAXYEAR, 1, 1))
+            db.put(self.account)
+
 
 if __name__ == '__main__':
     run([('/subscribe', Subscribe)], debug=True)

@@ -35,6 +35,8 @@ This project uses the following naming conventions in variables and properties:
         A non-localizable, UI-displayable text label for an entity.
 """
 
+import datetime
+
 from google.appengine.ext import db
 
 class Subdomain(db.Model):
@@ -343,14 +345,19 @@ class Account(db.Model):
     requested_actions = db.StringListProperty()  # permissions requested but
                                                  # not yet granted
     locale = db.StringProperty() # user chosen locale
-    default_frequency = db.StringProperty() # default frequency for updates
-    next_daily_alert = db.DateTimeProperty() # next time to send a daily update
-    next_weekly_alert = db.DateTimeProperty() # next time to send a weekly
-                                              # update to the user
-    next_monthly_alert = db.DateTimeProperty() # next time to send a monthly
-                                               # update to the user
+    # default frequency for updates
+    default_frequency = db.StringProperty(default='instant')
+    # next time to send a daily update
+    next_daily_alert = db.DateTimeProperty(
+        default=datetime.datetime(datetime.MAXYEAR, 1, 1))
+    # next time to send a weekly update to the user
+    next_weekly_alert = db.DateTimeProperty(
+        default=datetime.datetime(datetime.MAXYEAR, 1, 1))
+    # next time to send a monthly update to the user
+    next_monthly_alert = db.DateTimeProperty(
+        default=datetime.datetime(datetime.MAXYEAR, 1, 1))
     # preferred format to receive e-mail in
-    email_format = db.StringProperty(choices=['plain', 'html'])
+    email_format = db.StringProperty(choices=['plain', 'html'], default='plain')
 
 class Message(db.Expando):
     """Internationalized strings for value identifiers.  Top-level entity,

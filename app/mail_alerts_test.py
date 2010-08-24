@@ -359,6 +359,8 @@ class MailAlertsTest(MediumTestCase):
                                 'haiti:example.org/456')
 
         # now send the alert
+        self.account.next_daily_alert = datetime.datetime(2010, 01, 01)
+        db.put(self.account)
         handler = self.simulate_request('/mail_alerts')
         handler.post()
         assert not PendingAlert.get('daily', 'test@example.com',

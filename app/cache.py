@@ -147,6 +147,12 @@ class MessageCache(Cache):
         return dict(((e.ns, e.name), e) for e in entities)
 
 
+class SubdomainCache(Cache):
+    def fetch_entities(self):
+        entities = utils.fetch_all(model.Subdomain.all())
+        return dict((e.key().name(), e) for e in entities)
+
+
 class DefaultAccountCache(Cache):
     key_name = 'default'
 
@@ -167,9 +173,10 @@ MINIMAL_SUBJECTS = CacheGroup(MinimalSubjectCache)
 ATTRIBUTES = AttributeCache()
 MESSAGES = MessageCache()
 DEFAULT_ACCOUNT = DefaultAccountCache()
+SUBDOMAINS = SubdomainCache()
 
 CACHES = [JSON, SUBJECT_TYPES, MINIMAL_SUBJECTS, ATTRIBUTES, MESSAGES,
-          DEFAULT_ACCOUNT]
+          DEFAULT_ACCOUNT, SUBDOMAINS]
 
 def flush_all():
     """Flush all caches."""

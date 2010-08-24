@@ -42,6 +42,7 @@ from operator import itemgetter
 from google.appengine.api import mail
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+from google.appengine.runtime import DeadlineExceededError
 
 import cache
 import utils
@@ -186,20 +187,10 @@ def update_account_alert_time(account, frequency, now=None, initial=False):
     else:
         new_time = now + get_timedelta(frequency, now)
 
-    if initial:
-        if frequency == 'daily' and not account.next_daily_alert:
-            account.next_daily_alert = new_time
-        elif frequency == 'weekly' and not account.next_weekly_alert:
-            account.next_weekly_alert = new_time
-        elif frequency == 'monthly' and not account.next_monthly_alert:
-            account.next_monthly_alert = new_time
-    else:
-        if frequency == 'daily':
-            account.next_daily_alert = new_time
-        elif frequency == 'weekly':
-            account.next_weekly_alert = new_time
-        elif frequency == 'monthly':
-            account.next_monthly_alert = new_time
+    if (initial and getattr(account, 'next_%s_alert' % frequency) !=
+        datetime.datetime(datetime.MAXYEAR, 1, 1)):
+        return
+    setattr(account, 'next_%s_alert' % frequency, new_time)
 
 
 class EmailFormatter:
@@ -386,9 +377,20 @@ class MailAlerts(Handler):
                 self.request.get('unchanged_data'))
             self.update_and_add_pending_alerts()
         else:
-            for subdomain in Subdomain.all():
-                for freq in ['daily', 'weekly', 'monthly']:
-                    self.send_digests(freq, subdomain.key().name())
+            try:
+                for subdomain in cache.SUBDOMAINS.keys():
+                    for freq in ['daily', 'weekly', 'monthly']:
+                        self.send_digests(freq, subdomain)
+            except DeadlineExceededError:
+                # The cron job will automatically be run every 5 minutes. We
+                # expect that in some situations, this will not finish in 30
+                # seconds. It is designed to simply pick up where it left off
+                # in the next queue of the file, so we pass off this exception
+                # to avoid having the system automatically restart the request.
+                # NOTE: this only applies to the digest system. If this script
+                # is run because a facility is changed, we let the AppEngine
+                # error management system kick in.
+                pass
 
     def update_and_add_pending_alerts(self):
         """Called when a subject is changed. It creates PendingAlerts for
@@ -399,7 +401,8 @@ class MailAlerts(Handler):
         subject = Subject.get_by_key_name(self.params.subject_name)
         subdomain = self.params.subject_name.split(':')[0]
 
-        subscriptions = Subscription.get_by_subject(self.params.subject_name)
+        subscriptions = utils.fetch_all(Subscription.get_by_subject(
+            self.params.subject_name))
         for subscription in subscriptions:
             if subscription.frequency != 'instant':
                 # queue pending alerts for non-instant update subscriptions
@@ -447,17 +450,16 @@ class MailAlerts(Handler):
         'monthly']. Also removes pending alerts once an e-mail has been sent
         and updates the account's next alert times.
         """
-        query = Account.all().filter('next_%s_alert <' % frequency,
-                                     datetime.datetime.now())
-        accounts = [account for account in query if account.email != None]
+        results = utils.fetch_all(Account.all().filter(
+            'next_%s_alert <' % frequency, datetime.datetime.now()))
+        accounts = [account for account in results if account.email != None]
         for account in accounts:
-            pending_alerts = PendingAlert.get_by_frequency(frequency,
-                                                           account.email)
             alerts_to_delete = []
             unchanged_subjects = []
             changed_subjects = {}
-            for subscription in Subscription.all().filter('user_email =',
-                account.email).filter('frequency =', frequency):
+            subscriptions = utils.fetch_all(Subscription.all().filter(
+                'user_email =', account.email).filter('frequency =', frequency))
+            for subscription in subscriptions:
                 subject = Subject.get_by_key_name(subscription.subject_name)
                 pa = PendingAlert.get(frequency, account.email,
                                       subscription.subject_name)
