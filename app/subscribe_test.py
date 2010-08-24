@@ -284,6 +284,8 @@ class MailUpdateSystemTest(MediumTestCase):
         assert Account.all().get().default_frequency == 'monthly'
 
     def test_check_and_max_next_alert_times(self):
+        """Confirms that next_%freq%_alert times are changed appropriately to
+        the max value we are using when no subscriptions exist."""
         subscribe_ = subscribe.Subscribe()
         Subscription(key_name='haiti:example.org/123:test@example.com',
                      user_email='test@example.com',
