@@ -378,6 +378,8 @@ class MailAlertsTest(MediumTestCase):
         assert 'nickname_foo' in sent_emails[0].body
 
     def test_post_error_catching(self):
+        """Makes sure that a raised DeadlineExceededError does nothing when
+        sending digest email updates."""
         def raise_exceeds_deadline_error(freq, subdomain):
             raise DeadlineExceededError
         mail_alerts_ = mail_alerts.MailAlerts()
