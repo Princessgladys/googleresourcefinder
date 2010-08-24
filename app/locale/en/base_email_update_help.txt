@@ -7,17 +7,17 @@ update General Hospital
 Here, General Hospital is the title of the facility to be updated. Each line that follows the initial update line must start with the name of an attribute, followed by a space, and then the new value for that attribute. A complete list of attribute names is included below. For example, to update the number of total and available beds for a facility, type:
 
 update General Hospital
-Total beds 500
-Available beds 79
+Total beds: 500
+Available beds: 79
 
 An update email for two facilities might look like the following:
 
 update General Hospital
-Total beds 37
-Available beds 10
-Email test@example.com
+Total beds: 37
+Available beds: 10
+Email: test@example.com
 
 update Public Hospital
-Reachable by road yes
+Reachable by road: yes
 
 {% include help_file %}
