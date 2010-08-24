@@ -21,6 +21,8 @@ import webob
 from google.appengine.api import mail
 from google.appengine.api import users
 from google.appengine.ext import db, webapp
+from google.appengine.runtime import DeadlineExceededError
+from nose.tools import assert_raises
 
 import cache
 import mail_alerts
@@ -374,6 +376,17 @@ class MailAlertsTest(MediumTestCase):
         assert 'attr_bar' in sent_emails[0].body
         assert 'attr_foo' in sent_emails[0].body
         assert 'nickname_foo' in sent_emails[0].body
+
+    def test_post_error_catching(self):
+        def raise_exceeds_deadline_error(freq, subdomain):
+            raise DeadlineExceededError
+        mail_alerts_ = mail_alerts.MailAlerts()
+        real_send_digests = mail_alerts_.send_digests
+        mail_alerts_.send_digests = raise_exceeds_deadline_error
+        mail_alerts_.request = Struct(action='', url='localhost:80/mail_alerts',
+                                      path='/mail_alerts')
+        mail_alerts_.post() # should not throw an error anyway
+        mail_alerts_.send_digests = real_send_digests
 
     def test_html_mail_alerts(self):
         """Simulates the class being called when a subject is changed with HTML
