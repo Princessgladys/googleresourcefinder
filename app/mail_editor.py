@@ -22,7 +22,11 @@ received update.
     parse(): parses a list of unicode strings into datastore-friendly objects
     MailEditor: incoming mail handler-- responds to incoming emails addressed to
         <subdomain>-updates@resource-finder@appspotmail.com
+    match_email(): given a string, uses re to locate email addresses
+    generate_ambiguous_update_error_msg(): helper function; given a list of
+        potential matches for an ambiguous update, creates an error message
     format_changes(): helper function to format attribute value tuples
+    parse_utc_offset(): turns a UTC offset in string form into a timedelta
 """
 
 __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
@@ -147,21 +151,15 @@ def update_subject(subject, observed, account, source_url, values, comments={},
     db.run_in_transaction(work)
 
 
-def parse(attribute_name, update, index):
+def parse(attribute_name, update):
     """Parses a list of Unicode strings into an attribute value."""
     type = cache.ATTRIBUTES[attribute_name].type
     if type in ['str', 'text']:
-        value = ' '.join(update[index:])
-        # Users wishing to escape string values so as not to be counted as
-        # an attribute name by mistake may do so by surrounding the value
-        # in quotes. Remove them here for the actual value if they exist.
-        if value[0] == '"' and value[-1] == '"':
-            value = value[1:-1]
-        return value
+        return update
     if type == 'int':
-        return int(update[index])
+        return int(update)
     if type == 'bool':
-        return bool(update[index].lower() in ['y', 'yes', 'true'])
+        return bool(update.lower() in ['y', 'yes', 'true'])
 
 
 # TODO(pfritzsche): Add support for all attributes.
@@ -179,10 +177,20 @@ UNSUPPORTED_ATTRIBUTES = {
 
 def match_email(text):
     """Given a string, tries to find a regex match for an email."""
-    email_regex = r'(.+\s+)*(<)*\s*(?P<email>\w+(?:.+\w+)*@\w+(?:\.\w+)+)(>)*'
+    email_regex = r'(.+\s+)*(<)*\s*(?P<email>\w+(?:.+\w+)*@\w+(?:.+\w+)' + \
+                  r'(?:\.\w+)+)(>)*'
     match = re.match(email_regex, text)
     if match:
         return match.group('email')
+
+
+def generate_ambiguous_update_error_msg(matches):
+    #i18n: Error message for an ambiguous attribute name
+    msg = _('Attribute name is ambiguous. Please specify one of the following:')
+    for match in matches:
+        change = format_changes(match)
+        msg += '\n-- %s: %s' % (change['attribute'], change['value'])
+    return msg
 
 
 class MailEditor(InboundMailHandler):
@@ -193,11 +201,22 @@ class MailEditor(InboundMailHandler):
         account: the account of the user the email is from
 
     Methods:
-        have_profile_info: checks to see if the email is from a valid account
+        init: handles various initialization tasks for the class
+        validate_subdomain: confirms that the given subdomain is valid
+        have_profile_info: checks to see if the current account exists and has a
+            valid nickname and affiliation
         check_and_store_profile_info: checks to see if the email includes
-            profile information for the user
+            profile information for the user and adds to the datastore if found
         receive: override function- triggered when an email is received
+        match_nickname_affiliation: locates the nickname and affiliation in a
+            body of text, if present
+        extract_subject_from_update_line: given an update header, locates the
+            subject title (and key name if present)
+        extract_update_lines: given a body of text and an update header, returns
+            a list of the non-empty lines up through the next update
         process_email: searches the text of an email for updates and errors
+        get_attribute_matches: gets a list of potential attribute name matches
+            from a given update line
         update_subjects: updates the datastore with all valid updates
         send_email: sends a response/confirmation email to the user
     """
@@ -326,7 +345,7 @@ class MailEditor(InboundMailHandler):
         concerned with the quoted section of the body, returns the section
         corresponding to the match's updates."""
         start = match.end()
-        quotes = 'group' in match.groupdict() and match.group('quotes') or ''
+        quotes = 'quotes' in match.groupdict() and match.group('quotes') or ''
         end = body.lower().find('%supdate'.lower() % quotes, start + 1)
         update_block = body[start:] if end == -1 else body[start:end]
         return [line for line in update_block.split('\n') if
@@ -379,45 +398,40 @@ class MailEditor(InboundMailHandler):
                     if STOP_DELIMITER in update:
                         stop = True
                         break
-                    update_split = [word for word in update.split() if
-                                    re.match('.*\w+.*', word, flags=re.UNICODE)]
-                    for i in range(len(update_split), 0, -1):
-                        # Automate the generation of potential atribute names
-                        # from the line. This checks each line for any
-                        # potential attribute name that fits this description.
-                        if len(update_split) <= i: # update must have >=1 words
-                            continue         # present after the attribute name
-                        name_match = re.match(
-                            '\w+', '_'.join(update_split[:i]).lower())
-                        if name_match:
-                            name = name_match.group(0)
-                        if name in subject_type.attribute_names:
-                            if name not in unsupported:
-                                try:
-                                    value = parse(name, update_split, i)
-                                    updates.append((name, value))
-                                except ValueError, error:
-                                    values = {
-                                        'value': ' '.join(update_split[i:]),
-                                        'attribute': name
-                                    }
-                                    #i18n: Error message for an invalid value
-                                    msg = _('"%(value)s" is not a valid value' +
-                                            ' for "%(attribute)s"') % values
-                                    errors.append({
-                                        'error_message': msg,
-                                        'original_line': update
-                                    })
-                            else:
-                                errors.append(
-                                    #i18n: Error message for an unsupported
-                                    #i18n: attribute
-                                    (_('Unsupported attribute'), update))
-                            # Break to remove the situation where substrings of
-                            # a name may also be counted; i.e. users who really
-                            # want to set the "commune" attribute to the value
-                            # "code" must escape code with "'s.
-                            break
+                    match_es = self.get_attribute_matches(subject_type, update)
+                    if match_es and isinstance(match_es, list):
+                        errors.append({
+                            'error_message':
+                                generate_ambiguous_update_error_msg(match_es),
+                            'original_line': update
+                        })
+                        continue
+                    elif not match_es:
+                        continue
+                    name, update_text = match_es
+                    if name not in unsupported:
+                        try:
+                            value = parse(name, update_text)
+                            updates.append((name, value))
+                        except ValueError, error:
+                            values = {
+                                'value': update_text,
+                                'attribute': name
+                            }
+                            #i18n: Error message for an invalid value
+                            msg = _('"%(value)s" is not a valid value' +
+                                    ' for "%(attribute)s"') % values
+                            errors.append({
+                                'error_message': msg,
+                                'original_line': update
+                            })
+                    else:
+                        errors.append({
+                            #i18n: Error message for an unsupported
+                            #i18n: attribute
+                            'error_message': _('Unsupported attribute'),
+                            'original_line': update
+                        })
                 if updates:
                     data.update_stanzas.append((subject, updates))
                 if errors:
@@ -433,6 +447,30 @@ class MailEditor(InboundMailHandler):
                 data.update_stanzas or data.error_stanzas or stop):
                 break
         return data
+
+    def get_attribute_matches(self, st, update):
+        """Given an update line and subject type, locates any attribute name
+        matches that exist in the line. Returns a list of tuples
+        (attribute name, unparsed value) for all located matches or if only one
+        match is found, simply returns that match."""
+        matches = []
+        update_split = [word for word in update.lower().split() if
+                        re.match('.*\w+.*', word, flags=re.UNICODE)]
+        for i in range(len(update_split), 0, -1):
+            colon_found = False
+            if len(update_split[:i]) < i:
+                continue
+            pre_name = '_'.join(update_split[:i]).lower()
+            if pre_name[-1] == ':':
+                name = pre_name[:-1]
+                colon_found = True
+            else:
+                name = pre_name
+            if name in st.attribute_names:
+                matches.append((name, ' '.join(update_split[i:])))
+                if colon_found:
+                    break
+        return matches[0] if len(matches) == 1 else matches
 
     def update_subjects(self, updates, observed, comment=''):
         """Goes through the supplied list of updates. Adds to the datastore."""
@@ -527,7 +565,7 @@ class MailEditor(InboundMailHandler):
         message.send()
 
 
-def format_changes(update, locale):
+def format_changes(update, locale='en'):
     """Helper function; used to format an attribute, value pair for email."""
     attribute, value = update
     return {
@@ -537,9 +575,10 @@ def format_changes(update, locale):
 
 
 def parse_utc_offset(text):
+    """Returns a timedelta representation of a UTC offset string."""
     if not re.match('^[+-][0-2][0-9][0-6][0-9]$', text):
         return timedelta()
-    offset = timedelta(hours=int(text[:2]), minutes=int(text[2:]))
+    offset = timedelta(hours=int(text[1:3]), minutes=int(text[3:]))
     if text[0] == '+':
         return offset
     else:

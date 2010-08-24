@@ -39,13 +39,13 @@ The following updates contained errors. To fix the errors, you can either draft 
 {% endif %}{% if need_profile_info and updates %}Pending updates:
 
 {% for update in updates %}update {{update.subject_title}} ({{update.subject_name}})
-{% for change in update.changed_attributes %}{{change.attribute}} {{change.value}}
+{% for change in update.changed_attributes %}{{change.attribute}}: {{change.value}}
 {% endfor %}
 {% endfor %}{% else %}{% if updates %}--- --- --- ---
 We recently received the following updates from you. They were inserted into the database as follows:
 {% for update in updates %}
 {{update.subject_title}} ({{update.subject_name}})
-{% for change in update.changed_attributes %}{{change.attribute}} {{change.value}}
+{% for change in update.changed_attributes %}{{change.attribute}}: {{change.value}}
 {% endfor %}{% endfor %}{% endif %}{% endif %}{% if errors or ambiguities or updates or unrecognized %}
 --- --- --- ---
 REFERENCE DOCUMENT{% endif %}{% if unrecognized or errors or ambiguities %}
