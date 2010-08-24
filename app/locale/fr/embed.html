@@ -1,11 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN">
-<html>
+<html DIR="LTR">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta name="keywords" content="pakistan, flood, resource, finder, hospitals,
-    medicine, medical, supplies, crisis, disaster, pakistani, pakistan
-    floods">
-  <meta http-equiv="content-language" content="en">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta name="keywords" content="pakistan, flood, resource, finder, hospitals, medicine, medical, supplies, crisis, disaster, pakistani, pakistan floods"> <meta http-equiv="content-language" content="en">
 
   <title>Google Resource Finder</title>
 
@@ -27,26 +23,22 @@
 
 <body>
   <div class="languages">
-    {% for lang in params.languages %}
-      {% ifequal lang.0 params.lang %}<span class="selected">{{lang.1}}</span>
-      {% else %}<a href="{{embed_url}}&lang={{lang.0}}">{{lang.1}}</a>
-      {% endifequal %}{% if not forloop.last %} | {% endif %}
-    {% endfor %}
+    {% for lang in params.languages %} {% ifequal lang.0 params.lang %}<span class="selected">{{lang.1}}</span> {% else %}<a href="{{embed_url}}&lang={{lang.0}}">{{lang.1}}</a> {% endifequal %}{% if not forloop.last %} | {% endif %} {% endfor %}
   </div>
 
-  <h1><a href="{{home_url|escape}}">Resource Finder</a></h1>
+  <h1><a href="{{home_url}}">Resource Finder</a></h1>
 
   <div class="embed">
-    <h2>Embedding the Application</h2>
-    <p>Copy and paste the following HTML code to put this tool on your site:</p>
+    <h2>Intégration de l'application</h2>
+    <p>Pour intégrer cet outil de recherche de ressources à votre site, copiez-collez le code HTML suivant :</p>
 
     <pre>
       &lt;iframe
-      &nbsp;&nbsp;src='{{home_url|escape}}' id='iframe'
+      &nbsp;&nbsp;src='{{embed_url|escape}}' id='iframe'
       &nbsp;&nbsp;width="740px" height="400" frameborder=0 style="border: dashed 2px #77c"&gt;
       &lt;/iframe&gt;</pre>
 
-    <p>This gadget is made available under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2.0 license</a>.</p>
+    <p>Ce gadget est fourni sous <a href="http://www.apache.org/licenses/LICENSE-2.0.html">licence Apache 2.0</a>.</p>
 
     <br/><br/>
 
