@@ -63,6 +63,12 @@ class Purge(utils.Handler):
                 cache.JSON[subdomain].flush()
 
         if access.check_action_permitted(self.account, subdomain, 'purge'):
+            full_name = '%s:%s' % (subdomain, subject_name)
+            alerts = utils.fetch_all(model.PendingAlert.all(keys_only=True
+                ).filter('subject_name =', full_name))
+            subscriptions = utils.fetch_all(model.filter_by_prefix(
+                model.Subscription.all(keys_only=True), full_name + ':'))
+            db.delete(subscriptions + alerts)
             db.run_in_transaction(work)
 
 if __name__ == '__main__':
