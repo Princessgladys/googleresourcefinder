@@ -303,6 +303,7 @@ class MailUpdateSystemTest(MediumTestCase):
         # the e-mail is sent
         s = Subject(key_name=subject_name, type='hospital', author=self.user)
         self.set_attr(s, 'title', 'title_foo')
+        self.set_attr(s, 'healthc_id', 123)
         st = SubjectType(key_name='haiti:hospital')
         db.put([s, st])
 
@@ -319,7 +320,7 @@ class MailUpdateSystemTest(MediumTestCase):
         for freq in ['daily', 'weekly', 'monthly']:
             assert not PendingAlert.get(freq, self.email, subject_name)
         assert len(sent_emails) == 1
-        assert 'TITLE_FOO' in sent_emails[0].body
+        assert 'UPDATE title_foo (example.org/123)' in sent_emails[0].body
         assert Account.all().get().next_weekly_alert == model.MAX_DATE
         db.delete([s, st])
 

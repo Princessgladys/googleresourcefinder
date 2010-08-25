@@ -30,7 +30,7 @@ from feed_provider import schedule_add_record
 from feeds.crypto import sign, verify
 from rendering import to_json
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
-from utils import db, get_message, html_escape
+from utils import db, can_edit, get_message, html_escape
 from utils import to_unicode, users, _
 
 XSRF_KEY_NAME = 'resource-finder-edit'
