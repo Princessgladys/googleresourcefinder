@@ -213,7 +213,7 @@ class Subscribe(Handler):
         if frequency == 'instant':
             return
         if not Subscription.all().filter('user_email =', self.email).filter(
-            'frequency =', frequency).get():
+            'frequency =', frequency).count():
             setattr(self.account, 'next_%s_alert' % frequency, model.MAX_DATE)
             db.put(self.account)
         else:
