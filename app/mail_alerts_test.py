@@ -21,9 +21,12 @@ import webob
 from google.appengine.api import mail
 from google.appengine.api import users
 from google.appengine.ext import db, webapp
+from google.appengine.runtime import DeadlineExceededError
+from nose.tools import assert_raises
 
 import cache
 import mail_alerts
+import model
 import utils
 from feeds.xmlutils import Struct
 from mail_alerts import EMAIL_FORMATTERS, get_timedelta, fetch_updates
@@ -359,6 +362,8 @@ class MailAlertsTest(MediumTestCase):
                                 'haiti:example.org/456')
 
         # now send the alert
+        self.account.next_daily_alert = datetime.datetime(2010, 01, 01)
+        db.put(self.account)
         handler = self.simulate_request('/mail_alerts')
         handler.post()
         assert not PendingAlert.get('daily', 'test@example.com',
@@ -372,6 +377,19 @@ class MailAlertsTest(MediumTestCase):
         assert 'attr_bar' in sent_emails[0].body
         assert 'attr_foo' in sent_emails[0].body
         assert 'nickname_foo' in sent_emails[0].body
+
+    def test_post_error_catching(self):
+        """Makes sure that a raised DeadlineExceededError does nothing when
+        sending digest email updates."""
+        def raise_exceeds_deadline_error(freq, subdomain):
+            raise DeadlineExceededError
+        mail_alerts_ = mail_alerts.MailAlerts()
+        real_send_digests = mail_alerts_.send_digests
+        mail_alerts_.send_digests = raise_exceeds_deadline_error
+        mail_alerts_.request = Struct(action='', url='localhost:80/mail_alerts',
+                                      path='/mail_alerts')
+        mail_alerts_.post() # should not throw an error anyway
+        mail_alerts_.send_digests = real_send_digests
 
     def test_html_mail_alerts(self):
         """Simulates the class being called when a subject is changed with HTML

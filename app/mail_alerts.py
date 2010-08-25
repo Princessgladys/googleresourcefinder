@@ -20,8 +20,6 @@ then sends out information to each user per their subscription settings.
 format_email_subject(subdomain, frequency): generates an e-mail subject line
 get_timedelta(account, subject): returns a text frequency as a timedelta
 fetch_updates(): returns a dictionary of updated values for the given subject
-order_and_format_updates(updates, subject_type, locale): sorts and formats the
-    updates as specified by the subject type for the updates
 format_update(update, locale): translates and formats a particular update
 send_email(): sends an e-mail with the supplied information
 update_account_alert_time(): updates an account's next_%freq%_alert time
@@ -42,13 +40,14 @@ from operator import itemgetter
 from google.appengine.api import mail
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+from google.appengine.runtime import DeadlineExceededError
 
 import cache
+import model
 import utils
 from feeds.xmlutils import Struct
-from model import Account, PendingAlert, Subdomain, Subject
-from model import Subscription
-from utils import _, format, get_last_updated_time, Handler
+from model import Account, PendingAlert, Subject, Subscription
+from utils import _, format, get_last_updated_time, order_and_format_updates
 
 # Set up localization.
 ROOT = os.path.dirname(__file__)
@@ -123,18 +122,6 @@ def fetch_updates(alert, subject):
     return updated_attrs
 
 
-def order_and_format_updates(updates, subject_type, locale):
-    """Orders attribute updates in the same order specified by
-    subject_type.attribute_names, in the given locale."""
-    updates_by_name = dict((update['attribute'], update) for update in updates)
-    formatted_attrs = []
-    for name in subject_type.attribute_names:
-        if name in updates_by_name:
-            formatted_attrs.append(format_update(updates_by_name[name],
-                                                 locale))
-    return formatted_attrs
-
-
 def format_update(update, locale):
     """Insures that the attribute and old/new values of an update are translated
     and properly formatted."""
@@ -186,20 +173,9 @@ def update_account_alert_time(account, frequency, now=None, initial=False):
     else:
         new_time = now + get_timedelta(frequency, now)
 
-    if initial:
-        if frequency == 'daily' and not account.next_daily_alert:
-            account.next_daily_alert = new_time
-        elif frequency == 'weekly' and not account.next_weekly_alert:
-            account.next_weekly_alert = new_time
-        elif frequency == 'monthly' and not account.next_monthly_alert:
-            account.next_monthly_alert = new_time
-    else:
-        if frequency == 'daily':
-            account.next_daily_alert = new_time
-        elif frequency == 'weekly':
-            account.next_weekly_alert = new_time
-        elif frequency == 'monthly':
-            account.next_monthly_alert = new_time
+    if (not getattr(account, 'next_%s_alert' % frequency) != model.MAX_DATE or
+        not initial):
+        setattr(account, 'next_%s_alert' % frequency, new_time)
 
 
 class EmailFormatter:
@@ -222,10 +198,10 @@ class EmailFormatter:
         self.locale = account.locale
 
     def format_body(self, data):
-        if self.email_format == 'plain':
-            return self.format_plain_body(data)
-        else:
+        if self.email_format == 'html':
             return self.format_html_body(data)
+        else:
+            return self.format_plain_body(data)
 
     def format_plain_body(self, data):
         """Forms the plain text body for an e-mail. Expects the data to be input
@@ -242,13 +218,13 @@ class EmailFormatter:
         for subject_name in data.changed_subjects:
             (subject_title, updates) = data.changed_subjects[subject_name]
             subject = Subject.get_by_key_name(subject_name)
-            subdomain = subject_name.split(':')[0]
+            subdomain = subject.get_subdomain()
             subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
             updates = order_and_format_updates(updates, subject_type,
-                                               self.locale)
-            body += subject_title.upper() + '\n'
+                                               self.locale, format_update)
+            body += 'UPDATE %s (%s)\n\n' % (subject_title, subject.get_name())
             for update in updates:
-                body += '-> %s: %s [%s: %s; %s: %s]\n' % (
+              body += '%s: %s\n-- %s: %s. %s: %s\n' % (
                     update['attribute'],
                     utils.to_unicode(format(update['new_value'], True)),
                     #i18n: old value for the attribute
@@ -291,7 +267,7 @@ class HospitalEmailFormatter(EmailFormatter):
             subject_type = cache.SUBJECT_TYPES[subdomain][subject.type]
             updates = order_and_format_updates(
                 data.changed_subjects[subject_name][1], subject_type,
-                self.locale)
+                self.locale, format_update)
             changed_subjects.append({
                 'name': subject_name,
                 'no_subdomain_name': no_subdomain_name,
@@ -348,7 +324,7 @@ EMAIL_FORMATTERS = {
     }
 }
 
-class MailAlerts(Handler):
+class MailAlerts(utils.Handler):
     """Handler for /mail_alerts. Used to handle e-mail update sending.
 
     Attributes:
@@ -386,9 +362,20 @@ class MailAlerts(Handler):
                 self.request.get('unchanged_data'))
             self.update_and_add_pending_alerts()
         else:
-            for subdomain in Subdomain.all():
-                for freq in ['daily', 'weekly', 'monthly']:
-                    self.send_digests(freq, subdomain.key().name())
+            try:
+                for subdomain in cache.SUBDOMAINS.keys():
+                    for freq in ['daily', 'weekly', 'monthly']:
+                        self.send_digests(freq, subdomain)
+            except DeadlineExceededError:
+                # The cron job will automatically be run every 5 minutes. We
+                # expect that in some situations, this will not finish in 30
+                # seconds. It is designed to simply pick up where it left off
+                # in the next queue of the file, so we pass off this exception
+                # to avoid having the system automatically restart the request.
+                # NOTE: this only applies to the digest system. If this script
+                # is run because a facility is changed, we let the AppEngine
+                # error management system kick in.
+                logging.info('mail_alerts.py: deadline exceeded error raised')
 
     def update_and_add_pending_alerts(self):
         """Called when a subject is changed. It creates PendingAlerts for
@@ -447,12 +434,14 @@ class MailAlerts(Handler):
         'monthly']. Also removes pending alerts once an e-mail has been sent
         and updates the account's next alert times.
         """
-        query = Account.all().filter('next_%s_alert <' % frequency,
-                                     datetime.datetime.now())
+        # Accounts with no daily/weekly/monthly subscriptions will be filtered
+        # out in this call as their next alert dates will always be set
+        # to an arbitrarily high constant date [see model.MAX_DATE].
+        query = Account.all().filter(
+            'next_%s_alert <' % frequency, datetime.datetime.now()).order(
+                'next_%s_alert' % frequency)
         accounts = [account for account in query if account.email != None]
         for account in accounts:
-            pending_alerts = PendingAlert.get_by_frequency(frequency,
-                                                           account.email)
             alerts_to_delete = []
             unchanged_subjects = []
             changed_subjects = {}

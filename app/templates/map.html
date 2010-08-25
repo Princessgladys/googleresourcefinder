@@ -168,6 +168,47 @@
 </div>
 {% endblock freshness %}
 
+{% if first_visit %}
+<div id="splash-popup" style="display: none;">
+  <h1>Welcome to Google Resource Finder</h1>
+  <div class="close-popup"><b>
+      <a color="#fff" href="#" onclick="show_splash(false);"><img
+        src="static/x.png"></a></b></div>
+  <table>
+    <tr>
+      <td>
+        <p><b>What is Resource Finder?</b>
+
+        <p>Resource Finder is a tool designed to help disseminate updated
+        information about health facilities and the services they offer.</p>
+
+        <p><b>Getting started</b>
+
+        <ul>
+          <li>Click a facility's name on the left to view detailed information.
+          <li>Click the "Edit this record" link in any information bubble to
+          make changes.
+        </ul>
+        <p>Check out the <a href="/help"
+          target="_blank">help page</a> on the top right for more information.</p>
+        <center><button onclick="show_splash(false);">Get started</button></center>
+      </td>
+      <td valign="middle">
+        <!-- Embedded YouTube "How to" video goes here. Set height=250px, width=300px -->
+      </td>
+    </tr>
+  </table>
+</div>
+<!-- The following is a necessary IE fix. It did not respond to filter in the css file, so it was placed here instead.-->
+<div id="background-fader"
+  style="display: none; filter: alpha(opacity=50);"></div>
+
+<script type="text/javascript" src="static/splash.js"></script>
+<script>
+  show_splash(true);
+</script>
+{% endif %}
+
 {% block footer %}
 {% endblock footer %}
 <div id="edit-data" style="display:none"></div>
