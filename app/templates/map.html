@@ -1,0 +1,296 @@
+{% comment %}
+# Copyright 2009-2010 by Ka-Ping Yee
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+{% extends "base.html" %}
+{% load i18n %}
+
+{% comment %}
+# Title, home, and print link blocks left in for potential overrides in
+# other files.
+# TODO(pfritzsche): Figure out why the blocks are necessary; according
+# kpy, they should not be necessary for overriding grandparents of a file.
+{% endcomment %}
+
+{% block home-link %}
+{{block.super}}
+{% endblock home-link %}
+
+{% block print-link %}
+{{block.super}}
+{% endblock print-link %}
+
+{% block title %}
+{{block.super}}
+{% endblock title %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="static/map.css">
+  <!--[if lt IE 8]>
+    <link rel="stylesheet" href="static/map-ie.css">
+  <![endif]-->
+  {% if params.lang_bidi %}
+    <link rel="stylesheet" href="static/map-rtl.css">
+  {% endif %}
+
+  <link rel="stylesheet" type="text/css" media="all"
+        href="static/css/custom-theme/jquery-ui-1.8rc3.custom.css">
+  <link rel="stylesheet" href="static/bubble.css">
+{% endblock stylesheets %}
+
+{% block javascript-includes %}
+  <script type="text/javascript" src="static/map.js"></script>
+  <script type="text/javascript" src="static/bubble.js"></script>
+  <script type="text/javascript" src="static/edit.js"></script>
+  <script type="text/javascript">
+    var is_logged_in = {% if user %} true {% else %} false {% endif %};
+    var print = {% if params.print %} true {% else %} false {% endif %};
+    var login_add_url = '{{login_add_url}}';
+    var print_url = '{{print_url}}';
+    var bubble_url = '{{bubble_url}}';
+    var edit_url_template = '{{edit_url_template}}';
+    var rtl = {% if params.lang_bidi %} true {% else %} false {% endif %};
+    var show_add_button = {% if show_add_button %} true {% else %} false {% endif %};
+  </script>
+
+  <!-- Google Maps API -->
+  <script type="text/javascript"
+      src="http://maps.google.com/maps/api/js?sensor=false&language={{params.maps_lang}}">
+  </script>
+  <script type="text/javascript"
+      src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer_compiled.js">
+  </script>
+
+{% endblock javascript-includes %}
+
+{% comment %}
+# Include block for potential overrides
+{% endcomment %}
+{% block language-select %}
+{{block.super}}
+{% endblock language-select %}
+
+{% block content %}
+<div id="map"></div>
+<div class="hshadow hs1"></div>
+<div class="hshadow hs2"></div>
+<div class="hshadow hs3"></div>
+<div class="vshadow vs1"></div>
+<div class="vshadow vs2"></div>
+<div class="vshadow vs3"></div>
+
+{% block print-summary %}
+{% endblock print-summary %}
+
+<div id="data">
+{% block data %}
+<div id="supply-section" class="section">
+  <div class="table-head">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <thead id="supply-thead">
+        <tr>
+          {% comment %}
+          #i18n: Header for a list of provisions
+          {% endcomment %}
+          <th>{% trans "Supplies" %}</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <div class="table-body">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <tbody id="supply-tbody"></tbody>
+    </table>
+  </div>
+</div>
+<div id="filter-section" class="section">
+  <div class="table-head">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <thead id="filter-thead">
+        <tr>
+          {% comment %}
+          #i18n: Header for a list of filters to restrict a list of data being
+          #i18n: viewed.
+          {% endcomment %}
+          <th>{% trans "Filters" %}</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <div class="table-body">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <tbody id="filter-tbody"></tbody>
+    </table>
+  </div>
+</div>
+<div id="legend-section" class="section">
+  <div class="table-body">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <tbody id="legend-tbody"></tbody>
+    </table>
+  </div>
+</div>
+<div id="division-section" class="section">
+  <div class="table-head">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <thead id="division-thead">
+        <tr>
+          {% comment %}
+          #i18n: Meaning: administrative division
+          {% endcomment %}
+          <th>{% trans "District" %}</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <div class="table-body" id="division-list">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <tbody id="division-tbody"></tbody>
+    </table>
+  </div>
+</div>
+<div id="subject-section" class="section">
+  <div class="table-head">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <thead id="subject-thead">
+        <tr>
+          {% comment %}
+          #i18n: A place that provides a particular service
+          {% endcomment %}
+          <th>{% trans "Facility" %}</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <div class="table-body" id="subject-list">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <tbody id="subject-tbody">
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock data %}
+</div>
+
+{% block freshness %}
+<div id="freshness">
+  <span id="freshness-text"></span>
+  <div>
+    {% comment %}
+    #i18n: Link text to export data to comma-separated-values format.
+    {% endcomment %}
+    <a target="_blank" href="{{export_url}}" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export CSV" %}</a>
+    {% if params.iframe %}
+      <span class="sep">|</span>
+      <a id="pop-out" target="_blank" href="{{disable_iframe_url}}"
+        onclick="_gaq.push(['_trackEvent', 'main', 'open', 'from_embed']);">
+      {% comment %}
+      #i18n: Link text to go to main page of resource finder sans iframe
+      {% endcomment %}
+      {% trans "New window" %}</a>
+    {% endif %}
+    <span class="sep">|</span>
+    <a id="embed-rf" target="_blank" href="{{embed_url}}"
+      onclick="_gaq.push(['_trackEvent', 'main', 'open', 'how_to_embed']);">
+      {% comment %}
+      #i18n: Link text to a "how to embed" page
+      {% endcomment %}
+      {% if params.iframe %}{% trans "Embed" %}{% else %}{% trans "Embed on your site" %}{% endif %}</a>
+  {% include subdomain_list_footer %}
+  </div>
+</div>
+{% endblock freshness %}
+
+{% if first_visit %}
+<div id="splash-popup" style="display: none;">
+  <h1>Welcome to Google Resource Finder</h1>
+  <div class="close-popup"><b>
+      <a color="#fff" href="#" onclick="show_splash(false);"><img
+        src="static/x.png"></a></b></div>
+  <table>
+    <tr>
+      <td>
+        <p><b>What is Resource Finder?</b>
+
+        <p>Resource Finder is a tool designed to help disseminate updated
+        information about health facilities and the services they offer.</p>
+
+        <p><b>Getting started</b>
+
+        <ul>
+          <li>Click a facility's name on the left to view detailed information.
+          <li>Click the "Edit this record" link in any information bubble to
+          make changes.
+        </ul>
+        <p>Check out the <a href="/help"
+          target="_blank">help page</a> on the top right for more information.</p>
+        <center><button onclick="show_splash(false);">Get started</button></center>
+      </td>
+      <td valign="middle">
+        <object height="250px" width="300px">
+          <param name="movie"
+            value="http://www.youtube.com/v/OV0g9wsjMsU&color1=0xb1b1b1&color2=0xd0d0d0&hl=en_US&feature=player_embedded&fs=1"></param>
+          <param name="allowFullScreen" value="true"></param>
+          <param name="allowScriptAccess" value="always"></param>
+          <embed
+            src="http://www.youtube.com/v/OV0g9wsjMsU&color1=0xb1b1b1&color2=0xd0d0d0&hl=en_US&feature=player_embedded&fs=1"
+            type="application/x-shockwave-flash" allowfullscreen="true"
+            allowScriptAccess="always" height="250px" width="300px"></embed>
+          </object>
+      </td>
+    </tr>
+  </table>
+</div>
+<!-- The following is a necessary IE fix. It does not respond to
+filter in the css file, so I had to place it here instead.-->
+<div id="background-fader"
+  style="display: none; filter: alpha(opacity=50);"></div>
+
+<script type="text/javascript" src="static/splash.js"></script>
+<script>
+  show_splash(true);
+</script>
+{% endif %}
+
+{% block footer %}
+{% endblock footer %}
+<div id="edit-data" style="display:none"></div>
+<script>
+  jQuery(document).ready(function() {
+    load_data({{data}}, '{{params.subject_name}}');
+    {% if params.embed and user %}
+      {% comment %}
+        We get here if redirected from the 'Sign-in to edit' link in the bubble
+        through the sign-in form. Need to check if the user exists to prevent
+        strange behavior when copy/pasting a link with embed=yes to a browser
+        that is not yet signed in.
+
+        TODO(shakusa) Proper escaping of params.subject_name. |escape won't
+        work if params.subject_name has an ampersand
+      {% endcomment %}     
+      inplace_edit_start(make_edit_url('{{params.subject_name|escape}}'));
+    {% endif %}
+    {% if params.add_new and user %}
+      {% comment %}
+        Similarly, we get here if redirected from the 'Add +' button on the map
+        through the sign-in form.
+      {% endcomment %}
+      init_add_new_subject();
+    {% endif %}
+  });
+</script>
+</body>
+</html>
+{% endblock content %}
