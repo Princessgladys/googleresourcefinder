@@ -20,6 +20,10 @@
  * @author pfritzsche@google.com (Phil Fritzsche)
  */
 
+/**
+ * Turns the display for the splash box on or off
+ * @param {boolean} show true to turn on splash, false to turn it off
+ */
 function show_splash(show) {
   $j('body').css('overflow', show ? 'hidden' : 'auto');
   var background_fader = $('background-fader');
@@ -37,6 +41,10 @@ function show_splash(show) {
   }
 }
 
+/**
+ * Centers an element on the screen.
+ * @param {HTMLElement} elem the element to be centered
+ */
 function center_element(elem) {
   var window_size = get_window_size();
   elem.style.left = (window_size[0] / 2) - (elem.clientWidth / 2) + 'px';
