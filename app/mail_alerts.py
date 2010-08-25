@@ -42,12 +42,13 @@ from operator import itemgetter
 from google.appengine.api import mail
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+from google.appengine.runtime import DeadlineExceededError
 
 import cache
+import model
 import utils
 from feeds.xmlutils import Struct
-from model import Account, PendingAlert, Subdomain, Subject
-from model import Subscription
+from model import Account, PendingAlert, Subject, Subscription
 from utils import _, format, get_last_updated_time, Handler
 
 # Set up localization.
@@ -186,20 +187,9 @@ def update_account_alert_time(account, frequency, now=None, initial=False):
     else:
         new_time = now + get_timedelta(frequency, now)
 
-    if initial:
-        if frequency == 'daily' and not account.next_daily_alert:
-            account.next_daily_alert = new_time
-        elif frequency == 'weekly' and not account.next_weekly_alert:
-            account.next_weekly_alert = new_time
-        elif frequency == 'monthly' and not account.next_monthly_alert:
-            account.next_monthly_alert = new_time
-    else:
-        if frequency == 'daily':
-            account.next_daily_alert = new_time
-        elif frequency == 'weekly':
-            account.next_weekly_alert = new_time
-        elif frequency == 'monthly':
-            account.next_monthly_alert = new_time
+    if (not getattr(account, 'next_%s_alert' % frequency) != model.MAX_DATE or
+        not initial):
+        setattr(account, 'next_%s_alert' % frequency, new_time)
 
 
 class EmailFormatter:
@@ -386,9 +376,20 @@ class MailAlerts(Handler):
                 self.request.get('unchanged_data'))
             self.update_and_add_pending_alerts()
         else:
-            for subdomain in Subdomain.all():
-                for freq in ['daily', 'weekly', 'monthly']:
-                    self.send_digests(freq, subdomain.key().name())
+            try:
+                for subdomain in cache.SUBDOMAINS.keys():
+                    for freq in ['daily', 'weekly', 'monthly']:
+                        self.send_digests(freq, subdomain)
+            except DeadlineExceededError:
+                # The cron job will automatically be run every 5 minutes. We
+                # expect that in some situations, this will not finish in 30
+                # seconds. It is designed to simply pick up where it left off
+                # in the next queue of the file, so we pass off this exception
+                # to avoid having the system automatically restart the request.
+                # NOTE: this only applies to the digest system. If this script
+                # is run because a facility is changed, we let the AppEngine
+                # error management system kick in.
+                logging.info('mail_alerts.py: deadline exceeded error raised')
 
     def update_and_add_pending_alerts(self):
         """Called when a subject is changed. It creates PendingAlerts for
@@ -447,12 +448,14 @@ class MailAlerts(Handler):
         'monthly']. Also removes pending alerts once an e-mail has been sent
         and updates the account's next alert times.
         """
-        query = Account.all().filter('next_%s_alert <' % frequency,
-                                     datetime.datetime.now())
+        # Accounts with no daily/weekly/monthly subscriptions will be filtered
+        # out in this call as their next alert dates will always be set
+        # to an arbitrarily high constant date [see model.MAX_DATE].
+        query = Account.all().filter(
+            'next_%s_alert <' % frequency, datetime.datetime.now()).order(
+                'next_%s_alert' % frequency)
         accounts = [account for account in query if account.email != None]
         for account in accounts:
-            pending_alerts = PendingAlert.get_by_frequency(frequency,
-                                                           account.email)
             alerts_to_delete = []
             unchanged_subjects = []
             changed_subjects = {}
