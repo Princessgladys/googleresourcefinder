@@ -451,8 +451,9 @@ class MailAlerts(Handler):
         # Accounts with no daily/weekly/monthly subscriptions will be filtered
         # out in this call as their next alert dates will always be set
         # to an arbitrarily high constant date [see model.MAX_DATE].
-        query = Account.all().filter('next_%s_alert <' % frequency,
-                                     datetime.datetime.now())
+        query = Account.all().filter(
+            'next_%s_alert <' % frequency, datetime.datetime.now()).order(
+                'next_%s_alert' % frequency)
         accounts = [account for account in query if account.email != None]
         for account in accounts:
             alerts_to_delete = []

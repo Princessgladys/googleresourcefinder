@@ -349,14 +349,17 @@ class Account(db.Model):
     locale = db.StringProperty() # user chosen locale
     # default frequency for updates
     default_frequency = db.StringProperty(default='instant')
+    # preferred format to receive e-mail in
+    email_format = db.StringProperty(choices=['plain', 'html'], default='plain')
+
+    # For explanation of default settings for the next alert times, see
+    # mail_alerts.py's send_digests function.
     # next time to send a daily update
     next_daily_alert = db.DateTimeProperty(default=MAX_DATE)
     # next time to send a weekly update to the user
     next_weekly_alert = db.DateTimeProperty(default=MAX_DATE)
     # next time to send a monthly update to the user
     next_monthly_alert = db.DateTimeProperty(default=MAX_DATE)
-    # preferred format to receive e-mail in
-    email_format = db.StringProperty(choices=['plain', 'html'], default='plain')
 
 class Message(db.Expando):
     """Internationalized strings for value identifiers.  Top-level entity,
