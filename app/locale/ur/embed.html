@@ -11,7 +11,7 @@
 
   <style type="text/css"><!--
     body { font-family: arial, sans-serif; font-size: 13px; margin: auto;
-      width: 800px; max-width: 1000px; padding: 15px; }
+      max-width: 1000px; padding: 15px; }
 
     div.languages { float: left; }
     div.languages .selected { font-weight: bold; }
@@ -34,7 +34,7 @@
     {% endfor %}
   </div>
 
-  <h1><a href="{{home_url}}">ذرائع کی تلاش</a></h1>
+  <h1><a href="{{home_url|escape}}">ذرائع کی تلاش</a></h1>
 
   <div class="embed">
     <h2>application کو embed کرنے کا طریقہ</h2>
@@ -42,7 +42,7 @@
 
     <pre dir="ltr">
       &lt;iframe
-      &nbsp;&nbsp;src='{{home_url}}' id='iframe'
+      &nbsp;&nbsp;src='{{embed_url|escape}}' id='iframe'
       &nbsp;&nbsp;width="740px" height="400" frameborder=0 style="border: dashed 2px #77c"&gt;
       &lt;/iframe&gt;</pre>
 
