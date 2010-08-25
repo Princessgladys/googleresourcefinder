@@ -66,11 +66,11 @@ class Purge(utils.Handler):
             full_name = '%s:%s' % (subdomain, subject_name)
 
             # Subscriptions and alerts are queried / deleted outside of the
-            # transaction due to AppEngine limitations on the number of types of
-            # entities available per transaction. We do it beforehand so as to
-            # avoid breaking other code (i.e. the situation where the subject is
-            # deleted but the alert/subscription remains, causing mail_alerts to
-            # try and send an alert about a nonexistant facility).
+            # transaction because they do not belong to the same entity group
+            # as the subject. We do it beforehand so as to avoid breaking other
+            # code (i.e. the situation where the subject is deleted but the
+            # alert/subscription remains, causing mail_alerts to try and send
+            # an alert about a nonexistant facility).
             alerts_query = model.PendingAlert.all(keys_only=True
                 ).filter('subject_name =', full_name)
             alerts = alerts_query.fetch(200)
