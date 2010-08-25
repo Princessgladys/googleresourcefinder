@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import cache
+import cron
 import simplejson
 from access import *
 from extract_messages import parse_message, PATTERNS
@@ -357,6 +358,10 @@ def setup_messages():
         batch, existing = existing[:200], existing[200:]
         db.delete(batch)
 
+def setup_mail_alerts():
+    cron.Job(key_name='mail_alerts_digest', url='/mail_alerts', method='POST',
+             description='Digest updates for mail alerts').put()
+
 def setup_js_messages():
     """Writes translated messages into app/static/locale_XX.js."""
     js_path = os.path.join(ROOT, 'static')
@@ -413,6 +418,7 @@ def setup_datastore():
     setup_subdomains()
     setup_subject_types()
     setup_messages()
+    setup_mail_alerts()
     cache.flush_all()  # flush any cached entities
 
 def wipe_datastore(*kinds):
@@ -436,7 +442,7 @@ def add_account(email='test@example.com', description=None,
                 nickname=None, affiliation=None,
                 actions=['*:view', '*:edit'], locale='en',
                 default_frequency='instant',
-                email_format='html'):
+                email_format='plain'):
     """Adds an Account entity to the datastore."""
     Account(email=email, description=description or email,
             nickname=nickname or email.split('@')[0],

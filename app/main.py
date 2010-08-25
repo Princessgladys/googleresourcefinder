@@ -26,7 +26,7 @@ class Main(utils.Handler):
     def get(self):
         if not self.subdomain:
             # Get the list of available subdomains.
-            names = [s.key().name() for s in model.Subdomain.all()]
+            names = [s for s in cache.SUBDOMAINS.keys()]
 
             # If there's only one subdomain, go straight there.
             if len(names) == 1:
@@ -57,6 +57,14 @@ class Main(utils.Handler):
             template = 'templates/print.html'
         else:
             template = 'templates/map.html'
+
+        # To enable a splash welcome popup on a user's first visit, uncomment
+        # the following three lines and comment the "first_visit = False" line.
+        # first_visit = not (user or self.request.cookies.get('visited', None))
+        # if first_visit:
+        #     self.response.headers.add_header('Set-Cookie', 'visited=yes')
+        first_visit = False
+
         self.render(template,
                     params=self.params,
                     user=user,
@@ -82,7 +90,8 @@ class Main(utils.Handler):
                     show_add_button=show_add_button,
                     subdomain=self.subdomain,
                     subdomain_list_footer=config.SUBDOMAIN_LIST_FOOTERS[
-                        self.subdomain])
+                        self.subdomain],
+                    first_visit=first_visit)
 
     def get_export_url(self):
         """If only one subject type, return the direct download link URL,
