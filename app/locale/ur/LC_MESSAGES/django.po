@@ -856,7 +856,7 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "%(action)s  بننے کی درخواست مسترد ہوگئی تھی۔"
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35 templates/hospital_email.html:234
+#: templates/subdomain_menu.html.py:35
 msgid "Resource Finder"
 msgstr "ذرائع کی تلاش"
 
