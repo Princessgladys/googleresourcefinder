@@ -1,0 +1,183 @@
+{% comment %}
+# Copyright 2010 by Google Inc
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+{% load i18n %}
+
+<!-- No doctype: need quirks mode to get scrollbars in IE. -->
+<html dir="{{params.lang_bidi|yesno:"rtl,ltr"}}">
+<head>
+  {% comment %}
+  #i18n: Name of the application.
+  {% endcomment %}
+  <title>{% trans "Resource Finder" %} ({{subdomain|title}})</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <!-- IE8 Compatibility View is required for Maps to work -->
+  <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+
+  {% block stylesheets %}
+  {% endblock stylesheets %}
+  
+  {% block jquery %}
+  <!-- jQuery files -->
+  <script type="text/javascript" src="static/jquery.min.js"></script>
+  <script type="text/javascript">jQuery.noConflict();</script>
+  <script type="text/javascript" src="static/jquery-ui-1.8rc3.custom.min.js">
+  </script>
+  {% endblock jquery %}
+
+  {% block rf-namespace %}
+  <!-- Initialize the rf namespace -->
+  <script type="text/javascript">
+    rf = {};
+  </script>
+  <script type="text/javascript" src="static/templates.js"></script>
+  <script type="text/javascript" src="static/base.js"></script>
+  {% ifequal 'en' params.lang %}
+    <script type="text/javascript" src="static/locale.js"></script>
+  {% else %}
+    <script type="text/javascript" src="static/locale_{{params.lang}}.js"></script>
+  {% endifequal %}
+  {% if params.lang_bidi %}
+  {% comment %}
+  # TODO(pfritzsche): Make keyboard hide when not selecting a text box.
+  {% endcomment %}
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+    // Load the Google Onscreen Keyboard API
+    google.load("elements", "1", {
+        packages: "keyboard"
+    });
+
+    function kbd_on_load() {
+      var kbd = new google.elements.keyboard.Keyboard(
+        ["{{params.lang}}"]);
+    }
+
+    google.setOnLoadCallback(kbd_on_load);
+  </script>
+  {% endif %}
+  {% endblock rf-namespace %}
+
+  {% block javascript-includes %}
+  {% endblock javascript-includes %}
+
+  {% include "analytics.html" %}
+</head>
+
+<body {% if params.iframe %}class="iframe"{% endif %}>
+<div id="viewport"></div>
+<div class="header">
+  {% block language-select %}
+  <div class="lang">
+    <select id="lang-select"
+      onChange="window.location = this.options[this.selectedIndex].value;">
+    {% for lang in params.languages %}
+      <option value="{{params.url_no_lang}}&amp;lang={{lang.0}}"
+        {% ifequal lang.0 params.lang %} selected{% endifequal %}>{{lang.1}}</option>
+    {% endfor %}
+    </select>
+  </div>
+  {% endblock language-select %}
+  <div class="user">
+  <ul class="user-bar">
+    {% block print-link %}
+      <li>
+        <a id="print-link" href="#" class="print-link-disabled">
+          <img style="border: none; vertical-align: text-bottom;"
+            src="../static/print.png"></a>
+        <span class="sep">|</span>
+      </li>
+    {% endblock print-link %}
+    <li id="legal">
+      <a href="#" style="text-decoration: none;">
+      {% comment %}
+      #i18n: Category for terms of service and privacy pages
+      {% endcomment %}
+      <u>{% trans "Legal" %}</u> &#x25be;</a>
+      <ul id="legal-sub" class="menu">
+        <li>
+          {% comment %}
+          #i18n: Link to terms of service for the application
+          {% endcomment %}
+          <a target="_blank" href="/terms">{% trans "Terms of Service" %}
+            </a>
+            </li><br/>
+        <li>
+          {% comment %}
+          #i18n: Link to privacy policy for the application
+          {% endcomment %}
+          <a target="_blank" href="/privacy">{% trans "Privacy" %}</a>
+        </li>
+      </ul>
+    </li>
+    <li><span class="sep">|</span></li>
+    <li><a target="_blank" href="/help" id="help-link">
+      {% comment %}
+      #i18n: Link to go to a help page for the application
+      {% endcomment %}
+      {% trans "Help" %}</a></li>
+    <li><span class="sep">|</span></li>
+    {% if user %}
+      <li id="user">
+        <a href="#" style="text-decoration: none;">
+          <strong><u>{{authorization}}</u></strong> &#x25be;</a>
+        <ul id="user-sub" class="menu">
+          <li>
+            {% block settings-link %}
+            {% comment %}
+            #i18n: Link to go to the settings page of the application
+            {% endcomment %}
+            <a href="{{settings_url}}">{% trans "Settings" %}</a><br/>
+            </li><br/>
+          <li>
+            {% endblock settings-link %}
+            {% comment %}
+            #i18n: Link to go to a help page for the application
+            {% endcomment %}
+            <a href="{{loginout_url}}">{{loginout_text}}</a>
+          </li>
+        </ul>
+      </li>
+    {% else %}
+      <li><a href="{{loginout_url}}">{{loginout_text}}</a></li>
+    {% endif %}
+  </ul>
+</div>
+
+
+<div id="menu" style="display: none;">
+
+</div>
+
+  {% block title %}
+  <div class="title">
+    {% comment %}
+    #i18n: Name of the application.
+    {% endcomment %}
+    <a href="{{home_url}}">{% trans "Resource Finder" %}</a>
+  </div>
+  {% endblock title %}
+
+  {% block loading %}
+    {% comment %}
+    #i18n: Indicator that the application is loading.
+    {% endcomment %}
+    <div id="loading" class="loading">{% trans "Loading..." %}</div>
+  {% endblock %}
+</div>
+
+{% block content %}
+{% endblock content %}
