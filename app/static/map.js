@@ -91,6 +91,7 @@ rf.get_services = function(subject) {
   return services;
 }
 
+  
 var summary_columns = [
   null, {
     get_title: function() {
