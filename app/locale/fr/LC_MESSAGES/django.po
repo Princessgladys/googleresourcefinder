@@ -521,7 +521,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Date incorrecte : %(date)r  (format AAAA-MM-JJ requis)"
 
 #. Error message for request missing subject name.
-#: subscribe.py:63 settings.py:34
+#: subscribe.py:64 settings.py:34
 msgid "Invalid or missing account e-mail."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -797,7 +797,7 @@ msgid "Postoperative Care"
 msgstr "Soins Postopératoires"
 
 #. old value for the attribute
-#: mail_alerts.py:255
+#: mail_alerts.py:245
 msgid "Previous value"
 msgstr "Valeur précédente"
 
@@ -855,7 +855,7 @@ msgid "Resource Finder"
 msgstr "Localisation de ressources"
 
 #. subject of e-mail -> Resource Finder Update
-#: mail_alerts.py:78
+#: mail_alerts.py:79
 msgid "Resource Finder %s Update"
 msgstr "Localisation de ressources"
 
@@ -1010,7 +1010,7 @@ msgid "Updated"
 msgstr "Mise à jour :"
 
 #. who the attribute was updated by
-#: mail_alerts.py:258
+#: mail_alerts.py:248
 msgid "Updated by"
 msgstr "Mise à jour :"
 
