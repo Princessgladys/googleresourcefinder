@@ -64,11 +64,27 @@ class Purge(utils.Handler):
 
         if access.check_action_permitted(self.account, subdomain, 'purge'):
             full_name = '%s:%s' % (subdomain, subject_name)
-            alerts = utils.fetch_all(model.PendingAlert.all(keys_only=True
-                ).filter('subject_name =', full_name))
-            subscriptions = utils.fetch_all(model.filter_by_prefix(
-                model.Subscription.all(keys_only=True), full_name + ':'))
-            db.delete(subscriptions + alerts)
+
+            # Subscriptions and alerts are queried / deleted outside of the
+            # transaction due to AppEngine limitations on the number of types of
+            # entities available per transaction. We do it beforehand so as to
+            # avoid breaking other code (i.e. the situation where the subject is
+            # deleted but the alert/subscription remains, causing mail_alerts to
+            # try and send an alert about a nonexistant facility).
+            alerts_query = model.PendingAlert.all(keys_only=True
+                ).filter('subject_name =', full_name)
+            alerts = alerts_query.fetch(200)
+            while alerts:
+                db.delete(alerts)
+                alerts = alerts_query.fetch(200)
+
+            subscriptions_query = model.filter_by_prefix(
+                model.Subscription.all(keys_only=True), full_name + ':')
+            subscriptions = subscriptions_query.fetch(200)
+            while subscriptions:
+                db.delete(subscriptions)
+                subscriptions = subscriptions_query.fetch(200)
+
             db.run_in_transaction(work)
 
 if __name__ == '__main__':
