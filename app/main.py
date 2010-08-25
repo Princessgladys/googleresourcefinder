@@ -26,7 +26,7 @@ class Main(utils.Handler):
     def get(self):
         if not self.subdomain:
             # Get the list of available subdomains.
-            names = [s.key().name() for s in model.Subdomain.all()]
+            names = [s.key().name() for s in cache.SUBDOMAINS.keys()]
 
             # If there's only one subdomain, go straight there.
             if len(names) == 1:

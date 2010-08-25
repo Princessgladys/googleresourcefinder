@@ -48,7 +48,7 @@ import cache
 import model
 import utils
 from feeds.xmlutils import Struct
-from model import Account, PendingAlert, Subdomain, Subject, Subscription
+from model import Account, PendingAlert, Subject, Subscription
 from utils import _, format, get_last_updated_time, Handler
 
 # Set up localization.
