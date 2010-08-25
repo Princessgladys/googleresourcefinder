@@ -400,8 +400,7 @@ class MailAlerts(Handler):
         subject = Subject.get_by_key_name(self.params.subject_name)
         subdomain = self.params.subject_name.split(':')[0]
 
-        subscriptions = utils.fetch_all(Subscription.get_by_subject(
-            self.params.subject_name))
+        subscriptions = Subscription.get_by_subject(self.params.subject_name)
         for subscription in subscriptions:
             if subscription.frequency != 'instant':
                 # queue pending alerts for non-instant update subscriptions
@@ -452,16 +451,15 @@ class MailAlerts(Handler):
         # Accounts with no daily/weekly/monthly subscriptions will be filtered
         # out in this call as their next alert dates will always be set
         # to an arbitrarily high constant date [see model.MAX_DATE].
-        results = utils.fetch_all(Account.all().filter(
-            'next_%s_alert <' % frequency, datetime.datetime.now()))
-        accounts = [account for account in results if account.email != None]
+        query = Account.all().filter('next_%s_alert <' % frequency,
+                                     datetime.datetime.now())
+        accounts = [account for account in query if account.email != None]
         for account in accounts:
             alerts_to_delete = []
             unchanged_subjects = []
             changed_subjects = {}
-            subscriptions = utils.fetch_all(Subscription.all().filter(
-                'user_email =', account.email).filter('frequency =', frequency))
-            for subscription in subscriptions:
+            for subscription in Subscription.all().filter('user_email =',
+                account.email).filter('frequency =', frequency):
                 subject = Subject.get_by_key_name(subscription.subject_name)
                 pa = PendingAlert.get(frequency, account.email,
                                       subscription.subject_name)
