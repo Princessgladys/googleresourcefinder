@@ -302,6 +302,15 @@ class MainTestCase(SeleniumTestCase):
         assert self.is_text_present('Embedding the Application')
 
     def test_purge_delete(self):
+        model.Subscription(key_name='haiti:example.org/1000:test@example.com',
+                     user_email='test@example.com',
+                     subject_name='haiti:example.org/1000',
+                     frequency='daily').put()
+        model.PendingAlert(
+            key_name='daily:test@example.com:haiti:example.org/1000',
+            user_email='test@example.com', frequency='daily', type='hospital',
+            subject_name='haiti:example.org/1000').put()
+
         # Login to main page
         self.set_default_permissions(['*:view'])
         self.delete_account()
@@ -326,3 +335,5 @@ class MainTestCase(SeleniumTestCase):
         # Click delete button. Make sure facility is actually gone.
         self.click('id=purge-delete')
         assert len(model.Subject.all().fetch(4)) == 3
+        assert not model.Subscription.all().get()
+        assert not model.PendingAlert.all().get()
