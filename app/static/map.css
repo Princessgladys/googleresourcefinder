@@ -126,6 +126,19 @@ img.new-subject-map-control-marker { padding: 0px 0px 0px 2px;
 tr.disabled td { color: #aaa; }
 tr.on-alert td { color: #a00; }
 
+/* Splash popup */
+#background-fader { position: absolute; height: 100%; width: 100%; top: 0px; left: 0px;
+                    background: #000; z-index: 10; opacity: 0.7; }
+#splash-popup { position: absolute; width: 640px; font-size: 13px;
+                background: #fff; border: 2px solid #bbb; z-index: 11; padding: 0px; }
+.close-popup { font-size: 11px; color: #fff; position: absolute; top: 5px; right: 5px; }
+#splash-popup h1 { width: 620px; background: #333; color: #fff; font-size: 18px; margin: 0px;
+                   padding: 7px 10px; }
+#splash-popup li { font-size: 12px; }
+#splash-popup p { padding: 0px 10px; margin: 10px; font-size: 12px; }
+#splash-popup object { padding: 0px 10px 0px 0px; margin: 0px 10px 0px 0px; }
+#splash-popup button { margin: 10px 0px 15px 20px; }
+
 /* iFrame overrides */
 
 /* Header line */
