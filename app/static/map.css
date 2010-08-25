@@ -134,6 +134,7 @@ tr.on-alert td { color: #a00; }
 .close-popup { font-size: 11px; color: #fff; position: absolute; top: 5px; right: 5px; }
 #splash-popup h1 { width: 620px; background: #333; color: #fff; font-size: 18px; margin: 0px;
                    padding: 7px 10px; }
+#splash-popup img { border: none; }
 #splash-popup li { font-size: 12px; }
 #splash-popup p { padding: 0px 10px; margin: 10px; font-size: 12px; }
 #splash-popup object { padding: 0px 10px 0px 0px; margin: 0px 10px 0px 0px; }
