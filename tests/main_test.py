@@ -303,9 +303,9 @@ class MainTestCase(SeleniumTestCase):
 
     def test_purge_delete(self):
         model.Subscription(key_name='haiti:example.org/1000:test@example.com',
-                     user_email='test@example.com',
-                     subject_name='haiti:example.org/1000',
-                     frequency='daily').put()
+                           user_email='test@example.com',
+                           subject_name='haiti:example.org/1000',
+                           frequency='daily').put()
         model.PendingAlert(
             key_name='daily:test@example.com:haiti:example.org/1000',
             user_email='test@example.com', frequency='daily', type='hospital',
