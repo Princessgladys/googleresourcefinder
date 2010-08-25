@@ -213,6 +213,57 @@
 </div>
 {% endblock freshness %}
 
+{% if first_visit %}
+<div id="splash-popup" style="display: none;">
+  <h1>Welcome to Google Resource Finder</h1>
+  <div class="close-popup"><b>
+      <a color="#fff" href="#" onclick="show_splash(false);"><img
+        src="static/x.png"></a></b></div>
+  <table>
+    <tr>
+      <td>
+        <p><b>What is Resource Finder?</b>
+
+        <p>Resource Finder is a tool designed to help disseminate updated
+        information about health facilities and the services they offer.</p>
+
+        <p><b>Getting started</b>
+
+        <ul>
+          <li>Click a facility's name on the left to view detailed information.
+          <li>Click the "Edit this record" link in any information bubble to
+          make changes.
+        </ul>
+        <p>Check out the <a href="/help"
+          target="_blank">help page</a> on the top right for more information.</p>
+        <center><button onclick="show_splash(false);">Get started</button></center>
+      </td>
+      <td valign="middle">
+        <object height="250px" width="300px">
+          <param name="movie"
+            value="http://www.youtube.com/v/OV0g9wsjMsU&color1=0xb1b1b1&color2=0xd0d0d0&hl=en_US&feature=player_embedded&fs=1"></param>
+          <param name="allowFullScreen" value="true"></param>
+          <param name="allowScriptAccess" value="always"></param>
+          <embed
+            src="http://www.youtube.com/v/OV0g9wsjMsU&color1=0xb1b1b1&color2=0xd0d0d0&hl=en_US&feature=player_embedded&fs=1"
+            type="application/x-shockwave-flash" allowfullscreen="true"
+            allowScriptAccess="always" height="250px" width="300px"></embed>
+          </object>
+      </td>
+    </tr>
+  </table>
+</div>
+<!-- The following is a necessary IE fix. It does not respond to
+filter in the css file, so I had to place it here instead.-->
+<div id="background-fader"
+  style="display: none; filter: alpha(opacity=50);"></div>
+
+<script type="text/javascript" src="static/splash.js"></script>
+<script>
+  show_splash(true);
+</script>
+{% endif %}
+
 {% block footer %}
 {% endblock footer %}
 <div id="edit-data" style="display:none"></div>

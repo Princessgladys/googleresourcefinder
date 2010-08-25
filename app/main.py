@@ -57,6 +57,9 @@ class Main(utils.Handler):
             template = 'templates/print.html'
         else:
             template = 'templates/map.html'
+        first_visit = not (user or self.request.cookies.get('visited', None))
+        if first_visit:
+            self.response.headers.add_header('Set-Cookie', 'visited=yes')
         self.render(template,
                     params=self.params,
                     user=user,
@@ -82,7 +85,8 @@ class Main(utils.Handler):
                     show_add_button=show_add_button,
                     subdomain=self.subdomain,
                     subdomain_list_footer=config.SUBDOMAIN_LIST_FOOTERS[
-                        self.subdomain])
+                        self.subdomain],
+                    first_visit=first_visit)
 
     def get_export_url(self):
         """If only one subject type, return the direct download link URL,
