@@ -522,7 +522,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Dat envalid : %(dat)r (bezwen ane-mwa-jou fòma)"
 
 #. Error message for request missing subject name.
-#: subscribe.py:63 settings.py:34
+#: subscribe.py:64 settings.py:34
 msgid "Invalid or missing account e-mail."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -798,7 +798,7 @@ msgid "Postoperative Care"
 msgstr "Swen Aprè Operasyon"
 
 #. old value for the attribute
-#: mail_alerts.py:255
+#: mail_alerts.py:245
 msgid "Previous value"
 msgstr "Anvan valè"
 
@@ -856,7 +856,7 @@ msgid "Resource Finder"
 msgstr "Chèche resous"
 
 #. subject of e-mail -> Resource Finder Update
-#: mail_alerts.py:78
+#: mail_alerts.py:79
 msgid "Resource Finder %s Update"
 msgstr "Chèche resous"
 
@@ -1011,7 +1011,7 @@ msgid "Updated"
 msgstr "Remete an fonksyon"
 
 #. who the attribute was updated by
-#: mail_alerts.py:258
+#: mail_alerts.py:248
 msgid "Updated by"
 msgstr "Remete an fonksyon"
 
