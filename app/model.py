@@ -39,6 +39,8 @@ import datetime
 
 from google.appengine.ext import db
 
+MAX_DATE = datetime.datetime(datetime.MAXYEAR, 1, 1)
+
 class Subdomain(db.Model):
     """A separate grouping of Subjects and SubjectTypes.  Top-level entity,
     with no parent.  Key name: unique subdomain name.  In the UI, each
@@ -348,14 +350,11 @@ class Account(db.Model):
     # default frequency for updates
     default_frequency = db.StringProperty(default='instant')
     # next time to send a daily update
-    next_daily_alert = db.DateTimeProperty(
-        default=datetime.datetime(datetime.MAXYEAR, 1, 1))
+    next_daily_alert = db.DateTimeProperty(default=MAX_DATE)
     # next time to send a weekly update to the user
-    next_weekly_alert = db.DateTimeProperty(
-        default=datetime.datetime(datetime.MAXYEAR, 1, 1))
+    next_weekly_alert = db.DateTimeProperty(default=MAX_DATE)
     # next time to send a monthly update to the user
-    next_monthly_alert = db.DateTimeProperty(
-        default=datetime.datetime(datetime.MAXYEAR, 1, 1))
+    next_monthly_alert = db.DateTimeProperty(default=MAX_DATE)
     # preferred format to receive e-mail in
     email_format = db.StringProperty(choices=['plain', 'html'], default='plain')
 

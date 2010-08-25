@@ -23,6 +23,7 @@ from google.appengine.api import mail
 from google.appengine.ext import db, webapp
 from google.appengine.ext.db import BadValueError
 
+import model
 import simplejson
 import subscribe
 import utils
@@ -83,7 +84,8 @@ class MailUpdateSystemTest(MediumTestCase):
                                default_frequency=self.default_frequency,
                                locale=self.locale, email_format='plain',
                                next_daily_alert=datetime.datetime(2000, 1, 1),
-                               next_weekly_alert=datetime.datetime(2000, 1, 1))
+                               next_weekly_alert=datetime.datetime(2000, 1, 1),
+                               next_monthly_alert=datetime.datetime(2000, 1, 1))
         db.put(self.account)
 
     def tearDown(self):
@@ -110,7 +112,7 @@ class MailUpdateSystemTest(MediumTestCase):
         s = Subscription.get('haiti:example.org/123', 'test@example.com')
         assert s
         assert s.frequency == 'instant'
-        
+
     def test_unsubscribe(self):
         """Confirm that a subscription is removed on post request."""
         # insure that the subscription is removed
@@ -124,21 +126,39 @@ class MailUpdateSystemTest(MediumTestCase):
                                         'subject_name=haiti:example.org/123')
         handler.post()
         assert not Subscription.get_by_key_name(key_name_s)
-        
-        # should also remove pending alerts if they exist
-        key_name_pa = 'instant:test@example.com:haiti:example.org/123'
+
+        # should also remove pending alerts if they exist, though there is
+        # another subscription so the next_daily_alert time should stay as is
+        key_name_s2 = 'haiti:example.org/456:test@example.com'
+        s2 = Subscription(key_name=key_name_s2,
+                          frequency='daily',
+                          subject_name='haiti:example.org/456',
+                          user_email=self.email)
+        s.frequency = 'daily'
+        key_name_pa = 'daily:test@example.com:haiti:example.org/123'
         pa = PendingAlert(key_name=key_name_pa, frequency='daily',
                           subject_name='haiti:example.org/123',
                           type='hospital', user_email='test@example.com')
-        db.put([s, pa])
+        db.put([s, s2, pa])
         handler.post()
         assert not Subscription.get_by_key_name(key_name_s)
         assert not PendingAlert.get_by_key_name(key_name_pa)
-        
+        assert Account.all().get().next_daily_alert == datetime.datetime(
+            2000, 1, 1)
+
+        # remove the last daily subscription -- user's next_daily_alert time
+        # should now match model.MAX_DATE
+        handler = self.simulate_request('/subscribe?action=unsubscribe&' +
+                                        'subject_name=haiti:example.org/456')
+        handler.post()
+        assert not Subscription.get_by_key_name(key_name_s2)
+        assert Account.all().get().next_daily_alert == model.MAX_DATE
+
         # should not raise an error if an invalid subscription is given
         handler = self.simulate_request('/subscribe?action=unsubscribe&' +
                                         'subject_name=haiti:example.org/789')
         handler.post()
+
 
     def test_unsubscribe_multiple(self):
         """Confirm that all specified subscriptions are removed per post
@@ -176,6 +196,32 @@ class MailUpdateSystemTest(MediumTestCase):
         handler.post()
         assert Subscription.get('haiti:example.org/123', self.email)
         assert Subscription.get('haiti:example.org/456', self.email)
+
+        # confirm that it does not max the next_daily_alert time when there are
+        # daily subscriptions left for the user
+        s1.frequency = 'daily'
+        s2.frequency = 'daily'
+        db.put([s1, s2])
+        json = simplejson.dumps(['haiti:example.org/123'])
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
+                                        'action=unsubscribe_multiple&' +
+                                        'subjects=' + json)
+        handler.post()
+        assert not Subscription.get('haiti:example.org/123', self.email)
+        assert Subscription.get('haiti:example.org/456', self.email)
+        assert Account.all().get().next_daily_alert == datetime.datetime(
+            2000, 1, 1)
+
+        # confirm that it does max the next_daily_alert time when there aren't
+        db.put([s1, s2])
+        json = simplejson.dumps(['haiti:example.org/123',
+                                 'haiti:example.org/456'])
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
+                                        'action=unsubscribe_multiple&' +
+                                        'subjects=' + json)
+        handler.post()
+        assert not Subscription.all().get()
+        assert Account.all().get().next_daily_alert == model.MAX_DATE
 
     def test_change_locale(self):
         """Confirm that the account's locale parameter is changed."""
@@ -230,7 +276,7 @@ class MailUpdateSystemTest(MediumTestCase):
                                         json_pickle_changes)
         handler.post()
         assert Subscription.get_by_key_name(key_name_s).frequency == 'daily'
-        
+
         # change subscription with pending alert from daily to weekly
         key_name_pa = 'daily:%s:%s' % (self.email, subject_name)
         pa = PendingAlert(key_name=key_name_pa, frequency='daily',
@@ -249,7 +295,9 @@ class MailUpdateSystemTest(MediumTestCase):
         assert Subscription.get_by_key_name(key_name_s).frequency == 'weekly'
         assert not PendingAlert.get_by_key_name(key_name_pa)
         assert PendingAlert.get('weekly', self.email, subject_name)
-        
+        assert Account.all().get().next_daily_alert == model.MAX_DATE
+        assert Account.all().get().next_weekly_alert != model.MAX_DATE
+
         # change subscription with pending alert to instant. make sure
         # that pending alerts are deleted and no errors are thrown when
         # the e-mail is sent
@@ -257,7 +305,7 @@ class MailUpdateSystemTest(MediumTestCase):
         self.set_attr(s, 'title', 'title_foo')
         st = SubjectType(key_name='haiti:hospital')
         db.put([s, st])
-        
+
         subject_changes = [{'subject_name': subject_name, 'old_frequency':
                             'weekly', 'new_frequency': 'instant'}]
         json_pickle_changes = simplejson.dumps(subject_changes)
@@ -272,6 +320,7 @@ class MailUpdateSystemTest(MediumTestCase):
             assert not PendingAlert.get(freq, self.email, subject_name)
         assert len(sent_emails) == 1
         assert 'TITLE_FOO' in sent_emails[0].body
+        assert Account.all().get().next_weekly_alert == model.MAX_DATE
         db.delete([s, st])
 
     def test_change_default_frequency(self):
@@ -283,7 +332,7 @@ class MailUpdateSystemTest(MediumTestCase):
         handler.post()
         assert Account.all().get().default_frequency == 'monthly'
 
-    def test_check_and_max_next_alert_times(self):
+    def test_check_and_update_next_alert_times(self):
         """Confirms that next_%freq%_alert times are changed appropriately to
         the max value we are using when no subscriptions exist."""
         subscribe_ = subscribe.Subscribe()
@@ -295,15 +344,19 @@ class MailUpdateSystemTest(MediumTestCase):
         subscribe_.email = self.email
 
         # user has daily subscriptions; next alert time should remain the same
-        subscribe_.check_and_max_next_alert_times('daily')
+        subscribe_.check_and_update_next_alert_times('daily')
         a = Account.all().get()
         assert a.next_daily_alert == datetime.datetime(2000, 1, 1)
 
         # user has no weekly subscriptions; next alert time should max out
-        subscribe_.check_and_max_next_alert_times('weekly')
+        subscribe_.check_and_update_next_alert_times('weekly')
         a = Account.all().get()
-        assert a.next_weekly_alert == datetime.datetime(datetime.MAXYEAR, 1, 1)
+        assert a.next_weekly_alert == model.MAX_DATE
 
+        # ditto weekly comment above
+        subscribe_.check_and_update_next_alert_times('monthly')
+        a = Account.all().get()
+        assert a.next_weekly_alert == model.MAX_DATE
 
     def simulate_request(self, path):
         request = webapp.Request(webob.Request.blank(path).environ)

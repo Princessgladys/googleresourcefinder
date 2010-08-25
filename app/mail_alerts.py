@@ -45,10 +45,10 @@ from google.appengine.ext.webapp import template
 from google.appengine.runtime import DeadlineExceededError
 
 import cache
+import model
 import utils
 from feeds.xmlutils import Struct
-from model import Account, PendingAlert, Subdomain, Subject
-from model import Subscription
+from model import Account, PendingAlert, Subdomain, Subject, Subscription
 from utils import _, format, get_last_updated_time, Handler
 
 # Set up localization.
@@ -187,10 +187,9 @@ def update_account_alert_time(account, frequency, now=None, initial=False):
     else:
         new_time = now + get_timedelta(frequency, now)
 
-    if (initial and getattr(account, 'next_%s_alert' % frequency) !=
-        datetime.datetime(datetime.MAXYEAR, 1, 1)):
-        return
-    setattr(account, 'next_%s_alert' % frequency, new_time)
+    if (not getattr(account, 'next_%s_alert' % frequency) != model.MAX_DATE or
+        not initial):
+        setattr(account, 'next_%s_alert' % frequency, new_time)
 
 
 class EmailFormatter:
@@ -390,7 +389,7 @@ class MailAlerts(Handler):
                 # NOTE: this only applies to the digest system. If this script
                 # is run because a facility is changed, we let the AppEngine
                 # error management system kick in.
-                pass
+                logging.info('mail_alerts.py: deadline exceeded error raised')
 
     def update_and_add_pending_alerts(self):
         """Called when a subject is changed. It creates PendingAlerts for
@@ -450,6 +449,9 @@ class MailAlerts(Handler):
         'monthly']. Also removes pending alerts once an e-mail has been sent
         and updates the account's next alert times.
         """
+        # Accounts with no daily/weekly/monthly subscriptions will be filtered
+        # out in this call as their next alert dates will always be set
+        # to an arbitrarily high constant date [see model.MAX_DATE].
         results = utils.fetch_all(Account.all().filter(
             'next_%s_alert <' % frequency, datetime.datetime.now()))
         accounts = [account for account in results if account.email != None]
