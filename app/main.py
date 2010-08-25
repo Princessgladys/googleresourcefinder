@@ -57,9 +57,14 @@ class Main(utils.Handler):
             template = 'templates/print.html'
         else:
             template = 'templates/map.html'
-        first_visit = not (user or self.request.cookies.get('visited', None))
-        if first_visit:
-            self.response.headers.add_header('Set-Cookie', 'visited=yes')
+
+        # To enable a splash welcome popup on a user's first visit, uncomment
+        # the following three lines and comment the "first_visit = False" line.
+        # first_visit = not (user or self.request.cookies.get('visited', None))
+        # if first_visit:
+        #     self.response.headers.add_header('Set-Cookie', 'visited=yes')
+        first_visit = False
+
         self.render(template,
                     params=self.params,
                     user=user,

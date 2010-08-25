@@ -22,7 +22,7 @@ body { width: 100%; height: 100%; }
 #freshness { position: absolute; left: 0; bottom: 0; padding: 6px 4px 0px; }
 #edit-bar { position: absolute; left: 0; bottom: 0; padding: 6px 4px 0px;
             width: 384px; }
-#background-fader { filter: alpha(opacity=50; zoom: 1; }
+#background-fader { filter: alpha(opacity=50); zoom: 1; }
 #splash-popup h1 { width: 640px; padding: 7px 0px; }
 
 .iframe #map { width:expression(document.body.clientWidth-300); }
