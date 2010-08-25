@@ -128,6 +128,11 @@ msgstr "Otro nombre"
 msgid "An error has occurred. Please try again later."
 msgstr "Ha ocurrido un error. Vuelve a intentarlo más tarde."
 
+#. Error message for an ambiguous attribute name
+#: mail_editor.py:189
+msgid "Attribute name is ambiguous. Please specify one of the following:"
+msgstr ""
+
 #. Label; available beds
 #: templates/hospital_email.html:100 templates/hospital_email.html.py:199
 msgid "Available"
@@ -692,7 +697,7 @@ msgid "New window"
 msgstr "Ventana externa"
 
 #. Form option for a false Boolean value
-#: edit.py:177 utils_test.py:321 utils.py:339
+#: edit.py:177 utils_test.py:321 utils.py:340
 msgid "No"
 msgstr "No"
 
@@ -798,7 +803,7 @@ msgid "Postoperative Care"
 msgstr "Cuidados Posoperatorios"
 
 #. old value for the attribute
-#: mail_alerts.py:245
+#: mail_alerts.py:231
 msgid "Previous value"
 msgstr "Valor anterior"
 
@@ -851,12 +856,12 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "La solicitud para ser %(role)s se denegó."
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35
+#: templates/subdomain_menu.html.py:35 templates/hospital_email.html:234
 msgid "Resource Finder"
 msgstr "Localizador de recursos"
 
 #. subject of e-mail -> Resource Finder Update
-#: mail_alerts.py:79
+#: mail_alerts.py:77
 msgid "Resource Finder %s Update"
 msgstr "Localizador de recursos"
 
@@ -971,7 +976,7 @@ msgid "URL:"
 msgstr "URL:"
 
 #. Error message
-#: utils.py:143
+#: utils.py:144
 msgid "Unauthorized user."
 msgstr "Sin autorización del usuario"
 
@@ -1005,13 +1010,18 @@ msgstr "Darse de Baja de Comprobarse"
 msgid "Unsubscribed."
 msgstr "Dados de baja."
 
+#. Error message for an unsupported attribute
+#: mail_editor.py:432
+msgid "Unsupported attribute"
+msgstr ""
+
 #. Label indicating a record was updated
 #: static/locale.js:214
 msgid "Updated"
 msgstr "Actualizado"
 
 #. who the attribute was updated by
-#: mail_alerts.py:248
+#: mail_alerts.py:234
 msgid "Updated by"
 msgstr "Actualizado"
 
@@ -1061,7 +1071,7 @@ msgid "X-Ray"
 msgstr "Rayos X"
 
 #. Form option for a true Boolean value
-#: utils_test.py:320 edit.py:175 utils.py:339
+#: utils_test.py:320 edit.py:175 utils.py:340
 msgid "Yes"
 msgstr "Sí"
 
@@ -1092,6 +1102,12 @@ msgstr "Sus cambios se han guardado"
 #, python-format
 msgid "Your request for \"%(action)s\" permission is now pending"
 msgstr "Tu solicitud de %(role)s ya se registró"
+
+#. Error message for an invalid value
+#: mail_editor.py:422
+#, python-format
+msgid "\"%(value)s\" is not a valid value"
+msgstr ""
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
 #: templates/print.html:81
