@@ -50,6 +50,9 @@ import utils
 from feeds.xmlutils import Struct
 from utils import db, format, get_message, order_and_format_updates
 
+# Constant for the parse function
+NO_VALUE_FOUND = '*no_attribute_found*'
+
 # If this is found in a line of the email, the system will immediately stop
 # parsing and ignore the remainder of the email.
 STOP_DELIMITER = '--- --- --- ---'
@@ -154,6 +157,8 @@ def update_subject(subject, observed, account, source_url, values, comments={},
 
 def parse(attribute_name, update):
     """Parses a list of Unicode strings into an attribute value."""
+    if not update.strip():
+        return NO_VALUE_FOUND
     if update.strip() == '*none':
         return
 
@@ -175,7 +180,7 @@ def parse(attribute_name, update):
             raise ValueError
         return formatted
     if attribute.type == 'multi':
-        values = [x.strip() for x in update.split(',')]
+        values = [x.strip() for x in update.split(',') if x]
         to_add = []
         to_subtract = []
         errors = []
@@ -193,7 +198,7 @@ def parse(attribute_name, update):
 def get_list_update(subject, attribute, subtract, add):
     """Returns an updated version of the subject's current value for the
     attribute to include the changs sent by the user."""
-    current_value = set(subject.get_value(attribute.key().name()))
+    current_value = set(subject.get_value(attribute.key().name()) or [])
     current_value -= set(subtract)
     current_value |= set(add)
     return list(current_value)
@@ -286,7 +291,7 @@ class MailEditor(InboundMailHandler):
         self.update_line_flags = re.UNICODE | re.MULTILINE | re.I
         self.update_line_regexes = {
             'unquoted': '^%s' % regex_base,
-            'quoted': '^(?P<quotes>\W+)%s' % regex_base,
+            'quoted': '^(?P<quotes>[^a-zA-Z0-9_\n]+)%s' % regex_base,
             'key': '.*\((?P<subject_name>.+/.+)\)\s*$'
         }
 
@@ -465,6 +470,8 @@ class MailEditor(InboundMailHandler):
                     pretty_name = simple_format(name)
                     try:
                         value = parse(name, update_text)
+                        if value == NO_VALUE_FOUND:
+                            continue
                         if isinstance(value, tuple): # multi
                             attr, subtract, add, error = value
                             if error: # error
@@ -485,7 +492,8 @@ class MailEditor(InboundMailHandler):
                     return
 
         for key in ['unquoted', 'quoted']:
-            matches = re.finditer(self.update_line_regexes[key], body,
+            matches = re.finditer(self.update_line_regexes[key],
+                                  body.split(STOP_DELIMITER)[0],
                                   flags=self.update_line_flags)
             process(matches)
             if (data.ambiguous_stanzas or data.unrecognized_subject_stanzas or
@@ -499,7 +507,7 @@ class MailEditor(InboundMailHandler):
         (attribute name, unparsed value) for all located matches or if only one
         match is found, simply returns that match."""
         matches = []
-        update_split = [word for word in update.lower().split() if
+        update_split = [word for word in update.split() if
                         re.match('.*\w+.*', word, flags=re.UNICODE)]
         for i in range(len(update_split), 0, -1):
             colon_found = False
@@ -536,12 +544,6 @@ class MailEditor(InboundMailHandler):
         """
         locale, nickname = get_locale_and_nickname(
             self.account, original_message)
-        if self.account:
-            locale = self.account.locale or 'en'
-            nickname = self.account.nickname or self.account.email
-        else:
-            locale = 'en'
-            nickname = original_message.sender
 
         formatted_updates = []
         formatted_errors = []
@@ -664,7 +666,9 @@ def format_changes(update, locale='en'):
 
 
 def simple_format(text):
-    return text.capitalize().replace('_', ' ')
+    if isinstance(text, basestring):
+        return text.capitalize().replace('_', ' ')
+    return text
 
 
 def parse_utc_offset(text):
