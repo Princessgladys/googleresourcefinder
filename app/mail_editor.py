@@ -621,7 +621,9 @@ class MailEditor(InboundMailHandler):
         subject_name = s and s.get_name()
         s_type = s and s.type or DEFAULT_SUBJECT_TYPES[self.subdomain]
         subject_type = cache.SUBJECT_TYPES[self.subdomain][s_type]
-        attributes = [simple_format(a) for a in subject_type.attribute_names]
+        attributes = [simple_format(a) for a in subject_type.attribute_names if
+                      utils.can_edit(self.account, self.subdomain,
+                                     cache.ATTRIBUTES[a])]
 
         template_values = {
             'nickname': nickname,
