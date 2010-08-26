@@ -39,6 +39,7 @@ import string
 from datetime import datetime, timedelta
 
 from google.appengine.api import mail
+from google.appengine.api.datastore_errors import BadValueError
 from google.appengine.api.labs import taskqueue
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.mail_handlers import InboundMailHandler
@@ -153,13 +154,49 @@ def update_subject(subject, observed, account, source_url, values, comments={},
 
 def parse(attribute_name, update):
     """Parses a list of Unicode strings into an attribute value."""
-    type = cache.ATTRIBUTES[attribute_name].type
-    if type in ['str', 'text']:
+    if update.strip() == '*none':
+        return
+
+    attribute = cache.ATTRIBUTES[attribute_name]
+    if attribute.type in ['str', 'text']:
         return update
-    if type == 'int':
+    if attribute.type == 'int':
         return int(update)
-    if type == 'bool':
+    if attribute.type == 'bool':
         return bool(update.lower() in ['y', 'yes', 'true'])
+    if attribute.type == 'geopt':
+        location = update.split(',')
+        if len(location) != 2:
+            raise ValueError
+        return db.GeoPt(float(location[0]), float(location[1]))
+    if attribute.type == 'choice':
+        formatted = update.upper().replace(' ', '_')
+        if formatted not in attribute.values:
+            raise ValueError
+        return formatted
+    if attribute.type == 'multi':
+        values = [x.strip() for x in update.split(',')]
+        to_add = []
+        to_subtract = []
+        errors = []
+        for value in values:
+            formatted = value.upper().replace(' ', '_')
+            if formatted[0] == '-' and formatted[1:] in attribute.values:
+                to_subtract.append(formatted[1:])
+            elif formatted in attribute.values:
+                to_add.append(formatted)
+            else:
+                errors.append(formatted)
+        return (attribute, to_subtract, to_add, errors)
+
+
+def get_list_update(subject, attribute, subtract, add):
+    """Returns an updated version of the subject's current value for the
+    attribute to include the changs sent by the user."""
+    current_value = set(subject.get_value(attribute.key().name()))
+    current_value -= set(subtract)
+    current_value |= set(add)
+    return list(current_value)
 
 
 # TODO(pfritzsche): Add support for all attributes.
@@ -172,6 +209,12 @@ UNSUPPORTED_ATTRIBUTES = {
         'hospital': ['services', 'organization_type', 'category',
                      'construction', 'operational_status']
     }
+}
+
+
+DEFAULT_SUBJECT_TYPES = {
+    'haiti': 'hospital',
+    'pakistan': 'hospital'
 }
 
 
@@ -191,6 +234,16 @@ def generate_ambiguous_update_error_msg(matches):
         change = format_changes(match)
         msg += '\n-- %s: %s' % (change['attribute'], change['value'])
     return msg
+
+
+def generate_bad_value_error_msg(value, line, attribute_name):
+    values = {'value': value, 'attribute': simple_format(attribute_name)}
+    return {
+        'error_message':
+            #i18n: Error message for an invalid value
+            _('"%(value)s" is not a valid value for "%(attribute)s"') %  values,
+        'original_line': line
+    }
 
 
 class MailEditor(InboundMailHandler):
@@ -304,7 +357,7 @@ class MailEditor(InboundMailHandler):
                              self.email)
                 self.send_email(message, data)
             else:
-                self.send_email(message, {})
+                self.send_template_email(message)
             break # to only pay attention to the first body found
 
     def match_nickname_affiliation(self, text):
@@ -409,29 +462,21 @@ class MailEditor(InboundMailHandler):
                     elif not match_es:
                         continue
                     name, update_text = match_es
-                    if name not in unsupported:
-                        try:
-                            value = parse(name, update_text)
-                            updates.append((name, value))
-                        except ValueError, error:
-                            values = {
-                                'value': update_text,
-                                'attribute': name
-                            }
-                            #i18n: Error message for an invalid value
-                            msg = _('"%(value)s" is not a valid value' +
-                                    ' for "%(attribute)s"') % values
-                            errors.append({
-                                'error_message': msg,
-                                'original_line': update
-                            })
-                    else:
-                        errors.append({
-                            #i18n: Error message for an unsupported
-                            #i18n: attribute
-                            'error_message': _('Unsupported attribute'),
-                            'original_line': update
-                        })
+                    pretty_name = simple_format(name)
+                    try:
+                        value = parse(name, update_text)
+                        if isinstance(value, tuple): # multi
+                            attr, subtract, add, error = value
+                            if error: # error
+                                error_text = ', '.join(error)
+                                line = '%s: %s' % (pretty_name, error_text)
+                                errors.append(generate_bad_value_error_msg(
+                                    error_text, line, pretty_name))
+                            value = get_list_update(subject, attr, subtract, add)
+                        updates.append((name, value))
+                    except (ValueError, BadValueError):
+                        errors.append(generate_bad_value_error_msg(
+                            update_text, update, pretty_name))
                 if updates:
                     data.update_stanzas.append((subject, updates))
                 if errors:
@@ -489,6 +534,8 @@ class MailEditor(InboundMailHandler):
         includes a list of all accepted updates and a list of any errors found
         in the update text that was submitted.
         """
+        locale, nickname = get_locale_and_nickname(
+            self.account, original_message)
         if self.account:
             locale = self.account.locale or 'en'
             nickname = self.account.nickname or self.account.email
@@ -564,14 +611,58 @@ class MailEditor(InboundMailHandler):
             to=self.email, subject=subject, body=body)
         message.send()
 
+    def send_template_email(self, original_message):
+        """Sends a response email to the user containing a blank template for
+        the specified subject (in the subject line) if one exists at all."""
+        locale, nickname = get_locale_and_nickname(
+            self.account, original_message)
+        s = model.Subject.get(self.subdomain, original_message.subject)
+        subject_title = s and s.get_value('title')
+        subject_name = s and s.get_name()
+        s_type = s and s.type or DEFAULT_SUBJECT_TYPES[self.subdomain]
+        subject_type = cache.SUBJECT_TYPES[self.subdomain][s_type]
+        attributes = [simple_format(a) for a in subject_type.attribute_names]
+
+        template_values = {
+            'nickname': nickname,
+            'subject_title': subject_title,
+            'subject_name': subject_name,
+            'attributes': attributes,
+            'help_file': '%s_email_update_help.txt' % self.subdomain
+        }
+
+        path = os.path.join(os.path.dirname(__file__),
+            'locale/%s/template_response_email.txt' % locale)
+        body = template.render(path, template_values)
+        message = mail.EmailMessage(
+            sender=self.subdomain + '-updates@resource-finder.appspotmail.com',
+            to=self.email, subject=original_message.subject, body=body)
+        message.send()
+
+
+def get_locale_and_nickname(account, message):
+    if account:
+        locale = account.locale or 'en'
+        nickname = account.nickname or account.email
+    else:
+        locale = 'en'
+        nickname = message.sender
+    return (locale, nickname)
+
 
 def format_changes(update, locale='en'):
     """Helper function; used to format an attribute, value pair for email."""
     attribute, value = update
+    formatted_value = ', '.join([simple_format(x) for x in value]) if \
+        cache.ATTRIBUTES[attribute].type == 'multi' else format(value)
     return {
-        'attribute': attribute.replace('_', ' ').capitalize(),
-        'value': format(value)
+        'attribute': simple_format(attribute),
+        'value': formatted_value
     }
+
+
+def simple_format(text):
+    return text.capitalize().replace('_', ' ')
 
 
 def parse_utc_offset(text):
