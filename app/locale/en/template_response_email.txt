@@ -3,7 +3,7 @@ Hello {{nickname}},
 To make changes to Resource Finder by email, reply and fill out the following template.
 
 update {% if subject_title %}{{subject_title}} ({{subject_name}}){% else %}<Subject Title>{% endif %}
-{% for attribute in attributes %}{{attribute}}
+{% for attribute in attributes %}{{attribute}}:
 {% endfor %}
 
 --- --- --- ---
