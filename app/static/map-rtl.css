@@ -23,6 +23,7 @@ th { text-align: right; }
 .header .user { left: 0px; right: auto; }
 .header .lang { right: 400px; left: auto; }
 .header .title { right: 0px; left: auto; }
+.header .feedback { float: left; }
 .loading { right: 48%; left: auto; }
 
 /* Data area */

@@ -264,7 +264,7 @@ msgid "Country:"
 msgstr "País:"
 
 #. Label for daily e-mail updates
-#: settings.py:57
+#: settings.py:59
 msgid "Daily"
 msgstr "Diálisis"
 
@@ -512,7 +512,7 @@ msgid "Infectious Disease"
 msgstr "Enfermedades Infecciosas"
 
 #. Label for instant e-mail updates
-#: settings.py:55
+#: settings.py:57
 msgid "Instant"
 msgstr "Inmediato"
 
@@ -527,7 +527,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Fecha no válida: %(date)r (requiere un formato de DD-MM-AAAA)"
 
 #. Error message for request missing subject name.
-#: subscribe.py:64 settings.py:34
+#: subscribe.py:64 settings.py:35
 msgid "Invalid or missing account e-mail."
 msgstr "Nombre de la institución no válido o no especificado"
 
@@ -597,7 +597,7 @@ msgid "Loader:"
 msgstr "Cargador:"
 
 #. Indicator that the application is loading.
-#: static/locale.js:138 templates/base.html:178
+#: static/locale.js:138 templates/base.html:186
 msgid "Loading..."
 msgstr "Cargando..."
 
@@ -652,7 +652,7 @@ msgid "Mobile clinic"
 msgstr "Clínica móvil"
 
 #. Label for monthly e-mail updates
-#: settings.py:61
+#: settings.py:63
 msgid "Monthly"
 msgstr "Mensual"
 
@@ -818,6 +818,11 @@ msgstr "Imprime una lista de hospitales por orden de distancia desde ${FACILITY_
 msgid "Privacy"
 msgstr "Privacidad"
 
+#. Feedback link
+#: templates/base.html:176
+msgid "Provide feedback"
+msgstr "Proporcionar información"
+
 #. Type of organization: Public (government) organization
 #: ../tools/setup.py:238
 msgid "Public"
@@ -911,7 +916,7 @@ msgid "Show"
 msgstr "Mostrar"
 
 #. Link to sign into the app
-#: main.py:77
+#: main.py:78
 msgid "Sign in"
 msgstr "Acceder"
 
@@ -921,7 +926,7 @@ msgid "Sign in to edit"
 msgstr "Accede para modificar tus datos"
 
 #. Link to sign out of the app
-#: settings.py:71 main.py:75
+#: settings.py:74 main.py:76
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
@@ -1056,7 +1061,7 @@ msgid "View in Google MapMaker"
 msgstr "Ver en Google MapMaker"
 
 #. Label for weekly e-mail updates
-#: settings.py:59
+#: settings.py:61
 msgid "Weekly"
 msgstr "Semanal"
 
@@ -1115,7 +1120,7 @@ msgid "and with availability."
 msgstr "y con disponibilidad."
 
 #. a user with no identity
-#: main.py:72
+#: main.py:73
 msgid "anonymous"
 msgstr "anónimo"
 
