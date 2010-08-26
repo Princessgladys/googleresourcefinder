@@ -168,6 +168,14 @@
     #i18n: Name of the application.
     {% endcomment %}
     <a href="{{home_url}}">{% trans "Resource Finder" %}</a>
+    {% if not params.iframe %}
+      <div class="feedback">
+        {% comment %}
+        #i18n: Feedback link
+        {% endcomment %}
+        <a target="_blank" href="{{feedback_url}}">{% trans "Provide feedback" %}</a>
+      </div>
+    {% endif %}
   </div>
   {% endblock title %}
 
