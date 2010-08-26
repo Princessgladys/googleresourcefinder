@@ -276,7 +276,7 @@ class MailEditorTest(MediumTestCase):
         body = self.sent_messages[1].textbody()
         assert len(self.sent_messages) == 2
         assert 'ERROR' in self.sent_messages[1].subject()
-        assert '"d" is not a valid value for "available_beds"' in body
+        assert '"d" is not a valid value for "Available beds"' in body
         assert body.count('--- --- --- ---') == 2
         assert 'REFERENCE DOCUMENT' in body
 
