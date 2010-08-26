@@ -48,7 +48,9 @@ def setup_subject_types():
               'INFECTIOUS_DISEASE', 'PEDIATRICS', 'POSTOPERATIVE_CARE',
               'REHABILITATION', 'OBSTETRICS_GYNECOLOGY', 'MENTAL_HEALTH',
               'DIALYSIS', 'LAB', 'X_RAY', 'CT_SCAN', 'BLOOD_BANK',
-              'MORTUARY_SERVICES']),
+              'MORTUARY_SERVICES', 'OUTPATIENT_CARE', 'EMERGENCY_SERVICES',
+              'OTHER']),
+        attr('str', 'other_services'),
         attr('str', 'contact_name'),
         attr('str', 'phone'),
         attr('str', 'mobile'),
@@ -100,11 +102,11 @@ def setup_subject_types():
         key_name='haiti:hospital',
         attribute_names=['title', 'alt_title', 'healthc_id', 'pcode',
                          'available_beds', 'total_beds', 'services',
-                         'contact_name', 'phone', 'email', 'department',
-                         'district', 'commune', 'address', 'location',
-                         'accuracy', 'organization', 'organization_type',
-                         'category', 'construction', 'damage',
-                         'operational_status', 'alert_status',
+                         'other_services', 'contact_name', 'phone', 'email',
+                         'department', 'district', 'commune', 'address',
+                         'location', 'accuracy', 'organization',
+                         'organization_type', 'category', 'construction',
+                         'damage', 'operational_status', 'alert_status',
                          'comments', 'reachable_by_road',
                          'can_pick_up_patients', 'region_id', 'district_id',
                          'commune_id', 'commune_code', 'sante_id'],
@@ -118,8 +120,8 @@ def setup_subject_types():
     pk_hospital = SubjectType(
         key_name='pakistan:hospital',
         attribute_names=['title', 'alt_title', 'id', 'alt_id', 'available_beds',
-                         'total_beds', 'services', 'contact_name',
-                         'phone', 'mobile', 'fax', 'email',
+                         'total_beds', 'services', 'other_services',
+                         'contact_name', 'phone', 'mobile', 'fax', 'email',
                          'administrative_area', 'sub_administrative_area',
                          'locality', 'address', 'location', 'maps_link',
                          'organization', 'organization_type', 'category',
@@ -168,6 +170,8 @@ def setup_messages():
         name_message('total_beds', en='Total beds'),
         #i18n: work done by someone that benefits another
         name_message('services', en='Services'),
+        #i18n: alternate place to store a list of medical services
+        name_message('other_services', en='Other Services'),
         #i18n: Name of a person to contact for more information.
         name_message('contact_name', en='Contact name'),
         #i18n: telephone number
@@ -337,6 +341,17 @@ def setup_messages():
         #i18n: Service provided by a health facility (use Title Case).
         #i18n: Meaning: Corpse removal
         value_message('MORTUARY_SERVICES', en='Mortuary Services'),
+        #i18n: Service provided by a health facility (use Title Case).
+        #i18n: Meaning: a person gets the care and goes home, there is no
+        #i18n: Meaning: overnight stay
+        value_message('OUTPATIENT_CARE', en='Outpatient Care'),
+        #i18n: Service provided by a health facility (use Title Case).
+        #i18n: Meaning: services needed to evaluate or stabilize an emergency
+        #i18n: Meaning: medical condition
+        value_message('EMERGENCY_SERVICES', en='Emergency Services'),
+        #i18n: Service provided by a health facility (use Title Case).
+        #i18n: Meaning: An unnamed service not mentioned in the services list
+        value_message('OTHER', en='Other'),
     ]
 
     for locale in os.listdir(settings.LOCALE_PATHS[0]):
