@@ -31,6 +31,8 @@ th { text-align: left; }
 .header .title { position: absolute: left: 0px; top: 0px; padding: 4px;
                  font-size: 18px; color: #fff; background: #333; width: 392px; }
 .header .title a { text-decoration: none; color: #fff; }
+.header .feedback { float: right; font-size: 12px; vertical-align: bottom; padding: 4px; }
+.header .feedback a { text-decoration: underline; }
 .loading { position: absolute; left:48%; top: 0px; padding: 3px; z-index: 5;
            background-color:#FFF1A8; font-size: 13px; font-weight: bold; 
            text-align: center; }
