@@ -1,6 +1,6 @@
 Hello {{nickname}},
 
-To make changes to Resource Finder by email, reply and fill out the following template.
+To make changes to Resource Finder by email, reply and fill out the following template in-line. If you do not want to change an attribute, you may leave it blank.
 
 update {% if subject_title %}{{subject_title}} ({{subject_name}}){% else %}<Subject Title>{% endif %}
 {% for attribute in attributes %}{{attribute}}:
