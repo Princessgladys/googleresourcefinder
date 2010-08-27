@@ -50,7 +50,8 @@ class Settings(Handler):
         subjects = sorted(subjects, key=itemgetter('title'))
 
         home_url = self.get_url('/')
-        feedback_url = config.FEEDBACK_URLS_BY_LANG[self.params.lang]
+        feedback_url = config.FEEDBACK_URLS_BY_LANG.get(self.params.lang,
+                                                        config.DISCUSSION_BOARD)
         logout_url = users.create_logout_url(home_url)
         frequencies = [
             #i18n: Label for instant e-mail updates

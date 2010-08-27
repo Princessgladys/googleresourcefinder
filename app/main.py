@@ -46,7 +46,8 @@ class Main(utils.Handler):
         if self.params.lat is not None and self.params.lon is not None:
             center = {'lat': self.params.lat, 'lon': self.params.lon}
         home_url = self.get_url('/?lang=%s' % self.params.lang)
-        feedback_url = config.FEEDBACK_URLS_BY_LANG[self.params.lang]
+        feedback_url = config.FEEDBACK_URLS_BY_LANG.get(self.params.lang,
+                                                        config.DISCUSSION_BOARD)
         settings_url = self.get_url('/settings')
         login_add_url = users.create_login_url(
             self.get_url('/', add_new='yes'))
