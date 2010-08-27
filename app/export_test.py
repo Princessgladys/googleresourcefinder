@@ -61,7 +61,8 @@ STR_FIELDS = [
     'organization',
     'damage',
     'alert_status',
-    'comments'
+    'comments',
+    'other_services'
 ]
 
 BOOL_FIELDS = {
@@ -87,7 +88,7 @@ class ExportTest(MediumTestCase):
         min_attrs = [u'title', u'pcode', u'healthc_id', u'available_beds',
                      u'total_beds', u'services', u'contact_name', u'phone',
                      u'address', u'location', u'operational_status',
-                     u'alert_status']
+                     u'alert_status', u'other_services']
         self.time = datetime.datetime(2010, 06, 01, 12, 30, 50)
         self.user = users.User('test@example.com')
         self.nickname = 'nickname_foo'

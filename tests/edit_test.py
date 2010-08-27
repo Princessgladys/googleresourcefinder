@@ -23,10 +23,14 @@ SERVICES = [
     'CT_SCAN',
     'BLOOD_BANK',
     'MORTUARY_SERVICES',
+    'OUTPATIENT_CARE',
+    'EMERGENCY_SERVICES',
+    'OTHER',
 ]
 
 # "name" attributes of the string input fields in the edit form.
 STR_FIELDS = [
+    'other_services',
     'contact_name',
     'phone',
     'email',

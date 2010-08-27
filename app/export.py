@@ -60,7 +60,8 @@ COLUMNS_BY_SUBJECT_TYPE = {
         ('commune_code', lambda f: f.get_value('commune_code')),
         ('sante_id', lambda f: f.get_value('sante_id')),
         ('entry_last_updated', lambda f: get_last_updated_time(f)),
-        ('alert_status', lambda f: f.get_value('alert_status'))
+        ('alert_status', lambda f: f.get_value('alert_status')),
+        ('other_services', lambda f: f.get_value('other_services'))
     ],
     ('pakistan', 'hospital'): [
         ('name', lambda f: f.get_value('title')),
@@ -94,7 +95,8 @@ COLUMNS_BY_SUBJECT_TYPE = {
         ('reachable_by_road', lambda f: f.get_value('reachable_by_road')),
         ('can_pick_up_patients', lambda f: f.get_value('can_pick_up_patients')),
         ('entry_last_updated', lambda f: get_last_updated_time(f)),
-        ('alert_status', lambda f: f.get_value('alert_status'))
+        ('alert_status', lambda f: f.get_value('alert_status')),
+        ('other_services', lambda f: f.get_value('other_services'))
     ],
 }
 
