@@ -157,9 +157,10 @@ def update_subject(subject, observed, account, source_url, values, comments={},
 
 def parse(attribute_name, update):
     """Parses a list of Unicode strings into an attribute value."""
-    if not update.strip():
+    update = update.strip()
+    if not update:
         return NO_VALUE_FOUND
-    if update.strip() == '*none':
+    if update == '*none':
         return
 
     attribute = cache.ATTRIBUTES[attribute_name]
@@ -185,36 +186,33 @@ def parse(attribute_name, update):
         to_subtract = []
         errors = []
         for value in values:
-            formatted = value.upper().replace(' ', '_')
-            if formatted[0] == '-' and formatted[1:] in attribute.values:
-                to_subtract.append(formatted[1:])
+            formatted = ''
+            subtract = value[0] == '-'
+            new_value = subtract and value[1:] or value
+            for key in cache.MESSAGES:
+                if key[0] == 'attribute_value':
+                    # TODO(pfritzsche): when multilingual support is added,
+                    # revisit this and update to include all languages
+                    message = cache.MESSAGES[key]
+                    if new_value.lower() == message.en.lower():
+                        formatted = message.name
+                        break
+            if subtract and formatted in attribute.values:
+                to_subtract.append(formatted)
             elif formatted in attribute.values:
                 to_add.append(formatted)
             else:
-                errors.append(formatted)
+                errors.append(value)
         return (attribute, to_subtract, to_add, errors)
 
 
 def get_list_update(subject, attribute, subtract, add):
     """Returns an updated version of the subject's current value for the
-    attribute to include the changs sent by the user."""
+    attribute to include the changes sent by the user."""
     current_value = set(subject.get_value(attribute.key().name()) or [])
     current_value -= set(subtract)
     current_value |= set(add)
     return list(current_value)
-
-
-# TODO(pfritzsche): Add support for all attributes.
-UNSUPPORTED_ATTRIBUTES = {
-    'haiti': {
-        'hospital': ['services', 'organization_type', 'category',
-                     'construction', 'operational_status']
-    },
-    'pakistan': {
-        'hospital': ['services', 'organization_type', 'category',
-                     'construction', 'operational_status']
-    }
-}
 
 
 DEFAULT_SUBJECT_TYPES = {
@@ -249,6 +247,18 @@ def generate_bad_value_error_msg(value, line, attribute_name):
             _('"%(value)s" is not a valid value for "%(attribute)s"') %  values,
         'original_line': line
     }
+
+
+def generate_error_msg_w_correction(value, line, attribute_name):
+    values = generate_bad_value_error_msg(value, line, attribute_name)
+    error = values['error_message']
+    attribute = cache.ATTRIBUTES[attribute_name]
+    #i18n: Accepted values error message
+    error += _('\n-- Accepted values are: ')
+    for value in attribute.values:
+        error += utils.get_message('attribute_value', value, locale='en') + ', '
+    values['error_message'] = error
+    return values
 
 
 class MailEditor(InboundMailHandler):
@@ -450,8 +460,6 @@ class MailEditor(InboundMailHandler):
                 if not subject:
                     continue
                 subject_type = cache.SUBJECT_TYPES[self.subdomain][subject.type]
-                unsupported = \
-                    UNSUPPORTED_ATTRIBUTES[self.subdomain][subject.type]
                 for update in update_lines:
                     if STOP_DELIMITER in update:
                         stop = True
@@ -477,9 +485,12 @@ class MailEditor(InboundMailHandler):
                             if error: # error
                                 error_text = ', '.join(error)
                                 line = '%s: %s' % (pretty_name, error_text)
-                                errors.append(generate_bad_value_error_msg(
-                                    error_text, line, pretty_name))
-                            value = get_list_update(subject, attr, subtract, add)
+                                errors.append(generate_error_msg_w_correction(
+                                    error_text, line, name))
+                            if not subtract and not add:
+                                continue
+                            value = get_list_update(
+                                subject, attr, subtract, add)
                         updates.append((name, value))
                     except (ValueError, BadValueError):
                         errors.append(generate_bad_value_error_msg(
@@ -656,11 +667,19 @@ def get_locale_and_nickname(account, message):
 
 def format_changes(update, locale='en'):
     """Helper function; used to format an attribute, value pair for email."""
-    attribute, value = update
-    formatted_value = ', '.join([simple_format(x) for x in value]) if \
-        cache.ATTRIBUTES[attribute].type == 'multi' else format(value)
+    attribute_name, value = update
+    attribute = cache.ATTRIBUTES[attribute_name]
+    # TODO(pfritzsche) use utils.format instead of get_message when email
+    # supports updates in multiple languages
+    if attribute.type == 'multi':
+        formatted_value = ', '.join([
+            utils.get_message('attribute_value', x, 'en') for x in value])
+    elif attribute.type == 'choice':
+        formatted_value = utils.get_message('attribute_value', value, 'en')
+    else:
+        formatted_value = format(value)
     return {
-        'attribute': simple_format(attribute),
+        'attribute': simple_format(attribute_name),
         'value': formatted_value
     }
 
