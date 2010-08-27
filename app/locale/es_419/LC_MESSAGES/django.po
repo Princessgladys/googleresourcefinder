@@ -264,7 +264,7 @@ msgid "Country:"
 msgstr "País:"
 
 #. Label for daily e-mail updates
-#: settings.py:59
+#: settings.py:60
 msgid "Daily"
 msgstr "Diálisis"
 
@@ -512,7 +512,7 @@ msgid "Infectious Disease"
 msgstr "Enfermedades Infecciosas"
 
 #. Label for instant e-mail updates
-#: settings.py:57
+#: settings.py:58
 msgid "Instant"
 msgstr "Inmediato"
 
@@ -597,7 +597,7 @@ msgid "Loader:"
 msgstr "Cargador:"
 
 #. Indicator that the application is loading.
-#: static/locale.js:138 templates/base.html:186
+#: static/locale.js:138 templates/base.html:190
 msgid "Loading..."
 msgstr "Cargando..."
 
@@ -652,7 +652,7 @@ msgid "Mobile clinic"
 msgstr "Clínica móvil"
 
 #. Label for monthly e-mail updates
-#: settings.py:63
+#: settings.py:64
 msgid "Monthly"
 msgstr "Mensual"
 
@@ -819,7 +819,7 @@ msgid "Privacy"
 msgstr "Privacidad"
 
 #. Feedback link
-#: templates/base.html:176
+#: templates/base.html:180
 msgid "Provide feedback"
 msgstr "Proporcionar información"
 
@@ -916,7 +916,7 @@ msgid "Show"
 msgstr "Mostrar"
 
 #. Link to sign into the app
-#: main.py:78
+#: main.py:79
 msgid "Sign in"
 msgstr "Acceder"
 
@@ -926,7 +926,7 @@ msgid "Sign in to edit"
 msgstr "Accede para modificar tus datos"
 
 #. Link to sign out of the app
-#: settings.py:74 main.py:76
+#: settings.py:75 main.py:77
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
@@ -1061,7 +1061,7 @@ msgid "View in Google MapMaker"
 msgstr "Ver en Google MapMaker"
 
 #. Label for weekly e-mail updates
-#: settings.py:61
+#: settings.py:62
 msgid "Weekly"
 msgstr "Semanal"
 
@@ -1120,7 +1120,7 @@ msgid "and with availability."
 msgstr "y con disponibilidad."
 
 #. a user with no identity
-#: main.py:73
+#: main.py:74
 msgid "anonymous"
 msgstr "anónimo"
 

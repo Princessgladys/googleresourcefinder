@@ -264,7 +264,7 @@ msgid "Country:"
 msgstr "ملک:"
 
 #. Label for daily e-mail updates
-#: settings.py:59
+#: settings.py:60
 msgid "Daily"
 msgstr "یومیہ"
 
@@ -512,7 +512,7 @@ msgid "Infectious Disease"
 msgstr "متعدی مرض"
 
 #. Label for instant e-mail updates
-#: settings.py:57
+#: settings.py:58
 msgid "Instant"
 msgstr "فوری"
 
@@ -597,7 +597,7 @@ msgid "Loader:"
 msgstr "لوڈ کرنے والا:"
 
 #. Indicator that the application is loading.
-#: static/locale.js:138 templates/base.html:186
+#: static/locale.js:138 templates/base.html:190
 msgid "Loading..."
 msgstr "لوڈ ہورہا ہے..."
 
@@ -652,7 +652,7 @@ msgid "Mobile clinic"
 msgstr "موبائل کلینک"
 
 #. Label for monthly e-mail updates
-#: settings.py:63
+#: settings.py:64
 msgid "Monthly"
 msgstr "ماہانہ"
 
@@ -819,7 +819,7 @@ msgid "Privacy"
 msgstr "رازداری"
 
 #. Feedback link
-#: templates/base.html:176
+#: templates/base.html:180
 msgid "Provide feedback"
 msgstr "راۓ دیں"
 
@@ -916,7 +916,7 @@ msgid "Show"
 msgstr "دکھائیں"
 
 #. Link to sign into the app
-#: main.py:78
+#: main.py:79
 msgid "Sign in"
 msgstr "سائن ان کریں"
 
@@ -926,7 +926,7 @@ msgid "Sign in to edit"
 msgstr "ترمیم کیلئے سائن ان کریں"
 
 #. Link to sign out of the app
-#: settings.py:74 main.py:76
+#: settings.py:75 main.py:77
 msgid "Sign out"
 msgstr "سائن آؤٹ کریں"
 
@@ -1061,7 +1061,7 @@ msgid "View in Google MapMaker"
 msgstr "Google MapMaker میں دیکھی"
 
 #. Label for weekly e-mail updates
-#: settings.py:61
+#: settings.py:62
 msgid "Weekly"
 msgstr "ہفتہ وار"
 
@@ -1120,7 +1120,7 @@ msgid "and with availability."
 msgstr "اور فراہمی کے ساتھ۔"
 
 #. a user with no identity
-#: main.py:73
+#: main.py:74
 msgid "anonymous"
 msgstr "گمنام"
 
