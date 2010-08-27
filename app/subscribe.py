@@ -188,6 +188,7 @@ class Subscribe(Handler):
                 db.put(alert)
             db.delete(old_alert)
             self.check_and_update_next_alert_times(old_frequency)
+        self.check_and_update_next_alert_times(new_frequency)
 
     def change_subscriptions(self):
         """Change's the current user's subscription to a list of subjects."""
@@ -218,6 +219,7 @@ class Subscribe(Handler):
             db.put(self.account)
         else:
             update_account_alert_time(self.account, frequency, initial=True)
+            db.put(self.account)
 
 
 if __name__ == '__main__':
