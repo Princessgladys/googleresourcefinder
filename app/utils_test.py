@@ -173,7 +173,7 @@ class UtilsTest(MediumTestCase):
     def setUp(self):
         MediumTestCase.setUp(self)
         for i in range(0, 10):
-            message = Message(namespace='attribute_value', name='name_%d' % i)
+            message = Message(ns='attribute_value', name='name_%d' % i)
             setattr(message, 'en', 'en_%d' %i)
             setattr(message, 'fr', 'fr_%d' %i)
             setattr(message, 'es_419', 'es_419_%d' %i)
@@ -244,7 +244,7 @@ class UtilsTest(MediumTestCase):
     def test_export(self):
         """Confirm export works as expected"""
         assert utils.export(Message) == '\n'.join(
-            ['''Message(namespace=u'attribute_value', name=u'name_%d').put()'''
+            ['''Message(ns=u'attribute_value', name=u'name_%d').put()'''
              % i for i in range(0, 10)]) + '\n'
 
     def test_to_utf8(self):

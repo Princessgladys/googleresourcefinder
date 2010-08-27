@@ -32,7 +32,7 @@ import utils
 SAN_FRANCISCO = {'lat': 40.7142, 'lon': -74.0064}
         
 def fake_get_message(ns, n):
-    message = model.Message(namespace = ns, name = n)
+    message = model.Message(ns=ns, name=n)
     if ns == 'attribute_value' and n == 'fake_to_localize':
         message.en = 'fake_localized'
     else:
