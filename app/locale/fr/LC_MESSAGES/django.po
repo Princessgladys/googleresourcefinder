@@ -153,7 +153,7 @@ msgid "Blood Bank"
 msgstr "Banque de sang"
 
 #. Save a copy of the data in CSV format
-#: export.py:164
+#: export.py:166
 msgid "CSV Export"
 msgstr "Exporter au format CSV"
 
@@ -263,7 +263,7 @@ msgid "Country:"
 msgstr "Pays :"
 
 #. Label for daily e-mail updates
-#: settings.py:57
+#: settings.py:60
 msgid "Daily"
 msgstr "Dialyse"
 
@@ -391,7 +391,7 @@ msgid "Error saving facility information."
 msgstr "Erreur lors du enregistrement des informations de installation."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:176 templates/map.html:149
+#: templates/map.html:149 export.py:178
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
@@ -516,7 +516,7 @@ msgid "Infectious Disease"
 msgstr "Maladies Infectieuses"
 
 #. Label for instant e-mail updates
-#: settings.py:55
+#: settings.py:58
 msgid "Instant"
 msgstr "Immédiat"
 
@@ -531,7 +531,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "Date incorrecte : %(date)r  (format AAAA-MM-JJ requis)"
 
 #. Error message for request missing subject name.
-#: subscribe.py:64 settings.py:34
+#: subscribe.py:64 settings.py:35
 msgid "Invalid or missing account e-mail."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -601,7 +601,7 @@ msgid "Loader:"
 msgstr "Outil de chargement :"
 
 #. Indicator that the application is loading.
-#: static/locale.js:138 templates/base.html:178
+#: static/locale.js:138 templates/base.html:190
 msgid "Loading..."
 msgstr "Chargement..."
 
@@ -656,7 +656,7 @@ msgid "Mobile clinic"
 msgstr "Clinique mobile"
 
 #. Label for monthly e-mail updates
-#: settings.py:61
+#: settings.py:64
 msgid "Monthly"
 msgstr "Mensual"
 
@@ -837,6 +837,11 @@ msgstr "Imprimer une liste d'hôpitaux triés selon la distance qui les sépare 
 msgid "Privacy"
 msgstr "Confidentialité"
 
+#. Feedback link
+#: templates/base.html:180
+msgid "Provide feedback"
+msgstr "Fournir une rétroaction"
+
 #. Type of organization: Public (government) organization
 #: ../tools/setup.py:242
 msgid "Public"
@@ -900,7 +905,7 @@ msgid "Saving..."
 msgstr "Enregistrement..."
 
 #. Label for a selector to export data to CSV
-#: export.py:168
+#: export.py:170
 msgid "Select subject type to export:"
 msgstr "Sélectionnez le type d'établissement à l'exportation :"
 
@@ -930,7 +935,7 @@ msgid "Show"
 msgstr "Montrer"
 
 #. Link to sign into the app
-#: main.py:77
+#: main.py:79
 msgid "Sign in"
 msgstr "Connexion"
 
@@ -940,7 +945,7 @@ msgid "Sign in to edit"
 msgstr "Connectez-vous pour apporter des modifications."
 
 #. Link to sign out of the app
-#: settings.py:71 main.py:75
+#: settings.py:75 main.py:77
 msgid "Sign out"
 msgstr "Déconnexion"
 
@@ -1075,7 +1080,7 @@ msgid "View in Google MapMaker"
 msgstr "Afficher dans Google MapMaker"
 
 #. Label for weekly e-mail updates
-#: settings.py:59
+#: settings.py:62
 msgid "Weekly"
 msgstr "Hebdomadaire"
 
@@ -1134,7 +1139,7 @@ msgid "and with availability."
 msgstr "avec disponibilités"
 
 #. a user with no identity
-#: main.py:72
+#: main.py:74
 msgid "anonymous"
 msgstr "anonyme"
 

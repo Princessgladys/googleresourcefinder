@@ -154,7 +154,7 @@ msgid "Blood Bank"
 msgstr "بلڈ بینک"
 
 #. Save a copy of the data in CSV format
-#: export.py:164
+#: export.py:166
 msgid "CSV Export"
 msgstr "CSV برآمد"
 
@@ -264,7 +264,7 @@ msgid "Country:"
 msgstr "ملک:"
 
 #. Label for daily e-mail updates
-#: settings.py:57
+#: settings.py:60
 msgid "Daily"
 msgstr "یومیہ"
 
@@ -392,7 +392,7 @@ msgid "Error saving facility information."
 msgstr "سہولت کی معلومات محفوظ کرنے میں غلطی۔"
 
 #. Button to export data to comma-separated-value format.
-#: export.py:176 templates/map.html:149
+#: templates/map.html:149 export.py:178
 msgid "Export CSV"
 msgstr "CSV برآمد کریں"
 
@@ -517,7 +517,7 @@ msgid "Infectious Disease"
 msgstr "متعدی مرض"
 
 #. Label for instant e-mail updates
-#: settings.py:55
+#: settings.py:58
 msgid "Instant"
 msgstr "فوری"
 
@@ -532,7 +532,7 @@ msgid "Invalid date: %(date)r (need YYYY-MM-DD format)"
 msgstr "غلط تاریخ: %(date)r (سال-ماہ-دن کی شکل درکار ہے)"
 
 #. Error message for request missing subject name.
-#: subscribe.py:64 settings.py:34
+#: subscribe.py:64 settings.py:35
 msgid "Invalid or missing account e-mail."
 msgstr "ای میل اکاؤنٹ غلط یا چھوٹا ہوا ہے۔"
 
@@ -602,7 +602,7 @@ msgid "Loader:"
 msgstr "لوڈ کرنے والا:"
 
 #. Indicator that the application is loading.
-#: static/locale.js:138 templates/base.html:178
+#: static/locale.js:138 templates/base.html:190
 msgid "Loading..."
 msgstr "لوڈ ہورہا ہے..."
 
@@ -657,7 +657,7 @@ msgid "Mobile clinic"
 msgstr "موبائل کلینک"
 
 #. Label for monthly e-mail updates
-#: settings.py:61
+#: settings.py:64
 msgid "Monthly"
 msgstr "ماہانہ"
 
@@ -838,6 +838,11 @@ msgstr "${FACILITY_NAME} سے دوری کے لحاظ سے ہسپتالوں کی 
 msgid "Privacy"
 msgstr "رازداری"
 
+#. Feedback link
+#: templates/base.html:180
+msgid "Provide feedback"
+msgstr "راۓ دیں"
+
 #. Type of organization: Public (government) organization
 #: ../tools/setup.py:242
 msgid "Public"
@@ -901,7 +906,7 @@ msgid "Saving..."
 msgstr "محفوظ ہو رہا ہے..."
 
 #. Label for a selector to export data to CSV
-#: export.py:168
+#: export.py:170
 msgid "Select subject type to export:"
 msgstr "برآمد کیلئے مریض کی نوعیت منتخب کریں:"
 
@@ -931,7 +936,7 @@ msgid "Show"
 msgstr "دکھائیں"
 
 #. Link to sign into the app
-#: main.py:77
+#: main.py:79
 msgid "Sign in"
 msgstr "سائن ان کریں"
 
@@ -941,7 +946,7 @@ msgid "Sign in to edit"
 msgstr "ترمیم کیلئے سائن ان کریں"
 
 #. Link to sign out of the app
-#: settings.py:71 main.py:75
+#: settings.py:75 main.py:77
 msgid "Sign out"
 msgstr "سائن آؤٹ کریں"
 
@@ -1076,7 +1081,7 @@ msgid "View in Google MapMaker"
 msgstr "Google MapMaker میں دیکھی"
 
 #. Label for weekly e-mail updates
-#: settings.py:59
+#: settings.py:62
 msgid "Weekly"
 msgstr "ہفتہ وار"
 
@@ -1135,7 +1140,7 @@ msgid "and with availability."
 msgstr "اور فراہمی کے ساتھ۔"
 
 #. a user with no identity
-#: main.py:72
+#: main.py:74
 msgid "anonymous"
 msgstr "گمنام"
 
