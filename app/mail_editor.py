@@ -50,6 +50,11 @@ import utils
 from feeds.xmlutils import Struct
 from utils import db, format, get_message, order_and_format_updates
 
+# Constant to represent the string that denotes a value of None. We use this
+# instead of None so as not to confuse setting a value to None with simply not
+# setting a value to anything.
+NONE = '*none'
+
 # Constant for the parse function
 NO_VALUE_FOUND = '*no_attribute_found*'
 
@@ -160,7 +165,7 @@ def parse(attribute_name, update):
     update = update.strip()
     if not update:
         return NO_VALUE_FOUND
-    if update == '*none':
+    if update == NONE:
         return
 
     attribute = cache.ATTRIBUTES[attribute_name]
@@ -254,11 +259,24 @@ def generate_error_msg_w_correction(value, line, attribute_name):
     error = values['error_message']
     attribute = cache.ATTRIBUTES[attribute_name]
     #i18n: Accepted values error message
-    error += _('\n-- Accepted values are: ')
-    for value in attribute.values:
-        error += utils.get_message('attribute_value', value, locale='en') + ', '
+    error += '\n' + _('-- Accepted values are: ')
+    options = [utils.get_message('attribute_value', value, locale='en')
+               for value in attribute.values]
+    error += ', '.join(options)
     values['error_message'] = error
     return values
+
+
+def get_m_subjects_by_lowercase_title(subdomain, title_lower, max=3):
+    """Returns a list of minimal subjects by title, case insensitive."""
+    minimal_subjects = []
+    for key in cache.MINIMAL_SUBJECTS[subdomain]:
+        ms = cache.MINIMAL_SUBJECTS[subdomain][key]
+        if ms.get_value('title', '').lower() == title_lower:
+            minimal_subjects.append(ms)
+        if len(minimal_subjects) >= max:
+            break
+    return minimal_subjects
 
 
 class MailEditor(InboundMailHandler):
@@ -399,14 +417,14 @@ class MailEditor(InboundMailHandler):
                              flags=self.update_line_flags)
         if key_match:
             subject_name = key_match.group('subject_name')
-            subject = model.Subject.get(self.subdomain, subject_name)
-            return subject
+            return model.Subject.get(self.subdomain, subject_name)
         else:
-            subjects = model.Subject.all_in_subdomain(self.subdomain).filter(
-                'title__ =', subject_line.strip()).fetch(3)
-            if len(subjects) == 1:
-                return subjects[0]
-            return subjects
+            title_lower = subject_line.strip()
+            minimal_subjects = get_m_subjects_by_lowercase_title(
+                self.subdomain, title_lower)
+            if len(minimal_subjects) == 1:
+                return minimal_subjects[0].parent()
+            return [ms.parent() for ms in minimal_subjects]
 
     def extract_update_lines(self, match, body):
         """Given a re.match, the body of the email, and whether or not we are
@@ -518,22 +536,24 @@ class MailEditor(InboundMailHandler):
         (attribute name, unparsed value) for all located matches or if only one
         match is found, simply returns that match."""
         matches = []
+
+        # try to match on colon first
+        update_split = update.split(':', 1)
+        if len(update_split) > 1:
+            attribute, update_text = update_split
+            attribute_formatted = attribute.replace(' ', '_').lower()
+            if attribute_formatted in st.attribute_names:
+                return (attribute_formatted, update_text.strip())
+
+        # if no valid match is found with the colon, guess and check
         update_split = [word for word in update.split() if
                         re.match('.*\w+.*', word, flags=re.UNICODE)]
         for i in range(len(update_split), 0, -1):
-            colon_found = False
             if len(update_split[:i]) < i:
                 continue
-            pre_name = '_'.join(update_split[:i]).lower()
-            if pre_name[-1] == ':':
-                name = pre_name[:-1]
-                colon_found = True
-            else:
-                name = pre_name
+            name = '_'.join(update_split[:i]).lower()
             if name in st.attribute_names:
                 matches.append((name, ' '.join(update_split[i:])))
-                if colon_found:
-                    break
         return matches[0] if len(matches) == 1 else matches
 
     def update_subjects(self, updates, observed, comment=''):
@@ -629,10 +649,13 @@ class MailEditor(InboundMailHandler):
         the specified subject (in the subject line) if one exists at all."""
         locale, nickname = get_locale_and_nickname(
             self.account, original_message)
-        s = model.Subject.get(self.subdomain, original_message.subject)
-        subject_title = s and s.get_value('title')
-        subject_name = s and s.get_name()
-        s_type = s and s.type or DEFAULT_SUBJECT_TYPES[self.subdomain]
+        title_lower = original_message.subject.lower().strip()
+        minimal_subjects = get_m_subjects_by_lowercase_title(
+            self.subdomain, title_lower)
+        ms = len(minimal_subjects) == 1 and minimal_subjects[0] or None
+        subject_title = ms and ms.get_value('title')
+        subject_name = ms and ms.get_name()
+        s_type = ms and ms.type or DEFAULT_SUBJECT_TYPES[self.subdomain]
         subject_type = cache.SUBJECT_TYPES[self.subdomain][s_type]
         attributes = [simple_format(a) for a in subject_type.attribute_names if
                       utils.can_edit(self.account, self.subdomain,

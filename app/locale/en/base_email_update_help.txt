@@ -9,7 +9,6 @@ Here, General Hospital is the title of the facility to be updated. Each line tha
 update General Hospital
 Total beds: 500
 Available beds: 79
-Services: X-Ray, -Cardiology
 
 An update email for two facilities might look like the following:
 
@@ -21,6 +20,6 @@ Operational status: No surgical capacity
 
 update Public Hospital
 Reachable by road: yes
-Services: Rehabilitation
+Services: Lab, Rehabilitation, -Cardiology
 
 {% include help_file %}

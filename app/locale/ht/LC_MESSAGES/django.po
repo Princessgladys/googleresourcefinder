@@ -62,6 +62,11 @@ msgstr "%(user)s pa gen pèmisyon edite %(a)s"
 msgid "(unspecified)"
 msgstr "(pa espesifye)"
 
+#. Accepted values error message
+#: mail_editor.py:262
+msgid "-- Accepted values are: "
+msgstr ""
+
 #. Note that a health facility has been marked closed.
 #: templates/hospital_bubble.html:89
 msgid "<strong>Note:</strong> This facility has been marked closed."
@@ -129,7 +134,7 @@ msgid "An error has occurred. Please try again later."
 msgstr "Gen yon erè ki te fèt. Tanpri, eseye ankò pi ta."
 
 #. Error message for an ambiguous attribute name
-#: mail_editor.py:189
+#: mail_editor.py:240
 msgid "Attribute name is ambiguous. Please specify one of the following:"
 msgstr ""
 
@@ -861,7 +866,7 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "Rekèt pou %(role)s la refise"
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35
+#: templates/subdomain_menu.html.py:35 templates/hospital_email.html:234
 msgid "Resource Finder"
 msgstr "Chèche resous"
 
@@ -1015,11 +1020,6 @@ msgstr "Koupe Abònman nan Tcheke"
 msgid "Unsubscribed."
 msgstr "Dezabone."
 
-#. Error message for an unsupported attribute
-#: mail_editor.py:432
-msgid "Unsupported attribute"
-msgstr ""
-
 #. Label indicating a record was updated
 #: static/locale.js:214
 msgid "Updated"
@@ -1109,9 +1109,9 @@ msgid "Your request for \"%(action)s\" permission is now pending"
 msgstr "Demand ou pou %(role)s la deja enrejistre"
 
 #. Error message for an invalid value
-#: mail_editor.py:422
+#: mail_editor.py:252
 #, python-format
-msgid "\"%(value)s\" is not a valid value"
+msgid "\"%(value)s\" is not a valid value for \"%(attribute)s\""
 msgstr ""
 
 #. Header for the number of facilities with available beds. OK to translate without the 'and' if it makes more sense
