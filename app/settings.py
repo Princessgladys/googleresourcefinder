@@ -19,6 +19,7 @@ from operator import itemgetter
 
 from google.appengine.api import users
 
+import config
 from model import Subject, Subscription
 from utils import _, Handler, run
 
@@ -49,6 +50,8 @@ class Settings(Handler):
         subjects = sorted(subjects, key=itemgetter('title'))
 
         home_url = self.get_url('/')
+        feedback_url = config.FEEDBACK_URLS_BY_LANG.get(self.params.lang,
+                                                        config.DISCUSSION_BOARD)
         logout_url = users.create_logout_url(home_url)
         frequencies = [
             #i18n: Label for instant e-mail updates
@@ -66,6 +69,7 @@ class Settings(Handler):
                     settings=True,
                     authorization=self.user.email(),
                     home_url=home_url,
+                    feedback_url=feedback_url,
                     loginout_url=logout_url,
                     #i18n: Link to sign out of the app
                     loginout_text=_('Sign out'),

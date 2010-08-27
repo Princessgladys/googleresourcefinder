@@ -36,3 +36,20 @@ LANG_FALLBACKS = {'es': 'es-419'}
 # Google Maps is not available in all languages.  This maps from unavailable
 # languages to the best available fallback language.
 MAPS_LANG_FALLBACKS = {'ht': 'fr', 'ur': 'en'}
+
+# English-only Resource Finder discussion board, monitored by Google
+DISCUSSION_BOARD = 'https://sites.google.com/site/resourcefinderdiscussion/'
+
+# Google feedback form, translated to other languages
+FEEDBACK_FORM = 'http://www.google.com/support/fluvaccinefinder/bin/' + \
+                'request.py?hl=%(lang)s&contact_type=do_resource'
+
+
+# Links to feedback / discussion sites
+FEEDBACK_URLS_BY_LANG = {
+    'en': DISCUSSION_BOARD,
+    'es-419': FEEDBACK_FORM % {'lang': 'es-419'},
+    'fr': FEEDBACK_FORM % {'lang': 'fr'},
+    'ht': FEEDBACK_FORM % {'lang': 'ht'},
+    'ur': DISCUSSION_BOARD
+}
