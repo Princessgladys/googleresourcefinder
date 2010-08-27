@@ -80,12 +80,13 @@ class MailUpdateSystemTest(MediumTestCase):
         self.email = self.user.email()
         self.default_frequency = 'instant'
         self.locale = 'en'
+        self.default_alert_time = datetime.datetime(2000, 1, 1)
         self.account = Account(email=self.email, actions=['*:*'],
                                default_frequency=self.default_frequency,
                                locale=self.locale, email_format='plain',
-                               next_daily_alert=datetime.datetime(2000, 1, 1),
-                               next_weekly_alert=datetime.datetime(2000, 1, 1),
-                               next_monthly_alert=datetime.datetime(2000, 1, 1))
+                               next_daily_alert=self.default_alert_time,
+                               next_weekly_alert=self.default_alert_time,
+                               next_monthly_alert=self.default_alert_time)
         db.put(self.account)
 
     def tearDown(self):
@@ -143,8 +144,7 @@ class MailUpdateSystemTest(MediumTestCase):
         handler.post()
         assert not Subscription.get_by_key_name(key_name_s)
         assert not PendingAlert.get_by_key_name(key_name_pa)
-        assert Account.all().get().next_daily_alert == datetime.datetime(
-            2000, 1, 1)
+        assert Account.all().get().next_daily_alert == self.default_alert_time
 
         # remove the last daily subscription -- user's next_daily_alert time
         # should now match model.MAX_DATE
@@ -209,8 +209,7 @@ class MailUpdateSystemTest(MediumTestCase):
         handler.post()
         assert not Subscription.get('haiti:example.org/123', self.email)
         assert Subscription.get('haiti:example.org/456', self.email)
-        assert Account.all().get().next_daily_alert == datetime.datetime(
-            2000, 1, 1)
+        assert Account.all().get().next_daily_alert == self.default_alert_time
 
         # confirm that it does max the next_daily_alert time when there aren't
         db.put([s1, s2])
@@ -298,6 +297,23 @@ class MailUpdateSystemTest(MediumTestCase):
         assert Account.all().get().next_daily_alert == model.MAX_DATE
         assert Account.all().get().next_weekly_alert != model.MAX_DATE
 
+        # change subscription from weekly back to daily; make sure that
+        # account.next_daily_alert is reset from MAX_DATE to tomorrow
+        key_name_pa = 'weekly:%s:%s' % (self.email, subject_name)
+        subject_changes = [{'subject_name': subject_name, 'old_frequency':
+                            'weekly', 'new_frequency': 'daily'}]
+        json_pickle_changes = simplejson.dumps(subject_changes)
+        handler = self.simulate_request('/subscribe?subdomain=haiti&' +
+                                        'action=change_subscriptions&' +
+                                        'subject_changes=%s' %
+                                        json_pickle_changes)
+        handler.post()
+        assert Subscription.get_by_key_name(key_name_s).frequency == 'daily'
+        assert not PendingAlert.get_by_key_name(key_name_pa)
+        assert PendingAlert.get('daily', self.email, subject_name)
+        assert Account.all().get().next_daily_alert != model.MAX_DATE
+        assert Account.all().get().next_weekly_alert == model.MAX_DATE
+
         # change subscription with pending alert to instant. make sure
         # that pending alerts are deleted and no errors are thrown when
         # the e-mail is sent
@@ -308,7 +324,7 @@ class MailUpdateSystemTest(MediumTestCase):
         db.put([s, st])
 
         subject_changes = [{'subject_name': subject_name, 'old_frequency':
-                            'weekly', 'new_frequency': 'instant'}]
+                            'daily', 'new_frequency': 'instant'}]
         json_pickle_changes = simplejson.dumps(subject_changes)
         handler = self.simulate_request('/subscribe?subdomain=haiti&' +
                                         'action=change_subscriptions&' +
@@ -346,18 +362,15 @@ class MailUpdateSystemTest(MediumTestCase):
 
         # user has daily subscriptions; next alert time should remain the same
         subscribe_.check_and_update_next_alert_times('daily')
-        a = Account.all().get()
-        assert a.next_daily_alert == datetime.datetime(2000, 1, 1)
+        assert Account.all().get().next_daily_alert == self.default_alert_time
 
         # user has no weekly subscriptions; next alert time should max out
         subscribe_.check_and_update_next_alert_times('weekly')
-        a = Account.all().get()
-        assert a.next_weekly_alert == model.MAX_DATE
+        assert Account.all().get().next_weekly_alert == model.MAX_DATE
 
         # ditto weekly comment above
         subscribe_.check_and_update_next_alert_times('monthly')
-        a = Account.all().get()
-        assert a.next_weekly_alert == model.MAX_DATE
+        assert Account.all().get().next_weekly_alert == model.MAX_DATE
 
     def simulate_request(self, path):
         request = webapp.Request(webob.Request.blank(path).environ)

@@ -35,7 +35,7 @@ LANG_FALLBACKS = {'es': 'es-419'}
 
 # Google Maps is not available in all languages.  This maps from unavailable
 # languages to the best available fallback language.
-MAPS_LANG_FALLBACKS = {'ht': 'fr', 'ur': 'en'}
+MAPS_LANG_FALLBACKS = {'ht': 'fr'}
 
 # English-only Resource Finder discussion board, monitored by Google
 DISCUSSION_BOARD = 'https://sites.google.com/site/resourcefinderdiscussion/'

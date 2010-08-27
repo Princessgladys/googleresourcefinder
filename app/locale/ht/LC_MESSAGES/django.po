@@ -823,7 +823,7 @@ msgid "Postoperative Care"
 msgstr "Swen Aprè Operasyon"
 
 #. old value for the attribute
-#: mail_alerts.py:231
+#: mail_alerts.py:229
 msgid "Previous value"
 msgstr "Anvan valè"
 
@@ -1046,7 +1046,7 @@ msgid "Updated"
 msgstr "Remete an fonksyon"
 
 #. who the attribute was updated by
-#: mail_alerts.py:234
+#: mail_alerts.py:232
 msgid "Updated by"
 msgstr "Remete an fonksyon"
 
