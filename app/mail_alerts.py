@@ -169,11 +169,9 @@ def update_account_alert_time(account, frequency, now=None, initial=False):
             time setting the account's update times"""
     if not now:
         now = datetime.datetime.now()
-        new_time = now + get_timedelta(frequency)
-    else:
-        new_time = now + get_timedelta(frequency, now)
+    new_time = now + get_timedelta(frequency, now)
 
-    if (not getattr(account, 'next_%s_alert' % frequency) != model.MAX_DATE or
+    if (getattr(account, 'next_%s_alert' % frequency) == model.MAX_DATE or
         not initial):
         setattr(account, 'next_%s_alert' % frequency, new_time)
 
