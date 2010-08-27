@@ -142,10 +142,14 @@ class MailEditorTest(MediumTestCase):
         self.subject4 = Subject(key_name='haiti:example.org/012',
                                 type='hospital', author=self.user,
                                 title__='title_foobar', healthc_id__='012')
-        self.ms = MinimalSubject(self.subject, type='hospital')
-        self.ms2 = MinimalSubject(self.subject2, type='hospital')
-        self.ms3 = MinimalSubject(self.subject3, type='hospital')
-        self.ms4 = MinimalSubject(self.subject4, type='hospital')
+        self.ms = MinimalSubject.create(self.subject)
+        self.ms.set_attribute('title', 'title_foo')
+        self.ms2 = MinimalSubject.create(self.subject2)
+        self.ms2.set_attribute('title', 'title_bar')
+        self.ms3 = MinimalSubject.create(self.subject3)
+        self.ms3.set_attribute('title', 'title_foobar')
+        self.ms4 = MinimalSubject.create(self.subject4)
+        self.ms4.set_attribute('title', 'title_foobar')
         attribute_names = export_test.STR_FIELDS + \
                           export_test.INT_FIELDS + \
                           export_test.BOOL_FIELDS.keys() + \
@@ -229,6 +233,9 @@ class MailEditorTest(MediumTestCase):
         assert mail_editor.parse(attribute_name, update) == db.GeoPt(18.5, 18)
 
         update = '0, 0'
+        assert mail_editor.parse(attribute_name, update) == db.GeoPt(0, 0)
+
+        update = '0,0'
         assert mail_editor.parse(attribute_name, update) == db.GeoPt(0, 0)
 
         update = '18.5'
@@ -667,6 +674,11 @@ class MailEditorTest(MediumTestCase):
 
         match = mail_editor_.get_attribute_matches(
             self.subject_type, 'commune code: 1')
+        assert match[0] == 'commune_code'
+        assert match[1] == '1'
+
+        match = mail_editor_.get_attribute_matches(
+            self.subject_type, 'commune code:1')
         assert match[0] == 'commune_code'
         assert match[1] == '1'
 
