@@ -169,6 +169,10 @@
     {% endcomment %}
     <a href="{{home_url}}">{% trans "Resource Finder" %}</a>
     {% if not params.iframe %}
+      {% comment %}
+      # Left out of iframe because the iframe is too small to fit the link
+      # anywhere reasonable on the page, per zeiger's decision.
+      {% endcomment %}
       <div class="feedback">
         {% comment %}
         #i18n: Feedback link

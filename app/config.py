@@ -37,14 +37,19 @@ LANG_FALLBACKS = {'es': 'es-419'}
 # languages to the best available fallback language.
 MAPS_LANG_FALLBACKS = {'ht': 'fr', 'ur': 'en'}
 
+# English-only Resource Finder discussion board, monitored by Google
+DISCUSSION_BOARD = 'https://sites.google.com/site/resourcefinderdiscussion/'
+
+# Google feedback form, translated to other languages
+FEEDBACK_FORM = 'http://www.google.com/support/fluvaccinefinder/bin/' + \
+                'request.py?hl=%(lang)s&contact_type=do_resource'
+
+
 # Links to feedback / discussion sites
 FEEDBACK_URLS_BY_LANG = {
-    'en': 'https://sites.google.com/site/resourcefinderdiscussion/',
-    'es-419': 'http://www.google.com/support/fluvaccinefinder/bin/' + \
-              'request.py?hl=es&contact_type=do_resource',
-    'fr': 'http://www.google.com/support/fluvaccinefinder/bin/request.py?' + \
-          'hl=fr&contact_type=do_resource',
-    'ht': 'http://www.google.com/support/fluvaccinefinder/bin/request.py?' + \
-          'hl=ht&contact_type=do_resource',
-    'ur': 'https://sites.google.com/site/resourcefinderdiscussion/'
+    'en': DISCUSSION_BOARD,
+    'es-419': FEEDBACK_FORM % {'lang': 'es-419'},
+    'fr': FEEDBACK_FORM % {'lang': 'fr'},
+    'ht': FEEDBACK_FORM % {'lang': 'ht'},
+    'ur': DISCUSSION_BOARD
 }
