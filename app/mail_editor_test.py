@@ -33,7 +33,7 @@ from utils import db
 
 SAMPLE_EMAIL_WORKING = '''UPDATE title_foo (example.org/123)
 Available beds: 18
-Total beds: 222
+Total beds:222
 Email test@example.com
 Commune foo@bar!
 Can pick_up patients yes'''
@@ -114,7 +114,7 @@ commune code 1'''
 
 SAMPLE_EMAIL_ENUMS = '''update title_foo
 services: -x-ray, general surgery
-operational status: operational'''
+operational status:operational'''
 
 SAMPLE_EMAIL_ENUMS_WITH_ERRORS = '''update title_foo
 services: x'''

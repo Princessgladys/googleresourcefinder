@@ -259,7 +259,7 @@ def generate_error_msg_w_correction(value, line, attribute_name):
     error = values['error_message']
     attribute = cache.ATTRIBUTES[attribute_name]
     #i18n: Accepted values error message
-    error += '\n' + _('-- Accepted values are: ')
+    error += '\n-- ' + _('Accepted values are: ')
     options = [utils.get_message('attribute_value', value, locale='en')
                for value in attribute.values]
     error += ', '.join(options)
