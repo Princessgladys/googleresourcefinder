@@ -144,7 +144,7 @@ class AttributeCache(Cache):
 class MessageCache(Cache):
     def fetch_entities(self):
         entities = utils.fetch_all(model.Message.all())
-        return dict(((e.namespace, e.name), e) for e in entities)
+        return dict(((e.ns, e.name), e) for e in entities)
 
 
 class DefaultAccountCache(Cache):

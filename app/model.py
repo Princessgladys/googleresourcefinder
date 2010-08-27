@@ -301,7 +301,7 @@ class Account(db.Model):
 class Message(db.Expando):
     """Internationalized strings for value identifiers.  Top-level entity,
     has no parent."""
-    namespace = db.StringProperty(required=True, choices=[
+    ns = db.StringProperty(required=True, choices=[
       'english',  # name is an English string
       'attribute_name',  # name is an Attribute's key_name
       'attribute_value', # name is a value name in a choice or multi attribute
