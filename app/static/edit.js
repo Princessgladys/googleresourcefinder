@@ -130,11 +130,11 @@ function validate_geopt(inputs) {
     var input_valid = is_valid_number(input.value);
     if (input_valid) {
       var value = parseFloat(jQuery.trim(input.value));
-      if (coord == 'lat' && value < -90 || value > 90) {
+      if (coord == 'lat' && (value < -90 || value > 90)) {
         input_valid = false;
         error.push(locale.ERROR_LATITUDE_INVALID());
         error.push(HTML('<br>'));
-      } else if (coord == 'lon' && value < -180 || value > 180) {
+      } else if (coord == 'lon' && (value < -180 || value > 180)) {
         input_valid = false;
         error.push(to_html(locale.ERROR_LONGITUDE_INVALID()));
         error.push(HTML('<br>'));
