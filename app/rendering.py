@@ -70,7 +70,8 @@ def minimal_subject_transformer(index, minimal_subject, attributes,
         'type': subject_type_is[subdomain + ':' + type],
         'values': values,
     }
-    if minimal_subject.has_value('location'):
+    if (minimal_subject.has_value('location') and
+        minimal_subject.get_value('location')):
         location = {
             'lat': minimal_subject.get_value('location').lat,
             'lon': minimal_subject.get_value('location').lon

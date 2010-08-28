@@ -126,7 +126,7 @@ function validate_geopt(inputs) {
     var name_coord = input.name.split('.');
     name = name_coord[0];
     var coord = name_coord[1];
-    var input_valid = is_valid_number(input.value);
+    var input_valid = !jQuery.trim(input.value) || is_valid_number(input.value);
     if (input_valid) {
       var value = parseFloat(jQuery.trim(input.value));
       if (coord == 'lat' && value < -90 || value > 90) {
