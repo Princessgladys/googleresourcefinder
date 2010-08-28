@@ -249,6 +249,12 @@ class EditTest(SeleniumTestCase):
         self.click('//input[@name="save"]')
         self.verify_errors(text_fields)
 
+        text_fields['location.lat'] = 'asdf'
+        text_fields['location.lon'] = '   '
+        self.fill_fields(text_fields, {}, {})
+        self.click('//input[@name="save"]')
+        self.verify_errors(text_fields)
+
         # Fill in the form
         text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
         if add_new:
@@ -338,6 +344,7 @@ class EditTest(SeleniumTestCase):
         # Check that the integer fields are actually zero, not empty
         text_fields['available_beds'] = '0'
         text_fields['total_beds'] = '0'
+        # And check that the latitude and longitude fields are empty
         text_fields['location.lat'] = ''
         text_fields['location.lon'] = ''
         self.verify_fields(text_fields, checkbox_fields, select_fields)

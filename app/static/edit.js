@@ -121,30 +121,42 @@ function validate_geopt(inputs) {
   var valid = true;
   var name = '';
   var error = [];
+  var blank_count = 0;
   for (var i = 0; i < inputs.length; i++) {
     var input = inputs[i];
     var name_coord = input.name.split('.');
     name = name_coord[0];
     var coord = name_coord[1];
-    var input_valid = !jQuery.trim(input.value) || is_valid_number(input.value);
+    var input_valid = is_valid_number(input.value);
     if (input_valid) {
       var value = parseFloat(jQuery.trim(input.value));
       if (coord == 'lat' && value < -90 || value > 90) {
         input_valid = false;
         error.push(locale.ERROR_LATITUDE_INVALID());
+        error.push(HTML('<br>'));
       } else if (coord == 'lon' && value < -180 || value > 180) {
         input_valid = false;
         error.push(to_html(locale.ERROR_LONGITUDE_INVALID()));
+        error.push(HTML('<br>'));
       }
     } else {
       error.push(to_html(
                    coord == 'lat' ? locale.ERROR_LATITUDE_MUST_BE_NUMBER()
                      : locale.ERROR_LONGITUDE_MUST_BE_NUMBER()));
+      error.push(HTML('<br>'));
+      if (!jQuery.trim(input.value)) {
+        blank_count++;
+      }
     }
     valid = valid && input_valid;
+  } 
+
+  if (blank_count == inputs.length) {
+    // If all inputs are blank, this is valid
+    return true;
   }
 
-  set_error(name, valid, HTML(error.join('<br>')));
+  set_error(name, valid, error);
   return valid;
 }
 
