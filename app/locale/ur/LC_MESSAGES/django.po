@@ -279,7 +279,7 @@ msgid "Date and time"
 msgstr "تاریخ اور وقت"
 
 #. Label for change default frequency box
-#: templates/settings.html:98
+#: templates/settings.html:102
 msgid "Default frequency:"
 msgstr "ڈیفالٹ تعدد:"
 
@@ -347,12 +347,12 @@ msgid "Edited by"
 msgstr "ترمیم کنندہ"
 
 #. Settings page title
-#: templates/settings.html:71
+#: templates/settings.html:75
 msgid "Email Subscription Settings"
 msgstr "ای میل رکنیت کی ترتیبات"
 
 #. Label for e-mail type radio buttons
-#: templates/settings.html:79
+#: templates/settings.html:83
 msgid "Email format:"
 msgstr "ای میل کی ساخت:"
 
@@ -402,7 +402,7 @@ msgid "Facilities with Changes"
 msgstr "سہولیات مع تبدیلیاں"
 
 #. A place that provides a particular service
-#: templates/print.html:129 static/locale.js:120 templates/settings.html:120 templates/map.html:127
+#: templates/print.html:129 static/locale.js:120 templates/settings.html:124 templates/map.html:127
 msgid "Facility"
 msgstr "سہولت"
 
@@ -712,7 +712,7 @@ msgid "No availability information"
 msgstr "فراہمی کی معلومات نہیں ہیں "
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:134
+#: templates/settings.html:138
 msgid "No facilities to display."
 msgstr "دکھانے کیلئے کوئی سہولیات نہیں ہیں۔"
 
@@ -808,7 +808,7 @@ msgid "Phone"
 msgstr "فون"
 
 #. Label for "plain text" radio button
-#: templates/settings.html:86
+#: templates/settings.html:90
 msgid "Plain text"
 msgstr "سادہ متن"
 
@@ -896,7 +896,7 @@ msgid "Save"
 msgstr "محفوظ کریں"
 
 #. Notice that a change has been saved.
-#: templates/settings.html:61
+#: templates/settings.html:65
 msgid "Saved."
 msgstr "محفوظ ہوگیا۔"
 
@@ -916,7 +916,7 @@ msgid "Services"
 msgstr "خدمات"
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:167
+#: templates/settings.html:171
 msgid "Set checked to default"
 msgstr "نشان زد کو ڈیفالٹ پر سیٹ کریں"
 
@@ -936,7 +936,7 @@ msgid "Show"
 msgstr "دکھائیں"
 
 #. Link to sign into the app
-#: main.py:79
+#: main.py:80
 msgid "Sign in"
 msgstr "سائن ان کریں"
 
@@ -946,7 +946,7 @@ msgid "Sign in to edit"
 msgstr "ترمیم کیلئے سائن ان کریں"
 
 #. Link to sign out of the app
-#: settings.py:75 main.py:77
+#: settings.py:75 main.py:78
 msgid "Sign out"
 msgstr "سائن آؤٹ کریں"
 
@@ -1026,7 +1026,7 @@ msgid "Unsubscribe"
 msgstr "رکنیت ختم کریں"
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:174
+#: templates/settings.html:178
 msgid "Unsubscribe from checked"
 msgstr "نشان زد سے رکنیت ختم کریں"
 
@@ -1140,7 +1140,7 @@ msgid "and with availability."
 msgstr "اور فراہمی کے ساتھ۔"
 
 #. a user with no identity
-#: main.py:74
+#: main.py:75
 msgid "anonymous"
 msgstr "گمنام"
 
