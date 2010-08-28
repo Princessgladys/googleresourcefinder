@@ -153,7 +153,7 @@ function validate_geopt(inputs) {
 
   if (blank_count == inputs.length) {
     // If all inputs are blank, this is valid
-    return true;
+    valid = true;
   }
 
   set_error(name, valid, error);
