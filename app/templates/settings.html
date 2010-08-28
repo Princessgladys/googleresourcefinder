@@ -20,6 +20,9 @@
 {% block stylesheets %}
   <link rel="stylesheet" href="static/map.css">
   <link rel="stylesheet" href="static/settings.css">
+  <!--[if lt IE 8]>
+    <link rel="stylesheet" href="static/map-ie.css">
+  <![endif]-->
   {% if params.lang_bidi %}
     <link rel="stylesheet" href="static/map-rtl.css">
   {% endif %}
@@ -33,6 +36,7 @@
 
 {% block javascript-includes %}
   <script type="text/javascript" src="static/settings.js"></script>
+  <script type="text/javascript" src="static/json2.min.js"></script>
 {% endblock javascript-includes %}
 
 {% block home-link %}
