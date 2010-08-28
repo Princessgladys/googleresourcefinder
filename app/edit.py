@@ -242,7 +242,7 @@ class GeoPtAttributeType(AttributeType):
     def to_stored_value(self, name, value, request, attribute):
         lat = request.get('%s.lat' % name, None)
         lon = request.get('%s.lon' % name, None)
-        if lat and long:
+        if lat and lat.strip() and lon and lon.strip():
             return db.GeoPt(float(lat), float(lon))
         return None
 

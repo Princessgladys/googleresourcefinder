@@ -498,12 +498,15 @@ function convert_markers_for_print() {
 
 // Construct and set up the map markers for the subjects.
 function initialize_markers() {
+  var to_add = [];
   for (var su = 1; su < subjects.length; su++) {
     add_marker(su, true);
+    if (markers[su]) {
+      to_add.push(markers[su]);
+    }
   }
 
-  var to_add = print ? markers.slice(1, MAX_MARKERS_TO_PRINT + 1)
-      : markers.slice(1);
+  to_add = print ? to_add.slice(1, MAX_MARKERS_TO_PRINT + 1) : to_add.slice(1);
   marker_clusterer.addMarkers(to_add);
   log("init markers done");
 }
@@ -698,7 +701,8 @@ function update_subject_icons() {
   var markers_to_keep = [];
   for (var su = 1; su < subjects.length; su++) {
     var st = subject_status_is[su];
-    if (st == STATUS_VISIBLE || st == STATUS_EXCLUDED_BY_VIEWPORT) {
+    if (markers[su] && (st == STATUS_VISIBLE
+        || st == STATUS_EXCLUDED_BY_VIEWPORT)) {
       // We must include EXCULDED_BY_VIEWPORT markers here because we want
       // the out-of-bounds markers to scroll smoothly into view when the user
       // pans.
@@ -1196,7 +1200,7 @@ function select_subject(subject_i) {
     error: function(request, text_status, error_thrown){
       log(text_status + ', ' + error_thrown);
       alert(locale.ERROR_LOADING_FACILITY_INFORMATION());
-      show_loading(false);
+      show_status(null, null, true);
     },
     success: function(result){
       subjects[subject_i].values = result.json.values;
@@ -1214,6 +1218,8 @@ function select_subject(subject_i) {
       update_subject_status_is();
       update_subject_row(subject_i);
       update_subject_icon(subject_i);
+
+      show_status(null, null, true);
 
       if (markers[subject_i]) {
         info.setContent(result.html);
@@ -1239,8 +1245,6 @@ function select_subject(subject_i) {
         }
         show_status(status, 60000);
       }
-
-      show_loading(false);
     }
   });
 
