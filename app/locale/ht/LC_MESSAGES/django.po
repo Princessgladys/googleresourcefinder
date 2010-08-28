@@ -279,7 +279,7 @@ msgid "Date and time"
 msgstr "Jou  ak  lè"
 
 #. Label for change default frequency box
-#: templates/settings.html:98
+#: templates/settings.html:102
 msgid "Default frequency:"
 msgstr "Frekans Estanda:"
 
@@ -347,12 +347,12 @@ msgid "Edited by"
 msgstr "Moun ki reekri a"
 
 #. Settings page title
-#: templates/settings.html:71
+#: templates/settings.html:75
 msgid "Email Subscription Settings"
 msgstr "Imel Abònman Anviwònman"
 
 #. Label for e-mail type radio buttons
-#: templates/settings.html:79
+#: templates/settings.html:83
 msgid "Email format:"
 msgstr "Adrès elektronik fòma:"
 
@@ -402,7 +402,7 @@ msgid "Facilities with Changes"
 msgstr "Etablisman ak Chanjman"
 
 #. A place that provides a particular service
-#: templates/print.html:129 static/locale.js:120 templates/settings.html:120 templates/map.html:127
+#: templates/print.html:129 static/locale.js:120 templates/settings.html:124 templates/map.html:127
 msgid "Facility"
 msgstr "Etablisman"
 
@@ -712,7 +712,7 @@ msgid "No availability information"
 msgstr "Pa gen enfòmasyon ki koresponn"
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:134
+#: templates/settings.html:138
 msgid "No facilities to display."
 msgstr "Pa gen fasilite yo afiche."
 
@@ -808,7 +808,7 @@ msgid "Phone"
 msgstr "Telefòn"
 
 #. Label for "plain text" radio button
-#: templates/settings.html:86
+#: templates/settings.html:90
 msgid "Plain text"
 msgstr "Tèks"
 
@@ -896,7 +896,7 @@ msgid "Save"
 msgstr "Anrejistre"
 
 #. Notice that a change has been saved.
-#: templates/settings.html:61
+#: templates/settings.html:65
 msgid "Saved."
 msgstr "Anrejistre"
 
@@ -916,7 +916,7 @@ msgid "Services"
 msgstr "Sèvis"
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:167
+#: templates/settings.html:171
 msgid "Set checked to default"
 msgstr "Mete Tcheke Estanda"
 
@@ -936,7 +936,7 @@ msgid "Show"
 msgstr "Montre"
 
 #. Link to sign into the app
-#: main.py:79
+#: main.py:80
 msgid "Sign in"
 msgstr "Mete Anprent"
 
@@ -946,7 +946,7 @@ msgid "Sign in to edit"
 msgstr "Tanpri siyen nan reekri"
 
 #. Link to sign out of the app
-#: settings.py:75 main.py:77
+#: settings.py:75 main.py:78
 msgid "Sign out"
 msgstr "Sòti"
 
@@ -1026,7 +1026,7 @@ msgid "Unsubscribe"
 msgstr "Koupe Abònman nan Tcheke"
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:174
+#: templates/settings.html:178
 msgid "Unsubscribe from checked"
 msgstr "Koupe Abònman nan Tcheke"
 
@@ -1140,7 +1140,7 @@ msgid "and with availability."
 msgstr "Avek anpil abilite"
 
 #. a user with no identity
-#: main.py:74
+#: main.py:75
 msgid "anonymous"
 msgstr "anonim"
 

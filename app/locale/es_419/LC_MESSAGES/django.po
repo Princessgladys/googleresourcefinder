@@ -279,7 +279,7 @@ msgid "Date and time"
 msgstr "Fecha y hora"
 
 #. Label for change default frequency box
-#: templates/settings.html:98
+#: templates/settings.html:102
 msgid "Default frequency:"
 msgstr "Predeterminada de Frecuencias:"
 
@@ -347,12 +347,12 @@ msgid "Edited by"
 msgstr "Modificado por"
 
 #. Settings page title
-#: templates/settings.html:71
+#: templates/settings.html:75
 msgid "Email Subscription Settings"
 msgstr "Configuración de Correo Electrónico de Suscripción"
 
 #. Label for e-mail type radio buttons
-#: templates/settings.html:79
+#: templates/settings.html:83
 msgid "Email format:"
 msgstr "Correo electrónico"
 
@@ -402,7 +402,7 @@ msgid "Facilities with Changes"
 msgstr "Instituciónes con los Cambios"
 
 #. A place that provides a particular service
-#: templates/print.html:129 static/locale.js:120 templates/settings.html:120 templates/map.html:127
+#: templates/print.html:129 static/locale.js:120 templates/settings.html:124 templates/map.html:127
 msgid "Facility"
 msgstr "Institución"
 
@@ -712,7 +712,7 @@ msgid "No availability information"
 msgstr "No hay información de disponibilidad"
 
 #. message saying no facilities are subscribed to
-#: templates/settings.html:134
+#: templates/settings.html:138
 msgid "No facilities to display."
 msgstr "No hay instituciónes para mostrar."
 
@@ -808,7 +808,7 @@ msgid "Phone"
 msgstr "Teléfono"
 
 #. Label for "plain text" radio button
-#: templates/settings.html:86
+#: templates/settings.html:90
 msgid "Plain text"
 msgstr "Texto Sin Formato"
 
@@ -896,7 +896,7 @@ msgid "Save"
 msgstr "Guardar"
 
 #. Notice that a change has been saved.
-#: templates/settings.html:61
+#: templates/settings.html:65
 msgid "Saved."
 msgstr "Guardar"
 
@@ -916,7 +916,7 @@ msgid "Services"
 msgstr "Servicios"
 
 #. label for changing subjects to default frequency
-#: templates/settings.html:167
+#: templates/settings.html:171
 msgid "Set checked to default"
 msgstr "Seleccionados para Establecer por Defecto"
 
@@ -936,7 +936,7 @@ msgid "Show"
 msgstr "Mostrar"
 
 #. Link to sign into the app
-#: main.py:79
+#: main.py:80
 msgid "Sign in"
 msgstr "Acceder"
 
@@ -946,7 +946,7 @@ msgid "Sign in to edit"
 msgstr "Accede para modificar tus datos"
 
 #. Link to sign out of the app
-#: settings.py:75 main.py:77
+#: settings.py:75 main.py:78
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
@@ -1026,7 +1026,7 @@ msgid "Unsubscribe"
 msgstr "Darse de Baja de Comprobarse"
 
 #. label for unsubscribing from subjects
-#: templates/settings.html:174
+#: templates/settings.html:178
 msgid "Unsubscribe from checked"
 msgstr "Darse de Baja de Comprobarse"
 
@@ -1140,7 +1140,7 @@ msgid "and with availability."
 msgstr "y con disponibilidad."
 
 #. a user with no identity
-#: main.py:74
+#: main.py:75
 msgid "anonymous"
 msgstr "anónimo"
 
