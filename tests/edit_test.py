@@ -150,7 +150,7 @@ class EditTest(SeleniumTestCase):
                 '/edit?subdomain=haiti&subject_name=%s' % extra_names[0])
             self.wait_for_load()
 
-        self.run_edit(login, save, edit, True, subject_id='subject-2')
+        self.run_edit(login, save, edit, add_new=True, subject_id='subject-2')
 
     def test_inplace_add(self):
         """In-place add/edit: Confirms that all the fields in the in-place edit
@@ -191,7 +191,12 @@ class EditTest(SeleniumTestCase):
             assert len(extra_names) == 1
             self.edit(login=False, subject_id=subject_id)
 
-        self.run_edit(login, save, edit, True, subject_id=subject_id)
+        def no_loc_edit(self):
+            self.wait_for_element('id=' + subject_id)
+            self.click('id=' + subject_id)
+
+        self.run_edit(login, save, edit, no_loc_edit_func=no_loc_edit,
+                      add_new=True, subject_id=subject_id)
 
     def test_inplace_edit(self):
         """In-place edit: Confirms that all the fields in the in-place edit
@@ -208,12 +213,23 @@ class EditTest(SeleniumTestCase):
         def edit(self):
             self.edit()
 
-        self.run_edit(login, save, edit)
+        def no_loc_save(self):
+            self.click('//input[@name="save"]')
+            self.wait_until(self.is_visible, 'data')
 
-    def run_edit(self, login_func, save_func, edit_func, add_new=False,
-                 subject_id='subject-1'):
+        def no_loc_edit(self):
+            self.wait_for_element('id=subject-1')
+            self.click('id=subject-1')
+
+        self.run_edit(login, save, edit, no_loc_save, no_loc_edit)
+
+    def run_edit(self, login_func, save_func, edit_func,
+                 no_loc_save_func=None, no_loc_edit_func=None,
+                 add_new=False, subject_id='subject-1'):
         """Runs the edit flow, for use in both inplace and separate page
         editing."""
+        no_loc_save_func = no_loc_save_func or save_func
+        no_loc_edit_func = no_loc_edit_func or edit_func
 
         login_func(self)
 
@@ -229,6 +245,12 @@ class EditTest(SeleniumTestCase):
         text_fields['total_beds'] = 'total'
         text_fields['location.lat'] = '91'
         text_fields['location.lon'] = '-181'
+        self.fill_fields(text_fields, {}, {})
+        self.click('//input[@name="save"]')
+        self.verify_errors(text_fields)
+
+        text_fields['location.lat'] = 'asdf'
+        text_fields['location.lon'] = '   '
         self.fill_fields(text_fields, {}, {})
         self.click('//input[@name="save"]')
         self.verify_errors(text_fields)
@@ -304,22 +326,27 @@ class EditTest(SeleniumTestCase):
         # Check that everything is now empty or deselected
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
-        # Set the integer fields to zero
+        # Set the integer fields to zero and clear the location
         self.type('//input[@name="available_beds"]', '  0')
         self.type('//input[@name="total_beds"]', '0  ')
+        self.type('//input[@name="location.lat"]', '  ')
+        self.type('//input[@name="location.lon"]', '')
 
         # Submit the form
-        save_func(self)
+        no_loc_save_func(self)
 
         # Check that the facility list is updated to show the zeros
         regex = Regex('.*0 / 0')
         self.wait_until(lambda: regex.match(self.get_text('id=' + subject_id)))
 
-        edit_func(self)
+        no_loc_edit_func(self)
 
         # Check that the integer fields are actually zero, not empty
         text_fields['available_beds'] = '0'
         text_fields['total_beds'] = '0'
+        # And check that the latitude and longitude fields are empty
+        text_fields['location.lat'] = ''
+        text_fields['location.lon'] = ''
         self.verify_fields(text_fields, checkbox_fields, select_fields)
 
     def test_edit_comments(self):
