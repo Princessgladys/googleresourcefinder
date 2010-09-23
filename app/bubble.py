@@ -148,6 +148,9 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
 VALUE_INFO_EXTRACTORS = {
     'haiti': {
         'hospital': HospitalValueInfoExtractor(),
+    },
+    'pakistan': {
+        'hospital': HospitalValueInfoExtractor(),
     }
 }
 
