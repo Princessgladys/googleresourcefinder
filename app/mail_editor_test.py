@@ -20,19 +20,20 @@ import re
 import django.utils.translation
 from google.appengine.api import mail
 from google.appengine.api import users
+from nose.tools import assert_raises
 
 import cache
 import export_test
 import mail_editor
 from feeds.xmlutils import Struct
 from medium_test_case import MediumTestCase
-from model import Account, Attribute, Subdomain, MinimalSubject, Subject
-from model import SubjectType
+from model import Account, Attribute, Subdomain, Message, MinimalSubject
+from model import Subject, SubjectType
 from utils import db
 
 SAMPLE_EMAIL_WORKING = '''UPDATE title_foo (example.org/123)
 Available beds: 18
-Total beds: 222
+Total beds:222
 Email test@example.com
 Commune foo@bar!
 Can pick_up patients yes'''
@@ -111,6 +112,13 @@ commune code: 1'''
 SAMPLE_EMAIL_AMBIGUOUS_UPDATE_BROKEN = '''update title_foo
 commune code 1'''
 
+SAMPLE_EMAIL_ENUMS = '''update title_foo
+services: -x-ray, general surgery
+operational status:operational'''
+
+SAMPLE_EMAIL_ENUMS_WITH_ERRORS = '''update title_foo
+services: x'''
+
 class MailEditorTest(MediumTestCase):
     def setUp(self):
         MediumTestCase.setUp(self)
@@ -123,7 +131,8 @@ class MailEditorTest(MediumTestCase):
                                affiliation='affiliation_foo')
         self.subject = Subject(key_name='haiti:example.org/123',
                                type='hospital', author=self.user,
-                               title__='title_foo', healthc_id__='123')
+                               title__='title_foo', healthc_id__='123',
+                               services__=['X_RAY'])
         self.subject2 = Subject(key_name='haiti:example.org/456',
                                 type='hospital', author=self.user,
                                 title__='title_bar', healthc_id__='456')
@@ -133,14 +142,19 @@ class MailEditorTest(MediumTestCase):
         self.subject4 = Subject(key_name='haiti:example.org/012',
                                 type='hospital', author=self.user,
                                 title__='title_foobar', healthc_id__='012')
-        self.ms = MinimalSubject(self.subject, type='hospital')
-        self.ms2 = MinimalSubject(self.subject2, type='hospital')
-        self.ms3 = MinimalSubject(self.subject3, type='hospital')
-        self.ms4 = MinimalSubject(self.subject4, type='hospital')
+        self.ms = MinimalSubject.create(self.subject)
+        self.ms.set_attribute('title', 'title_foo')
+        self.ms2 = MinimalSubject.create(self.subject2)
+        self.ms2.set_attribute('title', 'title_bar')
+        self.ms3 = MinimalSubject.create(self.subject3)
+        self.ms3.set_attribute('title', 'title_foobar')
+        self.ms4 = MinimalSubject.create(self.subject4)
+        self.ms4.set_attribute('title', 'title_foobar')
         attribute_names = export_test.STR_FIELDS + \
                           export_test.INT_FIELDS + \
                           export_test.BOOL_FIELDS.keys() + \
-                          export_test.SELECT_FIELDS.keys()
+                          export_test.SELECT_FIELDS.keys() + \
+                          ['services']
         self.subject_type = SubjectType(key_name='haiti:hospital',
                                         attribute_names=attribute_names)
         self.subdomain = Subdomain(key_name='haiti')
@@ -155,7 +169,16 @@ class MailEditorTest(MediumTestCase):
         for field in export_test.BOOL_FIELDS:
             Attribute(key_name=field, type='bool').put()
         for field in export_test.SELECT_FIELDS:
-            Attribute(key_name=field, type='choice').put()
+            Attribute(key_name=field, type='choice',
+                      values=['OPERATIONAL']).put()
+        Attribute(key_name='services', type='multi',
+                  values=export_test.SERVICES).put()
+        Attribute(key_name='location', type='geopt').put()
+        Message(ns='attribute_value', en='X-Ray', name='X_RAY').put()
+        Message(ns='attribute_value', en='General Surgery',
+                name='GENERAL_SURGERY').put()
+        Message(ns='attribute_value', en='Operational',
+                name='OPERATIONAL').put()
 
     def tearDown(self):
         db.delete([self.account, self.subject, self.subject2, self.subject3,
@@ -163,6 +186,8 @@ class MailEditorTest(MediumTestCase):
                    self.ms, self.ms2, self.ms3, self.ms4])
         for attribute in Attribute.all():
             db.delete(attribute)
+        for message in Message.all():
+            db.delete(message)
 
     def test_parse(self):
         """Confirm that the parse function properly translates string values
@@ -193,17 +218,62 @@ class MailEditorTest(MediumTestCase):
         update = 'y'
         assert mail_editor.parse(attribute_name, update)
 
-        attribute_name = 'reachable_by_road'
         update = 'yEs'
         assert mail_editor.parse(attribute_name, update)
 
-        attribute_name = 'reachable_by_road'
         update = '!'
         assert not mail_editor.parse(attribute_name, update)
 
-        attribute_name = 'reachable_by_road'
         update = 'no'
         assert not mail_editor.parse(attribute_name, update)
+
+        # test a geopt attribute
+        attribute_name = 'location'
+        update = '18.5, 18'
+        assert mail_editor.parse(attribute_name, update) == db.GeoPt(18.5, 18)
+
+        update = '0, 0'
+        assert mail_editor.parse(attribute_name, update) == db.GeoPt(0, 0)
+
+        update = '0,0'
+        assert mail_editor.parse(attribute_name, update) == db.GeoPt(0, 0)
+
+        update = '18.5'
+        assert_raises(ValueError, mail_editor.parse, attribute_name, update)
+
+        update = '18.5, 18, 17.5'
+        assert_raises(ValueError, mail_editor.parse, attribute_name, update)
+
+        update = 'a,b'
+        assert_raises(ValueError, mail_editor.parse, attribute_name, update)
+
+        # test a choice attribute
+        attribute_name = 'operational_status'
+        update = 'operational'
+        assert mail_editor.parse(attribute_name, update) == 'OPERATIONAL'
+
+        update = 'foo'
+        assert_raises(ValueError, mail_editor.parse, attribute_name, update)
+
+        # test a multi attribute
+        attribute_name = 'services'
+        update = 'general surgery, -x-ray'
+        assert mail_editor.parse(attribute_name, update) == (
+            cache.ATTRIBUTES[attribute_name], ['X_RAY'], ['GENERAL_SURGERY'], [])
+
+        update += ', x'
+        assert mail_editor.parse(attribute_name, update) == (
+            cache.ATTRIBUTES[attribute_name], ['X_RAY'], ['GENERAL_SURGERY'],
+            ['x'])
+
+        # test a value being set to null
+        update = '*none'
+        assert not mail_editor.parse(attribute_name, update)
+
+        # test an unfound value
+        update = ''
+        assert (mail_editor.parse(attribute_name, update) ==
+                mail_editor.NO_VALUE_FOUND)
 
     def test_mail_editor_have_profile_info(self):
         """Confirms that have_profile_info() identifies existing users."""
@@ -276,7 +346,7 @@ class MailEditorTest(MediumTestCase):
         body = self.sent_messages[1].textbody()
         assert len(self.sent_messages) == 2
         assert 'ERROR' in self.sent_messages[1].subject()
-        assert '"d" is not a valid value for "available_beds"' in body
+        assert '"d" is not a valid value for "Available beds"' in body
         assert body.count('--- --- --- ---') == 2
         assert 'REFERENCE DOCUMENT' in body
 
@@ -392,6 +462,25 @@ class MailEditorTest(MediumTestCase):
         assert 'Attribute name is ambiguous' in body
         assert 'Commune:' in body and 'Commune code:' in body
         assert 'REFERENCE DOCUMENT' in body
+
+        # check email with enums
+        message.body = SAMPLE_EMAIL_ENUMS
+        mail_editor_.receive(message)
+        body = self.sent_messages[13].textbody()
+        assert len(self.sent_messages) == 14
+        assert 'ERROR' not in self.sent_messages[13].subject()
+        assert 'Services' in body and 'General Surgery' in body
+        assert 'X-Ray' not in body
+        assert 'Operational status' in body and 'Operational' in body
+
+        # check email with enums and error
+        message.body = SAMPLE_EMAIL_ENUMS_WITH_ERRORS
+        mail_editor_.receive(message)
+        body = self.sent_messages[14].textbody()
+        assert len(self.sent_messages) == 15
+        assert 'ERROR' in self.sent_messages[14].subject()
+        assert 'Services' in body and 'x' in body
+        assert 'not a valid value' in body
 
     def test_mail_editor_process_email(self):
         """Confirms that process_email() returns a properly formatted structure
@@ -588,6 +677,11 @@ class MailEditorTest(MediumTestCase):
         assert match[0] == 'commune_code'
         assert match[1] == '1'
 
+        match = mail_editor_.get_attribute_matches(
+            self.subject_type, 'commune code:1')
+        assert match[0] == 'commune_code'
+        assert match[1] == '1'
+
     def test_match_email(self):
         assert mail_editor.match_email('test@example.com') == 'test@example.com'
         assert (mail_editor.match_email(u't\u00e9st@example.com') ==
@@ -596,7 +690,6 @@ class MailEditorTest(MediumTestCase):
                 'test@example.com')
         assert (mail_editor.match_email('"First Last" ' +
                 '<first.last@example.com.pk>') == 'first.last@example.com.pk')
-        print mail_editor.match_email('12_3%4-56@123-456.org')
         assert (mail_editor.match_email('12_3%4-56@123-456.org') ==
                 '12_3%4-56@123-456.org')
         assert (mail_editor.match_email('<me+pakistan@example.biz>') ==
