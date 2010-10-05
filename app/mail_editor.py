@@ -19,13 +19,23 @@ Parses through the email in the form described at /help/email. Confirms any
 changes to the user as well as any errors that were discovered in the
 received update.
 
+    find_in_messages(): tries to match a given value with a translation
     parse(): parses a list of unicode strings into datastore-friendly objects
+    get_list_update(): for multi attr's, combines two sets (to add and subtract)
+        with the current value for a specified subject
+    match_email(): given a string, uses reg. exp. to locate email addresses
+    generate_ambiguous_update_error_msg(): given a list of potential matches
+        for an ambiguous update, creates an error message
+    generate_bad_value_error_msg(): generates an error message for type errors
+    generate_error_msg_w_correction(): generates an error message, including
+        a list of accepted values for the given attribute
+    get_m_subjects_by_lowercase_title(): searches minimal subjects by title
     MailEditor: incoming mail handler-- responds to incoming emails addressed to
         <subdomain>-updates@resource-finder@appspotmail.com
-    match_email(): given a string, uses re to locate email addresses
-    generate_ambiguous_update_error_msg(): helper function; given a list of
-        potential matches for an ambiguous update, creates an error message
+    get_locale_and_nickname(): returns a locale and nickname for the given
+        account and email message
     format_changes(): helper function to format attribute value tuples
+    simple_format(): capitalizes strings and replaces _'s with spaces
     parse_utc_offset(): turns a UTC offset in string form into a timedelta
 """
 
@@ -49,14 +59,27 @@ import model
 import utils
 from feeds.xmlutils import Struct
 from utils import db, format, get_message, order_and_format_updates
+from utils import NoValueFoundError, ValueNotAllowedError
 
 # Constant to represent the string that denotes a value of None. We use this
 # instead of None so as not to confuse setting a value to None with simply not
 # setting a value to anything.
 NONE = '*none'
 
-# Constant for the parse function
-NO_VALUE_FOUND = '*no_attribute_found*'
+# Mapping of attribute types to error messages.
+ERRORS_BY_TYPE = {
+    #i18n: Error message for an invalid value to a boolean attribute
+    'bool': _('"%(attribute)s" requires a boolean value: "yes" or "no".'),
+    #i18n: Error message for an invalid value to an int attribute
+    'int': _('"%(attribute)s" requires a numerical value.'),
+    #i18n: Error message for an invalid value to a geopt attribute
+    'geopt': _('"%(attribute)s" requires two numbers separated by a comma.'),
+    #i18n: Error message for an invalid value to a choice attribute
+    'choice': _('"%(attribute)s" requires one of a specific set of values.'),
+    #i18n: Error message for an invalid value to a multi attribute
+    'multi': _('"%(attribute)s" requires all values to be from a specific set.')
+}
+
 
 # If this is found in a line of the email, the system will immediately stop
 # parsing and ignore the remainder of the email.
@@ -160,55 +183,62 @@ def update_subject(subject, observed, account, source_url, values, comments={},
     db.run_in_transaction(work)
 
 
-def parse(attribute_name, update):
+def find_in_messages(type, value):
+    """Checks to see if the given value matches an English translation of a
+    message in the datastore. Case insensitive. Returns None if not found."""
+    for key in cache.MESSAGES:
+        if key[0] == type:
+            message = cache.MESSAGES[key]
+            if value.lower() == message.en.lower():
+                # TODO(pfritzsche): revisit this later and add support for all
+                # available languages [i.e. diacritical tolerance]
+                return message.name
+
+
+def parse(attribute, update):
     """Parses a list of Unicode strings into an attribute value."""
     update = update.strip()
     if not update:
-        return NO_VALUE_FOUND
+        raise NoValueFoundError
     if update == NONE:
         return
 
-    attribute = cache.ATTRIBUTES[attribute_name]
     if attribute.type in ['str', 'text']:
         return update
     if attribute.type == 'int':
         return int(update)
     if attribute.type == 'bool':
-        return bool(update.lower() in ['y', 'yes', 'true'])
+        yes_vals = ['y', 'yes', 'true']
+        no_vals = ['n', 'no', 'false']
+        if update.lower() not in yes_vals + no_vals:
+            raise ValueError
+        return bool(update.lower() in yes_vals)
     if attribute.type == 'geopt':
         location = update.split(',')
         if len(location) != 2:
             raise ValueError
         return db.GeoPt(float(location[0]), float(location[1]))
     if attribute.type == 'choice':
-        formatted = update.upper().replace(' ', '_')
+        formatted = find_in_messages('attribute_value', update)
         if formatted not in attribute.values:
-            raise ValueError
+            raise ValueNotAllowedError
         return formatted
     if attribute.type == 'multi':
         values = [x.strip() for x in update.split(',') if x]
-        to_add = []
         to_subtract = []
+        to_add = []
         errors = []
         for value in values:
-            formatted = ''
             subtract = value[0] == '-'
             new_value = subtract and value[1:] or value
-            for key in cache.MESSAGES:
-                if key[0] == 'attribute_value':
-                    # TODO(pfritzsche): when multilingual support is added,
-                    # revisit this and update to include all languages
-                    message = cache.MESSAGES[key]
-                    if new_value.lower() == message.en.lower():
-                        formatted = message.name
-                        break
+            formatted = find_in_messages('attribute_value', new_value)
             if subtract and formatted in attribute.values:
                 to_subtract.append(formatted)
             elif formatted in attribute.values:
                 to_add.append(formatted)
             else:
                 errors.append(value)
-        return (attribute, to_subtract, to_add, errors)
+        return (to_subtract, to_add, errors)
 
 
 def get_list_update(subject, attribute, subtract, add):
@@ -236,6 +266,7 @@ def match_email(text):
 
 
 def generate_ambiguous_update_error_msg(matches):
+    """Generates an error message for an ambiguous attribute name."""
     #i18n: Error message for an ambiguous attribute name
     msg = _('Attribute name is ambiguous. Please specify one of the following:')
     for match in matches:
@@ -244,25 +275,32 @@ def generate_ambiguous_update_error_msg(matches):
     return msg
 
 
-def generate_bad_value_error_msg(value, line, attribute_name):
-    values = {'value': value, 'attribute': simple_format(attribute_name)}
+def generate_bad_value_error_msg(update_text, attribute):
+    """Generates an error message for an incorrect value for the specified
+    attribute's type."""
+    name = simple_format(attribute.key().name())
+    line = '%s: %s' % (name, update_text)
     return {
-        'error_message':
-            #i18n: Error message for an invalid value
-            _('"%(value)s" is not a valid value for "%(attribute)s"') %  values,
+        'error_message': ERRORS_BY_TYPE[attribute.type] % {'attribute': name},
         'original_line': line
     }
 
 
-def generate_error_msg_w_correction(value, line, attribute_name):
-    values = generate_bad_value_error_msg(value, line, attribute_name)
-    error = values['error_message']
-    attribute = cache.ATTRIBUTES[attribute_name]
+def generate_error_msg_w_correction(line, attribute):
+    """Generates an error message. Includes a list of accepted values for the
+    given attribute."""
+    values = generate_bad_value_error_msg(line, attribute)
+    error = values['error_message'] + '\n'
     #i18n: Accepted values error message
-    error += '\n-- ' + _('Accepted values are: ')
-    options = [utils.get_message('attribute_value', value, locale='en')
-               for value in attribute.values]
-    error += ', '.join(options)
+    options = '-- ' + _('Accepted values are: ')
+    for i, value in enumerate(attribute.values):
+        value = utils.get_message('attribute_value', value, locale='en')
+        if len(options) + len(value) >= 80:
+            error += options + '\n'
+            options = '---- '
+        maybe_comma = i != len(attribute.values) - 1 and ', ' or ''
+        options += value + maybe_comma 
+    error += options
     values['error_message'] = error
     return values
 
@@ -303,8 +341,12 @@ class MailEditor(InboundMailHandler):
         process_email: searches the text of an email for updates and errors
         get_attribute_matches: gets a list of potential attribute name matches
             from a given update line
+        check_and_return_attr_names: searches the AttributeMap table in
+            the datastore for an attribute mapped to the given string
         update_subjects: updates the datastore with all valid updates
         send_email: sends a response/confirmation email to the user
+        send_template_email: sends an email to the user containing a blank
+            template on how to update subjects
     """
     def init(self, message):
         self.domain = 'http://%s' % self.request.headers['Host']
@@ -419,7 +461,7 @@ class MailEditor(InboundMailHandler):
             subject_name = key_match.group('subject_name')
             return model.Subject.get(self.subdomain, subject_name)
         else:
-            title_lower = subject_line.strip()
+            title_lower = subject_line.strip().lower()
             minimal_subjects = get_m_subjects_by_lowercase_title(
                 self.subdomain, title_lower)
             if len(minimal_subjects) == 1:
@@ -493,32 +535,34 @@ class MailEditor(InboundMailHandler):
                     elif not match_es:
                         continue
                     name, update_text = match_es
-                    pretty_name = simple_format(name)
+                    attribute = cache.ATTRIBUTES[name]
                     try:
-                        value = parse(name, update_text)
-                        if value == NO_VALUE_FOUND:
-                            continue
-                        if isinstance(value, tuple): # multi
-                            attr, subtract, add, error = value
-                            if error: # error
+                        value = parse(attribute, update_text)
+                        if value == NONE:
+                            value = None
+                        if value and attribute.type == 'multi':
+                            subtract, add, error = value
+                            if error:
                                 error_text = ', '.join(error)
-                                line = '%s: %s' % (pretty_name, error_text)
                                 errors.append(generate_error_msg_w_correction(
-                                    error_text, line, name))
+                                    error_text, attribute))
                             if not subtract and not add:
                                 continue
                             value = get_list_update(
-                                subject, attr, subtract, add)
+                                subject, attribute, subtract, add)
                         updates.append((name, value))
-                    except (ValueError, BadValueError):
+                    except ValueError, BadValueError:
                         errors.append(generate_bad_value_error_msg(
-                            update_text, update, pretty_name))
+                            update_text, attribute))
+                    except ValueNotAllowedError:
+                        errors.append(generate_error_msg_w_correction(
+                            update_text, attribute))
+                    except NoValueFoundError:
+                        continue
                 if updates:
                     data.update_stanzas.append((subject, updates))
                 if errors:
                     data.error_stanzas.append((subject, errors))
-                if stop:
-                    return
 
         for key in ['unquoted', 'quoted']:
             matches = re.finditer(self.update_line_regexes[key],
@@ -542,8 +586,16 @@ class MailEditor(InboundMailHandler):
         if len(update_split) > 1:
             attribute, update_text = update_split
             attribute_formatted = attribute.replace(' ', '_').lower()
+            
+            # check for actual attribute names
             if attribute_formatted in st.attribute_names:
                 return (attribute_formatted, update_text.strip())
+
+            # check for alternate mapping matches
+            attribute_name = self.check_and_return_attr_name(
+                attribute.lower(), attribute_formatted)
+            if attribute_name:
+                return (attribute_name, update_text.strip())
 
         # if no valid match is found with the colon, guess and check
         update_split = [word for word in update.split() if
@@ -553,8 +605,27 @@ class MailEditor(InboundMailHandler):
                 continue
             name = '_'.join(update_split[:i]).lower()
             if name in st.attribute_names:
-                matches.append((name, ' '.join(update_split[i:])))
+                matches.append((name, ' '.join(update_split[i:]))) 
+            name_match = self.check_and_return_attr_name(name)
+            if name_match and name_match != name:
+                update = ' '.join(update_split)
+                is_already_found = False
+                for match in matches:
+                    if name_match == match[0]:
+                        is_already_found = True
+                if not is_already_found:
+                    value_start = update.find(' ', update.find(name)) + 1
+                    matches.append((name_match, update[value_start:])) 
         return matches[0] if len(matches) == 1 else matches
+
+    def check_and_return_attr_name(self, *names):
+        """Given an attribute name or names, searches the AttributeMap table
+        in the datastore for an attribute name, mapped to any of the given
+        strings."""
+        for key, map in cache.ATTRIBUTE_MAPS.iteritems():
+            for name in names:
+                if name in map.alt_names:
+                    return key
 
     def update_subjects(self, updates, observed, comment=''):
         """Goes through the supplied list of updates. Adds to the datastore."""
@@ -590,6 +661,7 @@ class MailEditor(InboundMailHandler):
                     'changed_attributes': order_and_format_updates(
                         update_data, subject_type, locale, format_changes, 0)
                 })
+            logging.info(formatted_updates)
 
             for error in data.error_stanzas:
                 subject, error_data = error
@@ -649,7 +721,7 @@ class MailEditor(InboundMailHandler):
         the specified subject (in the subject line) if one exists at all."""
         locale, nickname = get_locale_and_nickname(
             self.account, original_message)
-        title_lower = original_message.subject.lower().strip()
+        title_lower = original_message.subject.strip().lower()
         minimal_subjects = get_m_subjects_by_lowercase_title(
             self.subdomain, title_lower)
         ms = len(minimal_subjects) == 1 and minimal_subjects[0] or None
@@ -679,6 +751,7 @@ class MailEditor(InboundMailHandler):
 
 
 def get_locale_and_nickname(account, message):
+    """Returns a locale and nickname for the given account and email message."""
     if account:
         locale = account.locale or 'en'
         nickname = account.nickname or account.email
@@ -708,6 +781,7 @@ def format_changes(update, locale='en'):
 
 
 def simple_format(text):
+    """Capitalizes string and replaces _'s with spaces."""
     if isinstance(text, basestring):
         return text.capitalize().replace('_', ' ')
     return text

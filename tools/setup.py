@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import cache
+import config
 import cron
 import simplejson
 from access import *
@@ -32,6 +33,9 @@ def setup_subject_types():
     def attr(type, name, values=[], edit_action=None):
         return Attribute(
             key_name=name, type=type, edit_action=edit_action, values=values)
+
+    def attr_map(name, alt_names):
+        return AttributeMap(key_name=name, alt_names=alt_names)
 
     attributes = [
         attr('str', 'title', edit_action='advanced_edit'),
@@ -97,6 +101,13 @@ def setup_subject_types():
     # Be careful when changing them, as you will change the order
     # of appearance in the map info window. Also, order here should
     # be kept roughly in sync with CSV column order defined in app/export.py
+
+    attribute_maps = [
+        attr_map('available_beds', ['available', 'avail', 'ab']),
+        attr_map('total_beds', ['total', 'beds', 'tb'])
+    ]
+
+    db.put(attribute_maps)
 
     ht_hospital = SubjectType(
         key_name='haiti:hospital',
