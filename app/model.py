@@ -435,3 +435,8 @@ class PendingAlert(MinimalSubject):
         associated user e-mail."""
         return filter_by_prefix(PendingAlert.all(), frequency + ':' +
                                 user_email + ':')
+
+class AttributeMap(db.Model):
+    """A map from attribute names to alternate titles accepted in the mail
+    editing system. Key name: follows the format attribute_name"""
+    alt_names = db.StringListProperty() # list of alternate titles to accept
