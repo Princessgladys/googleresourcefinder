@@ -563,6 +563,8 @@ class MailEditor(InboundMailHandler):
                     data.update_stanzas.append((subject, updates))
                 if errors:
                     data.error_stanzas.append((subject, errors))
+                if stop:
+                    return
 
         for key in ['unquoted', 'quoted']:
             matches = re.finditer(self.update_line_regexes[key],
@@ -661,7 +663,6 @@ class MailEditor(InboundMailHandler):
                     'changed_attributes': order_and_format_updates(
                         update_data, subject_type, locale, format_changes, 0)
                 })
-            logging.info(formatted_updates)
 
             for error in data.error_stanzas:
                 subject, error_data = error
