@@ -476,7 +476,7 @@ class MailEditor(InboundMailHandler):
         quotes = 'quotes' in match.groupdict() and match.group('quotes') or ''
         end = body.lower().find('%supdate'.lower() % quotes, start + 1)
         update_block = body[start:] if end == -1 else body[start:end]
-        return [line for line in update_block.split('\n') if
+        return [line.replace(quotes, '') for line in update_block.split('\n') if
                 line.startswith(quotes)]
 
     def process_email(self, body):
