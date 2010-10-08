@@ -482,6 +482,10 @@ class MailAlerts(utils.Handler):
                 db.delete(alerts_to_delete)
                 db.put(account)
             except OverQuotaError, message:
+                # Throw the error here in order to avoid mass duplication of
+                # the mail alerts task. If you let the system automatically
+                # handle the error, the combination of cron jobs and re-created
+                # tasks will overflow the task queue.
                 logging.error(message)
 
 

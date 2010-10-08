@@ -436,7 +436,31 @@ class PendingAlert(MinimalSubject):
         return filter_by_prefix(PendingAlert.all(), frequency + ':' +
                                 user_email + ':')
 
-class AttributeMap(db.Model):
+class MailUpdateMessage(db.Model):
     """A map from attribute names to alternate titles accepted in the mail
     editing system. Key name: follows the format attribute_name"""
-    alt_names = db.StringListProperty() # list of alternate titles to accept
+    name = db.StringProperty(required=True) # name of the attribute
+    ns = db.StringProperty(required=True, choices=[
+        'attribute_name', # accepted shorthand versions for attribute names
+        'attribute_value', # accepted versions of different attribute values
+        'attribute_choices' # accepted choices for restricted attributes
+    ])
+    # list of names to accept for this message
+    choices = db.StringListProperty(default=[])
+
+    @classmethod
+    def get(cls, ns, name):
+        """Gets an entity by its namespace and name."""
+        key_name = '%s:%s' % (ns, name)
+        return cls.get_by_key_name(key_name)
+
+    @classmethod
+    def create(cls, ns, name, choices=[]):
+        """Creates an eneity with the specified namespace and name."""
+        key_name = '%s:%s' % (ns, name)
+        return cls(key_name=key_name, ns=ns, name=name, choices=choices)
+
+    @classmethod
+    def all_in_namespace(cls, ns):
+        """Gets a query for all entities with the given namespace."""
+        return filter_by_prefix(cls.all(), ns + ':')

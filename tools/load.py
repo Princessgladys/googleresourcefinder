@@ -396,7 +396,7 @@ def load(
     arrived = datetime.datetime.utcnow().replace(microsecond=0)
 
     # Store the raw file contents in a Dump.
-#    Dump(source=source_url, data=open(filename, 'rb').read()).put()
+    Dump(source=source_url, data=open(filename, 'rb').read()).put()
 
     if filename.endswith('zip'):
         archive = zipfile.ZipFile(filename, 'r')

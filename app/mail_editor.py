@@ -19,7 +19,7 @@ Parses through the email in the form described at /help/email. Confirms any
 changes to the user as well as any errors that were discovered in the
 received update.
 
-    find_in_messages(): tries to match a given value with a translation
+    find_in_mail_update_messages(): tries to match a given value with a translation
     parse(): parses a list of unicode strings into datastore-friendly objects
     get_list_update(): for multi attr's, combines two sets (to add and subtract)
         with the current value for a specified subject
@@ -27,9 +27,9 @@ received update.
     generate_ambiguous_update_error_msg(): given a list of potential matches
         for an ambiguous update, creates an error message
     generate_bad_value_error_msg(): generates an error message for type errors
-    generate_error_msg_w_correction(): generates an error message, including
+    generate_error_with_correction(): generates an error message, including
         a list of accepted values for the given attribute
-    get_m_subjects_by_lowercase_title(): searches minimal subjects by title
+    get_min_subjects_by_lowercase_title(): searches minimal subjects by title
     MailEditor: incoming mail handler-- responds to incoming emails addressed to
         <subdomain>-updates@resource-finder@appspotmail.com
     get_locale_and_nickname(): returns a locale and nickname for the given
@@ -183,16 +183,17 @@ def update_subject(subject, observed, account, source_url, values, comments={},
     db.run_in_transaction(work)
 
 
-def find_in_messages(type, value):
-    """Checks to see if the given value matches an English translation of a
-    message in the datastore. Case insensitive. Returns None if not found."""
-    for key in cache.MESSAGES:
-        if key[0] == type:
-            message = cache.MESSAGES[key]
-            if value.lower() == message.en.lower():
-                # TODO(pfritzsche): revisit this later and add support for all
-                # available languages [i.e. diacritical tolerance]
-                return message.name
+def find_in_mail_update_messages(ns, attribute, value):
+    """Checks to see if the given value matches any item in MailUpdateMessages
+    table. Case insensitive. Returns None if not found."""
+    value_upper = value.upper().replace(' ', '_')
+    if value_upper in attribute.values:
+        return value_upper
+    messages = cache.MAIL_UPDATE_MESSAGES[ns]
+    for key, message in messages.iteritems():
+        if (value.lower() in message.choices and
+            message.name in attribute.values):
+            return message.name
 
 
 def parse(attribute, update):
@@ -208,8 +209,9 @@ def parse(attribute, update):
     if attribute.type == 'int':
         return int(update)
     if attribute.type == 'bool':
-        yes_vals = ['y', 'yes', 'true']
-        no_vals = ['n', 'no', 'false']
+        ns = 'attribute_value'
+        yes_vals = cache.MAIL_UPDATE_MESSAGES[ns]['true'].choices
+        no_vals = cache.MAIL_UPDATE_MESSAGES[ns]['false'].choices
         if update.lower() not in yes_vals + no_vals:
             raise ValueError
         return bool(update.lower() in yes_vals)
@@ -219,10 +221,11 @@ def parse(attribute, update):
             raise ValueError
         return db.GeoPt(float(location[0]), float(location[1]))
     if attribute.type == 'choice':
-        formatted = find_in_messages('attribute_value', update)
-        if formatted not in attribute.values:
+        value = find_in_mail_update_messages(
+            'attribute_value', attribute, update)
+        if not value:
             raise ValueNotAllowedError
-        return formatted
+        return value 
     if attribute.type == 'multi':
         values = [x.strip() for x in update.split(',') if x]
         to_subtract = []
@@ -231,10 +234,11 @@ def parse(attribute, update):
         for value in values:
             subtract = value[0] == '-'
             new_value = subtract and value[1:] or value
-            formatted = find_in_messages('attribute_value', new_value)
-            if subtract and formatted in attribute.values:
+            formatted = find_in_mail_update_messages(
+                'attribute_value', attribute, new_value)
+            if subtract and formatted:
                 to_subtract.append(formatted)
-            elif formatted in attribute.values:
+            elif formatted:
                 to_add.append(formatted)
             else:
                 errors.append(value)
@@ -286,26 +290,30 @@ def generate_bad_value_error_msg(update_text, attribute):
     }
 
 
-def generate_error_msg_w_correction(line, attribute):
+def generate_error_with_correction(line, attribute):
     """Generates an error message. Includes a list of accepted values for the
     given attribute."""
     values = generate_bad_value_error_msg(line, attribute)
     error = values['error_message'] + '\n'
     #i18n: Accepted values error message
     options = '-- ' + _('Accepted values are: ')
-    for i, value in enumerate(attribute.values):
-        value = utils.get_message('attribute_value', value, locale='en')
+    update_message = model.MailUpdateMessage.get(
+        'attribute_choices', attribute.key().name())
+    if not update_message:
+        raise NoValueFoundError
+    attribute_choices = update_message.choices
+    for i, value in enumerate(attribute_choices):
         if len(options) + len(value) >= 80:
             error += options + '\n'
             options = '---- '
-        maybe_comma = i != len(attribute.values) - 1 and ', ' or ''
+        maybe_comma = i != len(attribute_choices) - 1 and ', ' or ''
         options += value + maybe_comma 
     error += options
     values['error_message'] = error
     return values
 
 
-def get_m_subjects_by_lowercase_title(subdomain, title_lower, max=3):
+def get_min_subjects_by_lowercase_title(subdomain, title_lower, max=3):
     """Returns a list of minimal subjects by title, case insensitive."""
     minimal_subjects = []
     for key in cache.MINIMAL_SUBJECTS[subdomain]:
@@ -341,7 +349,7 @@ class MailEditor(InboundMailHandler):
         process_email: searches the text of an email for updates and errors
         get_attribute_matches: gets a list of potential attribute name matches
             from a given update line
-        check_and_return_attr_names: searches the AttributeMap table in
+        check_and_return_attr_names: searches the MailUpdateMessage table in
             the datastore for an attribute mapped to the given string
         update_subjects: updates the datastore with all valid updates
         send_email: sends a response/confirmation email to the user
@@ -462,7 +470,7 @@ class MailEditor(InboundMailHandler):
             return model.Subject.get(self.subdomain, subject_name)
         else:
             title_lower = subject_line.strip().lower()
-            minimal_subjects = get_m_subjects_by_lowercase_title(
+            minimal_subjects = get_min_subjects_by_lowercase_title(
                 self.subdomain, title_lower)
             if len(minimal_subjects) == 1:
                 return minimal_subjects[0].parent()
@@ -476,8 +484,8 @@ class MailEditor(InboundMailHandler):
         quotes = 'quotes' in match.groupdict() and match.group('quotes') or ''
         end = body.lower().find('%supdate'.lower() % quotes, start + 1)
         update_block = body[start:] if end == -1 else body[start:end]
-        return [line.replace(quotes, '') for line in update_block.split('\n') if
-                line.startswith(quotes)]
+        return [line.replace(quotes, '', 1) for line in update_block.split('\n')
+                if line.startswith(quotes)]
 
     def process_email(self, body):
         """Given the body of an email, locates updates from the user.
@@ -544,7 +552,7 @@ class MailEditor(InboundMailHandler):
                             subtract, add, error = value
                             if error:
                                 error_text = ', '.join(error)
-                                errors.append(generate_error_msg_w_correction(
+                                errors.append(generate_error_with_correction(
                                     error_text, attribute))
                             if not subtract and not add:
                                 continue
@@ -555,7 +563,7 @@ class MailEditor(InboundMailHandler):
                         errors.append(generate_bad_value_error_msg(
                             update_text, attribute))
                     except ValueNotAllowedError:
-                        errors.append(generate_error_msg_w_correction(
+                        errors.append(generate_error_with_correction(
                             update_text, attribute))
                     except NoValueFoundError:
                         continue
@@ -595,7 +603,7 @@ class MailEditor(InboundMailHandler):
 
             # check for alternate mapping matches
             attribute_name = self.check_and_return_attr_name(
-                attribute.lower(), attribute_formatted)
+                st, attribute.lower(), attribute_formatted)
             if attribute_name:
                 return (attribute_name, update_text.strip())
 
@@ -608,7 +616,7 @@ class MailEditor(InboundMailHandler):
             name = '_'.join(update_split[:i]).lower()
             if name in st.attribute_names:
                 matches.append((name, ' '.join(update_split[i:]))) 
-            name_match = self.check_and_return_attr_name(name)
+            name_match = self.check_and_return_attr_name(st, name)
             if name_match and name_match != name:
                 update = ' '.join(update_split)
                 is_already_found = False
@@ -620,14 +628,17 @@ class MailEditor(InboundMailHandler):
                     matches.append((name_match, update[value_start:])) 
         return matches[0] if len(matches) == 1 else matches
 
-    def check_and_return_attr_name(self, *names):
-        """Given an attribute name or names, searches the AttributeMap table
-        in the datastore for an attribute name, mapped to any of the given
-        strings."""
-        for key, map in cache.ATTRIBUTE_MAPS.iteritems():
-            for name in names:
-                if name in map.alt_names:
-                    return key
+    def check_and_return_attr_name(self, st, *names):
+        """Given an attribute name or names, searches the MailUpdateMessage
+        table in the datastore for an attribute name, mapped to any of the
+        given strings."""
+        for name in names:
+            if name in st.attribute_names:
+                return name
+            for key, message in \
+                cache.MAIL_UPDATE_MESSAGES['attribute_name'].iteritems():
+                    if name in message.choices:
+                        return key
 
     def update_subjects(self, updates, observed, comment=''):
         """Goes through the supplied list of updates. Adds to the datastore."""
@@ -723,7 +734,7 @@ class MailEditor(InboundMailHandler):
         locale, nickname = get_locale_and_nickname(
             self.account, original_message)
         title_lower = original_message.subject.strip().lower()
-        minimal_subjects = get_m_subjects_by_lowercase_title(
+        minimal_subjects = get_min_subjects_by_lowercase_title(
             self.subdomain, title_lower)
         ms = len(minimal_subjects) == 1 and minimal_subjects[0] or None
         subject_title = ms and ms.get_value('title')
