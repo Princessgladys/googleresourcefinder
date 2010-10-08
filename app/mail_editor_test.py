@@ -28,7 +28,7 @@ import mail_editor
 from feeds.errors import *
 from feeds.xmlutils import Struct
 from medium_test_case import MediumTestCase
-from model import Account, Attribute, AttributeMap, Message, MinimalSubject
+from model import Account, Attribute, MailUpdateMessage, Message, MinimalSubject
 from model import Subdomain, Subject, SubjectType
 from utils import db
 
@@ -181,7 +181,23 @@ class MailEditorTest(MediumTestCase):
         Attribute(key_name='services', type='multi',
                   values=export_test.SERVICES).put()
         Attribute(key_name='location', type='geopt').put()
-        AttributeMap(key_name='total_beds', alt_names=['tb', 'total']).put()
+        MailUpdateMessage(key_name='attribute_name:total_beds',
+                          ns='attribute_name',
+                          name='total_beds',
+                          choices=['tb', 'total']).put()
+        MailUpdateMessage(key_name='attribute_value:true',
+                          ns='attribute_value', name='true',
+                          choices=['y', 'yes', 'true']).put()
+        MailUpdateMessage(key_name='attribute_value:false',
+                          ns='attribute_value', name='false',
+                          choices=['n', 'no', 'false']).put()
+        MailUpdateMessage(key_name='attribute_value:GENERAL_SURGERY',
+                          ns='attribute_value', name='GENERAL_SURGERY').put()
+        MailUpdateMessage(key_name='attribute_value:X_RAY',
+                          ns='attribute_value', name='X_RAY',
+                          choices=['x-ray']).put()
+        MailUpdateMessage(key_name='attribute_choices:services',
+                          ns='attribute_choices', name='services').put()
         Message(ns='attribute_value', en='X-Ray', name='X_RAY').put()
         Message(ns='attribute_value', en='General Surgery',
                 name='GENERAL_SURGERY').put()
@@ -194,7 +210,7 @@ class MailEditorTest(MediumTestCase):
                    self.ms, self.ms2, self.ms3, self.ms4])
         for attribute in Attribute.all():
             db.delete(attribute)
-        for attr_map in AttributeMap.all():
+        for attr_map in MailUpdateMessage.all():
             db.delete(attr_map)
         for message in Message.all():
             db.delete(message)
@@ -269,7 +285,6 @@ class MailEditorTest(MediumTestCase):
         # test a multi attribute
         attribute = Attribute.get_by_key_name('services')
         update = 'general surgery, -x-ray'
-        print mail_editor.parse(attribute, update)
         assert mail_editor.parse(attribute, update) == (
             ['X_RAY'], ['GENERAL_SURGERY'], [])
 

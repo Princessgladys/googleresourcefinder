@@ -34,9 +34,6 @@ def setup_subject_types():
         return Attribute(
             key_name=name, type=type, edit_action=edit_action, values=values)
 
-    def attr_map(name, alt_names):
-        return AttributeMap(key_name=name, alt_names=alt_names)
-
     attributes = [
         attr('str', 'title', edit_action='advanced_edit'),
         attr('str', 'alt_title', edit_action='advanced_edit'),
@@ -102,13 +99,6 @@ def setup_subject_types():
     # of appearance in the map info window. Also, order here should
     # be kept roughly in sync with CSV column order defined in app/export.py
 
-    attribute_maps = [
-        attr_map('available_beds', ['available', 'avail', 'ab']),
-        attr_map('total_beds', ['total', 'beds', 'tb'])
-    ]
-
-    db.put(attribute_maps)
-
     ht_hospital = SubjectType(
         key_name='haiti:hospital',
         attribute_names=['title', 'alt_title', 'healthc_id', 'pcode',
@@ -145,6 +135,86 @@ def setup_subject_types():
                                  'operational_status', 'alert_status'])
     db.put(pk_hospital)
 
+
+def setup_mail_update_messages():
+    """Sets up mail update messages."""
+    def mail_update_message(ns, name, choices):
+        return MailUpdateMessage.create(ns, name, choices)
+
+    name_update_message = lambda name, choices: mail_update_message(
+        'attribute_name', name, choices)
+    value_update_message = lambda name, choices: mail_update_message(
+        'attribute_value', name, choices)
+    value_choice_message = lambda name, choices: mail_update_message(
+        'attribute_choices', name, choices)
+
+    mail_update_messages = [
+        # ------------------------------------------------------ Attribute Names
+        name_update_message('title', ['name']),
+        name_update_message('alt_title', ['alternate name']),
+        name_update_message('available_beds', ['available', 'avail', 'ab']),
+        name_update_message('total_beds', ['total', 'beds', 'tb']),
+        name_update_message('email', ['e-mail']),
+        name_update_message('administrative_area',
+                            ['state / province / territory', 'state',
+                             'province', 'territory',
+                             'state/province/territory']),
+        name_update_message('sub_administrative_area',
+                            ['district/county', 'district / county', 
+                             'district', 'county']),
+        name_update_message('locality',
+                            ['city / town / village', 'city/town/village',
+                            'city', 'town', 'village']),
+        name_update_message('maps_link', ['google maps link']),
+ 
+        # ----------------------------------------------------- Attribute Values
+        # Boolean [General]
+        value_update_message('true', ['y', 'yes', 'true']),
+        value_update_message('false', ['n', 'no', 'false']),
+
+        # Organization Type
+        value_update_message('FAITH_BASED', ['faith-based']),
+        value_update_message('FOR_PROFIT', ['for-profit']),
+
+        # Operational Status
+        value_update_message('FIELD_WITH_HOSPITAL',
+                             ['Field hospital co-located with hospital']),
+        value_update_message('CLOSED_OR_CLOSING', ['closed', 'closing']),
+
+        # Services
+        value_update_message('OBSTETRICS_GYNECOLOGY',
+                             ['obstetrics', 'gynecology',
+                              'obstetrics and gynecology', 'obgyn']),
+        value_update_message('X_RAY', ['xray', 'x-ray']),
+
+        # ---------------------------------------------- Attribute Value Choices
+        value_choice_message('services',
+                             ['General Surgery', 'Orthopedics', 'Neurosurgery',
+                              'Vascular Surgery', 'Internal Medicine',
+                              'Cardiology', 'Infectious Disease', 'Pediatrics',
+                              'Postoperative Care', 'Rehabilitation',
+                              'Obstetrics and Gynecology', 'Mental Health',
+                              'Dialysis', 'Lab', 'X-Ray', 'CT Scan',
+                              'Blood Bank', 'Mortuary Services',
+                              'Outpatient Care', 'Emergency Services',
+                              'Other']),
+        value_choice_message('organization_type',
+                             ['Public', 'For-Profit', 'University', 'Community',
+                              'NGO', 'Faith-Based', 'Military', 'Mixed']),
+        value_choice_message('category',
+                             ['Hospital', 'Clinic', 'Mobile Clinic',
+                              'Dispensary', 'Laboratory']),
+        value_choice_message('construction',
+                             ['Reinforced Concrete', 'Unreinforced Masonry',
+                              'Wood Frame', 'Adobe']),
+        value_choice_message('operational_status',
+                             ['Operational', 'No Surgical Capacity',
+                              'Field Hospital',
+                              'Field hospital co-located with hospital',
+                              'Closed or closing'])
+    ]
+
+    db.put(mail_update_messages)
 
 
 def setup_messages():
@@ -443,6 +513,7 @@ def setup_datastore():
     information will not be changed or deleted.)"""
     setup_subdomains()
     setup_subject_types()
+    setup_mail_update_messages()
     setup_messages()
     setup_mail_alerts()
     cache.flush_all()  # flush any cached entities
