@@ -35,7 +35,6 @@ received update.
     get_locale_and_nickname(): returns a locale and nickname for the given
         account and email message
     format_changes(): helper function to format attribute value tuples
-    simple_format(): capitalizes strings and replaces _'s with spaces
     parse_utc_offset(): turns a UTC offset in string form into a timedelta
 """
 
@@ -282,7 +281,7 @@ def generate_ambiguous_update_error_msg(matches):
 def generate_bad_value_error_msg(update_text, attribute):
     """Generates an error message for an incorrect value for the specified
     attribute's type."""
-    name = simple_format(attribute.key().name())
+    name = get_readable_attr_info('attribute_name', attribute.key().name())
     line = '%s: %s' % (name, update_text)
     return {
         'error_message': ERRORS_BY_TYPE[attribute.type] % {'attribute': name},
@@ -741,7 +740,8 @@ class MailEditor(InboundMailHandler):
         subject_name = ms and ms.get_name()
         s_type = ms and ms.type or DEFAULT_SUBJECT_TYPES[self.subdomain]
         subject_type = cache.SUBJECT_TYPES[self.subdomain][s_type]
-        attributes = [simple_format(a) for a in subject_type.attribute_names if
+        attributes = [get_readable_attr_info('attribute_name', a) for a in
+                      subject_type.attribute_names if
                       utils.can_edit(self.account, self.subdomain,
                                      cache.ATTRIBUTES[a])]
 
@@ -762,6 +762,11 @@ class MailEditor(InboundMailHandler):
         message.send()
 
 
+def get_readable_attr_info(ns, name, locale='en'):
+    """Gets a readable version of the supplied value in its namespace."""
+    return getattr(cache.MAIL_UPDATE_MESSAGES[ns][name], 'en', '')
+
+
 def get_locale_and_nickname(account, message):
     """Returns a locale and nickname for the given account and email message."""
     if account:
@@ -777,26 +782,19 @@ def format_changes(update, locale='en'):
     """Helper function; used to format an attribute, value pair for email."""
     attribute_name, value = update
     attribute = cache.ATTRIBUTES[attribute_name]
-    # TODO(pfritzsche) use utils.format instead of get_message when email
-    # supports updates in multiple languages
     if attribute.type == 'multi':
-        formatted_value = ', '.join([
-            utils.get_message('attribute_value', x, 'en') for x in value])
+        formatted_value = ', '.join([get_readable_attr_info(
+            'attribute_value', x, locale) for x in value])
     elif attribute.type == 'choice':
-        formatted_value = utils.get_message('attribute_value', value, 'en')
+        formatted_value = get_readable_attr_info(
+            'attribute_value', value, locale)
     else:
         formatted_value = format(value)
     return {
-        'attribute': simple_format(attribute_name),
+        'attribute': get_readable_attr_info(
+            'attribute_name', attribute_name),
         'value': formatted_value
     }
-
-
-def simple_format(text):
-    """Capitalizes string and replaces _'s with spaces."""
-    if isinstance(text, basestring):
-        return text.capitalize().replace('_', ' ')
-    return text
 
 
 def parse_utc_offset(text):

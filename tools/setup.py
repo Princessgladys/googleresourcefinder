@@ -138,80 +138,176 @@ def setup_subject_types():
 
 def setup_mail_update_messages():
     """Sets up mail update messages."""
-    def mail_update_message(ns, name, choices):
-        return MailUpdateMessage.create(ns, name, choices)
+    def mail_update_message(ns, name, choices, **kw):
+        return MailUpdateMessage.create(ns, name, choices, **kw)
 
-    name_update_message = lambda name, choices: mail_update_message(
-        'attribute_name', name, choices)
-    value_update_message = lambda name, choices: mail_update_message(
-        'attribute_value', name, choices)
-    value_choice_message = lambda name, choices: mail_update_message(
-        'attribute_choices', name, choices)
+    name_update_message = lambda name, choices, **kw: mail_update_message(
+        'attribute_name', name, choices, **kw)
+    value_update_message = lambda name, choices, **kw: mail_update_message(
+        'attribute_value', name, choices, **kw)
+    choice_update_message = lambda name, choices, **kw: mail_update_message(
+        'attribute_choices', name, choices, **kw)
 
     mail_update_messages = [
         # ------------------------------------------------------ Attribute Names
-        name_update_message('title', ['name']),
-        name_update_message('alt_title', ['alternate name']),
-        name_update_message('available_beds', ['available', 'avail', 'ab']),
-        name_update_message('total_beds', ['total', 'beds', 'tb']),
-        name_update_message('email', ['e-mail']),
+        name_update_message('title', ['name'], en='Title'),
+        name_update_message('alt_title',
+                            ['alternate name', 'alternate title', 'alt name'],
+                            en='Alternate title'),
+        name_update_message('pcode', [], en='PCode'),
+        name_update_message('healthc_id', ['healthcid', 'hid'],
+                            en='HealthC ID'),
+        name_update_message('id', [], en='ID'),
+        name_update_message('alt_id', ['alternate id'], en='Alternate ID'),
+        name_update_message('available_beds', ['available', 'avail', 'ab'],
+                            en='Available beds'),
+        name_update_message('total_beds', ['total', 'beds', 'tb'],
+                            en='Total beds'),
+        name_update_message('services', ['serv'], en='Services'),
+        name_update_message('other_services', [], en='Other Services'),
+        name_update_message('contact_name', ['contact'], en='Contact name'),
+        name_update_message('phone', [], en='Phone'),
+        name_update_message('mobile', ['cellphone'], en='Mobile'),
+        name_update_message('fax', [], en='Fax'),
+        name_update_message('email', ['e-mail'], en='E-mail'),
+        name_update_message('department', ['dept'], en='Department'),
+        name_update_message('district', [], en='Distrct'),
+        name_update_message('commune', [], en='Commune'),
         name_update_message('administrative_area',
                             ['state / province / territory', 'state',
                              'province', 'territory',
-                             'state/province/territory']),
+                             'state/province/territory'],
+                            en='State / Province / Territory'),
         name_update_message('sub_administrative_area',
                             ['district/county', 'district / county', 
-                             'district', 'county']),
+                             'district', 'county'],
+                            en='District / County'),
         name_update_message('locality',
                             ['city / town / village', 'city/town/village',
-                            'city', 'town', 'village']),
-        name_update_message('maps_link', ['google maps link']),
+                             'city', 'town', 'village'],
+                            en='City / Town / Village'),
+        name_update_message('address', [], en='Address'),
+        name_update_message('location', ['loc'], en='Location'),
+        name_update_message('accuracy', ['acc'], en='Accuracy'),
+        name_update_message('maps_link', ['google maps link'],
+                            en='Google Maps Link'),
+        name_update_message('organization', ['org'], en='Organization'),
+        name_update_message('organization_type', ['org type'],
+                            en='Organization Type'),
+        name_update_message('category', ['cat'], en='Category'),
+        name_update_message('construction', [], en='Construction'),
+        name_update_message('damage', ['dmg'], en='Damage'),
+        name_update_message('operational_status', ['op status'],
+                            en='Operational Status'),
+        name_update_message('alert_status', ['alert'], en='Alert Status'),
+        name_update_message('comments', [], en='Comments'),
+        name_update_message('reachable_by_road', [], en='Reachable by road'),
+        name_update_message('can_pick_up_patients', [],
+                            en='Can pick up patients'),
  
         # ----------------------------------------------------- Attribute Values
+        # None [General]
+        value_update_message('none', ['null']),
+
         # Boolean [General]
         value_update_message('true', ['y', 'yes', 'true']),
         value_update_message('false', ['n', 'no', 'false']),
 
         # Organization Type
-        value_update_message('FAITH_BASED', ['faith-based']),
+        value_update_message('COMMUNITY', [], en='Community'),
+        value_update_message('FAITH_BASED', ['faith-based'], en='Faith-based'),
         value_update_message('FOR_PROFIT', ['for-profit']),
+        value_update_message('MILITARY', ['mil'], en='Military'),
+        value_update_message('MIXED', ['mix'], en='Mixed'),
+        value_update_message('NGO', [], en='NGO'),
+        value_update_message('PUBLIC', ['pub'], en='Public'),
+        value_update_message('UNIVERSITY', [], en='University'),
+
+        # Category
+        value_update_message('CLINIC', [], en='Clinic'),
+        value_update_message('DISPENSARY', [], en='Dispensary'),
+        value_update_message('HOSPITAL', [], en='Hospital'),
+        value_update_message('MOBILE_CLINIC', [], en='Mobile clinic',),
+        value_update_message('LABORATORY', ['lab'], en='Laboratory',),
+
+        # Construction
+        value_update_message('REINFORCED_CONCRETE', ['reinforced', 'concrete'],
+                             en='Reinforced concrete'),
+        value_update_message('UNREINFORCED_MASONRY',
+                             ['unreinforced', 'masonry'],
+                             en='Unreinforced masonry'),
+        value_update_message('WOOD_FRAME', ['wood', 'frame'], en='Wood frame'),
+        value_update_message('ADOBE', [], en='Adobe'),
 
         # Operational Status
-        value_update_message('FIELD_WITH_HOSPITAL',
-                             ['Field hospital co-located with hospital']),
-        value_update_message('CLOSED_OR_CLOSING', ['closed', 'closing']),
+        value_update_message('OPERATIONAL', [], en='Operational'),
+        value_update_message('NO_SURGICAL_CAPACITY', ['no surgery'],
+                             en='No surgical capacity'),
+        value_update_message('FIELD_HOSPITAL', [], en='Field hospital'),
+        value_update_message('FIELD_WITH_HOSPITAL', [],
+                             en='Field hospital co-located with hospital'),
+        value_update_message('CLOSED_OR_CLOSING', ['closed', 'closing'],
+                             en='Closed or closing'),
 
         # Services
+        value_update_message('GENERAL_SURGERY', ['gen surgery'],
+                             en='General Surgery'),
+        value_update_message('ORTHOPEDICS', ['ortho'], en='Orthopedics'),
+        value_update_message('NEUROSURGERY', ['neuro'], en='Neurosurgery'),
+        value_update_message('VASCULAR_SURGERY', ['vascular'],
+                             en='Vascular Surgery'),
+        value_update_message('INTERNAL_MEDICINE', ['internal med'],
+                             en='Internal Medicine'),
+        value_update_message('CARDIOLOGY', ['cardio'], en='Cardiology'),
+        value_update_message('INFECTIOUS_DISEASE', ['infectious'],
+                             en='Infectious Disease'),
+        value_update_message('PEDIATRICS', [], en='Pediatrics'),
+        value_update_message('POSTOPERATIVE_CARE', ['postoperative'],
+                             en='Postoperative Care'),
+        value_update_message('REHABILITATION', [], en='Rehabilitation'),
         value_update_message('OBSTETRICS_GYNECOLOGY',
-                             ['obstetrics', 'gynecology',
-                              'obstetrics and gynecology', 'obgyn']),
-        value_update_message('X_RAY', ['xray', 'x-ray']),
+                             ['obstetrics', 'gynecology', 'obgyn',
+                              'obstetrics and gynecology'],
+                             en='Obstetrics and Gynecology'),
+        value_update_message('MENTAL_HEALTH', ['mental'], en='Mental Health'),
+        value_update_message('DIALYSIS', [], en='Dialysis'),
+        value_update_message('LAB', [], en='Lab'),
+        value_update_message('X_RAY', ['xray', 'x-ray'], en='X-Ray'),
+        value_update_message('CT_SCAN', ['ct'], en='CT Scan'),
+        value_update_message('BLOOD_BANK', ['blood'], en='Blood Bank'),
+        value_update_message('MORTUARY_SERVICES',
+                             ['mortuary'], en='Mortuary Services'),
+        value_update_message('OUTPATIENT_CARE', ['outpatient'],
+                             en='Outpatient Care'),
+        value_update_message('EMERGENCY_SERVICES', ['emergency'],
+                             en='Emergency Services'),
+        value_update_message('OTHER', [], en='Other'),
 
         # ---------------------------------------------- Attribute Value Choices
-        value_choice_message('services',
-                             ['General Surgery', 'Orthopedics', 'Neurosurgery',
-                              'Vascular Surgery', 'Internal Medicine',
-                              'Cardiology', 'Infectious Disease', 'Pediatrics',
-                              'Postoperative Care', 'Rehabilitation',
-                              'Obstetrics and Gynecology', 'Mental Health',
-                              'Dialysis', 'Lab', 'X-Ray', 'CT Scan',
-                              'Blood Bank', 'Mortuary Services',
-                              'Outpatient Care', 'Emergency Services',
-                              'Other']),
-        value_choice_message('organization_type',
-                             ['Public', 'For-Profit', 'University', 'Community',
-                              'NGO', 'Faith-Based', 'Military', 'Mixed']),
-        value_choice_message('category',
-                             ['Hospital', 'Clinic', 'Mobile Clinic',
-                              'Dispensary', 'Laboratory']),
-        value_choice_message('construction',
-                             ['Reinforced Concrete', 'Unreinforced Masonry',
-                              'Wood Frame', 'Adobe']),
-        value_choice_message('operational_status',
-                             ['Operational', 'No Surgical Capacity',
-                              'Field Hospital',
-                              'Field hospital co-located with hospital',
-                              'Closed or closing'])
+        choice_update_message('services',
+                              ['General Surgery', 'Orthopedics', 'Neurosurgery',
+                               'Vascular Surgery', 'Internal Medicine',
+                               'Cardiology', 'Infectious Disease', 'Pediatrics',
+                               'Postoperative Care', 'Rehabilitation',
+                               'Obstetrics and Gynecology', 'Mental Health',
+                               'Dialysis', 'Lab', 'X-Ray', 'CT Scan',
+                               'Blood Bank', 'Mortuary Services',
+                               'Outpatient Care', 'Emergency Services',
+                               'Other']),
+        choice_update_message('organization_type',
+                              ['Public', 'For-Profit', 'University', 'Community',
+                               'NGO', 'Faith-Based', 'Military', 'Mixed']),
+        choice_update_message('category',
+                              ['Hospital', 'Clinic', 'Mobile Clinic',
+                               'Dispensary', 'Laboratory']),
+        choice_update_message('construction',
+                              ['Reinforced Concrete', 'Unreinforced Masonry',
+                               'Wood Frame', 'Adobe']),
+        choice_update_message('operational_status',
+                              ['Operational', 'No Surgical Capacity',
+                               'Field Hospital',
+                               'Field hospital co-located with hospital',
+                               'Closed or closing'])
     ]
 
     db.put(mail_update_messages)

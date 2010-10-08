@@ -436,7 +436,7 @@ class PendingAlert(MinimalSubject):
         return filter_by_prefix(PendingAlert.all(), frequency + ':' +
                                 user_email + ':')
 
-class MailUpdateMessage(db.Model):
+class MailUpdateMessage(db.Expando):
     """A map from attribute names to alternate titles accepted in the mail
     editing system. Key name: follows the format attribute_name"""
     name = db.StringProperty(required=True) # name of the attribute
@@ -455,10 +455,11 @@ class MailUpdateMessage(db.Model):
         return cls.get_by_key_name(key_name)
 
     @classmethod
-    def create(cls, ns, name, choices=[]):
+    def create(cls, ns, name, choices=[], **kwargs):
         """Creates an eneity with the specified namespace and name."""
         key_name = '%s:%s' % (ns, name)
-        return cls(key_name=key_name, ns=ns, name=name, choices=choices)
+        return cls(key_name=key_name, ns=ns, name=name, choices=choices,
+                   **kwargs)
 
     @classmethod
     def all_in_namespace(cls, ns):

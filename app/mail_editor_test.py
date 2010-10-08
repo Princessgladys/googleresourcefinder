@@ -183,21 +183,50 @@ class MailEditorTest(MediumTestCase):
         Attribute(key_name='location', type='geopt').put()
         MailUpdateMessage(key_name='attribute_name:total_beds',
                           ns='attribute_name',
-                          name='total_beds',
+                          name='total_beds', en='Total beds',
                           choices=['tb', 'total']).put()
+        MailUpdateMessage(key_name='attribute_name:available_beds',
+                          ns='attribute_name', en='Available beds',
+                          name='available_beds',
+                          choices=['ab', 'available']).put()
+        MailUpdateMessage(key_name='attribute_name:email',
+                          ns='attribute_name', name='email',
+                          choices=['e-mail'], en='Email').put()
+        MailUpdateMessage(key_name='attribute_name:commune',
+                          ns='attribute_name', name='commune',
+                          choices=[], en='Commune').put()
+        MailUpdateMessage(key_name='attribute_name:commune_code',
+                          ns='attribute_name', name='commune_code',
+                          choices=[], en='Commune code').put()
+        MailUpdateMessage(key_name='attribute_name:can_pick_up_patients',
+                          ns='attribute_name', name='can_pick_up_patients',
+                          choices=[], en='Can pick up patients').put()
+        MailUpdateMessage(key_name='attribute_name:operational_status',
+                          ns='attribute_name', name='operational_status',
+                          choices=[], en='Operational status').put()
+        MailUpdateMessage(key_name='attribute_name:services',
+                          ns='attribute_name', name='services',
+                          choices=[], en='Services').put()
+        MailUpdateMessage(key_name='attribute_value:OPERATIONAL',
+                          ns='attribute_value', name='OPERATIONAL',
+                          choices=[], en='Operational').put()
         MailUpdateMessage(key_name='attribute_value:true',
                           ns='attribute_value', name='true',
-                          choices=['y', 'yes', 'true']).put()
+                          choices=['y', 'yes', 'true'],
+                          en='Yes').put()
         MailUpdateMessage(key_name='attribute_value:false',
                           ns='attribute_value', name='false',
-                          choices=['n', 'no', 'false']).put()
+                          choices=['n', 'no', 'false'],
+                          en='No').put()
         MailUpdateMessage(key_name='attribute_value:GENERAL_SURGERY',
-                          ns='attribute_value', name='GENERAL_SURGERY').put()
+                          ns='attribute_value', name='GENERAL_SURGERY',
+                          en='General Surgery').put()
         MailUpdateMessage(key_name='attribute_value:X_RAY',
                           ns='attribute_value', name='X_RAY',
-                          choices=['x-ray']).put()
+                          choices=['x-ray'], en='X-Ray').put()
         MailUpdateMessage(key_name='attribute_choices:services',
-                          ns='attribute_choices', name='services').put()
+                          ns='attribute_choices', name='services',
+                          en='Services').put()
         Message(ns='attribute_value', en='X-Ray', name='X_RAY').put()
         Message(ns='attribute_value', en='General Surgery',
                 name='GENERAL_SURGERY').put()
