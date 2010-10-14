@@ -143,10 +143,10 @@ class AttributeCache(Cache):
         return dict((e.key().name(), e) for e in entities)
 
 
-class MailUpdateMessageCache(Cache):
+class MailUpdateTextCache(Cache):
     def fetch_entities(self):
         entities = utils.fetch_all(
-            model.MailUpdateMessage.all_in_namespace(self.subdomain_or_ns))
+            model.MailUpdateText.all_in_namespace(self.subdomain_or_ns))
         return dict((e.name, e) for e in entities)
 
 
@@ -178,15 +178,17 @@ JSON = CacheGroup(JsonCache)
 SUBJECT_TYPES = CacheGroup(SubjectTypeCache)
 MINIMAL_SUBJECTS = CacheGroup(MinimalSubjectCache)
 
+# These types have a separate cache for each namespace.
+MAIL_UPDATE_TEXTS = CacheGroup(MailUpdateTextCache)
+
 # Each of these caches is shared across all subdomains.
-MAIL_UPDATE_MESSAGES = CacheGroup(MailUpdateMessageCache)
 ATTRIBUTES = AttributeCache()
 MESSAGES = MessageCache()
 DEFAULT_ACCOUNT = DefaultAccountCache()
 SUBDOMAINS = SubdomainCache()
 
 CACHES = [JSON, SUBJECT_TYPES, MINIMAL_SUBJECTS, ATTRIBUTES, MESSAGES,
-          DEFAULT_ACCOUNT, SUBDOMAINS, MAIL_UPDATE_MESSAGES]
+          DEFAULT_ACCOUNT, SUBDOMAINS, MAIL_UPDATE_TEXTS]
 
 def flush_all():
     """Flush all caches."""

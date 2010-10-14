@@ -436,17 +436,31 @@ class PendingAlert(MinimalSubject):
         return filter_by_prefix(PendingAlert.all(), frequency + ':' +
                                 user_email + ':')
 
-class MailUpdateMessage(db.Expando):
-    """A map from attribute names to alternate titles accepted in the mail
-    editing system. Key name: follows the format attribute_name"""
+class MailUpdateText(db.Expando):
+    """A map from attribute names and values to alternate values accepted
+    in the mail editing system. They are strings that users can type into
+    e-mails to refer to attribute names or values.
+
+    Key name: follows the format namespace:name
+    
+    This table should at all times contain the following special cases for
+    general-use attribute values: true, false, and none. Accepted values are:
+        true: ['Yes', 'y', 'true']
+        false: ['No', 'n', 'false']
+        none: ['*none']
+    by default."""
     name = db.StringProperty(required=True) # name of the attribute
     ns = db.StringProperty(required=True, choices=[
         'attribute_name', # accepted shorthand versions for attribute names
-        'attribute_value', # accepted versions of different attribute values
-        'attribute_choices' # accepted choices for restricted attributes
+        'attribute_value' # accepted versions of different attribute values
     ])
-    # list of names to accept for this message
-    choices = db.StringListProperty(default=[])
+    # Expando values should be initialized on a per-language basis as a list
+    # of accepted input strings for this particular map, in that language.
+    # Use the same naming format as in the Message table [en for English,
+    # fr for French, etc.]. The first value in each list will be treated as
+    # a properly formatted value, for use as a display value to the user. For
+    # comparison purposes, each item in the list will be treated as
+    # case-insensitive. Spaces should be used in favor of underscores.
 
     @classmethod
     def get(cls, ns, name):
@@ -455,11 +469,10 @@ class MailUpdateMessage(db.Expando):
         return cls.get_by_key_name(key_name)
 
     @classmethod
-    def create(cls, ns, name, choices=[], **kwargs):
-        """Creates an eneity with the specified namespace and name."""
+    def create(cls, ns, name, **kwargs):
+        """Creates an entity with the specified namespace and name."""
         key_name = '%s:%s' % (ns, name)
-        return cls(key_name=key_name, ns=ns, name=name, choices=choices,
-                   **kwargs)
+        return cls(key_name=key_name, ns=ns, name=name, **kwargs)
 
     @classmethod
     def all_in_namespace(cls, ns):
