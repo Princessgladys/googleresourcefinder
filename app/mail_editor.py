@@ -19,7 +19,7 @@ Parses through the email in the form described at /help/email. Confirms any
 changes to the user as well as any errors that were discovered in the
 received update.
 
-    find_in_mail_update_messages(): tries to match a given value with a translation
+    find_attribute_value(): tries to match a given value with a translation
     parse(): parses a list of unicode strings into datastore-friendly objects
     get_list_update(): for multi attr's, combines two sets (to add and subtract)
         with the current value for a specified subject
@@ -32,6 +32,7 @@ received update.
     get_min_subjects_by_lowercase_title(): searches minimal subjects by title
     MailEditor: incoming mail handler-- responds to incoming emails addressed to
         <subdomain>-updates@resource-finder@appspotmail.com
+    get_display_text: gets a display string version of an attribute name / value
     get_locale_and_nickname(): returns a locale and nickname for the given
         account and email message
     format_changes(): helper function to format attribute value tuples
@@ -60,10 +61,16 @@ from feeds.xmlutils import Struct
 from utils import db, format, get_message, order_and_format_updates
 from utils import NoValueFoundError, ValueNotAllowedError
 
-# Constant to represent the string that denotes a value of None. We use this
-# instead of None so as not to confuse setting a value to None with simply not
-# setting a value to anything.
-NONE = '*none'
+# Constant to represent the list of strings that denotes a value of None. We
+# use this instead of None so as not to confuse setting a value to None with
+# simply not setting a value to anything.
+none_texts = cache.MAIL_UPDATE_TEXTS['attribute_value'].get('none')
+# The following check is performed to allow mail_editor to be imported
+# from its test file, even before the datastore has been populated
+if none_texts:
+    NONE_VALS = none_texts.en
+else:
+    NONE_VALS = ['*none']
 
 # Mapping of attribute types to error messages.
 ERRORS_BY_TYPE = {
@@ -182,17 +189,20 @@ def update_subject(subject, observed, account, source_url, values, comments={},
     db.run_in_transaction(work)
 
 
-def find_in_mail_update_messages(ns, attribute, value):
-    """Checks to see if the given value matches any item in MailUpdateMessages
-    table. Case insensitive. Returns None if not found."""
-    value_upper = value.upper().replace(' ', '_')
-    if value_upper in attribute.values:
-        return value_upper
-    messages = cache.MAIL_UPDATE_MESSAGES[ns]
-    for key, message in messages.iteritems():
-        if (value.lower() in message.choices and
-            message.name in attribute.values):
-            return message.name
+def find_attribute_value(attribute, update_text):
+    """Checks to see if the given value matches any item in MailUpdateText
+    table, within the given namespace. Case insensitive. Returns None if not
+    found."""
+    update_upper = update_text.upper().replace(' ', '_')
+    if update_upper in attribute.values:
+        return update_upper
+    maps = cache.MAIL_UPDATE_TEXTS['attribute_value']
+    update_lower = update_text.lower()
+    for key, map in maps.iteritems():
+        if (update_lower in map.en[1:] or
+            update_lower == map.en[0].lower() and
+            map.name in attribute.values):
+            return map.name
 
 
 def parse(attribute, update):
@@ -200,7 +210,7 @@ def parse(attribute, update):
     update = update.strip()
     if not update:
         raise NoValueFoundError
-    if update == NONE:
+    if update in NONE_VALS:
         return
 
     if attribute.type in ['str', 'text']:
@@ -209,8 +219,8 @@ def parse(attribute, update):
         return int(update)
     if attribute.type == 'bool':
         ns = 'attribute_value'
-        yes_vals = cache.MAIL_UPDATE_MESSAGES[ns]['true'].choices
-        no_vals = cache.MAIL_UPDATE_MESSAGES[ns]['false'].choices
+        yes_vals = cache.MAIL_UPDATE_TEXTS[ns]['true'].en
+        no_vals = cache.MAIL_UPDATE_TEXTS[ns]['false'].en
         if update.lower() not in yes_vals + no_vals:
             raise ValueError
         return bool(update.lower() in yes_vals)
@@ -220,8 +230,7 @@ def parse(attribute, update):
             raise ValueError
         return db.GeoPt(float(location[0]), float(location[1]))
     if attribute.type == 'choice':
-        value = find_in_mail_update_messages(
-            'attribute_value', attribute, update)
+        value = find_attribute_value(attribute, update)
         if not value:
             raise ValueNotAllowedError
         return value 
@@ -233,8 +242,7 @@ def parse(attribute, update):
         for value in values:
             subtract = value[0] == '-'
             new_value = subtract and value[1:] or value
-            formatted = find_in_mail_update_messages(
-                'attribute_value', attribute, new_value)
+            formatted = find_attribute_value(attribute, new_value)
             if subtract and formatted:
                 to_subtract.append(formatted)
             elif formatted:
@@ -281,7 +289,7 @@ def generate_ambiguous_update_error_msg(matches):
 def generate_bad_value_error_msg(update_text, attribute):
     """Generates an error message for an incorrect value for the specified
     attribute's type."""
-    name = get_readable_attr_info('attribute_name', attribute.key().name())
+    name = get_display_text('attribute_name', attribute.key().name())
     line = '%s: %s' % (name, update_text)
     return {
         'error_message': ERRORS_BY_TYPE[attribute.type] % {'attribute': name},
@@ -296,11 +304,8 @@ def generate_error_with_correction(line, attribute):
     error = values['error_message'] + '\n'
     #i18n: Accepted values error message
     options = '-- ' + _('Accepted values are: ')
-    update_message = model.MailUpdateMessage.get(
-        'attribute_choices', attribute.key().name())
-    if not update_message:
-        raise NoValueFoundError
-    attribute_choices = update_message.choices
+    attribute_choices = [cache.MAIL_UPDATE_TEXTS['attribute_value'][val].en[0]
+                         for val in attribute.values]
     for i, value in enumerate(attribute_choices):
         if len(options) + len(value) >= 80:
             error += options + '\n'
@@ -387,8 +392,6 @@ class MailEditor(InboundMailHandler):
         entry into the database. If both are found, creates a new account for
         the user and inserts it into the datastore then returns True. Returns
         False if no such information is found."""
-        if self.have_profile_info():
-            return True
         # TODO(pfritzsche): Add HTML support.
         for content_type, body in message.bodies('text/plain'):
             body = body.decode()
@@ -545,8 +548,6 @@ class MailEditor(InboundMailHandler):
                     attribute = cache.ATTRIBUTES[name]
                     try:
                         value = parse(attribute, update_text)
-                        if value == NONE:
-                            value = None
                         if value and attribute.type == 'multi':
                             subtract, add, error = value
                             if error:
@@ -594,27 +595,31 @@ class MailEditor(InboundMailHandler):
         update_split = update.split(':', 1)
         if len(update_split) > 1:
             attribute, update_text = update_split
-            attribute_formatted = attribute.replace(' ', '_').lower()
+            attribute_lower = attribute.lower()
+
+            # use _'s as the subject type attribute_names lists do, too
+            attribute_formatted = attribute_lower.replace(' ', '_')
             
             # check for actual attribute names
             if attribute_formatted in st.attribute_names:
                 return (attribute_formatted, update_text.strip())
 
             # check for alternate mapping matches
+            # when checking the map, use spaces as the mapped values do
             attribute_name = self.check_and_return_attr_name(
-                st, attribute.lower(), attribute_formatted)
+                st, attribute_lower.replace('_', ' '))
             if attribute_name:
                 return (attribute_name, update_text.strip())
 
         # if no valid match is found with the colon, guess and check
-        update_split = [word for word in update.split() if
-                        re.match('.*\w+.*', word, flags=re.UNICODE)]
+        update_split = update.split()
         for i in range(len(update_split), 0, -1):
             if len(update_split[:i]) < i:
                 continue
-            name = '_'.join(update_split[:i]).lower()
-            if name in st.attribute_names:
-                matches.append((name, ' '.join(update_split[i:]))) 
+            name_formatted = '_'.join(update_split[:i]).lower()
+            if name_formatted in st.attribute_names:
+                matches.append((name_formatted, ' '.join(update_split[i:])))
+            name = ' '.join(update_split[:i]).lower().replace('_', ' ')
             name_match = self.check_and_return_attr_name(st, name)
             if name_match and name_match != name:
                 update = ' '.join(update_split)
@@ -623,20 +628,20 @@ class MailEditor(InboundMailHandler):
                     if name_match == match[0]:
                         is_already_found = True
                 if not is_already_found:
-                    value_start = update.find(' ', update.find(name)) + 1
+                    value_start = update.find(
+                        ' ', update.find(name) + len(name)) + 1
                     matches.append((name_match, update[value_start:])) 
         return matches[0] if len(matches) == 1 else matches
 
     def check_and_return_attr_name(self, st, *names):
         """Given an attribute name or names, searches the MailUpdateMessage
-        table in the datastore for an attribute name, mapped to any of the
-        given strings."""
+        table's attribute_name namespace in the datastore for an attribute name,
+        mapped to any of the given strings."""
         for name in names:
-            if name in st.attribute_names:
-                return name
-            for key, message in \
-                cache.MAIL_UPDATE_MESSAGES['attribute_name'].iteritems():
-                    if name in message.choices:
+            messages = cache.MAIL_UPDATE_TEXTS['attribute_name']
+            for key, message in messages.iteritems():
+                for val in getattr(message, 'en'):
+                    if name == val.lower():
                         return key
 
     def update_subjects(self, updates, observed, comment=''):
@@ -740,7 +745,7 @@ class MailEditor(InboundMailHandler):
         subject_name = ms and ms.get_name()
         s_type = ms and ms.type or DEFAULT_SUBJECT_TYPES[self.subdomain]
         subject_type = cache.SUBJECT_TYPES[self.subdomain][s_type]
-        attributes = [get_readable_attr_info('attribute_name', a) for a in
+        attributes = [get_display_text('attribute_name', a) for a in
                       subject_type.attribute_names if
                       utils.can_edit(self.account, self.subdomain,
                                      cache.ATTRIBUTES[a])]
@@ -762,9 +767,12 @@ class MailEditor(InboundMailHandler):
         message.send()
 
 
-def get_readable_attr_info(ns, name, locale='en'):
+def get_display_text(ns, name, locale='en'):
     """Gets a readable version of the supplied value in its namespace."""
-    return getattr(cache.MAIL_UPDATE_MESSAGES[ns][name], 'en', '')
+    # TODO(pfritzsche): when multiple languages are supported, actually use the
+    # third locale parameter for this function
+    map = getattr(cache.MAIL_UPDATE_TEXTS[ns].get(name), locale, [])
+    return map and map[0] or ''
 
 
 def get_locale_and_nickname(account, message):
@@ -783,15 +791,15 @@ def format_changes(update, locale='en'):
     attribute_name, value = update
     attribute = cache.ATTRIBUTES[attribute_name]
     if attribute.type == 'multi':
-        formatted_value = ', '.join([get_readable_attr_info(
-            'attribute_value', x, locale) for x in value])
+        formatted_value = ', '.join([get_display_text(
+            'attribute_value', e) or e for e in value])
     elif attribute.type == 'choice':
-        formatted_value = get_readable_attr_info(
-            'attribute_value', value, locale)
+        formatted_value = get_display_text(
+            'attribute_value', value) or value
     else:
         formatted_value = format(value)
     return {
-        'attribute': get_readable_attr_info(
+        'attribute': get_display_text(
             'attribute_name', attribute_name),
         'value': formatted_value
     }

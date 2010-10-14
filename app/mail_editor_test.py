@@ -28,8 +28,9 @@ import mail_editor
 from feeds.errors import *
 from feeds.xmlutils import Struct
 from medium_test_case import MediumTestCase
-from model import Account, Attribute, MailUpdateMessage, Message, MinimalSubject
+from model import Account, Attribute, MailUpdateText, Message, MinimalSubject
 from model import Subdomain, Subject, SubjectType
+from setup import setup_mail_update_texts, setup_subdomains, setup_subject_types
 from utils import db
 
 SAMPLE_EMAIL_WORKING = '''UPDATE title_foo (example.org/123)
@@ -181,57 +182,12 @@ class MailEditorTest(MediumTestCase):
         Attribute(key_name='services', type='multi',
                   values=export_test.SERVICES).put()
         Attribute(key_name='location', type='geopt').put()
-        MailUpdateMessage(key_name='attribute_name:total_beds',
-                          ns='attribute_name',
-                          name='total_beds', en='Total beds',
-                          choices=['tb', 'total']).put()
-        MailUpdateMessage(key_name='attribute_name:available_beds',
-                          ns='attribute_name', en='Available beds',
-                          name='available_beds',
-                          choices=['ab', 'available']).put()
-        MailUpdateMessage(key_name='attribute_name:email',
-                          ns='attribute_name', name='email',
-                          choices=['e-mail'], en='Email').put()
-        MailUpdateMessage(key_name='attribute_name:commune',
-                          ns='attribute_name', name='commune',
-                          choices=[], en='Commune').put()
-        MailUpdateMessage(key_name='attribute_name:commune_code',
-                          ns='attribute_name', name='commune_code',
-                          choices=[], en='Commune code').put()
-        MailUpdateMessage(key_name='attribute_name:can_pick_up_patients',
-                          ns='attribute_name', name='can_pick_up_patients',
-                          choices=[], en='Can pick up patients').put()
-        MailUpdateMessage(key_name='attribute_name:operational_status',
-                          ns='attribute_name', name='operational_status',
-                          choices=[], en='Operational status').put()
-        MailUpdateMessage(key_name='attribute_name:services',
-                          ns='attribute_name', name='services',
-                          choices=[], en='Services').put()
-        MailUpdateMessage(key_name='attribute_value:OPERATIONAL',
-                          ns='attribute_value', name='OPERATIONAL',
-                          choices=[], en='Operational').put()
-        MailUpdateMessage(key_name='attribute_value:true',
-                          ns='attribute_value', name='true',
-                          choices=['y', 'yes', 'true'],
-                          en='Yes').put()
-        MailUpdateMessage(key_name='attribute_value:false',
-                          ns='attribute_value', name='false',
-                          choices=['n', 'no', 'false'],
-                          en='No').put()
-        MailUpdateMessage(key_name='attribute_value:GENERAL_SURGERY',
-                          ns='attribute_value', name='GENERAL_SURGERY',
-                          en='General Surgery').put()
-        MailUpdateMessage(key_name='attribute_value:X_RAY',
-                          ns='attribute_value', name='X_RAY',
-                          choices=['x-ray'], en='X-Ray').put()
-        MailUpdateMessage(key_name='attribute_choices:services',
-                          ns='attribute_choices', name='services',
-                          en='Services').put()
         Message(ns='attribute_value', en='X-Ray', name='X_RAY').put()
         Message(ns='attribute_value', en='General Surgery',
                 name='GENERAL_SURGERY').put()
         Message(ns='attribute_value', en='Operational',
                 name='OPERATIONAL').put()
+        setup_mail_update_texts()
 
     def tearDown(self):
         db.delete([self.account, self.subject, self.subject2, self.subject3,
@@ -239,7 +195,7 @@ class MailEditorTest(MediumTestCase):
                    self.ms, self.ms2, self.ms3, self.ms4])
         for attribute in Attribute.all():
             db.delete(attribute)
-        for attr_map in MailUpdateMessage.all():
+        for attr_map in MailUpdateText.all():
             db.delete(attr_map)
         for message in Message.all():
             db.delete(message)
@@ -523,7 +479,7 @@ class MailEditorTest(MediumTestCase):
         body = self.sent_messages[13].textbody()
         assert len(self.sent_messages) == 14
         assert 'ERROR' not in self.sent_messages[13].subject()
-        assert 'Services' in body and 'General Surgery' in body
+        assert 'Services' in body and 'General surgery' in body
         assert 'X-Ray' not in body
         assert 'Operational status' in body and 'Operational' in body
 
@@ -731,6 +687,7 @@ class MailEditorTest(MediumTestCase):
 
     def test_mail_editor_get_attribute_matches(self):
         mail_editor_ = mail_editor.MailEditor()
+        mail_editor_.account = self.account
         matches = mail_editor_.get_attribute_matches(
             self.subject_type, 'commune code 1')
         assert len(matches) == 2
@@ -837,6 +794,29 @@ class MailEditorTest(MediumTestCase):
             hours=1, minutes=34)
         assert mail_editor.parse_utc_offset('+0134') == datetime.timedelta(
             0, 5640)
+
+    def test_mail_update_text(self):
+        """Checks to make sure that no input strings from the MailUpdateText
+        table are used twice within the same subject type."""
+        setup_subdomains()
+        setup_subject_types()
+
+        for subdomain in cache.SUBDOMAINS:
+            for type in cache.SUBJECT_TYPES[subdomain]:
+                map = {}
+                for attribute in cache.SUBJECT_TYPES[
+                    subdomain][type].attribute_names:
+                    for value in cache.MAIL_UPDATE_TEXTS['attribute_name'][
+                        attribute].en:
+                        if value in map:
+                            assert False
+                        map[value] = 1
+                    for value in cache.ATTRIBUTES[attribute].values:
+                        for text in cache.MAIL_UPDATE_TEXTS['attribute_value'][
+                            value].en:
+                            if text in map:
+                                assert False
+                            map[text] = 1
 
     def check_for_correct_update(self, body, message):
         assert body.count('--- --- --- ---') == 2
