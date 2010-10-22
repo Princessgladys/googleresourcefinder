@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import utils
-from feeds.errors import Redirect
+from feedlib.errors import Redirect
 
 class Embed(utils.Handler):
     def get(self):

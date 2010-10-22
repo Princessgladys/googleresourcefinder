@@ -102,7 +102,8 @@ def shellquote(text):
     """Quote a string literal for /bin/sh."""
     return "'" + text.replace("'", "'\\''") + "'"
 
-def curl(url, data=None, agent=None, referrer=None, cookies=None, verbose=0):
+def curl(url, data=None, agent=None, referrer=None, cookies=None, verbose=0,
+         headers={}):
     """Use curl to make a request; return the entire reply as a string."""
     import os, tempfile
     fd, tempname = tempfile.mkstemp(prefix='scrape')
@@ -117,6 +118,8 @@ def curl(url, data=None, agent=None, referrer=None, cookies=None, verbose=0):
         command += ' --referer ' + shellquote(referrer)
     if cookies:
         command += ' --cookie ' + shellquote(cookies)
+    for name, value in headers.items():
+        command += ' --header ' + shellquote(name + ': ' + value)
     command += ' ' + shellquote(url)
     if verbose >= 3:
         print >>sys.stderr, 'execute:', command
@@ -150,7 +153,7 @@ def setcookies(cookiejar, host, lines):
 RAW = object() # This sentinel value for 'charset' means "don't decode".
 
 def fetch(url, data='', agent=None, referrer=None, charset=None, verbose=0,
-          cookiejar={}):
+          cookiejar={}, headers={}):
     """Make an HTTP or HTTPS request.  If 'data' is given, do a POST;
     otherwise do a GET.  If 'agent' and/or 'referrer' are given, include
     them as User-Agent and Referer headers in the request, respectively.
@@ -186,10 +189,13 @@ def fetch(url, data='', agent=None, referrer=None, charset=None, verbose=0,
     if scheme == 'http' or scheme == 'https' and hasattr(socket, 'ssl'):
         if query:
             path += '?' + query
+        # Canonicalize the headers from the 'headers' argument to lowercase.
+        extra_headers = dict((key.lower(), value)
+                             for (key, value) in headers.items())
+        # Now prepare the request headers.
         headers = {'host': host, 'accept': '*/*'}
         if data:
             # When we're clearly submitting XML, say so.
-            # TODO: Allow passing in a headers dict as an argument.
             if data.startswith('<?xml'):
                 headers['content-type'] = 'text/xml'
             else:
@@ -201,9 +207,12 @@ def fetch(url, data='', agent=None, referrer=None, charset=None, verbose=0,
             headers['referer'] = referrer
         if cookieheader:
             headers['cookie'] = cookieheader
+        # Apply the extra headers that were passed in.
+        headers.update(extra_headers)
+        # Make the request.
         reply = request(scheme, method, host, path, headers, data, verbose)
     elif scheme == 'https':
-        reply = curl(url, data, agent, referrer, cookieheader, verbose)
+        reply = curl(url, data, agent, referrer, cookieheader, verbose, headers)
     else:
         raise ValueError, scheme + ' not supported'
 
@@ -269,7 +278,8 @@ class Session:
         self.cookiejar = {}
         self.history = []
 
-    def go(self, url, data='', redirects=10, referrer=True, charset=None):
+    def go(self, url, data='', redirects=10, referrer=True, charset=None,
+           headers={}):
         """Navigate to a given URL.  If the URL is relative, it is resolved
         with respect to the current URL.  If 'data' is provided, do a POST;
         otherwise do a GET.  Follow redirections up to 'redirects' times.
@@ -290,7 +300,7 @@ class Session:
         while 1:
             self.url, self.status, self.message, self.headers, self.content = \
                 fetch(url, data, self.agent, referrer, charset, self.verbose,
-                      self.cookiejar)
+                      self.cookiejar, headers)
             if redirects:
                 if self.status in [301, 302] and 'location' in self.headers:
                     url, data = urljoin(url, self.headers['location']), ''

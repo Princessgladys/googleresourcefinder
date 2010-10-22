@@ -30,6 +30,7 @@ class ValueInfo:
     def __init__(self, name, value, localize, author=None, affiliation=None,
                  comment=None, date=None):
         self.label = get_message('attribute_name', name)
+        self.specified = value is not None
         self.raw = value
         self.value = format(value, localize)
         self.author = format(author)
@@ -156,6 +157,9 @@ class HospitalValueInfoExtractor(ValueInfoExtractor):
 VALUE_INFO_EXTRACTORS = {
     'haiti': {
         'hospital': HaitiHospitalValueInfoExtractor(),
+    },
+    'pakistan': {
+        'hospital': HospitalValueInfoExtractor(),
     },
     'pakistan': {
         'hospital': HospitalValueInfoExtractor(),

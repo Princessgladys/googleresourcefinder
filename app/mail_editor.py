@@ -46,7 +46,7 @@ from google.appengine.ext.webapp.mail_handlers import InboundMailHandler
 import cache
 import model
 import utils
-from feeds.xmlutils import Struct
+from feedlib.xml_utils import Struct
 from utils import db, format, get_message, order_and_format_updates
 
 # If this is found in a line of the email, the system will immediately stop
@@ -135,9 +135,10 @@ def update_subject(subject, observed, account, source_url, values, comments={},
             cache.JSON[subdomain].flush()
 
             params = {
+                'subdomain': subdomain,
                 'action': 'subject_changed',
                 'user_email': account.email,
-                'subject_name': subject.key().name(),
+                'subject_name': subject.name,
                 'observed': utils.url_pickle(observed),
                 'changed_data': utils.url_pickle(change_information),
                 'unchanged_data': utils.url_pickle(unchanged_values)

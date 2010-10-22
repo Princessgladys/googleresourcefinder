@@ -17,7 +17,7 @@ import cron
 import simplejson
 from access import *
 from extract_messages import parse_message, PATTERNS
-from feeds import crypto
+from feedlib import crypto
 from model import *
 from utils import *
 
@@ -138,8 +138,8 @@ def setup_subject_types():
 
 def setup_messages():
     """Sets up messages, pulling translations from the django .po files."""
-    def message(namespace, name, **kw):
-        return Message(ns=namespace, name=name, **kw)
+    def message(ns, name, **kw):
+        return Message(ns=ns, name=name, **kw)
     subject_type_message = \
         lambda name, **kw: message('subject_type', name, **kw)
     name_message = lambda name, **kw: message('attribute_name', name, **kw)

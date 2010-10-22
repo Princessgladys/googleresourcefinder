@@ -45,7 +45,7 @@ from google.appengine.runtime import DeadlineExceededError
 import cache
 import model
 import utils
-from feeds.xmlutils import Struct
+from feedlib.xml_utils import Struct
 from model import Account, PendingAlert, Subject, Subscription
 from utils import _, format, get_last_updated_time, order_and_format_updates
 

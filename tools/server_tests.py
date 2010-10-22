@@ -154,6 +154,7 @@ def main():
     options, args = parser.parse_args()
 
     runners = []
+    success = False
     try:
         if options.address == 'localhost':
             # Start up a clean new appserver for testing.
@@ -192,7 +193,9 @@ def main():
 
         # Run the tests.
         print
-        unittest.TextTestRunner().run(unittest.TestSuite(suites))
+        result = unittest.TextTestRunner().run(unittest.TestSuite(suites))
+        if result.wasSuccessful():
+            success = True
         print
     except:
         # Something went wrong in this script.
@@ -201,6 +204,8 @@ def main():
     finally:
         # Clean up all the subprocesses, no matter what happened.
         for runner in runners:
+            if not success:
+                runner.flush_output()  # show logs if anything failed
             runner.stop()
 
 

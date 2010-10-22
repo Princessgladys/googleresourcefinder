@@ -22,10 +22,9 @@ from google.appengine.api import users
 import access
 
 from access import ACTIONS
-from feeds.xmlutils import Struct
 from medium_test_case import MediumTestCase
 from model import Account
-from utils import db
+from utils import Struct, db
         
 class AccessTest(MediumTestCase):
     def setUp(self):

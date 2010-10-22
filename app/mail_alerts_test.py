@@ -28,7 +28,7 @@ import cache
 import mail_alerts
 import model
 import utils
-from feeds.xmlutils import Struct
+from feedlib.xml_utils import Struct
 from mail_alerts import EMAIL_FORMATTERS, get_timedelta, fetch_updates
 from mail_alerts import update_account_alert_time
 from medium_test_case import MediumTestCase
