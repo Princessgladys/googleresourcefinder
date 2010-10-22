@@ -182,5 +182,5 @@ class DeltaTest(ScrapeTestCase):
         # Test a POST with an invalid signature.
         doc = self.s.go(self.URL, data=DATA,
                         headers={'X-Hub-Signature': 'sha1=foo'})
-        assert self.s.status != 200
+        assert self.s.status == 200  # PSHB spec section 7.4
         assert ReportEntry.all().count() == 0
