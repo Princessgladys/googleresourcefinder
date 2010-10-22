@@ -23,7 +23,7 @@ from StringIO import StringIO
 
 import kml
 import setup
-from feeds.geo import point_inside_polygon
+from feedlib.geo import point_inside_polygon
 from model import *
 from pakistan_data import *
 

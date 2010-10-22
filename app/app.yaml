@@ -29,8 +29,6 @@ handlers:
 - url: /
   script: main.py
 
-- url: /foo
-  script: foo.py
 
 - url: /edit
   script: edit.py
@@ -58,11 +56,8 @@ handlers:
 
 # Public machine endpoints.
 
-- url: /feeds/.*
-  script: feed_provider.py
-
-- url: /incoming/.*
-  script: feed_receiver.py
+- url: /feeds/delta(/.*)?
+  script: feeds_delta.py
 
 # ------------------------------------------ Subdomain-independent endpoints
 
@@ -102,6 +97,10 @@ handlers:
   script: $PYTHON_LIB/google/appengine/ext/appstats/ui.py
   login: admin
 
+- url: /pubsub
+  script: pubsub.py
+  login: admin
+
 # Machine administrative endpoints.
 
 - url: /remote_api
@@ -112,12 +111,20 @@ handlers:
   script: cron.py
   login: admin
 
+- url: /refresh_json_cache
+  script: refresh_json_cache.py
+  login: admin
+
 - url: /tasks/add_feed_record
   script: feed_provider.py
   login: admin
 
-- url: /refresh_json_cache
-  script: refresh_json_cache.py
+- url: /tasks/external
+  script: feedlib/tasks_external.py
+  login: admin
+
+- url: /tasks/add_delta_entry
+  script: tasks_add_delta_entry.py
   login: admin
 
 # Incoming mail handlers.
