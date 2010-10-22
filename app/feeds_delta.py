@@ -46,9 +46,9 @@ def update_subject(subject, observed, account, source_url, values, comments={},
             editable_attributes.append(name)
 
     # We'll use these to fill in the metadata on the subject. 
-    user = account.get('user')
-    nickname = account.get('nickname')
-    affiliation = account.get('affiliation')
+    user = account.user
+    nickname = account.nickname
+    affiliation = account.affiliation
 
     # The real work happens here.
     def work(key):
@@ -61,7 +61,7 @@ def update_subject(subject, observed, account, source_url, values, comments={},
         report = model.Report(
             subject,
             observed=observed,
-            author=account.user,
+            author=user,
             source=source_url,
             arrived=arrived or DateTime.utcnow())
 
@@ -104,7 +104,8 @@ class Feed(Handler):
             topic = self.request.get('hub.topic')
             signature = self.request.get('hub.verify_token')
             if not crypto.verify('hub_verify', topic, signature):
-                raise errors.ErrorMessage(403, 'Invalid signature.')
+                # Section 6.2.1 of the PSHB spec says to return 404.
+                raise errors.ErrorMessage(404, 'Invalid signature.')
 
             # The request came from us.  Confirm it.
             if self.request.get('hub.mode') == 'subscribe':
@@ -128,8 +129,9 @@ class Feed(Handler):
         # a hub that we subscribed to (and gave our hub_secret to).
         hmac = crypto.sha1_hmac(crypto.get_key('hub_secret'), self.request.body)
         import logging; logging.warn(hmac)
-        if self.request.headers['X-Hub-Signature'] != 'sha1=' + hmac:
-            raise errors.ErrorMessage(403, 'Invalid signature.')
+        if self.request.headers.get('X-Hub-Signature', '') != 'sha1=' + hmac:
+            # Section 7.4 of the PSHB spec says to return 200 (oddly).
+            raise errors.ErrorMessage(200, 'Invalid signature.')
 
         # Store the incoming reports on the 'delta' feed.
         entries = report_feeds.handle_feed_post(
