@@ -190,9 +190,13 @@ def update_subject(subject, observed, account, source_url, values, comments={},
 
 
 def find_attribute_value(attribute, update_text):
-    """Checks to see if the given value matches any item in MailUpdateText
-    table, within the given namespace. Case insensitive. Returns None if not
-    found."""
+    """Checks to see if the given value matches any value in the given
+    attribute's values. If no match is found, checks to see if it matches
+    any item in the MailUpdateText table, within the 'attribute_value'
+    namespace. Case insensitive. Returns None if not found.
+    
+    Note: currently defaulting to the 'en' values until multi-language
+    support is added."""
     update_upper = update_text.upper().replace(' ', '_')
     if update_upper in attribute.values:
         return update_upper
@@ -202,11 +206,13 @@ def find_attribute_value(attribute, update_text):
         if (update_lower in map.en[1:] or
             update_lower == map.en[0].lower() and
             map.name in attribute.values):
-            return map.name
+            return map.name # name is an attribute value
 
 
 def parse(attribute, update):
-    """Parses a list of Unicode strings into an attribute value."""
+    """Parses a list of Unicode strings into an attribute value. Note:
+    this currently assumes we are working with English values only.
+    Multiple languages are not yet supported."""
     update = update.strip()
     if not update:
         raise NoValueFoundError
@@ -642,7 +648,7 @@ class MailEditor(InboundMailHandler):
             for key, message in messages.iteritems():
                 for val in getattr(message, 'en'):
                     if name == val.lower():
-                        return key
+                        return key # key is an attribute name
 
     def update_subjects(self, updates, observed, comment=''):
         """Goes through the supplied list of updates. Adds to the datastore."""

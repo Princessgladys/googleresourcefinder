@@ -439,20 +439,22 @@ class PendingAlert(MinimalSubject):
 class MailUpdateText(db.Expando):
     """A map from attribute names and values to alternate values accepted
     in the mail editing system. They are strings that users can type into
-    e-mails to refer to attribute names or values.
-
-    Key name: follows the format namespace:name
+    e-mails to refer to attribute names or values. Key name: follows the
+    format namespace:name.
     
     This table should at all times contain the following special cases for
     general-use attribute values: true, false, and none. Accepted values are:
         true: ['Yes', 'y', 'true']
         false: ['No', 'n', 'false']
         none: ['*none']
-    by default."""
-    name = db.StringProperty(required=True) # name of the attribute
+    by default. In total, the number of entities in the table should be equal
+    to the number of attribute entities, plus the unique values across all
+    multi and choice attributes, plus the 3 general values defined above."""
+    # name is an attribute name or attribute value; see below
+    name = db.StringProperty(required=True)
     ns = db.StringProperty(required=True, choices=[
-        'attribute_name', # accepted shorthand versions for attribute names
-        'attribute_value' # accepted versions of different attribute values
+        'attribute_name', # name is an attribute's key_name
+        'attribute_value' # name is a value name in a choice or multi attribute
     ])
     # Expando values should be initialized on a per-language basis as a list
     # of accepted input strings for this particular map, in that language.
