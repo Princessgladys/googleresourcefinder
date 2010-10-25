@@ -154,7 +154,7 @@ msgid "Blood Bank"
 msgstr "بلڈ بینک"
 
 #. Save a copy of the data in CSV format
-#: export.py:166
+#: export.py:168
 msgid "CSV Export"
 msgstr "CSV برآمد"
 
@@ -392,7 +392,7 @@ msgid "Error saving facility information."
 msgstr "سہولت کی معلومات محفوظ کرنے میں غلطی۔"
 
 #. Button to export data to comma-separated-value format.
-#: templates/map.html:149 export.py:178
+#: templates/map.html:149 export.py:180
 msgid "Export CSV"
 msgstr "CSV برآمد کریں"
 
@@ -537,7 +537,7 @@ msgid "Invalid or missing account e-mail."
 msgstr "ای میل اکاؤنٹ غلط یا چھوٹا ہوا ہے۔"
 
 #. Error message for request missing subject name.
-#: bubble.py:177 edit.py:448
+#: bubble.py:174 edit.py:448
 msgid "Invalid or missing subject name."
 msgstr "مریض کا نام غلط ہے یا چھوٹ گیا ہے۔"
 
@@ -823,7 +823,7 @@ msgid "Postoperative Care"
 msgstr "آپریشن کے بعد کی نگہداشت"
 
 #. old value for the attribute
-#: mail_alerts.py:229
+#: mail_alerts.py:231
 msgid "Previous value"
 msgstr "سابق قدر"
 
@@ -886,7 +886,7 @@ msgid "Resource Finder"
 msgstr "ذرائع کی تلاش"
 
 #. subject of e-mail -> Resource Finder Update
-#: mail_alerts.py:77
+#: mail_alerts.py:79
 msgid "Resource Finder %s Update"
 msgstr "ریسورس تلاش %s کی خبر"
 
@@ -906,7 +906,7 @@ msgid "Saving..."
 msgstr "محفوظ ہو رہا ہے..."
 
 #. Label for a selector to export data to CSV
-#: export.py:170
+#: export.py:172
 msgid "Select subject type to export:"
 msgstr "برآمد کیلئے مریض کی نوعیت منتخب کریں:"
 
@@ -1046,7 +1046,7 @@ msgid "Updated"
 msgstr "تجدید شدہ"
 
 #. who the attribute was updated by
-#: mail_alerts.py:232
+#: mail_alerts.py:234
 msgid "Updated by"
 msgstr "ترمیم کنندہ"
 

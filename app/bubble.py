@@ -160,9 +160,6 @@ VALUE_INFO_EXTRACTORS = {
     },
     'pakistan': {
         'hospital': HospitalValueInfoExtractor(),
-    },
-    'pakistan': {
-        'hospital': HospitalValueInfoExtractor(),
     }
 }
 
