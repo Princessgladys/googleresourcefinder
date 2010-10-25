@@ -153,7 +153,7 @@ msgid "Blood Bank"
 msgstr "Banque de sang"
 
 #. Save a copy of the data in CSV format
-#: export.py:166
+#: export.py:168
 msgid "CSV Export"
 msgstr "Exporter au format CSV"
 
@@ -391,7 +391,7 @@ msgid "Error saving facility information."
 msgstr "Erreur lors du enregistrement des informations de installation."
 
 #. Button to export data to comma-separated-value format.
-#: templates/map.html:149 export.py:178
+#: templates/map.html:149 export.py:180
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
@@ -536,7 +536,7 @@ msgid "Invalid or missing account e-mail."
 msgstr "Nom d'établissement incorrect ou manquant"
 
 #. Error message for request missing subject name.
-#: bubble.py:177 edit.py:448
+#: bubble.py:174 edit.py:448
 msgid "Invalid or missing subject name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -822,7 +822,7 @@ msgid "Postoperative Care"
 msgstr "Soins Postopératoires"
 
 #. old value for the attribute
-#: mail_alerts.py:229
+#: mail_alerts.py:231
 msgid "Previous value"
 msgstr "Valeur précédente"
 
@@ -885,7 +885,7 @@ msgid "Resource Finder"
 msgstr "Localisation de ressources"
 
 #. subject of e-mail -> Resource Finder Update
-#: mail_alerts.py:77
+#: mail_alerts.py:79
 msgid "Resource Finder %s Update"
 msgstr "Localisation de ressources"
 
@@ -905,7 +905,7 @@ msgid "Saving..."
 msgstr "Enregistrement..."
 
 #. Label for a selector to export data to CSV
-#: export.py:170
+#: export.py:172
 msgid "Select subject type to export:"
 msgstr "Sélectionnez le type d'établissement à l'exportation :"
 
@@ -1045,7 +1045,7 @@ msgid "Updated"
 msgstr "Mise à jour :"
 
 #. who the attribute was updated by
-#: mail_alerts.py:232
+#: mail_alerts.py:234
 msgid "Updated by"
 msgstr "Mise à jour :"
 

@@ -128,7 +128,6 @@ class Feed(Handler):
         # Check the signature on the request, to verify that this came from
         # a hub that we subscribed to (and gave our hub_secret to).
         hmac = crypto.sha1_hmac(crypto.get_key('hub_secret'), self.request.body)
-        import logging; logging.warn(hmac)
         if self.request.headers.get('X-Hub-Signature', '') != 'sha1=' + hmac:
             # Section 7.4 of the PSHB spec says to return 200 (oddly).
             raise errors.ErrorMessage(200, 'Invalid signature.')

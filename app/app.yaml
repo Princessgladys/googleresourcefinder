@@ -29,7 +29,6 @@ handlers:
 - url: /
   script: main.py
 
-
 - url: /edit
   script: edit.py
 
