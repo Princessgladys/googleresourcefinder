@@ -204,8 +204,8 @@ msgstr "Modification"
 
 #. Service provided by a health facility (use Title Case). Meaning: Treatment of cholera
 #: ../tools/setup.py:354
-msgid "Cholera Treatment Center"
-msgstr "Centre de traitement du choléra"
+msgid "Cholera Treatment"
+msgstr "Traitement du choléra"
 
 #. Instructions for a menu of deployed instances of the application
 #: templates/subdomain_menu.html:40
