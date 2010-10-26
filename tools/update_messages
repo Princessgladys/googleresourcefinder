@@ -7,7 +7,7 @@ cd $APP_DIR
 # Check if anything has changed since the last update.
 if [ -f messages.timestamp ]; then
   changed=$(find . ../tools/setup.py \
-      \( -name '*.py' -or -name '*.html' -or -name 'locale.js' \) \
+      \( -name '*.py' -or -name '*.html' -or -name locale.js -or -name django.po \) \
       -newer messages.timestamp)
 else
   changed=yes

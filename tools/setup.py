@@ -351,7 +351,7 @@ def setup_messages():
         value_message('EMERGENCY_SERVICES', en='Emergency Services'),
         #i18n: Service provided by a health facility (use Title Case).
         #i18n: Meaning: Treatment of cholera
-        value_message('CHOLERA_TREATMENT', en='Cholera Treatment Center'),
+        value_message('CHOLERA_TREATMENT', en='Cholera Treatment'),
         #i18n: Service provided by a health facility (use Title Case).
         #i18n: Meaning: An unnamed service not mentioned in the services list
         value_message('OTHER', en='Other'),

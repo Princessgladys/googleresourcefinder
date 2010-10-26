@@ -205,7 +205,7 @@ msgstr "تبدیلی کا نوٹ"
 
 #. Service provided by a health facility (use Title Case). Meaning: Treatment of cholera
 #: ../tools/setup.py:354
-msgid "Cholera Treatment Center"
+msgid "Cholera Treatment"
 msgstr ""
 
 #. Instructions for a menu of deployed instances of the application
