@@ -53,7 +53,7 @@ class Main(utils.Handler):
             self.get_url('/', add_new='yes'))
         login_url = users.create_login_url(home_url)
         logout_url = users.create_logout_url(home_url)
-        is_print = bool(self.params.__dict__.get('print'))
+        is_print = getattr(self.params, 'print')
         show_add_button = access.check_action_permitted(
             self.account, self.subdomain, 'add') and not is_print
         if is_print:

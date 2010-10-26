@@ -1,4 +1,5 @@
 from model import Account, Subject, db
+from feedlib import report_feeds
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import scrape
@@ -61,6 +62,8 @@ class EditTest(SeleniumTestCase):
     def tearDown(self):
         for subject in Subject.all_in_subdomain('haiti'):
             self.delete_subject('haiti', subject.name)
+        for entry in report_feeds.ReportEntry.all():
+            entry.delete()
         self.delete_account()
         self.delete_default_account()
         SeleniumTestCase.tearDown(self)
@@ -87,8 +90,8 @@ class EditTest(SeleniumTestCase):
         def edit(self):
             self.open_edit_page()
 
-        # Check that feed is empty
-        feed = self.s.go('http://localhost:8081/feeds/delta')
+        # Check that the delta feed is empty
+        feed = self.fetch('/feeds/delta?subdomain=haiti')
         assert feed.first('atom:feed')
         assert feed.first('atom:feed').all('atom:entry') == []
 
@@ -97,9 +100,9 @@ class EditTest(SeleniumTestCase):
         # TODO(kpy): This feature is disabled until we can debug it.
         # Re-enable this test when the delta feed is working properly.
         # Check that feed is not empty now
-        # feed = self.s.go('http://localhost:8081/feeds/delta')
-        # assert feed.first('atom:feed')
-        # assert feed.first('atom:feed').first('atom:entry')
+        feed = self.fetch('/feeds/delta?subdomain=haiti')
+        assert feed.first('atom:feed')
+        assert feed.first('atom:feed').first('atom:entry')
 
     def test_edit_permissions(self):
         """Ensure that the edit page can't be used without edit permission."""
@@ -209,6 +212,7 @@ class EditTest(SeleniumTestCase):
         def save(self):
             self.click('//input[@name="save"]')
             self.wait_until(self.is_visible, 'data')
+            self.wait_until(self.is_visible, 'id=subject-1')
             self.wait_for_element('link=Change details')
 
         def edit(self):

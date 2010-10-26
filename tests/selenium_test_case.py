@@ -84,7 +84,7 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
 
         # Start up Selenium.
         selenium.selenium.__init__(
-            self, 'localhost', 4444, '*chrome', 'https://www.google.com/')
+            self, 'localhost', 4444, '*chrome', self.config.base_url)
         self.start()
 
     def tearDown(self):
@@ -94,6 +94,11 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
 
         # Shut down Selenium.
         self.stop()
+
+    def fetch(self, path):
+        """Fetch the given path from the app server using scrape."""
+        s = scrape.Session()
+        return s.go(self.config.base_url + path)
 
     def login(self, path=None):
         """Navigates to the given path, logging in if necessary, and waits for
