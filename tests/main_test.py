@@ -23,6 +23,7 @@ SERVICES = ['All',
             'Mortuary Services',
             'Outpatient Care',
             'Emergency Services',
+            'Cholera Treatment',
             'Other']
 
 class MainTestCase(SeleniumTestCase):

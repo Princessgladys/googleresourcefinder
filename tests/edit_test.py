@@ -25,6 +25,7 @@ SERVICES = [
     'MORTUARY_SERVICES',
     'OUTPATIENT_CARE',
     'EMERGENCY_SERVICES',
+    'CHOLERA_TREATMENT',
     'OTHER',
 ]
 
@@ -479,7 +480,8 @@ class EditTest(SeleniumTestCase):
         self.wait_until(self.is_visible, 'edit-data')
         self.assert_element('//input[@name="account_nickname"]')
         # Add button should not be visible
-        assert not self.is_visible('//div[@class="new-subject-map-control-ui"]')
+        self.wait_until(self.is_not_visible,
+            '//div[@class="new-subject-map-control-ui"]')
 
     def test_inplace_edit_no_location_facility(self):
         self.delete_subject('haiti', 'example.org/123')
@@ -537,21 +539,21 @@ class EditTest(SeleniumTestCase):
         self.wait_for_element('map')
         self.is_text_present('Click a location')
         # Make sure add button is not visible
-        assert not self.is_visible(add_button)
+        self.wait_until(self.is_not_visible, add_button)
 
         # Zoom does not cancel add
         self.run_script('map.setZoom(map.getZoom() + 1)')
-        assert not self.is_visible(add_button)
+        self.wait_until(self.is_not_visible, add_button)
 
         # Cancel link cancels add
         self.click('id=cancel_add_link')
-        assert self.is_visible(add_button)
+        self.wait_until(self.is_visible, add_button)
 
         # Click a link cancels add
         self.click(add_button)
-        assert not self.is_visible(add_button)
+        self.wait_until(self.is_not_visible, add_button)
         self.click('id=subject-1')
-        assert self.is_visible(add_button)
+        self.wait_until(self.is_visible, add_button)
 
         # Place marker, then cancel edit
         self.click(add_button)
@@ -559,7 +561,7 @@ class EditTest(SeleniumTestCase):
                         'map, "click", { latLng: map.getCenter() })')
         self.wait_until(self.is_visible, 'edit-data')
         self.click('//input[@name="cancel"]')
-        assert self.is_visible(add_button)
+        self.wait_until(self.is_visible, add_button)
 
     def edit(self, login=False, subject_id='subject-1'):
         """Goes to edit form for subject 1"""
