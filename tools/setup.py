@@ -49,7 +49,7 @@ def setup_subject_types():
               'REHABILITATION', 'OBSTETRICS_GYNECOLOGY', 'MENTAL_HEALTH',
               'DIALYSIS', 'LAB', 'X_RAY', 'CT_SCAN', 'BLOOD_BANK',
               'MORTUARY_SERVICES', 'OUTPATIENT_CARE', 'EMERGENCY_SERVICES',
-              'OTHER']),
+              'CHOLERA_TREATMENT', 'OTHER']),
         attr('str', 'other_services'),
         attr('str', 'contact_name'),
         attr('str', 'phone'),
@@ -349,6 +349,9 @@ def setup_messages():
         #i18n: Meaning: services needed to evaluate or stabilize an emergency
         #i18n: Meaning: medical condition
         value_message('EMERGENCY_SERVICES', en='Emergency Services'),
+        #i18n: Service provided by a health facility (use Title Case).
+        #i18n: Meaning: Treatment of cholera
+        value_message('CHOLERA_TREATMENT', en='Cholera Treatment Center'),
         #i18n: Service provided by a health facility (use Title Case).
         #i18n: Meaning: An unnamed service not mentioned in the services list
         value_message('OTHER', en='Other'),
