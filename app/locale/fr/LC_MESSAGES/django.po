@@ -202,6 +202,11 @@ msgstr "Détails des modifications"
 msgid "Change note"
 msgstr "Modification"
 
+#. Service provided by a health facility (use Title Case). Meaning: Treatment of cholera
+#: ../tools/setup.py:354
+msgid "Cholera Treatment"
+msgstr "Traitement du choléra"
+
 #. Instructions for a menu of deployed instances of the application
 #: templates/subdomain_menu.html:40
 msgid "Choose a site:"
@@ -772,7 +777,7 @@ msgid "Orthopedics"
 msgstr "Orthopédie"
 
 #. Service provided by a health facility (use Title Case). Meaning: An unnamed service not mentioned in the services list
-#: ../tools/setup.py:354
+#: ../tools/setup.py:357
 msgid "Other"
 msgstr "Autres"
 

@@ -219,8 +219,10 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         self.wait_for_load()
 
     def is_not_visible(self, locator):
-        """Returns true if an element is not visible. Useful with wait_until"""
-        return not self.is_visible(locator)
+        """Returns true if an element is missing or not visible. Useful with
+        wait_until."""
+        return (not self.is_element_present(locator) or
+                not self.is_visible(locator))
 
     def assert_element(self, locator):
         """Asserts that the given element is present."""
