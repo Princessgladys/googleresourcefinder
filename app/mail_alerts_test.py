@@ -28,7 +28,7 @@ import cache
 import mail_alerts
 import model
 import utils
-from feeds.xmlutils import Struct
+from feedlib.xml_utils import Struct
 from mail_alerts import EMAIL_FORMATTERS, get_timedelta, fetch_updates
 from mail_alerts import update_account_alert_time
 from medium_test_case import MediumTestCase
@@ -293,7 +293,8 @@ class MailAlertsTest(MediumTestCase):
         unchanged_vals = {'test_attr_bar': 'attr_bar'}
         path = '/mail_alerts?' + utils.urlencode({
             'action': 'subject_changed',
-            'subject_name': 'haiti:example.org/123',
+            'subdomain': 'haiti',
+            'subject_name': 'example.org/123',
             'changed_data': utils.url_pickle(changed_vals),
             'unchanged_data': utils.url_pickle(unchanged_vals)
         })
@@ -314,7 +315,8 @@ class MailAlertsTest(MediumTestCase):
                          'author': 'author_foo'}]
         path = '/mail_alerts?' + utils.urlencode({
             'action': 'subject_changed',
-            'subject_name': 'haiti:example.org/123',
+            'subdomain': 'haiti',
+            'subject_name': 'example.org/123',
             'changed_data': utils.url_pickle(changed_vals),
             'unchanged_data': utils.url_pickle(unchanged_vals)
         })
@@ -334,7 +336,8 @@ class MailAlertsTest(MediumTestCase):
                          'author': 'author_foo'}]
         path = '/mail_alerts?' + utils.urlencode({
             'action': 'subject_changed',
-            'subject_name': 'haiti:example.org/123',
+            'subdomain': 'haiti',
+            'subject_name': 'example.org/123',
             'changed_data': utils.url_pickle(changed_vals),
             'unchanged_data': utils.url_pickle(unchanged_vals)
         })
@@ -352,7 +355,8 @@ class MailAlertsTest(MediumTestCase):
         # changed for a non-instant subscription
         path = '/mail_alerts?' + utils.urlencode({
             'action': 'subject_changed',
-            'subject_name': 'haiti:example.org/456',
+            'subdomain': 'haiti',
+            'subject_name': 'example.org/456',
             'changed_data': utils.url_pickle(changed_vals),
             'unchanged_data': utils.url_pickle(unchanged_vals)
         })
@@ -407,7 +411,8 @@ class MailAlertsTest(MediumTestCase):
         unchanged_vals = {'test_attr_bar': 'attr_bar'}
         path = '/mail_alerts?' + utils.urlencode({
             'action': 'subject_changed',
-            'subject_name': 'haiti:example.org/123',
+            'subdomain': 'haiti',
+            'subject_name': 'example.org/123',
             'changed_data': utils.url_pickle(changed_vals),
             'unchanged_data': utils.url_pickle(unchanged_vals)
         })

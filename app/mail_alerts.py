@@ -29,6 +29,8 @@ HospitalEmailFormatter(EmailFormatter): extension for formatting specific to
 MailAlerts(utils.Handler): handler class to send e-mail updates
 """
 
+# TODO(kpy): Add an end-to-end test for the subscription system as a whole. 
+
 __author__ = 'pfritzsche@google.com (Phil Fritzsche)'
 
 import datetime
@@ -45,7 +47,7 @@ from google.appengine.runtime import DeadlineExceededError
 import cache
 import model
 import utils
-from feeds.xmlutils import Struct
+from feedlib.xml_utils import Struct
 from model import Account, PendingAlert, Subject, Subscription
 from utils import _, format, get_last_updated_time, order_and_format_updates
 
@@ -381,10 +383,9 @@ class MailAlerts(utils.Handler):
         users who were subscribed to instant updates for this particular
         subject.
         """
-        subject = Subject.get_by_key_name(self.params.subject_name)
-        subdomain = self.params.subject_name.split(':')[0]
-
-        subscriptions = Subscription.get_by_subject(self.params.subject_name)
+        subject = Subject.get(self.subdomain, self.params.subject_name)
+        subject_key_name = self.subdomain + ':' + self.params.subject_name
+        subscriptions = Subscription.get_by_subject(subject_key_name)
         for subscription in subscriptions:
             if subscription.frequency != 'instant':
                 # queue pending alerts for non-instant update subscriptions
@@ -412,15 +413,15 @@ class MailAlerts(utils.Handler):
                 email_data = Struct(
                     nickname=account.nickname or account.email,
                     domain=self.domain,
-                    subdomain=subdomain,
-                    changed_subjects={self.params.subject_name: (
+                    subdomain=self.subdomain,
+                    changed_subjects={subject_key_name: (
                         subject.get_value('title'),
                         deepcopy(self.changed_request_data))}
                 )
                 email_formatter = EMAIL_FORMATTERS[
-                    subdomain][subject.type](account)
+                    self.subdomain][subject.type](account)
                 body = email_formatter.format_body(email_data)
-                email_subject = format_email_subject(subdomain,
+                email_subject = format_email_subject(self.subdomain,
                                                      subscription.frequency)
                 send_email(account.locale, self.appspot_email,
                            account.email, email_subject,
@@ -450,7 +451,7 @@ class MailAlerts(utils.Handler):
                                       subscription.subject_name)
                 if pa:
                     values = fetch_updates(pa, subject)
-                    changed_subjects[subject.key().name()] = (
+                    changed_subjects[subscription.subject_name] = (
                         subject.get_value('title'), values)
                     alerts_to_delete.append(pa)
                 else:

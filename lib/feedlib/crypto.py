@@ -26,13 +26,19 @@ class Secret(db.Model):
     value = db.ByteStringProperty(required=True)
 
 
+def sha1_hmac(key, bytes):
+    """Computes a hexadecimal HMAC using the SHA1 digest algorithm."""
+    return hmac.new(key, bytes, digestmod=hashlib.sha1).hexdigest()
+
 def sha256_hmac(key, bytes):
     """Computes a hexadecimal HMAC using the SHA256 digest algorithm."""
     return hmac.new(key, bytes, digestmod=hashlib.sha256).hexdigest()
 
 def generate_random_key():
-    """Generates a random 20-byte key."""
-    return ''.join(chr(random.randrange(256)) for i in range(20))
+    """Generates a random 32-byte key."""
+    # The key is in hexadecimal because PubSubHubbub runs into Unicode
+    # decoding problems with keys that contain non-7-bit characters.
+    return ''.join('%02x' % random.randrange(256) for i in range(32))
 
 def get_key(name):
     """Gets a secret key with the given name, or creates a new random key."""

@@ -24,7 +24,7 @@ from google.appengine.api import users
 import cache
 import export_test
 import mail_editor
-from feeds.xmlutils import Struct
+from feedlib.xml_utils import Struct
 from medium_test_case import MediumTestCase
 from model import Account, Attribute, Subdomain, MinimalSubject, Subject
 from model import SubjectType
