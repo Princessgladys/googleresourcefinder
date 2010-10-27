@@ -34,11 +34,11 @@ class PrintTest(SeleniumTestCase):
             title='title_outside_10_miles', location=db.GeoPt(51.6, 0.2))
 
     def tearDown(self):
-        SeleniumTestCase.tearDown(self)
         self.delete_account()
         self.delete_subject('haiti', 'example.org/10')
         self.delete_subject('haiti', 'example.org/11')
         self.delete_subject('haiti', 'example.org/12')
+        SeleniumTestCase.tearDown(self)
 
     def test_print_page(self):
         """Confirms that the print page renders correctly."""

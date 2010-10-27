@@ -115,12 +115,16 @@
         <th class="services">{% trans "services" %}</th>
       </tr>
       <tr>
-        {% if special.total_beds.raw or special.available_beds.raw %}
+        {% if special.total_beds.specified or special.available_beds.specified %}
           <td class="availability">
-            <div class="number">{{special.available_beds.value|escape}}</div>
+            <div id="bubble-availability" class="number">
+              {{special.available_beds.value|escape}}
+            </div>
           </td>
           <td class="capacity">
-            <div class="number">{{special.total_beds.value|escape}}</div>
+            <div id="bubble-capacity" class="number">
+              {{special.total_beds.value|escape}}
+            </div>
           </td>
         {% else %}
         <td class="no-information" colspan="2">

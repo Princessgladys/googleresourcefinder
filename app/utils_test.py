@@ -34,7 +34,7 @@ import utils
 
 import django.utils.translation
 
-from feeds.errors import ErrorMessage, Redirect
+from feedlib.errors import ErrorMessage, Redirect
 from medium_test_case import MediumTestCase
 from model import Account, Message, Subject, SubjectType
 

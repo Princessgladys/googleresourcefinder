@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.appengine.api.labs import taskqueue
-from google.appengine.api.labs.taskqueue import Task
-
 import cache
 import datetime
 import logging
@@ -25,9 +22,10 @@ import urlparse
 import utils
 import wsgiref
 
+from google.appengine.api.labs import taskqueue
+
 from access import check_action_permitted
-from feed_provider import schedule_add_record
-from feeds.crypto import sign, verify
+from feedlib.crypto import sign, verify
 from rendering import to_json
 from utils import DateTime, ErrorMessage, HIDDEN_ATTRIBUTE_NAMES, Redirect
 from utils import db, can_edit, get_message, html_escape
@@ -357,9 +355,7 @@ def update(subject_name, subject_type, request, user, account, attributes,
         observed=utcnow)
     change_metadata = ChangeMetadata(
         utcnow, user, account.nickname, account.affiliation)
-    has_changes = False
-    changed_attributes_dict = {}
-    changed_attribute_information = []
+    changed_attribute_information = {}
     unchanged_attribute_values = {}
 
     # Validate the changes and package them up for use by mail_alerts.py.
@@ -370,8 +366,7 @@ def update(subject_name, subject_type, request, user, account, attributes,
         # different than the one in the subject at the time the page
         # rendered, and the user has to have permission to edit it now.
         value_changed = has_changed(subject, request, attribute)
-        comment_changed = has_comment_changed(
-            subject, request, attribute)
+        comment_changed = has_comment_changed(subject, request, attribute)
         if (is_editable(request, attribute) and
             (value_changed or comment_changed)):
             if not can_edit(account, subdomain, attribute, new):
@@ -381,43 +376,39 @@ def update(subject_name, subject_type, request, user, account, attributes,
                     '%(user)s does not have permission to edit %(a)s')
                     % {'user': user.email(),
                        'a': get_message('attribute_name', attribute)})
-            has_changes = True
             change_info = {'attribute': name,
                            'old_value': subject.get_value(name)}
-            apply_change(subject, minimal_subject, report,
-                         subject_type, request, attribute,
-                         change_metadata)
+            apply_change(subject, minimal_subject, report, subject_type,
+                         request, attribute, change_metadata)
             change_info['new_value'] = subject.get_value(name)
+            # TODO(kpy): This seems always redundant with account.nickname?
             change_info['author'] = subject.get_author_nickname(name)
-            changed_attribute_information.append(change_info)
-            changed_attributes_dict[name] = attribute
+            changed_attribute_information[name] = change_info
         else:
             unchanged_attribute_values[name] = subject.get_value(name)
     
-    if has_changes:
-        # Schedule a task to add a feed record.
-        # We can't really do this inside this transaction, since
-        # feed records are not part of the entity group.
-        # Transactional tasks is the closest we can get.
-        # TODO(kpy): This is disabled for now because it causes
-        # intermittent exceptions.  Re-enable it when we have it
-        # tested and working.
-        # schedule_add_record(self.request, user,
-        #     subject, changed_attributes_dict, utcnow)
+    if changed_attribute_information:
+        # Store the changes.
         db.put([report, subject, minimal_subject])
         cache.MINIMAL_SUBJECTS[subdomain].flush()
         cache.JSON[subdomain].flush()
         
-        # On edit, create a task to e-mail users who have subscribed
-        # to that subject.
         params = {
-            'subject_name': subject.key().name(),
+            'subdomain': subdomain,
             'action': 'subject_changed',
+            'user_email': user.email() or '',
+            'subject_name': subject.name,
+            'observed': utils.url_pickle(utcnow),
             'changed_data': utils.url_pickle(changed_attribute_information),
             'unchanged_data': utils.url_pickle(unchanged_attribute_values)
         }
 
-        taskqueue.add(url='/mail_alerts', method='POST',
+        # Schedule a task to e-mail users who have subscribed to this subject.
+        taskqueue.add(method='POST', url='/mail_alerts',
+                      params=params, transactional=transactional)
+
+        # Schedule a task to add an entry to the delta feed.
+        taskqueue.add(method='POST', url='/tasks/add_delta_entry',
                       params=params, transactional=transactional)
 
 

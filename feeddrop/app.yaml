@@ -12,16 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Common exception classes."""
+application: feeddrop
+version: 1
+runtime: python
+api_version: 1
 
-class ErrorMessage(Exception):
-    """Raise this exception to show an error message to the user."""
-    def __init__(self, status, message):
-        self.status = status
-        self.message = message
+handlers:
+- url: /feeds/.*
+  script: feeds.py
 
-class Redirect(Exception):
-    """Raise this exception to redirect to another page."""
-    def __init__(self, url):
-        self.url = url
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
 
+- url: /tasks/external
+  script: feedlib/tasks_external.py
+  login: admin
