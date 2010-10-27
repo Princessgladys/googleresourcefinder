@@ -31,7 +31,7 @@ import config
 import model
 import utils
 from bubble import format
-from feeds.xmlutils import Struct
+from feedlib.xml_utils import Struct
 from mail_alerts import EMAIL_FORMATTERS, fetch_updates, format_email_subject
 from mail_alerts import send_email, update_account_alert_time
 from model import PendingAlert, Subject, Subscription

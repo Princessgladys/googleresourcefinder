@@ -131,6 +131,8 @@ def write_csv(out, subdomain, type_name):
                 row.append(format(value))
         writer.writerow(row)
 
+# TODO(kpy): This should probably reuse row_utils.serialize().  It's here for
+# now since it converts to local time; serialize() formats times as UTC.
 def format(value):
     """Format value in a way suitable for CSV export."""
     if isinstance(value, unicode):

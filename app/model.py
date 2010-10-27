@@ -384,6 +384,9 @@ class Dump(db.Model):
     source = db.StringProperty()  # URL identifying the source
     data = db.BlobProperty()  # received raw data
 
+# TODO(kpy): Clean up the inconsistent use of the term "subject_name".
+# In Subscription, subject_name is the entire Subject key including the
+# subdomain; elsewhere it is just the part after the subdomain.
 class Subscription(db.Model):
     """A subscription by a user to receive notification when details for a
     facility change. Top-level entity, has no parent.
