@@ -9,7 +9,9 @@ from google.appengine.api import memcache, users
 
 import cache
 import scrape
-from model import Account, MinimalSubject, Subject, db
+from model import Account, MinimalSubject, PendingAlert, Report, Subject
+from model import Subscription, db
+from feedlib import report_feeds
 
 
 class Struct:
@@ -88,6 +90,11 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         self.start()
 
     def tearDown(self):
+        # Delete any stuff that was created for the test.
+        db.delete(list(Subject.all()) + list(MinimalSubject.all()) +
+                  list(Report.all()) + list(report_feeds.ReportEntry.all()) +
+                  list(Subscription.all()) + list(PendingAlert.all()))
+
         # Hitting any page with flush=yes will flush the appserver's caches.
         s = scrape.Session()
         s.go(self.config.base_url + '/help?flush=yes')

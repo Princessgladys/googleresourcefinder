@@ -138,7 +138,9 @@ class Feed(Handler):
 
         # Store each report as a report entity and apply its changes.
         for entry in entries:
-            account = Struct(user=None, nickname=entry.author_uri)
+            # TODO(kpy): Handle identity for incoming edits better.
+            account = Struct(
+                user=None, affiliation='', nickname=entry.author_uri)
             row = xml_utils.parse(entry.content)
             values, comments = row_utils.parse_from_elements(row)
             subject = model.Subject.get(self.subdomain, entry.subject_id)
