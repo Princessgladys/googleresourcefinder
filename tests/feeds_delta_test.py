@@ -86,43 +86,36 @@ import urllib
 
 from feedlib import crypto
 from feedlib.report_feeds import ReportEntry
+from model import MinimalSubject, Subject
 from scrape_test_case import ScrapeTestCase
 
 # An actual POST request body from pubsubhubbub.
-# Note that PSHB currently requires the Atom namespace to be the default
-# XML namespace (e.g. it recognizes <entry> but not <atom:entry>).  Brett
-# is working on fixing this.
-DATA = """<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns:have="urn:oasis:names:tc:emergency:EDXL:HAVE:1.0" xmlns:report="http://schemas.google.com/report/2010" xmlns="http://www.w3.org/2005/Atom" xmlns:gml="http://opengis.net/gml" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3">
-  <id>http://example.com/feeds/delta</id>
+POST_DATA = '''<?xml version="1.0" encoding="utf-8"?>
+<atom:feed xmlns:atom="http://www.w3.org/2005/Atom" xmlns:report="http://schemas.google.com/report/2010" xmlns:gs="http://schemas.google.com/spreadsheets/2006">
+  <atom:id>http://feeddrop.appspot.com/feeds/kpy_sms</atom:id>
+  <atom:title>http://feeddrop.appspot.com/feeds/kpy_sms</atom:title>
+  <atom:updated>2010-10-26T23:18:28.722198Z</atom:updated>
+  <atom:link href="https://pubsubhubbub.appspot.com" rel="hub"/>
 
-<entry>
-    <author>
-      <email>foo@example.com</email>
-    </author>
-    <id>http://example.com/feeds/delta/122</id>
-    <title/>
-    <updated>2010-03-16T09:13:48.224281Z</updated>
-    <report:subject>paho.org/HealthC_ID/1115006</report:subject>
-    <report:observed>2010-03-12T12:12:12Z</report:observed>
-    <report:content type="{urn:oasis:names:tc:emergency:EDXL:HAVE:1.0}Hospital">
-      <have:Hospital>
-        <have:OrganizationInformation>
-          <xnl:OrganisationName>
-            <xnl:NameElement>Foo Hospital</xnl:NameElement>
-          </xnl:OrganisationName>
-        </have:OrganizationInformation>
-        <have:OrganizationGeoLocation>
-          <gml:Point>
-            <gml:pos>45.256 -71.92</gml:pos>
-          </gml:Point>
-        </have:OrganizationGeoLocation>
-        <have:LastUpdateTime>2010-03-12T12:12:12Z</have:LastUpdateTime>
-      </have:Hospital>
+<atom:entry>
+    <atom:id>http://feeddrop.appspot.com/feeds/kpy_sms/31001</atom:id>
+    <atom:title/>
+    <atom:updated>2010-10-26T23:18:28.722198Z</atom:updated>
+    <atom:author>
+      <atom:uri>mailto:test@example.com</atom:uri>
+      <atom:email>test@example.com</atom:email>
+    </atom:author>
+    <report:subject>paho.org/HealthC_ID/1115010</report:subject>
+    <report:observed>2010-10-20T17:06:18Z</report:observed>
+    <report:content type="{http://schemas.google.com/report/2010}row">
+      <report:row>
+        <gs:field name="available_beds">123</gs:field>
+        <gs:field name="total_beds">234</gs:field>
+        <gs:field name="operational_status">FIELD_HOSPITAL</gs:field>
+      </report:row>
     </report:content>
-  </entry>
-</feed>
-"""
+  </atom:entry>
+</atom:feed>'''
 
 
 class DeltaTest(ScrapeTestCase):
@@ -131,11 +124,11 @@ class DeltaTest(ScrapeTestCase):
 
     def setUp(self):
         ScrapeTestCase.setUp(self)
-        for entry in ReportEntry.all():
-            entry.delete()
         self.hub_secret = crypto.get_key('hub_secret')
 
     def tearDown(self):
+        for subject in Subject.all():
+            subject.delete()
         for entry in ReportEntry.all():
             entry.delete()
         ScrapeTestCase.tearDown(self)
@@ -157,9 +150,23 @@ class DeltaTest(ScrapeTestCase):
         assert doc.content == challenge
 
     def test_feed_update_notification(self):
+        # Set up a Subject that will be updated.
+        subject = Subject.create(
+            'haiti', 'hospital', 'paho.org/HealthC_ID/1115010', None)
+
+        # The incoming edit's effective time (see POST_DATA) is on 2010-10-20.
+        BEFORE_EDIT = datetime.datetime(2010, 10, 1)
+        AFTER_EDIT = datetime.datetime(2010, 11, 1)
+        subject.set_attribute(
+            'available_beds', 100, BEFORE_EDIT, None, None, None, '')
+        subject.set_attribute(
+            'total_beds', 200, AFTER_EDIT, None, None, None, '')
+        subject.put()
+        MinimalSubject.create(subject).put()
+
         # Test POST request from the hub to announce feed update.
-        signature = 'sha1=' + crypto.sha1_hmac(self.hub_secret, DATA)
-        doc = self.s.go(self.URL, data=DATA,
+        signature = 'sha1=' + crypto.sha1_hmac(self.hub_secret, POST_DATA)
+        doc = self.s.go(self.URL, data=POST_DATA,
                         headers={'X-Hub-Signature': signature})
         assert self.s.status == 200
         assert doc.content == ''
@@ -168,19 +175,28 @@ class DeltaTest(ScrapeTestCase):
         assert ReportEntry.all().count() == 1
 
         entry = ReportEntry.all().get()
-        assert entry.external_entry_id == 'http://example.com/feeds/delta/122'
-        assert entry.external_feed_id == 'http://example.com/feeds/delta'
-        assert (entry.type_name ==
-                '{urn:oasis:names:tc:emergency:EDXL:HAVE:1.0}Hospital')
-        assert entry.subject_id == 'paho.org/HealthC_ID/1115006'
+        assert entry.external_entry_id == \
+            'http://feeddrop.appspot.com/feeds/kpy_sms/31001'
+        assert entry.external_feed_id == \
+            'http://feeddrop.appspot.com/feeds/kpy_sms'
+        assert entry.type_name == '{http://schemas.google.com/report/2010}row'
+        assert entry.subject_id == 'paho.org/HealthC_ID/1115010'
         assert entry.title is None
-        assert entry.author_uri == 'mailto:foo@example.com'
-        assert entry.observed == datetime.datetime(2010, 3, 12, 12, 12, 12)
+        assert entry.author_uri == 'mailto:test@example.com'
+        assert entry.observed == datetime.datetime(2010, 10, 20, 17, 6, 18)
         # Not checking: arrived (dynamic), content (large)
+
+        # The corresponding Subject should have been edited as a result.
+        subject = Subject.get('haiti', 'paho.org/HealthC_ID/1115010')
+        # The newer edit should take effect, but not the older edit.
+        assert subject.get_value('available_beds') == 123
+        assert subject.get_value('total_beds') == 200
+        # A new attribute should be created.
+        assert subject.get_value('operational_status') == 'FIELD_HOSPITAL'
 
     def test_feed_update_bad_signature(self):
         # Test a POST with an invalid signature.
-        doc = self.s.go(self.URL, data=DATA,
+        doc = self.s.go(self.URL, data=POST_DATA,
                         headers={'X-Hub-Signature': 'sha1=foo'})
         assert self.s.status == 200  # PSHB spec section 7.4
         assert ReportEntry.all().count() == 0
