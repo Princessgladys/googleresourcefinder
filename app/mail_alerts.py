@@ -43,6 +43,7 @@ from google.appengine.api import mail
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from google.appengine.runtime import DeadlineExceededError
+from google.appengine.runtime.apiproxy_errors import OverQuotaError
 
 import cache
 import model
@@ -423,7 +424,8 @@ class MailAlerts(utils.Handler):
                 body = email_formatter.format_body(email_data)
                 email_subject = format_email_subject(self.subdomain,
                                                      subscription.frequency)
-                send_email(account.locale, self.appspot_email,
+                send_email(account.locale,
+                           '%s-%s' % (self.subdomain, self.appspot_email),
                            account.email, email_subject,
                            body, account.email_format)
 
@@ -472,12 +474,20 @@ class MailAlerts(utils.Handler):
                 subdomain][subject.type](account)
             body = email_formatter.format_body(email_data)
             email_subject = format_email_subject(subdomain, frequency)
-            send_email(account.locale, self.appspot_email,
-                       account.email, email_subject,
-                       body, account.email_format)
-            update_account_alert_time(account, frequency)
-            db.delete(alerts_to_delete)
-            db.put(account)
+            try:
+                send_email(account.locale,
+                           '%s-%s' % (subdomain, self.appspot_email),
+                           account.email, email_subject,
+                           body, account.email_format)
+                update_account_alert_time(account, frequency)
+                db.delete(alerts_to_delete)
+                db.put(account)
+            except OverQuotaError, message:
+                # Throw the error here in order to avoid mass duplication of
+                # the mail alerts task. If you let the system automatically
+                # handle the error, the combination of cron jobs and re-created
+                # tasks will overflow the task queue.
+                logging.error(message)
 
 
 if __name__ == '__main__':
