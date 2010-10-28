@@ -46,6 +46,8 @@ def create_element(tag, *args, **kwargs):
     for arg in args:
         if isinstance(arg, dict):  # attributes
             for key, value in arg.items():
+                if isinstance(key, tuple):
+                    key = qualify(*key)
                 element.set(key, value)
         else:
             if not isinstance(arg, list):
@@ -56,6 +58,8 @@ def create_element(tag, *args, **kwargs):
                 elif child is not None:  # child elements
                     element.append(child)
     for key, value in kwargs.items():  # attributes
+        if isinstance(key, tuple):
+            key = qualify(*key)
         element.set(key, value)
     return element
 

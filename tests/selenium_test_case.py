@@ -1,4 +1,6 @@
+import code
 import datetime
+import inspect
 import os
 import re
 import selenium
@@ -106,6 +108,23 @@ class SeleniumTestCase(unittest.TestCase, selenium.selenium):
         """Fetch the given path from the app server using scrape."""
         s = scrape.Session()
         return s.go(self.config.base_url + path)
+
+    def pause(self):
+        """Pauses the test and starts an interactive Python console."""
+        # Use inspect to get information about the calling stack frame.
+        frame = inspect.currentframe().f_back  # stack frame of the caller
+        locals = frame.f_locals  # local namespace of the caller
+        filename, lineno, name, lines, here = inspect.getframeinfo(frame, 11)
+
+        # Construct a nice banner showing the point where we paused.
+        banner = ('\n--- Test paused in %s() at %s:%d ---\n\n' %
+                  (name, filename.split('/')[-1], lineno))
+        for i in range(len(lines)):  # show the surrounding lines of code
+            banner += (i == here and '->' or '| ') + lines[i]
+        banner += '\nLocals: %s' % ', '.join(sorted(locals.keys()))
+
+        # Start the interactive console.
+        code.interact(banner, None, locals)
 
     def login(self, path=None):
         """Navigates to the given path, logging in if necessary, and waits for

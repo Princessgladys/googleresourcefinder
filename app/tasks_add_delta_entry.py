@@ -29,9 +29,12 @@ class AddDeltaEntry(Handler):
         type_name = xml_utils.qualify(report_feeds.REPORT_NS, 'row')
         row = xml_utils.create_element(type_name)
         for name in changes:
+            attributes = {'name': name}
+            comment = changes[name].get('comment', None)
+            if comment:
+                attributes[(report_feeds.REPORT_NS, 'comment')] = comment
             row.append(xml_utils.create_element(
-                (report_feeds.SPREADSHEETS_NS, 'field'),
-                {'name': name},
+                (report_feeds.SPREADSHEETS_NS, 'field'), attributes,
                 row_utils.serialize(name, changes[name]['new_value'])))
         report_feeds.ReportEntry.create_original(
             self.subdomain + '/delta', '', author_uri,

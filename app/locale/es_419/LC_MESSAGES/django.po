@@ -542,12 +542,12 @@ msgid "Invalid or missing account e-mail."
 msgstr "Nombre de la institución no válido o no especificado"
 
 #. Error message for request missing subject name.
-#: bubble.py:174 edit.py:448
+#: bubble.py:174 edit.py:449
 msgid "Invalid or missing subject name."
 msgstr "Nombre de la institución no válido o no especificado"
 
 #. Error message for a missing subject type.
-#: edit.py:440
+#: edit.py:441
 msgid "Invalid or missing subject type."
 msgstr "Nombre de la institución no válido o no especificado"
 
@@ -859,7 +859,7 @@ msgid "Reachable by road"
 msgstr "Acceso a través de carretera"
 
 #. Record updated successfully.
-#: edit.py:554
+#: edit.py:555
 msgid "Record updated."
 msgstr "Registro actualizado."
 

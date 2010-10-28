@@ -381,6 +381,7 @@ def update(subject_name, subject_type, request, user, account, attributes,
             apply_change(subject, minimal_subject, report, subject_type,
                          request, attribute, change_metadata)
             change_info['new_value'] = subject.get_value(name)
+            change_info['comment'] = subject.get_comment(name)
             # TODO(kpy): This seems always redundant with account.nickname?
             change_info['author'] = subject.get_author_nickname(name)
             changed_attribute_information[name] = change_info

@@ -542,12 +542,12 @@ msgid "Invalid or missing account e-mail."
 msgstr "ای میل اکاؤنٹ غلط یا چھوٹا ہوا ہے۔"
 
 #. Error message for request missing subject name.
-#: bubble.py:174 edit.py:448
+#: bubble.py:174 edit.py:449
 msgid "Invalid or missing subject name."
 msgstr "مریض کا نام غلط ہے یا چھوٹ گیا ہے۔"
 
 #. Error message for a missing subject type.
-#: edit.py:440
+#: edit.py:441
 msgid "Invalid or missing subject type."
 msgstr "مریض کی نوعیت غلط ہے یا چھوٹ گئی ہے۔"
 
@@ -859,7 +859,7 @@ msgid "Reachable by road"
 msgstr "بذریعہ سڑک قابل رسائی"
 
 #. Record updated successfully.
-#: edit.py:554
+#: edit.py:555
 msgid "Record updated."
 msgstr "ریکارڈ کی تجدید ہوگئی۔"
 

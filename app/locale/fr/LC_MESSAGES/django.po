@@ -541,12 +541,12 @@ msgid "Invalid or missing account e-mail."
 msgstr "Nom d'établissement incorrect ou manquant"
 
 #. Error message for request missing subject name.
-#: bubble.py:174 edit.py:448
+#: bubble.py:174 edit.py:449
 msgid "Invalid or missing subject name."
 msgstr "Nom d'établissement incorrect ou manquant"
 
 #. Error message for a missing subject type.
-#: edit.py:440
+#: edit.py:441
 msgid "Invalid or missing subject type."
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -858,7 +858,7 @@ msgid "Reachable by road"
 msgstr "Accessible en voiture"
 
 #. Record updated successfully.
-#: edit.py:554
+#: edit.py:555
 msgid "Record updated."
 msgstr "Enregistrement mis à jour"
 

@@ -86,7 +86,7 @@ import urllib
 
 from feedlib import crypto
 from feedlib.report_feeds import ReportEntry
-from model import MinimalSubject, Subject
+from model import MinimalSubject, Report, Subject
 from scrape_test_case import ScrapeTestCase
 
 # An actual POST request body from pubsubhubbub.
@@ -109,8 +109,8 @@ POST_DATA = '''<?xml version="1.0" encoding="utf-8"?>
     <report:observed>2010-10-20T17:06:18Z</report:observed>
     <report:content type="{http://schemas.google.com/report/2010}row">
       <report:row>
-        <gs:field name="available_beds">123</gs:field>
-        <gs:field name="total_beds">234</gs:field>
+        <gs:field name="available_beds" report:comment="foo">123</gs:field>
+        <gs:field name="total_beds" report:comment="bar">234</gs:field>
         <gs:field name="operational_status">FIELD_HOSPITAL</gs:field>
       </report:row>
     </report:content>
@@ -188,11 +188,19 @@ class DeltaTest(ScrapeTestCase):
 
         # The corresponding Subject should have been edited as a result.
         subject = Subject.get('haiti', 'paho.org/HealthC_ID/1115010')
+
         # The newer edit should take effect, but not the older edit.
         assert subject.get_value('available_beds') == 123
+        assert subject.get_comment('available_beds') == 'foo'
         assert subject.get_value('total_beds') == 200
+        assert not subject.get_comment('total_beds')
         # A new attribute should be created.
         assert subject.get_value('operational_status') == 'FIELD_HOSPITAL'
+
+        # The missing edit should be preserved in the report.
+        report = Report.all().get()
+        assert report.get_value('total_beds') == 234
+        assert report.get_comment('total_beds') == 'bar'
 
     def test_feed_update_bad_signature(self):
         # Test a POST with an invalid signature.

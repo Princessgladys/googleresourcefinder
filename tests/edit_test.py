@@ -1,5 +1,7 @@
 from model import Account, Subject, db
-from feedlib import report_feeds
+from feedlib import report_feeds, xml_utils
+from feedlib.report_feeds import ATOM_NS, REPORT_NS, SPREADSHEETS_NS
+from feedlib.xml_utils import qualify
 from selenium_test_case import Regex, SeleniumTestCase
 import datetime
 import scrape
@@ -91,18 +93,49 @@ class EditTest(SeleniumTestCase):
             self.open_edit_page()
 
         # Check that the delta feed is empty
-        feed = self.fetch('/feeds/delta?subdomain=haiti')
-        assert feed.first('atom:feed')
-        assert feed.first('atom:feed').all('atom:entry') == []
+        doc = self.fetch('/feeds/delta?subdomain=haiti')
+        feed = doc.first('atom:feed')
+        assert feed
+        assert feed.all('atom:entry') == []
 
         self.run_edit(login, save, edit)
 
-        # TODO(kpy): This feature is disabled until we can debug it.
-        # Re-enable this test when the delta feed is working properly.
-        # Check that feed is not empty now
-        feed = self.fetch('/feeds/delta?subdomain=haiti')
-        assert feed.first('atom:feed')
-        assert feed.first('atom:feed').first('atom:entry')
+        # Check that the delta feed has an entry now
+        doc = self.fetch('/feeds/delta?subdomain=haiti')
+        feed = xml_utils.parse(doc.content)
+        assert feed
+        entries = feed.findall(qualify(ATOM_NS, 'entry'))
+        
+        entry = entries[-1]  # last entry should be the first edit
+        content = entry.find(qualify(REPORT_NS, 'content'))
+        row = content.find(qualify(REPORT_NS, 'row'))
+        fields = row.findall(qualify(SPREADSHEETS_NS, 'field'))
+        cells = {}
+        for field in fields:
+            cells[field.get('name')] = \
+                (field.text, field.get(qualify(REPORT_NS, 'comment')))
+        assert cells['commune'] == ('commune_foo', None)
+        assert cells['district'] == ('district_foo', None)
+        assert cells['damage'] == ('damage_foo', None)
+        assert cells['available_beds'] == ('1', None)
+        assert cells['total_beds'] == ('2', 'comment1')
+        assert cells['location'] == ('18.537207,-72.349663', 'comment2')
+        assert cells['services'] == (','.join(SERVICES), None)
+        assert cells['organization_type'] == ('NGO', None)
+        assert cells['reachable_by_road'] == ('TRUE', None)
+        assert cells['operational_status'] == ('NO_SURGICAL_CAPACITY', None)
+
+        entry = entries[0]  # first entry should be the last edit
+        content = entry.find(qualify(REPORT_NS, 'content'))
+        row = content.find(qualify(REPORT_NS, 'row'))
+        fields = row.findall(qualify(SPREADSHEETS_NS, 'field'))
+        cells = {}
+        for field in fields:
+            cells[field.get('name')] = \
+                (field.text, field.get(qualify(REPORT_NS, 'comment')))
+        assert cells['location'] == (None, None)
+        assert cells['available_beds'] == ('0', None)
+        assert cells['total_beds'] == ('0', None)
 
     def test_edit_permissions(self):
         """Ensure that the edit page can't be used without edit permission."""

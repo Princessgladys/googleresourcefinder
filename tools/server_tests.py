@@ -18,14 +18,9 @@
 Instead of running this script directly, use the 'server_tests' shell script,
 which sets up the PYTHONPATH and other necessary environment variables."""
 
-import access
-import console
-import model
-import optparse
+import code
 import os
 import re
-import scrape
-import setup
 import signal
 import subprocess
 import sys
@@ -33,6 +28,13 @@ import threading
 import time
 import traceback
 import unittest
+
+import access
+import console
+import model
+import optparse
+import scrape
+import setup
 
 
 class ProcessRunner(threading.Thread):
@@ -155,6 +157,7 @@ def main():
 
     runners = []
     success = False
+    original_interact = code.interact
     try:
         if options.address == 'localhost':
             # Start up a clean new appserver for testing.
@@ -191,6 +194,13 @@ def main():
                 else:        
                     suites.append(loader.loadTestsFromName(module))
 
+        # Patch code.interact() to flush log output before proceeding.
+        def flush_interact(*args):
+            for runner in runners:
+                runner.flush_output()
+            original_interact(*args)
+        code.interact = flush_interact
+
         # Run the tests.
         print
         result = unittest.TextTestRunner().run(unittest.TestSuite(suites))
@@ -207,6 +217,7 @@ def main():
             if not success:
                 runner.flush_output()  # show logs if anything failed
             runner.stop()
+        code.interact = original_interact
 
 
 if __name__ == '__main__':
