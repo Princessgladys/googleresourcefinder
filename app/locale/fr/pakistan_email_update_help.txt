@@ -1,0 +1,25 @@
+Text attribute values can contain any letter, number, or punctuation:
+    Contact name: The primary contact of the facility
+    Phone: The primary phone number of the facility
+    Mobile: The mobile phone number of the facility
+    Fax: The fax number of the facility
+    Email: The primary email contact of the facility
+    Administrative area: The state, province, or territory of the facility
+    Sub administrative area: The district or county of the facility
+    Locality: The city, town, or village of the facility
+    Address: The facility's address
+    Organization: The facility's organization name
+    Damage: Description of any damage done to the facility
+    Alert status: Any significant alert information for the facility
+
+Number attribute values must be whole numbers:
+    Available beds: The number of available beds at the facility
+    Total beds: The total number of beds at the facility
+
+Yes/No attribute values must be either "yes" or "no":
+    Reachable by road: Whether or not the facility is reachable by road
+    Can pick up patients: Whether or not the facility can pick up patients
+{% comment %}
+# TODO(pfritzsche): add information on list attributes, i.e. services
+{% endcomment %}
+
