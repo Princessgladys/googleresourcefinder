@@ -20,6 +20,8 @@ changes to the user as well as any errors that were discovered in the
 received update.
 
     find_attribute_value(): tries to match a given value with a translation
+    check_messages_for_attr_info(): finds the name of the message that matches
+        the given parameters
     parse(): parses a list of unicode strings into datastore-friendly objects
     get_list_update(): for multi attr's, combines two sets (to add and subtract)
         with the current value for a specified subject
@@ -200,6 +202,10 @@ def find_attribute_value(attribute, update_text):
     update_upper = update_text.upper().replace(' ', '_')
     if update_upper in attribute.values:
         return update_upper
+    attr_val = check_messages_for_attr_info(
+        'attribute_value', update_text)
+    if attr_val:
+        return attr_val
     maps = cache.MAIL_UPDATE_TEXTS['attribute_value']
     update_lower = update_text.lower()
     for key, map in maps.iteritems():
@@ -207,6 +213,16 @@ def find_attribute_value(attribute, update_text):
             update_lower == map.en[0].lower() and
             map.name in attribute.values):
             return map.name # name is an attribute value
+
+
+def check_messages_for_attr_info(ns, alt_name, locale='en'):
+    """Iterates through the Message table trying to find the name that
+    matches the given alternate name in the supplied namespace for the
+    given locale."""
+    for key, msg in cache.MESSAGES.iteritems():
+        if key[0] == ns:
+            if getattr(msg, locale).lower() == alt_name.lower():
+                return msg.name
 
 
 def parse(attribute, update):
@@ -643,9 +659,13 @@ class MailEditor(InboundMailHandler):
         """Given an attribute name or names, searches the MailUpdateMessage
         table's attribute_name namespace in the datastore for an attribute name,
         mapped to any of the given strings."""
+        ns = 'attribute_name'
         for name in names:
-            messages = cache.MAIL_UPDATE_TEXTS['attribute_name']
-            for key, message in messages.iteritems():
+            attr_name = check_messages_for_attr_info(ns, name)
+            if attr_name:
+                return attr_name
+            mail_texts = cache.MAIL_UPDATE_TEXTS[ns]
+            for key, message in mail_texts.iteritems():
                 for val in getattr(message, 'en'):
                     if name == val.lower():
                         return key # key is an attribute name
@@ -776,9 +796,9 @@ class MailEditor(InboundMailHandler):
 def get_display_text(ns, name, locale='en'):
     """Gets a readable version of the supplied value in its namespace."""
     # TODO(pfritzsche): when multiple languages are supported, actually use the
-    # third locale parameter for this function
-    map = getattr(cache.MAIL_UPDATE_TEXTS[ns].get(name), locale, [])
-    return map and map[0] or ''
+    # locale parameter for this function
+    print ns, name
+    return getattr(cache.MESSAGES.get((ns, name)), locale, '')
 
 
 def get_locale_and_nickname(account, message):

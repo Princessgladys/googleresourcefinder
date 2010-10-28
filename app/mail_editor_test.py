@@ -183,10 +183,23 @@ class MailEditorTest(MediumTestCase):
                   values=export_test.SERVICES).put()
         Attribute(key_name='location', type='geopt').put()
         Message(ns='attribute_value', en='X-Ray', name='X_RAY').put()
-        Message(ns='attribute_value', en='General Surgery',
+        Message(ns='attribute_value', en='General surgery',
                 name='GENERAL_SURGERY').put()
         Message(ns='attribute_value', en='Operational',
                 name='OPERATIONAL').put()
+        Message(ns='attribute_name', en='Available beds',
+                name='available_beds').put()
+        Message(ns='attribute_name', en='Email', name='email').put()
+        Message(ns='attribute_name', en='Commune', name='commune').put()
+        Message(ns='attribute_name', en='Services', name='services').put()
+        Message(ns='attribute_name', en='Total beds',
+                name='total_beds').put()
+        Message(ns='attribute_name', en='Can pick up patients',
+                name='can_pick_up_patients').put()
+        Message(ns='attribute_name', en='Commune code',
+                name='commune_code').put()
+        Message(ns='attribute_name', en='Operational status',
+                name='operational_status').put()
         setup_mail_update_texts()
 
     def tearDown(self):
