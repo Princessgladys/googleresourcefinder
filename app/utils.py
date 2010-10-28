@@ -14,6 +14,7 @@
 
 from google.appengine.api import urlfetch
 from google.appengine.api import users
+from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 import google.appengine.ext.webapp.template
@@ -29,9 +30,9 @@ import config
 from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
-from feedlib.crypto import get_secret
-from feedlib.errors import ErrorMessage, Redirect
-from feedlib.struct import Struct
+from feeds.crypto import get_secret
+from feeds.errors import ErrorMessage, NoValueFoundError, ValueNotAllowedError
+from feeds.errors import Redirect
 import gzip
 from html import html_escape
 import logging
@@ -110,6 +111,10 @@ def get_message(namespace, name_or_entity, locale=''):
     message = cache.MESSAGES.get((namespace, name))
     return message and getattr(message, locale or get_locale()) or name
 
+
+class Struct:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
 
 
 class Handler(webapp.RequestHandler):

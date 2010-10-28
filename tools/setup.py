@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import cache
+import config
 import cron
 import simplejson
 from access import *
@@ -134,6 +135,147 @@ def setup_subject_types():
                                  'operational_status', 'alert_status'])
     db.put(pk_hospital)
 
+
+def setup_mail_update_texts():
+    """Sets up mail update messages."""
+    def mail_update_text(ns, name, **kw):
+        return MailUpdateText.create(ns, name, **kw)
+
+    name_txt = lambda name, **kw: mail_update_text(
+        'attribute_name', name, **kw)
+    value_txt = lambda name, **kw: mail_update_text(
+        'attribute_value', name, **kw)
+
+    mail_update_texts = [
+        # ------------------------------------------------------ Attribute Names
+        name_txt('title', en=['Title', 'name']),
+        name_txt('alt_title',
+                 en=['Alternate title', 'alternate name', 'alt name']),
+        name_txt('pcode', en=['PCode']),
+        name_txt('healthc_id', en=['HealthC ID', 'healthcid', 'hid']),
+        name_txt('id', en=['ID']),
+        name_txt('alt_id', en=['Alternate ID']),
+        name_txt('available_beds',
+                 en=['Available beds', 'available', 'avail', 'ab']),
+        name_txt('total_beds', en=['Total beds', 'total', 'beds', 'tb']),
+        name_txt('services', en=['Services', 'serv']),
+        name_txt('other_services', en=['Other services', 'other serv']),
+        name_txt('contact_name', en=['Contact name', 'contact']),
+        name_txt('phone', en=['Phone']),
+        name_txt('mobile', en=['Mobile', 'cellphone']),
+        name_txt('fax', en=['Fax']),
+        name_txt('email', en=['Email', 'e-mail']),
+        name_txt('department', en=['Department', 'dept']),
+        name_txt('district', en=['District']),
+        name_txt('commune_code', en=['Commune code']),
+        name_txt('commune', en=['Commune']),
+        name_txt('administrative_area',
+                 en=['State / Province / Territory', 'state', 'province',
+                     'territory', 'state/province/territory']),
+        name_txt('sub_administrative_area',
+                 en=['District / County', 'district/county', 
+                     'district', 'county']),
+        name_txt('locality',
+                 en=['City / Town / Village', 'city/town/village',
+                     'city', 'town', 'village']),
+        name_txt('address', en=['Address']),
+        name_txt('location', en=['Location', 'loc']),
+        name_txt('accuracy', en=['Accuracy', 'acc']),
+        name_txt('maps_link', en=['Google Maps Link']),
+        name_txt('organization', en=['Organization', 'org']),
+        name_txt('organization_type',
+                 en=['Organization type', 'org type']),
+        name_txt('category', en=['Category', 'cat']),
+        name_txt('construction', en=['Construction']),
+        name_txt('damage', en=['Damage', 'dmg']),
+        name_txt('operational_status',
+                 en=['Operational status', 'op status']),
+        name_txt('alert_status', en=['Alert status', 'alert']),
+        name_txt('comments', en=['Comments']),
+        name_txt('reachable_by_road', en=['Reachable by road']),
+        name_txt('can_pick_up_patients', en=['Can pick up patients']),
+        name_txt('region_id', en=['Region ID']),
+        name_txt('district_id', en=['District ID']),
+        name_txt('commune_id', en=['Commune ID']),
+        name_txt('sante_id', en=['Sante ID']),
+ 
+        # ----------------------------------------------------- Attribute Values
+        # None [General]
+        value_txt('none', en=['*none']),
+
+        # Boolean [General]
+        value_txt('true', en=['yes', 'y', 'true']),
+        value_txt('false', en=['no', 'n', 'false']),
+
+        # Organization Type
+        value_txt('COMMUNITY', en=['Community']),
+        value_txt('FAITH_BASED', en=['Faith-based']),
+        value_txt('FOR_PROFIT', en=['For-profit', 'profit']),
+        value_txt('MILITARY', en=['Military', 'mil']),
+        value_txt('MIXED', en=['Mixed', 'mix']),
+        value_txt('NGO', en=['NGO']),
+        value_txt('PUBLIC', en=['Public', 'pub']),
+        value_txt('UNIVERSITY', en=['University']),
+
+        # Category
+        value_txt('CLINIC', en=['Clinic']),
+        value_txt('DISPENSARY', en=['Dispensary']),
+        value_txt('HOSPITAL', en=['Hospital', 'hosp']),
+        value_txt('MOBILE_CLINIC', en=['Mobile clinic']),
+        value_txt('LABORATORY', en=['Laboratory', 'lab']),
+
+        # Construction
+        value_txt('REINFORCED_CONCRETE',
+                  en=['Reinforced concrete', 'reinforced', 'concrete']),
+        value_txt('UNREINFORCED_MASONRY',
+                  en=['Unreinforced masonry', 'unreinforced', 'masonry']),
+        value_txt('WOOD_FRAME',
+                  en=['Wood frame', 'wood', 'frame']),
+        value_txt('ADOBE', en=['Adobe']),
+
+        # Operational Status
+        value_txt('OPERATIONAL', en=['Operational']),
+        value_txt('NO_SURGICAL_CAPACITY',
+                  en=['No surgical capacity', 'no surgery']),
+        value_txt('FIELD_HOSPITAL', en=['Field hospital']),
+        value_txt('FIELD_WITH_HOSPITAL',
+                  en=['Field hospital co-located with hospital',
+                      'field with hospital']),
+        value_txt('CLOSED_OR_CLOSING',
+                  en=['Closed or closing', 'closed', 'closing']),
+
+        # Services
+        value_txt('GENERAL_SURGERY',
+                  en=['General surgery', 'gen surgery']),
+        value_txt('ORTHOPEDICS', en=['Orthopedics', 'ortho']),
+        value_txt('NEUROSURGERY', en=['Neurosurgery', 'neuro']),
+        value_txt('VASCULAR_SURGERY', en=['Vascular surgery', 'vascular']),
+        value_txt('INTERNAL_MEDICINE',
+                  en=['Internal medicine', 'internal med']),
+        value_txt('CARDIOLOGY', en=['Cardiology', 'cardio']),
+        value_txt('INFECTIOUS_DISEASE',
+                  en=['Infectious disease', 'infectious']),
+        value_txt('PEDIATRICS', en=['Pediatrics']),
+        value_txt('POSTOPERATIVE_CARE',
+                  en=['Postoperative care', 'postoperative']),
+        value_txt('REHABILITATION', en=['Rehabilitation']),
+        value_txt('OBSTETRICS_GYNECOLOGY',
+                  en=['Obstetrics and Gynecology', 'obstetrics', 'gynecology',
+                      'obgyn']),
+        value_txt('MENTAL_HEALTH', en=['Mental Health', 'mental']),
+        value_txt('DIALYSIS', en=['Dialysis']),
+        value_txt('LAB', en=['Lab']),
+        value_txt('X_RAY', en=['X-Ray', 'xray']),
+        value_txt('CT_SCAN', en=['CT Scan', 'ct']),
+        value_txt('BLOOD_BANK', en=['Blood Bank', 'blood']),
+        value_txt('MORTUARY_SERVICES', en=['Mortuary Services', 'mortuary']),
+        value_txt('OUTPATIENT_CARE', en=['Outpatient Care', 'outpatient']),
+        value_txt('EMERGENCY_SERVICES', en=['Emergency Services', 'emergency']),
+        value_txt('CHOLERA_TREATMENT', en=['Cholera Treatment', 'cholera']),
+        value_txt('OTHER', en=['Other']),
+    ]
+
+    db.put(mail_update_texts)
 
 
 def setup_messages():
@@ -435,6 +577,7 @@ def setup_datastore():
     information will not be changed or deleted.)"""
     setup_subdomains()
     setup_subject_types()
+    setup_mail_update_texts()
     setup_messages()
     setup_mail_alerts()
     cache.flush_all()  # flush any cached entities
