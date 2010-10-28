@@ -222,7 +222,8 @@ def check_messages_for_attr_info(ns, alt_name, locale='en'):
     given locale."""
     for key, msg in cache.MESSAGES.iteritems():
         if key[0] == ns:
-            if getattr(msg, locale).lower() == alt_name.lower():
+            text = getattr(msg, locale)
+            if text and text.lower() == alt_name.lower():
                 return msg.name
 
 
@@ -798,7 +799,6 @@ def get_display_text(ns, name, locale='en'):
     """Gets a readable version of the supplied value in its namespace."""
     # TODO(pfritzsche): when multiple languages are supported, actually use the
     # locale parameter for this function
-    print ns, name
     return getattr(cache.MESSAGES.get((ns, name)), locale, '')
 
 
