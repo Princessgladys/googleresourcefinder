@@ -26,19 +26,21 @@ and in-memory caches."""
 
 
 class CacheGroup:
-    """A group of caches, keyed by subdomain.  Instantiates the given cache
-    class for each subdomain the first time that cache is requested."""
+    """A group of caches, keyed by subdomain or namespace.  Instantiates the
+    given cache class for each subdomain or namespace the first time that cache
+    is requested."""
     def __init__(self, cache_class):
         """'cache_class' should be a class that (a) has a flush() method and
-        (b) has a constructor taking one argument, a subdomain."""
+        (b) has a constructor taking one argument, a subdomain or namespace."""
         self.cache_class = cache_class
         self.caches = {}
 
-    def __getitem__(self, subdomain):
-        """Gets (and optionally creates) the cache for the given subdomain."""
-        if subdomain not in self.caches:
-            self.caches[subdomain] = self.cache_class(subdomain)
-        return self.caches[subdomain]
+    def __getitem__(self, subdomain_or_ns):
+        """Gets (and optionally creates) the cache for the given subdomain
+        or namespace."""
+        if subdomain_or_ns not in self.caches:
+            self.caches[subdomain_or_ns] = self.cache_class(subdomain_or_ns)
+        return self.caches[subdomain_or_ns]
 
     def flush(self):
         """Flushes all the underlying caches."""
@@ -75,13 +77,13 @@ class Cache(UserDict.DictMixin):
     then finally loads data from the datastore.  The local in-memory cache
     lives for ttl seconds, then is refreshed from memcache.  Transparently
     exposes a dictionary interface to the underlying cached dictionary."""
-    def __init__(self, subdomain='', ttl=30):
+    def __init__(self, subdomain_or_ns='', ttl=30):
         assert ttl > 0
-        self.subdomain = subdomain
+        self.subdomain_or_ns = subdomain_or_ns
         self.entities = None
         self.last_refresh = 0  # last time data was loaded into local memory
         self.ttl = ttl  # maximum age in seconds for data in local memory
-        self.memcache_key = subdomain + ':' + self.__class__.__name__
+        self.memcache_key = subdomain_or_ns + ':' + self.__class__.__name__
 
     def __getitem__(self, key):
         self.load()
@@ -124,14 +126,14 @@ class Cache(UserDict.DictMixin):
 class SubjectTypeCache(Cache):
     def fetch_entities(self):
         entities = utils.fetch_all(
-            model.SubjectType.all_in_subdomain(self.subdomain))
+            model.SubjectType.all_in_subdomain(self.subdomain_or_ns))
         return dict((e.key().name().split(':', 1)[1], e) for e in entities)
 
 
 class MinimalSubjectCache(Cache):
     def fetch_entities(self):
         entities = utils.fetch_all(
-            model.MinimalSubject.all_in_subdomain(self.subdomain))
+            model.MinimalSubject.all_in_subdomain(self.subdomain_or_ns))
         return dict((e.key().name().split(':', 1)[1], e) for e in entities)
 
 
@@ -139,6 +141,13 @@ class AttributeCache(Cache):
     def fetch_entities(self):
         entities = utils.fetch_all(model.Attribute.all())
         return dict((e.key().name(), e) for e in entities)
+
+
+class MailUpdateTextCache(Cache):
+    def fetch_entities(self):
+        entities = utils.fetch_all(
+            model.MailUpdateText.all_in_namespace(self.subdomain_or_ns))
+        return dict((e.name, e) for e in entities)
 
 
 class MessageCache(Cache):
@@ -169,6 +178,9 @@ JSON = CacheGroup(JsonCache)
 SUBJECT_TYPES = CacheGroup(SubjectTypeCache)
 MINIMAL_SUBJECTS = CacheGroup(MinimalSubjectCache)
 
+# These types have a separate cache for each namespace.
+MAIL_UPDATE_TEXTS = CacheGroup(MailUpdateTextCache)
+
 # Each of these caches is shared across all subdomains.
 ATTRIBUTES = AttributeCache()
 MESSAGES = MessageCache()
@@ -176,7 +188,7 @@ DEFAULT_ACCOUNT = DefaultAccountCache()
 SUBDOMAINS = SubdomainCache()
 
 CACHES = [JSON, SUBJECT_TYPES, MINIMAL_SUBJECTS, ATTRIBUTES, MESSAGES,
-          DEFAULT_ACCOUNT, SUBDOMAINS]
+          DEFAULT_ACCOUNT, SUBDOMAINS, MAIL_UPDATE_TEXTS]
 
 def flush_all():
     """Flush all caches."""

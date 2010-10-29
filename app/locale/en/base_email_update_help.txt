@@ -16,8 +16,10 @@ update General Hospital
 Total beds: 37
 Available beds: 10
 Email: test@example.com
+Operational status: No surgical capacity
 
 update Public Hospital
 Reachable by road: yes
+Services: Lab, Rehabilitation, -Cardiology
 
 {% include help_file %}

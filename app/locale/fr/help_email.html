@@ -4,7 +4,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Resource Finder</title>
 <style>
-  body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
+  body, h1, td, p { font-family: helvetica, arial; font-size: 13px;
+    vertical-align: top; min-width: 150px; }
+  div { padding: 2px 0px 5px 10px; }
   h1 { font-size: 16px }
   ol { margin:0 0 1em 2em; *margin:0 0 1em 2.3em }
   p { margin:0 0 1em }
@@ -119,8 +121,57 @@ Reachable by road: yes</pre>
       <td>Can pick up patients</td>
       <td>Whether or not the facility can pick up patients</td>
     </tr>
+
+    <tr>
+      <td colspan="2">
+        <b><br/>Multiple choice attribute values must be comma separated. Add a
+          '-' to the start of a value to remove it from the list:</b>
+      </td>
+    </tr>
+    <tr>
+      <td>Services</td>
+      <td>Available services for the facility.
+        <div>
+          <b>Choices:</b> General Surgery, Orthopedics, Neurosurgery, Vascular
+          Surgery, Internal Medicine, Cardiology, Infectious Disease,
+          Pediatrics, Postoperative Care, Rehabilitation, Obstetrics and
+          Gynecology, Mental Health, Dialysis, Lab, X-Ray, CT Scan, Blood Bank,
+          Mortuary Services</div></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <b><br/>List attribute values must be one of a specific set of
+          choices.</b>
+      </td>
+    </tr>
+    <tr>
+      <td>Organization type</td>
+      <td>The category of organization the facility falls under
+        <div>
+          <b>Choices:</b> Public, For-profit, University, Community, NGO,
+          Faith-based, Military, Mixed</div></td>
+    </tr>
+    <tr>
+      <td>Category</td>
+      <td>The type of facility
+        <div>
+          <b>Choices:</b> Hospital, Clinic, Mobile Clinic, Dispensary,
+          Laboratory</div></td>
+    </tr>
+    <tr>
+      <td>Construction</td>
+      <td>The construction type of the building
+        <div>
+          <b>Choices:</b> Reinforced concrete, Unreinforced masonry, Wood frame,
+          Adobe</div></td>
+    </tr>
+    <tr>
+      <td>Operational status</td>
+      <td>The current operational status of the facility
+        <div>
+          <b>Choices:</b> Operational, No surgical capacity, Field hospital,
+          Field hospital co-located with hospital, Closed or closing</div></td>
+    </tr>
   </table>
-{% comment %}
-# TODO(pfritzsche): add information on list attributes, i.e. services
-{% endcomment %}
 {% include "footer.html" %}

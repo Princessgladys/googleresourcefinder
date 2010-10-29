@@ -20,19 +20,22 @@ import re
 import django.utils.translation
 from google.appengine.api import mail
 from google.appengine.api import users
+from nose.tools import assert_raises
 
 import cache
 import export_test
 import mail_editor
-from feedlib.xml_utils import Struct
+from feeds.errors import *
+from feeds.xmlutils import Struct
 from medium_test_case import MediumTestCase
-from model import Account, Attribute, Subdomain, MinimalSubject, Subject
-from model import SubjectType
+from model import Account, Attribute, MailUpdateText, Message, MinimalSubject
+from model import Subdomain, Subject, SubjectType
+from setup import setup_mail_update_texts, setup_subdomains, setup_subject_types
 from utils import db
 
 SAMPLE_EMAIL_WORKING = '''UPDATE title_foo (example.org/123)
 Available beds: 18
-Total beds: 222
+Total beds:222
 Email test@example.com
 Commune foo@bar!
 Can pick_up patients yes'''
@@ -111,6 +114,19 @@ commune code: 1'''
 SAMPLE_EMAIL_AMBIGUOUS_UPDATE_BROKEN = '''update title_foo
 commune code 1'''
 
+SAMPLE_EMAIL_ENUMS = '''update title_foo
+services: -x-ray, general surgery
+operational status:operational'''
+
+SAMPLE_EMAIL_ENUMS_WITH_ERRORS = '''update title_foo
+services: x'''
+
+SAMPLE_EMAIL_WITH_ABBREVIATION = '''update title_foo
+tb: 9999'''
+
+SAMPLE_EMAIL_WITH_AMBIGUOUS_MAP = '''update title_foo
+total beds 8888'''
+
 class MailEditorTest(MediumTestCase):
     def setUp(self):
         MediumTestCase.setUp(self)
@@ -123,7 +139,8 @@ class MailEditorTest(MediumTestCase):
                                affiliation='affiliation_foo')
         self.subject = Subject(key_name='haiti:example.org/123',
                                type='hospital', author=self.user,
-                               title__='title_foo', healthc_id__='123')
+                               title__='title_foo', healthc_id__='123',
+                               services__=['X_RAY'])
         self.subject2 = Subject(key_name='haiti:example.org/456',
                                 type='hospital', author=self.user,
                                 title__='title_bar', healthc_id__='456')
@@ -133,14 +150,19 @@ class MailEditorTest(MediumTestCase):
         self.subject4 = Subject(key_name='haiti:example.org/012',
                                 type='hospital', author=self.user,
                                 title__='title_foobar', healthc_id__='012')
-        self.ms = MinimalSubject(self.subject, type='hospital')
-        self.ms2 = MinimalSubject(self.subject2, type='hospital')
-        self.ms3 = MinimalSubject(self.subject3, type='hospital')
-        self.ms4 = MinimalSubject(self.subject4, type='hospital')
+        self.ms = MinimalSubject.create(self.subject)
+        self.ms.set_attribute('title', 'title_foo')
+        self.ms2 = MinimalSubject.create(self.subject2)
+        self.ms2.set_attribute('title', 'title_bar')
+        self.ms3 = MinimalSubject.create(self.subject3)
+        self.ms3.set_attribute('title', 'title_foobar')
+        self.ms4 = MinimalSubject.create(self.subject4)
+        self.ms4.set_attribute('title', 'title_foobar')
         attribute_names = export_test.STR_FIELDS + \
                           export_test.INT_FIELDS + \
                           export_test.BOOL_FIELDS.keys() + \
-                          export_test.SELECT_FIELDS.keys()
+                          export_test.SELECT_FIELDS.keys() + \
+                          ['services']
         self.subject_type = SubjectType(key_name='haiti:hospital',
                                         attribute_names=attribute_names)
         self.subdomain = Subdomain(key_name='haiti')
@@ -155,7 +177,30 @@ class MailEditorTest(MediumTestCase):
         for field in export_test.BOOL_FIELDS:
             Attribute(key_name=field, type='bool').put()
         for field in export_test.SELECT_FIELDS:
-            Attribute(key_name=field, type='choice').put()
+            Attribute(key_name=field, type='choice',
+                      values=['OPERATIONAL']).put()
+        Attribute(key_name='services', type='multi',
+                  values=export_test.SERVICES).put()
+        Attribute(key_name='location', type='geopt').put()
+        Message(ns='attribute_value', en='X-Ray', name='X_RAY').put()
+        Message(ns='attribute_value', en='General surgery',
+                name='GENERAL_SURGERY').put()
+        Message(ns='attribute_value', en='Operational',
+                name='OPERATIONAL').put()
+        Message(ns='attribute_name', en='Available beds',
+                name='available_beds').put()
+        Message(ns='attribute_name', en='Email', name='email').put()
+        Message(ns='attribute_name', en='Commune', name='commune').put()
+        Message(ns='attribute_name', en='Services', name='services').put()
+        Message(ns='attribute_name', en='Total beds',
+                name='total_beds').put()
+        Message(ns='attribute_name', en='Can pick up patients',
+                name='can_pick_up_patients').put()
+        Message(ns='attribute_name', en='Commune code',
+                name='commune_code').put()
+        Message(ns='attribute_name', en='Operational status',
+                name='operational_status').put()
+        setup_mail_update_texts()
 
     def tearDown(self):
         db.delete([self.account, self.subject, self.subject2, self.subject3,
@@ -163,47 +208,95 @@ class MailEditorTest(MediumTestCase):
                    self.ms, self.ms2, self.ms3, self.ms4])
         for attribute in Attribute.all():
             db.delete(attribute)
+        for attr_map in MailUpdateText.all():
+            db.delete(attr_map)
+        for message in Message.all():
+            db.delete(message)
 
     def test_parse(self):
         """Confirm that the parse function properly translates string values
         into datastore-friendly values."""
         # test an int attribute
-        attribute_name = 'available_beds'
+        attribute = Attribute.get_by_key_name('available_beds')
         update = '222'
-        assert mail_editor.parse(attribute_name, update) == 222
+        assert mail_editor.parse(attribute, update) == 222
 
         # make sure it throws an error when an int is expected but not received
         update = 'd'
         self.assertRaises(ValueError, mail_editor.parse,
-                          attribute_name, update)
+                          attribute, update)
 
         # test a string attribute
-        attribute_name = 'organization'
+        attribute = Attribute.get_by_key_name('organization')
         update = 'organization_foo'
-        assert (mail_editor.parse(attribute_name, update) ==
+        assert (mail_editor.parse(attribute, update) ==
                 'organization_foo')
 
         # test like attributes names
-        attribute_name = 'commune_code'
+        attribute = Attribute.get_by_key_name('commune_code')
         update = '12345'
-        assert mail_editor.parse(attribute_name, update) == 12345
+        assert mail_editor.parse(attribute, update) == 12345
 
         # test a bool attribute
-        attribute_name = 'reachable_by_road'
+        attribute = Attribute.get_by_key_name('reachable_by_road')
         update = 'y'
-        assert mail_editor.parse(attribute_name, update)
+        assert mail_editor.parse(attribute, update)
 
-        attribute_name = 'reachable_by_road'
         update = 'yEs'
-        assert mail_editor.parse(attribute_name, update)
+        assert mail_editor.parse(attribute, update)
 
-        attribute_name = 'reachable_by_road'
-        update = '!'
-        assert not mail_editor.parse(attribute_name, update)
-
-        attribute_name = 'reachable_by_road'
         update = 'no'
-        assert not mail_editor.parse(attribute_name, update)
+        assert not mail_editor.parse(attribute, update)
+
+        update = '!'
+        assert_raises(ValueError, mail_editor.parse, attribute, update)
+        
+        # test a geopt attribute
+        attribute = Attribute.get_by_key_name('location')
+        update = '18.5, 18'
+        assert mail_editor.parse(attribute, update) == db.GeoPt(18.5, 18)
+
+        update = '0, 0'
+        assert mail_editor.parse(attribute, update) == db.GeoPt(0, 0)
+
+        update = '0,0'
+        assert mail_editor.parse(attribute, update) == db.GeoPt(0, 0)
+
+        update = '18.5'
+        assert_raises(ValueError, mail_editor.parse, attribute, update)
+
+        update = '18.5, 18, 17.5'
+        assert_raises(ValueError, mail_editor.parse, attribute, update)
+
+        update = 'a,b'
+        assert_raises(ValueError, mail_editor.parse, attribute, update)
+
+        # test a choice attribute
+        attribute = Attribute.get_by_key_name('operational_status')
+        update = 'operational'
+        assert mail_editor.parse(attribute, update) == 'OPERATIONAL'
+
+        update = 'foo'
+        assert_raises(
+            ValueNotAllowedError, mail_editor.parse, attribute, update)
+
+        # test a multi attribute
+        attribute = Attribute.get_by_key_name('services')
+        update = 'general surgery, -x-ray'
+        assert mail_editor.parse(attribute, update) == (
+            ['X_RAY'], ['GENERAL_SURGERY'], [])
+
+        update += ', x'
+        assert mail_editor.parse(attribute, update) == (
+            ['X_RAY'], ['GENERAL_SURGERY'], ['x'])
+
+        # test a value being set to null
+        update = '*none'
+        assert not mail_editor.parse(attribute, update)
+
+        # test an unfound value
+        update = ''
+        assert_raises(NoValueFoundError, mail_editor.parse, attribute, update)
 
     def test_mail_editor_have_profile_info(self):
         """Confirms that have_profile_info() identifies existing users."""
@@ -276,7 +369,7 @@ class MailEditorTest(MediumTestCase):
         body = self.sent_messages[1].textbody()
         assert len(self.sent_messages) == 2
         assert 'ERROR' in self.sent_messages[1].subject()
-        assert '"d" is not a valid value for "available_beds"' in body
+        assert '"Available beds" requires a numerical value.' in body
         assert body.count('--- --- --- ---') == 2
         assert 'REFERENCE DOCUMENT' in body
 
@@ -393,6 +486,41 @@ class MailEditorTest(MediumTestCase):
         assert 'Commune:' in body and 'Commune code:' in body
         assert 'REFERENCE DOCUMENT' in body
 
+        # check email with enums
+        message.body = SAMPLE_EMAIL_ENUMS
+        mail_editor_.receive(message)
+        body = self.sent_messages[13].textbody()
+        assert len(self.sent_messages) == 14
+        assert 'ERROR' not in self.sent_messages[13].subject()
+        assert 'Services' in body and 'General surgery' in body
+        assert 'X-Ray' not in body
+        assert 'Operational status' in body and 'Operational' in body
+
+        # check email with enums and error
+        message.body = SAMPLE_EMAIL_ENUMS_WITH_ERRORS
+        mail_editor_.receive(message)
+        body = self.sent_messages[14].textbody()
+        assert len(self.sent_messages) == 15
+        assert 'ERROR' in self.sent_messages[14].subject()
+        assert 'Services' in body and 'x' in body
+        assert 'requires all values' in body
+
+        # check email with an abbreviation for the attribute name
+        message.body = SAMPLE_EMAIL_WITH_ABBREVIATION
+        mail_editor_.receive(message)
+        body = self.sent_messages[15].textbody()
+        assert len(self.sent_messages) == 16
+        assert 'ERROR' not in self.sent_messages[15].subject()
+        assert 'Total beds' in body and '9999' in body
+
+        # check email with mixed attribute names
+        message.body = SAMPLE_EMAIL_WITH_AMBIGUOUS_MAP
+        mail_editor_.receive(message)
+        body = self.sent_messages[16].textbody()
+        assert len(self.sent_messages) == 17
+        assert 'ERROR' not in self.sent_messages[16].subject()
+        assert 'Total beds' in body and '8888' in body
+
     def test_mail_editor_process_email(self):
         """Confirms that process_email() returns a properly formatted structure
         of updates and errors, given the body of an email."""
@@ -419,7 +547,7 @@ class MailEditorTest(MediumTestCase):
         updates = data.update_stanzas
         errors = data.error_stanzas
         assert updates[0][0].key().name() == 'haiti:example.org/123'
-        assert 'Available beds d' in errors[0][1][0]['original_line']
+        assert 'Available beds: d' in errors[0][1][0]['original_line']
         assert len(updates[0][1]) == 4
 
         # check quoted email body
@@ -572,6 +700,7 @@ class MailEditorTest(MediumTestCase):
 
     def test_mail_editor_get_attribute_matches(self):
         mail_editor_ = mail_editor.MailEditor()
+        mail_editor_.account = self.account
         matches = mail_editor_.get_attribute_matches(
             self.subject_type, 'commune code 1')
         assert len(matches) == 2
@@ -588,6 +717,11 @@ class MailEditorTest(MediumTestCase):
         assert match[0] == 'commune_code'
         assert match[1] == '1'
 
+        match = mail_editor_.get_attribute_matches(
+            self.subject_type, 'commune code:1')
+        assert match[0] == 'commune_code'
+        assert match[1] == '1'
+
     def test_match_email(self):
         assert mail_editor.match_email('test@example.com') == 'test@example.com'
         assert (mail_editor.match_email(u't\u00e9st@example.com') ==
@@ -596,7 +730,6 @@ class MailEditorTest(MediumTestCase):
                 'test@example.com')
         assert (mail_editor.match_email('"First Last" ' +
                 '<first.last@example.com.pk>') == 'first.last@example.com.pk')
-        print mail_editor.match_email('12_3%4-56@123-456.org')
         assert (mail_editor.match_email('12_3%4-56@123-456.org') ==
                 '12_3%4-56@123-456.org')
         assert (mail_editor.match_email('<me+pakistan@example.biz>') ==
@@ -674,6 +807,29 @@ class MailEditorTest(MediumTestCase):
             hours=1, minutes=34)
         assert mail_editor.parse_utc_offset('+0134') == datetime.timedelta(
             0, 5640)
+
+    def test_mail_update_text(self):
+        """Checks to make sure that no input strings from the MailUpdateText
+        table are used twice within the same subject type."""
+        setup_subdomains()
+        setup_subject_types()
+
+        for subdomain in cache.SUBDOMAINS:
+            for type in cache.SUBJECT_TYPES[subdomain]:
+                map = {}
+                for attribute in cache.SUBJECT_TYPES[
+                    subdomain][type].attribute_names:
+                    for value in cache.MAIL_UPDATE_TEXTS['attribute_name'][
+                        attribute].en:
+                        if value in map:
+                            assert False
+                        map[value] = 1
+                    for value in cache.ATTRIBUTES[attribute].values:
+                        for text in cache.MAIL_UPDATE_TEXTS['attribute_value'][
+                            value].en:
+                            if text in map:
+                                assert False
+                            map[text] = 1
 
     def check_for_correct_update(self, body, message):
         assert body.count('--- --- --- ---') == 2

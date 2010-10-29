@@ -20,13 +20,21 @@ class ErrorMessage(Exception):
         self.status = status
         self.message = message
 
-    def __str__(self):
-        return 'ErrorMessage(%r, %r)' % (self.status, self.message)
+
+class NoValueFoundError(Exception):
+    """Raise this exception when no value is found when one is expected."""
+    def __init__(self, message=''):
+        self.message = message
+
+
+class ValueNotAllowedError(Exception):
+    """Raise this exception when an incorrect or invalid value is found."""
+    def __init__(self, message=''):
+        self.message = message
+
 
 class Redirect(Exception):
     """Raise this exception to redirect to another page."""
     def __init__(self, url):
         self.url = url
 
-    def __str__(self):
-        return 'Redirect(%r)' % self.url
