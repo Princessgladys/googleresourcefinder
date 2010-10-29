@@ -92,50 +92,7 @@ class EditTest(SeleniumTestCase):
         def edit(self):
             self.open_edit_page()
 
-        # Check that the delta feed is empty
-        doc = self.fetch('/feeds/delta?subdomain=haiti')
-        feed = doc.first('atom:feed')
-        assert feed
-        assert feed.all('atom:entry') == []
-
         self.run_edit(login, save, edit)
-
-        # Check that the delta feed has an entry now
-        doc = self.fetch('/feeds/delta?subdomain=haiti')
-        feed = xml_utils.parse(doc.content)
-        assert feed
-        entries = feed.findall(qualify(ATOM_NS, 'entry'))
-        
-        entry = entries[-1]  # last entry should be the first edit
-        content = entry.find(qualify(REPORT_NS, 'content'))
-        row = content.find(qualify(REPORT_NS, 'row'))
-        fields = row.findall(qualify(SPREADSHEETS_NS, 'field'))
-        cells = {}
-        for field in fields:
-            cells[field.get('name')] = \
-                (field.text, field.get(qualify(REPORT_NS, 'comment')))
-        assert cells['commune'] == ('commune_foo', None)
-        assert cells['district'] == ('district_foo', None)
-        assert cells['damage'] == ('damage_foo', None)
-        assert cells['available_beds'] == ('1', None)
-        assert cells['total_beds'] == ('2', 'comment1')
-        assert cells['location'] == ('18.537207,-72.349663', 'comment2')
-        assert cells['services'] == (','.join(SERVICES), None)
-        assert cells['organization_type'] == ('NGO', None)
-        assert cells['reachable_by_road'] == ('TRUE', None)
-        assert cells['operational_status'] == ('NO_SURGICAL_CAPACITY', None)
-
-        entry = entries[0]  # first entry should be the last edit
-        content = entry.find(qualify(REPORT_NS, 'content'))
-        row = content.find(qualify(REPORT_NS, 'row'))
-        fields = row.findall(qualify(SPREADSHEETS_NS, 'field'))
-        cells = {}
-        for field in fields:
-            cells[field.get('name')] = \
-                (field.text, field.get(qualify(REPORT_NS, 'comment')))
-        assert cells['location'] == (None, None)
-        assert cells['available_beds'] == ('0', None)
-        assert cells['total_beds'] == ('0', None)
 
     def test_edit_permissions(self):
         """Ensure that the edit page can't be used without edit permission."""
@@ -293,6 +250,12 @@ class EditTest(SeleniumTestCase):
         self.click('//input[@name="save"]')
         self.verify_errors(text_fields)
 
+        # Check that the delta feed is empty
+        doc = self.fetch('/feeds/delta?subdomain=haiti')
+        feed = doc.first('atom:feed')
+        assert feed
+        assert feed.all('atom:entry') == []
+
         # Fill in the form
         text_fields = dict((name, name + '_foo') for name in STR_FIELDS)
         if add_new:
@@ -386,6 +349,44 @@ class EditTest(SeleniumTestCase):
         text_fields['location.lat'] = ''
         text_fields['location.lon'] = ''
         self.verify_fields(text_fields, checkbox_fields, select_fields)
+
+        # Check that the delta feed has three entries now
+        doc = self.fetch('/feeds/delta?subdomain=haiti')
+        feed = xml_utils.parse(doc.content)
+        assert feed
+        entries = feed.findall(qualify(ATOM_NS, 'entry'))
+        assert len(entries) == 3
+        
+        entry = entries[-1]  # last entry should be the first edit
+        content = entry.find(qualify(REPORT_NS, 'content'))
+        row = content.find(qualify(REPORT_NS, 'row'))
+        fields = row.findall(qualify(SPREADSHEETS_NS, 'field'))
+        cells = {}
+        for field in fields:
+            cells[field.get('name')] = \
+                (field.text, field.get(qualify(REPORT_NS, 'comment')))
+        assert cells['commune'] == ('commune_foo', None)
+        assert cells['district'] == ('district_foo', None)
+        assert cells['damage'] == ('damage_foo', None)
+        assert cells['available_beds'] == ('1', None)
+        assert cells['total_beds'] == ('2', 'comment1')
+        assert cells['location'] == ('18.537207,-72.349663', 'comment2')
+        assert cells['services'] == (','.join(SERVICES), None)
+        assert cells['organization_type'] == ('NGO', None)
+        assert cells['reachable_by_road'] == ('TRUE', None)
+        assert cells['operational_status'] == ('NO_SURGICAL_CAPACITY', None)
+
+        entry = entries[0]  # first entry should be the last edit
+        content = entry.find(qualify(REPORT_NS, 'content'))
+        row = content.find(qualify(REPORT_NS, 'row'))
+        fields = row.findall(qualify(SPREADSHEETS_NS, 'field'))
+        cells = {}
+        for field in fields:
+            cells[field.get('name')] = \
+                (field.text, field.get(qualify(REPORT_NS, 'comment')))
+        assert cells['location'] == (None, None)
+        assert cells['available_beds'] == ('0', None)
+        assert cells['total_beds'] == ('0', None)
 
     def test_edit_comments(self):
         """Tests comments and bubble reload during separate-page edit."""
