@@ -462,10 +462,11 @@ class MailUpdateText(db.Expando):
     # Expando values should be initialized on a per-language basis as a list
     # of accepted input strings for this particular map, in that language.
     # Use the same naming format as in the Message table [en for English,
-    # fr for French, etc.]. The first value in each list will be treated as
-    # a properly formatted value, for use as a display value to the user. For
-    # comparison purposes, each item in the list will be treated as
-    # case-insensitive. Spaces should be used in favor of underscores.
+    # fr for French, etc.]. The first value in each list should match the
+    # corresponding Message, to make mail editing behavior resilient to
+    # changes in translations. For comparison purposes, each item in the
+    # list will be treated as case-insensitive. Spaces should be used in
+    # favor of underscores.
 
     @classmethod
     def get(cls, ns, name):
