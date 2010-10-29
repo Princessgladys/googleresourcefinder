@@ -25,8 +25,8 @@ from nose.tools import assert_raises
 import cache
 import export_test
 import mail_editor
-from feeds.errors import *
-from feeds.xmlutils import Struct
+from feedlib.errors import *
+from feedlib.xml_utils import Struct
 from medium_test_case import MediumTestCase
 from model import Account, Attribute, MailUpdateText, Message, MinimalSubject
 from model import Subdomain, Subject, SubjectType
