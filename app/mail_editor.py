@@ -34,7 +34,6 @@ received update.
     get_min_subjects_by_lowercase_title(): searches minimal subjects by title
     MailEditor: incoming mail handler-- responds to incoming emails addressed to
         <subdomain>-updates@resource-finder@appspotmail.com
-    get_display_text: gets a display string version of an attribute name / value
     get_locale_and_nickname(): returns a locale and nickname for the given
         account and email message
     format_changes(): helper function to format attribute value tuples
@@ -210,8 +209,7 @@ def find_attribute_value(attribute, update_text):
     maps = cache.MAIL_UPDATE_TEXTS['attribute_value']
     update_lower = update_text.lower()
     for key, map in maps.iteritems():
-        if (update_lower in map.en[1:] or
-            update_lower == map.en[0].lower() and
+        if (update_lower in [text.lower() for text in map.en] and
             map.name in attribute.values):
             return map.name # name is an attribute value
 
@@ -313,7 +311,7 @@ def generate_ambiguous_update_error_msg(matches):
 def generate_bad_value_error_msg(update_text, attribute):
     """Generates an error message for an incorrect value for the specified
     attribute's type."""
-    name = get_display_text('attribute_name', attribute.key().name())
+    name = get_message('attribute_name', attribute.key().name(), 'en')
     line = '%s: %s' % (name, update_text)
     return {
         'error_message': ERRORS_BY_TYPE[attribute.type] % {'attribute': name},
@@ -773,7 +771,7 @@ class MailEditor(InboundMailHandler):
         subject_name = ms and ms.get_name()
         s_type = ms and ms.type or DEFAULT_SUBJECT_TYPES[self.subdomain]
         subject_type = cache.SUBJECT_TYPES[self.subdomain][s_type]
-        attributes = [get_display_text('attribute_name', a) for a in
+        attributes = [get_message('attribute_name', a, 'en') for a in
                       subject_type.attribute_names if
                       utils.can_edit(self.account, self.subdomain,
                                      cache.ATTRIBUTES[a])]
@@ -795,13 +793,6 @@ class MailEditor(InboundMailHandler):
         message.send()
 
 
-def get_display_text(ns, name, locale='en'):
-    """Gets a readable version of the supplied value in its namespace."""
-    # TODO(pfritzsche): when multiple languages are supported, actually use the
-    # locale parameter for this function
-    return getattr(cache.MESSAGES.get((ns, name)), locale, '')
-
-
 def get_locale_and_nickname(account, message):
     """Returns a locale and nickname for the given account and email message."""
     if account:
@@ -818,16 +809,16 @@ def format_changes(update, locale='en'):
     attribute_name, value = update
     attribute = cache.ATTRIBUTES[attribute_name]
     if attribute.type == 'multi':
-        formatted_value = ', '.join([get_display_text(
-            'attribute_value', e) or e for e in value])
+        formatted_value = ', '.join([get_message(
+            'attribute_value', e, locale) or e for e in value])
     elif attribute.type == 'choice':
-        formatted_value = get_display_text(
-            'attribute_value', value) or value
+        formatted_value = get_message(
+            'attribute_value', value, locale) or value
     else:
         formatted_value = format(value)
     return {
-        'attribute': get_display_text(
-            'attribute_name', attribute_name),
+        'attribute': get_message(
+            'attribute_name', attribute_name, locale),
         'value': formatted_value
     }
 
