@@ -21,11 +21,14 @@ from utils import Handler, run, url_unpickle
 
 class AddDeltaEntry(Handler):
     def post(self):
+        # Get the information about the edit from the query parameters.
         user_email = self.request.get('user_email')
         author_uri = user_email and 'mailto:' + user_email or ''
         subject_name = self.request.get('subject_name')
         observed = url_unpickle(self.request.get('observed'))
         changes = url_unpickle(self.request.get('changed_data'))
+
+        # Construct the XML content describing the edit.
         type_name = xml_utils.qualify(report_feeds.REPORT_NS, 'row')
         row = xml_utils.create_element(type_name)
         for name in changes:
@@ -36,10 +39,15 @@ class AddDeltaEntry(Handler):
             row.append(xml_utils.create_element(
                 (report_feeds.SPREADSHEETS_NS, 'field'), attributes,
                 row_utils.serialize(name, changes[name]['new_value'])))
+
+        # Create the Atom entry for the edit.
         report_feeds.ReportEntry.create_original(
             self.subdomain + '/delta', '', author_uri,
             subject_name, observed, type_name, xml_utils.serialize(row)
         ).put()
+
+        # Notify the PSHB hub that we have published a new entry.
+        report_feeds.notify_hub(self.request.host_url + '/feeds/delta')
 
 
 if __name__ == '__main__':
