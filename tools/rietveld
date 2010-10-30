@@ -144,7 +144,7 @@ else
 fi
 
 # Ask for a patch set description.
-TMP=~/issue-message.$$
+TMP=/tmp/issue-message.$$
 if [ -n "$MESSAGE" ]; then
   # Get one line of the last change description.
   DESC="$(hg log -b "$BRANCH" -r tip --template '{desc|firstline}  ')"
@@ -189,7 +189,7 @@ fi
 echo
 echo $PYTHON $TOOLS_DIR/upload.py $OPTIONS -m "\"$MESSAGE\""
 cd $PROJECT_DIR
-TMP=~/issue-number.$$
+TMP=/tmp/issue-number.$$
 MESSAGE=$(echo "$MESSAGE" | sed -e 's/\\/\\\\/g' -e s/\'/\\\\\'/g -e s/\"/\\\\\"/g)
 PYTHONPATH=$TOOLS_DIR $PYTHON -c "
 import upload
