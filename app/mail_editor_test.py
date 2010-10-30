@@ -25,8 +25,8 @@ from nose.tools import assert_raises
 import cache
 import export_test
 import mail_editor
-from feeds.errors import *
-from feeds.xmlutils import Struct
+from feedlib.errors import *
+from feedlib.xml_utils import Struct
 from medium_test_case import MediumTestCase
 from model import Account, Attribute, MailUpdateText, Message, MinimalSubject
 from model import Subdomain, Subject, SubjectType
@@ -118,6 +118,9 @@ SAMPLE_EMAIL_ENUMS = '''update title_foo
 services: -x-ray, general surgery
 operational status:operational'''
 
+SAMPLE_EMAIL_ENUMS_OVERWRITE = '''update title_foo
+services: ct scan'''
+
 SAMPLE_EMAIL_ENUMS_WITH_ERRORS = '''update title_foo
 services: x'''
 
@@ -185,6 +188,7 @@ class MailEditorTest(MediumTestCase):
         Message(ns='attribute_value', en='X-Ray', name='X_RAY').put()
         Message(ns='attribute_value', en='General surgery',
                 name='GENERAL_SURGERY').put()
+        Message(ns='attribute_value', en='CT Scan', name='CT_SCAN').put()
         Message(ns='attribute_value', en='Operational',
                 name='OPERATIONAL').put()
         Message(ns='attribute_name', en='Available beds',
@@ -496,29 +500,38 @@ class MailEditorTest(MediumTestCase):
         assert 'X-Ray' not in body
         assert 'Operational status' in body and 'Operational' in body
 
-        # check email with enums and error
-        message.body = SAMPLE_EMAIL_ENUMS_WITH_ERRORS
+        # check email with an enum overwrite
+        message.body = SAMPLE_EMAIL_ENUMS_OVERWRITE
         mail_editor_.receive(message)
         body = self.sent_messages[14].textbody()
         assert len(self.sent_messages) == 15
-        assert 'ERROR' in self.sent_messages[14].subject()
+        assert 'ERROR' not in self.sent_messages[14].subject()
+        assert 'Services' in body and 'CT Scan' in body
+        assert 'General surgery' not in body
+
+        # check email with enums and error
+        message.body = SAMPLE_EMAIL_ENUMS_WITH_ERRORS
+        mail_editor_.receive(message)
+        body = self.sent_messages[15].textbody()
+        assert len(self.sent_messages) == 16
+        assert 'ERROR' in self.sent_messages[15].subject()
         assert 'Services' in body and 'x' in body
         assert 'requires all values' in body
 
         # check email with an abbreviation for the attribute name
         message.body = SAMPLE_EMAIL_WITH_ABBREVIATION
         mail_editor_.receive(message)
-        body = self.sent_messages[15].textbody()
-        assert len(self.sent_messages) == 16
-        assert 'ERROR' not in self.sent_messages[15].subject()
+        body = self.sent_messages[16].textbody()
+        assert len(self.sent_messages) == 17
+        assert 'ERROR' not in self.sent_messages[16].subject()
         assert 'Total beds' in body and '9999' in body
 
         # check email with mixed attribute names
         message.body = SAMPLE_EMAIL_WITH_AMBIGUOUS_MAP
         mail_editor_.receive(message)
-        body = self.sent_messages[16].textbody()
-        assert len(self.sent_messages) == 17
-        assert 'ERROR' not in self.sent_messages[16].subject()
+        body = self.sent_messages[17].textbody()
+        assert len(self.sent_messages) == 18
+        assert 'ERROR' not in self.sent_messages[17].subject()
         assert 'Total beds' in body and '8888' in body
 
     def test_mail_editor_process_email(self):

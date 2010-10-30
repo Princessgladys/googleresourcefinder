@@ -258,20 +258,34 @@ def parse(attribute, update):
         return value 
     if attribute.type == 'multi':
         values = [x.strip() for x in update.split(',') if x]
-        to_subtract = []
-        to_add = []
-        errors = []
-        for value in values:
-            subtract = value[0] == '-'
-            new_value = subtract and value[1:] or value
-            formatted = find_attribute_value(attribute, new_value)
-            if subtract and formatted:
-                to_subtract.append(formatted)
-            elif formatted:
-                to_add.append(formatted)
-            else:
-                errors.append(value)
-        return (to_subtract, to_add, errors)
+        plus_minus = ['-', '+']
+        has_plus_minus = [x for x in values if x[0] in plus_minus]
+        if has_plus_minus:
+            to_subtract = []
+            to_add = []
+            errors = []
+            for value in values:
+                subtract = value[0] == '-'
+                add = value[0] == '+'
+                new_value = (subtract or add) and value[1:] or value
+                formatted = find_attribute_value(attribute, new_value)
+                if subtract and formatted:
+                    to_subtract.append(formatted)
+                elif formatted:
+                    to_add.append(formatted)
+                else:
+                    errors.append(value)
+            return (to_subtract, to_add, errors)
+        else:
+            new_value = []
+            errors = []
+            for value in values:
+                formatted = find_attribute_value(attribute, value)
+                if formatted:
+                    new_value.append(formatted)
+                else:
+                    errors.append(value)
+            return (new_value, errors)
 
 
 def get_list_update(subject, attribute, subtract, add):
@@ -571,15 +585,19 @@ class MailEditor(InboundMailHandler):
                     try:
                         value = parse(attribute, update_text)
                         if value and attribute.type == 'multi':
-                            subtract, add, error = value
+                            if len(value) == 3:
+                                subtract, add, error = value
+                                if not subtract and not add:
+                                    continue
+                                value = get_list_update(
+                                    subject, attribute, subtract, add)
+                            else:
+                                value, error = value
+                                
                             if error:
                                 error_text = ', '.join(error)
                                 errors.append(generate_error_with_correction(
                                     error_text, attribute))
-                            if not subtract and not add:
-                                continue
-                            value = get_list_update(
-                                subject, attribute, subtract, add)
                         updates.append((name, value))
                     except ValueError, BadValueError:
                         errors.append(generate_bad_value_error_msg(
