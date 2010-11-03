@@ -228,7 +228,27 @@ def check_messages_for_attr_info(ns, alt_name, locale='en'):
 def parse(attribute, update):
     """Parses a list of Unicode strings into an attribute value. Note:
     this currently assumes we are working with English values only.
-    Multiple languages are not yet supported."""
+    Multiple languages are not yet supported.
+    
+    Returns:
+      - For most attribute types, the new value supplied by the user.
+      - For "multi"-type attributes, the following will be returned:
+          
+          * Tuple of length 2 (new value, errors/invalid elements)
+          * Tuple of length 3 (values to subtract, to add, errors)
+
+        Length 2 tuples will be returned when the user does not
+        use +/- case; their supplied value will overwrite the datastore's
+        current value. Length 3 tuples will be returned when the user
+        uses +/- or mixed case; the values will be added/subtracted
+        to the current value in the datastore.
+        
+    Throws:
+        - NoValueFoundError, when none is supplied
+        - [Bad]ValueError, when the value is not of the correct format
+        - ValueNotAllowedError, when a given value is not allowed
+            * used when a value does not match a choice attribute's choices
+    """
     update = update.strip()
     if not update:
         raise NoValueFoundError
@@ -258,43 +278,49 @@ def parse(attribute, update):
         return value 
     if attribute.type == 'multi':
         values = [x.strip() for x in update.split(',') if x]
-        plus_minus = ['-', '+']
-        has_plus_minus = [x for x in values if x[0] in plus_minus]
-        if has_plus_minus:
+        if any(x[:1] in ['+', '-'] for x in values):
             to_subtract = []
             to_add = []
             errors = []
-            for value in values:
-                subtract = value[0] == '-'
-                add = value[0] == '+'
-                new_value = (subtract or add) and value[1:] or value
-                formatted = find_attribute_value(attribute, new_value)
-                if subtract and formatted:
-                    to_subtract.append(formatted)
-                elif formatted:
-                    to_add.append(formatted)
+            for value_text in values:
+                value = find_attribute_value(attribute, value_text.lstrip('-+'))
+                if value_text.startswith('-') and value:
+                    to_subtract.append(value)
+                elif value:
+                    to_add.append(value)
                 else:
-                    errors.append(value)
+                    errors.append(value_text)
             return (to_subtract, to_add, errors)
         else:
             new_value = []
             errors = []
-            for value in values:
-                formatted = find_attribute_value(attribute, value)
-                if formatted:
-                    new_value.append(formatted)
+            for value_text in values:
+                value = find_attribute_value(attribute, value_text)
+                if value:
+                    new_value.append(value)
                 else:
-                    errors.append(value)
+                    errors.append(value_text)
             return (new_value, errors)
 
 
-def get_list_update(subject, attribute, subtract, add):
+def get_list_update(subject, attribute, value):
     """Returns an updated version of the subject's current value for the
     attribute to include the changes sent by the user."""
-    current_value = set(subject.get_value(attribute.key().name()) or [])
-    current_value -= set(subtract)
-    current_value |= set(add)
-    return list(current_value)
+    if len(value) == 3: # user used plus/minus syntax
+        subtract, add, error = value
+        if not subtract and not add:
+            return []
+        value = set(subject.get_value(attribute.key().name()) or [])
+        value -= set(subtract)
+        value |= set(add)
+        value = list(value)
+    else:
+        value, error = value
+
+    if error:
+        error_text = ', '.join(error)
+        error = generate_error_with_correction(error_text, attribute)
+    return value, error
 
 
 DEFAULT_SUBJECT_TYPES = {
@@ -585,23 +611,12 @@ class MailEditor(InboundMailHandler):
                     try:
                         value = parse(attribute, update_text)
                         if value and attribute.type == 'multi':
-                            has_update = True
-                            if len(value) == 3: # user used plus/minus syntax
-                                subtract, add, error = value
-                                if not subtract and not add:
-                                    has_update = False
-                                value = get_list_update(
-                                    subject, attribute, subtract, add)
-                            else:
-                                value, error = value
-                                
+                            value, error = get_list_update(
+                                subject, attribute, value)
                             if error:
-                                error_text = ', '.join(error)
-                                errors.append(generate_error_with_correction(
-                                    error_text, attribute))
-                            if not has_update:
-                                continue
-                        updates.append((name, value))
+                                errors.append(error)
+                        if value != []:
+                            updates.append((name, value))
                     except ValueError, BadValueError:
                         errors.append(generate_bad_value_error_msg(
                             update_text, attribute))
@@ -829,10 +844,10 @@ def format_changes(update, locale='en'):
     """Helper function; used to format an attribute, value pair for email."""
     attribute_name, value = update
     attribute = cache.ATTRIBUTES[attribute_name]
-    if attribute.type == 'multi':
+    if value and attribute.type == 'multi':
         formatted_value = ', '.join([get_message(
             'attribute_value', e, locale) or e for e in value])
-    elif attribute.type == 'choice':
+    elif value and attribute.type == 'choice':
         formatted_value = get_message(
             'attribute_value', value, locale) or value
     else:
