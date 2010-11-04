@@ -50,6 +50,12 @@ Email test@example.com
 Commune foo@bar!
 Can pick up patients yes'''
 
+SAMPLE_EMAIL_AUTHENTICATION2 = '''nickname: nickname_foo
+affiliation: affiliation_foo
+
+update title_foo (example.org/123)
+Available beds 18'''
+
 SAMPLE_EMAIL_PARTIAL_AUTHENTICATION = 'nickname nickname_foo'
 
 SAMPLE_EMAIL_BROKEN = '''UPDATE title_foo (example.org/123)
@@ -330,11 +336,16 @@ class MailEditorTest(MediumTestCase):
             sender=self.account.email,
             to='haiti-updates@resource-finder.appspotmail.com',
             subject='Resource Finder Updates',
+            # check authentication without colons
             body=SAMPLE_EMAIL_AUTHENTICATION)
         mail_editor_ = mail_editor.MailEditor()
         mail_editor_.request = Struct(headers={'Host': 'localhost:8080'})
         mail_editor_.init(message)
         mail_editor_.account = None
+        assert mail_editor_.check_and_store_profile_info(message)
+
+        # check authentication with colons
+        message.body = SAMPLE_EMAIL_AUTHENTICATION2
         assert mail_editor_.check_and_store_profile_info(message)
 
         message.body=SAMPLE_EMAIL_WORKING

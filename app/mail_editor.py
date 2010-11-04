@@ -473,12 +473,11 @@ class MailEditor(InboundMailHandler):
         will be accessible by the group name s.
         """
         def check_for_example(s, example):
-            exp = r'%s\s+(?P<%s>.+)' % (s, s)
+            exp = r'%s(:)*\s+(?P<%s>.+)' % (s, s)
             matches = re.finditer(exp, text, flags=self.update_line_flags)
             for match in matches:
-                if match.group(s) == example:
-                    continue
-                return match.group(s).strip()
+                if not match.group(s) == example:
+                    return match.group(s).strip()
         nickname = check_for_example('nickname', 'John Smith')
         affiliation = check_for_example('affiliation', 'Smith Inc.')
         return (nickname, affiliation)
