@@ -308,12 +308,13 @@ def get_list_update(subject, attribute, value):
     attribute to include the changes sent by the user."""
     if len(value) == 3: # user used plus/minus syntax
         subtract, add, error = value
-        if not subtract and not add:
-            return []
-        value = set(subject.get_value(attribute.key().name()) or [])
-        value -= set(subtract)
-        value |= set(add)
-        value = list(value)
+        if subtract or add:
+            value = set(subject.get_value(attribute.key().name()) or [])
+            value -= set(subtract)
+            value |= set(add)
+            value = list(value)
+        else:
+            raise NoValueFoundError, error
     else:
         value, error = value
 
@@ -614,15 +615,17 @@ class MailEditor(InboundMailHandler):
                                 subject, attribute, value)
                             if error:
                                 errors.append(error)
-                        if value != []:
-                            updates.append((name, value))
+                        updates.append((name, value))
                     except ValueError, BadValueError:
                         errors.append(generate_bad_value_error_msg(
                             update_text, attribute))
                     except ValueNotAllowedError:
                         errors.append(generate_error_with_correction(
                             update_text, attribute))
-                    except NoValueFoundError:
+                    except NoValueFoundError, err:
+                        if err.message:
+                            errors.append(generate_error_with_correction(
+                                ', '.join(err.message, attribute)))
                         continue
                 if updates:
                     data.update_stanzas.append((subject, updates))

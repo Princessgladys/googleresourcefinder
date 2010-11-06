@@ -130,6 +130,9 @@ services: -general surgery, ct scan'''
 SAMPLE_EMAIL_ENUMS3 = '''update title_foo
 services: general surgery, +x-ray'''
 
+SAMPLE_EMAIL_ENUMS4 = '''update title_foo
+services: -general surgery, -x-ray, -ct scan'''
+
 SAMPLE_EMAIL_ENUMS_OVERWRITE = '''update title_foo
 services: xray'''
 
@@ -563,6 +566,16 @@ class MailEditorTest(MediumTestCase):
         assert 'ERROR' not in self.sent_messages[num_emails].subject()
         assert 'Services' in body and 'CT Scan' in body
         assert 'General Surgery' in body and 'X-Ray' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
+
+        message.body = SAMPLE_EMAIL_ENUMS4
+        message = incr_msg_time(message)
+        mail_editor_.receive(message)
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' not in self.sent_messages[num_emails].subject()
+        assert 'Services' in body and 'CT Scan' not in body
+        assert 'General Surgery' not in body and 'X-Ray' not in body
         num_emails += 1
         assert len(self.sent_messages) == num_emails
 
