@@ -625,8 +625,7 @@ class MailEditor(InboundMailHandler):
                     except NoValueFoundError, err:
                         if err.message:
                             errors.append(generate_error_with_correction(
-                                ', '.join(err.message, attribute)))
-                        continue
+                                ', '.join(err.message), attribute))
                 if updates:
                     data.update_stanzas.append((subject, updates))
                 if errors:
