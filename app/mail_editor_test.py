@@ -121,14 +121,32 @@ SAMPLE_EMAIL_AMBIGUOUS_UPDATE_BROKEN = '''update title_foo
 commune code 1'''
 
 SAMPLE_EMAIL_ENUMS = '''update title_foo
-services: -x-ray, general surgery
+services: -x-ray, +general surgery
 operational status:operational'''
+
+SAMPLE_EMAIL_ENUMS2 = '''update title_foo
+services: -general surgery, ct scan'''
+
+SAMPLE_EMAIL_ENUMS3 = '''update title_foo
+services: general surgery, +x-ray'''
+
+SAMPLE_EMAIL_ENUMS4 = '''update title_foo
+services: -general surgery, -x-ray, -ct scan'''
+
+SAMPLE_EMAIL_ENUMS_OVERWRITE = '''update title_foo
+services: xray'''
 
 SAMPLE_EMAIL_ENUMS_WITH_ERRORS = '''update title_foo
 services: x'''
 
 SAMPLE_EMAIL_WITH_ABBREVIATION = '''update title_foo
 tb: 9999'''
+
+SAMPLE_EMAIL_WITH_ABBREVIATION2 = '''update title_foo
+tb: 9999
+ab: 10000
+serv: ct, gen surgery, xray
+op status: operational'''
 
 SAMPLE_EMAIL_WITH_AMBIGUOUS_MAP = '''update title_foo
 total beds 8888'''
@@ -189,8 +207,9 @@ class MailEditorTest(MediumTestCase):
                   values=export_test.SERVICES).put()
         Attribute(key_name='location', type='geopt').put()
         Message(ns='attribute_value', en='X-Ray', name='X_RAY').put()
-        Message(ns='attribute_value', en='General surgery',
+        Message(ns='attribute_value', en='General Surgery',
                 name='GENERAL_SURGERY').put()
+        Message(ns='attribute_value', en='CT Scan', name='CT_SCAN').put()
         Message(ns='attribute_value', en='Operational',
                 name='OPERATIONAL').put()
         Message(ns='attribute_name', en='Available beds',
@@ -355,6 +374,14 @@ class MailEditorTest(MediumTestCase):
     def test_mail_editor_receive(self):
         """Confirm that it receives and properly sends an email with the
         information from the received update."""
+        def incr_msg_time(msg):
+            """Used to increment the date of an InboundEmailMessage by 1
+            minute. Needed in order to change the same attribute twice
+            with the same message."""
+            minute_idx = msg.date.rfind(':') + 1
+            minute = msg.date[minute_idx:minute_idx + 2]
+            msg.date = msg.date.replace(minute, str((int(minute) + 1) % 60))
+            return msg
         self.sent_messages = []
         message = mail.InboundEmailMessage(
             sender=self.account.email,
@@ -367,74 +394,81 @@ class MailEditorTest(MediumTestCase):
                          domain='localhost:8080')
         mail_editor_ = mail_editor.MailEditor()
         mail_editor_.request = request
+        num_emails = 0
 
         # check working update email
         mail_editor_.receive(message)
-        body = self.sent_messages[0].textbody()
-        assert len(self.sent_messages) == 1
-        self.check_for_correct_update(body, self.sent_messages[0])
+        body = self.sent_messages[num_emails].textbody()
+        self.check_for_correct_update(body, self.sent_messages[num_emails])
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # check broken email
         message.body = SAMPLE_EMAIL_BROKEN
         mail_editor_.receive(message)
-        body = self.sent_messages[1].textbody()
-        assert len(self.sent_messages) == 2
-        assert 'ERROR' in self.sent_messages[1].subject()
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' in self.sent_messages[num_emails].subject()
         assert '"Available beds" requires a numerical value.' in body
         assert body.count('--- --- --- ---') == 2
         assert 'REFERENCE DOCUMENT' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # check working quoted email
         message.body = SAMPLE_EMAIL_QUOTED
         mail_editor_.receive(message)
-        body = self.sent_messages[2].textbody()
-        assert len(self.sent_messages) == 3
-        self.check_for_correct_update(body, self.sent_messages[2])
+        body = self.sent_messages[num_emails].textbody()
+        self.check_for_correct_update(body, self.sent_messages[num_emails])
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # check working mixed email. should ignore the error in the quoted area
         message.body = SAMPLE_EMAIL_MIXED
         mail_editor_.receive(message)
-        body = self.sent_messages[3].textbody()
-        assert len(self.sent_messages) == 4
-        self.check_for_correct_update(body, self.sent_messages[3])
+        body = self.sent_messages[num_emails].textbody()
+        self.check_for_correct_update(body, self.sent_messages[num_emails])
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         db.delete(self.account)
         # check working but not authenticated email
         message.body = SAMPLE_EMAIL_WORKING
         mail_editor_.receive(message)
-        body = self.sent_messages[4].textbody()
-        assert len(self.sent_messages) == 5
+        body = self.sent_messages[num_emails].textbody()
         assert mail_editor_.need_profile_info
         assert 'nickname' in body
         assert 'affiliation' in body
         assert 'Pending updates' in body
         assert not Account.all().get()
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # send it an authentication email
         message.body = SAMPLE_EMAIL_AUTHENTICATION
         mail_editor_.receive(message)
-        body = self.sent_messages[5].textbody()
+        body = self.sent_messages[num_emails].textbody()
         assert Account.all().get()
-        assert len(self.sent_messages) == 6
         assert not mail_editor_.need_profile_info
-        self.check_for_correct_update(body, self.sent_messages[5])
+        self.check_for_correct_update(body, self.sent_messages[num_emails])
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # do same with an already existing account sans nickname/affiliation
         self.account.nickname = None
         self.account.affiliation = None
         db.put(self.account)
         mail_editor_.receive(message)
-        body = self.sent_messages[6].textbody()
+        body = self.sent_messages[num_emails].textbody()
         assert Account.all().get()
-        assert len(self.sent_messages) == 7
         assert not mail_editor_.need_profile_info
-        self.check_for_correct_update(body, self.sent_messages[6])
+        self.check_for_correct_update(body, self.sent_messages[num_emails])
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # check working email with stop delimeter
         message.body = SAMPLE_EMAIL_STOP
         mail_editor_.receive(message)
-        body = self.sent_messages[7].textbody()
-        assert len(self.sent_messages) == 8
+        body = self.sent_messages[num_emails].textbody()
         assert not 'update title_foo' in body
         assert 'title_foo' in body
         assert 'Available beds' in body and '18' in body
@@ -442,95 +476,162 @@ class MailEditorTest(MediumTestCase):
         assert 'Email' in body and 'test@example.com' in body
         assert 'Commune' in body and 'foo@bar!' in body
         assert 'Can pick up patients' not in body and 'yes' not in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # check email with multiple subjects
         message.body = SAMPLE_EMAIL_MULTIPLE
         mail_editor_.receive(message)
-        body = self.sent_messages[8].textbody()
-        assert len(self.sent_messages) == 9
+        body = self.sent_messages[num_emails].textbody()
         assert 'title_foo' in body and 'title_bar' in body
         assert 'update title_foo' not in body
         assert 'update title_bar' not in body
         assert 'Available beds' in body and '18' in body and '20' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # check email with an ambiguous subject
         message.body = SAMPLE_EMAIL_AMBIGUOUS
         mail_editor_.receive(message)
-        body = self.sent_messages[9].textbody()
-        assert len(self.sent_messages) == 10
-        assert 'ERROR' in self.sent_messages[9].subject()
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' in self.sent_messages[num_emails].subject()
         assert 'title_foobar' in body and 'ambiguous' in body
         assert 'Try again with one of the following' in body
         assert 'example.org/789' in body
         assert 'example.org/012' in body
         assert 'Total beds 77' in body
         assert 'REFERENCE DOCUMENT' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # check email with multiple same title'd facilities [and unique keys]
         message.body = SAMPLE_EMAIL_AMBIGUOUS_WITH_KEYS
         mail_editor_.receive(message)
-        body = self.sent_messages[10].textbody()
-        assert len(self.sent_messages) == 11
-        assert 'ERROR' not in self.sent_messages[10].subject()
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' not in self.sent_messages[num_emails].subject()
         assert 'title_foobar' in body and '789' in body and '012' in body
         assert 'Total beds' in body and '77' in body and '76' in body
         assert 'REFERENCE DOCUMENT' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # check email with correct [though potentially ambiguous] update details
         message.body = SAMPLE_EMAIL_AMBIGUOUS_UPDATE_WORKING
         mail_editor_.receive(message)
-        body = self.sent_messages[11].textbody()
-        assert len(self.sent_messages) == 12
-        assert 'ERROR' not in self.sent_messages[11].subject()
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' not in self.sent_messages[num_emails].subject()
         assert 'title_foo' in body
         assert 'Commune' in body and 'code 1' in body
         assert 'Commune code' in body and '1' in body
         assert 'REFERENCE DOCUMENT' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # check email with incorrect / ambiguous update details
         message.body = SAMPLE_EMAIL_AMBIGUOUS_UPDATE_BROKEN
         mail_editor_.receive(message)
-        body = self.sent_messages[12].textbody()
-        assert len(self.sent_messages) == 13
-        assert 'ERROR' in self.sent_messages[12].subject()
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' in self.sent_messages[num_emails].subject()
         assert 'Attribute name is ambiguous' in body
         assert 'Commune:' in body and 'Commune code:' in body
         assert 'REFERENCE DOCUMENT' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # check email with enums
         message.body = SAMPLE_EMAIL_ENUMS
         mail_editor_.receive(message)
-        body = self.sent_messages[13].textbody()
-        assert len(self.sent_messages) == 14
-        assert 'ERROR' not in self.sent_messages[13].subject()
-        assert 'Services' in body and 'General surgery' in body
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' not in self.sent_messages[num_emails].subject()
+        assert 'Services' in body and 'General Surgery' in body
         assert 'X-Ray' not in body
         assert 'Operational status' in body and 'Operational' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
+
+        message.body = SAMPLE_EMAIL_ENUMS2
+        message = incr_msg_time(message)
+        mail_editor_.receive(message)
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' not in self.sent_messages[num_emails].subject()
+        assert 'Services' in body and 'CT Scan' in body
+        assert 'General Surgery' not in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
+
+        message.body = SAMPLE_EMAIL_ENUMS3
+        message = incr_msg_time(message)
+        mail_editor_.receive(message)
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' not in self.sent_messages[num_emails].subject()
+        assert 'Services' in body and 'CT Scan' in body
+        assert 'General Surgery' in body and 'X-Ray' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
+
+        message.body = SAMPLE_EMAIL_ENUMS4
+        message = incr_msg_time(message)
+        mail_editor_.receive(message)
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' not in self.sent_messages[num_emails].subject()
+        assert 'Services' in body and 'CT Scan' not in body
+        assert 'General Surgery' not in body and 'X-Ray' not in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
+
+        # check email with an enum overwrite
+        message.body = SAMPLE_EMAIL_ENUMS_OVERWRITE
+        mail_editor_.receive(message)
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' not in self.sent_messages[num_emails].subject()
+        assert 'Services' in body and 'X-Ray' in body
+        assert 'General Surgery' not in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # check email with enums and error
         message.body = SAMPLE_EMAIL_ENUMS_WITH_ERRORS
         mail_editor_.receive(message)
-        body = self.sent_messages[14].textbody()
-        assert len(self.sent_messages) == 15
-        assert 'ERROR' in self.sent_messages[14].subject()
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' in self.sent_messages[num_emails].subject()
         assert 'Services' in body and 'x' in body
         assert 'requires all values' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
         # check email with an abbreviation for the attribute name
         message.body = SAMPLE_EMAIL_WITH_ABBREVIATION
         mail_editor_.receive(message)
-        body = self.sent_messages[15].textbody()
-        assert len(self.sent_messages) == 16
-        assert 'ERROR' not in self.sent_messages[15].subject()
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' not in self.sent_messages[num_emails].subject()
         assert 'Total beds' in body and '9999' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
+
+        # check email with multiple abbreviations in the attribute
+        # names and values
+        message.body = SAMPLE_EMAIL_WITH_ABBREVIATION2
+        message = incr_msg_time(message)
+        mail_editor_.receive(message)
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' not in self.sent_messages[num_emails].subject()
+        assert 'Total beds' in body and '9999' in body
+        assert 'Available beds' in body and '10000' in body
+        assert 'Services' in body and 'CT Scan' in body
+        assert 'General Surgery' in body and 'X-Ray' in body
+        assert 'Operational status' in body and 'Operational' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
+
 
         # check email with mixed attribute names
         message.body = SAMPLE_EMAIL_WITH_AMBIGUOUS_MAP
         mail_editor_.receive(message)
-        body = self.sent_messages[16].textbody()
-        assert len(self.sent_messages) == 17
-        assert 'ERROR' not in self.sent_messages[16].subject()
+        body = self.sent_messages[num_emails].textbody()
+        assert 'ERROR' not in self.sent_messages[num_emails].subject()
         assert 'Total beds' in body and '8888' in body
+        num_emails += 1
+        assert len(self.sent_messages) == num_emails
 
     def test_mail_editor_process_email(self):
         """Confirms that process_email() returns a properly formatted structure
