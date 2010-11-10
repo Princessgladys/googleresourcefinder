@@ -19,10 +19,29 @@ class Help(utils.Handler):
         locale = utils.get_locale()
         self.render('locale/%s/help.html' % locale, params=self.params)
 
+
 class EmailHelp(utils.Handler):
     def get(self):
         locale = utils.get_locale()
         self.render('locale/%s/help_email.html' % locale, params=self.params)
 
+
+class EmailHelpDocumentation(utils.Handler):
+    def get(self):
+        locale = utils.get_locale()
+        self.render('locale/%s/help_email_documentation.html' % locale, params=self.params)
+
+
+class EmailHelpReference(utils.Handler):
+    def get(self):
+        locale = utils.get_locale()
+        self.render('locale/%s/help_email_reference.html' % locale, params=self.params)
+
+
 if __name__ == '__main__':
-    utils.run([('/help', Help), ('/help/email', EmailHelp)], debug=True)
+    utils.run([
+        ('/help', Help),
+        ('/help/email', EmailHelp),
+        ('/help/email/documentation', EmailHelpDocumentation),
+        ('/help/email/reference', EmailHelpReference)
+    ], debug=True)
