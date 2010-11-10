@@ -26,11 +26,17 @@ received update.
     get_list_update(): for multi attr's, combines two sets (to add and subtract)
         with the current value for a specified subject
     match_email(): given a string, uses reg. exp. to locate email addresses
+    generate_ambiguous_update_error_msg(): given a list of potential matches
+        for an ambiguous update, creates an error message
+    generate_bad_value_error_msg(): generates an error message for type errors
+    generate_error_with_correction(): generates an error message, including
+        a list of accepted values for the given attribute
     get_min_subjects_by_lowercase_title(): searches minimal subjects by title
     MailEditor: incoming mail handler-- responds to incoming emails addressed to
         <subdomain>-updates@resource-finder@appspotmail.com
     get_locale_and_nickname(): returns a locale and nickname for the given
         account and email message
+    format_changes(): helper function to format attribute value tuples
     parse_utc_offset(): turns a UTC offset in string form into a timedelta
 """
 
@@ -43,7 +49,6 @@ import re
 import string
 from datetime import datetime, timedelta
 
-import django.utils.translation
 from google.appengine.api import mail
 from google.appengine.api.datastore_errors import BadValueError
 from google.appengine.api.labs import taskqueue
@@ -54,10 +59,8 @@ import cache
 import model
 import utils
 from feedlib.xml_utils import Struct
-from mail_editor_errors import AmbiguousUpdateNotice, BadValueNotice
-from mail_editor_errors import ValueNotAllowedNotice
-from utils import db, format, format_changes, get_message
-from utils import order_and_format_updates
+from utils import db, format, get_message, order_and_format_updates
+from utils import NoValueFoundError, ValueNotAllowedError
 
 # Constant to represent the list of strings that denotes a value of None. We
 # use this instead of None so as not to confuse setting a value to None with
@@ -70,7 +73,20 @@ if none_texts:
 else:
     NONE_VALS = ['*none']
 
-NO_CHANGE = {} # sentinel object
+# Mapping of attribute types to error messages.
+ERRORS_BY_TYPE = {
+    #i18n: Error message for an invalid value to a boolean attribute
+    'bool': _('"%(attribute)s" requires a boolean value: "yes" or "no".'),
+    #i18n: Error message for an invalid value to an int attribute
+    'int': _('"%(attribute)s" requires a numerical value.'),
+    #i18n: Error message for an invalid value to a geopt attribute
+    'geopt': _('"%(attribute)s" requires two numbers separated by a comma.'),
+    #i18n: Error message for an invalid value to a choice attribute
+    'choice': _('"%(attribute)s" requires one of a specific set of values.'),
+    #i18n: Error message for an invalid value to a multi attribute
+    'multi': _('"%(attribute)s" requires all values to be from a specific set.')
+}
+
 
 # If this is found in a line of the email, the system will immediately stop
 # parsing and ignore the remainder of the email.
@@ -235,45 +251,31 @@ def parse(attribute, update):
     """
     update = update.strip()
     if not update:
-        return (NO_CHANGE, None)
+        raise NoValueFoundError
     if update in NONE_VALS:
-        return (None, None)
+        return
 
-    value = None
     if attribute.type in ['str', 'text']:
-        return (update, None)
-
+        return update
     if attribute.type == 'int':
-        try:
-            value = int(update)
-        except:
-            return (NO_CHANGE, BadValueNotice(update))
-        return (value, None)
-
+        return int(update)
     if attribute.type == 'bool':
         ns = 'attribute_value'
         yes_vals = cache.MAIL_UPDATE_TEXTS[ns]['true'].en
         no_vals = cache.MAIL_UPDATE_TEXTS[ns]['false'].en
         if update.lower() not in yes_vals + no_vals:
-            return (NO_CHANGE, BadValueNotice(update))
-        return (bool(update.lower() in yes_vals), None)
-
+            raise ValueError
+        return bool(update.lower() in yes_vals)
     if attribute.type == 'geopt':
         location = update.split(',')
         if len(location) != 2:
-            return (NO_CHANGE, BadValueNotice(update))
-        try:
-            value = db.GeoPt(float(location[0]), float(location[1]))
-        except:
-            return (NO_CHANGE, BadValueNotice(update))
-        return (value, None)
-
+            raise ValueError
+        return db.GeoPt(float(location[0]), float(location[1]))
     if attribute.type == 'choice':
         value = find_attribute_value(attribute, update)
         if not value:
-            return (NO_CHANGE, ValueNotAllowedNotice(update))
-        return (value, None)
-
+            raise ValueNotAllowedError
+        return value 
     if attribute.type == 'multi':
         values = [x.strip() for x in update.split(',') if x]
         if any(x[:1] in ['+', '-'] for x in values):
@@ -288,8 +290,7 @@ def parse(attribute, update):
                     to_add.append(value)
                 else:
                     errors.append(value_text)
-            return ((to_subtract, to_add),
-                    errors and ValueNotAllowedNotice(', '.join(errors)))
+            return (to_subtract, to_add, errors)
         else:
             new_value = []
             errors = []
@@ -299,18 +300,28 @@ def parse(attribute, update):
                     new_value.append(value)
                 else:
                     errors.append(value_text)
-            return (new_value,
-                    errors and ValueNotAllowedNotice(', '.join(errors)))
+            return (new_value, errors)
 
 
 def get_list_update(subject, attribute, value):
     """Returns an updated version of the subject's current value for the
     attribute to include the changes sent by the user."""
-    subtract, add = value
-    value = set(subject.get_value(attribute.key().name()) or [])
-    value -= set(subtract)
-    value |= set(add)
-    return  list(value)
+    if len(value) == 3: # user used plus/minus syntax
+        subtract, add, error = value
+        if subtract or add:
+            value = set(subject.get_value(attribute.key().name()) or [])
+            value -= set(subtract)
+            value |= set(add)
+            value = list(value)
+        else:
+            raise NoValueFoundError, error
+    else:
+        value, error = value
+
+    if error:
+        error_text = ', '.join(error)
+        error = generate_error_with_correction(error_text, attribute)
+    return value, error
 
 
 DEFAULT_SUBJECT_TYPES = {
@@ -326,6 +337,47 @@ def match_email(text):
     match = re.match(email_regex, text)
     if match:
         return match.group('email')
+
+
+def generate_ambiguous_update_error_msg(matches):
+    """Generates an error message for an ambiguous attribute name."""
+    #i18n: Error message for an ambiguous attribute name
+    msg = _('Attribute name is ambiguous. Please specify one of the following:')
+    for match in matches:
+        change = format_changes(match)
+        msg += '\n-- %s: %s' % (change['attribute'], change['value'])
+    return msg
+
+
+def generate_bad_value_error_msg(update_text, attribute):
+    """Generates an error message for an incorrect value for the specified
+    attribute's type."""
+    name = get_message('attribute_name', attribute.key().name(), 'en')
+    line = '%s: %s' % (name, update_text)
+    return {
+        'error_message': ERRORS_BY_TYPE[attribute.type] % {'attribute': name},
+        'original_line': line
+    }
+
+
+def generate_error_with_correction(line, attribute):
+    """Generates an error message. Includes a list of accepted values for the
+    given attribute."""
+    values = generate_bad_value_error_msg(line, attribute)
+    error = values['error_message'] + '\n'
+    #i18n: Accepted values error message
+    options = '-- ' + _('Accepted values are: ')
+    attribute_choices = [cache.MAIL_UPDATE_TEXTS['attribute_value'][val].en[0]
+                         for val in attribute.values]
+    for i, value in enumerate(attribute_choices):
+        if len(options) + len(value) >= 80:
+            error += options + '\n'
+            options = '---- '
+        maybe_comma = i != len(attribute_choices) - 1 and ', ' or ''
+        options += value + maybe_comma 
+    error += options
+    values['error_message'] = error
+    return values
 
 
 def get_min_subjects_by_lowercase_title(subdomain, title_lower, max=3):
@@ -434,13 +486,11 @@ class MailEditor(InboundMailHandler):
             # TODO(pfritzsche): Add better handling of invalid subdomain
             self.send_email(message, {}, no_subdomain=True)
             return
-        locale = self.account and self.account.locale or 'en'
-        django.utils.translation.activate(locale)
         # TODO(pfritzsche): Add HTML support.
         for content_type, body in message.bodies('text/plain'):
             data = self.process_email(body.decode())
             if (data.unrecognized_subject_stanzas or data.ambiguous_stanzas or
-                data.update_stanzas or data.notice_stanzas):
+                data.update_stanzas or data.error_stanzas):
                 # Email date arrives in the same form as the following example:
                 # Thu, 19 Aug 2010 17:29:23 -0400.
                 date_format = '%a, %d %b %Y %H:%M:%S'
@@ -512,7 +562,7 @@ class MailEditor(InboundMailHandler):
             # list of tuples (subject, updates for the subject)
             update_stanzas=[],
             # list of tuples (subject, error'd lines)
-            notice_stanzas=[],
+            error_stanzas=[],
             # list of tuples (potential subjects, updates)
             ambiguous_stanzas=[],
             # list of tuples (subject title, updates)
@@ -524,7 +574,7 @@ class MailEditor(InboundMailHandler):
         # found, locates any updates or errors, and picks out unrecognized data.
         def process(matches):
             for subject_match in matches:
-                notices = []
+                errors = []
                 updates = []
                 stop = False
                 is_ambiguous = False
@@ -548,28 +598,38 @@ class MailEditor(InboundMailHandler):
                         break
                     match_es = self.get_attribute_matches(subject_type, update)
                     if match_es and isinstance(match_es, list):
-                        notice = AmbiguousUpdateNotice(match_es)
-                        notices.append({
-                            'error_message': notice.format(),
+                        errors.append({
+                            'error_message':
+                                generate_ambiguous_update_error_msg(match_es),
                             'original_line': update
                         })
-                    elif match_es:
-                        name, update_text = match_es
-                        attribute = cache.ATTRIBUTES[name]
-                        value, notice = parse(attribute, update_text)
-                        if value is not NO_CHANGE:
-                            if (value and attribute.type == 'multi' and 
-                                isinstance(value, tuple)):
-                                value = get_list_update(
-                                    subject, attribute, value)
-                            updates.append((name, value))
-                        if notice:
-                            notices.append(notice.format(attribute))
-
+                        continue
+                    elif not match_es:
+                        continue
+                    name, update_text = match_es
+                    attribute = cache.ATTRIBUTES[name]
+                    try:
+                        value = parse(attribute, update_text)
+                        if value and attribute.type == 'multi':
+                            value, error = get_list_update(
+                                subject, attribute, value)
+                            if error:
+                                errors.append(error)
+                        updates.append((name, value))
+                    except ValueError, BadValueError:
+                        errors.append(generate_bad_value_error_msg(
+                            update_text, attribute))
+                    except ValueNotAllowedError:
+                        errors.append(generate_error_with_correction(
+                            update_text, attribute))
+                    except NoValueFoundError, err:
+                        if err.message:
+                            errors.append(generate_error_with_correction(
+                                ', '.join(err.message), attribute))
                 if updates:
                     data.update_stanzas.append((subject, updates))
-                if notices:
-                    data.notice_stanzas.append((subject, notices))
+                if errors:
+                    data.error_stanzas.append((subject, errors))
                 if stop:
                     return
 
@@ -579,7 +639,7 @@ class MailEditor(InboundMailHandler):
                                   flags=self.update_line_flags)
             process(matches)
             if (data.ambiguous_stanzas or data.unrecognized_subject_stanzas or
-                data.update_stanzas or data.notice_stanzas or stop):
+                data.update_stanzas or data.error_stanzas or stop):
                 break
         return data
 
@@ -668,7 +728,7 @@ class MailEditor(InboundMailHandler):
             self.account, original_message)
 
         formatted_updates = []
-        formatted_notices = []
+        formatted_errors = []
         formatted_ambiguities = []
         formatted_unrecognized_subjects = []
         if data:
@@ -682,12 +742,12 @@ class MailEditor(InboundMailHandler):
                         update_data, subject_type, locale, format_changes, 0)
                 })
 
-            for notice in data.notice_stanzas:
-                subject, notice_data = notice
-                formatted_notices.append({
+            for error in data.error_stanzas:
+                subject, error_data = error
+                formatted_errors.append({
                     'subject_title': subject.get_value('title'),
                     'subject_name': subject.get_name(),
-                    'data': notice_data
+                    'data': error_data
                 })
 
             for ambiguity in data.ambiguous_stanzas:
@@ -714,7 +774,7 @@ class MailEditor(InboundMailHandler):
         template_values = {
             'nickname': nickname,
             'updates': formatted_updates,
-            'notices': formatted_notices,
+            'errors': formatted_errors,
             'ambiguities': formatted_ambiguities,
             'unrecognized': formatted_unrecognized_subjects,
             'need_profile_info': self.need_profile_info,
@@ -725,7 +785,7 @@ class MailEditor(InboundMailHandler):
         path = os.path.join(os.path.dirname(__file__),
             'locale/%s/update_response_email.txt' % locale)
         body = template.render(path, template_values)
-        if (formatted_notices or formatted_ambiguities or
+        if (formatted_errors or formatted_ambiguities or
             formatted_unrecognized_subjects):
             subject = 'ERROR - %s' % original_message.subject
         else:
@@ -779,6 +839,25 @@ def get_locale_and_nickname(account, message):
         locale = 'en'
         nickname = message.sender
     return (locale, nickname)
+
+
+def format_changes(update, locale='en'):
+    """Helper function; used to format an attribute, value pair for email."""
+    attribute_name, value = update
+    attribute = cache.ATTRIBUTES[attribute_name]
+    if value and attribute.type == 'multi':
+        formatted_value = ', '.join([get_message(
+            'attribute_value', e, locale) or e for e in value])
+    elif value and attribute.type == 'choice':
+        formatted_value = get_message(
+            'attribute_value', value, locale) or value
+    else:
+        formatted_value = format(value)
+    return {
+        'attribute': get_message(
+            'attribute_name', attribute_name, locale),
+        'value': formatted_value
+    }
 
 
 def parse_utc_offset(text):

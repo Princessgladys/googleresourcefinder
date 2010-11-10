@@ -31,7 +31,8 @@ from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
 from feedlib.crypto import get_secret
-from feedlib.errors import ErrorMessage, Redirect
+from feedlib.errors import ErrorMessage, NoValueFoundError, ValueNotAllowedError
+from feedlib.errors import Redirect
 import gzip
 from html import html_escape
 import logging
@@ -459,24 +460,6 @@ def order_and_format_updates(updates, subject_type, locale, format_function,
             formatted_attrs.append(
                 format_function(updates_by_name[name], locale))
     return formatted_attrs
-
-def format_changes(update, locale='en'):
-    """Helper function; used to format an attribute, value pair for email."""
-    attribute_name, value = update
-    attribute = cache.ATTRIBUTES[attribute_name]
-    if value and attribute.type == 'multi':
-        formatted_value = ', '.join([get_message(
-            'attribute_value', e, locale) or e for e in value])
-    elif value and attribute.type == 'choice':
-        formatted_value = get_message(
-            'attribute_value', value, locale) or value
-    else:
-        formatted_value = format(value)
-    return {
-        'attribute': get_message(
-            'attribute_name', attribute_name, locale),
-        'value': formatted_value
-    }
 
 def run(*args, **kwargs):
     webapp.util.run_wsgi_app(webapp.WSGIApplication(*args, **kwargs))
