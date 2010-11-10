@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import django.utils.translation
-
 import cache
 import utils
 
@@ -47,21 +45,14 @@ class AmbiguousUpdateNotice:
     def __init__(self, matches=None):
         self.matches = matches
 
-    def format(self, locale='en'):
+    def format(self):
         """Generates an error message for an ambiguous attribute name."""
-        if locale:
-            previous_locale = utils.get_locale()
-            django.utils.translation.activate(locale)
-
         #i18n: Error message for an ambiguous attribute name
         msg = _('Attribute name is ambiguous. Please specify one of the ' +
                 'following:')
         for match in self.matches:
             change = utils.format_changes(match)
             msg += '\n-- %s: %s' % (change['attribute'], change['value'])
-
-        if locale:
-            django.utils.translation.activate(previous_locale)
         return msg
 
 
@@ -69,27 +60,17 @@ class BadValueNotice:
     def __init__(self, update_text=''):
         self.update_text = update_text
 
-    def format(self, attribute, locale='en'):
-        if locale:
-            previous_locale = utils.get_locale()
-            django.utils.translation.activate(locale)
-        error_msg = generate_bad_value_error_msg(self.update_text, attribute)
-        if locale:
-              django.utils.translation.activate(previous_locale)
-        return error_msg
+    def format(self, attribute):
+        return generate_bad_value_error_msg(self.update_text, attribute)
 
 
 class ValueNotAllowedNotice:
     def __init__(self, update_text=''):
         self.update_text = update_text
 
-    def format(self, attribute, locale='en'):
+    def format(self, attribute):
         """Generates an error message. Includes a list of accepted values
         for the given attribute."""
-        if locale:
-            previous_locale = utils.get_locale()
-            django.utils.translation.activate(locale)
-
         values = generate_bad_value_error_msg(self.update_text, attribute)
         error = values['error_message'] + '\n'
         #i18n: Accepted values error message
@@ -105,8 +86,5 @@ class ValueNotAllowedNotice:
             options += value + maybe_comma 
         error += options
         values['error_message'] = error
-
-        if locale:
-            django.utils.translation.activate(previous_locale)
         return values
 
