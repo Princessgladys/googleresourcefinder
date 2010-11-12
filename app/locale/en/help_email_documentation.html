@@ -12,17 +12,17 @@
 /*<![CDATA[*/
   ol{ margin: 0; padding: 0 }
   p{ margin: 0 }
-  .c2{color:#000000;font-size:24pt;font-family:Arial;font-weight:bold}
-  .c4 {color: #000099; font-size: 11pt; text-decoration: underline; font-family: Arial }
-  .c0 {color: #000000; font-size: 11pt; font-family: Arial }
-  .c14 {color: #0b5394; font-size: 24pt; font-family: Arial }
-  .c8 {color: #000000; font-size: 14pt; font-family: Arial }
+  .c2{color:#000000;font-size:24pt;font-family:Helvetica, Arial;font-weight:bold}
+  .c4 {color: #000099; font-size: 11pt; text-decoration: underline; font-family: Helvetica, Arial }
+  .c0 {color: #000000; font-size: 11pt; font-family: Helvetica, Arial }
+  .c14 {color: #0b5394; font-size: 24pt; font-family: Helvetica, Arial }
+  .c8 {color: #000000; font-size: 14pt; font-family: Helvetica, Arial }
   .c10 {padding-top: 24.0pt; text-align: center; padding-bottom: 6.0pt }
   .c1 {line-height: 1.15; text-indent: 0pt; direction: ltr }
-  .c9 {color: #cc0000; font-size: 24pt; font-family: Arial }
-  .c11 {color: #38761d; font-size: 24pt; font-family: Arial }
-  .c15 {color: #000000; font-size: 18pt; font-family: Arial }
-  .c16 {color: #bf9000; font-size: 24pt; font-family: Arial }
+  .c9 {color: #cc0000; font-size: 24pt; font-family: Helvetica, Arial }
+  .c11 {color: #38761d; font-size: 24pt; font-family: Helvetica, Arial }
+  .c15 {color: #000000; font-size: 18pt; font-family: Helvetica, Arial }
+  .c16 {color: #bf9000; font-size: 24pt; font-family: Helvetica, Arial }
   .c7 {padding-top: 18.0pt; padding-bottom: 4.0pt }
   .c3 {padding-top: 14.0pt; padding-bottom: 4.0pt }
   .c5 {margin-left: 54.0pt }
@@ -31,7 +31,8 @@
   .c12 {margin-left: 36.0pt }
   .c13 {font-style: italic }
   .c6 {font-weight: bold }
-  .c17 {background-color: #ffffff; padding: 0px 15px; width: 800px; }
+  .c17 {background-color: #ffffff; padding: 0px 15px 15px 15px; width: 800px; }
+  .footer { margin:3em 0 0; text-align:center; color: #666; font-family: Helvetica, Arial; font-size: 13px; }
   /*]]>*/
   </style>
 </head>
@@ -468,5 +469,8 @@
 
   <p class="c1"><span class="c0">---- Vascular surgery, Internal medicine,
   Cardiology</span></p>
+
+{% include "footer.html" %}
+{% include "../../templates/analytics.html" %}
 </body>
 </html>
