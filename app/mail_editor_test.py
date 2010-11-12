@@ -29,7 +29,6 @@ from feedlib.errors import *
 from feedlib.xml_utils import Struct
 from mail_editor import NO_CHANGE
 from mail_editor_errors import AmbiguousUpdateNotice, BadValueNotice
-from mail_editor_errors import ValueNotAllowedNotice
 from medium_test_case import MediumTestCase
 from model import Account, Attribute, MailUpdateText, Message, MinimalSubject
 from model import Subdomain, Subject, SubjectType
@@ -324,7 +323,7 @@ class MailEditorTest(MediumTestCase):
         update = 'foo'
         value, notice = mail_editor.parse(attribute, update)
         assert value is NO_CHANGE
-        assert isinstance(notice, ValueNotAllowedNotice)
+        assert isinstance(notice, BadValueNotice)
         assert notice.update_text == update
 
         # test a multi attribute
@@ -336,7 +335,7 @@ class MailEditorTest(MediumTestCase):
         update += ', x'
         value, notice = mail_editor.parse(attribute, update)
         assert value == (['X_RAY'], ['GENERAL_SURGERY'])
-        assert isinstance(notice, ValueNotAllowedNotice)
+        assert isinstance(notice, BadValueNotice)
         assert notice.update_text == 'x'
 
         # test a value being set to null

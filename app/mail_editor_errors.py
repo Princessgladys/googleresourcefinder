@@ -29,62 +29,87 @@ ERRORS_BY_TYPE = {
     'multi': _('"%(attribute)s" requires all values to be from a specific set.')
 }
 
+# ========================================================= Notice Classes
+# The *Notice classes serve as containers for information pertaining to
+# erroneous updates received by the mail_editor module. Each class is set
+# to store a specific type of information (i.e. a list of regex matches in
+# AmbiguousUpdateNotice) and should be able to produce a formatted string
+# containing text suitable for display to a user describing the issue with
+# the information, via the format() function."""
 
-def generate_bad_value_error_msg(text, attribute):
-    """Generates an error message for an incorrect value for the specified
-    attribute's type."""
-    name = utils.get_message('attribute_name', attribute.key().name(), 'en')
-    line = '%s: %s' % (name, text)
-    return {
-        'error_message': ERRORS_BY_TYPE[attribute.type] % {'attribute': name},
-        'original_line': line
-    }
+class Notice:
+    """Base class."""
+    def format(self):
+        """Should be overriden with a function capable of producing a
+        formatted error string for the user describing the reason why
+        the Notice was created."""
+        raise NotImplementedError
 
 
-class AmbiguousUpdateNotice:
-    def __init__(self, matches=None):
+class AmbiguousUpdateNotice(Notice):
+    """Notice for ambiguous updates. Used to store a list of regex matches
+    for attribute names that are not exact. i.e. If a user submits the line
+    "organization type foo", it is unclear if they are trying to set the
+    attribute "organization" to the value "type foo" or if they are trying
+    to set the attribute "organization type" to the value "foo"."""
+
+    def __init__(self, matches):
         self.matches = matches
 
     def format(self):
-        """Generates an error message for an ambiguous attribute name."""
+        """Produces an error message containing a list of all possible
+        attribute matches based on the user's query."""
         #i18n: Error message for an ambiguous attribute name
         msg = _('Attribute name is ambiguous. Please specify one of the ' +
                 'following:')
         for match in self.matches:
-            change = utils.format_changes(match)
+            change = utils.format_attr_value(match)
             msg += '\n-- %s: %s' % (change['attribute'], change['value'])
         return msg
 
 
-class BadValueNotice:
-    def __init__(self, update_text=''):
+class BadValueNotice(Notice):
+    """Used when the given value is invalid for the attribute in question.
+    For example, this might be used when the user gives a non-numeric string
+    to update an integer-only attribute, or when a user tries to enter an
+    invalid selection to a multiple choice attribute."""
+
+    def __init__(self, update_text, attribute):
         self.update_text = update_text
+        self.attribute = attribute
 
-    def format(self, attribute):
-        return generate_bad_value_error_msg(self.update_text, attribute)
+    def format(self):
+        """Produces an error message detailing the issue with the update
+        text received. If the attribute has specific choices the user must
+        select from, they will be included for reference."""
+        # Produce error message
+        name = utils.get_message(
+            'attribute_name', self.attribute.key().name(), 'en')
+        line = '%s: %s' % (name, self.update_text)
+        values = {
+            'error_message': ERRORS_BY_TYPE[self.attribute.type] % \
+                {'attribute': name},
+            'original_line': line
+        }
 
+        # If the attribute does not have specific values the user may
+        # choose from, return the error as is. Otherwise, produce a
+        # list of the available choices.
+        if not self.attribute.values:
+            return values
 
-class ValueNotAllowedNotice:
-    def __init__(self, update_text=''):
-        self.update_text = update_text
-
-    def format(self, attribute):
-        """Generates an error message. Includes a list of accepted values
-        for the given attribute."""
-        values = generate_bad_value_error_msg(self.update_text, attribute)
         error = values['error_message'] + '\n'
         #i18n: Accepted values error message
         options = '-- ' + _('Accepted values are: ')
-        attribute_choices = [cache.MAIL_UPDATE_TEXTS[
+        self.attribute_choices = [cache.MAIL_UPDATE_TEXTS[
                                  'attribute_value'][val].en[0]
-                             for val in attribute.values]
-        for i, value in enumerate(attribute_choices):
+                             for val in self.attribute.values]
+        for i, value in enumerate(self.attribute_choices):
             if len(options) + len(value) >= 80:
                 error += options + '\n'
                 options = '---- '
-            maybe_comma = i != len(attribute_choices) - 1 and ', ' or ''
+            maybe_comma = i != len(self.attribute_choices) - 1 and ', ' or ''
             options += value + maybe_comma 
         error += options
         values['error_message'] = error
         return values
-

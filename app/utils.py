@@ -313,15 +313,16 @@ def fetch(url, payload=None, previous_data=None):
     dump.put()
     return dump
 
-def format(value, localize=False):
+def format(value, localize=False, locale=''):
     """Formats values in a way that is suitable to display to a user.
     If 'localize' is true, the value is treated as a localizable message key or
     list of message keys to be looked up in the 'attribute_value' namespace."""
     if localize:
         if isinstance(value, list):
-            value = [get_message('attribute_value', item) for item in value]
+            value = [get_message('attribute_value', item, locale)
+                     for item in value]
         else:
-            value = get_message('attribute_value', value)
+            value = get_message('attribute_value', value, locale)
     if isinstance(value, unicode):
         return value.encode('utf-8')
     if isinstance(value, str) and value != '':
@@ -460,16 +461,14 @@ def order_and_format_updates(updates, subject_type, locale, format_function,
                 format_function(updates_by_name[name], locale))
     return formatted_attrs
 
-def format_changes(update, locale='en'):
-    """Helper function; used to format an attribute, value pair for email."""
+def format_attr_value(update, locale='en'):
+    """Helper function; used to format an (attribute_name, value) tuple.
+    Returns a dictionary with keys 'attribute' and 'value', containing
+    user-friendly strings representing each."""
     attribute_name, value = update
     attribute = cache.ATTRIBUTES[attribute_name]
-    if value and attribute.type == 'multi':
-        formatted_value = ', '.join([get_message(
-            'attribute_value', e, locale) or e for e in value])
-    elif value and attribute.type == 'choice':
-        formatted_value = get_message(
-            'attribute_value', value, locale) or value
+    if value and attribute.type in ['choice', 'multi']:
+        formatted_value = format(value, True, locale)
     else:
         formatted_value = format(value)
     return {

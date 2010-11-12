@@ -55,8 +55,7 @@ import model
 import utils
 from feedlib.xml_utils import Struct
 from mail_editor_errors import AmbiguousUpdateNotice, BadValueNotice
-from mail_editor_errors import ValueNotAllowedNotice
-from utils import db, format, format_changes, get_message
+from utils import db, format, format_attr_value, get_message
 from utils import order_and_format_updates
 
 # Constant to represent the list of strings that denotes a value of None. We
@@ -247,7 +246,7 @@ def parse(attribute, update):
         try:
             value = int(update)
         except:
-            return (NO_CHANGE, BadValueNotice(update))
+            return (NO_CHANGE, BadValueNotice(update, attribute))
         return (value, None)
 
     if attribute.type == 'bool':
@@ -255,23 +254,23 @@ def parse(attribute, update):
         yes_vals = cache.MAIL_UPDATE_TEXTS[ns]['true'].en
         no_vals = cache.MAIL_UPDATE_TEXTS[ns]['false'].en
         if update.lower() not in yes_vals + no_vals:
-            return (NO_CHANGE, BadValueNotice(update))
+            return (NO_CHANGE, BadValueNotice(update, attribute))
         return (bool(update.lower() in yes_vals), None)
 
     if attribute.type == 'geopt':
         location = update.split(',')
         if len(location) != 2:
-            return (NO_CHANGE, BadValueNotice(update))
+            return (NO_CHANGE, BadValueNotice(update, attribute))
         try:
             value = db.GeoPt(float(location[0]), float(location[1]))
         except:
-            return (NO_CHANGE, BadValueNotice(update))
+            return (NO_CHANGE, BadValueNotice(update, attribute))
         return (value, None)
 
     if attribute.type == 'choice':
         value = find_attribute_value(attribute, update)
         if not value:
-            return (NO_CHANGE, ValueNotAllowedNotice(update))
+            return (NO_CHANGE, BadValueNotice(update, attribute))
         return (value, None)
 
     if attribute.type == 'multi':
@@ -289,7 +288,7 @@ def parse(attribute, update):
                 else:
                     errors.append(value_text)
             return ((to_subtract, to_add),
-                    errors and ValueNotAllowedNotice(', '.join(errors)))
+                    errors and BadValueNotice(', '.join(errors), attribute))
         else:
             new_value = []
             errors = []
@@ -300,7 +299,7 @@ def parse(attribute, update):
                 else:
                     errors.append(value_text)
             return (new_value,
-                    errors and ValueNotAllowedNotice(', '.join(errors)))
+                    errors and BadValueNotice(', '.join(errors), attribute))
 
 
 def get_list_update(subject, attribute, value):
@@ -310,7 +309,7 @@ def get_list_update(subject, attribute, value):
     value = set(subject.get_value(attribute.key().name()) or [])
     value -= set(subtract)
     value |= set(add)
-    return  list(value)
+    return list(value)
 
 
 DEFAULT_SUBJECT_TYPES = {
@@ -564,7 +563,7 @@ class MailEditor(InboundMailHandler):
                                     subject, attribute, value)
                             updates.append((name, value))
                         if notice:
-                            notices.append(notice.format(attribute))
+                            notices.append(notice.format())
 
                 if updates:
                     data.update_stanzas.append((subject, updates))
@@ -679,7 +678,7 @@ class MailEditor(InboundMailHandler):
                     'subject_title': subject.get_value('title'),
                     'subject_name': subject.get_name(),
                     'changed_attributes': order_and_format_updates(
-                        update_data, subject_type, locale, format_changes, 0)
+                        update_data, subject_type, locale, format_attr_value, 0)
                 })
 
             for notice in data.notice_stanzas:
