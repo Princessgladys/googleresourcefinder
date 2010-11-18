@@ -29,7 +29,7 @@ import os
 import unittest
 import utils
 
-def fake_get_message(ns, n):
+def fake_get_message(ns, n, locale=''):
     message = model.Message(ns=ns, name=n)
     if ns == 'attribute_value' and n == 'fake_to_localize':
         message.en = 'fake_localized'

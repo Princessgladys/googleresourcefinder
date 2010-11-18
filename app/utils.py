@@ -31,8 +31,7 @@ from datetime import date as Date
 from datetime import datetime as DateTime  # all DateTimes are always in UTC
 from datetime import timedelta as TimeDelta
 from feedlib.crypto import get_secret
-from feedlib.errors import ErrorMessage, NoValueFoundError, ValueNotAllowedError
-from feedlib.errors import Redirect
+from feedlib.errors import ErrorMessage, Redirect
 import gzip
 from html import html_escape
 import logging
@@ -314,15 +313,16 @@ def fetch(url, payload=None, previous_data=None):
     dump.put()
     return dump
 
-def format(value, localize=False):
+def format(value, localize=False, locale=''):
     """Formats values in a way that is suitable to display to a user.
     If 'localize' is true, the value is treated as a localizable message key or
     list of message keys to be looked up in the 'attribute_value' namespace."""
     if localize:
         if isinstance(value, list):
-            value = [get_message('attribute_value', item) for item in value]
+            value = [get_message('attribute_value', item, locale)
+                     for item in value]
         else:
-            value = get_message('attribute_value', value)
+            value = get_message('attribute_value', value, locale)
     if isinstance(value, unicode):
         return value.encode('utf-8')
     if isinstance(value, str) and value != '':
@@ -460,6 +460,22 @@ def order_and_format_updates(updates, subject_type, locale, format_function,
             formatted_attrs.append(
                 format_function(updates_by_name[name], locale))
     return formatted_attrs
+
+def format_attr_value(update, locale='en'):
+    """Helper function; used to format an (attribute_name, value) tuple.
+    Returns a dictionary with keys 'attribute' and 'value', containing
+    user-friendly strings representing each."""
+    attribute_name, value = update
+    attribute = cache.ATTRIBUTES[attribute_name]
+    if value and attribute.type in ['choice', 'multi']:
+        formatted_value = format(value, True, locale)
+    else:
+        formatted_value = format(value)
+    return {
+        'attribute': get_message(
+            'attribute_name', attribute_name, locale),
+        'value': formatted_value
+    }
 
 def run(*args, **kwargs):
     webapp.util.run_wsgi_app(webapp.WSGIApplication(*args, **kwargs))

@@ -27,6 +27,8 @@ import export_test
 import mail_editor
 from feedlib.errors import *
 from feedlib.xml_utils import Struct
+from mail_editor import NO_CHANGE
+from mail_editor_errors import AmbiguousUpdateNotice, BadValueNotice
 from medium_test_case import MediumTestCase
 from model import Account, Attribute, MailUpdateText, Message, MinimalSubject
 from model import Subdomain, Subject, SubjectType
@@ -244,84 +246,105 @@ class MailEditorTest(MediumTestCase):
         # test an int attribute
         attribute = Attribute.get_by_key_name('available_beds')
         update = '222'
-        assert mail_editor.parse(attribute, update) == 222
+        assert mail_editor.parse(attribute, update) == (222, None)
 
-        # make sure it throws an error when an int is expected but not received
+        # make sure it returns an error when an int is expected but not received
         update = 'd'
-        self.assertRaises(ValueError, mail_editor.parse,
-                          attribute, update)
+        value, notice = mail_editor.parse(attribute, update)
+        assert value is NO_CHANGE
+        assert isinstance(notice, BadValueNotice)
+        assert notice.update_text == update
 
         # test a string attribute
         attribute = Attribute.get_by_key_name('organization')
         update = 'organization_foo'
         assert (mail_editor.parse(attribute, update) ==
-                'organization_foo')
+                ('organization_foo', None))
 
         # test like attributes names
         attribute = Attribute.get_by_key_name('commune_code')
         update = '12345'
-        assert mail_editor.parse(attribute, update) == 12345
+        assert mail_editor.parse(attribute, update) == (12345, None)
 
         # test a bool attribute
         attribute = Attribute.get_by_key_name('reachable_by_road')
         update = 'y'
-        assert mail_editor.parse(attribute, update)
+        assert mail_editor.parse(attribute, update) == (True, None)
 
         update = 'yEs'
-        assert mail_editor.parse(attribute, update)
+        assert mail_editor.parse(attribute, update) == (True, None)
 
         update = 'no'
-        assert not mail_editor.parse(attribute, update)
+        assert mail_editor.parse(attribute, update) == (False, None)
 
         update = '!'
-        assert_raises(ValueError, mail_editor.parse, attribute, update)
+        value, notice = mail_editor.parse(attribute, update)
+        assert value is NO_CHANGE
+        assert isinstance(notice, BadValueNotice)
+        assert notice.update_text == update
         
         # test a geopt attribute
         attribute = Attribute.get_by_key_name('location')
         update = '18.5, 18'
-        assert mail_editor.parse(attribute, update) == db.GeoPt(18.5, 18)
+        assert mail_editor.parse(attribute, update) == (
+            db.GeoPt(18.5, 18), None)
 
         update = '0, 0'
-        assert mail_editor.parse(attribute, update) == db.GeoPt(0, 0)
+        assert mail_editor.parse(attribute, update) == (
+            db.GeoPt(0, 0), None)
 
         update = '0,0'
-        assert mail_editor.parse(attribute, update) == db.GeoPt(0, 0)
+        assert mail_editor.parse(attribute, update) == (
+            db.GeoPt(0, 0), None)
 
         update = '18.5'
-        assert_raises(ValueError, mail_editor.parse, attribute, update)
+        value, notice = mail_editor.parse(attribute, update)
+        assert value is NO_CHANGE
+        assert isinstance(notice, BadValueNotice)
+        assert notice.update_text == update
 
         update = '18.5, 18, 17.5'
-        assert_raises(ValueError, mail_editor.parse, attribute, update)
+        value, notice = mail_editor.parse(attribute, update)
+        assert value is NO_CHANGE
+        assert isinstance(notice, BadValueNotice)
+        assert notice.update_text == update
 
         update = 'a,b'
-        assert_raises(ValueError, mail_editor.parse, attribute, update)
+        value, notice = mail_editor.parse(attribute, update)
+        assert value is NO_CHANGE
+        assert isinstance(notice, BadValueNotice)
+        assert notice.update_text == update
 
         # test a choice attribute
         attribute = Attribute.get_by_key_name('operational_status')
         update = 'operational'
-        assert mail_editor.parse(attribute, update) == 'OPERATIONAL'
+        assert mail_editor.parse(attribute, update) == ('OPERATIONAL', None)
 
         update = 'foo'
-        assert_raises(
-            ValueNotAllowedError, mail_editor.parse, attribute, update)
+        value, notice = mail_editor.parse(attribute, update)
+        assert value is NO_CHANGE
+        assert isinstance(notice, BadValueNotice)
+        assert notice.update_text == update
 
         # test a multi attribute
         attribute = Attribute.get_by_key_name('services')
         update = 'general surgery, -x-ray'
         assert mail_editor.parse(attribute, update) == (
-            ['X_RAY'], ['GENERAL_SURGERY'], [])
+            (['X_RAY'], ['GENERAL_SURGERY']), [])
 
         update += ', x'
-        assert mail_editor.parse(attribute, update) == (
-            ['X_RAY'], ['GENERAL_SURGERY'], ['x'])
+        value, notice = mail_editor.parse(attribute, update)
+        assert value == (['X_RAY'], ['GENERAL_SURGERY'])
+        assert isinstance(notice, BadValueNotice)
+        assert notice.update_text == 'x'
 
         # test a value being set to null
         update = '*none'
-        assert not mail_editor.parse(attribute, update)
+        assert mail_editor.parse(attribute, update) == (None, None)
 
         # test an unfound value
         update = ''
-        assert_raises(NoValueFoundError, mail_editor.parse, attribute, update)
+        assert mail_editor.parse(attribute, update) == (NO_CHANGE, None)
 
     def test_mail_editor_have_profile_info(self):
         """Confirms that have_profile_info() identifies existing users."""
@@ -652,12 +675,12 @@ class MailEditorTest(MediumTestCase):
         assert 'email' in updates[0][1][2]
         assert 'commune' in updates[0][1][3]
         assert 'can_pick_up_patients' in updates[0][1][4]
-        assert not data.error_stanzas
+        assert not data.notice_stanzas
 
         # check broken email body
         data = mail_editor_.process_email(SAMPLE_EMAIL_BROKEN)
         updates = data.update_stanzas
-        errors = data.error_stanzas
+        errors = data.notice_stanzas
         assert updates[0][0].key().name() == 'haiti:example.org/123'
         assert 'Available beds: d' in errors[0][1][0]['original_line']
         assert len(updates[0][1]) == 4
@@ -671,7 +694,7 @@ class MailEditorTest(MediumTestCase):
         assert 'email' in updates[0][1][2]
         assert 'commune' in updates[0][1][3]
         assert 'can_pick_up_patients' in updates[0][1][4]
-        assert not data.error_stanzas
+        assert not data.notice_stanzas
 
         # check mixed email body
         data = mail_editor_.process_email(SAMPLE_EMAIL_MIXED)
@@ -682,7 +705,7 @@ class MailEditorTest(MediumTestCase):
         assert 'email' in updates[0][1][2]
         assert 'commune' in updates[0][1][3]
         assert 'can_pick_up_patients' in updates[0][1][4]
-        assert not data.error_stanzas
+        assert not data.notice_stanzas
 
         # check stop delimeter'd body
         data = mail_editor_.process_email(SAMPLE_EMAIL_STOP)
@@ -692,7 +715,7 @@ class MailEditorTest(MediumTestCase):
         assert 'total_beds' in updates[0][1][1]
         assert 'email' in updates[0][1][2]
         assert 'commune' in updates[0][1][3]
-        assert not data.error_stanzas
+        assert not data.notice_stanzas
 
     def test_mail_editor_update_subjects(self):
         """Confirm that update_subjects() properly updates the datastore."""

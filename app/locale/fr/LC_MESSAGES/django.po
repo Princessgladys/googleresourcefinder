@@ -67,7 +67,7 @@ msgid "<strong>Note:</strong> This facility has been marked closed."
 msgstr "<strong>Note:</strong> Cet établissement a été marquée fermée."
 
 #. Accepted values error message
-#: mail_editor.py:328
+#: mail_editor_errors.py:99
 msgid "Accepted values are: "
 msgstr ""
 
@@ -133,8 +133,8 @@ msgid "An error has occurred. Please try again later."
 msgstr "Une erreur s'est produite. Veuillez réessayer ultérieurement."
 
 #. Error message for an ambiguous attribute name
-#: mail_editor.py:304
-msgid "Attribute name is ambiguous. Please specify one of the following:"
+#: mail_editor_errors.py:63
+msgid "Attribute name is ambiguous. Please specify one of the "
 msgstr ""
 
 #. Label; available beds
@@ -1010,7 +1010,7 @@ msgid "URL:"
 msgstr "URL :"
 
 #. Error message
-#: utils.py:145
+#: utils.py:144
 msgid "Unauthorized user."
 msgstr "utilisateur non autorisé"
 
@@ -1133,31 +1133,31 @@ msgid "Your request for \"%(action)s\" permission is now pending"
 msgstr "Votre demande pour devenir %(role)s  est déjà enregistrée."
 
 #. Error message for an invalid value to a boolean attribute
-#: mail_editor.py:79
+#: mail_editor_errors.py:21
 #, python-format
 msgid "\"%(attribute)s\" requires a boolean value: \"yes\" or \"no\"."
 msgstr ""
 
 #. Error message for an invalid value to an int attribute
-#: mail_editor.py:81
+#: mail_editor_errors.py:23
 #, python-format
 msgid "\"%(attribute)s\" requires a numerical value."
 msgstr ""
 
 #. Error message for an invalid value to a multi attribute
-#: mail_editor.py:87
+#: mail_editor_errors.py:29
 #, python-format
 msgid "\"%(attribute)s\" requires all values to be from a specific set."
 msgstr ""
 
 #. Error message for an invalid value to a choice attribute
-#: mail_editor.py:85
+#: mail_editor_errors.py:27
 #, python-format
 msgid "\"%(attribute)s\" requires one of a specific set of values."
 msgstr ""
 
 #. Error message for an invalid value to a geopt attribute
-#: mail_editor.py:83
+#: mail_editor_errors.py:25
 #, python-format
 msgid "\"%(attribute)s\" requires two numbers separated by a comma."
 msgstr ""

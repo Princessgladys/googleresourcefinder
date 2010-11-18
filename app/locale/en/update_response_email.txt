@@ -11,7 +11,7 @@ affiliation: Smith Inc.
 
 Be sure to also include any updates in the body of your response email.
 {% endif %}{% if not updates %}
-***No valid updates were received.***{% if not errors and not ambiguities and not unrecognized %}
+***No valid updates were received.***{% if not notices and not ambiguities and not unrecognized %}
 
 --- --- --- ---
 REFERENCE DOCUMENT
@@ -29,11 +29,11 @@ The following facility titles could not be recognized.
 
 {% for subject in unrecognized %}update {{subject.subject_title}}
 {% for update in subject.updates %}{{update}}
-{% endfor %}{% endfor %}{% endif %}{% if errors %}
+{% endfor %}{% endfor %}{% endif %}{% if notices %}
 The following updates contained errors. To fix the errors, you can either draft a new email or reply to this email and correct the values in-line.
 
-{% for error in errors %}update {{error.subject_title}} ({{error.subject_name}})
-{% for data in error.data %}{{data.original_line}}
+{% for notice in notices %}update {{notice.subject_title}} ({{notice.subject_name}})
+{% for data in notice.data %}{{data.original_line}}
 -- {{data.error_message}}
 {% endfor %}{% endfor %}
 {% endif %}{% if need_profile_info and updates %}Pending updates:
@@ -46,9 +46,9 @@ We recently received the following updates from you. They were inserted into the
 {% for update in updates %}
 {{update.subject_title}} ({{update.subject_name}})
 {% for change in update.changed_attributes %}{{change.attribute}}: {{change.value}}
-{% endfor %}{% endfor %}{% endif %}{% endif %}{% if errors or ambiguities or updates or unrecognized %}
+{% endfor %}{% endfor %}{% endif %}{% endif %}{% if notices or ambiguities or updates or unrecognized %}
 --- --- --- ---
-REFERENCE DOCUMENT{% endif %}{% if unrecognized or errors or ambiguities %}
+REFERENCE DOCUMENT{% endif %}{% if unrecognized or notices or ambiguities %}
 
 {% include "base_email_update_help.txt" %}
 {% endif %}
