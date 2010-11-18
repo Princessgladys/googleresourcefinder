@@ -563,7 +563,7 @@ class MailEditor(InboundMailHandler):
                                     subject, attribute, value)
                             updates.append((name, value))
                         if notice:
-                            formatted_name = utils.get_message(
+                            formatted_name = get_message(
                                 'attribute_name', attribute.key().name(), 'en')
                             orig_line = '%s: %s' % (formatted_name,
                                                     notice.update_text)
