@@ -85,31 +85,25 @@ class BadValueNotice(Notice):
         # Produce error message
         name = utils.get_message(
             'attribute_name', self.attribute.key().name(), 'en')
-        line = '%s: %s' % (name, self.update_text)
-        values = {
-            'error_message': ERRORS_BY_TYPE[self.attribute.type] % \
-                {'attribute': name},
-            'original_line': line
-        }
+        error_msg = ERRORS_BY_TYPE[self.attribute.type] % \
+            {'attribute': name}
 
         # If the attribute does not have specific values the user may
         # choose from, return the error as is. Otherwise, produce a
         # list of the available choices.
         if not self.attribute.values:
-            return values
+            return error_msg
 
-        error = values['error_message'] + '\n'
+        error_msg += '\n'
         #i18n: Accepted values error message
         options = '-- ' + _('Accepted values are: ')
         self.attribute_choices = [cache.MAIL_UPDATE_TEXTS[
-                                 'attribute_value'][val].en[0]
-                             for val in self.attribute.values]
+                                  'attribute_value'][val].en[0]
+                                  for val in self.attribute.values]
         for i, value in enumerate(self.attribute_choices):
             if len(options) + len(value) >= 80:
-                error += options + '\n'
+                error_msg += options + '\n'
                 options = '---- '
             maybe_comma = i != len(self.attribute_choices) - 1 and ', ' or ''
             options += value + maybe_comma 
-        error += options
-        values['error_message'] = error
-        return values
+        return error_msg + options
