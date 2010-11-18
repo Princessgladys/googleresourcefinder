@@ -20,6 +20,8 @@ class Help(utils.Handler):
         self.render('locale/%s/help.html' % locale, params=self.params)
 
 
+# The email update help pages below [the base help file, the documentation,
+# and the reference] are currently available only in English.
 class EmailHelp(utils.Handler):
     def get(self):
         self.render('locale/en/help_email.html', params=self.params)
@@ -27,7 +29,8 @@ class EmailHelp(utils.Handler):
 
 class EmailHelpDocumentation(utils.Handler):
     def get(self):
-        self.render('locale/en/help_email_documentation.html', params=self.params)
+        self.render('locale/en/help_email_documentation.html',
+                    params=self.params)
 
 
 class EmailHelpReference(utils.Handler):
