@@ -563,7 +563,14 @@ class MailEditor(InboundMailHandler):
                                     subject, attribute, value)
                             updates.append((name, value))
                         if notice:
-                            notices.append(notice.format())
+                            formatted_name = utils.get_message(
+                                'attribute_name', attribute.key().name(), 'en')
+                            orig_line = '%s: %s' % (formatted_name,
+                                                    notice.update_text)
+                            notices.append({
+                                'error_message': notice.format(),
+                                'original_line': orig_line
+                            })
 
                 if updates:
                     data.update_stanzas.append((subject, updates))
