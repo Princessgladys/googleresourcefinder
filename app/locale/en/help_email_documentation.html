@@ -3,10 +3,6 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta name="generator"
-        content=
-        "HTML Tidy for Linux/x86 (vers 11 February 2007), see www.w3.org" />
-
   <title>Resource Finder</title>
   <style type="text/css">
   ol{ margin: 0; padding: 0 }
@@ -290,9 +286,9 @@ Available beds: fifty
   value.</p>
 
   <p>If the attribute in question is a checklist or
-  multiple choice type attribute, then along with the error message will come a
-  list of accepted value. For example, an incorrect attempt to update the
-  multiple choice &ldquo;Services&rdquo; attribute will receive the following
+  multiple choice type attribute, then a list of accepted values will follow the
+  error message. For example, an incorrect attempt to update the
+  multiple choice &ldquo;Services&rdquo; attribute will result in the following
   error message:</p>
 
   <pre>update 128 Chak Hospital
@@ -301,18 +297,20 @@ Services: x
 -- Accepted values are: General surgery, Orthopedics, Neurosurgery,
 ---- Vascular surgery, Internal medicine, Cardiology</pre>
 
-  <p>One possible error is an attempted update of a facility with an ambiguous
-  title. If a user tries to update &ldquo;General Hospital&rdquo; when the
-  server has three facilities with that name, the server's reply with list
-  all possible matches. Next to each name will also be a unique key, used by the
-  database to reference a specific facility, like so:</p>
+  <p>There may be cases when multiple facilities have the same name.  Attempting to
+  update a facility in that case will result in an error message asking you to
+  choose the one you wish to update.  For example, if there are three facilities
+  with the name &ldquo;General Hospital&rdquo;, an attempted update will return a
+  list of facilities, each accompanied by a unique ID:</p>
 
   <pre>General Hospital (example.org/123)
 General Hospital (example.org/456)
 General Hospital (example.org/789)</pre>
 
-  <p>When trying to update one of these facilities, you must also specify the
-  key. For example:</p>
+  <p>To find which facility to update, visit the Resource Finder application and
+  click the icon on the map corresponding to the facility.  The info window that
+  opens will display the ID of the facility, which can then be matched to one of
+  the above items.  Then retry the update, including the ID.  For example:</p>
 
   <pre>update General Hospital (example.org/123)
 Available beds: 15</pre>
