@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Resource Finder</title>
+  <style type="text/css">
+  ol{ margin: 0; padding: 0 }
+  body, h1, td, p { font-family: helvetica, arial; font-size: 13px;
+    vertical-align: top; min-width: 150px; }
+  div { padding: 2px 0px 5px 10px; }
+  h1 { font-size: 16px }
+  h2 { font-size: 15px; padding-top: 10px; }
+  h3 { font-size: 14px; margin-left: 9.0pt; margin-bottom: 5px; }
+  .toc { margin: 0px }
+  .indent1 { margin-left: 18.0pt }
+  .indent2 { margin-left: 36.0pt }
+  ol { margin:0 0 1em 2em; *margin:0 0 1em 2.3em }
+  p { margin:0 0 1em; margin-left: 9.0pt }
+  li { margin:0 0 .5em }
+  .footer { margin:3em 0 0; text-align:center; color: #666; }
+  .q { font-weight: bold }
+  .maincontent { width:760px; margin: 15px; }
+  pre { margin-left: 2em; padding: 0.5em; background: #eee;
+    border: 1px solid #ddd; }
+  </style>
+</head>
+
+<body class="maincontent">
+  <h1><a name="title" id="title"></a>
+	  Google Resource Finder: Email Update Reference</h1>
+
+  <h2>Table of Contents</h2>
+
+  <p class="toc indent1"><a href="#subdomains">Subdomains</a></p>
+  <p class="toc indent1"><a href="#facility-types">Facility Types</a></p>
+  <p class="toc indent1"><a href="#attribute-names">Attribute Names</a></p>
+  <p class="toc indent1"><a href="#attribute-values">Attribute Values</a></p>
+  <p class="toc indent2"><a href="#boolean">Boolean</a></p>
+  <p class="toc indent2"><a href="#special">Special</a></p>
+  <p class="toc indent2"><a href="#organization-type">Organization Type</a></p>
+  <p class="toc indent2"><a href="#category">Category</a></p>
+  <p class="toc indent2"><a href="#operational-status">Operational Status</a></p>
+  <p class="toc indent2"><a href="#services">Services</a></p>
+
+  <br/>
+
+  <p>This reference document contains a list of all
+  subdomains, facility types, attribute names, values, and accepted
+  abbreviations for each.</p>
+
+  <h2><a name="subdomains" id="subdomains"></a>Subdomains</h2>
+
+  <p>Each instance of Resource Finder is available
+  at a particular subdomain of resource-finder.appspot.com. For example, to
+  assist with the floods in Pakistan, the Pakistan subdomain was created at
+  pakistan.resource-finder.appspot.com.</p>
+
+  <p><i>Available subdomains: Haiti, Pakistan</i></p>
+
+  <h2><a name="facility-types" id="facility-types"></a>Facility Types</h2>
+
+  <p>A facility type is a type of
+  &ldquo;resource&rdquo; that is being tracked. Currently, the only facility
+  available in the system is a hospital. Each subdomain has its own hospital
+  type as different locations may have different kinds of hospitals.</p>
+
+  <p><i>Available subject types: Hospital [in Haiti], Hospital [in Pakistan]
+    </i></p>
+
+  <p>Below is a list of attribute names for each subject type:</p>
+
+  <p><b>Haiti Hospital:</b> title,
+  alternate title, HealthC ID, PCode, available beds, total beds, services,
+  other services, contact name, phone, email, department, district, commune,
+  address, location, accuracy, organization, organization type, category,
+  construction, damage, operational status, alert status, comments, reachable
+  by road, can pick up patients, region ID, district ID, commune ID, commune
+  code, sante ID</p>
+
+  <p><b>Pakistan Hospital:</b> title, alternate title, ID, alternate ID,
+  available beds, total beds,
+  services, other services, contact name, phone, mobile, fax, email,
+  administrative area, sub administrative area, locality, address, location,
+  maps link, organization, organization type, category, construction, damage,
+  operational status, alert status, comments, reachable by road, can pick up
+  patients</p>
+
+  <h2><a name="attribute-names" id="attribute-names"></a>Attribute Names</h2>
+
+  <p>Below is a list of all attribute names and
+  their accepted abbreviated values. In drafting an email, you may use either the
+  full name of an attribute, or any of the accepted abbreviations. For example,
+  to update the total beds for a facility you could send any one of the
+  following:</p>
+
+  <pre>Total beds: 50
+Total: 50
+Beds: 50
+tb: 50</pre>
+
+  <p>
+  <b>Title:</b> name<br/>
+  <b>Alternate title:</b> alternate name, alt name<br/>
+  <b>HealthC ID:</b> healthcid, hid<br/>
+  <b>Alternate ID:</b> alt id<br/>
+  <b>Available beds:</b> available, avail, ab<br/>
+  <b>Total beds:</b> total, beds, tb<br/>
+  <b>Services:</b> serv<br/>
+  <b>Other services:</b> other serv<br/>
+  <b>Contact name:</b> contact<br/>
+  <b>Mobile:</b> cellphone<br/>
+  <b>Email:</b> e-mail<br/>
+  <b>Department:</b> dept<br/>
+  <b>Administrative area:</b> state / province / territory, state, province,
+    territory, state/province/territory<br/>
+  <b>Sub administrative area:</b> district / county, district/county, district,
+    county<br/>
+  <b>Locality:</b> city / town / village, city/town/village, city, town,
+    village<br/>
+  <b>Location:</b> loc<br/>
+  <b>Accuracy:</b> acc<br/>
+  <b>Maps link:</b> Google Maps link<br/>
+  <b>Organization:</b> org<br/>
+  <b>Organization type:</b> org type<br/>
+  <b>Category:</b> cat<br/>
+  <b>Damage:</b> dmg<br/>
+  <b>Operational status:</b> op status<br/>
+  <b>Alert status:</b> alert</p>
+
+  <p>These attribute names do not have
+  abbreviations. They must be entered as is [case insensitive] to make
+  changes:</p>
+
+  <p>
+  <b>PCode<br/>
+  ID<br/>
+  Phone<br/>
+  Fax<br/>
+  District<br/>
+  Commune code<br/>
+  Commune<br/>
+  Address<br/>
+  Construction<br/>
+  Comments<br/>
+  Reachable by road<br/>
+  Can pick up patients<br/>
+  region ID<br/>
+  district ID<br/>
+  commune ID<br/>
+  sante ID</b></p>
+
+  <h2><a name="attribute-values" id="attribute-values"></a>Attribute Values</h2>
+
+  <p>The following is a list of values for the
+  different attributes. They&rsquo;ve been divided into sub sections, based on
+  the attribute name that they apply to.</p>
+
+  <h3><a name="boolean" id="boolean"></a>Boolean</h3>
+
+  <p class="indent1">
+  <b>True:</b> yes, y, true<br/>
+  <b>False:</b> no, n, false</p>
+
+  <h3><a name="special" id="special"></a>Special</h3>
+
+  <p class="indent1"><b>Unspecified:</b> *none</p>
+
+  <p class="indent1">Note: clearing a value is a special case. The <b>only</b>
+    accepted value to do so is &ldquo;*none&rdquo;.</p>
+
+  <h3><a name="organization-type" id="organization-type"></a>
+    Organization Type</h3>
+
+  <p class="indent1">
+  <b>Faith-based:</b> faith based</br>
+  <b>For-profit:</b> for profit, profit</br>
+  <b>Military:</b> mil</br>
+  <b>Mixed:</b> mix</br>
+  <b>Public:</b> pub</p>
+
+  <p class="indent1">No alternate values:<br/>
+  <b>community</b><br/>
+  <b>NGO</b><br/>
+  <b>university</b></p>
+
+  <h3><a name="category" id="category"></a>Category</h3>
+
+  <p class="indent1">
+  <b>Hospital:</b> hosp<br/>
+  <b>Laboratory:</b> lab</p>
+
+  <p class="indent1">No alternate values:<br/>
+  <b>clinic<br/>
+  dispensary<br/>
+  mobile clinic</b></p>
+
+  <h3><a name="operational-status" id="operational-status"></a>
+    Operational Status</h3>
+
+  <p class="indent1">
+  <b>No surgical capacity:</b> no surgery<br/>
+  <b>Field hospital co-located with hospital:</b> field with hospital<br/>
+  <b>Closed or closing:</b> closed, closing</p>
+
+  <p class="indent1">No alternate values:<br/>
+  <b>operational<br/>
+  field hospital</b></p>
+
+  <h3><a name="services" id="services"></a>Services</h3>
+
+  <p class="indent1">
+  <b>General surgery:</b> gen surgery<br/>
+  <b>Orthopedics:</b> ortho<br/>
+  <b>Neurosurgery:</b> neuro<br/>
+  <b>Vascular surgery:</b> vascular<br/>
+  <b>Internal medicine:</b> internal med<br/>
+  <b>Cardiology:</b> cardio<br/>
+  <b>Infectious disease:</b> infectious<br/>
+  <b>Postoperative care:</b> postoperative<br/>
+  <b>Obstetrics and Gynecology:</b> obstetrics gynecology, obstetrics,
+    gynecology, obgyn<br/>
+  <b>Mental health:</b> mental<br/>
+  <b>X-Ray:</b> x ray, xray<br/>
+  <b>CT Scan:</b> ct<br/>
+  <b>Blood bank:</b> blood<br/>
+  <b>Mortuary services:</b> mortuary<br/>
+  <b>Outpatient care:</b> outpatient<br/>
+  <b>Cholera treatment:</b> cholera<br/>
+  <b>Emergency services:</b> emergency</p>
+
+  <p class="indent1">No alternate values:<br/>
+
+  <b>pediatrics<br/>
+  rehabilitation<br/>
+  dialysis<br/>
+  lab<br/>
+  other</b></p>
+
+{% include "footer.html" %}
+{% include "../../templates/analytics.html" %}
+</body>
+</html>
