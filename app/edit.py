@@ -355,7 +355,7 @@ def update(subject_name, subject_type, request, user, account, attributes,
         observed=utcnow)
     change_metadata = ChangeMetadata(
         utcnow, user, account.nickname, account.affiliation)
-    changed_attribute_information = {}
+    changed_attribute_information = []
     unchanged_attribute_values = {}
 
     # Validate the changes and package them up for use by mail_alerts.py.
@@ -384,7 +384,7 @@ def update(subject_name, subject_type, request, user, account, attributes,
             change_info['comment'] = subject.get_comment(name)
             # TODO(kpy): This seems always redundant with account.nickname?
             change_info['author'] = subject.get_author_nickname(name)
-            changed_attribute_information[name] = change_info
+            changed_attribute_information.append(change_info)
         else:
             unchanged_attribute_values[name] = subject.get_value(name)
     
@@ -408,6 +408,9 @@ def update(subject_name, subject_type, request, user, account, attributes,
         taskqueue.add(method='POST', url='/mail_alerts',
                       params=params, transactional=transactional)
 
+        params['changed_data'] = utils.url_pickle(
+            dict((update['attribute'], update) for
+                 update in changed_attribute_information))
         # Schedule a task to add an entry to the delta feed.
         taskqueue.add(method='POST', url='/tasks/add_delta_entry',
                       params=params, transactional=transactional)
