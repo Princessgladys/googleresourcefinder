@@ -547,12 +547,12 @@ msgid "Invalid or missing account e-mail."
 msgstr ""
 
 #. Error message for request missing subject name.
-#: bubble.py:174 edit.py:449
+#: bubble.py:174 edit.py:452
 msgid "Invalid or missing subject name."
 msgstr ""
 
 #. Error message for a missing subject type.
-#: edit.py:441
+#: edit.py:444
 msgid "Invalid or missing subject type."
 msgstr ""
 
@@ -864,7 +864,7 @@ msgid "Reachable by road"
 msgstr ""
 
 #. Record updated successfully.
-#: edit.py:555
+#: edit.py:558
 msgid "Record updated."
 msgstr ""
 
