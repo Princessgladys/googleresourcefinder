@@ -34,8 +34,9 @@ from model import *
 
 # Make some useful functions available.
 
-from setup import *
+from admin import *
 from load import *
+from setup import *
 
 # Make some useful environment variables available.
 
