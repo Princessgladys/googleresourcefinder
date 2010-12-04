@@ -109,8 +109,8 @@ def write_csv(out, subdomain, type_name):
     writer = csv.writer(out)
 
     subject_type = cache.SUBJECT_TYPES[subdomain][type_name]
-    subjects = fetch_all(
-        Subject.all_in_subdomain(subdomain).filter('type =', type_name))
+    subject_query = Subject.all_in_subdomain(subdomain
+        ).filter('type =', type_name)
     columns = COLUMNS_BY_SUBJECT_TYPE[(subdomain, type_name)]
     if columns:
         row = list(column[0] for column in columns)
@@ -118,17 +118,36 @@ def write_csv(out, subdomain, type_name):
         row = [type_name] + subject_type.attribute_names
     writer.writerow(row)
 
+    # To avoid out-of-memory errors, we cannot fetch all Subjects at one time.
+    # So we process batches.  There's a delicate balance here; batching is
+    # slower, and we also have to be careful of the 30s request limit, so
+    # large batches are preferred.
+    # Also, we want to sort by title, which we cannot do by adding .order()
+    # to subject_query. This is because .all_in_subdomain() adds an inequality
+    # filter on the key_name and appengine prohibits a sort on a field that is
+    # different from the field involved in the inequality. Therefore, we
+    # read all the rows into an array, then sort and write the output, knowing
+    # title is the first field in each row.
+    rows = []
+    batch_size = 500
+    subjects = subject_query.fetch(batch_size)
+    while subjects:
+        for subject in subjects:
+            if columns:
+                row = []
+                for column in columns:
+                    row.append(format(column[1](subject)))
+            else:
+                row = [subject.name]
+                for name in subject_type.attribute_names:
+                    value = get_value(subject, name)
+                    row.append(format(value))
+            rows.append(row)
+        subject_query.with_cursor(subject_query.cursor())
+        subjects = subject_query.fetch(batch_size)
+
     # Write a row for each subject.
-    for subject in sorted(subjects, key=lambda f: f.get_value('title')):
-        if columns:
-            row = []
-            for column in columns:
-                row.append(format(column[1](subject)))
-        else:
-            row = [subject.name]
-            for name in subject_type.attribute_names:
-                value = get_value(subject, name)
-                row.append(format(value))
+    for row in sorted(rows):
         writer.writerow(row)
 
 # TODO(kpy): This should probably reuse row_utils.serialize().  It's here for

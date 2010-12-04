@@ -159,7 +159,7 @@ msgid "Blood Bank"
 msgstr "بلڈ بینک"
 
 #. Save a copy of the data in CSV format
-#: export.py:168
+#: export.py:187
 msgid "CSV Export"
 msgstr "CSV برآمد"
 
@@ -402,7 +402,7 @@ msgid "Error saving facility information."
 msgstr "سہولت کی معلومات محفوظ کرنے میں غلطی۔"
 
 #. Button to export data to comma-separated-value format.
-#: templates/map.html:149 export.py:180
+#: export.py:199 templates/map.html:149
 msgid "Export CSV"
 msgstr "CSV برآمد کریں"
 
@@ -916,7 +916,7 @@ msgid "Saving..."
 msgstr "محفوظ ہو رہا ہے..."
 
 #. Label for a selector to export data to CSV
-#: export.py:172
+#: export.py:191
 msgid "Select subject type to export:"
 msgstr "برآمد کیلئے مریض کی نوعیت منتخب کریں:"
 
