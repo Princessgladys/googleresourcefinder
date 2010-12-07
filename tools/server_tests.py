@@ -217,6 +217,7 @@ def main():
             if not success:
                 runner.flush_output()  # show logs if anything failed
             runner.stop()
+        print '\nTests %s.' % (success and 'passed' or 'failed')
         code.interact = original_interact
 
 
