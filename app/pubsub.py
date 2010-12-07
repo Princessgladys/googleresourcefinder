@@ -18,6 +18,7 @@ import logging
 
 from google.appengine.api import urlfetch
 
+import config
 from feedlib import crypto, report_feeds
 from model import filter_by_prefix
 from utils import ErrorMessage, Handler, db, run, urlencode
