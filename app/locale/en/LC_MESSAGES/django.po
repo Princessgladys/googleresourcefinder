@@ -712,7 +712,7 @@ msgid "New window"
 msgstr ""
 
 #. Form option for a false Boolean value
-#: edit.py:175 utils.py:361 utils_test.py:321
+#: edit.py:175 utils.py:359 utils_test.py:321
 msgid "No"
 msgstr ""
 
@@ -1101,7 +1101,7 @@ msgid "X-Ray"
 msgstr ""
 
 #. Form option for a true Boolean value
-#: utils.py:361 edit.py:173 utils_test.py:320
+#: utils_test.py:320 edit.py:173 utils.py:359
 msgid "Yes"
 msgstr ""
 
