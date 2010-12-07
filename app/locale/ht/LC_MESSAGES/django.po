@@ -712,7 +712,7 @@ msgid "New window"
 msgstr "Deyò fenèt"
 
 #. Form option for a false Boolean value
-#: edit.py:175 utils_test.py:321 utils.py:341
+#: edit.py:175 utils.py:361 utils_test.py:321
 msgid "No"
 msgstr "Pa dakò"
 
@@ -1011,7 +1011,7 @@ msgid "URL:"
 msgstr "Sit entenet"
 
 #. Error message
-#: utils.py:144
+#: utils.py:147
 msgid "Unauthorized user."
 msgstr "San otorizasyon User"
 
@@ -1101,7 +1101,7 @@ msgid "X-Ray"
 msgstr "Reyon X"
 
 #. Form option for a true Boolean value
-#: edit.py:173 utils.py:341 utils_test.py:320
+#: utils.py:361 edit.py:173 utils_test.py:320
 msgid "Yes"
 msgstr "Wi"
 

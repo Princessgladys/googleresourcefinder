@@ -56,6 +56,7 @@ class PshbSubscription(db.Model):
 
 class Pubsub(Handler):
     """Handler for the PSHB subscription administration page."""
+    https_required = True  # must match https_required in feeds_delta.py
 
     def get(self):
         if not self.subdomain:

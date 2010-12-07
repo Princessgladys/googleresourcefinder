@@ -94,6 +94,8 @@ def update_subject(subject, observed, account, source_url, values, comments={},
 
 
 class Feed(Handler):
+    https_required = True
+
     def get(self):
         """Emits entries in the delta feed; also handles subscription checks."""
         if not self.subdomain:
@@ -162,6 +164,8 @@ class Feed(Handler):
 
 
 class Entry(Handler):
+    https_required = True
+
     def get(self):
         report_feeds.handle_entry_get(
             self.request, self.response, self.subdomain + '/delta')

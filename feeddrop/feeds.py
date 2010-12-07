@@ -21,7 +21,17 @@ import config
 from feedlib import report_feeds
 
 
-class Feed(webapp.RequestHandler):
+class HttpsRequestHandler(webapp.RequestHandler):
+    def initialize(self, request, response, user_for_test=None):
+        webapp.RequestHandler.initialize(self, request, response)
+        if request.scheme != 'https':
+            self.error(403)
+            self.response.out.write('HTTPS is required.')
+            self.get = lambda *args: None
+            self.post = lambda *args: None
+
+
+class Feed(HttpsRequestHandler):
     def get(self, feed_name):
         """Emits the entries in the specified feed."""
         report_feeds.handle_feed_get(
@@ -34,7 +44,7 @@ class Feed(webapp.RequestHandler):
             store_as_original=True)
 
 
-class Entry(webapp.RequestHandler):
+class Entry(HttpsRequestHandler):
     def get(self, feed_name, entry_key):
         """Emits a single entry of the specified feed."""
         report_feeds.handle_entry_get(self.request, self.response, feed_name)

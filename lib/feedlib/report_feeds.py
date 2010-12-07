@@ -303,5 +303,6 @@ def handle_feed_post(request, response, feed_name, hub=None,
         for entry in entries:
             logging.info('Stored entry: ' + entry.get_entry_id(request.uri))
         if hub:
+            logging.info('Notifying hub: %s (url %s)' % (hub, request.uri))
             notify_hub(hub, request.uri)
     return entries
