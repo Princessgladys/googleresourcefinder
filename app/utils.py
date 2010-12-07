@@ -117,6 +117,9 @@ class Struct:
 
 
 class Handler(webapp.RequestHandler):
+    # Handlers that require HTTPS can set this to True.
+    https_required = False
+
     auto_params = {
         'iframe': validate_yes,
         'embed': validate_yes,
@@ -161,6 +164,12 @@ class Handler(webapp.RequestHandler):
     def write(self, text):
         self.response.out.write(text)
 
+    def terminate_response(self):
+        """Prevents any further output from being written."""
+        self.response.out.write = lambda *args: None
+        self.get = lambda *args: None
+        self.post = lambda *args: None
+
     def initialize(self, request, response, user_for_test=None):
         """Performs common initialization steps for all requests (subdomain
         selection, language selection, query parameter validation)."""
@@ -171,6 +180,15 @@ class Handler(webapp.RequestHandler):
         for name in request.headers.keys():
             if name.lower().startswith('x-appengine'):
                 logging.debug('%s: %s' % (name, request.headers[name]))
+
+        # Check for SSL (unless running on localhost for development).
+        if self.https_required and request.host.split(':')[0] != 'localhost':
+            if request.scheme != 'https':
+                self.response.clear()
+                self.error(403)
+                self.write('HTTPS is required.')
+                self.terminate_response()
+                return
 
         # Determine the subdomain.
         self.subdomain = ''
