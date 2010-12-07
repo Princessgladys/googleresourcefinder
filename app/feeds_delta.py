@@ -20,6 +20,7 @@ import logging
 from google.appengine.ext import db
 
 import cache
+import config
 from feedlib import crypto, errors, report_feeds, xml_utils
 import model
 import pubsub
@@ -118,7 +119,8 @@ class Feed(Handler):
 
         else:
             report_feeds.handle_feed_get(
-                self.request, self.response, self.subdomain + '/delta')
+                self.request, self.response, self.subdomain + '/delta',
+                hub=config.get('hub_url'))
 
     def post(self):
         """Feed update notification from hub."""
@@ -134,7 +136,8 @@ class Feed(Handler):
 
         # Store the incoming reports on the 'delta' feed.
         entries = report_feeds.handle_feed_post(
-            self.request, self.response, self.subdomain + '/delta')
+            self.request, self.response, self.subdomain + '/delta',
+            hub=config.get('hub_url'))
 
         # Store each report as a report entity and apply its changes.
         for entry in entries:

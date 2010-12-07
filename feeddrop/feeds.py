@@ -17,18 +17,21 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
+import config
 from feedlib import report_feeds
 
 
 class Feed(webapp.RequestHandler):
     def get(self, feed_name):
         """Emits the entries in the specified feed."""
-        report_feeds.handle_feed_get(self.request, self.response, feed_name)
+        report_feeds.handle_feed_get(
+            self.request, self.response, feed_name, config.get('hub_url'))
 
     def post(self, feed_name):
         """Stores the posted entries on the specified feed."""
-        report_feeds.handle_feed_post(self.request, self.response, feed_name,
-                                      store_as_original=True)
+        report_feeds.handle_feed_post(
+            self.request, self.response, feed_name, config.get('hub_url'),
+            store_as_original=True)
 
 
 class Entry(webapp.RequestHandler):

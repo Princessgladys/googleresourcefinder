@@ -27,7 +27,6 @@ import tasks_external
 from time_formats import from_rfc3339, to_rfc1123, to_rfc3339
 from xml_utils import create_element, qualify, parse, serialize, write
 
-HUB = 'https://pubsubhubbub.appspot.com'
 ATOM_NS = 'http://www.w3.org/2005/Atom'
 REPORT_NS = 'http://schemas.google.com/report/2010'
 SPREADSHEETS_NS = 'http://schemas.google.com/spreadsheets/2006'
@@ -162,14 +161,14 @@ def write_entry(file, entry, feed_uri, uri_prefixes={}):
     entry_element = create_entry_element(entry, feed_uri)
     write(file, entry_element, add_uri_prefixes(uri_prefixes))
 
-def write_feed(file, entries, feed_uri, uri_prefixes={}, hub=None):
+def write_feed(file, entries, feed_uri, hub, uri_prefixes={}):
     """Writes an Atom <feed> of the given report entries to the given file."""
     feed_element = create_feed_element(entries, feed_uri, hub)
     write(file, feed_element, add_uri_prefixes(uri_prefixes))
 
-def notify_hub(feed_uri):
+def notify_hub(hub, feed_uri):
     """Notifies a PubSubHubbub hub of new content at a given feed URI."""
-    tasks_external.add(HUB, {'hub.mode': 'publish', 'hub.url': feed_uri})
+    tasks_external.add(hub, {'hub.mode': 'publish', 'hub.url': feed_uri})
 
 def check_request_etag(headers):
     """Determines etag, limit, arrived_after based on request headers."""
@@ -193,7 +192,7 @@ def create_response_etag(entries):
     timestamp = to_rfc3339(arrival_time)
     return '"' + timestamp + '/' + crypto.sign('etag_key', timestamp) + '"'
 
-def handle_feed_get(request, response, feed_name, uri_prefixes={}):
+def handle_feed_get(request, response, feed_name, hub=None, uri_prefixes={}):
     """Handles a request for an Atom feed of XML report entries."""
     etag, limit, arrived_after = check_request_etag(request.headers)
     entries = ReportEntry.get_latest_arrived(
@@ -202,12 +201,12 @@ def handle_feed_get(request, response, feed_name, uri_prefixes={}):
     response.headers['Content-Type'] = 'application/atom+xml'
     if entries:  # Deliver the new entries.
         response.headers['ETag'] = create_response_etag(entries)
-        write_feed(response.out, entries, request.uri, uri_prefixes, hub=HUB)
+        write_feed(response.out, entries, request.uri, hub, uri_prefixes)
     elif etag:  # If-None-Match was specified, and there was nothing new.
         response.set_status(304)
         response.headers['ETag'] = '"' + etag + '"'
     else:  # There are no entries in this feed.
-        write_feed(response.out, entries, request.uri, uri_prefixes, hub=HUB)
+        write_feed(response.out, entries, request.uri, hub, uri_prefixes)
 
 def handle_entry_get(request, response, feed_name, uri_prefixes={}):
     """Handles a request for the Atom entry for an individual XML report."""
@@ -272,7 +271,8 @@ def create_report_entry(entry_element, feed_name, external_feed_id=None):
             feed_name, title, author_uri, subject_id, observed, type_name,
             serialize(enclosed_element))
 
-def handle_feed_post(request, response, feed_name, store_as_original=False):
+def handle_feed_post(request, response, feed_name, hub=None,
+                     store_as_original=False):
     """Handles a post of incoming entries, storing each entry as a report in
     the specified local feed.  By default, the entries are assumed to belong
     to an external feed, and the posted feed must contain an <id> element,
@@ -302,5 +302,6 @@ def handle_feed_post(request, response, feed_name, store_as_original=False):
         db.put(entries)
         for entry in entries:
             logging.info('Stored entry: ' + entry.get_entry_id(request.uri))
-        notify_hub(request.uri)
+        if hub:
+            notify_hub(hub, request.uri)
     return entries

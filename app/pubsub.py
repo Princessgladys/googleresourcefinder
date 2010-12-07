@@ -87,7 +87,7 @@ class Pubsub(Handler):
             # Give the hub up to 10 minutes to call us back.
             'hub.verify_token': crypto.sign('hub_verify', topic, 600)
         }
-        urlfetch.fetch(report_feeds.HUB, urlencode(params), urlfetch.POST,
+        urlfetch.fetch(config.get('hub_url'), urlencode(params), urlfetch.POST,
                        {'Content-Type': 'application/x-www-form-urlencoded'})
         logging.info('Asked hub to %s: %s', mode, topic)
 

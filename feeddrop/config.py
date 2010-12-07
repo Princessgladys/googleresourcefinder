@@ -17,44 +17,6 @@
 from google.appengine.ext import db
 import random, simplejson
 
-# List of language codes supported for each subdomain
-LANGS_BY_SUBDOMAIN = {'haiti': ('en', 'fr', 'ht', 'es-419'),
-                      'pakistan': ('en', 'ur')}
-
-SUBDOMAIN_LIST_FOOTERS = {'haiti': 'haiti_list_footer.html',
-                          'pakistan': 'blank.html'}
-
-# List of languages that appear in the language menu, as (code, name) pairs.
-LANGUAGES = (('en', 'English'),
-             ('fr', u'Fran\u00e7ais'), # French
-             ('ht', u'Krey\u00f2l'), # Kreyol
-             ('es-419', u'Espa\u00F1ol'), # Spanish (Latin American)
-             ('ur', u'\u0627\u0631\u062F\u0648') # Urdu
-            )
-
-# A map from unavailable languages to the best available fallback languages.
-LANG_FALLBACKS = {'es': 'es-419'}
-
-# Google Maps is not available in all languages.  This maps from unavailable
-# languages to the best available fallback language.
-MAPS_LANG_FALLBACKS = {'ht': 'fr'}
-
-# English-only Resource Finder discussion board, monitored by Google
-DISCUSSION_BOARD = 'https://sites.google.com/site/resourcefinderdiscussion/'
-
-# Google feedback form, translated to other languages
-FEEDBACK_FORM = 'http://www.google.com/support/fluvaccinefinder/bin/' + \
-                'request.py?hl=%(lang)s&contact_type=do_resource'
-
-# Links to feedback / discussion sites
-FEEDBACK_URLS_BY_LANG = {
-    'en': DISCUSSION_BOARD,
-    'es-419': FEEDBACK_FORM % {'lang': 'es-419'},
-    'fr': FEEDBACK_FORM % {'lang': 'fr'},
-    'ht': FEEDBACK_FORM % {'lang': 'ht'},
-    'ur': DISCUSSION_BOARD
-}
-
 
 class ConfigEntry(db.Model):
     """An application configuration setting, identified by its key_name."""
