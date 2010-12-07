@@ -211,7 +211,7 @@ msgstr "Nota"
 #. Service provided by a health facility (use Title Case). Meaning: Treatment of cholera
 #: ../tools/setup.py:496
 msgid "Cholera Treatment"
-msgstr ""
+msgstr "Tratamiento del Cólera"
 
 #. Instructions for a menu of deployed instances of the application
 #: templates/subdomain_menu.html:40
