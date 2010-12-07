@@ -84,7 +84,10 @@ class Pubsub(Handler):
             'hub.callback': callback,
             'hub.mode': mode,
             'hub.topic': topic,
-            'hub.verify': 'async',
+            # Should be 'async', but http://pubsubhubbub.appspot.com/ has a bug
+            # so only 'sync' currently works. See https://groups.google.com/
+            # group/pubsubhubbub/browse_thread/thread/bc4d01f8b9961ae7
+            'hub.verify': 'sync',
             'hub.secret': crypto.get_key('hub_secret'),
             # Give the hub up to 10 minutes to call us back.
             'hub.verify_token': crypto.sign('hub_verify', topic, 600)
