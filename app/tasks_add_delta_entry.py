@@ -14,6 +14,7 @@
 
 """Internal task to add an entry to the delta feed."""
 
+import config
 from feedlib import report_feeds, xml_utils
 import row_utils
 from utils import Handler, run, url_unpickle
@@ -47,7 +48,8 @@ class AddDeltaEntry(Handler):
         ).put()
 
         # Notify the PSHB hub that we have published a new entry.
-        report_feeds.notify_hub(self.request.host_url + '/feeds/delta')
+        report_feeds.notify_hub(
+            config.get('hub_url'), self.request.host_url + '/feeds/delta')
 
 
 if __name__ == '__main__':
