@@ -105,7 +105,7 @@ td.subject-count.selected { color: #fff; }
 .vs2 { height: 3px; opacity: 0.06; filter:alpha(opacity=6); }
 .vs3 { height: 4px; opacity: 0.03; filter:alpha(opacity=3); }
 #freshness { position: absolute; left: 0; bottom: 0; padding: 4px;
-             font-size: 13px; background: #eee; width: 392px; }
+             font-size: 11px; background: #eee; width: 392px; }
 #edit-bar { position: absolute; left: 0; bottom: 0; padding: 4px;
             background: #eee; width: 377px; }
 .new-subject-map-control { margin: 5px 1px; border: 1px solid #000; }
