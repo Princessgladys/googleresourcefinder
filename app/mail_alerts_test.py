@@ -391,7 +391,7 @@ class MailAlertsTest(MediumTestCase):
         real_send_digests = mail_alerts_.send_digests
         mail_alerts_.send_digests = raise_exceeds_deadline_error
         mail_alerts_.request = Struct(action='', url='localhost:80/mail_alerts',
-                                      path='/mail_alerts')
+                                      path='/mail_alerts', headers={'Host': ''})
         mail_alerts_.post() # should not throw an error anyway
         mail_alerts_.send_digests = real_send_digests
 

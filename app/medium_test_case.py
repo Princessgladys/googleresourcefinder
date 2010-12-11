@@ -21,7 +21,7 @@ from google.appengine.api import apiproxy_stub_map
 from google.appengine.api import datastore_file_stub
 from google.appengine.api import mail_stub
 from google.appengine.api import user_service_stub
-from google.appengine.api.labs.taskqueue import taskqueue_stub
+from google.appengine.api.taskqueue import taskqueue_stub
 from google.appengine.api.memcache import memcache_stub
 
 APP_ID = 'test'

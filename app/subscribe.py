@@ -168,8 +168,11 @@ class Subscribe(Handler):
                 body = email_formatter.format_body(email_data)
                 email_subject = format_email_subject(self.subdomain,
                                                      old_frequency)
-                send_email(self.account.locale,
-                           'updates@resource-finder.appspotmail.com',
+
+                sender = '%s-updates@%s' % (
+                    self.subdomain, self.get_parent_domain().replace(
+                        'appspot.com', 'appspotmail.com'))
+                send_email(self.account.locale, sender,
                            self.account.email, email_subject,
                            body, self.account.email_format)
             else:

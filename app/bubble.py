@@ -191,6 +191,9 @@ class Bubble(Handler):
             self.get_url('/', subject_name=self.params.subject_name,
                          embed='yes'))
         settings_url = self.get_url('/settings')
+        # Email updates are currently available only in English.
+        show_edit_by_email = self.params.lang == 'en'
+        edit_by_email_url = self.get_url('/mail_editor_start')
         frequency = self.account and self.account.default_frequency or 'instant'
         purge_permitted = access.check_action_permitted(
             self.account, self.subdomain, 'purge')
@@ -198,9 +201,12 @@ class Bubble(Handler):
         html = self.render_to_string(
             value_info_extractor.template_name,
             user=self.user,
+            email=self.user and self.user.email() or '',
             login_url=login_url,
             edit_url=edit_url,
             settings_url=settings_url,
+            edit_by_email_url=edit_by_email_url,
+            show_edit_by_email=show_edit_by_email,
             subdomain=self.subdomain,
             subscribed=subscribed,
             frequency=frequency,

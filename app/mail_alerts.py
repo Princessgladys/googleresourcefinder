@@ -341,7 +341,8 @@ class MailAlerts(utils.Handler):
 
     def init(self):
         """Handles any useful initialization tasks for the class."""
-        self.appspot_email = 'updates@resource-finder.appspotmail.com'
+        self.appspot_email = 'updates@%s' % (
+            self.get_parent_domain().replace('appspot.com', 'appspotmail.com'))
         self.action = self.request.get('action')
 
         # Calls made from taskqueue don't have a 'Host' attribute in the headers

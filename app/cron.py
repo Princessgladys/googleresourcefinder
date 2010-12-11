@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.appengine.api.labs import taskqueue
+from google.appengine.api import taskqueue
 
 from utils import *
 

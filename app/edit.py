@@ -22,7 +22,7 @@ import urlparse
 import utils
 import wsgiref
 
-from google.appengine.api.labs import taskqueue
+from google.appengine.api import taskqueue
 
 from access import check_action_permitted
 from feedlib.crypto import sign, verify

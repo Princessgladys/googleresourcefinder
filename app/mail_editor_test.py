@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for mail_alerts.py."""
+"""Tests for mail_editor.py."""
 
 import datetime
 import re

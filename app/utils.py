@@ -14,7 +14,7 @@
 
 from google.appengine.api import urlfetch
 from google.appengine.api import users
-from google.appengine.api.labs import taskqueue
+from google.appengine.api import taskqueue
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 import google.appengine.ext.webapp.template
@@ -274,6 +274,13 @@ class Handler(webapp.RequestHandler):
             elif len(levels) >= 3:  # resource-finder.appspot.com
                 return 'http://%s.%s/' % (subdomain, '.'.join(levels[-3:]))
         return 'http://%s/?subdomain=%s' % (host, subdomain)
+
+    def get_parent_domain(self):
+        """Determines the app's domain, not including the subdomain."""
+        levels = self.request.headers.get('Host', '').split('.')
+        if levels[-2:] == ['appspot', 'com']:
+            return '.'.join(levels[-3:])
+        return '.'.join(levels)
 
     def get_url(self, path, **params):
         """Constructs a relative URL for a given path and query parameters,

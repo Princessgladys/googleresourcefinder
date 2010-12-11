@@ -96,3 +96,107 @@ function purge_subject(subdomain, subject_name) {
   }
 }
 
+/**
+ * Open the edit-by-email dialog.
+ */
+function edit_by_email_open() {
+  hide('edit-by-email-sending');
+  hide('edit-by-email-success');
+  hide('edit-by-email-fail');
+  hide('edit-by-email-error');
+  show('edit-by-email-form');
+  show('edit-by-email-buttons');
+  show('edit-by-email-insert');
+  set_text('edit-by-email-error', '');
+  set_text('edit-by-email-address-span', '');
+}
+
+/**
+ * Sends an AJAX request to send an email update form.
+ * @param {string} subdomain the current subdomain
+ * @param {string} subject_name the key name of the subject to be purged
+ * @param {string} edit_by_email_url server url to send the request
+ */
+function edit_by_email_send(subdomain, subject_name, edit_by_email_url) {
+  var email = $("edit-by-email-address").value;
+  hide('edit-by-email-buttons');
+  show('edit-by-email-sending');
+
+  var post_data = {
+    subdomain: subdomain,
+    subject_name: subject_name,
+    email: email
+  };
+
+  $j.ajax({
+      type: 'POST',
+      url: edit_by_email_url,
+      data: post_data,
+      success: function(response) {
+        if ('OK' == response) {
+          hide('edit-by-email-form');
+          show('edit-by-email-success');
+          set_text('edit-by-email-address-span', email);
+        } else {
+          hide('edit-by-email-sending');
+          show('edit-by-email-buttons');
+          show('edit-by-email-error');
+          set_text('edit-by-email-error', response);
+        }
+      },
+      error: function(xhr, text_status, error) {
+        log(text_status + ', ' + error);
+        hide('edit-by-email-form');
+        show('edit-by-email-fail');
+      }
+    });
+}
+
+/**
+ * Closes the edit-by-email dialog.
+ */
+function edit_by_email_close() {
+  hide('edit-by-email-insert');
+}
+
+/**
+ * Shows the element with the given id.
+ * @param {string} id the id of the element to show
+ */
+function show(id) {
+  set_display(id, true);
+}
+
+/**
+ * Hides the element with the given id.
+ * @param {string} id the id of the element to hide
+ */
+function hide(id) {
+  set_display(id, false);
+}
+
+/**
+ * Changes the display of the element with the given id
+ * @param {string} id the id of the element to update
+ * @param {boolean} show true to show, false to hide
+ */
+function set_display(id, show) {
+  var e = $(id);
+  if (!e) {
+    return;
+  }
+  e.style.display = show ? '' : 'none';
+}
+
+/**
+ * Updates innerText on of the element with the given id
+ * @param {string} id the id of the element to update
+ * @param {string} text the new text
+ */
+function set_text(id, text) {
+  var e = $(id);
+  if (!e) {
+    return;
+  }
+  e.innerText = text;
+}

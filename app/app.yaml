@@ -32,6 +32,9 @@ handlers:
 - url: /edit
   script: edit.py
 
+- url: /mail_editor_start
+  script: mail_editor_start.py
+
 - url: /request_access
   script: request_access.py
 
@@ -128,6 +131,6 @@ handlers:
 
 # Incoming mail handlers.
 
-- url: /_ah/mail/(.+)-updates@resource-finder.appspotmail.com
+- url: /_ah/mail/(.+)-updates@resource-finder(.*).appspotmail.com
   script: mail_editor.py
 
