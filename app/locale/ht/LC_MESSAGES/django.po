@@ -63,7 +63,7 @@ msgid "(unspecified)"
 msgstr "(pa espesifye)"
 
 #. Note that a health facility has been marked closed.
-#: templates/hospital_bubble.html:89
+#: templates/hospital_bubble.html:172
 msgid "<strong>Note:</strong> This facility has been marked closed."
 msgstr "<strong>Remak:</strong> etablisman sa a te make fèmen."
 
@@ -89,7 +89,7 @@ msgid "Add a new %(type_name)s"
 msgstr "Ajoute yon %(type_name)s new"
 
 #. Header for a street address
-#: templates/print.html:138 ../tools/setup.py:340 templates/hospital_bubble.html:173
+#: templates/print.html:138 ../tools/setup.py:340 templates/hospital_bubble.html:256
 msgid "Address"
 msgstr "Adrès"
 
@@ -104,7 +104,7 @@ msgid "Affiliation (required)"
 msgstr "Afilyasyon (obligatwa)"
 
 #. Note that a health facility is on alert.
-#: templates/hospital_bubble.html:97
+#: templates/hospital_bubble.html:180
 msgid "Alert"
 msgstr "Alèt"
 
@@ -119,7 +119,7 @@ msgid "All"
 msgstr "Tout"
 
 #. Proper name of an alternate ID for a health facility
-#: templates/hospital_bubble.html:68 ../tools/setup.py:308
+#: ../tools/setup.py:308 templates/hospital_bubble.html:151
 msgid "Alternate ID"
 msgstr "Altène non"
 
@@ -128,8 +128,8 @@ msgstr "Altène non"
 msgid "Alternate name"
 msgstr "Altène non"
 
-#. Eror message, shown when an error occurs.
-#: static/locale.js:75
+#. Error message.
+#: templates/hospital_bubble.html:128 static/locale.js:75
 msgid "An error has occurred. Please try again later."
 msgstr "Gen yon erè ki te fèt. Tanpri, eseye ankò pi ta."
 
@@ -174,7 +174,7 @@ msgid "Can pick up patients"
 msgstr "Ka al chache malad"
 
 #. Button text to cancel and return to the home page
-#: templates/edit.html:173 static/locale.js:33
+#: templates/hospital_bubble.html:98 templates/edit.html:173 static/locale.js:33
 msgid "Cancel"
 msgstr "Anile"
 
@@ -194,17 +194,17 @@ msgid "Category"
 msgstr "Kategori"
 
 #. Header for a record of a change to a facility detail
-#: templates/hospital_bubble.html:202
+#: templates/hospital_bubble.html:285
 msgid "Change"
 msgstr "Chanje"
 
 #. Header for the history of changes in data for a facility
-#: templates/hospital_bubble.html:163
+#: templates/hospital_bubble.html:246
 msgid "Change details"
 msgstr "Chanje done"
 
 #. Header a column of comment about why a change was made
-#: templates/hospital_bubble.html:210
+#: templates/hospital_bubble.html:293
 msgid "Change note"
 msgstr "Chanje"
 
@@ -232,6 +232,11 @@ msgstr "Klike sou yon kote sou kat la nan plas Makè a pou yon nouvo etablisman.
 #: ../tools/setup.py:391
 msgid "Clinic"
 msgstr "Klinik"
+
+#. Button text to close a form
+#: templates/hospital_bubble.html.py:134 templates/hospital_bubble.html:121
+msgid "Close"
+msgstr "PCode"
 
 #. Facility operational status: closed or in the process of closing
 #: ../tools/setup.py:428
@@ -284,7 +289,7 @@ msgid "Damage"
 msgstr "Domaj"
 
 #. Header for date and time of a change record
-#: templates/hospital_bubble.html:214
+#: templates/hospital_bubble.html:297
 msgid "Date and time"
 msgstr "Jou  ak  lè"
 
@@ -346,20 +351,35 @@ msgstr "Adrès elektronik:"
 msgid "Edit %(title)s"
 msgstr "Reekri %(title)s"
 
+#. Link to a feature allowing a user to edit a record by email
+#: templates/hospital_bubble.html.py:69 templates/hospital_bubble.html:33
+msgid "Edit by email"
+msgstr "Moun ki reekri a"
+
 #. Label for link to edit a subject record
 #: templates/hospital_email.html.py:182
 msgid "Edit this record"
 msgstr "modifye enregistreman sa"
 
 #. Header a column of user who made the edits
-#: templates/hospital_bubble.html:206
+#: templates/hospital_bubble.html:289
 msgid "Edited by"
 msgstr "Moun ki reekri a"
+
+#. Explains the edit by email feature.
+#: templates/hospital_bubble.html:85
+msgid "Email"
+msgstr "Adrès elektronik:"
 
 #. Settings page title
 #: templates/settings.html:75
 msgid "Email Subscription Settings"
 msgstr "Imel Abònman Anviwònman"
+
+#. Error message for invalid email address
+#: mail_editor_start.py:66
+msgid "Email address is invalid."
+msgstr ""
 
 #. Label for e-mail type radio buttons
 #: templates/settings.html:83
@@ -417,7 +437,7 @@ msgid "Facility"
 msgstr "Etablisman"
 
 #. Header for details about a facility
-#: templates/hospital_bubble.html:158
+#: templates/hospital_bubble.html:241
 msgid "Facility details"
 msgstr "Enfòmasyon sou etablisman "
 
@@ -481,6 +501,11 @@ msgstr "Enfòmasyon jeneral"
 msgid "General Surgery"
 msgstr "Chiriji Jeneral"
 
+#. Button text to submit a form
+#: templates/hospital_bubble.html:92
+msgid "Go"
+msgstr ""
+
 #. Link to this subject in Google Maps
 #: ../tools/setup.py:346
 msgid "Google Maps Link"
@@ -512,7 +537,7 @@ msgid "Hospital"
 msgstr "Lopital"
 
 #. Proper name of an ID for a health facility
-#: ../tools/setup.py:306 templates/hospital_bubble.html:62
+#: templates/hospital_bubble.html:145 ../tools/setup.py:306
 msgid "ID"
 msgstr "ID"
 
@@ -556,6 +581,11 @@ msgstr "Envalid oubyen erè nan non etablisman an"
 msgid "Invalid or missing subject type."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
+#. Error message for invalid subject
+#: mail_editor_start.py:73
+msgid "Invalid subject"
+msgstr "Envalid oubyen erè nan non etablisman an"
+
 #. Abbreviated months of the year.
 #: static/locale.js:143
 msgid "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"
@@ -577,7 +607,7 @@ msgid "Last Updated:"
 msgstr "Misajou"
 
 #. Label for a date-time when the data was last updated
-#: templates/hospital_bubble.html:82
+#: templates/hospital_bubble.html:165
 msgid "Last updated"
 msgstr "Misajou"
 
@@ -622,7 +652,7 @@ msgid "Location"
 msgstr "Kote"
 
 #. Geographic coordinates of a location on earth.
-#: templates/hospital_bubble.html:182
+#: templates/hospital_bubble.html:265
 msgid "Location:"
 msgstr "Kote"
 
@@ -712,12 +742,12 @@ msgid "New window"
 msgstr "Deyò fenèt"
 
 #. Form option for a false Boolean value
-#: edit.py:175 utils.py:359 utils_test.py:321
+#: utils.py:366 edit.py:175 utils_test.py:321
 msgid "No"
 msgstr "Pa dakò"
 
 #. Indicates there is no availability information for this  hospital.
-#: templates/hospital_bubble.html:142
+#: templates/hospital_bubble.html:225
 msgid "No availability information"
 msgstr "Pa gen enfòmasyon ki koresponn"
 
@@ -823,7 +853,7 @@ msgid "Plain text"
 msgstr "Tèks"
 
 #. Indicates a user should call for availability of beds and services at a hospital.
-#: templates/hospital_bubble.html:136
+#: templates/hospital_bubble.html:219
 msgid "Please call for availability information."
 msgstr "Tanpri rele pou enfomasyon disponib"
 
@@ -920,6 +950,11 @@ msgstr "Anrejistre..."
 msgid "Select subject type to export:"
 msgstr "Idantite kalite etablisman ekspòtasyon"
 
+#. Waiting message to send an email
+#: templates/hospital_bubble.html:105
+msgid "Sending..."
+msgstr "Anrejistre..."
+
 #. work done by someone that benefits another
 #: ../tools/setup.py:314 static/locale.js:186
 msgid "Services"
@@ -951,7 +986,7 @@ msgid "Sign in"
 msgstr "Mete Anprent"
 
 #. Link to sign in to edit the data for a hospital record.
-#: templates/hospital_bubble.html:53
+#: templates/hospital_bubble.html:62
 msgid "Sign in to edit"
 msgstr "Tanpri siyen nan reekri"
 
@@ -966,9 +1001,14 @@ msgid "State / Province / Territory"
 msgstr "Éta / Provens / Teritwa"
 
 #. Label to subscribe to a subject
-#: templates/hospital_bubble.html:41 static/locale.js:198
+#: templates/hospital_bubble.html:50 static/locale.js:198
 msgid "Subscribe to email updates"
 msgstr "Abònman imel mizajou"
+
+#. Message on successfully sent email
+#: templates/hospital_bubble.html:114
+msgid "Success! An email was sent to:"
+msgstr ""
 
 #. Link to terms of service for the application
 #: templates/base.html:115
@@ -1031,7 +1071,7 @@ msgid "Unreinforced masonry"
 msgstr "Pa ranfòse konkrè"
 
 #. Label to unsubscribe from a subject
-#: static/locale.js:206 templates/hospital_bubble.html:36
+#: static/locale.js:206 templates/hospital_bubble.html:45
 msgid "Unsubscribe"
 msgstr "Koupe Abònman nan Tcheke"
 
@@ -1081,7 +1121,7 @@ msgid "View full record"
 msgstr "Gade Tout Dosye"
 
 #. View in Google Mapmaker
-#: templates/hospital_bubble.html:75
+#: templates/hospital_bubble.html:158
 msgid "View in Google MapMaker"
 msgstr "Gade nan Google MapMaker"
 
@@ -1101,7 +1141,7 @@ msgid "X-Ray"
 msgstr "Reyon X"
 
 #. Form option for a true Boolean value
-#: utils_test.py:320 edit.py:173 utils.py:359
+#: utils.py:366 edit.py:173 utils_test.py:320
 msgid "Yes"
 msgstr "Wi"
 
@@ -1115,6 +1155,11 @@ msgstr "Wol ou a bon a %(role)s"
 #: static/locale.js:67
 msgid "You can add a latitude and longitude in the edit form."
 msgstr "Ou kapab ajoute yon latitid ak lonjitd nan reekri fòm."
+
+#. Explains the edit by email feature.
+#: templates/hospital_bubble.html:80
+msgid "You can edit this facility by sending an email.<br>Enter your email address. We will send you simple instructions to get started."
+msgstr ""
 
 #. Saved message; e-mail subscription has been saved
 #: static/locale.js:71
@@ -1174,12 +1219,12 @@ msgid "anonymous"
 msgstr "anonim"
 
 #. Heading for number of available beds at a hospital
-#: templates/hospital_bubble.html:106
+#: templates/hospital_bubble.html:189
 msgid "availability"
 msgstr "Disponibilite"
 
 #. Heading for number of total beds at a hospital
-#: templates/hospital_bubble.html:110
+#: templates/hospital_bubble.html:193
 msgid "capacity"
 msgstr "Kapasite"
 
@@ -1200,7 +1245,7 @@ msgid "p ${PHONE}"
 msgstr "t ${PHONE}"
 
 #. Heading for servies available at a hospital (eg, orthopedics, cardiology)
-#: templates/hospital_bubble.html:115
+#: templates/hospital_bubble.html:198
 msgid "services"
 msgstr "sèvis"
 
