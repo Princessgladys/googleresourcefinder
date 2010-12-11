@@ -1,4 +1,4 @@
-# Copyright 2009-2010 by Google Inc.
+# Copyright 2010 by Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Handles various limited-use administrative tasks."""
+"""Handles requests from a UI hook to get users started with email update."""
 
-__author__ = 'pfritzsche@google.com'
+__author__ = 'shakusa@google.com'
 
-import logging
 import re
 
 import cache
@@ -36,8 +35,6 @@ def is_valid_email(email):
         return None
     if EMAIL_PATTERN.match(email):
         return True
-    else:
-        return False
 
 class MailEditorStart(utils.Handler):
     """Handler for /mail_editor_start, which is a UI hook to get
@@ -68,7 +65,7 @@ class MailEditorStart(utils.Handler):
 
         self.minimal_subject = cache.MINIMAL_SUBJECTS[
             self.subdomain].get(self.params.subject_name)
-        if self.minimal_subject is None:
+        if not self.minimal_subject:
             #i18n: Error message for invalid subject
             raise ErrorMessage(400, _('Invalid subject'))
 

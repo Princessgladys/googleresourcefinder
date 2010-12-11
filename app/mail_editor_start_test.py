@@ -115,11 +115,7 @@ class MailEditorStartTest(MediumTestCase):
         handler = self.simulate_request('/mail_editor_start?' + urlencode({
             'email': self.email, 'subject_name': '',
             'subdomain': self.subdomain.key().name()}))
-        try:
-            handler.post()
-            assert False
-        except ErrorMessage:
-            pass
+        assert_raises(ErrorMessage, handler.post)
 
     def test_invalid_email(self):
         """Confirms that mail_editor_start sends an error message when it
@@ -132,7 +128,7 @@ class MailEditorStartTest(MediumTestCase):
 
     def test_validate_email(self):
         """Confirms the behavior of is_valid_email."""
-        assert mail_editor_start.is_valid_email('test123.e5+test@example.com')
+        assert mail_editor_start.is_valid_email('test%123.E5+test@example.com')
         assert not mail_editor_start.is_valid_email('test')
         assert not mail_editor_start.is_valid_email('')
         assert not mail_editor_start.is_valid_email(None)

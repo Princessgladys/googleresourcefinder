@@ -736,24 +736,22 @@ class MailEditor(InboundMailHandler):
             subject = 'ERROR - %s' % original_message.subject
         else:
             subject = original_message.subject
-        message = mail.EmailMessage(
-            # Note: Must update to test on other servers
-            sender=self.subdomain + '-updates@resource-finder.appspotmail.com',
-            to=self.email, subject=subject, body=body)
+        message = mail.EmailMessage(sender=original_message.to,
+                                    to=self.email, subject=subject, body=body)
         message.send()
 
-    def send_template_email(self, original_message, minimal_subject=None, minimal_subject_title=None):
+    def send_template_email(self, original_message, ms=None, ms_title=None):
         """Sends a response email to the user containing a blank template for
-        the specified subject (in the subject line) if one exists at all."""
+        the specified subject from the given MinimalSubject ms or
+        in the subject line of original_message, if provided."""
         locale, nickname = get_locale_and_nickname(
             self.account, original_message)
-        ms = minimal_subject
         if ms is None:
           title_lower = original_message.subject.strip().lower()
           minimal_subjects = get_min_subjects_by_lowercase_title(
               self.subdomain, title_lower)
           ms = len(minimal_subjects) == 1 and minimal_subjects[0] or None
-        subject_title = minimal_subject_title or (ms and ms.get_value('title'))
+        subject_title = ms_title or (ms and ms.get_value('title'))
         subject_name = ms and ms.get_name()
         s_type = ms and ms.type or DEFAULT_SUBJECT_TYPES[self.subdomain]
         subject_type = cache.SUBJECT_TYPES[self.subdomain][s_type]
@@ -773,9 +771,7 @@ class MailEditor(InboundMailHandler):
         path = os.path.join(os.path.dirname(__file__),
             'locale/%s/template_response_email.txt' % locale)
         body = template.render(path, template_values)
-        message = mail.EmailMessage(
-            # Note: Must update to test on other servers
-            sender=self.subdomain + '-updates@resource-finder.appspotmail.com',
+        message = mail.EmailMessage(sender=original_message.to,
             to=self.email, subject=original_message.subject, body=body)
         message.send()
 
