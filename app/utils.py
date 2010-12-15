@@ -192,6 +192,7 @@ class Handler(webapp.RequestHandler):
 
         # Determine the subdomain.
         self.subdomain = ''
+        # TODO(shakusa) Use req.host instead
         levels = self.request.headers.get('Host', '').split('.')
         if levels[-2:] == ['appspot', 'com'] and len(levels) >= 4:
             # foo.resource-finder.appspot.com -> subdomain 'foo'
@@ -266,6 +267,7 @@ class Handler(webapp.RequestHandler):
 
     def get_subdomain_root(self, subdomain):
         """Gets the URL to the main page for a subdomain."""
+        # TODO(shakusa) Use req.host instead
         host = self.request.headers['Host']
         levels = host.split('.')
         if levels[-2:] == ['appspot', 'com']:
@@ -277,6 +279,7 @@ class Handler(webapp.RequestHandler):
 
     def get_parent_domain(self):
         """Determines the app's domain, not including the subdomain."""
+        # TODO(shakusa) Use req.host instead
         levels = self.request.headers.get('Host', '').split('.')
         if levels[-2:] == ['appspot', 'com']:
             return '.'.join(levels[-3:])

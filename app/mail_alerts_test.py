@@ -390,6 +390,8 @@ class MailAlertsTest(MediumTestCase):
         mail_alerts_ = mail_alerts.MailAlerts()
         real_send_digests = mail_alerts_.send_digests
         mail_alerts_.send_digests = raise_exceeds_deadline_error
+        # This struct is mocking a webob.request; it needs a host header
+        # since we use that to formulate the 'to' address in the email
         mail_alerts_.request = Struct(action='', url='localhost:80/mail_alerts',
                                       path='/mail_alerts', headers={'Host': ''})
         mail_alerts_.post() # should not throw an error anyway
