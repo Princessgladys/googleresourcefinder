@@ -236,7 +236,7 @@ msgstr "کلینک"
 #. Button text to close a form
 #: templates/hospital_bubble.html.py:134 templates/hospital_bubble.html:121
 msgid "Close"
-msgstr "PCode"
+msgstr ""
 
 #. Facility operational status: closed or in the process of closing
 #: ../tools/setup.py:428
@@ -349,7 +349,7 @@ msgstr "ترمیم %(title)s"
 #. Link to a feature allowing a user to edit a record by email
 #: templates/hospital_bubble.html.py:69 templates/hospital_bubble.html:33
 msgid "Edit by email"
-msgstr "ترمیم کنندہ"
+msgstr ""
 
 #. Label for link to edit a subject record
 #: templates/hospital_email.html.py:182
@@ -579,7 +579,7 @@ msgstr "مریض کی نوعیت غلط ہے یا چھوٹ گئی ہے۔"
 #. Error message for invalid subject
 #: mail_editor_start.py:70
 msgid "Invalid subject"
-msgstr "مریض کا نام غلط ہے یا چھوٹ گیا ہے۔"
+msgstr ""
 
 #. Abbreviated months of the year.
 #: static/locale.js:143
@@ -737,7 +737,7 @@ msgid "New window"
 msgstr "باہر نکالیں"
 
 #. Form option for a false Boolean value
-#: utils.py:366 edit.py:175 utils_test.py:321
+#: edit.py:175 utils.py:369 utils_test.py:321
 msgid "No"
 msgstr "نہیں"
 
@@ -948,7 +948,7 @@ msgstr "برآمد کیلئے مریض کی نوعیت منتخب کریں:"
 #. Waiting message to send email
 #: templates/hospital_bubble.html:105
 msgid "Sending..."
-msgstr "محفوظ ہو رہا ہے..."
+msgstr ""
 
 #. work done by someone that benefits another
 #: ../tools/setup.py:314 static/locale.js:186
@@ -1136,7 +1136,7 @@ msgid "X-Ray"
 msgstr "ایکسرے"
 
 #. Form option for a true Boolean value
-#: utils.py:366 edit.py:173 utils_test.py:320
+#: utils.py:369 edit.py:173 utils_test.py:320
 msgid "Yes"
 msgstr "ہاں"
 
