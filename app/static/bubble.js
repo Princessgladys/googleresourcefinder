@@ -198,5 +198,5 @@ function set_text(id, text) {
   if (!e) {
     return;
   }
-  e.innerText = text;
+  e.innerHTML = to_html(text);
 }

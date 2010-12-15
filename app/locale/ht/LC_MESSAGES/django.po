@@ -340,11 +340,6 @@ msgstr "Distri"
 msgid "District/County"
 msgstr "Distri/Konte"
 
-#. E-mail address
-#: edit.py:118 ../tools/setup.py:326
-msgid "E-mail"
-msgstr "Adrès elektronik:"
-
 #. Title for the form to edit an existing record
 #: templates/edit.html:58
 #, python-format
@@ -366,8 +361,8 @@ msgstr "modifye enregistreman sa"
 msgid "Edited by"
 msgstr "Moun ki reekri a"
 
-#. Explains the edit by email feature.
-#: templates/hospital_bubble.html:85
+#. Email address
+#: edit.py:118 templates/hospital_bubble.html:85 ../tools/setup.py:326
 msgid "Email"
 msgstr "Adrès elektronik:"
 
@@ -377,7 +372,7 @@ msgid "Email Subscription Settings"
 msgstr "Imel Abònman Anviwònman"
 
 #. Error message for invalid email address
-#: mail_editor_start.py:66
+#: mail_editor_start.py:63
 msgid "Email address is invalid."
 msgstr ""
 
@@ -582,7 +577,7 @@ msgid "Invalid or missing subject type."
 msgstr "Envalid oubyen erè nan non etablisman an"
 
 #. Error message for invalid subject
-#: mail_editor_start.py:73
+#: mail_editor_start.py:70
 msgid "Invalid subject"
 msgstr "Envalid oubyen erè nan non etablisman an"
 
@@ -950,7 +945,7 @@ msgstr "Anrejistre..."
 msgid "Select subject type to export:"
 msgstr "Idantite kalite etablisman ekspòtasyon"
 
-#. Waiting message to send an email
+#. Waiting message to send email
 #: templates/hospital_bubble.html:105
 msgid "Sending..."
 msgstr "Anrejistre..."
@@ -1007,7 +1002,7 @@ msgstr "Abònman imel mizajou"
 
 #. Message on successfully sent email
 #: templates/hospital_bubble.html:114
-msgid "Success! An email was sent to:"
+msgid "Success! Sent mail to:"
 msgstr ""
 
 #. Link to terms of service for the application
@@ -1158,7 +1153,7 @@ msgstr "Ou kapab ajoute yon latitid ak lonjitd nan reekri fòm."
 
 #. Explains the edit by email feature.
 #: templates/hospital_bubble.html:80
-msgid "You can edit this facility by sending an email.<br>Enter your email address. We will send you simple instructions to get started."
+msgid "You can edit this facility by sending email.<br>Enter your email address. We will send you simple instructions to get started."
 msgstr ""
 
 #. Saved message; e-mail subscription has been saved

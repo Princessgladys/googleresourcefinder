@@ -164,7 +164,7 @@ def setup_mail_update_texts():
         name_txt('phone', en=['Phone']),
         name_txt('mobile', en=['Mobile', 'cellphone']),
         name_txt('fax', en=['Fax']),
-        name_txt('email', en=['E-mail']),
+        name_txt('email', en=['Email']),
         name_txt('department', en=['Department', 'dept']),
         name_txt('district', en=['District']),
         name_txt('commune_code', en=['Commune code']),
@@ -322,8 +322,8 @@ def setup_messages():
         name_message('mobile', en='Mobile'),
         #i18n: fax number
         name_message('fax', en='Fax'),
-        #i18n: E-mail address
-        name_message('email', en='E-mail'),
+        #i18n: Email address
+        name_message('email', en='Email'),
         #i18n: Meaning: administrative division
         name_message('department', en='Department'),
         #i18n: Meaning: administrative division
