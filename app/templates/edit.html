@@ -1,0 +1,199 @@
+{% comment %}
+# Copyright 2009-2010 by Ka-Ping Yee
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}
+
+{% load i18n %}
+
+{% if not params.embed %}
+<html>
+<head>
+{% endif %}
+{% comment %}
+#i18n: Name of the application.
+{% endcomment %}
+<title>{% trans "Resource Finder" %} ({{subdomain}})</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style>
+{% if not params.embed %}
+  body, h1, td, p { font-family: helvetica, arial; font-size: 13px; }
+  h1 { font-size: 24px }
+{% endif %}
+tr.field { vertical-align: baseline; margin-top: 1em; }
+tr.field.text { vertical-align: top; }
+.readonly { color: #666; }
+.label { text-align: right; color: #666; }
+.hidden { display:none }
+.errorbox-bad { padding: 2px; border: 2px solid #900; }
+.errormsg { margin-left: 4px; color: #900 }
+.instructions { width: 500px }
+.dash { border-top: 3px dotted #000; margin: 12px; }
+</style>
+{% if not params.embed %}
+{% include "analytics.html" %}
+</head>
+<body>
+{% endif %}
+<h1>
+  {% if params.add_new %}
+    {% comment %}
+    #i18n: Title for the form to add a new record
+    {% endcomment %}
+    {% blocktrans with subject_type_title|escape as type_name %}Add a new {{type_name}}{% endblocktrans %}
+  {% else %}
+    {% comment %}
+    #i18n: Title for the form to edit an existing record
+    {% endcomment %}
+    {% blocktrans with subject_title|escape as title %}Edit {{title}}{% endblocktrans %}
+  {% endif %}
+</h1>
+
+<form method="post" id="edit" action="{{edit_url|escape}}">
+  <input type="hidden" name="token" value="{{token}}">
+  <input type="hidden" name="embed" value="{{params.embed|escape}}">
+  <input type="hidden" name="subject_name"
+      value="{{params.subject_name|escape}}">
+  <input type="hidden" name="subject_type"
+      value="{{params.subject_type|escape}}">
+  {% if params.add_new %}
+    <input type="hidden" name="add_new" value="yes">
+  {% endif %}
+  <table>
+    {% if not account.nickname %}
+      <tr class="account">
+        <td colspan="2" class="instructions">
+          {% comment %}
+          #TODO(shakusa) Make instructions fit in same-page-edit without horizontal scrolling.
+          {% endcomment %}
+          {% comment %}
+          #i18n: Instructions to enter a person's name and organizational
+          #i18n: affiliation.
+          {% endcomment %}
+          {% blocktrans %}Thanks for adding content to Resource Finder. To get started please create a username and tell us your affiliation. This information will be displayed next to information you've added or edited. Also see the <a target="_blank" href="/terms">Terms of Service</a> and <a target="_blank" href="/privacy">Privacy Policy</a>.{% endblocktrans %}
+        </td>
+      </tr>
+      <tr class="field">
+        <td class="label">
+          {% comment %}
+          #i18n: Label for a required text box to enter a person's name
+          {% endcomment %}
+          {% trans "Name (required)" %}
+        </td>
+        <td class="input">
+          <div id="account_nickname_errorbox" class="errorbox-good">
+            <input type="text" name="account_nickname" id="account_nickname" 
+                   value="{{suggested_nickname}}"/>
+            <div id="account_nickname_errormsg" class="hidden"></div>
+          </div>
+        </td>
+      </tr>
+      <tr class="field">
+        <td class="label">
+          {% comment %}
+          #i18n: Label for a required text box to enter organizational
+          #i18n: affiliation.
+          {% endcomment %}
+          {% trans "Affiliation (required)" %}
+        </td>
+        <td class="input">
+          <div id="account_affiliation_errorbox" class="errorbox-good">
+            <input type="text" name="account_affiliation" id="account_affiliation"
+                   value=""/>
+            <div id="account_affiliation_errormsg" class="hidden"></div>
+          </div>
+          <br/>
+        </td>
+      </tr>
+      <tr>
+        <td colspan=2 class="dash">
+          <br/>
+        </td>
+      </tr>
+    {% endif %}
+    {% for field in readonly_fields %}
+      <tr class="field">
+        <td class="label">
+          {{field.title|escape}}
+        </td>
+        <td class="readonly">
+          {{field.value}}
+        </td>
+      </tr>
+    {% endfor %}
+    {% for field in fields %}
+      <tr class="field {{field.type}}">
+        <td class="label">
+          {{field.title|escape}}
+        </td>
+        <td class="input">
+          <div id="{{field.name}}_errorbox" class="errorbox-good">
+            {{field.input}}
+            <input type="hidden" name="editable.{{field.name}}"
+                   value="{{field.previous|escape}}"/>
+            <div id="{{field.name}}_errormsg" class="hidden"></div>
+          </div>
+      {% if not params.embed %}
+        </td>
+        <td>
+      {% endif %}
+            <div id="{{field.name}}__comment" class="comment" style="display:none">
+              {% comment %}
+              #i18n: Label for a text field to enter a comment about a change.
+              {% endcomment %}
+              &nbsp;&nbsp;{% trans 'Comment:' %} <input type="text"
+                name="{{field.name}}__comment" value="{{field.comment|escape}}"
+                class="comment">
+            </div>
+        </td>
+      </tr>
+    {% endfor %}
+    <tr>
+      <td>
+      </td>
+      <td class="field">
+        <div id="{% if params.embed %}edit-bar{% endif %}">
+          {% comment %}
+          #i18n: Button text to save data
+          {% endcomment %}
+          <input type="{% if params.embed %}button{% else %}submit{% endif %}" name="save" id="save" value="{% trans 'Save' %}">
+          {% comment %}
+          #i18n: Button text to cancel and return to the home page
+          {% endcomment %}
+          <input type="{% if params.embed %}button{% else %}submit{% endif %}" name="cancel" id="cancel" value="{% trans 'Cancel' %}">
+        </div>
+        <span id="edit-status"></span>
+        {% if params.embed %}
+          <br/><br/>
+        {% endif %}
+      </td>
+    </tr>
+  </table>
+</form>
+{% if not params.embed %}
+{% comment %}
+# If params.embed is true, this should be included in the page where this html
+# is embedded.
+{% endcomment %}
+<script type="text/javascript" src="static/jquery.min.js"></script>
+<script type="text/javascript" src="static/edit.js"></script>
+<script type="text/javascript" src="static/templates.js"></script>
+{% ifequal 'en' params.lang %}
+  <script type="text/javascript" src="static/locale.js"></script>
+{% else %}
+  <script type="text/javascript" src="static/locale_{{params.lang}}.js"></script>
+{% endifequal %}
+  <script type="text/javascript">init_edit(false, '{{edit_url|escape}}')</script>
+</body>
+</html>
+{% endif %}

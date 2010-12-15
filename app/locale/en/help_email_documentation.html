@@ -1,0 +1,324 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Resource Finder</title>
+  <style type="text/css">
+  ol{ margin: 0; padding: 0 }
+  body, h1, td, p { font-family: helvetica, arial; font-size: 13px;
+    vertical-align: top; min-width: 150px; }
+  div { padding: 2px 0px 5px 10px; }
+  h1 { font-size: 16px }
+  h2 { font-size: 15px; padding-top: 10px; }
+  h3 { font-size: 14px; margin-left: 9.0pt; margin-bottom: 5px; }
+  .toc { margin: 0px }
+  .indent1 { margin-left: 18.0pt }
+  .indent2 { margin-left: 36.0pt }
+  ol { margin:0 0 1em 2em; *margin:0 0 1em 2.3em }
+  p { margin:0 0 1em; margin-left: 9.0pt }
+  li { margin:0 0 .5em }
+  .footer { margin:3em 0 0; text-align:center; color: #666; }
+  .q { font-weight: bold }
+  .maincontent { width:760px; margin: 15px; }
+  pre { margin-left: 2em; padding: 0.5em; background: #eee;
+    border: 1px solid #ddd; }
+  </style>
+</head>
+
+<body class="maincontent">
+  <h1><a name="title" id="title"></a>
+    Google Resource Finder: Email Update Documentation</h1>
+
+  <h2>Table of Contents</h2>
+
+  <p class="toc indent1"><a href="#who-do-i-email">What Address Do I Email?
+    </a></p>
+  <p class="toc indent1"><a href="#data-input-types">Data Input Types</a></p>
+  <p class="toc indent1"><a href="#attributes">Attributes</a></p>
+  <p class="toc indent1"><a href="#drafting-new-update">Drafting a New
+    Email Update</a></p>
+  <p class="toc indent1"><a href="#confirmation">Will I Receive Confirmation?
+    </a></p>
+  <p class="toc indent1"><a href="#data-input-types">Using Different
+    Data Input Types</a></p>
+  <p class="toc indent2"><a href="#plain-text">Plain text</a></p>
+  <p class="toc indent2"><a href="#numeric">Numeric</a></p>
+  <p class="toc indent2"><a href="#boolean">Boolean</a></p>
+  <p class="toc indent2"><a href="#checklist">Checklist</a></p>
+  <p class="toc indent2"><a href="#choice">Choice</a></p>
+  <p class="toc indent2"><a href="#null-values">Clearing the
+    Value for an Attribute</a></p>
+  <p class="toc indent1"><a href="#help">How to Get Help</a></p>
+  <p class="toc indent2"><a href="#error-handling">Error Handling</a></p>
+
+  <br/>
+
+  <p>For a complete list of accepted
+  attribute names and values, see the
+  <a href="/help/email/reference">reference document</a>.</p>
+
+  <h2><a name="who-do-i-email" id="who-do-i-email"></a>
+    What Address Do I Email?</h2>
+
+  <p>To update Resource Finder by email, use the email address pattern
+    subdomain-updates@resource-finder.appspotmail.com. For example:</p>
+
+  <p class="indent1">Pakistan:
+    <a href="mailto:pakistan-updates@resource-finder.appspotmail.com">
+    pakistan-updates@resource-finder.appspotmail.com</a></p>
+
+  <p class="indent1">Haiti:
+    <a href="mailto:haiti-updates@resource-finder.appspotmail.com">
+    haiti-updates@resource-finder.appspotmail.com</a></p>
+
+  <h2><a name="data-input-types" id="data-input-types"></a>
+    Data Input Types</h2>
+
+  <p>Each attribute in the system accepts values of a specific kind.
+    The different types of fields are as follows:</p>
+
+  <p>
+  <b>Plain text:</b> any value is accepted<br/>
+  <b>Numeric:</b> values must be numbers only<br/>
+  <b>Boolean:</b> values must be &lsquo;yes&rsquo; or &lsquo;no&rsquo;<br/>
+  <b>Geopoint:</b> values must be two floating point numbers, separated by
+    a comma, formatted as latitude north of equator, then longitude west of
+    Greenwich<br/>
+  <b>Checklist:</b> any number of values from a predefined set of plain text
+    options*<br/>
+  <b>Choice:</b> one of a predefined set of plain text options*<br/>
+  <b>Unspecified:</b> if at any point you wish to erase the value for an
+    attribute, the value must be &lsquo;*none&rsquo;<br/></p>
+
+  <p>* Accepted values are restricted to a predefined list of choices. Each
+    attribute may have its own list of possible choices.</p>
+
+  <h2><a name="attributes" id="attributes"></a>Attributes</h2>
+
+  <p>Each facility type has several attributes that
+  can be updated with this system. When making changes, the attributes may be
+  specified in a case insensitive manner. Using &ldquo;Available beds&rdquo; is
+  equivalent to both &ldquo;Available Beds&rdquo; and &ldquo;available
+  beds&rdquo;, or even &ldquo;aVAILABLE bEDS&rdquo;. Example methods of
+  describing an attribute are listed below:</p>
+
+  <p><b>Name:</b> a short name for the field. These names may include any
+    standard character in the roman alphabet [A-Z], upper or lower case.</p>
+
+  <p><i>Examples: Available beds, Services</i></p>
+
+  <p><b>Abbreviation:</b> an abbreviated name for an individual attribute.
+    Uses the same characters as the name of an attribute.</p>
+
+  <p><i>Examples: avbed, serv</i></p>
+
+  <p>Both versions, the full name or abbreviation, are acceptable as
+    identifiers for an attribute in an update email.</p>
+
+  <h2><a name="drafting-new-update" id="drafting-new-update"></a>
+    Drafting a New Email Update</h2>
+
+  <p>To update a single facility, you must first declare which facility
+    is being updated. To do so, begin your email like this:</p>
+
+  <pre>update General Hospital</pre>
+
+  <p>where &ldquo;General Hospital&rdquo; is the name of the hospital to
+    be edited. Each line after should specify a specific attribute to be
+    updated, a colon, and a value to update the attribute to. For example:</p>
+
+  <pre>Available beds: 50</pre>
+
+  <p>As shown, the format for each line should be &ldquo;Attribute: value for
+    the attribute&rdquo;. Multiple lines may be put in a row, like so:</p>
+
+  <pre>Available beds: 50
+Total beds: 100</pre>
+
+  <p>Similarly, abbreviations may be used as mentioned above:</p>
+
+  <pre>avbed: 50
+totbed: 100</pre>
+
+  <p>Put together, if we wanted to update the hospital &ldquo;General
+    Hospital&rdquo; to show that there are 50 available beds and 100 total
+    beds, we might write the following:</p>
+
+  <pre>update General Hospital
+avbed: 50
+totbed: 100</pre>
+
+  <p>If we wanted to update multiple facilities in one email, simply
+    append a similar section for the second hospital below the
+    first, like so:</p>
+
+  <pre>update General Hospital
+avbed: 50
+
+update Public Hospital
+avbed: 75</pre>
+
+  <h2><a name="confirmation" id="confirmation"></a>Will I Receive
+     Confirmation?</h2>
+
+  <p>After your email has been sent, you should receive email containing
+    a list of the updates the server accepted. In addition, you&rsquo;ll
+    receive a list of any errors you made in your email, as well as a short
+    reference document to remind you of the basics, just in case.</p>
+
+  <p>Assuming the email you receive does not explicitly mention any errors,
+    no further action is required for your update to go through on the
+    server.</p>
+
+  <h2><a name="data-input-types" id="data-input-types"></a>Using Different
+    Data Input Types</h2>
+
+  <p>Below you&rsquo;ll find a description of how to specify each data input
+    type, as well as an example of each.</p>
+
+  <h3><a name="plain-text" id="plain-text"></a>Plain text</h3>
+
+  <p>Plain text lines simply follow the format above, where any value may be
+    input after the colon, be it a word, phrase, number, etc.</p>
+
+  <pre>Contact name: John Smith
+Address: 5 Avenue Rd</pre>
+
+  <h3><a name="numeric" id="numeric"></a>Numeric</h3>
+
+  <p>Numeric attributes require the value to be a number.</p>
+
+  <pre>Total beds: 100</pre>
+
+  <h3><a name="boolean" id="boolean"></a>Boolean</h3>
+
+  <p>Boolean values can be set with a simple &lsquo;yes&rsquo; or
+    &lsquo;no&rsquo;. The values &lsquo;y&rsquo;, &lsquo;n&rsquo;,
+    &lsquo;true&rsquo;, and &lsquo;false&rsquo; are also acceptable
+    as alternatives.</p>
+
+  <pre>Reachable by road: yes
+Can pick up patients: false</pre>
+
+  <h3><a name="checklist" id="checklist"></a>Checklist</h3>
+
+  <p>Checklists are made up of a collection of values, chosen from a specific
+    list of accepted values. For example, if the &ldquo;services&rdquo; field
+    has the options &ldquo;Cardiology&rdquo;, &ldquo;Pediatrics&rdquo;, and
+    &ldquo;General Surgery&rdquo;, you would select values as such:</p>
+
+  <pre>Services: Cardiology, Pediatrics</pre>
+
+  <p>This above example would set the value for &ldquo;Services&rdquo; to both
+    &ldquo;Cardiology&rdquo; and &ldquo;Pediatrics&rdquo;. As you can see,
+    each value is simply separated by a comma. You can also use a plus/minus
+    syntax to add or remove individual choices, rather than overwriting the
+    entire list. To do so, format the value like so:</p>
+
+  <pre>Services: -Cardiology, +General Surgery</pre>
+
+  <p>This example would remove &ldquo;Cardiology&rdquo; from the list of
+    values, as well as add &ldquo;General Surgery&rdquo;. As we also set
+    &ldquo;Pediatrics&rdquo; earlier, that value would still remain.</p>
+
+  <h3><a name="choice" id="choice"></a>Choice</h3>
+
+  <p>Multiple choice values are similar to checklists, except you may only
+    select one value instead of many. For example, if dealing with the attribute
+    &ldquo;Operational status&rdquo;, which has the values &ldquo;Open&rdquo;
+    and &ldquo;Closed&rdquo;, we would set it to &ldquo;Open&rdquo; like this:
+    </p>
+
+  <pre>Operational status: Open</pre>
+
+  <h3><a name="null-values" id="null-values"></a>Clearing the Value for an
+     Attribute</h3>
+
+  <p>Unspecified values are a special case. Any
+  attribute may be cleared with the special keyword &ldquo;*none&rdquo;. This
+  action effectively erases the current value. From that point on, accessing
+  the value for an attribute will return nothing until it has been set again to
+  a new value. To do so, use the following syntax:</p>
+
+  <pre>Services: *none</pre>
+
+  <h2><a name="help" id="help"></a>How to Get Help</h2>
+
+  <p>If you send email with no updates to the
+  server, you will automatically receive a templated email with instructions in
+  reply. This email will be tailored to the default subject type in the
+  subdomain you have emailed.</p>
+
+  <p>If you wish the form to automatically include
+  the title for a specific facility, set the subject line of your email to that
+  title. For example, to update the facility &ldquo;General Hospital&rdquo; in
+  the subdomain &ldquo;Pakistan&rdquo;, you would enter the following
+  information into your email:</p>
+
+  <pre>To: pakistan-updates@resource-finder.appspotmail.com
+Subject: General Hospital
+Body: &lt;blank&gt;</pre>
+
+  <h3><a name="error-handling" id="error-handling"></a>Error Handling</h3>
+
+  <p>If at any point you make an error in your
+  email update to the server, you will receive email back, pointing out your
+  mistake.</p>
+
+  <p>By mistake, a user might send the server an
+  email like this:</p>
+
+  <pre>update General Hospital
+Available beds: fifty</pre>
+
+  <p>In response, they would receive the following
+  error message:</p>
+
+  <pre>update General Hospital
+Available beds: fifty
+-- "Available beds" requires a numerical value.</pre>
+
+  <p>The third line, indented by the two dashes, is
+  where the error message is located. In this particular case, as the attribute
+  &ldquo;available beds&rdquo; is a numerical attribute, typing in a word (even
+  though fifty is a textual representation of the number 50) is not a valid
+  value.</p>
+
+  <p>If the attribute in question is a checklist or
+  multiple choice type attribute, then a list of accepted values will follow the
+  error message. For example, an incorrect attempt to update the
+  multiple choice &ldquo;Services&rdquo; attribute will result in the following
+  error message:</p>
+
+  <pre>update 128 Chak Hospital
+Services: x
+-- "Services" requires all values to be from a specific set.
+-- Accepted values are: General surgery, Orthopedics, Neurosurgery,
+---- Vascular surgery, Internal medicine, Cardiology</pre>
+
+  <p>There may be cases when multiple facilities have the same name.  Attempting to
+  update a facility in that case will result in an error message asking you to
+  choose the one you wish to update.  For example, if there are three facilities
+  with the name &ldquo;General Hospital&rdquo;, an attempted update will return a
+  list of facilities, each accompanied by a unique ID:</p>
+
+  <pre>General Hospital (example.org/123)
+General Hospital (example.org/456)
+General Hospital (example.org/789)</pre>
+
+  <p>To find which facility to update, visit the Resource Finder application and
+  click the icon on the map corresponding to the facility.  The info window that
+  opens will display the ID of the facility, which can then be matched to one of
+  the above items.  Then retry the update, including the ID.  For example:</p>
+
+  <pre>update General Hospital (example.org/123)
+Available beds: 15</pre>
+
+  <p>would update the facility General Hospital, associated with the key
+  &ldquo;example.org/123&rdquo;, to show 15 available beds.</p>
+
+{% include "footer.html" %}
+{% include "../../templates/analytics.html" %}
+</body>
+</html>
