@@ -340,11 +340,6 @@ msgstr "ضلع"
 msgid "District/County"
 msgstr "ضل/کاؤنٹ"
 
-#. E-mail address
-#: edit.py:118 ../tools/setup.py:326
-msgid "E-mail"
-msgstr "ای میل"
-
 #. Title for the form to edit an existing record
 #: templates/edit.html:58
 #, python-format
@@ -366,8 +361,8 @@ msgstr "اس ریکارڈ میں ترمیم کریں"
 msgid "Edited by"
 msgstr "ترمیم کنندہ"
 
-#. Explains the edit by email feature.
-#: templates/hospital_bubble.html:85
+#. Email address
+#: edit.py:118 templates/hospital_bubble.html:85 ../tools/setup.py:326
 msgid "Email"
 msgstr "ای میل"
 
@@ -377,7 +372,7 @@ msgid "Email Subscription Settings"
 msgstr "ای میل رکنیت کی ترتیبات"
 
 #. Error message for invalid email address
-#: mail_editor_start.py:66
+#: mail_editor_start.py:63
 msgid "Email address is invalid."
 msgstr ""
 
@@ -582,7 +577,7 @@ msgid "Invalid or missing subject type."
 msgstr "مریض کی نوعیت غلط ہے یا چھوٹ گئی ہے۔"
 
 #. Error message for invalid subject
-#: mail_editor_start.py:73
+#: mail_editor_start.py:70
 msgid "Invalid subject"
 msgstr "مریض کا نام غلط ہے یا چھوٹ گیا ہے۔"
 
@@ -950,7 +945,7 @@ msgstr "محفوظ ہو رہا ہے..."
 msgid "Select subject type to export:"
 msgstr "برآمد کیلئے مریض کی نوعیت منتخب کریں:"
 
-#. Waiting message to send an email
+#. Waiting message to send email
 #: templates/hospital_bubble.html:105
 msgid "Sending..."
 msgstr "محفوظ ہو رہا ہے..."
@@ -1007,7 +1002,7 @@ msgstr "ای میل تازہ کاریوں کی رکنیت حاصل کریں"
 
 #. Message on successfully sent email
 #: templates/hospital_bubble.html:114
-msgid "Success! An email was sent to:"
+msgid "Success! Sent mail to:"
 msgstr ""
 
 #. Link to terms of service for the application
@@ -1158,7 +1153,7 @@ msgstr "آپ فارم ء ترمیم میں ایک طول بلد اور عرض ب
 
 #. Explains the edit by email feature.
 #: templates/hospital_bubble.html:80
-msgid "You can edit this facility by sending an email.<br>Enter your email address. We will send you simple instructions to get started."
+msgid "You can edit this facility by sending email.<br>Enter your email address. We will send you simple instructions to get started."
 msgstr ""
 
 #. Saved message; e-mail subscription has been saved

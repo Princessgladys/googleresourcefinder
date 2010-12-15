@@ -114,8 +114,8 @@ class ContactAttributeType(AttributeType):
             _('Name'), self.text_input(name + '.name', contact_name),
             #i18n: telephone number
             _('Phone'), self.text_input(name + '.phone', contact_phone),
-            #i18n: E-mail address
-            _('E-mail'), self.text_input(name + '.email', contact_email),
+            #i18n: Email address
+            _('Email'), self.text_input(name + '.email', contact_email),
         )
 
     def parse_input(self, report, name, value, request, attribute):

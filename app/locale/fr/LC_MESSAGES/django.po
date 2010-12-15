@@ -339,11 +339,6 @@ msgstr "District"
 msgid "District/County"
 msgstr "District/Comté"
 
-#. E-mail address
-#: edit.py:118 ../tools/setup.py:326
-msgid "E-mail"
-msgstr "E-mail"
-
 #. Title for the form to edit an existing record
 #: templates/edit.html:58
 #, python-format
@@ -365,8 +360,8 @@ msgstr "Modifier cet enregistrement"
 msgid "Edited by"
 msgstr "Modifié par"
 
-#. Explains the edit by email feature.
-#: templates/hospital_bubble.html:85
+#. Email address
+#: edit.py:118 templates/hospital_bubble.html:85 ../tools/setup.py:326
 msgid "Email"
 msgstr "E-mail"
 
@@ -376,7 +371,7 @@ msgid "Email Subscription Settings"
 msgstr "Paramètres d'Abonnement par Courriel"
 
 #. Error message for invalid email address
-#: mail_editor_start.py:66
+#: mail_editor_start.py:63
 msgid "Email address is invalid."
 msgstr ""
 
@@ -581,7 +576,7 @@ msgid "Invalid or missing subject type."
 msgstr "Nom d'établissement incorrect ou manquant"
 
 #. Error message for invalid subject
-#: mail_editor_start.py:73
+#: mail_editor_start.py:70
 msgid "Invalid subject"
 msgstr "Nom d'établissement incorrect ou manquant"
 
@@ -949,7 +944,7 @@ msgstr "Enregistrement..."
 msgid "Select subject type to export:"
 msgstr "Sélectionnez le type d'établissement à l'exportation :"
 
-#. Waiting message to send an email
+#. Waiting message to send email
 #: templates/hospital_bubble.html:105
 msgid "Sending..."
 msgstr "Enregistrement..."
@@ -1006,7 +1001,7 @@ msgstr "Abonnez-vous aux mises à jour par courriel"
 
 #. Message on successfully sent email
 #: templates/hospital_bubble.html:114
-msgid "Success! An email was sent to:"
+msgid "Success! Sent mail to:"
 msgstr ""
 
 #. Link to terms of service for the application
@@ -1157,7 +1152,7 @@ msgstr "Vous pouvez ajouter une latitude et la longitude dans le formulaire de m
 
 #. Explains the edit by email feature.
 #: templates/hospital_bubble.html:80
-msgid "You can edit this facility by sending an email.<br>Enter your email address. We will send you simple instructions to get started."
+msgid "You can edit this facility by sending email.<br>Enter your email address. We will send you simple instructions to get started."
 msgstr ""
 
 #. Saved message; e-mail subscription has been saved
