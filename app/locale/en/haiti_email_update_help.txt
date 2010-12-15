@@ -23,7 +23,8 @@ Multiple choice attribute values must be comma separated. Add a '-' to the start
         -- Choices: General Surgery, Orthopedics, Neurosurgery, Vascular
             Surgery, Internal Medicine, Cardiology, Infectious Disease, Pediatrics,
             Postoperative Care, Rehabilitation, Obstetrics and Gynecology, Mental
-            Health, Dialysis, Lab, X-Ray, CT Scan, Blood Bank, Mortuary Services
+            Health, Dialysis, Lab, X-Ray, CT Scan, Blood Bank, Mortuary Services,
+	    Cholera Treatment
 
 List attribute values must be one of a specific set of choices.
     Organization type: The category of organization the facility falls under
