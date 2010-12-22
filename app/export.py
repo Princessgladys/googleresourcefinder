@@ -15,10 +15,13 @@
 import calendar
 import csv
 import datetime
+import zipfile
+import StringIO
 
 import access
 import bubble
 import cache
+import utils
 from model import *
 from utils import *
 
@@ -100,6 +103,27 @@ COLUMNS_BY_SUBJECT_TYPE = {
     ],
 }
 
+KML_PROLOGUE = '''<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>%s Resource Finder</name>
+    <Snippet>Created: %s</Snippet>
+    <Style id="s">
+      <IconStyle>
+        <scale>0.35</scale>
+        <Icon>
+          <href>%s</href>
+        </Icon>
+      </IconStyle>
+    </Style>
+    <Folder>
+      <name>%s</name>
+'''
+
+KML_EPILOGUE = '''    </Folder>
+  </Document>
+</kml>'''
+
 def short_date(date):
     return '%s %d' % (calendar.month_abbr[date.month], date.day)
 
@@ -150,6 +174,62 @@ def write_csv(out, subdomain, type_name):
     for row in sorted(rows):
         writer.writerow(row)
 
+def write_kml(out, subdomain, type_name, icon_url, now, render_to_string):
+    """Dump the attributes for all subjects of the given type
+       in kml format, with a placemark for each subject"""
+    subject_type = cache.SUBJECT_TYPES[subdomain][type_name]
+    subject_query = Subject.all_in_subdomain(subdomain
+        ).filter('type =', type_name)
+    value_info_extractor = bubble.VALUE_INFO_EXTRACTORS[subdomain][type_name]
+    attributes_by_title = {}
+
+    # Same as write_csv: To avoid out-of-memory errors, process Subjects in
+    # batches. read all the rows into a map, then sort and write the output,
+    # because we cannot add .order() to subject_query.
+    batch_size = 500
+    subjects = subject_query.fetch(batch_size)
+    while subjects:
+        for subject in subjects:
+            title = subject.get_value('title')
+            (special, general, details) = value_info_extractor.extract(
+                subject, subject_type.attribute_names)
+            attributes_by_title[title] = (
+                special, general, max(detail.date for detail in details))
+        subject_query.with_cursor(subject_query.cursor())
+        subjects = subject_query.fetch(batch_size)
+
+    subdomain_cap = to_utf8(subdomain[0].upper() + subdomain[1:])
+
+    out.write(KML_PROLOGUE % (subdomain_cap, now, icon_url, to_utf8(type_name)))
+    for title in sorted(attributes_by_title.keys()):
+        attrs = attributes_by_title[title]
+        placemark = render_to_string('templates/hospital_placemark.kml',
+                                     special=attrs[0], general=attrs[1],
+                                     last_updated=attrs[2])
+        out.write(placemark)
+    out.write(KML_EPILOGUE)
+
+def write_kmz(out, subdomain, type_name, render_to_string):
+    """Dump the attributes for all subjects of the given type
+       in kmz format, with a placemark for each subject"""
+    kml_out = StringIO.StringIO()
+    now = to_local_isotime(datetime.datetime.now(), True)
+    write_kml(kml_out, subdomain, type_name, 'reddot.png', now,
+              render_to_string)
+
+    # Zip up the KML and associated icon
+    zipstream = StringIO.StringIO()
+    zfile = zipfile.ZipFile(file=zipstream, mode="w",
+                            compression=zipfile.ZIP_DEFLATED)
+    zfile.writestr('%s.%s.kml' % (to_utf8(subdomain), to_utf8(type_name)),
+                   kml_out.getvalue())
+    zfile.write('templates/reddot.png', 'reddot.png')
+    zfile.close()
+    zipstream.seek(0)
+
+    # Finally, write the kmz to the output stream
+    out.write(zipstream.getvalue())
+
 # TODO(kpy): This should probably reuse row_utils.serialize().  It's here for
 # now since it converts to local time; serialize() formats times as UTC.
 def format(value):
@@ -167,17 +247,26 @@ def format(value):
 class Export(Handler):
     def get(self):
         type_name = self.params.subject_type
+        output = self.request.get('output', 'csv')
+        if output != 'csv':
+            output = 'kmz'
 
         if type_name:
             # Construct a reasonable filename.
             timestamp = datetime.datetime.utcnow()
-            filename = '%s.%s.csv' % (self.subdomain, type_name)
-            self.response.headers['Content-Type'] = 'text/csv'
+            filename = '%s.%s.%s' % (self.subdomain, type_name, output)
             self.response.headers['Content-Disposition'] = \
                 'attachment; filename=' + filename
-
-            # Write out the CSV data.
-            write_csv(self.response.out, self.subdomain, type_name)
+            if output == 'csv':
+                self.response.headers['Content-Type'] = 'text/csv'
+                # Write out the CSV data.
+                write_csv(self.response.out, self.subdomain, type_name)
+            else:
+                self.response.headers['Content-Type'] = \
+                    'application/vnd.google-earth.kmz'
+                # Write out the KMZ data.
+                write_kmz(self.response.out, self.subdomain, type_name,
+                          self.render_to_string)
         else:
             self.write('<html><head>')
             self.write('<title>%s</title>' % to_unicode(_("Resource Finder")))
