@@ -159,7 +159,7 @@ msgid "Blood Bank"
 msgstr "Bank san"
 
 #. Save a copy of the data in CSV format
-#: export.py:276
+#: export.py:283
 msgid "CSV Export"
 msgstr "Ekspote CSV"
 
@@ -277,6 +277,11 @@ msgstr "Non pou kontak"
 #: templates/load.html:34
 msgid "Country:"
 msgstr "Peyi"
+
+#. Label for a timestamp when a file was created
+#: export.py:205
+msgid "Created"
+msgstr "Kreyasyon dat"
 
 #. Label for daily e-mail updates
 #: settings.py:60
@@ -417,7 +422,7 @@ msgid "Error saving facility information."
 msgstr "Erè anrejistreman etablisman enfòmasyon."
 
 #. Button to export data to comma-separated-value format.
-#: templates/map.html:149 export.py:288
+#: templates/map.html:149 export.py:295
 msgid "Export CSV"
 msgstr "Ekspote CSV"
 
@@ -946,7 +951,7 @@ msgid "Saving..."
 msgstr "Anrejistre..."
 
 #. Label for a selector to export data to CSV
-#: export.py:280
+#: export.py:287
 msgid "Select subject type to export:"
 msgstr "Idantite kalite etablisman ekspòtasyon"
 
