@@ -158,7 +158,7 @@ msgid "Blood Bank"
 msgstr "Banque de sang"
 
 #. Save a copy of the data in CSV format
-#: export.py:276
+#: export.py:283
 msgid "CSV Export"
 msgstr "Exporter au format CSV"
 
@@ -276,6 +276,11 @@ msgstr "Nom de la personne à contacter"
 #: templates/load.html:34
 msgid "Country:"
 msgstr "Pays :"
+
+#. Label for a timestamp when a file was created
+#: export.py:205
+msgid "Created"
+msgstr "Date de création"
 
 #. Label for daily e-mail updates
 #: settings.py:60
@@ -416,7 +421,7 @@ msgid "Error saving facility information."
 msgstr "Erreur lors du enregistrement des informations de installation."
 
 #. Button to export data to comma-separated-value format.
-#: templates/map.html:149 export.py:288
+#: templates/map.html:149 export.py:295
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
 
@@ -945,7 +950,7 @@ msgid "Saving..."
 msgstr "Enregistrement..."
 
 #. Label for a selector to export data to CSV
-#: export.py:280
+#: export.py:287
 msgid "Select subject type to export:"
 msgstr "Sélectionnez le type d'établissement à l'exportation :"
 

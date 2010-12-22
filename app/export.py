@@ -106,8 +106,8 @@ COLUMNS_BY_SUBJECT_TYPE = {
 KML_PROLOGUE = '''<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Document>
-    <name>%s Resource Finder</name>
-    <Snippet>Created: %s</Snippet>
+    <name>%s</name>
+    <Snippet>%s</Snippet>
     <Style id="s">
       <IconStyle>
         <scale>0.3</scale>
@@ -199,7 +199,11 @@ def write_kml(out, subdomain, type_name, icon_url, now, render_to_string):
         subjects = subject_query.fetch(batch_size)
     subdomain_cap = to_utf8(subdomain[0].upper() + subdomain[1:])
 
-    out.write(KML_PROLOGUE % (subdomain_cap, now, icon_url, to_utf8(type_name)))
+    #i18n: Name of the application.
+    title = to_utf8(subdomain_cap + ' ' + _('Resource Finder'))
+    #i18n: Label for a timestamp when a file was created
+    created = to_utf8(_('Created') + ': ' + now)
+    out.write(KML_PROLOGUE % (title, created, icon_url, to_utf8(type_name)))
     for title in sorted(attributes_by_title.keys()):
         attrs = attributes_by_title[title]
         placemark = render_to_string('templates/hospital_placemark.kml',
@@ -212,8 +216,8 @@ def write_kmz(out, subdomain, type_name, render_to_string):
     """Dump the attributes for all subjects of the given type
        in kmz format, with a placemark for each subject"""
     # TODO(shakusa) Because this is so slow, it probably makes sense to cache
-    # the result in memcache, purge it when editing, and reload like
-    # refresh_json_cache does
+    # the result in memcache by (subdomain, type_name, lang), purge it when
+    # editing, and reload like refresh_json_cache does
 
     kml_out = StringIO.StringIO()
     now = to_local_isotime(datetime.datetime.now(), True)
