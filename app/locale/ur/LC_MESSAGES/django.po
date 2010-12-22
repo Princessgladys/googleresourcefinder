@@ -159,7 +159,7 @@ msgid "Blood Bank"
 msgstr "بلڈ بینک"
 
 #. Save a copy of the data in CSV format
-#: export.py:187
+#: export.py:276
 msgid "CSV Export"
 msgstr "CSV برآمد"
 
@@ -382,12 +382,12 @@ msgid "Email format:"
 msgstr "ای میل کی ساخت:"
 
 #. Link text to a "how to embed" page
-#: templates/map.html:165
+#: templates/map.html:170
 msgid "Embed"
 msgstr "Embed"
 
 #. Link text to a "how to embed" page
-#: templates/map.html:165
+#: templates/map.html:170
 msgid "Embed on your site"
 msgstr "اس ٹول کواپنی ساءٹ میں embed کریں"
 
@@ -417,9 +417,14 @@ msgid "Error saving facility information."
 msgstr "سہولت کی معلومات محفوظ کرنے میں غلطی۔"
 
 #. Button to export data to comma-separated-value format.
-#: export.py:199 templates/map.html:149
+#: templates/map.html:149 export.py:288
 msgid "Export CSV"
 msgstr "CSV برآمد کریں"
+
+#. Link text to export data to KML format.
+#: templates/map.html:154
+msgid "Export KML"
+msgstr "KML برآمد کریں"
 
 #. Label for facilities with changes
 #: templates/hospital_email.html:63
@@ -732,7 +737,7 @@ msgid "New facility"
 msgstr "نئی سہولت"
 
 #. Link text to go to main page of resource finder sans iframe
-#: templates/map.html:157
+#: templates/map.html:162
 msgid "New window"
 msgstr "باہر نکالیں"
 
@@ -941,7 +946,7 @@ msgid "Saving..."
 msgstr "محفوظ ہو رہا ہے..."
 
 #. Label for a selector to export data to CSV
-#: export.py:191
+#: export.py:280
 msgid "Select subject type to export:"
 msgstr "برآمد کیلئے مریض کی نوعیت منتخب کریں:"
 

@@ -21,7 +21,7 @@ import random, simplejson
 LANGS_BY_SUBDOMAIN = {'haiti': ('en', 'fr', 'ht', 'es-419'),
                       'pakistan': ('en', 'ur')}
 
-SUBDOMAIN_LIST_FOOTERS = {'haiti': 'haiti_list_footer.html',
+SUBDOMAIN_LIST_FOOTERS = {'haiti': 'blank.html',
                           'pakistan': 'blank.html'}
 
 # List of languages that appear in the language menu, as (code, name) pairs.

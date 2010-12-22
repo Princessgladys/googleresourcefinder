@@ -117,7 +117,7 @@ class MainTestCase(SeleniumTestCase):
         # Check a few links
         assert self.is_visible('link=Help')
         assert self.is_visible('link=Export CSV')
-        assert self.is_visible('link=View Master List archive')
+        assert self.is_visible('link=Export KML')
 
         # Check pop out button not here
         assert not self.is_text_present('New window')

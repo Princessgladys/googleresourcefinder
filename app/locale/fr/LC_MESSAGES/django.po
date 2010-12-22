@@ -158,7 +158,7 @@ msgid "Blood Bank"
 msgstr "Banque de sang"
 
 #. Save a copy of the data in CSV format
-#: export.py:187
+#: export.py:276
 msgid "CSV Export"
 msgstr "Exporter au format CSV"
 
@@ -381,12 +381,12 @@ msgid "Email format:"
 msgstr "Format E-mail:"
 
 #. Link text to a "how to embed" page
-#: templates/map.html:165
+#: templates/map.html:170
 msgid "Embed"
 msgstr "Intégrer"
 
 #. Link text to a "how to embed" page
-#: templates/map.html:165
+#: templates/map.html:170
 msgid "Embed on your site"
 msgstr "Intégrer sur votre site"
 
@@ -416,9 +416,14 @@ msgid "Error saving facility information."
 msgstr "Erreur lors du enregistrement des informations de installation."
 
 #. Button to export data to comma-separated-value format.
-#: export.py:199 templates/map.html:149
+#: templates/map.html:149 export.py:288
 msgid "Export CSV"
 msgstr "Exporter au format CSV"
+
+#. Link text to export data to KML format.
+#: templates/map.html:154
+msgid "Export KML"
+msgstr "Exporter au format KML"
 
 #. Label for facilities with changes
 #: templates/hospital_email.html:63
@@ -731,7 +736,7 @@ msgid "New facility"
 msgstr "Une nouvelle installation"
 
 #. Link text to go to main page of resource finder sans iframe
-#: templates/map.html:157
+#: templates/map.html:162
 msgid "New window"
 msgstr "Fenêtre externe"
 
@@ -940,7 +945,7 @@ msgid "Saving..."
 msgstr "Enregistrement..."
 
 #. Label for a selector to export data to CSV
-#: export.py:191
+#: export.py:280
 msgid "Select subject type to export:"
 msgstr "Sélectionnez le type d'établissement à l'exportation :"
 
