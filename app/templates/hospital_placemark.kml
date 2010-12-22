@@ -38,7 +38,7 @@
             {% endcomment %}
             <font color="#a00"><b>{% trans "Alert" %}</b></font>
           </td>
-          <td><font color="#a00">{{special.alert_status.value|escape|linebreaksbr}}</font></td>
+          <td colspan="2"><font color="#a00">{{special.alert_status.value|escape|linebreaksbr}}</font></td>
         </tr>
       {% endif %}
         <tr valign="top">
@@ -48,7 +48,7 @@
             {% endcomment %}
             <b>{% trans "Last updated" %}</b>
           </td>
-          <td>{{last_updated|escape}}</td>
+          <td colspan="2">{{last_updated|escape}}</td>
         </tr>
         <tr valign="top">
           <td><b>{{special.available_beds.label|escape}}</b></td>
@@ -62,13 +62,11 @@
           <td><b>{{special.services.label|escape}}</b></td>
           <td colspan="2">{{special.services.value|escape|linebreaksbr}}</td>
         </tr>
-      {% if special.address.specified %}
         <tr valign="top">
           <td><b>{{special.address.label|escape}}</b></td>
           <td>{{special.address.value|escape|linebreaksbr}}</td>
           <td>{{special.location.label|escape}}: {{special.location.value|escape|linebreaksbr}}</td>
         </tr>
-      {% endif %}
       {% for attribute in general %}
         {% if attribute.specified %}
         <tr valign="top">
@@ -80,31 +78,31 @@
      {% if special.maps_link.specified %}
        <tr valign="top">
          <td><b>{{special.maps_link.label|escape}}</b></td>
-         <td>{{special.maps_link.value|escape|linebreaksbr}}</td>
+         <td colspan="2">{{special.maps_link.value|escape|linebreaksbr}}</td>
        </tr>
      {% endif %}
      {% if special.id.specified %}
        <tr valign="top">
          <td><b>{{special.id.label|escape}}</b></td>
-         <td>{{special.id.value|escape|linebreaksbr}}</td>
+         <td colspan="2">{{special.id.value|escape|linebreaksbr}}</td>
        </tr>
      {% endif %}
      {% if special.alt_id.specified %}
        <tr valign="top">
          <td><b>{{special.alt_id.label|escape}}</b></td>
-         <td>{{special.alt_id.value|escape|linebreaksbr}}</td>
+         <td colspan="2">{{special.alt_id.value|escape|linebreaksbr}}</td>
        </tr>
      {% endif %}
      {% if special.healthc_id.specified %}
        <tr valign="top">
          <td><b>{{special.healthc_id.label|escape}}</b></td>
-         <td>{{special.healthc_id.value|escape|linebreaksbr}}</td>
+         <td colspan="2">{{special.healthc_id.value|escape|linebreaksbr}}</td>
        </tr>
      {% endif %}
      {% if special.pcode.specified %}
        <tr valign="top">
          <td><b>{{special.pcode.label|escape}}</b></td>
-         <td>{{special.pcode.value|escape|linebreaksbr}}</td>
+         <td colspan="2">{{special.pcode.value|escape|linebreaksbr}}</td>
        </tr>
      {% endif %}
      </table>

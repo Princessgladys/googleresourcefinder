@@ -110,7 +110,7 @@ KML_PROLOGUE = '''<?xml version="1.0" encoding="UTF-8"?>
     <Snippet>Created: %s</Snippet>
     <Style id="s">
       <IconStyle>
-        <scale>0.35</scale>
+        <scale>0.3</scale>
         <Icon>
           <href>%s</href>
         </Icon>
@@ -186,7 +186,7 @@ def write_kml(out, subdomain, type_name, icon_url, now, render_to_string):
     # Same as write_csv: To avoid out-of-memory errors, process Subjects in
     # batches. read all the rows into a map, then sort and write the output,
     # because we cannot add .order() to subject_query.
-    batch_size = 500
+    batch_size = 400
     subjects = subject_query.fetch(batch_size)
     while subjects:
         for subject in subjects:
@@ -197,7 +197,6 @@ def write_kml(out, subdomain, type_name, icon_url, now, render_to_string):
                 special, general, max(detail.date for detail in details))
         subject_query.with_cursor(subject_query.cursor())
         subjects = subject_query.fetch(batch_size)
-
     subdomain_cap = to_utf8(subdomain[0].upper() + subdomain[1:])
 
     out.write(KML_PROLOGUE % (subdomain_cap, now, icon_url, to_utf8(type_name)))
@@ -212,6 +211,10 @@ def write_kml(out, subdomain, type_name, icon_url, now, render_to_string):
 def write_kmz(out, subdomain, type_name, render_to_string):
     """Dump the attributes for all subjects of the given type
        in kmz format, with a placemark for each subject"""
+    # TODO(shakusa) Because this is so slow, it probably makes sense to cache
+    # the result in memcache, purge it when editing, and reload like
+    # refresh_json_cache does
+
     kml_out = StringIO.StringIO()
     now = to_local_isotime(datetime.datetime.now(), True)
     write_kml(kml_out, subdomain, type_name, 'reddot.png', now,
@@ -221,8 +224,8 @@ def write_kmz(out, subdomain, type_name, render_to_string):
     zipstream = StringIO.StringIO()
     zfile = zipfile.ZipFile(file=zipstream, mode="w",
                             compression=zipfile.ZIP_DEFLATED)
-    zfile.writestr('%s.%s.kml' % (to_utf8(subdomain), to_utf8(type_name)),
-                   kml_out.getvalue())
+    zfile.writestr('%s.%s.kml' % (
+        to_utf8(subdomain), to_utf8(type_name)), kml_out.getvalue())
     zfile.write('templates/reddot.png', 'reddot.png')
     zfile.close()
     zipstream.seek(0)
