@@ -5,7 +5,7 @@
     <Snippet>Created: 2010-12-22 08:33:07 -05:00</Snippet>
     <Style id="s">
       <IconStyle>
-        <scale>0.35</scale>
+        <scale>0.3</scale>
         <Icon>
           <href>icon.png</href>
         </Icon>
@@ -14,7 +14,7 @@
     <Folder>
       <name>hospital</name>
 <Placemark> <name>title_foo</name> <styleUrl>#s</styleUrl> <description> <![CDATA[
-      <table cellpadding="0" cellspacing="3"> <tr valign="top"> <td> <b>Last updated</b> </td> <td>2010-06-01 07:30:50 -05:00</td> </tr> <tr valign="top"> <td><b>available_beds</b></td> <td colspan="2">\u2013</td> </tr> <tr valign="top"> <td><b>total_beds</b></td> <td colspan="2">\u2013</td> </tr> <tr valign="top"> <td><b>services</b></td> <td colspan="2">\u2013</td> </tr> <tr valign="top"> <td><b>operational_status</b></td> <td colspan="2">OPERATIONAL</td> </tr> <tr valign="top"> <td><b>alert_status</b></td> <td colspan="2">alert_status_foo</td> </tr> <tr valign="top"> <td><b>pcode</b></td> <td>3</td> </tr> </table>
+      <table cellpadding="0" cellspacing="3"> <tr valign="top"> <td> <b>Last updated</b> </td> <td colspan="2">2010-06-01 07:30:50 -05:00</td> </tr> <tr valign="top"> <td><b>available_beds</b></td> <td colspan="2">\u2013</td> </tr> <tr valign="top"> <td><b>total_beds</b></td> <td colspan="2">\u2013</td> </tr> <tr valign="top"> <td><b>services</b></td> <td colspan="2">\u2013</td> </tr> <tr valign="top"> <td><b>address</b></td> <td>\u2013</td> <td>location: \u2013</td> </tr> <tr valign="top"> <td><b>operational_status</b></td> <td colspan="2">OPERATIONAL</td> </tr> <tr valign="top"> <td><b>alert_status</b></td> <td colspan="2">alert_status_foo</td> </tr> <tr valign="top"> <td><b>pcode</b></td> <td colspan="2">3</td> </tr> </table>
     ]]> </description> </Placemark>
     </Folder>
   </Document>
