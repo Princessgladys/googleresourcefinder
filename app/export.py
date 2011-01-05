@@ -181,7 +181,7 @@ def write_kml(out, subdomain, type_name, icon_url, now, render_to_string):
     subject_query = Subject.all_in_subdomain(subdomain
         ).filter('type =', type_name)
     value_info_extractor = bubble.VALUE_INFO_EXTRACTORS[subdomain][type_name]
-    attributes_by_title = {}
+    attributes_by_title_and_name = {}
 
     # Same as write_csv: To avoid out-of-memory errors, process Subjects in
     # batches. read all the rows into a map, then sort and write the output,
@@ -193,7 +193,7 @@ def write_kml(out, subdomain, type_name, icon_url, now, render_to_string):
             title = subject.get_value('title')
             (special, general, details) = value_info_extractor.extract(
                 subject, subject_type.attribute_names)
-            attributes_by_title[title] = (
+            attributes_by_title_and_name[(title, subject.get_name())] = (
                 special, general, max(detail.date for detail in details))
         subject_query.with_cursor(subject_query.cursor())
         subjects = subject_query.fetch(batch_size)
@@ -204,11 +204,11 @@ def write_kml(out, subdomain, type_name, icon_url, now, render_to_string):
     #i18n: Label for a timestamp when a file was created
     created = to_utf8(_('Created') + ': ' + now)
     out.write(KML_PROLOGUE % (title, created, icon_url, to_utf8(type_name)))
-    for title in sorted(attributes_by_title.keys()):
-        attrs = attributes_by_title[title]
+    for key in sorted(attributes_by_title_and_name.keys()):
+        special, general, last_updated = attributes_by_title_and_name[key]
         placemark = render_to_string('templates/hospital_placemark.kml',
-                                     special=attrs[0], general=attrs[1],
-                                     last_updated=attrs[2])
+                                     special=special, general=general,
+                                     last_updated=last_updated)
         out.write(placemark)
     out.write(KML_EPILOGUE)
 

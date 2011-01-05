@@ -173,7 +173,7 @@ msgstr "Tomografía Computada"
 msgid "Can pick up patients"
 msgstr "Puedes buscar pacientes"
 
-#. Button text to cancel and return to the home page
+#. Button text to cancel a form
 #: templates/hospital_bubble.html:98 templates/edit.html:173 static/locale.js:33
 msgid "Cancel"
 msgstr "Cancelar"
@@ -356,8 +356,8 @@ msgstr "Modificar %(title)s"
 msgid "Edit by email"
 msgstr "Modificado por correo electrónico"
 
-#. Label for link to edit a subject record
-#: templates/hospital_email.html.py:182
+#. Link to edit the data for a hospital record.
+#: templates/hospital_bubble.html:26
 msgid "Edit this record"
 msgstr "Modifica este registro"
 
@@ -926,7 +926,7 @@ msgid "Request for becoming %(action)s was denied."
 msgstr "La solicitud para ser %(role)s se denegó."
 
 #. Name of the application.
-#: templates/subdomain_menu.html.py:35
+#: templates/error.html:21
 msgid "Resource Finder"
 msgstr "Localizador de recursos"
 
