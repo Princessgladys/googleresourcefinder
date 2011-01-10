@@ -147,6 +147,11 @@
     #i18n: Link text to export data to comma-separated-values format.
     {% endcomment %}
     <a target="_blank" href="{{export_url}}" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export CSV" %}</a>
+    <span class="sep">|</span>
+    {% comment %}
+    #i18n: Link text to export data to KML format.
+    {% endcomment %}
+    <a target="_blank" href="{{export_url}}&output=kml" onclick="_gaq.push(['_trackEvent', 'outbound', 'export', this.href])">{% trans "Export KML" %}</a>
     {% if params.iframe %}
       <span class="sep">|</span>
       <a id="pop-out" target="_blank" href="{{disable_iframe_url}}"

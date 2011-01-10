@@ -24,6 +24,7 @@ from google.appengine.api import users
 
 import export
 import model
+import utils
 from medium_test_case import MediumTestCase
 from utils import db
 
@@ -138,3 +139,13 @@ class ExportTest(MediumTestCase):
         buffer = StringIO.StringIO()
         export.write_csv(buffer, 'haiti', 'hospital')
         assert buffer.getvalue().strip() == golden_csv.strip()
+
+    def test_write_kml(self):
+        handler = export.Export()
+        golden_kml = open('app/testdata/golden_file.kml', 'r').read()
+        # bit of a hack to easily support en-dashes in the golden file
+        golden_kml = golden_kml.replace('\\u2013', u'\u2013').encode('utf-8')
+        buffer = StringIO.StringIO()
+        export.write_kml(buffer, 'haiti', 'hospital', 'icon.png',
+                         '2010-12-22 08:33:07 -05:00', handler.render_to_string)
+        assert buffer.getvalue().strip() == golden_kml.strip()
