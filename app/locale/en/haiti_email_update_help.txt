@@ -1,0 +1,39 @@
+Text attribute values can contain any letter, number, or punctuation:
+    Contact name: The primary contact of the facility
+    Phone: The primary phone number of the facility
+    Email: The primary email contact of the facility
+    Department: The facility's department name
+    District: The facility's district name
+    Commune: The facility's commune name
+    Address: The facility's address
+    Organization: The facility's organization name
+    Damage: Description of any damage done to the facility
+    Alert status: Any significant alert information for the facility
+
+Number attribute values must be whole numbers:
+    Available beds: The number of available beds at the facility
+    Total beds: The total number of beds at the facility
+
+Yes/No attribute values must be either "yes" or "no":
+    Reachable by road: Whether or not the facility is reachable by road
+    Can pick up patients: Whether or not the facility can pick up patients
+
+Multiple choice attribute values must be comma separated. Add a '-' to the start of a value to remove it from the list:
+    Services: Available services at the facility
+        -- Choices: General Surgery, Orthopedics, Neurosurgery, Vascular
+            Surgery, Internal Medicine, Cardiology, Infectious Disease, Pediatrics,
+            Postoperative Care, Rehabilitation, Obstetrics and Gynecology, Mental
+            Health, Dialysis, Lab, X-Ray, CT Scan, Blood Bank, Mortuary Services,
+	    Cholera Treatment
+
+List attribute values must be one of a specific set of choices.
+    Organization type: The category of organization the facility falls under
+        -- Choices: Public, For-profit, University, Community, NGO, Faith-based,
+            Military, Mixed
+    Category: The type of facility
+        -- Choices: Hospital, Clinic, Mobile Clinic, Dispensary, Laboratory
+    Construction: How the facility is built
+        -- Choices: Reinforced concrete, Unreinforced masonry, Wood frame, Adobe
+    Operational status: The current operational status of the facility
+        -- Choices: Operational, No surgical capacity, Field hospital,
+            Field hospital co-located with hospital, Closed or closing
