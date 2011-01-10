@@ -1,0 +1,112 @@
+{% comment %}
+# Copyright 2010 by Google Inc
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{% endcomment %}{% spaceless %}
+
+{% load i18n %}
+
+{% comment %}
+  HTML conforms to Earth 4.3 guidelines.
+  Earth 5.0 and later support full HTML and Javascript.
+{% endcomment %}
+
+<Placemark>
+  <name>{{special.title.value|escape}}</name>
+  <styleUrl>#s</styleUrl>
+  {% if special.location.specified %}<Point>
+    <coordinates>{{special.location.raw.lon}},{{special.location.raw.lat}},0</coordinates>
+  </Point>{% endif %}
+  <description>
+    <![CDATA[
+      <table cellpadding="0" cellspacing="3">
+      {% if special.alert_status.specified %}
+        <tr valign="top">
+          <td>
+            {% comment %}
+            #i18n: Note that a health facility is on alert.
+            {% endcomment %}
+            <font color="#a00"><b>{% trans "Alert" %}</b></font>
+          </td>
+          <td colspan="2"><font color="#a00">{{special.alert_status.value|escape|linebreaksbr}}</font></td>
+        </tr>
+      {% endif %}
+        <tr valign="top">
+          <td>
+            {% comment %}
+            #i18n: Label for a date-time when the data was last updated
+            {% endcomment %}
+            <b>{% trans "Last updated" %}</b>
+          </td>
+          <td colspan="2">{{last_updated|escape}}</td>
+        </tr>
+        <tr valign="top">
+          <td><b>{{special.available_beds.label|escape}}</b></td>
+          <td colspan="2">{{special.available_beds.value|escape|linebreaksbr}}</td>
+        </tr>
+        <tr valign="top">
+          <td><b>{{special.total_beds.label|escape}}</b></td>
+          <td colspan="2">{{special.total_beds.value|escape|linebreaksbr}}</td>
+        </tr>
+        <tr valign="top">
+          <td><b>{{special.services.label|escape}}</b></td>
+          <td colspan="2">{{special.services.value|escape|linebreaksbr}}</td>
+        </tr>
+        <tr valign="top">
+          <td><b>{{special.address.label|escape}}</b></td>
+          <td>{{special.address.value|escape|linebreaksbr}}</td>
+          <td>{{special.location.label|escape}}: {{special.location.value|escape|linebreaksbr}}</td>
+        </tr>
+      {% for attribute in general %}
+        {% if attribute.specified %}
+        <tr valign="top">
+         <td><b>{{attribute.label|escape}}</b></td>
+         <td colspan="2">{{attribute.value|escape|linebreaksbr}}</td>
+        </tr>
+        {% endif %}
+     {% endfor %}
+     {% if special.maps_link.specified %}
+       <tr valign="top">
+         <td><b>{{special.maps_link.label|escape}}</b></td>
+         <td colspan="2">{{special.maps_link.value|escape|linebreaksbr}}</td>
+       </tr>
+     {% endif %}
+     {% if special.id.specified %}
+       <tr valign="top">
+         <td><b>{{special.id.label|escape}}</b></td>
+         <td colspan="2">{{special.id.value|escape|linebreaksbr}}</td>
+       </tr>
+     {% endif %}
+     {% if special.alt_id.specified %}
+       <tr valign="top">
+         <td><b>{{special.alt_id.label|escape}}</b></td>
+         <td colspan="2">{{special.alt_id.value|escape|linebreaksbr}}</td>
+       </tr>
+     {% endif %}
+     {% if special.healthc_id.specified %}
+       <tr valign="top">
+         <td><b>{{special.healthc_id.label|escape}}</b></td>
+         <td colspan="2">{{special.healthc_id.value|escape|linebreaksbr}}</td>
+       </tr>
+     {% endif %}
+     {% if special.pcode.specified %}
+       <tr valign="top">
+         <td><b>{{special.pcode.label|escape}}</b></td>
+         <td colspan="2">{{special.pcode.value|escape|linebreaksbr}}</td>
+       </tr>
+     {% endif %}
+     </table>
+    ]]>
+  </description>
+</Placemark>
+{% endspaceless %}
