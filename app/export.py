@@ -153,7 +153,7 @@ def write_csv(out, subdomain, type_name):
     # read all the rows into an array, then sort and write the output, knowing
     # title is the first field in each row.
     rows = []
-    batch_size = 500
+    batch_size = 400
     subjects = subject_query.fetch(batch_size)
     while subjects:
         for subject in subjects:
